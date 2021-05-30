@@ -1,0 +1,52 @@
+@@ Legion Outpost Registration System
+@@ Version 1.0 by Kynn Bartlett (kynn@primenet.com)
+@@
+@@ require slave-guest.conf
+@@
+@@ Commands:
+@@
+@@ +register
+@@ +register <email address>
+@@
+@@ Wiz Commands:
+@@
+@@ +register/check
+@@ +register/check <player>
+@@ +register/confirm <player>
+@@ +register/email <player>=<email address>
+@@ +register/status <player>=[u* | p* | c*]
+@@ +register/comment <player>=<comment>
+@@ +register/pending
+@@
+@@ Attributes:
+@@
+@@ &reg-email       <email address> | Set by [<wizard> | player] on 
+@@                  <date> | [Confirmed by <wizard> on <date>]
+@@ &reg-comments    <wizard> / <date> / <comment> | etc
+@@
+@@ Flags:
+@@
+@@ SUSPECT + SLAVE  Unregistered
+@@ SUSPECT          Pending
+@@ Neither          Confirmed
+@@
+
+@create Registration
+&cmd-register Registration=$+register:@pemit %# = [mudname()] Registration Information%r%rPlayer: %n%rStatus: [setq(0,u(reg-status,%#))][r(0)]%rRegistered Email Address: [switch(r(0),u,None,before(get(%#/reg-email),|))]%r%r[s(v(regmessage-[r(0)]))]
+&regmessage-unregistered Registration=You have not registered to play on [mudname()].  Type '+register <your email address>' to do so.
+&regmessage-pending Registration=Your email has been noted, and we are awaiting confirmation of your address. When you receive a letter from a wizard, please reply to let us know you got it.
+&regmessage-confirmed Registration=Your email address has been confirmed; you are a registered player of [mudname()].
+&reg-status Registration=[switch([hasflag(%0,SUSPECT)] [hasflag(%0,SLAVE)],1 1,Unregistered,1 0,Pending,0 0,Confirmed,#-1 REGISTRATION/FLAG ERROR)]
+&cmd-register_me Registration=$+register *:@switch [u(reg-status,%#)]=Confirmed,{@pemit %#=You are already a registered player.},{@set %#=SUSPECT;@set %#=!SLAVE;@pemit %#=You have registered your email address as:%r%0%r%rA wizard will be sending you email within a day or two to complete the registration process.;&reg-email %#=%0 | Set by player on [time()] |}
+&cmd-register_check Registration=$+register/check:@pemit %#=[switch(hasflag(%#,wizard),1,[u(topline-register_who)][iter(filter(filter-pending,lwho()),u(fmt-register_who,##))],Permission denied.)]
+&topline-register_who Registration=[ljust(Name,20)] [ljust(Status,15)] Email%r[repeat(-,20)] [repeat(-,15)] [repeat(-,40)]
+&fmt-register_who Registration=%r[ljust(name(%0),20)] [ljust(u(reg-status,%0),15)] [mid(before(get(%0/reg-email),|),0,40)]
+&filter-pending Registration=[switch(u(reg-status,%0),Pending,1,0)]
+&cmd-register_who Registration=$+register/who:@pemit %#=[switch(hasflag(%#,wizard),1,[u(topline-register_who)][iter(lwho(),u(fmt-register_who,##))],Permission denied.)]
+&cmd-register_check-player Registration=$+register/check *:@pemit %#=[switch(hasflag(%#,wizard),1,u(fmt-register_player,num(*%0)),Permission denied.)]
+&fmt-register_player Registration=[switch(%0,#-1,No such player.,[mudname()] Registration Information%r%rPlayer: [name(%0)] (%0[flags(%0)])%rStatus: [u(reg-status,%0)]%rRegistered Email Address: [setq(0,get(%0/reg-email))][switch(r(0),,None,r(0))][setq(1,get(%0/reg-comments))][switch(r(1),,,%rComments:[edit(r(1),|,%r)])])]
+&cmd-register_confirm Registration=$+register/confirm *:@switch 1=not(hasflag(%#,wizard)),{@pemit %#=Permission denied.},[setq(0,num(*%0))][match(r(0),#-*)],{@pemit %#=Player not found.},not(hasflag(r(0),suspect)),{@pemit %#=That player is already registered.},{@pemit %#=Confirming registration for [name(r(0))] ([first(get(r(0)/reg-email),|)]).;@set [r(0)]=!SUSPECT;&reg-email [r(0)]=[first(get(r(0)/reg-email),|)] | [first(rest(get(r(0)/reg-email),|),|)] | Confirmed by %n on [time()]}
+&cmd-register_email Registration=$+register/email *=*:@switch 1=not(hasflag(%#,wizard)),{@pemit %#=Permission denied.},[setq(0,num(*%0))][match(r(0),#-*)],{@pemit %#=Player not found.},{@pemit %#=Setting reg-email for [name(r(0))] (%1).;&reg-email [r(0)]=%1 | Set by %n on [time()] | }
+&cmd-register_status Registration=$+register/status *=*:@switch 1=not(hasflag(%#,wizard)),{@pemit %#=Permission denied.},[setq(0,num(*%0))][match(r(0),#-*)],{@pemit %#=Player not found.},[match(unregistered,%1*)],{@pemit %#=[name(r(0))]'s status reset to 'Unregistered'.;@set [r(0)]=SUSPECT;@set [r(0)]=SLAVE},[match(pending,%1*)],{@pemit %#=[name(r(0))]'s status set to 'Pending'.;@set [r(0)]=SUSPECT;@set [r(0)]=!SLAVE},[match(confirmed,%1*)],{@pemit %#=[name(r(0))]'s status set to `Confirmed'.;@set [r(0)]=!SUSPECT;@set [r(0)]=!SLAVE},{@pemit %#=Invalid status.}
+&cmd-register_comment Registration=$+register/comment *=*:@switch 1=not(hasflag(%#,wizard)),{@pemit %#=Permission denied.},[setq(0,num(*%0))][match(r(0),#-*)],{@pemit %#=Player not found.},{@pemit %#=Comment added to [name(r(0))].;&reg-comments [r(0)]=%1 (added by %n on [time()] | [get(r(0)/reg-comments)] }
+&cmd-register_pending Registration=$+register/pending:@pemit %#=[switch(hasflag(%#,wizard,1,[u(topline-register_who)][iter(filter(filter-pending,search(flags=Pu)),u(fmt-register_who,##))],Permission denied.)]

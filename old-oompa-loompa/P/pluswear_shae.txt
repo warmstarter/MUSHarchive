@@ -1,0 +1,52 @@
+@@ This is +wear code that enables MUSHers to store outfits on their 
+@@ character and change clothes, descriptions and effects at will.
+@@ It also enables the Player to chose whether their description 
+@@ should be visible from afar.. (Granted the Option assumes
+@@ seeing from afar is allowed.)
+@@ This object is intended to be placed in the Master Room and
+@@ set Inherit, though it would work for an individual who carries
+@@ one.
+@@ This was written for TinyMUSH 2.2.1 and uses the function:
+@@ hasattr().  Feel free to modify the code to work with whatever
+@@ version of MUSH you might be using.
+@@ HELP FILES INCLUDED @@
+@create global help data=10
+&HELP_WEAR global help data=%r[repeat(_,76)]%r %t%tGlobal Wear System%r%rThis system is designed to assist players who enjoy frequently changing their character descriptions. It stores multiple descriptions, outfits and extra features which can be changed independently of one another. To learn more about the global wear system, type:%r%r+help wear create%tTo create new descs%r+help wear wear%t%tTo wear or clear a desc%r+help wear list%t%tTo list all descs or delete a single desc %r+help wear example %tAdditional example %r+help wear options%tTo view Options%r[repeat(_,76)]%r
+&HELP_WEAR_CREATE global help data=%r[repeat(_,76)]%r %rTOPIC: %t%tCreating new descs for Global Wear System%rSYNTAX: %t+<gen | wear | fx>-new <title> = <desc> %rEX: %t+gen-new normal = A mean hombre, Jolly Green Giant stands over 40 feet. %r%t+wear-new usual = He is clad in a sorong of enormous green felt leaves. %r%t+fx-new hoho = His normal mode of address is Ho Ho Ho. %r%rUsing the +wear system involves the creation of a GEN (general) description, at least one Wear outfit and if desired at least one extra FX which may include information about present mood, health, or the like. Each of these text items are stored under a user-named attribute on your character. %r%rMORE HELP: +help wear wear %r%r[repeat(_,76)]%r
+&HELP_WEAR_EXAMPLE global help data=%r[repeat(_,76)]%r %rTOPIC: %tExamples of the Global Wear System%r%rTo set up a set of new descriptions, the character Selena would type in the following commands: %r%r+gen-new Insomnia = Selena looks exhausted, her face pale and her eyes gleaming fanatically as she mumbles "code... must code..." %r+wear-new Yesterday = She is still dressed in yesterday's clothes, making it obvious she hasn't sleep. %r+fx-new Coffee = In one trembling hand she holds a cup of cappucino, the steam wending its way up from it. %r%rThen she would type separately, '+gen Insomnia','+wear Yesterday', and '+fx Coffee' and her desc would be set to:%r%rSelena looks exhausted, her face pale and her eyes gleaming fanaticallyas she mumbles "code... must code..."%bShe is still dressed in yesterday's clothes, making it obvious she hasn't sleep.%bIn one trembling hand she holds a cup of cappucino, the steam wending its way up from it. %r%r[repeat(_,76)]%r
+&HELP_WEAR_LIST global help data=%r[repeat(_,76)]%r %rTOPIC: %tList and delete descs in Global Wear System%rSYNTAX: %t+<gen | wear | fx>-list %r%rLists stored information by <name>. This will help you if you can't remember the names of the descriptions you have created for yourself. %r%r%t%t+<gen | wear | fx>-delete <name> %r%rDeletes desc <name> permanently from your list of available descs. %r%r[repeat(_,76)]%r
+&HELP_WEAR_WEAR global help data=%r[repeat(_,76)]%r %rTOPIC: %tWear and clear stored descs in Global Wear System%rSYNTAX: +<gen | wear | fx> <name> %tSets that portion of your desc%r%t+<gen | wear | fx>-clear %tClears that portion of your desc%rEX: %t%t+gen normal %r%t%t+wear usual %r%t%t+fx hoho %r%rOnce you have created a general description, an outfit or an extra, the first command will change your description to wear it. The second clears that portion of the description, setting it to nothing. Both commands affect your description, so be prepared to lose any text currently stored there that isn't specifically stored as part of the Global Wear System.%r%rMORE HELP: +help wear list %r%r[repeat(_,76)]%r
+&HELP_WEAR_OPTIONS global help data=[repeat(_,75)]%r%rTOPIC: %t+Wear Options%rSYNTAX:%t+wear-option <option>%rSUMMARY:%tThe option command enables you to choose from one of the following options:%r%rPublic%tThis sets your description to be publically viewable, even by people who are not in the same room as you, by using the 'e/f' or get() and get_eval() functions. (MUSH Default)%rPrivate%tThis option requires that the looker is in the same location as the looked at in order to view the looked at's description.%r[repeat(_,75)]
+
+@@
+@@ Problems: Contact Shae@together.net
+
+@create Clothes Object
+&CREDITS Clothes Object=+wear credits:Coded by Pandora at GuardiansMUSH & Shae@GuardiansMUSH
+&DESC_GETTER Clothes Object=[u(%0/tmpdsc)]%b[u(%0/clothdsc)]%b[u(%0/fxdsc)]
+&DESC_PRIVATE Clothes Object=[ switch( %l , loc( %! ) , {[u(tmpdsc)]%b[u(clothdsc)]%b[u(fxdsc)]} , Description Unavailable From Afar. ) ]
+&DESC_PUBLIC Clothes Object=[u(tmpdsc)]%b[u(clothdsc)]%b[u(fxdsc)]
+&DO-CLEAR-FX Clothes Object=$+fx-clear:&fxdsc %#=;@pemit %#=Your "Effects" has been cleared and your description is set to...%r[ u( desc_getter , %# ) ]%r
+&DO-CLEAR-GEN Clothes Object=$+gen-clear:&tmpdsc %#=;@pemit %#=Your "Gen" has been cleared and your description is set to...%r[ u( desc_getter , %# ) ]%r
+&DO-CLEAR-WEAR Clothes Object=$+wear-clear:&clothdsc %#=;@pemit %#=Your "Outfit" has been cleared and your description is set to...%r[ u( desc_getter , %# ) ]%r
+&DO-DELETE-FX Clothes Object=$+fx-delete *:@swi hasattr( %# , FX-%0 ) =0 , {@pemit %#=The effect %0 is not on your list of effects.} , {&fx-%0 %#=;@pemit %#=The effect "%0" has been deleted from your list of effects.}
+&DO-DELETE-GEN Clothes Object=$+gen-delete *:@swi hasattr( %# , GEN-%0 ) =0 , {@pemit %#=The general description %0 is not on your list of descriptions.} , {&gen-%0 %#=;@pemit %#=The description "%0" has been deleted from your list of descriptions.}
+&DO-DELETE-WEAR Clothes Object=$+wear-delete *:@swi hasattr( %# , DR-%0 ) =0 , {@pemit %#=The clothing %0 is not on your list of clothes.} , {&dr-%0 %#=;@pemit %#=The outfit "%0" has been deleted from your list of outfits.}
+&DO-LIST-FX Clothes Object=$+fx-list:@pemit %#=This is the list of effects you have set:%r;@pemit %#=[ iter( sort( lattr( %#/FX-* ) ) , [ after( ## , FX- ) ]%b%b[ get( %#/## ) ]%r ) ]
+&DO-LIST-GEN Clothes Object=$+gen-list:@pemit %#=This is the list of general descriptions you have set:%r;@pemit %#=[ iter( sort( lattr( %#/GEN-* ) ) , [ after( ## , GEN- ) ]%b%b[ get( %#/## ) ]%r ) ]
+&DO-LIST-WEAR Clothes Object=$+wear-list:@pemit %#=This is the list of clothing descriptions you have set:%r;@pemit %#=[ iter( sort( lattr( %#/DR-* ) ) , [ after( ## , DR- ) ]%b%b[ get( %#/## ) ]%r ) ]
+&DO-NEW-FX Clothes Object=$+fx-new *=*:@swi words( %0 ) =1 , {&fx-%0 %#=%1;@pemit %#=A new effect of title "%0" and description %r%r%1%r%rhas been added to your list of effects.} , {@pemit %#=The name for a new effect must be limited to one word. Please try again.}
+&DO-NEW-GEN Clothes Object=$+gen-new *=*:@swi words( %0 ) =1 , {&gen-%0 %#=%1;@pemit %#=A new general description of title "%0" and description %r%r%1%r%rhas been added to your list of outfits.} , {@pemit %#=The name for a new description must be limited to one word. Please try again.}
+&DO-NEW-WEAR Clothes Object=$+wear-new *=*:@swi words( %0 ) =1 , {&DR-%0 %#=%1;@pemit %#=A new outfit of title "%0" and description %r%r%1%r%rhas been added to your list of outfits.} , {@pemit %#=The name for a new outfit must be limited to one word. Please try again.}
+&DO-SET-FX Clothes Object=$+fx *:@swi hasattr( %# , FX-%0 ) =0 , {@pemit %#=The effect %0 is not on your list of effects.} , {&fxdsc %#=[ u( %#/fx-%0 ) ];@pemit %#=Your desc is set to...%r[ u( desc_getter , %# ) ]%r;@swi u(%#/wear_opt)=private,{@desc %#=[v(desc_private)]},{@desc %#=[v(desc_public)]}}
+&DO-SET-GEN Clothes Object=$+gen *:@swi hasattr( %# , GEN-%0 ) =0 , {@pemit %#=The general description %0 is not on your list of descriptions.} , {&tmpdsc %#=[ u( %#/gen-%0 ) ];@pemit %#=Your desc is set to...%r[ u( desc_getter , %# ) ]%r;@swi u(%#/wear_opt)=private,{@desc %#=[v(desc_private)]},{@desc %#=[v(desc_public)]}}
+&DO-SET-OPTION Clothes Object=$+wear-option *:@swi match(public private,%0)=0,{@pemit %#=Only valid +Wear options are 'Public' or 'Private'},{@pemit %#=Your +wear option has been set to '%0';&wear_opt %#=%0;@desc %#=[v(desc_%0)]}
+&DO-SET-WEAR Clothes Object=$+wear *:@swi hasattr( %# , DR-%0 ) =0 , {@pemit %#=The outfit %0 is not on your list of outfits.} , {&clothdsc %#=[ u( %#/dr-%0 ) ] ;@pemit %#=Your desc is set to...%r[ u( desc_getter , %# ) ]%r;@swi u(%#/wear_opt)=private,{@desc %#=[v(desc_private)]},{@desc %#=[v(desc_public)]}}
+@Desc Clothes Object=So all the little MUSHers don't run around naked.
+@set Clothes Object/CREDITS = no_command
+@set Clothes Object/DESC_GETTER = no_command
+@set Clothes Object/DESC_PRIVATE = no_command
+@set Clothes Object/DESC_PUBLIC = no_command
+@set Clothes Object=INHERIT
+
+

@@ -1,0 +1,287 @@
+/* 
+   Pern Knots
+   v. 2.0 beta 2 (June 23, 1994)
+   Written by Kynn Bartlett (Malachite@PernMUSH, Onyx@SouCon)
+              kynn@netcom.com / morpheus@cco.caltech.edu 
+
+   This code is written to run under TinyMUSH 2.0.10 p5.  Performance
+   under any other server is not guaranteed.
+
+-----------------------------------------------------------------------------
+README:
+
+   This file is intended to be quoted via cpp, the C Preprocessor,
+   which should be standard on all Unix systems.  The general way
+   to do this under tinyfugue is as follows:
+
+   (from tinyfugue:)
+   /quote -0 !/usr/lib/cpp -PR filename
+              ^^^^^^^^^^^^
+
+   (Or, at least, that's where cpp is located on my system.  See your
+    local 'man cpp' page for more details.) 
+
+   You can also get the same effect by saving the output of cpp to
+   a file and then uploading that file:
+
+   (at the Unix prompt:)
+   /usr/lib/cpp -PR filename > filename2
+   (from tinyfugue:)
+   /quote -0 'filename2
+   
+   If you have problems, feel free to email me.
+
+-----------------------------------------------------------------------------
+CHANGES:
+   
+   2.0 beta 2:
+   o The knot code now sends chat messages differently; you will need to
+     re-load the code to update this.  Chat is now done using AUDIBLE
+     and @forwardlist, as per public demand.
+   o 'cords version' command added
+-----------------------------------------------------------------------------
+CONFIG:
+
+You must change at least some of the definitions below, to fit your
+specific hold, craft, or weyr.  These are correct for Ista Hold on
+DawnSisters MUSH.                                                          */
+
+#define PLACE_NAME     Ista Hold    /* The full name of your place         */
+#define SHORT_NAME     ista         /* Not more than 6 characters long     */
+#define COLORS         orange and white   
+
+/* #define NO_CHAT     true */      /* Uncomment if you don't want chat    */
+#define CHAT_COMMAND   ih           /* What you want for a chat command    */
+#define CHAT_PREFIX    ^ Ista ^     /* To identify chat messages           */
+
+#define PARENT_NAME    Parent Object: PLACE_NAME Knots
+#define ADMIN_NAME     Parent Object: PLACE_NAME Admin Knots
+#define DATABASE_NAME  Database: PLACE_NAME Information
+#define KNOT_NAME      PLACE_NAME Resident Cords
+
+/*
+-----------------------------------------------------------------------------
+INSTALLATON: 
+
+   Uncomment the line below if you are installing the knots for the
+   first time.  Alternately, when sending the file through cpp, include
+   the command-line flag -DINSTALL.                                       */
+
+/* #define INSTALL true */
+
+/*
+-----------------------------------------------------------------------------
+UPDATING:
+
+   Uncomment the line below if you are updating from the previous version
+   of the knot code; which did the chat function differently; alternately,
+   include -DUPDATE_CHAT in the cpp command.  You only need to do this
+   once.                                                                  */
+
+/* #define UPDATE_CHAT true */
+
+/*
+-----------------------------------------------------------------------------
+BUGS:
+
+There are no known bugs, but then, if there were, I would've fixed 'em.
+Of course, it stands to reason that if there -are- unfixed bugs, I likely
+don't know about them.
+
+Ergo, I suggest that if you spot something broken, email me and I'll get
+right to work on fixing it!  My email address is kynn@netcom.com.
+
+-----------------------------------------------------------------------------
+NEW VERSIONS:
+
+New release numbers of my code happen every now and then, usually when I
+fix some bugs, create some new ones, and add new features.  If you're in-
+terested in keeping up with these changes, drop me a note and I'll send
+you email next time I upgrade the knot code.
+-----------------------------------------------------------------------------
+
+
+            You shouldn't have to change anything below this line.
+
+                                                                            */
+/* ------------------------------------------------------------------------ */
+/* ======================================================================== */
+/* ------------------------------------------------------------------------ */
+
+#define VERSION Pern Knots 2.0 beta 2 (Jun 23 1994)
+
+#ifdef INSTALL
+
+@create PARENT_NAME=10
+@create ADMIN_NAME=10
+@create DATABASE_NAME=10
+
+@set PARENT_NAME=halt
+@set ADMIN_NAME=halt
+@set DATABASE_NAME=halt
+
+@parent ADMIN_NAME=PARENT_NAME
+@fo me = &dbnum PARENT_NAME = [num(DATABASE_NAME)]
+#endif
+
+@drop PARENT_NAME = You remove the [name(me)] from your shoulder.
+@odrop PARENT_NAME = removes the [name(me)] from %p shoulder.
+@succ PARENT_NAME = You wear the [name(me)] on your shoulder.
+@osucc PARENT_NAME = wears the [name(me)] on %p shoulder.
+@sex PARENT_NAME = neuter PLACE_NAME cords
+@use PARENT_NAME = You look over your [name(me)].
+@ouse PARENT_NAME = looks over %p [name(me)].
+@ause PARENT_NAME = @pemit %#=[u(v(dbnum)/msg-help)]
+
+@desc PARENT_NAME = These are simple cords, tied in the colors of PLACE_NAME, COLORS, marking the wearer as a resident.
+
+&short_name PARENT_NAME = SHORT_NAME
+&short_name DATABASE_NAME = SHORT_NAME
+&place_name PARENT_NAME = PLACE_NAME
+&place_name DATABASE_NAME = PLACE_NAME
+&chat_command DATABASE_NAME = CHAT_COMMAND
+&knot_name DATABASE_NAME = KNOT_NAME
+
+/* Database structure:
+
+  &people -- who lives in the place
+  &pdata-<num> -- knotnumber|Rank|Posting|biography
+  &data-authorized -- People who are authorized
+
+*/
+
+&get_knotnum DATABASE_NAME = [index(v(pdata-%0),|,1,1)]
+&get_rank DATABASE_NAME = [index(v(pdata-%0),|,2,1)]
+&get_job DATABASE_NAME = [index(v(pdata-%0),|,3,1)]
+&get_bio DATABASE_NAME = [index(v(pdata-%0),|,4,1)]
+
+
+&cmd-who PARENT_NAME = $SHORT_NAME who:@pemit %#=[u(fmt-topline_who)][map(fmt-who,filter(filter-connected,get(v(dbnum)/data-people)))][u(fmt-bottomline_who)]
+
+&filter-connected PARENT_NAME = [hasflag(owner(%0),connected)]
+
+&fmt-topline_who PARENT_NAME = [center([v(place_name)] Census,70)]%r[center(As Of:,70)]%r[center([extract(time(),1,3)] [extract(time(),5,1)],70)]%r%r[ljust(Name,16)] [ljust(Rank,25)] [ljust(Posting/Job,25)] [ljust(Status,9)]%r[repeat(-,16)] [repeat(-,25)] [repeat(-,25)] [repeat(-,9)]
+
+&cmd-census PARENT_NAME = $SHORT_NAME census:@pemit %#=[u(fmt-topline_who)][iter(get(v(dbnum)/data-people),u(fmt-who,##))]
+
+&fmt-bottomline_who PARENT_NAME = %r%rType '[v(short_name)] census' for the complete list of PLACE_NAME Residents.
+
+#ifdef NO_CHAT
+&fmt-who PARENT_NAME = %r[ljust(name(%0),16)] [ljust(u(v(dbnum)/get_rank,%0),25)] [ljust(u(v(dbnum)/get_job,%0),25)] [switch(1,hasflag(owner(%0),connected),awake,gt(sub(secs(),convtime(get(owner(%0)/last))),2592000),inactive,sleeping)]
+
+#else 
+&fmt-who PARENT_NAME = %r[ljust(name(%0),16)] [ljust(u(v(dbnum)/get_rank,%0),25)] [ljust(u(v(dbnum)/get_job,%0),25)] [switch(1,hasflag(owner(%0),connected),awake [switch(hasflag(u(v(dbnum)/get_knotnum,%0),audible),0,<H>)],gt(sub(secs(),convtime(get(owner(%0)/last))),2592000),inactive,sleeping)]
+#endif
+
+&cmd-help PARENT_NAME = $SHORT_NAME help:@pemit %#=[u(v(dbnum)/msg-help,%#)]
+
+&msg-help DATABASE_NAME = Your [v(place_name)] knot supports the following commands:%r[edit(map(fmt-command_list,switch(member(v(data-authorized),num(%0)),0,u(command-list),[u(command-list)]|[u(command-list_admin)]),|),|,%r)]
+
+#ifdef NO_CHAT
+&command-list DATABASE_NAME = [v(short_name)] census.List the [v(place_name)] census|[v(short_name)] who.List connected [v(place_name)] residents|[v(short_name)] motd.Read the Message of the Day|[v(short_name)] motd check.See if there's a new MOTD (silent if old)|[v(short_name)] bio <who>.See someone's bio entry|[v(short_name)] bio=<text>.Create your own bio entry|[v(short_name)] cords.List commands to change your knot|[v(short_name)] archives.Peruse the archives|[v(short_name)] help.This help screen
+
+#else
+&command-list DATABASE_NAME = [v(short_name)] census.List the [v(place_name)] census|[v(short_name)] who.List connected [v(place_name)] residents|[v(short_name)] motd.Read the Message of the Day|[v(short_name)] motd check.See if there's a new MOTD (silent if old)|[v(short_name)] bio <who>.See someone's bio entry|[v(short_name)] bio=<text>.Create your own bio entry|[v(chat_command)] <text>.[v(place_name)] Chat System|[v(short_name)] \[!\]haven.Haven or unhaven (blocks chat spam)|[v(short_name)] cords.List commands to change your knot|[v(short_name)] archives.Peruse the archives|[v(short_name)] help.This help screen
+#endif
+
+&command-list_admin DATABASE_NAME = [v(short_name)] add <who>=<rank>,<job>.Add someone and create a knot|[v(short_name)] rank <who>=<rank>.Set someone's rank|[v(short_name)] job <who>=<job>.Set someone's job or posting|[v(short_name)] remove <who>.Remove someone and dest knot|[v(short_name)] purge <dbnum>.Remove an object|[v(short_name)] addnum <dbnum>=<rank>,<job>.Add an object and create a knot|[v(short_name)] list.List everyone with dbnums|[v(short_name)] authorize <who>.Give admin permissions|[v(short_name)] !authorize <who>.Retract admin permissions|[v(short_name)] motd=<text>.Set the Message of the Day|[v(short_name)] archadd <subj>=<text>.Add info to the archives
+
+&fmt-command_list DATABASE_NAME =[ljust(before(%0,.),35)][after(%0,.)]
+
+#ifndef NO_CHAT
+
+&cmd-chat PARENT_NAME = $CHAT_COMMAND *:@switch hasflag(me,audible)=0,{@pemit %#=Sorry, you're havened and can't use the [v(place_name)] Chat channel.},{@pemit [v(dbnum)]=u(v(dbnum)/fmt-chat,%0,%#)}
+
+@prefix PARENT_NAME = CHAT_PREFIX
+@prefix DATABASE_NAME = %
+@set DATABASE_NAME = audible
+@set PARENT_NAME = audible
+
+&fmt-chat DATABASE_NAME = [name(%1)][switch(%0,:*,%b[after(%0,:)],\;*,[after(%0,\;)],"*,%bsays\, "[after(%0,")]",: [%0])]
+
+&cmd-haven PARENT_NAME = $SHORT_NAME haven:@pemit %#=[switch(hasflag(me,audible),0,You're already havened!,You will not hear any more [v(place_name)] chat messages.)];@set me = !audible
+
+&cmd-unhaven PARENT_NAME = $SHORT_NAME !haven:@pemit %#=[switch(hasflag(me,audible),0,You will now hear [v(place_name)] chat messages again.,You're not havened!)];@set me = audible
+#endif
+
+#ifdef UPDATE_CHAT
+&tmp-knot_list DATABASE_NAME = [iter(v(data-people),u(get_knotnum,##))]
+@fo me = @forwardlist DATABASE_NAME = [get_eval( DATABASE_NAME /tmp-knot_list)]
+@dolist [get_eval( DATABASE_NAME /tmp-knot_list)]={@switch hasflag(##,haven)=0,@set ##=audible;@set ##=!haven}
+#endif
+
+&cmd-archives PARENT_NAME = $SHORT_NAME archives:@pemit %#=The archives include information on the following topics:%r%r[map(fmt-archive_list,lattr(v(dbnum)/ARCH*))]%r%rType '[v(short_name)] archives <topic>' to read further.
+
+&fmt-archive_list PARENT_NAME = [after(%0,ARCH-)][space(2)]
+
+&cmd-archives_read PARENT_NAME = $SHORT_NAME archives *:@pemit %#=[setq(0,lattr(v(dbnum)/ARCH-[edit(%0,%b,_)]*))][switch(words(r(0)),0,There is no such archive on record.,1,[v(place_name)] Archives on [after(r(0),ARCH-)]:%r%r[get_eval(v(dbnum)/[r(0)])],The following entries match your specified criteria:%r%r[edit(r(0),ARCH-,%b)]%r%rPlease enter a more specific reference.)]
+
+&cmd-motd PARENT_NAME = $SHORT_NAME motd:@pemit %#=[u(v(dbnum)/fmt-motd)];&data-last_motd me = [secs()]
+
+&fmt-motd DATABASE_NAME =[center([v(place_name)] Message of the Day,70)]%r[center(For:,70)]%r[center([extract(index(v(data-motd),|,1,1),1,3)] [extract(index(v(data-motd),|,1,1),5,1)],70)]%r%r[repeat(-,75)]%r[s(index(v(data-motd),|,3,1))]%r%r[space(35)][name(index(v(data-motd),|,2,1))]%r[space(35)][s(v(edit(index(v(data-motd),|,2,1),#,pos-)))]%r[repeat(-,75)]
+
+&cmd-motd_check PARENT_NAME = $SHORT_NAME motd check:@switch gt(v(data-last_motd),convtime(index(get(v(dbnum)/data-motd),|,1,1)))=0,{@pemit %#=There is a new [v(place_name)] MOTD\; type '[v(short_name)] motd' to read it.}
+
+&cmd-cords PARENT_NAME = $SHORT_NAME cords:@pemit %#=Commands to change your [name(me)] include:%r%r[v(short_name)] cords name=<name>[space(sub(18,strlen(v(short_name))))]Rename your cords%r[v(short_name)] cords desc=<description>[space(sub(11,strlen(v(short_name))))]Redescribe your cords%r[v(short_name)] cords dark[space(sub(25,strlen(v(short_name))))]Set your cords dark%r[v(short_name)] cords !dark[space(sub(24,strlen(v(short_name))))]Unset the dark flag%r[v(short_name)] cords version[space(sub(22,strlen(v(short_name))))]List the cords code version
+
+&cmd-cords_darken PARENT_NAME = $SHORT_NAME cords dark:@pemit %#=[name(me)]: set DARK.;@set me = dark
+
+&cmd-cords_undarken PARENT_NAME = $SHORT_NAME cords !dark:@pemit %#=[name(me)]: set !DARK;@set me = !dark
+
+&cmd-cords_name PARENT_NAME = $SHORT_NAME cords name=*:@pemit %#=[name(me)] renamed to %0.;@name me = %0 
+
+&cmd-cords_description PARENT_NAME = $SHORT_NAME cords desc=*:@pemit %#=[name(me)]: Description set.;@desc me = %0
+
+&cmd-cords_version PARENT_NAME = $SHORT_NAME cords version:@pemit %#= VERSION
+
+&cmd-bio PARENT_NAME = $SHORT_NAME bio *:@pemit %#=[setq(0,u(v(dbnum)/fnc-name_match,%0))][switch(r(0),#-1,No such person at [v(place_name)].,[u(v(dbnum)/get_bio,r(0))] )]
+
+&cmd-bio_set PARENT_NAME = $SHORT_NAME bio=*:@pemit %#=Your bio entry has been set to: [setq(0,edit(%0,|,//))][r(0)];&pdata-%# [v(dbnum)]= [u(v(dbnum)/get_knotnum,%#)]|[u(v(dbnum)/get_rank,%#)]|[u(v(dbnum)/get_job,%#)]|[r(0)]
+
+&fnc-name_match DATABASE_NAME = [setq(9,iter(v(data-people),switch(strmatch(name(##),%0*),1,##)))][switch(words(r(9)),1,trim(r(9)),0,#-1,#-1)]
+
+/* Admin Commands */
+
+&cmda-motd_set ADMIN_NAME = $SHORT_NAME motd=*:@pemit %#=PLACE_NAME MOTD set.;&data-motd [v(dbnum)]=[time()]|[num(%#)]|[%0]
+
+#ifdef NO_CHAT
+&cmda-add ADMIN_NAME = $SHORT_NAME add *=*,*:@switch [setq(0,num(*%0))][r(0)]=#-1,{@pemit %#=There's no player with that name.},{@clone/parent/inventory [parent(parent(me))] = [get(v(dbnum)/knot_name)];@lock/use [con(me)]=[r(0)];@lock [con(me)]=[r(0)];@set [con(me)]=!halt;@pemit %#=[name(r(0))] added to the [v(place_name)] Census.;&data-people [v(dbnum)]=[remove(get(v(dbnum)/data-people),r(0))] [r(0)];&pdata-[r(0)] [v(dbnum)]=[con(me)]|%1|%2|No bio entry available.;drop [con(me)]}
+#else
+&cmda-add ADMIN_NAME = $SHORT_NAME add *=*,*:@switch [setq(0,num(*%0))][r(0)]=#-1,{@pemit %#=There's no player with that name.},{@clone/parent/inventory [parent(parent(me))] = [get(v(dbnum)/knot_name)];@lock/use [con(me)]=[r(0)];@lock [con(me)]=[r(0)];@forwardlist [v(dbnum)]=[get(v(dbnum)/forwardlist)] [con(me)];@set [con(me)]=!halt;@pemit %#=[name(r(0))] added to the [v(place_name)] Census.;&data-people [v(dbnum)]=[remove(get(v(dbnum)/data-people),r(0))] [r(0)];&pdata-[r(0)] [v(dbnum)]=[con(me)]|%1|%2|No bio entry available.;drop [con(me)]}
+#endif
+
+&cmda-list ADMIN_NAME = $SHORT_NAME list:@pemit %#=[u(fmt-topline_list)][map(fmt-list,get(v(dbnum)/data-people))]
+
+&fmt-topline_list ADMIN_NAME = [ljust(Player Number,14)] [ljust(Player Name,16)] [ljust(Knot Number,14)] [ljust(Auth?,7)] Last%r[repeat(-,14)] [repeat(-,16)] [repeat(-,14)] [repeat(-,7)] [repeat(-,24)]
+
+&fmt-list ADMIN_NAME = %r[rjust(%0,7)][ljust(flags(%0),7)] [ljust(name(%0),16)] [rjust([setq(8,u(v(dbnum)/get_knotnum,%0))][r(8)],7)][ljust(flags(r(8)),7)] [ljust(switch(member(get(v(dbnum)/data-authorized),%0),0,--,Admin),7)] [get(owner(%0)/last)]
+
+&cmda-addnum ADMIN_NAME = $SHORT_NAME addnum *=*,*:@switch [setq(0,num(%0))][r(0)]=#-1,{@pemit %#=There's no object with that name.},{@clone/parent/inventory [parent(parent(me))] = [get(v(dbnum)/knot_name)];@lock/use [con(me)]=[r(0)];@lock [con(me)]=[r(0)];@set [con(me)]=!halt;@pemit %#=[name(r(0))] added to the [v(place_name)] Census.;&data-people [v(dbnum)]=[remove(get(v(dbnum)/data-people),r(0))] [r(0)];&pdata-[r(0)] [v(dbnum)]=[con(me)]|%1|%2|No bio entry available.;drop [con(me)]}
+
+&cmda-remove ADMIN_NAME = $SHORT_NAME remove *:@switch member(get(v(dbnum)/data-people),[setq(0,num(*%0))][r(0)])=0,{@pemit %#=There's nobody with that name in the database.},{@pemit %#=[name(r(0))] removed from the [v(place_name)] Census.;@dest [u(v(dbnum)/get_knotnum,r(0))];&data-people [v(dbnum)]=[remove(get(v(dbnum)/data-people),r(0))];&pdata-[r(0)] [v(dbnum)];&data-authorized [v(dbnum)]=[remove(get(v(dbnum)/data-authorized),r(0))]}
+
+&cmda-authorize ADMIN_NAME = $SHORT_NAME authorize *:@switch [setq(0,num(*%0))][member(get(v(dbnum)/data-people),r(0))]=0,{@pemit %#=There's no such player in [v(place_name)].},{@pemit %#=Authorized.;&data-authorized [v(dbnum)]=[remove(get(v(dbnum)/data-authorized),r(0))] [r(0)];@parent [u(v(dbnum)/get_knotnum,r(0))]=[parent(me)]}
+
+&cmda-archadd ADMIN_NAME = $SHORT_NAME archadd *=*:@pemit %#=You add information about %0 to the archives.;&ARCH-[edit(%0,%b,_)] [v(dbnum)]=%1
+
+&cmda-rank ADMIN_NAME = $SHORT_NAME rank *=*:@switch [setq(0,u(v(dbnum)/fnc-name_match,%0))][r(0)]=#-1,{@pemit %#=No such person at [v(place_name)].},{@pemit %#=[name(r(0))]'s rank set to %1.;&pdata-[r(0)] [v(dbnum)]=[u(v(dbnum)/get_knotnum,r(0))]|%1|[u(v(dbnum)/get_job,r(0))]|[u(v(dbnum)/get_bio,r(0))]}
+
+&cmda-job ADMIN_NAME = $SHORT_NAME job *=*:@switch [setq(0,u(v(dbnum)/fnc-name_match,%0))][r(0)]=#-1,{@pemit %#=No such person at [v(place_name)].},{@pemit %#=[name(r(0))]'s job set to %1.;&pdata-[r(0)] [v(dbnum)]=[u(v(dbnum)/get_knotnum,r(0))]|[u(v(dbnum)/get_rank,r(0))]|%1|[u(v(dbnum)/get_bio,r(0))]}
+
+&cmda-unauthorize ADMIN_NAME = $SHORT_NAME !authorize *:@switch [setq(0,num(*%0))][member(get(v(dbnum)/data-people),r(0))]=0,{@pemit %#=There's no such player in [v(place_name)].},{@pemit %#=[name(r(0))] removed from the list of authorized knot admins.;&data-authorized [v(dbnum)]=[remove(get(v(dbnum)/data-authorized),r(0))];@parent [u(v(dbnum)/get_knotnum,r(0))]=[parent(parent(me))]}
+
+&cmda-purge ADMIN_NAME = $SHORT_NAME purge *:@switch [member(get(v(dbnum/data-people),[setq(0,num(%0))][r(0)])]=0,{@pemit %#=There's nobody with that name in the database.},{@pemit %#=[name(r(0))] removed from the [v(place_name)] Census.;@dest [u(v(dbnum)/get_knotnum,r(0))];&data-people [v(dbnum)]=[remove(get(v(dbnum)/data-people),r(0))];&pdata-[r(0)] [v(dbnum)];&data-authorized [v(dbnum)]=[remove(get(v(dbnum)/data-authorized),r(0))]}
+
+/* Setup the initial conditions, and create an initial knot */
+
+#ifdef INSTALL
+
+@fo me = &data-authorized DATABASE_NAME = [num(me)]
+@fo me = &data-people DATABASE_NAME = [num(me)]
+@fo me = @clone/parent/inventory ADMIN_NAME = KNOT_NAME
+@fo me = @set KNOT_NAME = !halt
+@fo me = @lock KNOT_NAME = me
+@fo me = @lock/use KNOT_NAME = me
+@fo me =  &pdata-[num(me)] DATABASE_NAME = [num(KNOT_NAME)]|Builder Character|Builder of PLACE_NAME|No bio entry available.
+
+#endif

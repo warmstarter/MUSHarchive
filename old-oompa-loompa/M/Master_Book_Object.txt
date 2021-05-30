@@ -1,0 +1,259 @@
+@@ Object: Master Book Object
+@@ Version: 1.0beta
+@@ Author: Jonathan A. Booth
+@@ E-mail: kamikaze@N0$PAMimsa.edu
+@@ Web: http://www.N0$PAMimsa.edu/~kamikaze/
+@@ (remove N0$PAM from hostnames to use them)
+@@ Date: Mar 21, 1999
+@@ Written for: PennMUSH 1.7.2 pl21
+@@ Author is willing to support: Yes
+@@
+@@ This script creates a master book object, which you can take and
+@@ parent children objects to to make them into books.
+@@ 
+@@ See the object's COPYRIGHT attribute for copyright information.
+@@
+@@ See the "Master_Book_Object.hlp" file for help on it -- it's
+@@ written in PennMUSH hardcode help format.
+@@
+
+@create Master Book Object
+@link Master Book Object = me
+@lock/user:CAN_LENGTH Master Book Object=FUN_BOOK_CAN_LENGTH/1
+@lock/user:CAN_CLOSE Master Book Object=FUN_BOOK_CAN_CLOSE/1
+@lock/user:CAN_OPEN Master Book Object=FUN_BOOK_CAN_OPEN/1
+@lock/user:CAN_WRITE Master Book Object=FUN_BOOK_CAN_WRITE/1
+@lock/user:CAN_READ Master Book Object=FUN_BOOK_CAN_READ/1
+@set Master Book Object = NO_COMMAND
+&COPYRIGHT Master Book Object=Copyright 1999, Jonathan A. Booth (kamikaze@imsa.edu). There is no warrenty on this code, if it breaks you get to keep all the peices. It is free for non-commercial use; contact me for info reguarding commercial use. You may redistribute this code provided it is unmodified and this COPYRIGHT notice is retained. Don't rip off this code and claim it as your own, that's lame. Bugs should be reported to me, as well as suggestions.
+@set Master Book Object/COPYRIGHT=visual
+&VERSION Master Book Object=Version 1.0beta
+@set Master Book Object/VERSION=visual
+&FUN_BOOK_CAN_WRITE_WITH_QUILL Master Book Object=gt(match(iter(lcon(%#),lparent(##)),locate(first(rest(revwords(lparent(me)))),Master Quill Object,Tn)),0)
+&NOTE_FUN_BOOK_CAN_WRITE Master Book Object=If you want someone to not need a quill to write in the book (but need to own it), copy FUN_BOOK_CAN_WRITE_WITHOUT_QUILL to FUN_BOOK_CAN_WRITE, otherwise, if they do need a quill, either make a object called Master Quill Object owned by the same person who ownes the book, and put it with the book parent object, and copy FUN_BOOK_CAN_WRITE_WITH_QUILL to FUN_BOOK_CAN_WRITE.
+&FUN_BOOK_CAN_WRITE_WITHOUT_QUILL Master Book Object=strmatch(%#,owner(me))
+&FUN_BOOK_CAN_LENGTH Master Book Object=cor(strmatch(%#,owner(me)),hasflag(%#,wizard))
+&CMD_LENGTH Master Book Object=$^length (.+)=([0-9]+)$:think setq(0,locate(num(me),secure(%1),*));@sel strmatch(%q0,num(me))=1,{@sel elock(me/CAN_LENGTH,%#)=1,{@pemit %#=You set [name(me)]'s length to be %2 pages.;&data_text_max_pages me=%2;@sel dec(words(v(data_text),|))=<%2,{&data_text me=[v(data_text)][repeat(|,inc(sub(%2,words(v(data_text),|))))]},>%2,{&data_text me=[extract(v(data_text),1,inc(%2),|)]}},{@pemit %#=Permission denied.}}
+@set Master Book Object/CMD_LENGTH=regexp
+&FUN_SETUP Master Book Object=iter(CAN_CLOSE CAN_OPEN CAN_WRITE CAN_READ CAN_LENGTH,lock(me/USER:##,FUN_BOOK_##/1))[lock(me/use,FUN_BOOK_USE_LOCK/1)][lock(me/enter,=#0)][set(me,!no_command)]
+&FUN_OBJ_NAME Master Book Object=Book [trim(%0,#)]
+@UFAIL Master Book Object=You have to be holding [name(me)] to be able to use it.
+@set Master Book Object/UFAIL=no_command
+&CMD_SETUP Master Book Object=$setup:@sel cor(strmatch(%#,owner(me)),hasflag(%#,wizard))=1,{@dol CAN_CLOSE CAN_OPEN CAN_WRITE CAN_READ CAN_LENGTH={@lock/user:## me=FUN_BOOK_##/1};@lock/use me=FUN_BOOK_USE_LOCK/1;@lock/enter me==#0},{@pemit %#=I don't think so.}
+&PREVIEW Master Book Object=You preview your text on [name(me)]:%r--[iter(%q2,%r[s(edit(edit(##,&hash;,#),&pipe;,|))],#)]%r--[if(not(u(FUN_PAGE_EMPTY,v(DATA_PAGE))),%r[ansi(rhf,center(%bWARNING%b,78,-))]%r[center(You are about to overwrite previous text on page [v(DATA_PAGE)]!,78)]%r[ansi(rhf,center(%bWARNING%b,78,-))])]
+&AWRITE Master Book Object=&DATA_TEXT me=[replace(v(DATA_TEXT),inc(v(DATA_PAGE)),%0,|)]
+&OWRITE Master Book Object=writes onto a page of [name(me)].
+&WRITE Master Book Object=You write onto page [v(DATA_PAGE)] in [name(me)].
+&CMD_WRITE Master Book Object=$^(write|preview) (.+)=(.+)$:think setq(0,locate(num(me),secure(%2),*))[setq(1,ucstr(%1))][setq(2,ulocal(FUN_PAGE_TRANSLATE,escape(%3)))];@sel strmatch(%q0,num(me)):[cor(u(FUN_PAGE_EMPTY,v(DATA_PAGE)),hasflag(%#,wizard),strmatch(%#,owner(me)))]:[elock(me/CAN_WRITE,%#)]=1:1:1,{@verb me=%#,%q1,,O%q1,,A%q1,%q2},1:0:*,{@pemit %#=You're trying to write on a page that you've already written.},1:*:0,{@pemit %#=You can not seem to write in [name(me)].}
+@set Master Book Object/CMD_WRITE=regexp case
+&FUN_PAGE_EMPTY Master Book Object=not(strlen(u(FUN_PAGE_GET,inc(%0))))
+&AFLIP Master Book Object=&data_page me=%0
+&OFLIP Master Book Object=flips some pages in [name(me)].
+&FLIP Master Book Object=You flip [name(me)] to page %q1.
+&CMD_FLIP Master Book Object=$^flip ((.+) to ([0-9]+)|(.+))$:think setq(0,locate(num(me),secure(%2%4),*))[setq(1,if(strlen(%3),%3,inc(mod(v(DATA_PAGE),v(DATA_TEXT_MAX_PAGES)))))];@sel strmatch(%q0,num(me)):[u(FUN_PAGE_VALID,%q1)]=1:1,{@verb me=%#,FLIP,,OFLIP,,AFLIP,%q1},1:0,{@pemit %#=You try to flip [name(me)] to a nonexistant page.}
+@set Master Book Object/CMD_FLIP=regexp
+&READ Master Book Object=You read a page in [name(me)].%r[u(DESCRIBE)]
+&OREAD Master Book Object=reads some of [name(me)].
+&AREAD Master Book Object=&data_page me=[inc(mod(v(DATA_PAGE),v(DATA_TEXT_MAX_PAGES)))]
+&CMD_READ Master Book Object=$^read (.+)$:think setq(0,locate(num(me),secure(%1),*));@sel strmatch(%q0,num(me)):[elock(me/CAN_READ,%#)]=1:1,{@verb me=%#,READ,,OREAD,,AREAD},1:0,{@pemit %#=You can not seem to read [name(me)].}
+@set Master Book Object/CMD_READ=regexp
+&FUN_LINE_WRAP Master Book Object=[setq(0,first(%0,#))][setq(1,rest(%0,#))][if(gt(strlen(s(edit(edit(%q0 %1,&hash;,#),&pipe;,|))),%q9),%1#%q0#%q1,%q0 %1#%q1)]
+&FUN_PAGE_LINE_WRAP Master Book Object=setq(9,v(DATA_TEXT_WIDTH))[revwords(trim(fold(FUN_LINE_WRAP,%0),#),#)]
+&FUN_PAGE_TRANSLATE Master Book Object=iter(escape(edit(edit(edit(edit(%0,#,&hash;),|,&pipe;),\\%%r,#),\\%%b,%%b)),u(FUN_PAGE_LINE_WRAP,##),#,#)
+&DATA_TEXT_WIDTH Master Book Object=70
+&NOTES Master Book Object=Translate on input: #=>&hash; |=>&pipe; %r=># %b=>%%b @@ Error: %t
+&FUN_BOOK_PRINT_PAGE_RIGHT Master Book Object=[space(8)]____[repeat(-,20)][repeat(_,16)]%r%b%b_--"""[space(40)][repeat(',13)][repeat(-,10)]____[iter(u(FUN_PAGE_GET,%0)#%b,%r[if(dec(#@),|| [ljust(edit(edit(##,&pipe;,|),&hash;,#),70)] || |,\\/ [ljust(edit(edit(##,&pipe;,|),&hash;,#),70)] |\\_)],#)]%r||[space(6)]____[repeat(-,20)][repeat(_,16)][space(12)] [rjust(dec(%0)/[v(DATA_TEXT_MAX_PAGES)],10)] %b%b||%b|%r||_--'''[repeat(=,40)][repeat(',13)][repeat(-,10)]___||%b|%r\\/[repeat(=,73)]\\ |%r[repeat(~,78)]
+&FUN_BOOK_PRINT_PAGE_LEFT Master Book Object=[space(30)][repeat(_,16)][repeat(-,20)]____%r%b%b%b____[repeat(-,10)][repeat(',13)][space(40)]'''--_[iter(u(FUN_PAGE_GET,%0)#%b,%r[if(not(dec(#@)),%b_/| [ljust(edit(edit(##,&pipe;,|),&hash;,#),70)] \\/,|%b|| [ljust(edit(edit(##,&pipe;,|),&hash;,#),70)] ||)],#)]%r|%b||%b%b [ljust(dec(%0)/[v(DATA_TEXT_MAX_PAGES)],10)] [space(12)][repeat(_,16)][repeat(-,20)]____%b%b%b%b%b%b||%r|%b||___[repeat(-,10)][repeat(',13)][repeat(=,40)]'''--_||%r| /[repeat(=,73)]\\/%r[repeat(~,78)]
+&CMD_CLOSE Master Book Object=$^close (.+)$:think setq(0,locate(num(me),secure(%1),*));@sel strmatch(%q0,num(me))=1,{@verb me=%#,CLOSE,,OCLOSE,,ACLOSE}
+@set Master Book Object/CMD_CLOSE=regexp
+&ACLOSE Master Book Object=&data_page me=0;&data_user me;@unlock/drop me
+&OCLOSE Master Book Object=closes [name(me)].
+&CLOSE Master Book Object=You close [name(me)].
+&FUN_BOOK_PRINT_COVER Master Book Object=%b[repeat(_,75)]%r|[space(75)]|[iter(u(FUN_PAGE_GET,%0),%r|[center(edit(edit(##,&pipe;,|),&hash;,#),75)]|[if(dec(#@),|)],#)]%r|[repeat(_,75)]||%r|\\[repeat(=,73)]| |%r\\|[repeat(=,73)]| |%r%b[repeat(~,77)]
+@OUSE Master Book Object=opens up [name(me)] and flips to the first page.
+@set Master Book Object/OUSE=no_command
+@USE Master Book Object=You open up [name(me)] and flip to the first page.%r[u(FUN_BOOK_PRINT,1)]
+@set Master Book Object/USE=no_command
+@AUSE Master Book Object=&data_user me=%#;&data_page me=2;@lock/drop me==me;@lock/use me=FUN_BOOK_USE_LOCK/1
+@set Master Book Object/AUSE=no_command
+&FUN_BOOK_CREATE Master Book Object=set(me,DATA_TEXT:[repeat(|,%0)])[set(me,DATA_TEXT_MAX_PAGES:%0)]
+&FUN_BOOK_USE_LOCK Master Book Object=if(not(hasattrval(%!,data_user)),cand(elock(%!/CAN_OPEN,%#),strmatch(%c,use *)),strmatch(v(data_user),%#))
+&DATA_PAGE Master Book Object=0
+@DESCRIBE Master Book Object=u(fun_book_print,v(data_page))
+@set Master Book Object/DESCRIBE=no_command visual
+&FUN_BOOK_PRINT Master Book Object=if(%0,if(not(elock(me/CAN_READ,%#,%0)),u(FUN_BOOK_PRINT_PAGE_[if(mod(%0,2),LEFT,RIGHT)],inc(%0)),{You see a book with some text on it. You are unable to read the text.}),u(FUN_BOOK_PRINT_COVER,inc(%0)))
+&FUN_BOOK_CAN_CLOSE Master Book Object=1
+&FUN_BOOK_CAN_OPEN Master Book Object=strmatch(%#,loc(num(me)))
+&FUN_BOOK_CAN_WRITE Master Book Object=strmatch(%#,owner(me))
+&FUN_BOOK_CAN_READ Master Book Object=1
+&FUN_PAGE_FLIP_NEXT Master Book Object=u(FUN_PAGE_FLIP_TO,inc(v(DATA_PAGE)))
+&FUN_PAGE_FLIP_TO Master Book Object=set(me,DATA_PAGE:[mod(%0,v(DATA_TEXT_MAX_PAGES))])
+&FUN_PAGE_VALID Master Book Object=cand(lte(%0,v(DATA_TEXT_MAX_PAGES)),gte(%0,0))
+&FUN_PAGE_SET Master Book Object=set(me,DATA_TEXT:[replace(v(DATA_TEXT),%0,u(FUN_PAGE_TRANSLATE,%1,v(DATA_TEXT_WIDTH)),|)])
+&FUN_PAGE_GET Master Book Object=extract(v(DATA_TEXT),%0,1,|)
+&DATA_TEXT_MAX_PAGES Master Book Object=5
+&DATA_TEXT Master Book Object=How to use a book.#Written by: Kami#Copyright 1999%, Jonathan A. Booth (ex [if(isdbref(parent(me)),parent(me),num(me))]/COPYRIGHT)##(See 'help book' for help on books and scrolls.)#(Or use 'use [name(me)]' to open the book to read some help.)|Commands:#%b%b[ljust(look <book>,25)]Shows you the text of the book#%b%b[ljust(flip <book>\[ to <page>\],25)]Flips book by 1 page or to <page>#%b%b[ljust(length <book>=<num>,25)]Makes <book> have <num> pages#%b%b[ljust(read <book>,25)]Read the text and flip a page#%b%b[ljust(preview <book>=<text>,25)]Preview text before writing it#%b%b[ljust(write <book>=<text>,25)]Write text into a book. Irreversable!#%b%b[ljust(close <book>,25)]Close the book so you can drop it.|Page three is empty.||Page four.|Page five. Kinda boring pages except for page 1%, eh?
+
+@@ HELP FILES @@
+
+& books
+& book
+______________________________________________________________________________
+0=0=0  The Annointed: help on books
+ |||
+ |||   Books, in our IC world have been made to act as close to books in
+ |||   the real world as is feasably possible. Things you can't do with an
+ |||   IC book are things like hilighting/editing. Once you've written on
+ |||   them, that's it. However, unlike real life, you can write as much on
+ |||   a single page as you wish provided that you write it all at one
+ |||   time. (I suggest keeping your length reasonable or it'll be too long
+ |||   on each page)
+ |||   
+ |||   Books have the following 'commands' associated with them:
+ |||	close		look		flip		length (wiz/owner)
+ |||	read		preview		use		write
+ |||   (to access help on these, type 'help book <topic>')
+ |||
+0=0=0  See also: 'help local'
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+& book close
+& books close
+______________________________________________________________________________
+0=0=0  The Annointed: help on books 'close' command
+ |||
+ |||   Closing a book is obviously what you do when you're done with it. It
+ |||   will cause you to close the book (so that you can then drop it --
+ |||   you can't drop a open book). Closing a book will also cause the book
+ |||   to ignore further commands you try to use on it (except look and
+ |||   use).
+ |||   
+ |||   Syntax:
+ |||	close <book name>
+ |||   
+0=0=0  See also: 'help books'
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+& book look
+& books look
+______________________________________________________________________________
+0=0=0  The Annointed: help on books 'look' command
+ |||
+ |||   Books will show different things when they are looked at, based on
+ |||   if you are using the book and have it open right now or not. If the
+ |||   book is closed, all you'll ever see is the cover. If it's open, the
+ |||   book will either show it's internal pages.
+ |||   
+0=0=0  See also: 'help books'
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+& book flip
+& books flip
+______________________________________________________________________________
+0=0=0  The Annointed: help on books 'flip' command
+ |||
+ |||   Flip is a command to move a book to another page to read it. This
+ |||   command is nice when you want to go to a specific page further on in
+ |||   the book or further previous, but it's not that nice to just read
+ |||   through a book. Consider using 'read' instead to combine a 'look and
+ |||   flip to next page' command in that case.
+ |||   
+ |||   Syntax:
+ |||	flip <book name> to <page number>
+ |||   
+0=0=0  See also: 'help books'
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+& book length
+& books length
+______________________________________________________________________________
+0=0=0  The Annointed: help on books 'length' command
+ |||
+ |||   Length is a wizard or book owner only command that will adjust the
+ |||   length of a book. You can increase and decrease the length (actually
+ |||   it sets the length to whatever number you provide and won't accept
+ |||   negative values) by any amount. Setting a length of 0 will give you
+ |||   the cover of a book with no pages only.
+ |||   
+ |||   Note that if you set the length below the current length it will
+ |||   simply truncate any text past the new length, and that text will be
+ |||   lost.
+ |||   
+ |||   Syntax:
+ |||	length <book name>=<num pages>
+ |||   
+0=0=0  See also: 'help books'
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+& book read
+& books read
+______________________________________________________________________________
+0=0=0  The Annointed: help on books 'read' command
+ |||
+ |||   Read is a command which combines 'look' and 'flip' to allow you to
+ |||   easialy read through a book, as you would in real life. Each time
+ |||   you read a book, you will first look at the current page, then flip
+ |||   to the next page.
+ |||   
+ |||   Syntax:
+ |||	read <book name>
+ |||   
+0=0=0  See also: 'help books'
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+& book preview
+& books preview
+______________________________________________________________________________
+0=0=0  The Annointed: help on books 'preview' command
+ |||
+ |||   The preview command is included for those writing in books, so that
+ |||   you can preview how your text is going to get formatted before you
+ |||   actually write it into the book permenantly.
+ |||   
+ |||   Note that this command does all the checking that a write command
+ |||   will, the only difference is that it doesn't actually have you write
+ |||   in the book. Any errors here, such as "Invalid page" or "You can't
+ |||   seem to write in the book" are the same errors you will get if you
+ |||   tried to write into the book without fixing the error.
+ |||
+ |||   If you're using raw telnet, or some other connection method without
+ |||   command recall, consider writing your text in an attribute on your
+ |||   player, and then using a <text> block of
+ |||   '[v(attribute_you_wrote_text_in)]' to retrieve that text.
+ |||   
+ |||   Syntax:
+ |||	preview <book name>=<text>
+ |||   
+0=0=0  See also: 'help books'
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+& book use
+& books use
+______________________________________________________________________________
+0=0=0  The Annointed: help on books 'use' command
+ |||
+ |||   The use command really isn't a command on the book, it's the MUSH's
+ |||   builtin 'use' command. However, this is the method you should use to
+ |||   open up a book so that you can read it in, or write in it, etc.
+ |||   
+ |||   Syntax:
+ |||	use <book name>
+ |||
+0=0=0  See also: 'help books'
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+& book write
+& books write
+______________________________________________________________________________
+0=0=0  The Annointed: help on books 'write' command
+ |||
+ |||   The write command is used, obviously, to write text into a book. You
+ |||   can only write text on empty pages, and may not add text to an
+ |||   already written on page (unless you are a wizard or the owner of the
+ |||   book). You will probably but not necessarialy need a 'pen' or
+ |||   'quill' object to actually be able to write in the book, depending
+ |||   on your local configuration (you'll get an error if you need it).
+ |||   
+ |||   Writing always occurs on the current page of the book, and if you
+ |||   have permissions to overwrite previous text, it will do so SILENTLY,
+ |||   so be careful with it.
+ |||   
+ |||   Syntax:
+ |||	write <book name>=<text>
+ |||   
+0=0=0  See also: 'help books'
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+

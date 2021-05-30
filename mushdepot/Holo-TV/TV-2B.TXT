@@ -1,0 +1,13 @@
+@create Broadcasting Console
+@set Broadcasting Console=INHERIT
+@set Broadcasting Console=OPAQUE
+@set Broadcasting Console=MONITOR
+&CH1 Broadcasting Console=  #291 #257
+@FAILURE Broadcasting Console=Sorry, its too heavy... and too big... and too high-tech for you.
+&TPORT Broadcasting Console=broa
+&STUDIOS Broadcasting Console=1
+&STUDIO1 Broadcasting Console=#251
+&ON Broadcasting Console=$studio * on:@swi [match([v(studios)],%0)]=0,{@pemit %#=That is not an available studio.},{@set [v(studio%0)]/mike2=!no_command;@pemit/l [lcon(here)]=Studio #%0 is now [ansi(hg,ON THE AIR)].;@pemit/l [lcon([v(studio%0)])]=This Studio is now [ansi(hg,ON THE AIR)];@edit [v(studio%0)]/adesc={hr,OFF THE AIR},{hg,ON THE AIR}}
+&OFF Broadcasting Console=$studio * off:@swi [match([v(studios)],%0)]=0,{@pemit %#=That is not an available studio.},{@cpattr [v(studio%0)]/default=[v(studio%0)]/describe;@halt [v(studio%0)];@set [v(studio%0)]=!halt;@set [v(studio%0)]=no_command;@pemit/l [lcon(here)]=Studio #%0 is now [ansi(hr,OFF THE AIR)].;@set [v(studio%0)]=!halt;@set [v(studio%0)]=no_command;@pemit/l [lcon([v(studio%0)])]=This Studio is now [ansi(hr,OFF THE AIR)];@edit [v(studio%0)]/adesc={hg,ON THE AIR},{hr,OFF THE AIR}}
+&STATUS Broadcasting Console=$studio status:@pemit %#=[center(-STUDIO STATUS-,79,-)]%r%rSTUDIO #1%t[v(name1)]%b%b%bChannel 1%t[extract([get_eval([v(studio1)]/adesc)],3,3)]%r%r[center(-,79,-)]
+&NAME1 Broadcasting Console=MPT -- Manhattan Public Television

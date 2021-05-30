@@ -1,0 +1,427 @@
+& help
+-------------------------------[ +Shelp Files ]-------------------------------
+---------------------------------- Commands ----------------------------------
+ +bg              +commands        +contents        +cron
+ +dark            +duty            +hangouts        +jnotes
+ +join            +return          +staff           +summon
+ +tags            +verify          
+
+---------------------------------- Systems -----------------------------------
+ +help            bboard           building         configure
+ cronsys          functions        
+
+To get help on a topic, type '+shelp <topic>'
+------------------------------------------------------------------------------
+
+& +bg
+------------------------------------------------------------------------------
+  Syntax: +bg <name>/<number
+          +bglist <name>
+
+  These commands allow you to review player background sections. The first
+  command reads them, and the second command lists the sections. The default
+  behavior for backgrounds is that when a player uses the +bgsubmit command,
+  their background sections are locked, and a new job is opened for their
+  background. Approving or completing that job will approve the player. Denying
+  or deleting the job will unlock their background sections so that they can
+  revise them.
+------------------------------------------------------------------------------
+
+& +commands
+------------------------------------------------------------------------------
+  Syntax: +commands <object>
+          +commands/nocol <object>
+
+  These commands allow you to see a list of the commands set on an object. The
+  first version gives the display in two columns, however the /nocol switch will
+  allow you to see the list as one column, which is useful for commands whose
+  text would otherwise flow out of the columns.
+------------------------------------------------------------------------------
+
+& +contents
+------------------------------------------------------------------------------
+  Syntax: +contents <object>
+
+  This command gives you a list of the contents of <object>.
+------------------------------------------------------------------------------
+
+& +cron
+------------------------------------------------------------------------------
+  Syntax: +cron
+          +cron <number>
+
+  These commands allow you to see the cron jobs set up on the cron object. Cron
+  is a way of scheduling commands to run at precise times. The first command
+  shows you a list of the jobs set to run, and the second command will let you
+  see detailed information on that job. For more information on creating cron
+  jobs, see '+shelp cronsys'.
+------------------------------------------------------------------------------
+
+& +dark
+------------------------------------------------------------------------------
+  Syntax: +dark
+
+  This command is a toggle that sets and removes your dark flag. It also sets an
+  attribute on you with the time you went dark. Players +fingering you or using
+  +staff will see your dark time as if it were your logout time.
+------------------------------------------------------------------------------
+
+& +duty
+------------------------------------------------------------------------------
+  Syntax: +duty
+
+  This command is a simple toggle. Using it once sets you off duty, and using it
+  again sets you on duty. Your duty status is controlled by the TRANSPARENT
+  flag.
+------------------------------------------------------------------------------
+
+& +hangouts
+------------------------------------------------------------------------------
+  Syntax: +hangouts/update
+
+  This command must be used to update the mast list of hangouts for the
+  '+hangouts' command. To designate a room as a hangout, please use +tag
+  <room>=hangout
+------------------------------------------------------------------------------
+
+& +jnotes
+------------------------------------------------------------------------------
+  Syntax: +jnotes <name>
+          +jnotes <name>/<jnote>
+          +jnote <name>/<title>=<data>
+          +jnote/hide <name>/<jnote>
+          +jnote/unhide <name>/<jnote>
+          +jnote/approve <name>/<jnote>
+          +jnote/unapprove <name>/<jnote>
+          +jnote/delete <name>/<jnote>
+
+  These commands allow you to manage player jnotes. In all cases '<jnote>' can
+  be a number or the name of the note. The first two commands allow you to see
+  players notes and read them. The third command allows you to set a new note.
+  This note will be set on the player with status "Proposed" and hidden from
+  their view. The fourth and fifth commands allow you to toggle a jnote's
+  visibility, while the last two commands allow you to approve and unapprove a
+  note.
+
+  Players may pitch jnotes. This will open a new job for that note. If you
+  approve or complete the job you approve the note. If you unapprove any
+  approved jnote, a new job will be opened for the note, and the same rules
+  apply for approving or denying it.
+------------------------------------------------------------------------------
+
+& +join
+------------------------------------------------------------------------------
+  Syntax: +join <player>
+
+  This command joins another player at their location. The player and the others
+  in their room will be given notice that you are coming, and there will be a
+  momentary delay before you arrive. When you are ready to return to your
+  original location, type +return.
+------------------------------------------------------------------------------
+
+& +return
+------------------------------------------------------------------------------
+  Syntax: +return
+          +return <player>
+
+  This command allows you to reverse a +summon or +join. +Return with no
+  arguments returns you to your previous location after joining. +Return
+  <player> returns a summoned player to their initial location. In both cases
+  the appropriate rooms will be notified of an impending arrival, and there will
+  be a momentary delay before they arrive.
+------------------------------------------------------------------------------
+
+& +staff
+------------------------------------------------------------------------------
+  Syntax: +staff/update
+
+  This command refreshes the +staff data list, which is normally set @daily.
+  While only Wizards can set the ROYALTY flag, any staffer can use this command,
+  which does not set any flags.
+------------------------------------------------------------------------------
+
+& +summon
+------------------------------------------------------------------------------
+  Syntax: +summon <player>
+
+  This command summons a player to your location. They will be given warning,
+  as will the others in your location, and there will be a momentary delay before
+  they arrive. To return a player to their original location, use +return
+  <player>.
+------------------------------------------------------------------------------
+
+& +tags
+------------------------------------------------------------------------------
+  Syntax: +tag <object>=<tag>
+          +untag <object>=<tag>
+          +tag/add <type>=<name>
+          +tag/del <type>=<name>
+          +tags
+
+  The tags system is a essentially a way to add additional flags to things, and
+  to easily store data that can be irritating to quantify in other ways without
+  having an object somewhere full of lists. The first command tags an object
+  (which is a player, thing, room, or exit) with the named tag. The second
+  command removes tags. The third and fourth commands create or destroy tags.
+  There is a different list for each object type, but you may specify "all" to
+  create a tag in all categories. The final command gives a quick list of the
+  available tags. Players can see the tags of objects they control using the
+  tags() function (see '+shelp functions').
+
+  Only one tag is included in the base system-- a room flag called 'hangouts'.
+  This is used to denote rooms that should be shown by the +hangouts command.
+  For more details, see '+shelp hangouts'.
+------------------------------------------------------------------------------
+
+& +verify
+------------------------------------------------------------------------------
+  Syntax: +verify <name>
+
+  Any data sent through the TR.JUDGE trigger will be recorded on players. In the
+  core system this is only done by the "+jnote/show" command, but it is useful
+  for other things such as dice rolls or proving stats. A player can review the
+  last 20 Judge outputs they have seen. This command allows you to check a
+  player's judge data and see what they've seen.
+------------------------------------------------------------------------------
+
+& +help
+------------------------------------------------------------------------------
+  Syntax: +help/staffhelp
+          +help/wizhelp
+
+  These commands show a list of the staff commands available to both royalty and
+  wizards; a full accounting of which could fill multiple help files. These
+  commands also hold true for the +shelp system.
+------------------------------------------------------------------------------
+
+& bboard
+------------------------------------------------------------------------------
+     +bbnewgroup <title>             Creates a new group.
+     +bbcleargroup <#>               Clears group <#> and all it's messages.
+     +bblock <#>=<lock>/<key>        Locks group <#>. Lock can be 'flag' or
+                                       an attribute name.
+                                       Examples: +bblock 4=flag/wizard
+                                                 +bblock 5=race/were
+     +bbwritelock <#>=<lock>/<key>   Same as above, but controls who may write
+                                       to the group.
+     +bbconfig                       Shows values of all config parameters.
+                                       See '+shelp bbconfig' for help on
+                                       config parameters and how to set them.
+------------------------------------------------------------------------------
+
+& bblock
+------------------------------------------------------------------------------
+A few notes about locking BB Groups.
+
+The +bblock/+bbwritelock commands are only meant to take care of the simplest
+of locks.  There is simply no way to write one bblock'ing command that can
+deal with all the different ways people want to lock their BB Groups, and it
+certainly isn't practical to keep adding different locking commands for each
+locking method I come across.
+
+Coders can set up locks on Groups that are as customized or exotic as you like
+quite easily, however.  Each Group has its own object.  If you look inside
+the global BBS object, you'll see them.  Each Group object has a pair of
+attributes that control who may read and who may write to that Group.  The
+attributes are named CANREAD and CANWRITE, respectively.  The dbref of the
+player attempting to read/write is passed to the appropriate attribute as %0.
+As long as the attribute returns a non-zero result, the player can read/write.
+
+CANREAD Examples:
+   CANREAD: 1                               Anyone can read
+   CANREAD: hasflag(%0,wizard)              Only wizards can read
+   CANREAD: strmatch(name(%0),*z*)          Only characters with a 'z' in
+                                              their name can read
+------------------------------------------------------------------------------
+
+& bbconfig
+------------------------------------------------------------------------------
+There are two types of configuration parameters: global and group.  Global
+configuration parameters affect the BB system as a whole, while group 
+configuration parameters affect a single Group.
+To set a global parameter:
+
+     +bbconfig <param>=<value>       Sets global config parameter.
+
+Global Parameters:
+
+     timeout            This sets the default timeout (in days) for any new
+                          groups created. A timeout of '0' means messages
+                          won't timeout. (ex. +bbconfig timeout=30)
+     autotimeout        If you don't have a way to trigger the TR_TIMEOUT
+                          attribute on the bbpocket (daily) to clean out
+                          expired messages, you can use the autotimeout param
+                          instead. Setting this param 'on' enables the BB's
+                          built in timer. Set this param to 'off' to disable.
+
+To set a Group parameter:
+
+     +bbconfig <#>/<param>=<value>   Sets config parameter for board <#>.
+
+Group Parameters:
+
+     anonymous          Setting this value turns the Group 'anonymous'.  This
+                          means that any future posting's 'Author' field will
+                          have the value of this param instead of the name of
+                          the author. Wizards will also see the actual name of
+                          author.  (examples:
+                          +bbconfig newspaper/anonymous=NewsPaper Staff,
+                          +bbconfig house rules/anonymous=The Staff)
+     timeout            Sets the default timeout value for the Group.  Any new
+                          messages will have this new value.  A value of '0'
+                          means messages won't timeout.
+------------------------------------------------------------------------------
+
+& building
+------------------------------------------------------------------------------
+  Syntax: +build
+          +build <project>
+          +build/create <project name>=<player>
+          +build/set <project>/<option>=<data>
+          +build/approve <project>
+          +build/advance <project>
+          +build/check <project>
+          +build/unapprove <project>
+          +build/destroy <project>
+          +build/addtype <letter>/<name>=<dbref>
+          +build/types
+
+  These commands allow for the management of building projects. In all cases
+  '<project>' can be a number or the name of the build. The first and second
+  commands will show a list, and specific detail about projects. The third
+  command allows the creation of new building projects. The name must be unique,
+  and player should be the player associated with the build. +build/set uses the
+  arguments listed in the second command. The approve command notes that a
+  project is ready to be advanced, and the /advance command will allow you to do
+  so manually.
+
+  Once a project is advanced to the 'In Progress' stage, you may use the /check
+  command to see its completion status. The /unapprove command allows you to
+  send a Live project on the grid back to the building nexus. The destroy
+  command completely destroys a project and its builder, and may only be used by
+  staff flagged WIZARD. The addtype command allows you to add a new project
+  parent, and the final command lists those parents.
+
+  This is a command reference. For a discussion of the building system, see
+  '+shelp explained'. For information on parents, see '+shelp parents'.
+------------------------------------------------------------------------------
+
+& explained
+------------------------------------------------------------------------------
+  The included building system is complex, but greatly simplifies the job of
+  building staff. The most common work flow will start with players making a
+  building request with the +brequest command. This creates a new job for that
+  build and creates a stub project with the "Approval" status. You can then
+  review the application, and if you want to approve it, some setup is
+  necessary. Using the +build/set command, set a type parent, a builder name
+  (should be a new character), and an amount of quota (at least 3 is required).
+  Then +build/approve their project and then +job/approve their request. Denying
+  or deleting the request will destroy the stub project.
+
+  This will automatically create the project in the Building Nexus, set up their
+  builder, and notify them their project has been approved. This advances the
+  status of the project to "In Progress," and the player can build their project
+  as usual. At any time you can use the +build/check command to check the status
+  of the build. When they are finished they will submit their build for
+  approval, which will create a new job. From there you can set the build's IC
+  Owner (a full name, or company name), along with an IC Location for the build,
+  which should be a dbref. Use the +build/approve command to set the project as
+  having been inspected, and then +job/approve or complete their job. This will
+  automatically link the build to the specified location. Denying or deleting
+  the job will leave the build as In Progress so that the builder can continue
+  working.
+
+  One final option is the ability to unapprove a project on the Grid and send it
+  back to the Building Nexus for more work. This makes it easy for players to
+  take over existing builds from others, and since the project is linked to a
+  separate builder character, projects are not lost when players leave. This
+  requires a bit more work from staff during the initial creation of a game, but
+  pays off in spades down the line!
+------------------------------------------------------------------------------
+
+& parents
+------------------------------------------------------------------------------
+  There are two included parents for use with the building system. One is for
+  residential builds, and the other is for businesses. Both have the same
+  commands initially, but can be customized as needed. The most basic function
+  of these parents is to control locks within the project. A lock may be set as
+  'Owners', 'Tenants', 'Keys', or 'None'. The last type cannot be locked or
+  unlocked. Locks set 'Keys' are only opened by people who have been given keys
+  via the code. Tenants can unlock both Tenants and Keys locks, and Owners can
+  unlock all locks in a project.
+------------------------------------------------------------------------------
+
+& configure
+------------------------------------------------------------------------------
+  The basic configuration of this softcode package is pretty simple. All
+  functions are stored on #5. By default the isstaff function does not look for
+  the Staff flag, since Royalty and Wizard are the only flags that actually
+  convey powers in the code. Globals objects are stored in the Master Room (#2),
+  and other objects that are for storage or functions are kept in the Auxiliary
+  Room (#58). In certain cases, objects are stored in their global object. The
+  Building Tracker is stored in the Building Globals Object, and the +Help and
+  +Shelp DBs are stored in the Player Help Globals object.
+
+  All players default to ANSI and UNINSPECTED. The room parent is #45, and is
+  set up with a basic set of formatting attributes to show what's possible (ie:
+  views, places, and jnotes are automatically reflected as appropriate in a
+  room's footer if they are present). The header, subheader, and footer
+  functions are all located on #5 and are @function'd. Public, Guest, and Scan
+  (to monitor code) channels are set up and associated with channel objects as
+  appropriate. Logging is enabled on all three channels.
+------------------------------------------------------------------------------
+
+& cronsys
+------------------------------------------------------------------------------
+  This softcode system includes a coded Cron system. Cron is a way of setting up
+  a list of commands to occur at a certain time. This is useful for a variety of
+  reasons. All cron attributes should go on the Cron System (#18 in the default
+  install). The attributes are as follows:
+
+  Time to run:  &CRON.TIME-<NAME> #18=month|date|day|hour|minute|flags|args
+
+  The list of commands to run:
+  &CRON.JOB-<NAME> #18=list;of;commands
+
+  Comments for the job (optional):
+  &CRON.COMMENT-<NAME> #18=This is a job!
+
+  The <name> should match on all three. You should use input for each section of
+  the time as they appear in the time function. ie: Thu for Thursday, Nov for
+  November, 17 for 5pm, and so forth. Valid flags are 'runonce' which runs the
+  job once and then removes it, and 'catchup' for jobs that should be caught up
+  if they're missed. Args are passed to the command list as %0. Times are
+  'greedy' to run as often as possible. ie: If a job is set to run at |||17|||,
+  it will run once a minute during the 5pm hour of every day.
+
+  The cron system is configured to run around the 30 second mark of each minute
+  to prevent drifting. The system remembers the last time it ran, and in the
+  event of server downtime it will try to catch up on missed jobs at startup,
+  but only if they are flagged 'catchup'. If the server is down for more than
+  about 12 hours, missed jobs past that mark cannot be caught up.
+------------------------------------------------------------------------------
+
+& functions
+------------------------------------------------------------------------------
+  There are several included softcode functions located on #5:
+
+  ISSTAFF........ Takes %0. Checks for the ROYALTY or WIZARD flags.
+  ISMEMBER....... Takes %0, %1, and %2. Checks to see if %1 is a member of    
+                  list %0 with optional delimiter %2. Case insensitive.       
+  PARTIAL........ Takes %0, %1, and %2. Partial matches %1 in list %0 with the
+                  optional delimiter 2.                                       
+  ISPOSINT....... Takes %0. Checks for a positive integer.
+  ROLLXDY........ Rolls %0d%1.
+  HEADER......... Displays the game header with optional text %0.
+  SUBHEADER...... As above, but a subheader.
+  FOOTER......... As above, but for a footer.
+  CAPALL......... Returns a string with all words capitalized. Omits certain  
+                  conjunctions.                                               
+  ALERT.......... A simple function to display something in an eyecatching    
+                  way. %0 is the text and %1 is a character.                  
+  TAGS........... Displays a list of tags on %0. You must control %0.
+  HASTAG......... Checks %0 for tag %1. You must control %0.
+  ANDTAGS........ Checks %0 for all tags in list %1. You must control %0.
+  ORTAGS......... As above, but with a logical 'or' instead of 'and'.
+------------------------------------------------------------------------------
+

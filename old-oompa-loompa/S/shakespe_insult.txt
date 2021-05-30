@@ -1,0 +1,22 @@
+@create Shakespeare
+@set Shakespeare = INHERIT
+@set Shakespeare = OPAQUE
+@set Shakespeare = QUIET
+@set Shakespeare = STICKY
+@set Shakespeare = UNFINDABLE
+@set Shakespeare = WIZARD
+@set Shakespeare = SAFE
+@set Shakespeare = ROYALTY
+@set Shakespeare = MONITOR
+@set Shakespeare = !NO_COMMAND
+@DESCRIBE Shakespeare=This is the fabulous, the fantastical, the mighty-morphin'... er.. yeah. This is a simple object built from a file I found called "How to create shakespearian insults." It combines a one word adjective with a hyphenated one applied to a very descriptive `pronoun', outputting something like this: "Thou art a pribbling pox-marked hedge-pig!"%r%r%t%t[ansi(h,*-*-*-* `insulthelp' *-*-*-*)]
+@set Shakespeare/DESCRIBE=no_command visual
+&FIRST Shakespeare=an artless | a bawdy | a beslubbering | a bootless | a churlish | a cockered | a clouted | a craven | a currish | a dankish | a dissembling | a droning | an errant | a fawning | a fobbing | a froward | a frothy | a gleeking | a goatish | a gorbellied | an impertinent | an infectious | a jarring | a loggerheaded | a lumpish | a mammering | a mangled | a mewling | a paunchy | a pribbling | a puking | a puny | a quailing | a rank | a reeky | a roguish | aruttish | a saucy | a spleeny | a spongy | a surly | a tottering | a unmuzzled | a vain | a venomed | a warped | a wayward | a weedy | a yeasty |
+&SECOND Shakespeare=base-court bat-fowling beef-witted beetle-headed boil-brained clapper-clawed clay-brained common-kissing crook-pated dismal-dreaming dizzy-eyed doghearted dread-bolted earth-vexing elf-skinned fat-kidneyed fen-sucked flap-mouthed fly-bitten folly-fallen foul-borned full-gorged guts-griping half-faced hasty-witted hedge-born hell-hated idle-headed ill-breeding ill-nutured knotty-pated milk-livered motley-minded onion-eyed plume-plucked pottle-deep pox-marked reeling-ripe rough-hewn rude-growing rump-fed shard-borne sheep-biting spur-galled swag-bellied tardy-gaited
+&THIRD Shakespeare=apple-john baggage barnacle bladder boar-pig bugbear bum-bailey canker-blossom clack-dish clotpole coxcomb codpiece death-token dewberry flap-dragon flax-wench flirt-gill foot-licker fustilarian giglet gudgeon haggard harpy hedge-pig horn-beast hugger-mugger jolthead lewdster lout maggot-pie malt-worm mammet measle minnow miscreant moldwarp mumble-news nut-hook pigeon-egg pignut puttock pumpion ratsbane scut skainsmate strumpet
+&DO_INSULT Shakespeare=$insult:@emit/room %N says, "Thou art[u(me/u_insult)]!"
+&U_INSULT Shakespeare=[extract(u(first),[add(1,rand(50))],1,|)][extract(u(second),[add(1,rand(47))],1)] [extract(u(third),[add(1,rand(46))],1)]
+&INSULTHELP Shakespeare=$insulthelp:@pemit %#=[ansi(hg,repeat(=,78))]%r%rinsult %t%tProduces an insult, random.%r%r%b%b%bYou may also enter `%[u([first(name(me))]/u_insult)]' into a pose or say, to position it as you will. It will provide a random insult in the form of, `a/an X Y Z', no exclamation.%r%r[ansi(hg,repeat(=,78))]
+&INSULT-1A Shakespeare=^* has arrived.:@remit [loc(me)]=[name(me)] says, "Thou art[u(me/u_insult)]!"
+
+

@@ -1,0 +1,1223 @@
+Tutorial for setting up a MUSH game.
+
+4th November 1995
+
+by Nick Gammon
+
+Notes
+
+This tutorial is a guide to setting up a MUSH game, starting from scratch using the file “minimal.db” which contains only three objects:
+·	Room Zero (the starting room for new players)
+·	Player One (the “god” or supreme wizard, who has the power to create other wizards)
+·	Master Room (room #2) which is the room which is checked for exits and commands if not found in the local room.
+
+The tutorial assumes that you have not created any players or objects yet. If you have, then the database numbers in the example will be different, and will need to be amended when typing in the (comparatively few) commands which directly refer to room or database numbers.
+
+If you have already added objects to the database, you will need to look up the database number in the appendix at the back of this tutorial,  find the same object in your database (use @search name=xxxx to find it), and then substitute your database number for the one given in the tutorial.
+
+For more information about any of the MUSH commands in this manual type: 
+
+HELP <command>
+
+Typographical conventions
+
+In this document, what you should type is in a monospaced bold font, like this:
+
+WHO
+
+Responses from the game are in a monospaced normal font, like this:
+
+Player Name          On For   Idle  Doing
+Gandalf               03:41    41m  setting up the game
+Bozo                  00:39     0s  mucking around
+There are 2 players connected.
+
+Explanations are in the same font as this paragraph.
+
+Testing what you have done
+
+Feel free at any time to try out the results of typing in the commands. For example, you can always type “look”, or “L” to look around in the current room, “inventory”, or “I” to see what you are carrying. You can also look at exits, for example: “look west”.
+
+You can also test “locks” by attempting to pass through exits (e.g. “go west”). You can also explore by using the movement commands (“north”, “south” and so on) or simply teleporting to any valid location.  However if you are planning to key in the whole tutorial, make sure that you return to where you started from before keying in the next part of the tutorial, or you may create objects or exits in the wrong location!
+
+If you get lost, you can find the room numbers of all rooms by typing:
+
+@search type=room
+
+which will give you a display like this:
+
+ROOMS:
+Limbo(#0Rn) [owner: MasterWizard(#1PWnM)]
+Master Room(#2RnF) [owner: MasterWizard(#1PWnM)]
+MasterWizard Castle(#3Rn) [owner: MasterWizard(#1PWnM)]
+The Wizard's Study(#5RnF) [owner: Gandalf(#4PWenAMc)]
+
+You can then teleport to any room by typing (for example):
+
+@tel #5
+
+Note that teleporting is a “wizard” function. Normal (mortal) players cannot teleport their way past locks, unless the destination room is set JUMP_OK. You can also stop mortal players from teleporting from any room by setting that room NO_TEL.
+
+Start of tutorial
+
+Basics —connecting, changing password, name, description and sex.
+
+Connect as player “One”, and change his name to “MasterWizard” and his password to “frodo”.
+
+connect one one
+
+Room Zero(#0Rn)
+You are in Room Zero. It's very dark here.
+
+@name me = MasterWizard
+Name set.
+@pass one = frodo
+Password changed.
+
+Lock MasterWizard, set description and sex.
+
+@lock me = me
+Locked.
+@sex me = male
+MasterWizard - Set.
+@desc me = An all-powerfull wizard with grey hair. He looks at you with steely eyes.
+MasterWizard - Set.
+
+Set output to wrap around at column 80 when descriptions etc. are being displayed.
+
+@set me = wrap
+Flag set.
+
+Creating a room
+
+Create a room for MasterWizard to live in, and teleport to it.
+
+@dig/teleport MasterWizard Castle
+MasterWizard Castle created with room number 3.
+MasterWizard Castle(#3Rn)
+
+Set this up as a “floating” room, so we don’t get warnings about there not being a way to get to it.
+
+@set here = floating
+Flag set.
+
+Set this room as the MasterWizard’s home, and provide a colourful description.
+
+@link me = here
+Home set.
+@desc here = An imposing castle in which the MasterWizard lives. No mortal may enter here!
+MasterWizard Castle - Set.
+
+Set MasterWizard so he knows when people connect to the MUSH.
+
+@set me = monitor
+Flag set.
+
+Creating another player
+
+Create another character called Gandalf who we will make a wizard for the purposes of further construction.
+
+@pcreate Gandalf = bilbo
+New player 'Gandalf' created with password 'bilbo'
+@set *gandalf = wizard
+Flag set.
+
+Logout (from the MasterWizard character) and log back in as Gandalf. We will do most of our construction using him.
+
+LOGOUT
+
+(various welcome messages appear here)
+
+connect gandalf bilbo
+
+Room Zero(#0Rn)
+You are in Room Zero. It's very dark here.
+
+Lock Gandalf, set up a description and sex.
+
+@lock me = me
+Locked.
+@desc me = You see a shabby old Wizard who appears to be asleep.
+Gandalf - Set.
+@sex me = male
+Gandalf - Set.
+
+Monitor when others connect, and set wrap-around flag.
+
+@set me = monitor
+Flag set.
+@set me = wrap
+Flag set.
+
+Create somewhere for the wizard to live.
+
+@dig/teleport The Wizard's Study
+The Wizard's Study created with room number 5.
+The Wizard's Study(#5Rn)
+@desc here = You are in an comfortable study decorated in the Victorian style.
+The Wizard's Study - Set.
+
+Set the Wizard’s Study as his home.
+
+@link me = here
+Home set.
+
+Set this up as a “floating” room, so we don’t get warnings about there not being a way to get to it.
+
+@set here = floating
+Flag set.
+
+Lower the warning levels so we don’t get some warnings.
+
+@warnings me = normal !exit-msgs !exit-oneway
+@warnings set to serious exit-multiple 
+
+Create another room and link it to the Wizard’s Study (in both directions).
+
+@dig The Wizard's Secret Laboratory = down;d, up;u
+The Wizard's Secret Laboratory created with room number 6.
+Opened.
+Trying to link...
+Linked.
+Opened.
+Trying to link...
+Linked.
+
+Give a description to the exit leading down.
+
+@desc down = You see some stairs leading down to the Wizard's laboratory.
+down;d - Set.
+
+Look around.
+
+look
+The Wizard's Study(#5Rn)
+You are in an comfortable study decorated in the Victorian style.
+Obvious exits:
+down  
+
+Go to the secret laboratory.
+
+down
+The Wizard's Secret Laboratory(#6Rn)
+Obvious exits:
+up  
+
+Give the laboratory a description.
+
+@desc here = You are in the Wizard's private laboratory. To your left is a full-length mirror. To your right is a closet door. There is something very odd about this place...
+The Wizard's Secret Laboratory - Set.
+
+Set this up as a “floating” room, so we don’t get warnings about there not being a way to get to it.
+
+@set here = floating
+Flag set.
+
+Give the exit a description.
+
+@desc up = Stairs lead back up to the Wizard's Study. 
+up;u - Set.
+
+Let’s create somewhere for ordinay mortals to explore
+
+@dig/teleport The Town Square
+The Town Square created with room number 9.
+The Town Square(#9Rn)
+@desc here = You are in the town square. All around you, peasants haggle over their wares as unwashed urchins scramble through the legs of tables topped with smelly produce. 
+
+Create an exit from the “initial room” (room zero) to the Town Square. (We start by teleporting to it, so we can then refer to it as “here”).
+
+@tel #0
+Room Zero(#0Rn)
+You are in Room Zero. It's very dark here.
+@open out;leave = #9
+Opened.
+Trying to link...
+Linked.
+
+Give the exit a description.
+
+@desc out = You catch a faint glimpse of light through the mist.
+out;leave - Set.
+
+Now mortal players can go from their initial room to the Town Square by saying “out” or “leave”.
+
+Give a name and description to the “initial room” (room zero).
+
+@name here = Limbo
+Name set.
+@desc here = You are in a dense mist that seems to go on forever. If you drop an object here, or set its home to be here, you probably won't be able to find it again.
+Limbo - Set.
+
+Let’s have some fun by sprucing up the Wizard’s home
+
+@tel #5
+The Wizard's Study(#5Rn)
+You are in an comfortable study decorated in the Victorian style.
+Obvious exits:
+down  
+
+Creating objects, locking exits
+
+Start by putting a “success” description on the stairs. This will be show to you when you go down.
+
+@succ down = You clamber down the stairs with some difficulty.
+down;d - Set.
+
+And a description that others see when you go down.
+
+@osucc down = disappears down a rickety staircase.
+down;d - Set.
+
+Let’s create some keys that are needed to open the closet.
+
+@create Keys
+Created: Object #11.
+@desc keys = The Wizard's brass keyring with various useful keys on it.
+Keys - Set.
+inventory
+You are carrying:
+Keys(#11n)
+You have 150 Pennies.
+
+Set the home of the keys to here, and set them as “sticky” so that when you drop them they return to the Wizard’s study.
+
+@link keys = here
+Home set.
+@set keys = sticky
+Flag set.
+@drop keys = The keys disappear in a puff of smoke!
+Keys - Set.
+
+The keys are automatically placed in our inventory.
+Now let’s go down to the laboratory.
+
+down
+You clamber down the stairs with some difficulty.
+The Wizard's Secret Laboratory(#6Rn)
+You are in the Wizard's private laboratory. To your left is a full-length mirror. To your right is a closet door. There is something very odd about this place...
+Obvious exits:
+up  
+
+We’ll create the closet, which is really an exit, taking us back to the Town Square.
+
+@open closet;right = #9
+Opened.
+Trying to link...
+Linked.
+
+Lock the closet so you need to be carrying the keys to get into it.
+
+@lock closet = +keys
+Locked.
+
+Set various success and failure messages.
+
+@succ closet = You go into the closet. Hey! There's no floor in here!
+closet;right - Set.
+@fail closet = The door is locked.
+closet;right - Set.
+@osucc closet = walks into the closet.
+closet;right - Set.
+@ofail closet = tugs uselessly at the closet door.
+closet;right - Set.
+
+Set some descriptions for going up the stairs.
+
+@succ up = You clamber back up to the Study.
+up;u - Set.
+@osucc up = clambers back up the stairs.
+up;u - Set.
+
+We will make a magic mirror that takes us to the MasterWizard’s castle.
+
+@open mirror = #3, mirror
+Opened.
+Trying to link...
+Linked.
+Opened.
+Trying to link...
+Linked.
+
+Set up some success and failure messages.
+
+@desc mirror = You see an ugly adventurer.
+mirror - Set.
+@fail mirror = You bump your nose on the magic mirror. The magic mirror reflects on the foolishness of mortals.
+mirror - Set.
+@succ mirror = You walk through the magic mirror.
+mirror - Set.
+@ofail mirror = bumps into the mirror.
+mirror - Set.
+@osucc mirror = walks through the magic mirror!
+mirror - Set.
+
+Let’s create a magic hat.
+
+@create The Wizard's Pointy Hat
+Created: Object #15.
+@desc hat = You see a pointy hat covered with obscure mystic symbols.
+The Wizard's Pointy Hat - Set.
+
+Lock the hat so only the wizard can pick it up.
+
+@lock hat = me
+Locked.
+@succ hat = You put on your hat. Suddenly you feel much better.
+The Wizard's Pointy Hat - Set.
+@fail hat = The hat runs away from you when you try to pick it up.
+The Wizard's Pointy Hat - Set.
+@osucc hat = puts on his hat.
+The Wizard's Pointy Hat - Set.
+@ofail hat = tries to pick up the Wizard's hat, but it runs away.
+The Wizard's Pointy Hat - Set.
+
+Lock the mirror to someone carrying the Wizard’s hat.
+
+@lock mirror = +hat
+Locked.
+
+Let’s find the database number of the other side of the mirror.
+
+@search name = mirror
+
+EXITS:
+mirror(#13Ew) [from The Wizard's Secret Laboratory(#6Rn) to MasterWizard Castle(#3Rn)]
+mirror(#14Ew) [from MasterWizard Castle(#3Rn) to The Wizard's Secret Laboratory(#6Rn)]
+
+Now that we know the database number of the mirror in the castle (#14), make our mirror on this side its “parent”. This means that the description, and success and failure messages will be shown for the other mirror as well.
+
+@parent #14 = mirror
+Parent changed.
+
+Controlling the players—make sure they describe themselves
+
+Let’s make sure that our adventurers provide themselves with a description and sex.
+
+Start by going to the initial room.
+
+@tel #0
+Limbo(#0Rn)
+You are in a dense mist that seems to go on forever. If you drop an object here, or set its home to be here, you probably won't be able to find it again.
+Obvious exits:
+out  
+
+Lock the exit to someone who has a description and whose sex is either M or F. Be careful in typing in the lock to get the punctuation correct, and not leave spaces in the middle of the lock description. The vertical bar in the lock is the “or” symbol (i.e. you must be male OR female). It is often located above the “\” symbol on keyboards.
+
+@lock out = desc:*&(sex:m*|sex:f*)
+
+Give them a message if they don’t pass the lock.
+
+@fail out = %rBefore venturing forth into the adventure, please set your description by typing:%r%r@desc me = <what you look like>%r%rand set your sex by typing:%r%r@sex me = <male or female>
+
+(The “%r” symbols above mean “carriage return/line feed” which inserts a blank line in the displayed message). To test the lock, temporarily remove your sex like this:
+
+@sex me =
+Gandalf - Set.
+out
+
+Before venturing forth into the adventure, please set your description by typing:
+
+@desc me = <what you look like>
+
+and set your sex by typing:
+
+@sex me = <male or female>
+
+Notice how you fail the lock and see the message. Now restore you sex attribute, and you will be able to leave.
+
+@sex me = male
+Gandalf - Set.
+out
+The Town Square(#9Rn)
+You are in the town square. All around you, peasants haggle over their wares as unwashed urchins scramble through the legs of tables topped with smelly produce.
+
+Building up the game with various rooms, exits and objects
+
+It’s time to add some more colour to our Town Square.
+
+@dig Eastward Ho Caravan Tours = caravan;se, northwest;nw;north;west
+Eastward Ho Caravan Tours created with room number 16.
+Opened.
+Trying to link...
+Linked.
+Opened.
+Trying to link...
+Linked.
+
+Set a description on the exit.
+
+@desc caravan = You see a caravan readying for a journey across the hot sands to the southeast of town.
+caravan;se - Set.
+
+Let players set their homes here, and teleport back to here if they get lost.
+
+@set here = abode
+Flag set.
+@set here = jump_ok
+Flag set.
+
+Go southeast to the Caravan Tours room.
+
+se
+Eastward Ho Caravan Tours(#16Rn)
+Obvious exits:
+northwest  
+
+Set up a description for this area, and the exit leading back to the Town Square.
+
+@desc here = This is the departure point for Easward Ho Desert Tours. The town lies to the north and west of here. You can join one of their relaxing tours by mounting one of the remaining camels.
+caravan;se - Set.
+
+@desc nw = To the distance you see the Town Square.
+northwest;nw;north;west - Set.
+
+Create an oasis for the caravan to go to.
+
+@dig The Oasis = join;mount;south;s
+The Oasis created with room number 19.
+Opened.
+Trying to link...
+
+@desc join = It seems like the desert stretches on forever.
+join;mount;south;s - Set.
+
+@succ join = You mount one of the camels, and begin to travel southeast through the seemingly endless desert. After some time, you arrive at a beautiful oasis, where you debark. The caravan moves on, leaving you alone.
+
+Let’s go there!
+
+join
+You mount one of the camels, and begin to travel southeast through the seemingly endless desert. After some time, you arrive at a beautiful oasis, where you debark. The caravan moves on, leaving you alone.
+The Oasis(#19Rn)
+
+Let’s set up a description for the oasis.
+
+@desc here = You are at an Oasis at the edge of a vast desert, which stretches out to the north, east and west. Date palms grow by the blue water here. To the south, you can see some fields of golden grain.
+The Oasis - Set.
+
+Let’s set up an action “drink” which will be triggered by the user trying to drink the water.
+
+@open drink;drink water = #19
+Opened.
+Trying to link...
+Linked.
+
+Set it dark so it doesn’t show up in the list of obvious exits. Lock it so it always fails, and print a message to show that you have had a drink.
+
+@set drink = dark
+Flag set.
+@lock drink = #0
+Locked.
+@fail drink = The water is cool and refreshing as you gulp it down.
+drink;drink water - Set.
+
+Create a room to the south which has grain fields.
+
+@dig In the fields = south;s, north;n
+In the fields created with room number 22.
+Opened.
+Trying to link...
+Linked.
+Opened.
+Trying to link...
+Linked.
+@desc south = Some grain fields are visible to the south.
+south;s - Set.
+
+Go south and set up the descriptions.
+
+south
+In the fields(#22Rn)
+Obvious exits:
+north  
+
+@desc here = You are standing between a corn field and a wheat field. An oasis shimmers to the north, and a group of tents lies to the south of you. You might be able to harvest some of the grain growing here.
+In the fields - Set.
+
+@desc north = To the North is an inviting oasis.
+north;n - Set.
+
+Set up a dummy (dark) exit in case they say “harvest grain”. We want them to specify corn or wheat.
+
+@open harvest;harvest grain;grain;take grain;get grain = #22
+Opened.
+Trying to link...
+Linked.
+@set harvest = dark
+Flag set.
+@lock harvest = #0
+Locked.
+@fail harvest = Which do you mean, the wheat or the corn?
+harvest;harvest grain;grain;take grain;get grain - Set.
+
+Create the corn field.
+
+@dig Corn field = west;w;harvest corn;corn  
+Corn field created with room number 26.
+Opened.
+Trying to link...
+Linked.
+
+Create the wheat field.
+
+@dig Wheat field = east;e;wheat;harvest wheat  
+Wheat field created with room number 28.
+Opened.
+Trying to link...
+Linked.
+
+Go to the corn field and set it up.
+
+@desc here = You stand in a field of waving corn, north of the bazaar. There is wheat growing to the East.
+Corn field - Set.
+@create A bushel of corn
+Created: Object #30.
+drop corn
+Dropped.
+@desc corn = A bushel of corn which may well prove valuable at the bazaar. 
+A bushel of corn - Set.
+
+Amend the description depending on whether there is corn there or not.
+
+@lock here = corn
+Locked.
+@fail here = A bushel of ripe ears are available.
+Corn field - Set.
+@succ here = The pickings are quite slim now.
+Corn field - Set.
+
+Try looking around (type LOOK), with or without the corn. The description amends itself depending on whether the bushel of corn is present.
+
+Now create a link between the corn field and the wheat field.
+
+@open east;e = #28, west;w
+Opened.
+Trying to link...
+Linked.
+Opened.
+Trying to link...
+Linked.
+
+Set the bushel’s home to be here, and set it sticky, so that when it is dropped it comes back into the corn field.
+
+@link bushel = here
+Home set.
+@set bushel = sticky
+Flag set.
+
+Now go to the wheat field and set it up as well.
+
+east
+Wheat field(#28Rn)
+Obvious exits:
+west  
+
+@desc here = You are in a large wheat field north of the bazaar. There is a corn field to the West.
+Wheat field - Set.
+@create A bushel of wheat.
+Created: Object #33.
+drop bushel
+Dropped.
+@lock here = bushel
+Locked.
+@desc wheat = A bushel of wheat which may well prove valuable at the bazaar. 
+A bushel of wheat - Set.
+@succ here = There's not much to be gleaned here.
+Wheat field - Set.
+@fail here = About a bushel of wheat can be harvested.
+Wheat field - Set.
+
+@link bushel = here
+Home set.
+@set bushel = sticky
+Flag set.
+
+Create a bazaar to the south.
+
+@dig The grand bazaar = south;s;bazaar
+The grand bazaar created with room number 34.
+Opened.
+Trying to link...
+Linked.
+
+Go west and create an exit to the bazaar from the corn field.
+
+w
+Corn field(#26Rn)
+You stand in a field of waving corn, north of the bazaar. There is wheat growing to the East.
+A bushel of ripe ears are available.
+Contents:
+A bushel of corn(#30Sn)
+Obvious exits:
+east  
+
+@open south;s;bazaar = #34
+Opened.
+Trying to link...
+Linked.
+
+Now go south and set up the bazaar.
+
+@desc here = You are standing in a bazaar, where merchants come to trade their stuff. Don't leave your goods unattended here! Some fields lie to the North, with tents to the East, South and West.
+The grand bazaar - Set.
+
+@create A Handsome Persian rug 
+Created: Object #37.
+
+@lock here = rug
+Locked.
+
+@desc rug = You see a hand-woven Persian rug with intricate designs woven into its fabric.
+A handsome Persian rug - Set.
+
+@fail here = The tents have signs:%r%r"Visit the CRAFTY CAMEL; admission one bushel of wheat.%r%rCome trade at OMAR's OASIS; admission one goat.%r%rBrowse at the SHOP OF THE DESERT; admission one horse.
+The grand bazaar - Set.
+
+Link to the fields in the north.
+
+@open north;n = #22
+Opened.
+Trying to link...
+Linked.
+
+Create a destination for the magic rug.
+
+@succ here = As you step into the bazaar, the rug seems to flutter, even though there is no breeze blowing.
+The grand bazaar - Set.
+
+@dig The middle of the desert = fly;rug;up;ride;drop rug;drop carpet
+The middle of the desert created with room number 39.
+Opened.
+Trying to link...
+Linked.
+@lock fly = rug
+Locked.
+
+Do some descriptions for the flying carpet.
+
+@succ fly = As you mount the carpet, it ascends high into the air above the bazaar, and begins heading off over the desert. You can see a caravan crossing far below you on the boundless sand. You hit some turbulence, and the carpet sputters. CRASH!
+fly;rug;up;ride;drop rug;drop carpet - Set.
+@fail fly = On what?
+fly;rug;up;ride;drop rug;drop carpet - Set.
+@set fly = dark
+Flag set.
+
+
+Now we want to make it a bit tricky for the player to find this magic carpet. So we’ll start setting up the various vendors in the bazaar, and lock entrances against goods we might be carrying (such as the wheat and the corn).
+
+@dig The Crafty Camel = east;e;visit;camel;crafty camel, out;west;w;leave;exit;bazaar
+The Crafty Camel created with room number 41.
+Opened.
+Trying to link...
+Linked.
+Opened.
+Trying to link...
+Linked.
+
+@desc east = The tent to the east leads to The Crafty Camel
+east;e;visit;camel;crafty camel - Set.
+
+Go and pick up the wheat and the corn
+
+north
+In the fields(#22Rn)
+You are standing between a corn field and a wheat field. An oasis shimmers to the north, and a group of tents lies to the south of you. You might be able to harvest some of the grain growing here.
+Obvious exits:
+east  west  north  
+
+take wheat
+Taken.
+
+west
+Corn field(#26Rn)
+You stand in a field of waving corn, north of the bazaar. There is wheat growing to the East.
+A bushel of ripe ears are available.
+Contents:
+A bushel of corn(#30Sn)
+Obvious exits:
+south  east  
+take corn
+Taken.
+
+south
+The grand bazaar(#34Rn)
+You are standing in a bazaar, where merchants come to trade their stuff. Don't leave your goods unattended here! Some fields lie to the North, with tents to the East, South and West.
+As you step into the bazaar, the rug seems to flutter, even though there is no breeze blowing.
+Obvious exits:
+east  north  
+
+Now lock the exit to the east to the wheat.
+
+@lock east = wheat
+Locked.
+
+@fail east = You can't pay the admission; come back when you have the bread.
+east;e;visit;camel;crafty camel - Set.
+@succ east = Please leave your admission price by the door.
+east;e;visit;camel;crafty camel - Set.
+
+Go into the Craft Camel and set up the various messages.
+
+east
+Please leave your admission price by the door.
+The Crafty Camel(#41Rn)
+Obvious exits:
+out  
+
+@lock out = !wheat
+Locked.
+
+@fail out = As you try to leave, the management reminds you that you haven't paid your admission of a bushel of wheat.
+out;west;w;leave;exit;bazaar - Set.
+
+Set up Jeff’s corner.
+
+@dig Jeff's = goat;jeff;buy from jeff;sell to jeff;but goat, leave;back;out;exit
+Jeff's created with room number 44.
+Opened.
+Trying to link...
+Linked.
+Opened.
+Trying to link...
+Linked.
+
+@set goat = dark
+Flag set.
+
+Jeff is only interested in corn.
+
+@lock jeff = corn
+Locked.
+@succ jeff = 'Come to my part of the tent' says Jeff with a greedy glint in his eyes.
+goat;jeff;buy from jeff;sell to jeff;but goat - Set.
+@fail jeff = Jeff just shakes his head, muttering something inaudible.
+goat;jeff;buy from jeff;sell to jeff;but goat - Set.
+
+Go to Jeff’s and set up the goat.
+
+jeff
+'Come to my part of the tent' says Jeff with a greedy glint in his eyes.
+Jeff's(#44Rn)
+Obvious exits:
+leave  
+
+@desc here = This corner of the tent is owned by Jeff.
+Jeff's - Set.
+
+@create A goat
+Created: Object #47.
+@set goat = sticky
+Flag set.
+@link goat = here
+Home set.
+drop goat
+Dropped.
+
+You must not leave with the corn.
+
+@lock leave = !corn
+Locked.
+
+@fail leave = As you try to get away, Jeff objects: 'What of our deal, Sahib? You must give me your corn!'
+leave;back;out;exit - Set.
+
+take goat
+Taken.
+
+Go back to the Crafty Camel and set up messages depending on whether you have the goat or not.
+
+@tel #41
+The Crafty Camel(#41Rn)
+
+@lock here = goat
+Locked.
+
+@fail here = Jeff has a special today: buy a goat for a bushel of corn.
+Jeff's - Set.
+@succ here = Akhbar is offering to sell a vat of yoghurt in exchange for a bushel of corn.
+
+(If you have the goat you will be offered yoghurt, if you don’t you will be offered a goat).
+
+Now let’s create Akhbar’s, where we can buy yoghurt.
+
+@dig Akhbar's = akhbar;buy from akhbar;sell to akhbar;buy yoghurt;joghurt;vat;buy vat, leave;out;exit;back
+Akhbar's created with room number 48.
+Opened.
+Trying to link...
+Linked.
+Opened.
+Trying to link...
+Linked.
+@set akhbar = dark
+Flag set.
+@lock akhbar = corn
+Locked.
+@fail akhbar = No corn, no deal!
+akhbar;buy from akhbar;sell to akhbar;buy yoghurt;joghurt;vat;buy vat - Set.
+@succ akhbar = Akhbar shakes your hand warmly, as you approach his corner of the tent.
+akhbar;buy from akhbar;sell to akhbar;buy yoghurt;joghurt;vat;buy vat - Set.
+
+Set up Akhbar’s corner of the tent.
+
+akhbar
+Akhbar shakes your hand warmly, as you approach his corner of the tent.
+Akhbar's(#48Rn)
+Obvious exits:
+leave  
+
+@desc here = You are in a dilapidated corner of the tent that smells like rancid milk.
+
+Don’t let them leave without paying.
+
+@lock leave = !corn
+Locked.
+@fail leave = Akhbar grabs your hand: 'No one leaves Akhbar without paying!'
+
+Set up the yoghurt.
+
+@create A vat of yoghurt
+Created: Object #51.
+@desc yoghurt = A tasty vat of slightly rancid yoghurt.
+A vat of yoghurt - Set.
+drop yoghurt
+Dropped.
+@link yoghurt = here
+Home set.
+@set yoghurt = sticky
+Flag set.
+
+Leave Akhbar’s.
+
+drop corn
+Dropped.
+leave
+The Crafty Camel(#41Rn)
+You are just inside the entrance of the tent of the crafty camel. It seems that the goods sold here are of low quality.
+Akhbar is offering to sell a vat of yoghurt in exchange for a bushel of corn.
+Obvious exits:
+out  
+
+Now let’s set up Omar’s Oasis.
+
+@dig Omar's Oasis = south;omar's;omar;oasis;omar's oasis; omars oasis;omars
+Omar's Oasis created with room number 52.
+Opened.
+Trying to link...
+Linked.
+
+Make sure they have a goat.
+
+@lock omar = goat
+Locked.
+@succ omar = Remember to surrender your goat before you leave!
+south;omar's;omar;oasis;omar's oasis; omars oasis;omars - Set.
+@fail omar = I'm afraid that Omar declines to admit you on credit. You have no goat and you smell bad.
+south;omar's;omar;oasis;omar's oasis; omars oasis;omars - Set.
+
+Go to Omar’s and set it up.
+
+omar
+Remember to surrender your goat before you leave!
+Omar's Oasis(#52Rn)
+
+Set up an exit back to the bazaar and make sure they don’t take the goat with them.
+
+@open leave;out;exit;bazaar = #34
+Opened.
+Trying to link...
+Linked.
+@lock out = !goat
+Locked.
+@fail out = Omar produces a pistol and insists that you surrender the goat. "It was to be your admission, remember?" he reminds you.
+leave;out;exit;bazaar - Set.
+
+Set up the various descriptions.
+
+@desc here = This tent is less run-down than the Crafty Camel. Omar himself is a short fellow in a fez, with a smile that shows a mouthful of gold teeth.
+Omar's Oasis - Set.
+@create A fine Arabian horse
+Created: Object #55.
+@lock here = horse
+Locked.
+@succ here = Abdul, in one corner of the tent, indicates that he would trade a dangerous-looking scimitar for a vat of tasty yoghurt.
+Omar's Oasis - Set.
+@fail here = In the far corner of the tent, Cleopatra has a horse for sale. Price: a quantity of cultured dairy product.
+Omar's Oasis - Set.
+
+Set up Abdul’s corner of the tent.
+
+@dig Abdul's = abdul;abduls;abdul's;buy scimitar;scimitar, out;exit;leave;back
+Abdul's created with room number 56.
+Opened.
+Trying to link...
+Linked.
+Opened.
+Trying to link...
+
+@lock abdul = yoghurt
+Locked.
+@succ abdul = Abdul kisses you on both cheeks as he leads you to his corner of the tent.
+abdul;abduls;abdul's;buy scimitar;scimitar - Set.
+@fail abdul = "Did you come here to trade, or are you just a stupid tourist?" says Abdul, who points out that you have no yoghurt to offer him.
+abdul;abduls;abdul's;buy scimitar;scimitar - Set.
+
+Go to Abdul’s.
+
+abdul
+Abdul kisses you on both cheeks as he leads you to his corner of the tent.
+Abdul's(#56Rn)
+Obvious exits:
+out  
+
+@desc here = This is where Abdul plies his trade.
+Abdul's - Set.
+@lock out = !yoghurt
+Locked.
+@fail out = "Give up the yoghurt you promised!" shouts Abdul angrily, as he prevents you from leaving.
+out;exit;leave;back - Set.
+@succ out = "Have a nice day" says Abdul, obsequiously, as you leave his part of the tent.
+out;exit;leave;back - Set.
+
+Set up the scimitar.
+
+@create A fierce-looking scimitar
+Created: Object #59.
+@link scimitar = here
+Home set.
+@set scimitar = sticky
+Flag set.
+
+Go back to Omar’s without having to drop the yoghurt.
+
+@tel #52
+Omar's Oasis(#52Rn)
+
+Set up Cleopatra’s corner of the tent.
+
+@dig Cleopatra's = cleopatra;cleopatra's;cleopatras;buy horse;horse, out;leave;back
+Cleopatra's created with room number 60.
+Opened.
+Trying to link...
+Linked.
+Opened.
+Trying to link...
+Linked.
+
+@lock cleopatra = yoghurt
+Locked.
+@succ cleopatra = Cleopatra takes you by the hand to a corner of the tent she has set up as a stable.
+cleopatra;cleopatra's;cleopatras;buy horse;horse - Set.
+@fail cleopatra = Cleopatra hisses at you: "Are you here for a handout? Come back when you have some yoghurt to trade!"
+cleopatra;cleopatra's;cleopatras;buy horse;horse - Set.
+
+Go to Cleopatras and set up some descriptions.
+
+cleopatras
+Cleopatra takes you by the hand to a corner of the tent she has set up as a stable.
+Cleopatra's(#60Rn)
+Obvious exits:
+out  
+
+@lock out = !yoghurt
+Locked.
+@succ out = "It was a pleasure doing business with you" says Cleopatra as you return to the main part of the tent.
+out;leave;back - Set.
+@fail out = A dangerous-looking snake bars your exit. It seems that Cleopatra won't let you get away without giving her the yoghurt.
+out;leave;back - Set.
+@desc here = The sultry Cleopatra offers her wares here--she's some piece of asp!
+Cleopatra's - Set.
+
+Hopefully you still have the horse we created earlier. Let’s set its home up to be here.
+
+@link horse = here
+Home set.
+@set horse = sticky
+Flag set.
+
+The same for the rug.
+
+@link rug = here
+Home set.
+@set rug = sticky
+Flag set.
+
+drop yoghurt
+Dropped.
+out
+"It was a pleasure doing business with you" says Cleopatra as you return to the main part of the tent.
+Omar's Oasis(#52Rn)
+
+Drop the goat so we can leave, and exit to the bazaar.
+
+drop goat
+Dropped.
+leave
+The grand bazaar(#34Rn)
+You are standing in a bazaar, where merchants come to trade their stuff. Don't leave your goods unattended here! Some fields lie to the North, with tents to the East, South and West.
+As you step into the bazaar, the rug seems to flutter, even though there is no breeze blowing.
+Obvious exits:
+south  east  north  
+
+Take the rug trip again.
+
+drop rug
+As you mount the carpet, it ascends high into the air above the bazaar, and begins heading off over the desert. You can see a caravan crossing far below you on the boundless sand. You hit some turbulence, and the carpet sputters.
+CRASH!
+The middle of the desert(#39Rn)
+
+Make an exit back to the town from the desert.
+
+@open west;w = #9
+Opened.
+Trying to link...
+Linked.
+
+@desc west = A dusty trail leads back to the town.
+west;w - Set.
+
+Make sure they leave the rug behind.
+
+@lock west = !rug
+Locked.
+
+@fail west = The rug has run out of puff, and it is too hot to carry it any further. You had best leave it behind.
+west;w - Set.
+
+drop rug
+Dropped.
+
+Back to the Town Square!
+
+west
+The Town Square(#9Rn)
+You are in the town square. All around you, peasants haggle over their wares as unwashed urchins scramble through the legs of tables topped with smelly produce.
+Obvious exits:
+caravan  
+
+Time to get rid of the horse.
+
+drop horse
+Dropped.
+
+We have now set up a mini adventure, with a few puzzles to be solved (finding the rug and so on).
+
+Setting up the Master Room
+
+A couple of more features will help. For a start, if we type “north” in any room where no “north” exit is defined we see the following message;
+
+Huh?  (Type "help" for help.)
+
+To stop this happening we should place “dummy” exits in room #2 (the master room). This room is checked for exits after the “current” room. For example:
+
+@tel #2
+Master Room(#2RnF)
+This is the master room. Any exit in here is considered global. The same is true to objects with $-commands placed here. The number of objects and exits in this room should be kept to a minimum.
+
+@open north;n = #2
+Opened.
+Trying to link...
+Linked.
+@lock north = #0
+Locked.
+@fail north = You cannot go North from here.
+north;n - Set.
+
+Since the “north” exit is locked against room #0 (which always fails) then the player sees “You cannot go North from here” if a room does not have a north exit.
+
+You should then type in similar exits for the other directions: south, east, west, up, down, ne, nw, se, sw.
+
+If you don’t mind a less descriptive error message, just type in a single multi-purpose exit like this:
+
+@open north;n;south;s;east;e;west; w;up;u;down;d;northeast;ne;southeast;se; northwest;nw;southwest;sw;exit;leave = #2
+Opened.
+Trying to link...
+Linked.
+@lock south = #0
+Locked.
+
+Summary
+
+Well, that’s enough tutorial for now. If anyone would like to submit a better one, feel free to contact the author. You should have a feel for some of the MUSH commands by now, don’t forget to type HELP for help on any command.
+
+Now is time to add your own rooms and descriptions, and create normal (mortal) players and explore the world you have created.
+
+You should also take the time to edit the various “connect” files (e.g. QUIT.TXT, CONNECT.TXT) to customize them to your own world, and add your own contact email numbers, descriptions, hints and so on.
+
+Appendix
+
+Object numbers used in this tutorial (type @search to see this list).
+
+
+ROOMS:
+Limbo(#0Rn) [owner: MasterWizard(#1PWnM)]
+Master Room(#2RnF) [owner: MasterWizard(#1PWnM)]
+MasterWizard Castle(#3Rn) [owner: MasterWizard(#1PWnM)]
+The Wizard's Study(#5RnF) [owner: Gandalf(#4PWenAMc)]
+The Wizard's Secret Laboratory(#6RnF) [owner: Gandalf(#4PWenAMc)]
+The Town Square(#9Rn) [owner: Gandalf(#4PWenAMc)]
+Eastward Ho Caravan Tours(#16Rn) [owner: Gandalf(#4PWenAMc)]
+The Oasis(#19Rn) [owner: Gandalf(#4PWenAMc)]
+In the fields(#22Rn) [owner: Gandalf(#4PWenAMc)]
+Corn field(#26Rn) [owner: Gandalf(#4PWenAMc)]
+Wheat field(#28Rn) [owner: Gandalf(#4PWenAMc)]
+The grand bazaar(#34Rn) [owner: Gandalf(#4PWenAMc)]
+The middle of the desert(#39Rn) [owner: Gandalf(#4PWenAMc)]
+The Crafty Camel(#41Rn) [owner: Gandalf(#4PWenAMc)]
+Jeff's(#44Rn) [owner: Gandalf(#4PWenAMc)]
+Akhbar's(#48Rn) [owner: Gandalf(#4PWenAMc)]
+Omar's Oasis(#52Rn) [owner: Gandalf(#4PWenAMc)]
+Abdul's(#56Rn) [owner: Gandalf(#4PWenAMc)]
+Cleopatra's(#60Rn) [owner: Gandalf(#4PWenAMc)]
+
+OBJECTS:
+Keys(#11Sn) [owner: Gandalf(#4PWenAMc)]
+The Wizard's Pointy Hat(#15n) [owner: Gandalf(#4PWenAMc)]
+A bushel of corn(#30Sn) [owner: Gandalf(#4PWenAMc)]
+A bushel of wheat.(#33Sn) [owner: Gandalf(#4PWenAMc)]
+A handsome Persian rug(#37Sn) [owner: Gandalf(#4PWenAMc)]
+A goat(#47Sn) [owner: Gandalf(#4PWenAMc)]
+A vat of yoghurt(#51Sn) [owner: Gandalf(#4PWenAMc)]
+A fine Arabian horse(#55Sn) [owner: Gandalf(#4PWenAMc)]
+A fierce-looking scimitar(#59Sn) [owner: Gandalf(#4PWenAMc)]
+
+EXITS:
+down;d(#7E) [from The Wizard's Study(#5RnF) to The Wizard's Secret Laboratory(#6RnF)]
+up;u(#8E) [from The Wizard's Secret Laboratory(#6RnF) to The Wizard's Study(#5RnF)]
+out;leave(#10E) [from Limbo(#0Rn) to The Town Square(#9Rn)]
+closet;right(#12E) [from The Wizard's Secret Laboratory(#6RnF) to The Town Square(#9Rn)]
+mirror(#13E) [from The Wizard's Secret Laboratory(#6RnF) to MasterWizard Castle(#3Rn)]
+mirror(#14E) [from MasterWizard Castle(#3Rn) to The Wizard's Secret Laboratory(#6RnF)]
+caravan;se(#17E) [from The Town Square(#9Rn) to Eastward Ho Caravan Tours(#16Rn)]
+northwest;nw;north;west(#18E) [from Eastward Ho Caravan Tours(#16Rn) to The Town Square(#9Rn)]
+join;mount;south;s(#20E) [from Eastward Ho Caravan Tours(#16Rn) to The Oasis(#19Rn)]
+drink;drink water(#21ED) [from The Oasis(#19Rn) to The Oasis(#19Rn)]
+south;s(#23E) [from The Oasis(#19Rn) to In the fields(#22Rn)]
+north;n(#24E) [from In the fields(#22Rn) to The Oasis(#19Rn)]
+harvest;harvest grain;grain;take grain;get grain(#25ED) [from In the fields(#22Rn) to In the fields(#22Rn)]
+west;w;harvest corn;corn(#27E) [from In the fields(#22Rn) to Corn field(#26Rn)]
+east;e;wheat;harvest wheat(#29E) [from In the fields(#22Rn) to Wheat field(#28Rn)]
+east;e(#31E) [from Corn field(#26Rn) to Wheat field(#28Rn)]
+west;w(#32E) [from Wheat field(#28Rn) to Corn field(#26Rn)]
+south;s(#35E) [from Wheat field(#28Rn) to The grand bazaar(#34Rn)]
+south;s;bazaar(#36E) [from Corn field(#26Rn) to The grand bazaar(#34Rn)]
+north;n(#38E) [from The grand bazaar(#34Rn) to In the fields(#22Rn)]
+fly;drop rug;drop carpet;up;ride(#40ED) [from The grand bazaar(#34Rn) to The middle of the desert(#39Rn)]
+east;e;visit;camel;crafty camel(#42E) [from The grand bazaar(#34Rn) to The Crafty Camel(#41Rn)]
+out;west;w;leave;exit;bazaar(#43E) [from The Crafty Camel(#41Rn) to The grand bazaar(#34Rn)]
+goat;jeff;buy from jeff;sell to jeff;but goat(#45ED) [from The Crafty Camel(#41Rn) to Jeff's(#44Rn)]
+leave;back;out;exit(#46E) [from Jeff's(#44Rn) to The Crafty Camel(#41Rn)]
+akhbar;buy from akhbar;sell to akhbar;buy yoghurt;joghurt;vat;buy vat(#49ED) [from The Crafty Camel(#41Rn) to Akhbar's(#48Rn)]
+leave;out;exit;back(#50E) [from Akhbar's(#48Rn) to The Crafty Camel(#41Rn)]
+south;omar's;omar;oasis;omar's oasis; omars oasis;omars(#53E) [from The grand bazaar(#34Rn) to Omar's Oasis(#52Rn)]
+leave;out;exit;bazaar(#54E) [from Omar's Oasis(#52Rn) to The grand bazaar(#34Rn)]
+abdul;abduls;abdul's;buy scimitar;scimitar(#57E) [from Omar's Oasis(#52Rn) to Abdul's(#56Rn)]
+out;exit;leave;back(#58E) [from Abdul's(#56Rn) to Omar's Oasis(#52Rn)]
+cleopatra;cleopatra's;cleopatras;buy horse;horse(#61E) [from Omar's Oasis(#52Rn) to Cleopatra's(#60Rn)]
+out;leave;back(#62E) [from Cleopatra's(#60Rn) to Omar's Oasis(#52Rn)]
+west;w(#63E) [from The middle of the desert(#39Rn) to The Town Square(#9Rn)]
+north;n(#64E) [from Master Room(#2RnF) to Master Room(#2RnF)]
+north;n;south;s;east;e;west;w;up;u;down;d;northeast;ne;southeast;se;northwest;nw;southwest;sw;exit;leave(#65E) [from Master Room(#2RnF) to Master Room(#2RnF)]
+
+PLAYERS:
+MasterWizard(#1PWnM) [location: MasterWizard Castle(#3Rn)]
+Gandalf(#4PWenAMc) [location: The Wizard's Study(#5RnF)]

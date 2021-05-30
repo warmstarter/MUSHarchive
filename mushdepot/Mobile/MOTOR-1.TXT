@@ -1,0 +1,114 @@
+Motorcycle of Doom(#25Mae)
+Type: THING Flags: MONITOR AUDIBLE ENTER_OK
+%r%r[u(outside)]%r
+Owner: Armageddon  Key: Armageddon(#182PXZc) Plocks: 10
+Zone: *NOTHING*
+Powers:
+Idesc: %r[get_eval(me/inside)]%r%rThe [name(me)] is currently at [name(here)]
+[setq(0,iter(lcon(here),switch(type(##),player,switch(hasflag(##,connected),1,
+##))))][setq(1,setdiff(iter(lcon(here),switch(and(strmatch(type(##),T*),not
+(hasflag(##,DARK))),1,##)),%!))]You can scan [switch(words(r(0)),0,nobody,1,
+name(r(0)),iter(rest(r(0)),name(##)%vz) and [name(first(r(0)))])] walkin' the
+area, and see [switch(words(r(1)),0,nothin' important,1,name(r(1)),iter(rest(r
+(1)),name(##)%vz) and [name(first(r(1)))])] around ya.%r%r('Bikehelp' gives
+options and instructions.)%r
+Listen: *
+Inprefix: On the street,
+Prefix: From the [name(me)],
+Infilter: *has arrived.,*has left.,Dropped.,*whispers to*
+Filter: *has arrived.,*has left.,Dropped.,*whispers to*
+Lalias: leave;exit;out;o;dismount
+Ealias: Mount Bike; Mount cycle; mount;mb
+Oenter: slides a leg over the bike and crouches down on it.
+Oxenter: slides a leg over the [name(me)] and crouches down on it.
+Fail: It's too heavy to lift.
+Ofail: strains, trying to lift the [name(me)].
+Omove: pulls up quietly with [setq(0,iter(lcon(me),switch(type(##),player,
+switch(hasflag(##,connected),1,##))))][switch(words(r(0)),0,no one,1,name(r
+(0)),2,name(first(r(0))) and [name(rest(r(0)))],iter(rest(r(0)),name(##)%va)
+and [name(first(r(0)))])] crouched on top.
+VA: ,
+VZ: ,
+Aenter: @unlock/enter me
+Aleave: @switch %#=owner(me),@lock/enter me=[owner(me)]
+Oxleave: slips a leg off the [name(me)] and hops off.
+Enter: You toss a leg over the seat and crouch down on the bike.
+Leave: You slip a leg off the bike and hop off.
+Oleave: slips a off the [name(me)] and hops off.
+INME: [gt(member(lcon(me),%#),0)]
+SHOULDFOLLOW: [gt(member(v(follow),%#),0)]
+CHECK_FOLLOW: ^* has left.:@switch [and(member(%#,v(follow)),member(lcon(me),
+owner(me)))]=1,{go [name(extract(lexits(here),match(iter(lexits(here),loc(##)),
+%l),1))]}
+Oxtport: zips off quietly, leaving not so much as a skid mark behind it despite
+its enormous speed.
+FOLLOW_DO: $stop follow:&follow me;@pemit %#=Stopped following.
+FOLLOW_DO2: $follow *:&follow me=[num(%0)];@wait 1=@pemit %#=Following [name(v
+(follow))].
+ENGINE: 0
+SCAN: $scan:look
+SCAN2: $scan *:look %0
+ENGERROR: The engine isn't on.
+START: $kickstart:@switch [u(me/engine)]=0,{@emit %N raises up in the seat and
+stomps down on the [name(me)]'s starter. The engine comes to life, purring like
+a kitten.;&engine me=1},{@pemit %#=The engine is already running.}
+STOP: $stop:@switch [u(me/engine)]=0,{@pemit %#=[u(me/engerror)]},1,{@emit %N
+relaxes on the [name(me)] as its engine slowly dies down and becomes silent.;
+&engine me=0},2,{@emit %n slams on the brakes to the [name(me)], skidding the
+bike to a halt and cutting the engine in one fluid motion.;&engine me=0}
+DRIVE: $dri* *:@switch [u(me/engine)]=0,{@pemit %#=[u(me/engerror)]},1,{@emit
+%n kicks the [name(me)] into gear and the bike tears off without so much as a
+sound.;&engine me=2;@force me=[iter(%1,secure(move ##);)]},2,{@emit %n drives
+off on the [name(me)].;@force me=[iter(%1,secure(move ##);)]}
+ENGIDLE: $idle:@switch [u(me/engine)]=0,{@pemit %#=[u(me/engerror)]},1,{@emit
+%n drops the [name(me)] into neutral and the engine drops from a soft purr to a
+nearly totally silent idle.},2,{@pemit %#=You need to brake first.}
+BRAKE: $brake:@switch [u(me/engine)]=0,{@pemit %#=[u(me/engerror)]},1,{@pemit
+%#=The [name(me)] is idling.},2,{@emit %n turns the [name(me)] sideways and
+slams on the brakes, bringing the bike to a screeching halt!;&engine me=1}
+CORNER: $corner *:@switch [u(me/engine)]=0,{@pemit %#=[u(me/engerror)]},1,
+{@pemit %#=The [name(me)] is idling.},2,{@emit %n leans the [name(me)] hard to
+one side, nearly touching the ground as the bike takes the corner at near full
+speed.;@force me=[iter(%0,secure(move ##);)]}
+SBRAKE: $sbrake:@switch [u(me/engine)]=0,{@pemit %#=[u(me/engerror)]},1,
+{@pemit %#=The [name(me)] is idling.},2,{@emit %n gradually applies the brakes
+on the [name(me)] and the bike slows to a halt.;&engine me=1}
+DRIVE_HOME: $drive home:@switch [u(me/engine)]=0,{@pemit %#=[u(me/engerror)]},
+1,{@emit %n revs the [name(me)]'s engine and puts it in gear.;@tel me=home},2,
+{@tel me=home}
+OUTSIDE: To set the Desc on your new bike type @set <name of bike>=Outside:
+<Desc of the outside of bike> %[u(me/engdesc)]. this will include the status of
+the Engine in the Bike's Desc.
+CREDITS: Sid @ The Damned
+ENGDESC: [switch(u(me/engine),0,The engine on the large bike is not running.,1,
+The bike's large engine is purring softly in neutral.,2,{The large bike is in
+gear, engine roaring loudly.})]
+RUNDOWN: $rundown *:@switch [u(me/engine)]=0,{@pemit %#=[u(me/engerror)]},1,
+{@emit %n kicks the [name(me)] into gear and the bike zooms off at full speed,
+headed directly towards %0!;&engine me=2},2,{@emit %n turns the deadly-silent
+bike and drives straight at %0!}
+INSIDE: Type @set here=<Desc of the bike when your on it> %[u(me/engdesc)]
+HELP: $bikehelp:@pemit %#=%r[repeat(-,78)]%r[center([name(me)],78)]%r[center
+(Bikehelp,78)]%r[repeat(-,78)]%r%r[space(6)][ljust(kickstart,21,.)]Stomps on
+the bike's starter, engaging the engine%r[space(6)][ljust(dri <direction>
+,21,.)]Drives the bike <direction>. Can be a string%r[space(6)][ljust(corner
+<direction>,21,.)]Corners the bike <direction>. Can be a string%r[space(6)]
+[ljust(brake,21,.)]Slams the bike's brakes on really hard%r[space(6)][ljust
+(sbrake,21,.)]Slowly applies the bike's brakes%r[space(6)][ljust(idle,21,.)]
+Drops the bike's engine from in gear to neutral%r[space(6)][ljust(drive home,
+21,.)]Drives the bike to [name(home(me))]%r[space(6)][ljust(follow <person>,21,
+.)]Bike follows <person>. Can be an object too%r[space(6)][ljust(stop follow,
+21,.)]Stops the bike from following anyone%r[space(6)][ljust(rundown <person>,
+21,.)]Tries to rundown <person> with the bike%r[space(6)][ljust(scan,21,.)]
+Scans the room the bike is currently in%r[space(6)][ljust(scan <object>,21,.)]
+Scans an <object> in the same room as the bike%r[space(6)][ljust(stop,21,.)]
+Cuts of the bikes engine, braking if needed%r%rNote: The bike can be either
+off, on but not moving, or on and moving. Each%r[space(6)]command will respond
+differently depending on the status of the bike.%r%r[repeat(-,78)]
+Efail: If you really want to steal my bike, contact a judge.
+Contents:
+Armageddon(#182PXZc)
+No exits.
+Home: Armageddon(#182PXZc)
+Location: Armageddon's Office(#32RF)
+_______________________________________________________________________________

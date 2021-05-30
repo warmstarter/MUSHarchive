@@ -1,0 +1,25 @@
+@create Mantle Clock
+@desc Mantle Clock=An elegant, antique French mantlepiece clock with a white enamel face, solid gold hands and an ormolu case lavishly decorated with leaves and flowers. It stands on four small ball-and-claw feet. Two small brass bells on the top chime the hours and quarters.
+End of decompile.
+@set Mantle Clock=I
+@scent Mantle Clock=It smells of time passing...
+@sound Mantle Clock=Tick, tock, tick, tock, ...
+@startup Mantle Clock=@if me/vj(here)={@vh me=1;@tr me/vf=[mid(extract(time(),4,1),0,2)],[mid(extract(time(),4,1),3,2)],[mid(extract(time(),4,1),6,2]},{@vh me=0}
+@functions Mantle Clock=#69 #12790
+@succ Mantle Clock=The command `TIMEZONE n' changes the clock's time zone. For example, use TIMEZONE 0 for TST, TIMEZONE 5 for UK time etc.
+@va Mantle Clock=14:04:33
+@vb Mantle Clock=12
+@vc Mantle Clock=twelve
+@vd Mantle Clock=4
+@ve Mantle Clock=@va me=extract (time(),4,1); @vb me=add(%vi,mid(v(va),0,2)); @vc me=ADD(1, MOD(SUB(v(vb),1),12)); @vd me=mid(v(va),3,2); @trigger me/vy
+@vf Mantle Clock=@wait mod(add(sub(60,v(2)),mul(60,sub(59,v(1)))),900)={@trigger me/ve;@if me/vj(here)={@wait 60={@trigger me/startup}},{@vh me=0}}
+@vh Mantle Clock=1
+@vi Mantle Clock=-2
+@vj Mantle Clock=0
+@vl Mantle Clock=$timezone *:@vi me=add(0,%0);:changes to timezone [v(vi)].
+@vy Mantle Clock=@if LT(v(vd),15)={:chimes the hour...;@while GE(v(vc),0)={@if GT(v(vc),0)={"Dong!},{:stops chiming.};@decrement me/vc=1}},{:chimes the quarter...;@while GE(v(vd),0)={@if GE(v(vd),15)={"Ting!},{:stops chiming.};@decrement me/vd=15}}
+@vz Mantle Clock=@vc me=switch(v(vb),{1},{one},{2},{two},{3},{three},{4},{four},{5},{five},switch(v(vb),{6},{six},{7},{seven},{8},{eight},{9},{nine},{10},{ten},{11},{eleven},{12},{twelve},{Dunno})); @vd me=ADD(0,mid(v(va),3,2)); @switch [v(vd)]={0},{say It's [v(vc)] o'clock precisely.},{say It's [v(vd)] minutes past [v(vc)] o'clock.}
+@listen Mantle Clock=*clock*time*
+@ahear Mantle Clock=@va me=extract (time(),4,1); @vb me=add(%vi,mid(v(va),0,2)); @vb me=ADD(1, MOD(SUB(v(vb),1),12)); @vd me=mid(v(va),3,2); @trigger me/vz
+@listen2 Mantle Clock=* has arrived.
+@ahear2 Mantle Clock=@switch %#={[owner(me)]},{},{@if %vh={},{@vh=1; @trigger me/startup}}

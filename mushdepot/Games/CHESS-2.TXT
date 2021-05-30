@@ -1,0 +1,53 @@
+@create Chess Board: PARENT
+@link Chess Board: PARENT=[owner(me)]
+@set Chess Board: PARENT=LINK_OK
+@set Chess Board: PARENT=VISUAL
+@set Chess Board: PARENT=SAFE
+@set Chess Board: PARENT=NO_COMMAND
+@DESCRIBE Chess Board: PARENT=A small chess board, folded on itself. (-help board)
+&OPENED-DESC Chess Board: PARENT=[ufun(o-desc)] (-help board)%r%b%bA%b%bB%b%bC%b%bD%b%bE%b%bF%b%bG%b%bH%r[iter(1 2 3 4 5 6 7 8,%r## [ufun(iit,##)])]%r%rLast move- [extract(ufun(mvd),2,1)][extract(ufun(mvd),3,1)] to [extract(ufun(mvd),4,1)][extract(ufun(mvd),5,1)], by [name(extract(ufun(mvd),1,1))]
+&CLOSED-DESC Chess Board: PARENT=[ufun(c-desc)] (-help board)
+&CLOSE Chess Board: PARENT=$close board:@emit %N puts the chess pieces away and folds it.;@dolist a b c d e f g h = &line## me = -- -- -- -- -- -- -- --;@desc me = [ufun(closed-desc)]
+&OPEN Chess Board: PARENT=$open board:@emit %N opens up the chess set, taking out the pieces.;@desc me = [get(me/opened-desc)];&mvd board = 0 0 0 0 0
+&LINEA Chess Board: PARENT=-- -- -- -- -- -- -- --
+&LINEB Chess Board: PARENT=-- -- -- -- -- -- -- --
+&LINEC Chess Board: PARENT=-- -- -- -- -- -- -- --
+&LINED Chess Board: PARENT=-- -- -- -- -- -- -- --
+&LINEE Chess Board: PARENT=-- -- -- -- -- -- -- --
+&LINEF Chess Board: PARENT=-- -- -- -- -- -- -- --
+&LINEG Chess Board: PARENT=-- -- -- -- -- -- -- --
+&LINEH Chess Board: PARENT=-- -- -- -- -- -- -- --
+&RESET Chess Board: PARENT=$reset board:@emit %N sets up the chess board.;&mvd me = 0 0 0 0 0;@dolist a b c d e f g h = &line## me = [ufun(bline##)]
+&NAMEWR Chess Board: PARENT=white rook
+&NAMEWN Chess Board: PARENT=white knight
+&NAMEWB Chess Board: PARENT=white bishop
+&NAMEWQ Chess Board: PARENT=white queen
+&NAMEWP Chess Board: PARENT=white pawn
+&NAMEBR Chess Board: PARENT=black rook
+&NAMEBN Chess Board: PARENT=black knight
+&NAMEBB Chess Board: PARENT=black bishop
+&NAMEBQ Chess Board: PARENT=black queen
+&NAMEWK Chess Board: PARENT=white king
+&NAMEBK Chess Board: PARENT=black king
+&NAMEBP Chess Board: PARENT=black pawn
+&ALPHAS Chess Board: PARENT=a b c d e f g h
+&BLINEA Chess Board: PARENT=bR bP -- -- -- -- wP wR
+&BLINEB Chess Board: PARENT=bN bP -- -- -- -- wP wN
+&BLINEC Chess Board: PARENT=bB bP -- -- -- -- wP wB
+&BLINED Chess Board: PARENT=bQ bP -- -- -- -- wP wQ
+&BLINEE Chess Board: PARENT=bK bP -- -- -- -- wP wK
+&BLINEF Chess Board: PARENT=bB bP -- -- -- -- wP wB
+&BLINEG Chess Board: PARENT=bN bP -- -- -- -- wP wN
+&BLINEH Chess Board: PARENT=bR bP -- -- -- -- wP wR
+@FAILURE Chess Board: PARENT=Nope.
+@OSUCCESS Chess Board: PARENT=picks up a chess board.
+@ODROP Chess Board: PARENT=sets down a chess board.
+&HELP Chess Board: PARENT=$-help board:@pemit %#=`reset board' sets up the pieces properly. `mv letter number letter number' moves a piece from the first pair to the second pair. `place type letter number' adds a piece of that type (as it appears on the board) at that location. `open board' opens it for play, `close board' closes it for travel.
+&PIECES Chess Board: PARENT=wR wN wB wQ wK wP bR bN bB bQ bK bP
+&PLACE Chess Board: PARENT=$place * * *:@switch [match(ufun(pieces),%0)]=0,{@pemit %# = That is not a valid piece.},{@emit %N places a [ufun(name%0)] at %1%2.;&line%1 me = [replace(ufun(line%1),%2,%0)]}
+&MMV Chess Board: PARENT=$mv * * * *:@switch [match(ufun(pieces),extract(ufun(line%0),%1,1))] = 0,{@pemit %# = You can't move from there.},{@switch [match(extract(ufun(line%2),%3,1),--)] = 0,{@emit %N moves from %0%1 to %2%3, taking the [ufun(name[extract(ufun(line%2),%3,1)])] with a [ufun(name[extract(ufun(line%0),%1,1)])].},{@emit %N moves %p [ufun(name[extract(ufun(line%0),%1,1)])] from %0%1 to %2%3.};@wait 3 = {&line%2 me = [replace(ufun(line%2),%3,extract(ufun(line%0),%1,1))];&line%0 me = [replace(ufun(line%0),%1,--)];&mvd me=%# %0 %1 %2 %3}}
+&IIT Chess Board: PARENT=[iter(a b c d e f g h,[switch(extract(ufun(line##),%0,1),--,[switch(mod(add(%0,[switch(##,a,1,b,2,c,3,d,4,e,5,f,6,g,7,h,8)]),2),0,--,1,++)],[extract(ufun(line##),%0,1)])])]
+&MVD Chess Board: PARENT=0 0 0 0 0
+&O-DESC Chess Board: PARENT=A small chess board, with small wooden pieces.
+&C-DESC Chess Board: PARENT=A small chess board, folded on itself.
+@USE Chess Board: PARENT=Set the o-desc to what the board should basically look when open, and c-desc when closed. (O-desc should be short, since the board appears below it). Enjoy!

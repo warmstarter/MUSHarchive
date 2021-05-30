@@ -1,0 +1,10 @@
+@create Wizlist
+@link Wizlist=#2
+@set Wizlist=INHERIT
+@set Wizlist=WIZARD
+&LIST Wizlist=[iter(u(weave,iter(u(wizlist),##),iter(u(roylist),##)),[switch(##,,,[ljust([name(##)],20)]<[get(##/empire)]>)],|,|)]
+&MAX Wizlist=[switch(gt(%0,%1),1,%0,%1)]
+@VA Wizlist=$wizlist:@pemit %#=[ansi(h,[ljust(Wizards currently online:,35)]%bRoyalty currently online:%r[repeat(-,70)])]%r[table(trim(u(list),|),35,79,|,%b)]%r[ansi(h,--- End ---)]
+&WEAVE Wizlist=[iter(lnum(u(max,words(%0),words(%1))),[index(%0,%b,add(##,1),1)]|[index(%1,%b,add(##,1),1)]|)]
+&ROYLIST Wizlist=[setq(0,iter(lwho(),switch(hasflag(##,royalty),1,##)))][setdiff(r(0),u(tmp_wizlist))]
+&WIZLIST Wizlist=[setq(0,iter(lwho(),switch(hasflag(##,wizard),1,##)))][r(0)][set(me,tmp_wizlist:[r(0)])]

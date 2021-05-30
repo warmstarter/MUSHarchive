@@ -1,0 +1,146 @@
+blade <generic bladed weapon>(#9899HVYh)
+Type: THING Flags: HAVEN VISUAL PARENT_OK HALTED
+--------------------===============Blade Help===============-------------------
+[space(5)]This is a general bladed weapon, you get to choose what type it will
+be, therefore it could be a knife or a sword or anything. It is basicaly an
+improvement on the `Sword <Generic Combat Type>' in that it is more flexible
+and I've managed to get rid of the problems, thanks to Mephistopheles for doing
+all the hard work. Please +mail Denakar if you have suggestions or there are
+errors. Type the following:%r 1) @clone #9899=<name of your weapon>
+{IMPORTANT:If it is a generical name then have the first letter lowercase, ie:
+Sword would be sword, but Excaliber would remain Excaliber}%r 2) take <object>
+%r 3) @desc <object>=<description of the weapon>%r 4) @set <your weapon>=
+!halted%r 4) +bhelp <name of your weapon>%r
+--------------------========================================-------------------
+Owner: Denakar  Key: Denakar Loonies: 1
+Adesc:@pemit %#=Type '+bhelp [name(me)]' for things you can do with the weapon.
+DRAW:0
+RANDOMIZE_DRAW:$+bdraw *:@switch [%0]=[name(me)],{@switch [get([name(me)]/
+draw)]=0,{&DRAW [num(me)]=1;@emit/room s([get([name(me)]/draw_[rand(4)])])},1,
+{@pemit%#=Your [name(me)] is already drawn.}},[num(me)],{@switch [get([name
+(me)]/draw)]=0,{&DRAW [num(me)]=1;@emit/room s([get([name(me)]/draw_[rand
+(4)])])},1,{@pemit %#=Your [name(me)] is already drawn.}}
+DRAW_0:%n brings forth %p [name(me)]!
+DRAW_1:%n brings forth %p [name(me)] with a slight ::wishink::
+DRAW_2:%n hesitates for an instant before drawing forth %p [name(me)] from it's
+scabbard!
+DRAW_3:%n flushes in anger and draws forth %p [name(me)]!
+RANDOMIZE_SHEATH:$+bsheath *:@switch [%0]=[name(me)],{@switch [get([name(me)]/
+draw)]=1,{&DRAW [num(me)]=0;@emit/room s([get([name(me)]/sheath_[rand(4)])])},
+0,{@pemit %#=Your [name(me)] is already in it's sheath.}},[num(me)],{@switch
+[get([name(me)]/draw)]=1,{&DRAW [num(me)]=0;@emit/room s([get([name(me)]/
+sheath_[rand(4)])])},0,{@pemit %#=Your [name(me)] is already in it's sheath.}}
+SHEATH_0:%n returns %p [name(me)] back from whence it came.
+SHEATH_1:%n wearily slides %p [name(me)] back into it's scabbard.
+SHEATH_2:%n drops %p [name(me)] back into it's scabbard... it lands with a
+light >clack<
+SHEATH_3:%n slides %p [name(me)] back into it's scabbard, done with combat for
+now.
+RANDOMIZE_STAB:$+bstab *:@switch/first [%0]=*=*,{@switch [before(%0,=)]=[nam
+(me)],{@switch [get([name(me)]/draw)]=1,{@switch/first [%0]={[name(me)]=* in
+*},@emit/room s([get([name(me)]/stab2_[rand(5)])]),@emit/room s([get([name
+(me)]/stab3_[rand(5)])])},0,{@pemit %#=You need to draw [name(me)] first.}},
+[num(me)],{@switch [get([name(me)]/draw)]=1,{@switch/first [%0]={[name(me)]=*
+in *},@emit/room s([get([name(me)]/stab2_[rand(5)])]),@emit/room s([get([name
+(me)]/stab3_[rand(5)])])},0,{@pemit %#=You need to draw [name(me)] first.}}},
+{@switch [%0]=[name(me)],{@switch [get([name(me)]/draw)]=1,{@emit/room s([get
+([name(me)]/stab_[rand(5)])])},0,{@pemit %#=You need to draw [name(me)]
+first.}},[num(me)],{@switch [get([name(me)]/draw)]=1,{@emit/room s([get([name
+(me)]/stab_[rand(5)])])},0,{@pemit %#=You need to draw [name(me)] first.}}}
+STAB_0:%n growls angrily and stabs at %p opponent.
+STAB_1:%n luges forward, attempting to stab %p opponent.
+STAB_2:%n drives forward, aiming for %p opponent's chest with %p [name(me)].
+STAB_3:%n jumps into %p opponent, stabbing for the stomach.
+STAB_4:%n calmly stabs for %p opponent's mid-section.
+STAB2_0:%n growls angrily and stabs at [before(after(%0,=),%bin%b)]'s [after
+(after(%0,=),%bin%b)].
+STAB2_1:%n luges forward, attempting to stab [before(after(%0,=),%bin%b)] in
+the [after(after(%0,=),%bin%b)].
+STAB2_2:%n drives forward, aiming for [before(after(%0,=),%bin%b)]'s [after
+(after(%0,=),%bin%b)] with %p [name(me)].
+STAB2_3:%n jumps into [before(after(%0,=),%bin%b)], stabbing for the [after
+(after(%0,=),%bin%b)].
+STAB2_4:%n calmly stabs for [before(after(%0,=),%bin%b)]'s [after(after(%0,=),
+%b in%b)].
+STAB3_0:%n growls angrily and stabs at [after(%0,=)].
+STAB3_1:%n luges forward, attempting to stab [after(%0,=)].
+STAB3_2:%n drives forward, aiming for [after(%0,=)]'s chest with %p [name(me)].
+STAB3_3:%n jumps into [after(%0,=)], stabbing for the stomach.
+STAB3_4:%n calmly stabs for [after(%0,=)]'s mid-section.
+RANDOMIZE_SLASH:$+bslash *:@switch/first [%0]=*=*,{@switch [before(%0,=)]=[name
+(me)],{@switch [get([name(me)]/draw)]=1,{@switch/first [%0]={[name(me)]=* in
+*},@emit/room s([get([name(me)]/slash2_[rand(5)])]),@emit/room s([get([name
+(me)]/slash3_[rand(5)])])},0,{@pemit %#=You need to draw [name(me)] first.}},
+[num(me)],{@switch [get([name(me)]/draw)]=1,{@switch/first [%0]={[name(me)]=*
+in *},@emit/room s([get([name(me)]/slash2_[rand(5)])]),@emit/room s([get([name
+(me)]/slash3_[rand(5)])])},0,{@pemit %#=You need to draw [name(me)] first.}}},
+{@switch [%0]=[name(me)],{@switch [get([name(me)]/draw)]=1,{@emit/room s([get(
+[name(me)]/slash_[rand(5)])])},0,{@pemit %#=You need to draw [name(me)]
+first.}},[num(me)],{@switch [get([name(me)]/draw)]=1,{@emit/room s([get([name
+(me)]/slash_[rand(5)])])},0,{@pemit %#=You need to draw [name(me)] first.}}}
+SLASH_0:%n brings %p [name(me)] up and to the side, slashing for %p opponent's
+chest.
+SLASH_1:%n dashes forward, slashing low to %p opponent's mid-section...
+SLASH_2:%n swings %p [name(me)] in a flashing arc, slashing for %p opponent's
+mid-section...
+SLASH_3:%n twists, throwing %p body fully around, slashing out for %p
+opponent's throat...
+SLASH_4:%n slashes for %p opponent's chest.
+SLASH2_0:%n brings %p [name(me)] up and to the side, slashing for [before(after
+(%0,=),%bin%b)]'s [after(after(%0,=),%bin%b)].
+SLASH2_1:%n dashes forward, slashing to [before(after(%0,=),%bin%b)]'s [after
+(after(%0,=),%bin%b)]...
+SLASH2_2:%n swings %p [name(me)] in a flashing arc, slashing for [before(after
+(%0,=),%bin%b)]'s [after(after(%0,=),%bin%b)]...
+SLASH2_3:%n twists, throwing %p body fully around, slashing out for [before
+(after(%0,=),%bin%b)]'s [after(after(%0,=),%bin%b)]...
+SLASH2_4:%n slashes for [before(after(%0,=),%bin%b)]'s [after(after(%0,=),%bin%
+b)].
+SLASH3_0:%n brings %p [name(me)] up and to the side, slashing for [after(%0,=)]
+'s chest.
+SLASH3_1:%n dashes forward, slashing low to [after(%0,=)]'s mid-section...
+SLASH3_2:%n swings %p [name(me)] in a flashing arc, slashing for [after(%0,=)]
+'s mid-section...
+SLASH3_3:%n twists, throwing %p body fully around, slashing out for [after
+(%0,=)]'s throat...
+SLASH3_4:%n slashes for [after(%0,=)]'s chest.
+RANDOMIZE_END:$+bend *:@switch [%0]=[name(me)],{@switch [get([name(me)]/draw)]=
+1,{@emit/room s([get([name(me)]/end_[rand(4)])])},0,{@pemit %#=Not only do you
+need to attack something, but you can atleast draw your [name(me)] first.}},
+[num(me)],{@switch [get([name(me)]/draw)]=1,{@emit/room s([get([name(me)]/end_
+[rand(4)])])},0,{@pemit %#=Not only do you need to attack something, but you
+can at least draw your [name(me)] first.}}
+END_0:%n shakes %p head as he wipes the blood from %p [name(me)].
+END_1:%n wipes the blood off %p [name(me)] with a part of %p clothing.
+END_2:%n rests %p [name(me)] wearily on the ground.
+END_3:%n chuckles and wipes the blood from %p [name(me)].
+RANDOMIZE_PLAY:$+bplay *:@switch [%0]=[name(me)],{@emit/room s([get([name(me)]/
+play_[rand(6)])])},[num(me)],{@emit/room s([get([name(me)]/play_[rand(6)])])}
+PLAY_0:%n holds %p [name(me)] into the light, letting it reflect wavy bands of
+impure substance.
+PLAY_1:%n takes a sharpening stone from %p pocket, sitting on the floor to
+sharpen %p [name(me)] a bit.
+PLAY_2:%n draws %p [name(me)], spinning it a bit in %p hand before replacing it
+in the scabbard.
+PLAY_3:%n looks at the finely carved blade of his [name(me)], smiling
+approvingly.
+PLAY_4:%n looks at all present as %s moves a finger over the smooth surface of
+%p [name(me)].
+PLAY_5:%n glances at %p [name(me)] longingly, as if %s wants to hold it in %p
+hand yet again.
+BLADE_HELP:$+bhelp *:@switch [%0]=[name(me)],{@pemit %#=
+--------------------===============Blade Help===============-------------------
+[capstr(name(me))] Commands, randomized:%r%r 1) +bdraw <name>-- Shows how you
+draw your [name(me)].%r 2) +bsheath <name>-- Shows how you resheath your [name
+(me)].%r 3) +bstab <name>=<opponent> in <area>-- During combat, a specific stab
+at someone in a certain area.%r 4) +bslash <name>=<opponent> in <area>-- During
+combat, a specific slash at someone in a certain area.%r 5) +bend <name>--
+Shows what you do directly after combat, before resheathing.%r 6) +bplay
+<name>-- Shows what you do when not in combat to have some fun with the
+[name(me)].%rNOTE: `=<opponent>' and ` in <area>' are not required but `<name>'
+is.%r
+--------------------========================================-------------------}
+No exits.
+Home: Garden of Eden (OOC)(#1625RAJL)
+Location: Free Code Room (Armageddon)
+_______________________________________________________________________________

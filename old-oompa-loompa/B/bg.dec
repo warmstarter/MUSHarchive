@@ -1,0 +1,111 @@
+@@ Faraday's Background System
+@@ Coded by Linda Naughton O'Meara (http://www.wordsmyth.org)
+@@
+@@ DISCLAIMERS:
+@@ - Permission is given to use and distribute this code, providing the 
+@@   credits entry in the help file remains intact.
+@@ - Although every effort has been made to test and debug this code, no warranty 
+@@   is provided for its use.
+@@   By using this code, you agree that the author is not responsible for any ill 
+@@   effects on your MUSH.
+@@ - I will support the code as far as I can, but I make no guarantees that I will 
+@@   have time to do everything.  RL comes first.  Please report any bugs or 
+@@   suggestions through http://www.wordsmyth.org
+@@
+@@ FEATURES:
+@@ This system allows players to submit their characters' backgrounds for staff review.
+@@ The system makes it easy for players to write their characters backgrounds.  There are
+@@ no complicated entry commands - they just set attributes on themselves, and can edit
+@@ them using the standard MUSH editing commands.
+@@
+@@ Once a background is submitted for review, it can't be edited unless it is unsubmitted.
+@@ Staff members can review and approve a character's background, or tell them to unsubmit
+@@ it and make revisions.
+@@
+@@ The system assumes that characters are set with the UNREGISTERED flag when they are 
+@@ created.  It will unset this flag when a character's background is approved.  You can
+@@ use this flag in coded commands to check whether a character is approved (for example,
+@@ in the +ic command to keep them from going IC before they're approved).
+@@
+@@ REQUIREMENTS:
+@@ This code is designed for PennMUSH only.  As long as PennMUSH stays backwards compatible,
+@@ it will work on version 1.7.4 patchlevel 15 or higher.  You're welcome to try it on older
+@@ versions of Penn, or on TinyMUX, but I make no guarantees that it will work.
+@@
+@@ Note:: This system is dependent on the "Staff Notice" system, also available from Faraday's
+@@ MUSH code page.
+@@
+@@ INSTALLATION:
+@@ This install script will handle everything for you. Simply save it as a TEXT file and
+@@ /quote it (or equivalent) to your MUSH as your Wizard character.
+@@
+@@ There is no need to create objects ahead of time.  You do not even have to edit this 
+@@ file by hand unless your globals room is not #2 (in which case replace #2 with the 
+@@ appropriate DB# throughout this file)
+@@
+@@ If you do not have /quote in your MUSH client, you can copy and paste, but beware of 
+@@ linebreaks inserted when copying!!
+@@
+@@ SETUP:
+@@ The system itself requires no setup, but you can edit the FUN_TOP_LINE and FUN_BOTTOM_LINE
+@@ attributes if you want to customize the look of the border lines. I do ask that you
+@@ leave the '+bg/help' prompt in the bottom line somewhere though, so it's always displayed.
+@@
+@@ You'll want to make sure player objects are created with the UNREGISTERED flag by default.
+@@ This is set in your MUSH config file. 
+@@ 
+@@ USAGE:
+@@ See the +bg/help command for instructions.
+@@
+@@ UPDATES:
+@@ A mailing list is available if you wish to be notified of bugfixes or other updates to this code.  
+@@ Visit my webpage: http://www.wordsmyth.org/faraday to find out more.
+@@
+@@ - Version 1.1 - 4/25/02
+@@   Fixed a bug where it was calling a global function "padstr" instead of a local function 
+@@   on the object. 
+@@ - Version 1.2 - 7/14/03
+@@   Fixed the staff review command so it uses +bg instead of +bio.
+@@   To patch, just copy the cmd-+bg-review command onto your existing object.
+@@
+@@ --------------------------------------------------------------------------------
+
+
+@set me=quiet
+
+@pemit/silent %#=[ansi(hr,Beginning Background System Installation.  Please wait until the Installation Complete message appears...)]%R
+
+@pemit/silent %#=[ansi(hr,Creating Objects...)]%R
+
+@create BG System
+@set BG System = WIZARD
+@set BG System = !NO_COMMAND
+@set BG System = SAFE
+@startup BG System = @set me=!no_command
+
+&CMD-+BG BG System=$+bg:think pemit(%#,[u(fun_top_line)]%r[ansi(h,Background Sections Available:)]%r[iter(sortby(sortby_bgs,lattr(%#/bg*)),%r[u(fun_padstr,#@.,5)][u(fun_padstr,##,10)][switch(1,hasflag(%#/##,wiz),APPROVED,atrlock(%#/##),SUBMITTED BUT NOT APPROVED,UNSUBMITTED)])]%r%r[ansi(h,Type +bg <#> to view a section of your bg.)]%r[u(fun_bottom_line)])
+&CMD-+BG-APPROVE BG System=$+bg/approve *:@switch [setq(0,pmatch(%0))]0=orflags(%#,WrJ),@pemit %#=This command is restricted to admin.,t(%q0),@pemit %#=There is no such player.,{@pemit %#=You approve %0's background. [iter(lattr(%q0/bg*),set(%q0/##,wiz))][set(%q0,!unregistered)][staff_notice(BG Approval - [capstr(%0)],%N has approved %0's background.)];@fo %#=@mail [capstr(%0)]=BG Approval - [capstr(%0)]/Congratulations - %N has approved your background. You may now enter RP.}
+&CMD-+BG-DETAIL BG System=$+bg *:think [setq(0,extract(sortby(sortby_bgs,lattr(%#/bg*)),trim(%0),1))][pemit(%#,switch(%q0,,ansi(hr,You don't have that many pages in your bg.),[u(fun_top_line)]%r[ansi(h,%q0)] -- [switch(1,hasflag(%#/%q0,wiz),APPROVED,atrlock(%#/%q0),SUBMITTED BUT NOT APPROVED,UNSUBMITTED)]%r%r[u(%#/%q0)]%r[u(fun_bottom_line)]))]
+&CMD-+BG-HELP BG System=$+bg/help:think pemit(%#,[u(fun_top_line)]%RThe Background system allows you to write your character's history.  You background is just another MUSH attribute on yourself, like your description.  You can set it by typing [ansi(h,&bg me=<your background text>)].  You can use the built-in MUSH editing commands (@edit, @dec, etc.) to edit it.%R%RIf your background is particularly long, you can split it into multiple attributes, like:%R[ansi(h,&BG1 me=This is the first part of my bg.)]%R[ansi(h,&BG2 me=This is the second part of my bg.)]%Retc.%R%RYou can review the various pieces of your background.  [ansi(h,+bg)] will show you a list of all the pieces, and [ansi(h,+bg <#>)] will read one of the pieces.%R%ROnce you've finished writing your background, use the [ansi(h,+bg/submit)] command to submit it for staff review.  You will not be able to edit your BG attributes once you do this.  If you find you need to make corrections to your BG after submitting it, use [ansi(h,+bg/unsubmit)] to un-submit it.  This will allow you to edit the attributes, but the staff won't review your BG until you submit it again.%R%R[switch(orflags(%#,WrJ),1,{Staff members can view pieces of a player's BG.  Use [ansi(h,+bg/review <player>)] to list a player's BG segments, and [ansi(h,+bg/review <player>/<#>)] to read a segment.  You can approve a player's BG using the [ansi(h,+bg/approve <player>)] command and their UNREGISTERED flag will be cleared.})]%R%R--Background System coded by Faraday (http://www.wordsmyth.org)--%R[ansi(hg,Version [v(version)])]%R[u(fun_bottom_line)]
+&CMD-+BG-REVIEW BG System=$+bg/review *:think switch(0,not(match(%0,*/*)),,orflags(%#,WrJ),pemit(%#,This command is restricted to staff.),[setq(0,pmatch(%0))]t(%q0),pemit(%#,That is not a valid player.),pemit(%#,[u(fun_top_line)]%r[ansi(h,Background Sections Available for %0:)]%r[iter(sort(lattr(%q0/bg*)),%r[u(fun_padstr,#@.,5)][u(fun_padstr,##,10)][switch(1,hasflag(%q0/##,wiz),APPROVED,atrlock(%q0/##),SUBMITTED BUT NOT APPROVED,UNSUBMITTED)])]%r%r[ansi(h,Type +bg/review <player>/<#> to view a section of the BG.)]%r[u(fun_bottom_line)]))
+&CMD-+BG-REVIEW-DETAIL BG System=$+bg/review */*:think switch(0,orflags(%#,WrJ),pemit(%#,This command is restricted to staff.),[setq(0,pmatch(%0))]t(%q0),pemit(%#,That is not a valid player.),pemit(%#,[setq(1,extract(sort(lattr(%q0/bg*)),[trim(%1)],1))][u(fun_top_line)]%r%0 [ansi(h,%q1)] -- [switch(hasflag(%q0/%q1,wizard),1,[ansi(g,Approved)],[ansi(r,Not Approved)])]%r%r[u(%q0/%q1)]%r[u(fun_bottom_line)])
+&CMD-+BGSUBMIT BG System=$+bg/submit:think [setq(0,squish(iter(lattr(%#/bg*),switch(hasflag(%#/##,wizard),0,##))))][switch(words(%q0),0,pemit(%#,ansi(hr,You do not have any unapproved portions or your bg.)),pemit(%#,ansi(hc,You submit unapproved parts of your bg (%q0) for review.  You will not be able to edit it unless you use the +bg/unsubmit command.))[iter(%q0,[atrlock(%#/##,on)])][staff_notice(BG Submit - %N,%N has submitted %p bg.)])]
+&CMD-+BGUNSUBMIT BG System=$+bg/unsubmit:think [iter(lattr(%#/bg*),switch(hasflag(%#/##,wiz),1,pemit(%#,ansi(hm,## cannot be unsubmitted.)),[atrlock(%#/##,off)][pemit(%#,ansi(hc,## unsubmitted.  You may now edit that page again.  When you are finished, resubmit your bg using the +bg/submit command.))]))][staff_notice(BG UnSubmit - %N,%N has UNsubmitted %p bg.)]
+@DESCRIBE BG System=This object contains the global commands for the Background System.  See +bg/help for a list of commands.%R%RYou can configure the two line functions: FUN_TOP_LINE and FUN_BOTTOM_LINE on this object if your MUSH uses custom lines.  Please leave the +bg/help prompt in the bottom line somewhere.%R%RNOTE:  This system depends on the Staff Notice system.%R%R-- Background system coded by Faraday (http://www.wordsmyth.org) --
+@set BG System/DESCRIBE=no_command visual
+&FUN_BOTTOM_LINE BG System=ansi(h,[repeat(-,34)] +bg/help [repeat(-,34)])
+&FUN_TOP_LINE BG System=ansi(h,[repeat(-,30)] Background System [repeat(-,29)])
+&SORTBY_BGS BG System=sub(after(%0,BG),after(%1,BG))
+&FUN_PADSTR BG System=[switch(%2,center,center(mid({%0},0,%1),%1,%3),right,rjust(mid({%0},0,%1),%1,%3),ljust(mid({%0},0,%1),%1,%3))]
+&VERSION BG System=1.2
+
+@pemit/silent %#=[ansi(hr,Setting up database numbers...)]%R
+
+@pemit/silent %#=[ansi(hr,Moving objects to their appropriate places...)]%R
+
+@wait 5=@tel BG System=#2
+
+@wait 5=@pemit/silent %#=%R%R[ansi(hr,Installation Complete!!)]%R
+
+@wait 5=@set me=!quiet
+

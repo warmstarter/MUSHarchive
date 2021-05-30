@@ -1,0 +1,48 @@
+@create Farm Parent
+@lock/Basic Farm Parent==me
+@lock/Use Farm Parent=canuse/1
+@set Farm Parent = WIZARD
+@set Farm Parent = SAFE
+@set Farm Parent = NO_COMMAND
+&CMD_DESTINATION_LIST Farm Parent=$list destinations:th [pemit(%#,[ansi(v(border_color),[repeat(=,76)])]%r[center([ansi(v(title_color),[name(me)] Destination List)],76)]%r[ansi(v(border_color),[repeat(=,76)])]%r [iter([edit([v(destination_list)],|,%b)],[ljust(##,8)][name(##)]%r)][ansi(v(border_color),[repeat(=,76)])])]
+&CMD_PUMP_LIST Farm Parent=$pump list:th [pemit(%#,[ansi(v(border_color),[repeat(=,76)])]%r[center([ansi(v(title_color),[name(me)] Pump List)],76)]%r[ansi(v(border_color),[repeat(=,76)])]%r [iter([edit([v(pump_list)],|,%b)],[ljust(##,8)][name(##)]%r)][ansi(v(border_color),[repeat(=,76)])])]
+&CMD_SEND Farm Parent=$send *=*:th [switch([u(fun_issystem,[secure(%0)])][lte(%1,[add([v(remaining_power)],[v(FOOD_[v(SYSTEM_%0)])])])][isnum(%1)],111,[switch([gte(%1,0)],1,[u(fun_transfer_power,%0,%1)],0,[pemit(%#,Number must be above 0.)])],011,[pemit(%#,That is not a system.)],101,[pemit(%#,You do not have that much free food.)],001,[pemit(%#,That is not a system.)],[pemit(%#,Argument must be a number.)])]
+&CMD_SET_DESTINATION Farm Parent=$set destination *:th [switch([strmatch([v(destination_list)],*|%0|*)],1,[set(me,destination:%0)][pemit(%#,The food packs are now transferred to [name(%0)] hourly.)],0,[pemit(%#,Invalid destination.)])]
+&CMD_SET_FOOD Farm Parent=$set food *:th [switch([hasflag(%#,Wiz)],1,[switch([strmatch([zone([loc(%0)])],[zone([loc(me)])])],1,[u(fun_set_food,%0)],0,[pemit(%#,Error: Zones do not match.)])],0,[pemit(%#,Permission denied.)])]
+&CMD_SET_MAX_YIELD Farm Parent=$set max yield *:th [switch([hasflag(%#,Wiz)],1,[set(me,max_reactor:%0)][pemit(%#,[name(me)] can now have a yield of up to %0 food.)],0,[pemit(%#,Permission denied.)])]
+&CMD_SET_PUMP Farm Parent=$set pump *:th [switch([strmatch([v(pump_list)],*|%0|*)],1,[set(me,pump:%0)][pemit(%#,The new source of water is [name(%0)].)],0,[pemit(%#,Invalid water pump.)])]
+&CMD_SET_YIELD Farm Parent=$set yield *:th [switch([lte(%0,[v(max_reactor)])][gte(%0,0)],01,{[pemit(%#,The farm cannot produce that much yield.%rPlease chose a number between 0 and [v(max_reactor)].)]},10,[pemit(%#,Farm yield must be above 0.)],00,[pemit(%#,Farm yield must be above 0.)],11,{[u(fun_set_reactor,[secure(%0)])]})]
+&CMD_TOGGLE_BATTERY_PRODUCTION Farm Parent=$toggle food store production:th [if(hasattr(me,build_batteries),[pemit(%#,Already producing packaged food.)],[if(strmatch(v(destination),[v(none)]),[pemit(%#,No available destination.)],[set(me,build_batteries:yes)][pemit(%#,Now producing packaged food with left-over food.)])])]
+&CMD_UNSET_FOOD Farm Parent=$unset food *:th [switch([hasflag(%#,Wiz)],1,[switch([hasattr(me,FOOD_%0)],1,[wipe(me/food_%0)][pemit(%#,No longer able to send food to [name(%0)] %(%0%))],0,[pemit(%#,Not currently sending food to there.)])],0,[pemit(%#,Permission denied.)])]
+&CMD_UNTOGGLE_BATTERY_PRODUCTION Farm Parent=$untoggle food store production:th [if(hasattr(me,build_batteries),[wipe(me/build_batteries)][pemit(%#,No longer producing packaged food.)])]
+&CREDITS Farm Parent=Dave@GalacticMUSH [EMAIL: davemilford@home.com] [ICQ: 8516328]
+&CURRENT_POWER_NUM Farm Parent=1
+@DESCRIBE Farm Parent=[set(me,REMAINING_POWER:[v(reactor_setting)])][set(me,SYSTEMS:)]%b[ansi(u(border_color),[repeat(_,74)]%r/)]%b[ljust([ansi(v(name_color),[v(type)] Farm)],73)][ansi(u(border_color),\\%r|[repeat(-,74)]|%r|)]%b[ljust([ansi(v(title_color),Owner:)] [v(owner)],73)][ansi(u(border_color),|%r|)]%b[ljust([ansi(v(title_color),Maximum Yield:)] [v(max_reactor)],73)][ansi(u(border_color),|%r|[repeat(-,74)]|%r|%b)][ljust([ansi(v(title_color),Water Source%b%b%b:)] [switch([hasattr(me,pump)],1,[name([v(pump)])]%b%b%([v(pump)]%),0,None)],73)][ansi(u(border_color),|%r|%b)][ljust([ansi(v(title_color),Water Available:)] [switch([hasattr(me,pump)],1,[u(fun_water_available)],0,None)],36)][ljust([ansi(v(title_color),Water Needed:)] [switch([hasattr(me,pump)],1,[u(fun_show_water_needed)],None)],37)][ansi(u(border_color),|%r|[repeat(-,74)]|%r|)]%b[ljust([ansi(v(title_color),Current Yield:)] [v(reactor_setting)]%b%([mul([fdiv([v(reactor_setting)],[v(max_reactor)])],100)]%%%),73)][ansi(u(border_color),|%r|)]%b[ljust([ansi(v(title_color),Recipients:)],73)][if([lattr(me/FOOD_*)],{[ansi(u(border_color),|%r|%b)][iter([lattr(me/FOOD_*)],[set(me,SYSTEM_[v(current_power_num)]:[edit(##,FOOD_,)])][ljust({[ansi(v(subtitle_color),[v(current_power_num)]:)] [name([edit(##,FOOD_,)])]},39)][ljust([ansi(nc,[u(##)])],4)][rjust([ansi(u(border_color),|%r|)],34)][u(fun_calc_power,[u(##)])][set(me,SYSTEMS:[v(systems)] [v(current_power_num)])][set(me,CURRENT_POWER_NUM:[inc([v(current_power_num)])])])]},{[ansi(u(border_color),|%r|%b)][ljust(None.,73)][ansi(u(border_color),|%r|)]})][ansi(u(border_color),[repeat(-,74)]|%r|)]%b[ljust([ansi(v(title_color),Food Remaining:)]%b[v(remaining_power)],73)][ansi(u(border_color),|%r[if(hasattr(me,build_batteries),[ansi(hb,|[repeat(-,74)]|%r|%b)][ljust(ansi(h,%[)[ansi(hg,X)][ansi(h,%])] Extra Food Diverted to Food Store Production,73)][ansi(hb,|%r|)]%b[ljust([ansi(h,Destination:)]%b[name(v(destination))]%b%b%([v(destination)]%),73)][ansi(hb,%|%r)])][ansi(hb,\\[repeat(_,74)]/)][set(me,CURRENT_POWER_NUM:1)]
+@set Farm Parent/DESCRIBE=no_command visual
+&DESTINATION Farm Parent=[v(none)]
+&DESTINATION_LIST Farm Parent=|
+&FUN_BUILD_BATTERIES Farm Parent=[if(gte(v(remaining_power),0),[setq(0,[div(v(remaining_power),400)])][setq(1,[mod(v(remaining_power),400)])][if(gte(%q0,1),[set(me,storage_food:%q0)])][set(me,leftover_energy:[add(v(leftover_energy),%q1)])][if(gte(v(leftover_energy),400),[if(hasattr(me,storage_food),[set(me,storage_food:[inc(v(storage_food))])],[set(me,storage_food:1)])][set(me,leftover_energy:[sub(v(leftover_energy),400)])])])]
+&FUN_CALC_POWER Farm Parent=[set(me,REMAINING_POWER:[sub([v(remaining_power)],%0)])]
+&FUN_CHECK_POWER Farm Parent=[iter([lattr(me/FOOD_*)],[set(me,REMAINING_POWER:[sub([v(remaining_power)],[u(##)])])])]
+&FUN_ISSYSTEM Farm Parent=[hasattr(me,SYSTEM_%0)]
+&FUN_MOVE_COMMODS Farm Parent=[iter([lattr(me/STORAGE_*)],[set([v(destination)],##:[switch([hasattr([v(destination)],##)],1,[add([get([v(destination)]/##)],[v(##)])],0,[v(##)])])][wipe(me/##)])][trigger([v(destination)]/fun_calc_capacity_used)][trigger([v(destination)]/fun_calc_capacity_remaining)]
+&FUN_SET_FOOD Farm Parent=[set(me,food_%0:0)][pemit(%#,[name(me)] can now send food to [name(%0)] %(%0%))]
+&FUN_SET_REACTOR Farm Parent=[set(me,reactor_setting:%0)][pemit(%#,Farm is now producing %0 food.%rFarm yield now at [mul([fdiv([v(reactor_setting)],[v(max_reactor)])],100)]%%.)][set(me,REMAINING_POWER:%0)][u(fun_check_power)][wait(1,[lit([switch([lte([v(remaining_power)],0)],1,[u(fun_smartalloc,[sub(u(fun_water_needed),u(fun_water_available))])][pemit(%#,Global food shortage. Resetting allocations.)])])])]
+&FUN_SHOW_WATER_NEEDED Farm Parent=[switch([gt([u(fun_water_needed)],[u(fun_water_available)])],1,[ansi(nr,[u(fun_water_needed)])],0,[ansi(ng,[u(fun_water_needed)])])]
+&FUN_SMARTALLOC Farm Parent=[set(me,AMOUNT_DONE:0)][iter([lattr(me/FOOD_*)],[setq(0,[v(##)])][if([not([hasattr(me,ALLOC_DONE)])],[if([gte(v(##),[sub(%0,[v(amount_done)])])],[set(me,##:[sub([v(##)],[mul([sub(%0,[v(amount_done)])],2)])])][set(me,ALLOC_DONE:YES)],[set(me,##:0)][set(me,amount_done:[add(v(amount_done),%q0)])])])])][wait(1,[lit([wipe(me/amount_done)][wipe(me/alloc_done)][set(me,remaining_power:0)])])]
+&FUN_TRANSFER_POWER Farm Parent=[set(me,FOOD_[v(SYSTEM_%0)]:%1)][pemit(%#,System %0 %([name([v(SYSTEM_%0)])]%) is now shipped %1 food hourly.)][set(me,REMAINING_POWER:[v(reactor_setting)])][u(fun_check_power)]
+&FUN_WATER_AVAILABLE Farm Parent=[get([v(pump)]/water_[num(me)])]
+&FUN_WATER_NEEDED Farm Parent=[fdiv([v(reactor_setting)],2)]
+&LEFTOVER_ENERGY Farm Parent=0
+&MAX_REACTOR Farm Parent=250
+&METAL_ALLOC Farm Parent=0
+&OWNER Farm Parent=Administration Farm Corp.
+&PUMP_LIST Farm Parent=|
+&REACTOR_SETTING Farm Parent=100
+&REMAINING_POWER Farm Parent=100
+&SET_MAX_CAPACITY Farm Parent=100
+&SWEEP Farm Parent=[if(hasattr(me,build_batteries),[u(fun_build_batteries)][wait(1,[lit([u(fun_move_commods)])])])][switch([gt([u(fun_water_needed)],[u(fun_water_available)])],1,[emit(Water shortfall. Resetting allocations.)][u(fun_smartalloc,[sub(u(fun_water_needed),u(fun_water_available))])][set(me,reactor_setting:[mul([u(fun_water_available)],2)])][u(fun_water_needed)][u(fun_check_power)][u(fun_calc_power)])]
+&SYSTEMS Farm Parent=
+&TITANIUM_ALLOC Farm Parent=0
+&TYPE Farm Parent=Type VI
+&VERSION Farm Parent=3.0

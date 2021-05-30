@@ -1,0 +1,46 @@
+@@  The Wizard lock will lock this object to all the wizards on a mush.
+@@  It will also place a dbref list of the wizard in the attrib: VA.
+@@  This is useful for locking things indirectly.  For example:
+@@  @lock thing=@<#dbref of wiz lock>
+
+@Startup The Wizard Lock and Wizard List=@trig me/vd
+@VD The Wizard Lock and Wizard List=@va me=search(flags=PW); @lock me==[edit(%va,%b,|=)]
+@set The Wizard Lock and Wizard List=INHERIT
+@set The Wizard Lock and Wizard List=SAFE
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+@@ The MOTD object was orginally created by Christian for NarniaMUSH.  I
+@@ added a few things and found it very useful on TooMUSH.  It manages three
+@@ modular motd messages, wiz motd, down motd, and full motd.  Oh, and a
+@@ theme, which we use as an in joke on TooMUSH.  Hope you find it useful.
+@@ If used in the master room, it should be use locked to the wizard lock and
+@@ and itself.
+@@
+@@ Tangent@TooMUSH
+@@
+@@ The commands are:
+@@
+@@ +setmotd<1|2|3> <text>	- set motd 1, 2, or 3.
+@@ +wipe motd				- wipe out all motds (1, 2, and 3).
+@@ +wipe motd<1,2,3>		- wipe out all motds message 1, 2, or 3.
+
+@create MOTD Object
+&DOWNMOTD MOTD Object=At this time, all non-administrative logins are disallowed. Please try back later. Sorry and thanks for playing [mudname()]!
+&FULLMOTD MOTD Object=Hallelujah! [mudname()] is full! Believe it or not, all available descriptors have been used. Please try again later, and thanks for playing!
+&SETMOTD MOTD Object=$setmotd:@motd %r---%rCurrent Theme: [v(theme)]%r[switch(strlen(v(motd1)),0,,v(motd1))][switch(strlen(v(motd2)),0,,v(motd2))][switch(strlen(v(motd3)),0,,v(motd3))]%r--- ;@motd/wizard [u(WIZMOTD)];@motd/down [u(DOWNMOTD)];@motd/full [u(FULLMOTD)];@pemit %#=GAME: MOTDs set.
+@Startup MOTD Object=setmotd
+&CMD_SETMOTD1 MOTD Object=$+setmotd1 *:&motd1 me=%r%0%r; @pemit %#=Motd1 set to:%r[v(motd1)]; @trig me/setmotd2
+&CMD_SETMOTD2 MOTD Object=$+setmotd2 *:&motd2 me=%r%0%r; @pemit %#=Motd2 set to:%r[v(motd2)]; @trig me/setmotd2
+&CMD_SETMOTD3 MOTD Object=$+setmotd3 *:&motd3 me=%r%0%r; @pemit %#=Motd3 set to:%r[v(motd3)]; @trig me/setmotd2
+&SETMOTD2 MOTD Object=@motd %r---%rCurrent Theme on TooMUSH: [v(theme)]%r[switch(strlen(v(motd1)),0,,v(motd1))][switch(strlen(v(motd2)),0,,v(motd2))][switch(strlen(v(motd3)),0,,v(motd3))]%r--- ;@motd/wizard [u(WIZMOTD)];@motd/down [u(DOWNMOTD)];@motd/full [u(FULLMOTD)];@pemit %#=GAME: MOTDs set.
+&CMD_CLEARALLMOTD MOTD Object=$+wipe motd:&motd1 me; &motd2 me; &motd3 me;@motd ; @pemit %#=The player motd cleared.
+&CMD_CLEARMOTD1 MOTD Object=$+wipe motd1:&motd1 me=; @pemit %#=Motd1 has been cleared.
+&CMD_CLEARMOTD2 MOTD Object=$+wipe motd2:&motd2 me=; @pemit %#=Motd2 has been cleared.
+&CMD_CLEARMOTD3 MOTD Object=$+wipe motd3:&motd3 me=; @pemit %#=Motd3 has been cleared.
+&CMD_SETWIZ MOTD Object=$+wizmotd *:&wizmotd me=%r---%rWIZARD MOTD: %0%r---; setmotd; @pemit %#=Wizmotd set to:%r[v(wizmotd)]
+@lock/UseLock MOTD Object=MOTD Object|@The Wizard Lock and Wizard List
+&CMD_CLEARWIZMOTD MOTD Object=$+wipe wizmotd:&wizmotd me=; @pemit %#=Wiz motd has been cleared.
+@set MOTD Object=INHERIT
+@set MOTD Object=VISUAL
+@set MOTD Object=SAFE

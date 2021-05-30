@@ -1,0 +1,28 @@
+@create Generic PC Clone Computer
+@link Generic PC Clone Computer=#70
+@lock Generic PC Clone Computer==*me
+@set Generic PC Clone Computer=LINK_OK
+@set Generic PC Clone Computer=OPAQUE
+@set Generic PC Clone Computer=QUIET
+@set Generic PC Clone Computer=VISUAL
+@set Generic PC Clone Computer=SAFE
+&PAGE_CONFIG.SYS Generic PC Clone Computer=Start computer
+Loadhigh=smartass.drv /1028 /fu
+&PAGE_NOTE Generic PC Clone Computer=bring home 2 dozen eggs
+&PAGE_JOURNAL1 Generic PC Clone Computer=I have successfully navigated to Earth and will begin my research as soon as I find a place to land. I am very eager to learn of what changes have occured since I was last here and hope that they have improved, although with humankind... they are not exactly the most predictible in actions. --Darius
+&LINE Generic PC Clone Computer=<>================================== FILE ====================================<>
+&DIR Generic PC Clone Computer=$+dir:@pemit %#=%RDIRECTORY%R[v(line)];@dolist [v(context)]=@pemit %#=##
+@DESCRIBE Generic PC Clone Computer=To create your own computer (MS DOS only, sorry :P)%R[space(3)]@create Computer%R[space(3)]@parent computer=#4192%R[space(3)]@lock computer=me%R[space(3)]@set computer=!NO_COMMAND%R[space(3)]Type comphelp for help.%R%RSample desc: A standard minitower style IBM computer, with SVGA monitor and built in 28.8 HST modem.
+&CONTEXT Generic PC Clone Computer=TEST Journal1 Journal1 Note note Ownership Test Jan 25th 23:47 2007 config.sys Day1
+&PAGE_TEST Generic PC Clone Computer=Test
+&READ Generic PC Clone Computer=$+load *:@switch [member(v(context),%0)]=0,{@pemit %#=That is not a file in the dir. Check +dir for correct filename, Filename must be spelt EXACTLY as written.},{@pemit %#=%R[ucstr(%0)]%R[v(line)];@pemit %#=[s(v(page_%0))]}
+&WRITE Generic PC Clone Computer=$+write *=*:@remit %1=[u(write_mesg)];&page_%0 me=%1;&context me=[v(context)] %0
+&CREDIT Generic PC Clone Computer=Orginal code by Boone@Masq, Improved and typed by Peter Ross@DamnedMUSH, slightly improved by Cyclonus@TF2005
+@ADESCRIBE Generic PC Clone Computer=@pemit %#=%rType <+comhelp> for help
+&HELP Generic PC Clone Computer=$comphelp:@pemit %#=[center(<*> COMPHELP <*>,70,.)]%r%r+write%b<TITLE>=<TEXT>[space(10)]will enter TEXT in a file called TITLE.%R+load%b<TITLE>[space(10)]will display the file called TITLE.%r+edit%b<TITLE>=<TEXTA>=<TEXTB>[space(10)]will replace TEXTA with TEXTB in file TITLE%r+del%b<TITLE>[space(10)]will delete file TITLE.
+&ERASE_MESG Generic PC Clone Computer=[name(owner(me))] rapidly hits the keys on the computer.
+&WRITE_MESG Generic PC Clone Computer=[name(owner(me))] types something into the computer.
+&DELETE Generic PC Clone Computer=$+del *:@switch [member(v(context),%0]=0,{@pemit %#=You can't delete something that isn't there. Check +dir to find the correct filename.},{@remit %1=[u(erase_mesg)];&page_%0 me=;&context me=[remove(v(context),%0)]}
+&EDIT Generic PC Clone Computer=$+edit *=*=*:@switch [member(v(context),%0)]=0,{@pemit %#=You can't revise something that isn't there. Check +dir to find the correct filename.},{@emit %N rapidly hits the keys on %p computer.};@edit me/page_%0={%1},{%2}
+&PAGE_OWNERSHIP Generic PC Clone Computer=This holopad belongs to the Autobot Syke, Junkion Liason. If found please return to the nearest Autobot installation or Autobot.
+&PAGE_DAY1 Generic PC Clone Computer=Well this is a great day, so far I haven't been able to destroy my telepad and then Libram shall come later. Muhahahahahahah

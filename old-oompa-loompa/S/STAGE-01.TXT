@@ -1,0 +1,19 @@
+@set here=DARK
+@set here=INHERIT
+@set here=UNFINDABLE
+@set here=WIZARD
+@set here=SAFE
+@set here=AUDIBLE
+@set here=TRANSPARENT
+@set here=FLOATING
+@set here=!NO_COMMAND
+&WIZ here=[hasflag(%#,WIZARD)]
+&ROY here=[hasflag(%#,ROYALTY)]
+@VA here=$+open:&curtain #631=open;@remit #631=The curtains open.;@set me=Audible
+@VB here=$+close:&curtain #631=closed;@remit #631=The curtains close.;@set me=!Audible
+@VC here=$+lock:@lock #741=Wiz/1;&stage #631=locked;@pemit %#=The stage is now locked.
+@VD here=$+unlock:@lock #741;&stage #631=unlocked;@pemit %#=The stage is now unlocked.
+@VE here=$+gag:@remit #631=Speech lock is now in effect, do +raise to raise your hand and +lower to lower it.;&speech #631=in effect;@lock/speech #631=Wiz/1
+@VF here=$+ungag:@lock/speech #631;@remit #631=Speech lock has been lifted.;&speech #631=not in effect
+&DESC-1 here=It's a stage, below you can see the Auditorium.%rThe stage commands are:%r+open - will open the curtains%r+close - will close the curtains%r+lock - will lock the stage%r+unlock - will unlock the stage%r+gag - will make it so they can't speak down there%r+ungag - will undo +gag%rWhen the curtains are close they can't hear us, but we can still hear them.
+

@@ -1,0 +1,47 @@
+Vendor Prototype for Armageddon(#15332VYs)
+Type: THING Flags: VISUAL PARENT_OK SAFE
+This is a vendor prototype that works within Armageddon MUSH. Feel free to
+@clone one and modify it as you please.%RIn fact, use @clone and then alter
+your copy, since there are hidden attributes%rset on the vendor.
+Owner: Taisch  Key: Taisch Loonies: 1
+Adesc:@pemit %#=Type 'vhelp' for vendor commands
+VHELP:$vhelp:@pemit %#=[center(Armageddon Vendor Commands:,79,-)]%r[u
+(vhelp-text)]%r[repeat(-,79)]
+VHELP-TEXT:list items --- get a list of items and costs%r+apay [name(me)]=#
+---pay [name(me)] # demonic coins.%rbuy <item> --- purchase <item>, after
+you've paid, of course%rcollect --- collect money from [name(me)] (only
+usable%rby people on the owners list.)%r%rvhelp owner --- instructions for the
+owner of the vendor
+VHELP-OWNER:$vhelp owner:@pemit %#=Relevant attributes:%r&coins : how many
+coins the vendor has%r&owners : list of people authorized to collect money from
+the vendor%r&items : list of items for sale%rAnd for each item, set: &cost-item
+and &x-item%rYou may also want to change the messages emitted in &buy-item and
+&buy-item0
+AR_APAY:&coins me=[add(v(coins),%1)];&paid-[name(%0)] me=%1;@emit/room [name
+(me)] turns to [name(%0)] and says, "Ok, whaddya want?"
+BUY-ITEM:$buy *:@switch [match(v(items),%0)]=0,{@pemit %#=We don't have that.},
+{@trig me/buy-item0=%#,%0}
+BUY-ITEM0:@switch [gte(v(paid-[name(%0)]),v(cost-%1))]=0,{@emit/room [name(me)]
+frowns at [name(%0)]. "A %1 costs [v(cost-%1)] coins, idiot!";@trig me/refund=
+%0},{@trig me/x-%1=%0,%1;@wait 2=&paid-[name(%0)] me=;@pemit %0=[name(me)]
+counts out the change.;+apay %0=[sub(v(paid-[name(%0)]),v(cost-%1))];&coins
+me=[u(change,v(paid-[name(%0)]),v(cost-%1))]}
+CHANGE:sub(v(coins),sub(%0,%1))
+REFUND:&coins me=[sub(v(coins),v(paid-[name(%0)]))];@emit/room [name(me)] gives
+[name(%0)] a refund.;+apay %0=[v(paid-[name(%0)])];&paid-[name(%0)] me=;
+LIST-ITEMS:$list items:@pemit %#=[name(me)] has the following for sale:%r%b
+[iter(v(items),## --- [v(cost-##)] Demonic Coins%r)]
+COLLECT:$collect:@switch [match(v(owners),%#)]=0,{@pemit %#=You can't do
+that.},{+apay %#=[v(coins)];&coins me=0}
+COINS:1
+OWNERS:#608
+ITEMS:Foo Bar
+COST-FOO:5
+X-FOO:@emit/room [name(me)] smiles and drops a Foo at [name(%0)]'s feet.
+COST-BAR:1
+X-BAR:@emit/room [name(me)] pours out a glass of Bar for [name(%0)].
+PAID-BAAL:1
+No exits.
+Home: Free Code Room (Armageddon)
+Location: Free Code Room (Armageddon)
+_______________________________________________________________________________

@@ -1,0 +1,135 @@
+@@ MUSH Compass version 3.1, Sep 17, 1993
+@@ Written by Kynn Bartlett, morpheus@sandman.caltech.edu
+@@
+@@ Commands:
+@@   +compass           -- Display the compass rose
+@@   +compass/formats   -- List formats available
+@@
+@@ Attributes:
+@@   COMPASS            -- Either one of the 'standard formats', or is 
+@@                         assumed to be a compass format string.
+@@
+@@ Formats with this release are:
+@@   standard           -- The "original" +compass format
+@@   amberyl            -- Amberyl's modifications to the standard
+@@   nsstreet           -- +compass for streets running north/south
+@@   ewstreet           -- +compass for streets running east/west
+@@   intersection       -- For intersections of streets
+@@   circular           -- For circular areas
+@@
+@@ Code Requirements:
+@@   This is written for MUSH 2.0.9 p2.  It may work for 2.0.9 p1.
+@@   +compass 3.0 will not run on 1.50 PennMUSH without some changes.
+@@
+@@ Changes:
+@@   - Different formats of +compass display added [3.0]
+@@   - User-defined formats allowed [3.0]
+@@   - Code rewritten to be much, much better mushcode [3.0]
+@@   - Will show DARK exits if the looker controls() them [3.1]
+@@
+@@ Credits:
+@@   Well, most of them are to myself, since I coded the first version
+@@     ever seen
+@@   Some credit, I guess, goes to Amberyl for doing a good job on
+@@     aping the "look and feel" of my version, and distributing it
+@@     widely
+
+@@ ---------------------------------------------------------------------- 
+@@                         Here begins the code!
+@@ ---------------------------------------------------------------------- 
+
+@@ Create the +General Globals!
+@@ Flags:
+@@   INHERIT:  Needed for the ability to locate()
+@@   SAFE:     If you're smart, all your global room machines will
+@@             be set safe.
+@@ Note:
+@@   Remove the @@'s before loading, to create a new +General Globals
+@@
+@@ @create +General Globals
+@@ @lock General Globals = me
+@@ @set General Globals = inherit
+@@ @set General Globals = safe
+
+@@ The +compass command itself
+@@ Local Registers:
+@@   r(0):  The dbref of 'out'
+@@   r(1):  The value of the room's COMPASS
+@@   r(2):  The function to call with u(), either a format attribute or
+@@          <room dbref>/COMPASS
+@@
+&cmd-compass global command storage=$+compass:@pemit %#=[setq(0,locate(room(%#),out,c))][setq(1,get(room(%#)/compass))][setq(2,switch(0,strlen(r(1)),General Globals/compass-[get(General Globals/default-format)],match(get(General Globals/data-compass_formats),r(1)),[room(%#)]/compass,General Globals/compass-[r(1)]))][u([r(2)],u(General Globals/fnc-exit_name,%#,north,r(0)),u(General Globals/fnc-exit_name,%#,northeast,r(0)),u(General Globals/fnc-exit_name,%#,east,r(0)),u(General Globals/fnc-exit_name,%#,southeast,r(0)),u(General Globals/fnc-exit_name,%#,south,r(0)),u(General Globals/fnc-exit_name,%#,southwest,r(0)),u(General Globals/fnc-exit_name,%#,west,r(0)),u(General Globals/fnc-exit_name,%#,northwest,r(0)),u(General Globals/fnc-exit_name,%#,up,r(0)),u(General Globals/fnc-exit_name,%#,down,r(0)))]
+
+@@ Fnc-Exit_Name
+@@ Input:
+@@   v(0):  The "looker", %#
+@@   v(1):  The exit direction (north, northeast, east, etc)
+@@   v(2):  The dbref of 'out'
+@@ Output:
+@@   A string not longer than 25 characters
+@@ Local Registers:
+@@   r(4):  The dbref of the exit
+@@
+&fnc-exit_name General Globals=[setq(4,locate(room(%0),%1,c))][switch(or(match(r(4),#-1),hasflag(r(4),dark)),1,,switch(r(4),%2,[mid(name(r(4)),0,19)] (out),[mid(name(r(4)),0,25)]))]
+
+@@ The List of Formats
+&data-compass_formats General Globals = standard amberyl nsstreet ewstreet intersection circular
+
+@@ Default Format
+@@ Note:
+@@   Comment out this line, and remove the comments in front of the next
+@@   line, if you prefer Amberyl's +compass format
+@@
+&default-format General Globals = standard
+@@ &default-format General Globals = amberyl
+
+@@ The +compass/formats command
+@@
+&cmd-compass_formats General Globals=$+compass/formats:@pemit %#=+compass formats available: [v(data-compass_formats)]
+
+@@ Six +compass formats:
+@@
+@@ Input (for all formats):
+@@   v(0):  The exit name of 'north'
+@@   v(1):   "   "    "   "  'northeast'
+@@   v(2):   "   "    "   "  'east'
+@@   v(3):   "   "    "   "  'southeast'
+@@   v(4):   "   "    "   "  'south'
+@@   v(5):   "   "    "   "  'southwest'
+@@   v(6):   "   "    "   "  'west'
+@@   v(7):   "   "    "   "  'northwest
+@@   v(8):   "   "    "   "  'up'
+@@   v(9):   "   "    "   "  'down'
+@@ Note:
+@@   None of the formats except 'amberyl' currently use %8 (up) and %9 (down).
+
+@@ 1.  Standard +compass
+@@
+&compass-standard General Globals = Obvious Exits:%r[space(23)][center(%0,25)]%r[space(34)]/N\\%r[space(8)][rjust(%7,25)][space(2)]|[space(2)]%1%r[space(33)]\\ | /%r[space(3)][rjust(%6,25)]%b<-W---+---E->%b%2%r[space(33)]/ | \\%r[space(8)][rjust(%5,25)][space(2)]|[space(2)]%3%r[space(34)]\\S/%r[space(23)][center(%4,25)]
+
+@@ 2.  Amberyl's +compass
+@@
+&compass-amberyl General Globals = COMPASS ROSE%r[space(23)][center(%0,25)]%r[space(34)]/N\\%r[space(35)]|[switch(%8,,,[space(24)]UP)]%r[space(8)][rjust(%7,25)][space(2)]|[space(2)]%1%r[space(33)]\\ | /%r[rjust(%6,25)]%b<--W-----+-----E-->%b%2%r[space(33)]/ | \\%r[space(8)][rjust(%5,25)][space(2)]|[space(2)]%3%r[space(35)]|[switch(%9,,,[space(23)]DOWN)]%r[space(34)]\\S/%r[space(23)][center(%4,25)]
+
+@@ 3.  East-West Streets
+@@
+&compass-ewstreet General Globals = Obvious Exits:%r|[space(22)][center(%0,25)][space(22)]|%r|%b[center(%7,25)][space(17)][center(%1,25)]%b|%r|[space(23)]|[space(21)]|[space(23)]|%r+[repeat(-,23)]+[repeat(-,21)]+[repeat(-,23)]+%r%r[ljust(%6,25)][space(21)][rjust(%2,25)]%r%r+[repeat(-,23)]+[repeat(-,21)]+[repeat(-,23)]+%r|[space(23)]|[space(21)]|[space(23)]|%r|%b[center(%5,25)][space(17)][center(%3,25)]%b|%r|[space(22)][center(%4,25)][space(22)]|
+
+@@ 4.  North-South Streets
+@@ Local Registers:
+@@   r(8):  [...]----------+        +----------[...]
+@@   r(9):  [...]          |        |          [...]
+@@
+&compass-nsstreet General Globals = Obvious Exits:%r[setq(8,[repeat(-,30)]+[space(8)]+[repeat(-,30)])][setq(9,[space(30)]|[space(8)]|)][space(23)][center(%0,25)]%r[r(8)]%r[r(9)]%r[space(4)][rjust(%7,25)]%b|[space(8)]|%b%1%r[r(9)]%r[r(8)]%r[r(9)]%r[space(4)][rjust(%6,25)]%b|[space(8)]|%b%2%r[r(9)]%r[r(8)]%r[r(9)]%r[space(4)][rjust(%5,25)]%b|[space(8)]|%b%3%r[r(9)]%r[r(8)]%r[space(23)][center(%4,25)]
+
+@@ 5.  Intersections
+@@ Local Registers:
+@@   r(8):  [...]----------+        +----------[...]
+@@   r(9):  [...]          |        |          [...]
+@@
+&compass-intersection General Globals = Obvious Exits:%r[setq(8,[repeat(-,30)]+[space(8)]+[repeat(-,30)])][setq(9,[space(30)]|[space(8)]|)][space(23)][center(%0,25)]%r[r(9)]%r[space(4)][rjust(%7,25)]%b|[space(8)]|%b%1%r[r(8)]%r%r[ljust(%6,25)][space(21)][rjust(%2,25)]%r%r[r(8)]%r[space(4)][rjust(%5,25)]%b|[space(8)]|%b%3%r[r(9)]%r[space(23)][center(%4,25)]
+
+@@ 6.  Circular Rooms
+@@ (That is to say, the Legionnaires Clubhouse. *grin*)
+@@
+&compass-circular General Globals = Obvious Exits:%r[space(23)][center(%0,25)]%r[space(30)]\\[space(9)]/%r[space(3)][rjust(%7,25)][space(3)]\\[repeat(_,7)]/[space(3)]%1%r[space(21)][repeat(_,8)][space(2)]/[space(7)]\\[space(2)][repeat(_,8)]%r[space(29)]\\/[space(9)]\\/%r[space(3)][rjust(%6,25)][space(2)]|[space(9)]|[space(2)]%2%r[space(30)]|[space(9)]|[space(30)]%r[space(21)][repeat(-,9)]\\[space(9)]/[repeat(-,9)]%r[space(31)]\\[repeat(_,7)]/%r[space(3)][rjust(%5,25)][space(3)]/[space(7)]\\[space(3)]%3%r[space(30)]/[space(9)]\\%r[space(23)][center(%4,25)]

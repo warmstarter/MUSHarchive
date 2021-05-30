@@ -1,0 +1,54 @@
+@@ This clock will trigger objects on the quarter hour, half hour, hour, and 
+@@ once at midnight.  The clock will not drift too much and will resynch.
+@@
+@@ The sytax to use it is:
+@@
+@@ clockadd <day|hour|half|quarter>=<dbref>
+@@ clockrm  <day|hour|half|quarter>=<dbref>
+@@
+@@  The clock will trigger the one (or more) of the following attributes:
+@@  T_DAY, T_HOUR, T_HALF, T_QUARTER
+@@
+@@  Written by: Tangent@TooMUSH edmond@gb.nrao.edu
+@@
+@create a large wooden clock
+&ADD_T a large wooden clock=$clockadd *=*:@switch [member(v(options),v(0))]=0,@pemit *%N=Huh?%rusage: clockadd <day|hour|half|quarter>=<dbref>,{@switch [member(v(t_[v(0)]),v(1))]=0,&t_[v(0)] me=[v(t_[v(0)])] %1;@pemit *%N=[name(v(1))] added to [v(0)] trigger.}
+&CTIME a large wooden clock=edit(extract(time(),4,1),:,space(1))
+&DAY_T a large wooden clock=@dolist [v(t_day)]=@trigger ##/t_day
+&D_LOG a large wooden clock=#28 @ Sun Oct 18 00:00:07 1992
+&HALF_HOUR_MESS a large wooden clock=A large wooden clock chimes for the half hour.
+&HALF_HOUR_T a large wooden clock=@dolist [v(t_half)]=@trigger ##/t_half_hour
+&HOUR a large wooden clock=add(extract(u(ctime),1,1),0)
+&HOUR_T a large wooden clock=@dolist [v(t_hour)]=@trigger ##/t_hour
+&LAST_Q a large wooden clock=3
+&LIST_T a large wooden clock=$clockls *:@switch [member(v(options),v(0))]=>0,{@pemit *%N=%rItems on [name(me)]'s [v(0)] trigger:%r[iter(v(t_[v(0)]),{%t\[name(##)\]\[space(sub(30,strlen(name(##))))\]##%r})]},@pemit *%N=Huh?%rusage: clockls <day|hour|half|quarter>
+&MIN a large wooden clock=add(extract(u(ctime),2,1),0)
+&NEW_HOUR_MESS a large wooden clock=A small bird peeks out of the large wooden clock to sing in the new hour.
+&OPTIONS a large wooden clock=day hour half quarter
+&QHOUR a large wooden clock=3
+&QUARTER a large wooden clock=div(u(min),15)
+&QUARTER0 a large wooden clock=@emit [v(new_hour_mess)];@trig me/quarter_t;@trig me/half_hour_t;@trig me/hour_t;@@ @switch/first [u(hour)]=0,@trig me/day_t,7,{@wall/emit/no_pre You here a rooster crow in the distance! Signaling the End is Neigh.;@wait 600=@shutdown}
+&QUARTER1 a large wooden clock=@emit [v(quarter_hour_mess)];@trig me/quarter_t
+&QUARTER2 a large wooden clock=@emit [v(half_hour_mess)];@trig me/quarter_t;@trig me/half_hour_t
+&QUARTER3 rm a large wooden clock=@emit [v(quarter_hour_mess)]; @trig me/quarter_t
+&QUARTER_HOUR_MESS a large wooden clock=The large wooden clock chimes once for the quarter hour.
+&QUARTER_T a large wooden clock=@dolist [v(t_quarter)]=@trigger ##/t_quarter
+&RESYNCH a large wooden clock=@wait [u(rset,add(1,u(min)))]=@trig me/timer
+&RM_T a large wooden clock=$clockrm *=*:@switch [member(v(options),v(0))]=0,@pemit *%N=Huh?%rusage: clockrm <day|hour|half|quarter>=<dbref>,{&t_[v(0)] me=remove([v(t_[v(0)])],v(1)); @pemit *%N=[name(v(1))] removed from [v(0)] trigger.}
+&RSET a large wooden clock=sub(add(mul(60,sub(v(0),u(min))),sub(60,u(sec))),60)
+&SEC a large wooden clock=add(extract(u(ctime),3,1),0)
+&TIMER a large wooden clock=&qhour me=[u(quarter)];@switch/first [v(last_q)]=[v(qhour)],,{&last_q me=[v(qhour)];@trig me/quarter[v(qhour)]};@trig clock/resynch
+&T_DAY a large wooden clock=#28
+&T_HOUR a large wooden clock=#929 #963
+&T_QUARTER a large wooden clock=#28 #262
+@Desc a large wooden clock=You see an old wooden upright cuckcoo clock. The wood is old and the stain is so dark it looks almost black. Upon the sides of the clock are curious carvings of dragons and other mythical animals.
+@Drop a large wooden clock=You set down the clock.
+@Fail a large wooden clock=You try to pick up the clock and you trip over it.
+@Odrop a large wooden clock=sets down the large wooden clock.
+@Ofail a large wooden clock=trips over the clock.
+@Osucc a large wooden clock=picks up the the large wooden clock.
+@Startup a large wooden clock=@trig me/timer
+@Succ a large wooden clock=You pick up the the large wooden clock.
+@lock a large wooden clock=#0
+@set a large wooden clock=INHERIT
+@set a large wooden clock=SAFE

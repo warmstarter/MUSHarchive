@@ -1,0 +1,425 @@
+@@ System: Character Data System for ThunderCombat
+@@ Author: Jonathan A. Booth
+@@ Email: kamikaze@N0$PAMimsa.edu
+@@ URL: http://www.N0$PAMimsa.edu/~kamikaze/
+@@ (remove NOSPAM from hostnames)
+@@ Date: April 17, 1999
+@@ Written for: PennMUSH 1.7.2p24
+@@ Author is willing to support: Yes(*: see Note)
+@@
+@@ License/Copyright info:
+@@   Copyright 1998-1999, Jonathan A. Booth (kamikaze@imsa.edu).
+@@   There is no warrenty on this code, if it breaks you get to
+@@   keep all the peices. It is free for non-commercial use;
+@@   contact me for info reguarding commercial use. You may
+@@   redistribute this code provided it is unmodified and this
+@@   copyright notice is retained. Don't rip off this code and
+@@   claim it as your own, that's lame. Bugs should be reported
+@@   to me, the author, as well as suggestions.
+@@
+@@ (*) Note: The author is willing to support the unmodified combat
+@@ system when used in conjunction with the character data system also
+@@ in this directory. The author will help you some for integrating
+@@ combat with another char data system insofar as he will explain
+@@ what the functions combat calls are expected to do.
+@@
+@@ What the author will not do:
+@@  * Login to your MUSH and install the system
+@@  * Fix a system that someone else has modified
+@@  * Be combatwiz for your mush. Don't ask, don't try to sneak me
+@@    into being such
+@@
+@@ What this file will do:
+@@  * After a very long time creating all the objects, it will install
+@@    the fully functional and setup char data system in #2.
+@@
+@@ For best results:
+@@  * Start with nothing in your inventory, and no objects around you in
+@@    the room you are in so naming confusion doesn't become a problem.
+@@  * Quote the entire system, and backend chargen functions as
+@@    combatwiz, and don't try to chown them to someone else later.
+@@  * Allocate a large block of time to quote the files, and
+@@    dedicate a connection to it; it's going to take a loooong time
+@@    (400 lines * 1 sec/line * 1 min/60 sec ~= 7 minutes)
+@@  * Raise your function_invocation_limit in mush.cnf up from 2500
+@@    to around 5000 unless you want +sheets to start getting cut
+@@    off
+@@  * Set null_eq_zero to be 'yes' in mush.cnf
+@@  * @shutdown/reboot the MUSH after you quote this file so that it
+@@    defines the @functions properly
+
+@@ Now create some commands to go with the skill system
+@create ThunderCombat Skill System Commands
+@link ThunderCombat Skill System Commands = #2
+@set ThunderCombat Skill System Commands = WIZARD
+@set ThunderCombat Skill System Commands = SAFE
+@set ThunderCombat Skill System Commands = !NO_COMMAND
+&CHECK_MESSAGE ThunderCombat Skill System Commands=[ansi(hr,<<)][ansi(hy,Checks)][ansi(hr,>>)] [u(Backup/skill_check,%0,%1,%2,%3,sw_die(add(mul(get_char_data(%#,%1),inc(strmatch(%2,*f*))),mul(3,words(graball(%2,c))))))] in [ansi(h,[name(%5)])] <[ansi(h,%5)]>
+&DO_+JCHECK ThunderCombat Skill System Commands=$+jcheck*:think [setq(2,sort(squish(edit(after(first(secure(%0)),/),,%b))))][setq(0,guess_skill(switch(before(secure(%0),=),*/*,rest(#$),#$)))][setq(1,after(secure(%0),=))];@select [words(%q0)][strmatch(c c c c c f,*%q2*)][isnum(%q1)][gte(get_char_data(%#,Char Points),words(graball(%q2,c)))][gte(get_char_data(%#,Force Points),strmatch(%q2,*f*))]:[gt(strlen(grab(v(list_skills_can't_check),*[edit(%q0,_,%b)]*,|)),0)]=11111:0,{@select get(%#/status)=IC,{think [set_char_data(%#,Char Points,sub(0,words(graball(%q2,c))))][set_char_data(%#,Force Points,sub(0,strmatch(%q2,*f*)))]};@pemit %#=Your +check has been sent to the judges.;@cemit Checks=u(check_message,%#,%q0,%q1,%q2,%q3,[loc(%#)])},???0?:*,{@pemit %#=ansi(rh,You do not have that many Char Points available to expend.)},????0:*,{@pemit %#=ansi(rh,You do not have that many Force Points available to expend.)},?0???:*,{@pemit %#=ansi(rh,The points to expend '%q2' must be no more than 1 Force Point (F) and 5 Char points (C).)},??0??:*,{@pemit %#=ansi(rh,The modifier '%q1' must be a number, either positive or negative.)},0????:*,{@pemit %#=ansi(rh,No such skill, '[switch(before(secure(%0),=),*/*,rest(before(secure(%0),=)),before(secure(%0),=))]'.)},*:1,{@pemit %#=Sorry, you aren't allowed to check that.},{@pemit %#=ansi(rh,Multiple matches (%q0) to '[switch(before(secure(%0),=),*/*,rest(before(secure(%0),=)),before(secure(%0),=))]'. Be more specific (type it out further).)}
+&DO_ADMIN_+RESET ThunderCombat Skill System Commands=$+reset *:think setq(0,switch(isdbref(secure(%0)),1,secure(%0),pmatch(secure(%0))));@select orflags(%#,W):[isdbref(%q0)]=1:1,{@cemit CombatBabble=<CombatBabble RESET> [name(%q0)](%q0) has been reset by %N(%#).;@desc *%0=;@dol background bgapproved alias money combat_data chargen_finished points_left_attribs points_left_skills char_data race icloc origin fullname full_name speaking payscale force_data combat_data quick_background web notes age sex aconnect homeworld arrests fines jailtime permit_weapon permit_ship permit_other={&## %q0;};@dolist [channels(%q0)]={@fo %q0={@chan/off ##}}; &rank %q0=None;&division %q0=None;&position %q0=Unemployed;&empire %q0=NEW;&status %q0=OOC;&icloc %q0=;@tel %q0=#0;&reset_by %q0=[setunion(get(%q0/reset_by),[name(%q0)](%q0) reset by %N(%#) on [time()],|)];think [u(#1462/clear_accounts,%#)] to clear econ stuff;@pemit %#=You reset [name(%q0)](%q0).;@pemit %q0=You are reset by %N.},1:0,{@pemit %#=No such player, '[secure(%0)]'.},{@pemit %#=Don't even thing about it.}
+&DO_ADMIN_+SHEET ThunderCombat Skill System Commands=$+sheet *:think setq(0,pmatch(secure(%0)));@select or(orflags(%#,WrJ),haspower(%#,see_all)):[isdbref(%q0)]=1:1,{@pemit %#=ufun(Backup Functions/display_sheet,%q0)},1:0,{@pemit %#=I can't find that player.},{@pemit %#=[ansi(h,GAME: Don't think so. Admin only.)]}
+&DO_+CHECK ThunderCombat Skill System Commands=$+check*:think [setq(2,sort(squish(edit(after(first(secure(%0)),/),,%b))))][setq(0,guess_skill(switch(before(secure(%0),=),*/*,rest(#$),#$)))][setq(1,after(secure(%0),=))];@select [words(%q0)][strmatch(c c c c c f,*%q2*)][isnum(%q1)][gte(get_char_data(%#,Char Points),words(graball(%q2,c)))][gte(get_char_data(%#,Force Points),strmatch(%q2,*f*))]:[gt(strlen(grab(v(list_skills_can't_check),*[edit(%q0,_,%b)]*,|)),0)]=11111:0,{@select get(%#/status)=IC,{think [set_char_data(%#,Char Points,sub(0,words(graball(%q2,c))))][set_char_data(%#,Force Points,sub(0,strmatch(%q2,*f*)))]};@remit %l=u(Backup/skill_check,%#,%q0,%q1,%q2,sw_die(add(mul(get_char_data(%#,%q0),inc(strmatch(%q2,*f*))),mul(3,words(graball(%q2,c))))))},???0?:*,{@pemit %#=ansi(rh,You do not have that many Char Points available to expend.)},????0:*,{@pemit %#=ansi(rh,You do not have that many Force Points available to expend.)},?0???:*,{@pemit %#=ansi(rh,The points to expend '%q2' must be no more than 1 Force Point (F) and 5 Char points (C).)},??0??:*,{@pemit %#=ansi(rh,The modifier '%q1' must be a number, either positive or negative.)},0????:*,{@pemit %#=ansi(rh,No such skill, '[switch(before(secure(%0),=),*/*,rest(before(secure(%0),=)),before(secure(%0),=))]'.)},*:1,{@pemit %#=Sorry, you aren't allowed to check that.},{@pemit %#=ansi(rh,Multiple matches (%q0) to '[switch(before(secure(%0),=),*/*,rest(before(secure(%0),=)),before(secure(%0),=))]'. Be more specific (type it out further).)}
+@DESCRIBE ThunderCombat Skill System Commands=[center(%bContents of [name(me)]%b,78,-)]%r[table(sort(lattr(me)),19)]%r[repeat(-,78)]
+&LIST_SKILLS_CAN'T_CHECK ThunderCombat Skill System Commands=force sensitivity|Life|DarkSide Points|Force Points|Char Points|Points Skill|Points Attribute
+
+@create Startup Object
+@link Startup Object = me
+@set Startup Object = WIZARD
+@set Startup Object = SAFE
+@DESCRIBE Startup Object=[center(%bContents of [name(me)]%b,78,-)]%r[table(sort(lattr(me)),25)]%r[repeat(-,78)]
+&DO_@FUNCS Startup Object=@dol [lattr(Attribute Functions/func_*)]=@function [after(##,_)]=Attribute Functions,##
+&DO_ROUNDS_TIMER Startup Object=@tr Rounds Timer/run-rounds
+@STARTUP Startup Object=@dol [lattr(me/do_*)]={@tr me/##}
+&DO_CHAR_DATA Startup Object=@attribute/access/retroactive char_data=wizard mortal_dark no_command no_clone
+&DO_COMBAT_DATA Startup Object=@attribute/access/retroactive combat_data=wizard mortal_dark no_command no_clone
+@tel Startup Object = ThunderCombat Skill System Commands
+
+@create Rounds Timer
+@link Rounds Timer = ThunderCombat Skill System Commands
+@set Rounds Timer = STICKY
+@set Rounds Timer = WIZARD
+@set Rounds Timer = SAFE
+@power Rounds Timer = See_All
+&DELAY Rounds Timer=50
+&RUN-ROUNDS Rounds Timer=@wait [v(delay)]={@dol lwho()=think u(update_player,##);@tr me/run-rounds}
+&UPDATE_PLAYER Rounds Timer=set_modifier(%0,@Modifier/@Actions/,=[min(add(u(Attribute Functions/get_skill_base,%0,@Modifier/@Actions/),3),sub(trim(grab(get(%0/powers_using),~*,|),~),mul(3,eq(3,get_char_data(%0,Life)))))])
+@DESCRIBE Rounds Timer=A timer that ever [v(delay)] seconds will raise every connected player's @Modifier/@Actions/ up by 3 to a max of 0.
+@tel Rounds Timer = ThunderCombat Skill System Commands
+
+@create Attribute Functions
+@link Attribute Functions = ThunderCombat Skill System Commands
+@set Attribute Functions = WIZARD
+@set Attribute Functions = SAFE
+&FUNC_SET_MODIFIER Attribute Functions=switch(or(orflags(%@,Wr),strmatch(owner(me),owner(%@)))[isdbref(secure(%0))][gt(strlen(secure(%1)),0)][isnum(trim(secure(%2),=))][secure(%2)],1111=0,set(secure(%0),char_data:[setdiff(get(secure(%0)/char_data),grab(get(secure(%0)/char_data),[secure(%1)] *,|),|)]),1111*,set(secure(%0),char_data:[switch(gt(match(get(secure(%0)/char_data),[secure(%1)] *,|),0),1,replace(get(secure(%0)/char_data),match(get(secure(%0)/char_data),[secure(%1)] *,|),[secure(%1)] [switch(secure(%2),=*,trim(secure(%2),=,l),add(secure(%2),u(get_skill_base,secure(%0),secure(%1))))],|),setunion(get(secure(%0)/char_data),[secure(%1)] [trim(secure(%2),=,l)],|))]),10??,#-2 NO SUCH OBJECT,110?,#-3 SECOND ARGUMENT MUST BE ATTRIBUTE OR ATTRIBUTE/SKILL,1110,#-4 THIRD ARGUMENT MUST BE NUMBER,#-1 PERMISSION DENIED)
+&FUNC_UNSECNAME Attribute Functions=edit(secure(%0),_,%b)
+&FUNC_SECNAME Attribute Functions=edit(secure(%0),%b,_)
+@DESCRIBE Attribute Functions=Combatwiz's methods to access character's statistics data. Current public functions:%r%b%bget_char_data(<player dbref>,<attribute or stat>)%r%b%bset_char_data(<player dbref>,<full attribute or stat name>,<val>)%r%b%bfmt_die(<val>)%r%b%bsw_die(<val>)%r%b%bguess_skill(<skill name>)
+&ADD_STUFF Attribute Functions=add(%0,%1)
+&GET_SKILL_BASE Attribute Functions=last(grab(get(%0/char_data),%1 *,|),/)
+&FUNC_SW_DIE Attribute Functions=switch(u(roll_wild_die,0):[gte(secure(%0),3)],-1:*,-1,*:1,max(0,add(add(die(max(dec(div(secure(%0),3)),0),6),mod(secure(%0),3)),before(#$,:))),mod(secure(%0),3))
+&ROLL_WILD_DIE Attribute Functions=switch(die(1,6):%0,*:6,before(#$,:),1:0,-[die(1,6)],6:*,add(before(#$,:),u(roll_wild_die,inc(%0))),before(#$,:))
+&FUNC_FMT_DIE Attribute Functions=[div(secure(%0),3)]D+[mod(secure(%0),3)]
+&FUNC_SET_CHAR_DATA Attribute Functions=switch(or(orflags(%@,Wr),strmatch(owner(me),owner(%@)))[isdbref(secure(%0))][hasattr(Skills Database,edit(secure(%1),%b,_))][gt(strlen(secure(%2)),0)][secure(%2)],1111=0,set(secure(%0),char_data:[setdiff(get(secure(%0)/char_data),grab(get(secure(%0)/char_data),[last(get(Skills Database/[edit(secure(%1),%b,_)]),|)] *,|),|)]),1111*,set(secure(%0),char_data:[switch([gt(match(get(secure(%0)/char_data),[last(get(Skills Database/[edit(secure(%1),%b,_)]),|)] *,|),0)]:[eq(add(peek_char_data(%0,secure(%1)),secure(%2)),0)],1:1,setdiff(get(secure(%0)/char_data),grab(get(secure(%0)/char_data),[last(get(Skills Database/[edit(secure(%1),%b,_)]),|)] *,|),|),1:0,replace(get(secure(%0)/char_data),match(get(secure(%0)/char_data),[last(get(Skills Database/[edit(secure(%1),%b,_)]),|)] *,|),[last(get(Skills Database/[edit(secure(%1),%b,_)]),|)] [switch(secure(%2),=*,trim(secure(%2),=),add(trim(secure(%2),=),u(get_skill_base,secure(%0),last(get(Skills Database/[edit(secure(%1),%b,_)]),|))))],|),switch(trim(secure(%2),=),0,get(secure(%0)/char_data),setunion(get(secure(%0)/char_data),[last(get(Skills Database/[edit(secure(%1),%b,_)]),|)] [trim(secure(%2),=)],|)))]),?0??*,#-2 NO SUCH OBJECT,??0?*,#-3 SECOND ARGUMENT MUST BE ATTRIBUTE OR SKILL,???0*,#-4 THIRD ARGUMENT MUST BE NUMBER,#-1 PERMISSION DENIED)
+&FUNC_GET_CHAR_DATA Attribute Functions=switch(or(orflags(%@,Wr),gt(match(owner(me),owner(%@)),0)):[hasattr(Skills Database,edit(secure(%1),%b,_))]:[isdbref(secure(%0))],1:1:1,fold(add_stuff,iter([get(Skills Database/[edit(secure(%1),%b,_)])]|[get(Modifiers Database/[edit(secure(%1),%b,_)])],u(get_skill_base,secure(%0),##),|,|),0,|),1:?:0,#-2 NO SUCH OBJECT,1:0:?,#-3 NO SUCH ATTRIBUTE OR SKILL,#-1 PERMISSION DENIED)
+&FUNC_GUESS_SKILL Attribute Functions=switch(hasattr(Skills Database,[edit(secure(%0),%b,_)]),1,ucstr(edit(secure(%0),%b,_)),lattr(Skills Database/[edit(secure(%0),%b,_)]*))
+&FUNC_COMBAT_SET Attribute Functions=switch(or(orflags(%@,Wr),strmatch(owner(me),owner(%@))),1,set(secure(%0),combat_data:[secure(%1)]),#-1 PERMISSION DENIED)
+&FUNC_COMBAT_GET Attribute Functions=switch(or(orflags(%@,Wr),strmatch(owner(me),owner(%@))),1,get(secure(%0)/combat_data),#-1 PERMISSION DENIED)
+&IS_ATTRIBUTE Attribute Functions=eq(words(get(Skills Database/[edit(secure(%0),%b,_)]),|),1)
+&IS_SKILL Attribute Functions=gt(words(get(Skills Database/[edit(secure(%0),%b,_)]),|),1)
+&FUNC_PEEK_CHAR_DATA Attribute Functions=switch(orflags(%@,Wr):[hasattr(Skills Database,edit(secure(%1),%b,_))]:[isdbref(secure(%0))],1:1:1,u(get_skill_base,secure(%0),last(get(Skills Database/[edit(secure(%1),%b,_)]),|)),1:?:0,#-2 NO SUCH OBJECT,1:0:?,#-3 NO SUCH ATTRIBUTE OR SKILL,#-1 PERMISSION DENIED)
+&FUNC_HEADER Attribute Functions=-%{[ansi(h,%b%0%b)]%}[repeat(-,sub(73,strlen(secure(%0))))]
+&FUNC_TRAILER Attribute Functions=[repeat(-,sub(73,strlen(secure(%0))))]%{[ansi(h,%b%0%b)]%}-
+&LIST_SKILLS Attribute Functions=[iter(grepi(Skills Database,*,secure(%0)),last(trim(last(get(Skills Database/##),|),/),/), ,|)]
+&FUNC_SKILL_PARENT Attribute Functions=switch(hasattr(Skills Database,edit(secure(%0),%b,_)),1,trim(first(get(Skills Database/[edit(secure(%0),%b,_)]),|),/),#-1 NO SUCH SKILL)
+
+@create Modifiers Database
+@link Modifiers Database = Attribute Functions
+&TACTICS Modifiers Database=@Modifier/@Actions/|@Modifier/Knowledge/|@Modifier/Tactics/
+&BLASTER_ARTILLERY Modifiers Database=@Modifier/@Actions/|@Modifier/Dexterity/|@Modifier/Blaster Artillery/
+&BUREAUCRACY Modifiers Database=@Modifier/@Actions/|@Modifier/Knowledge/|@Modifier/Bureaucracy/
+&GLIDER Modifiers Database=@Modifier/@Actions/|@Modifier/Mechanical/|@Modifier/Glider/
+&PRIMITIVE_CONSTRUCTION Modifiers Database=@Modifier/@Actions/|@Modifier/Technical/|@Modifier/Primitive Construction/
+&LIGHTSABER_REPAIR Modifiers Database=@Modifier/@Actions/|@Modifier/Technical/|@Modifier/Lightsaber Repair/
+&MELEE_PARRY Modifiers Database=@Modifier/@Actions/|@Modifier/Dexterity/|@Modifier/Melee Parry/
+&FORCE_ALTER Modifiers Database=@Modifier/@Actions/
+&FORCE_SENSE Modifiers Database=@Modifier/@Actions/
+&FORCE_CONTROL Modifiers Database=@Modifier/@Actions/
+@DESCRIBE Modifiers Database=The modifiers table
+&MECHANICAL Modifiers Database=@Modifier/@Actions/|@Modifier/Mechanical/
+&TECHNICAL Modifiers Database=@Modifier/@Actions/|@Modifier/Technical/
+&PERCEPTION Modifiers Database=@Modifier/@Actions/|@Modifier/Perception/
+&KNOWLEDGE Modifiers Database=@Modifier/@Actions/|@Modifier/Knowledge/
+&DEXTERITY Modifiers Database=@Modifier/@Actions/|@Modifier/Dexterity/
+&STRENGTH Modifiers Database=@Modifier/@Actions/|@Modifier/Strength/
+&SWIMMING Modifiers Database=@Modifier/@Actions/|@Modifier/Strength/|@Modifier/Swimming/
+&STAMINA Modifiers Database=@Modifier/@Actions/|@Modifier/Strength/|@Modifier/Stamina/
+&LIFTING Modifiers Database=@Modifier/@Actions/|@Modifier/Strength/|@Modifier/Lifting/
+&CLIMBING-JUMPING Modifiers Database=@Modifier/@Actions/|@Modifier/Strength/|@Modifier/Climbing-Jumping/
+&BRAWLING Modifiers Database=@Modifier/@Actions/|@Modifier/Strength/|@Modifier/Brawling/
+&SNEAK Modifiers Database=@Modifier/@Actions/|@Modifier/Perception/|@Modifier/Sneak/
+&SEARCH Modifiers Database=@Modifier/@Actions/|@Modifier/Perception/|@Modifier/Search/
+&PERSUASION Modifiers Database=@Modifier/@Actions/|@Modifier/Perception/|@Modifier/Persuasion/
+&INVESTIGATION Modifiers Database=@Modifier/@Actions/|@Modifier/Perception/|@Modifier/Investigation/
+&HIDE Modifiers Database=@Modifier/@Actions/|@Modifier/Perception/|@Modifier/Hide/
+&GAMBLING Modifiers Database=@Modifier/@Actions/|@Modifier/Perception/|@Modifier/Gambling/
+&FORGERY Modifiers Database=@Modifier/@Actions/|@Modifier/Perception/|@Modifier/Forgery/
+&CON Modifiers Database=@Modifier/@Actions/|@Modifier/Perception/|@Modifier/Con/
+&COMMAND Modifiers Database=@Modifier/@Actions/|@Modifier/Perception/|@Modifier/Command/
+&BARGAIN Modifiers Database=@Modifier/@Actions/|@Modifier/Perception/|@Modifier/Bargain/
+&WALKER_OPERATION Modifiers Database=@Modifier/@Actions/|@Modifier/Mechanical/|@Modifier/Walker Operation/
+&SWOOP_OPERATION Modifiers Database=@Modifier/@Actions/|@Modifier/Mechanical/|@Modifier/Swoop Operation/
+&STARSHIP_SHIELDS Modifiers Database=@Modifier/@Actions/|@Modifier/Mechanical/|@Modifier/Starship Shields/
+&STARSHIP_GUNNERY Modifiers Database=@Modifier/@Actions/|@Modifier/Mechanical/|@Modifier/Starship Gunnery/
+&STARFIGHTER_PILOTING Modifiers Database=@Modifier/@Actions/|@Modifier/Mechanical/|@Modifier/Starfighter Piloting/
+&SPACE_TRANSPORTS Modifiers Database=@Modifier/@Actions/|@Modifier/Mechanical/|@Modifier/Space Transports/
+&SENSORS Modifiers Database=@Modifier/@Actions/|@Modifier/Mechanical/|@Modifier/Sensors/
+&REPULSORLIFT_OPERATION Modifiers Database=@Modifier/@Actions/|@Modifier/Mechanical/|@Modifier/Repulsorlift Operation/
+&POWERSUIT_OPERATION Modifiers Database=@Modifier/@Actions/|@Modifier/Mechanical/|@Modifier/Powersuit Operation/
+&HOVER_VEHICLE_OPERATION Modifiers Database=@Modifier/@Actions/|@Modifier/Mechanical/|@Modifier/Hover Vehicle Operation/
+&GROUND_VEHICLE_OPERATION Modifiers Database=@Modifier/@Actions/|@Modifier/Mechanical/|@Modifier/Ground Vehicle Operation/
+&COMMUNICATIONS Modifiers Database=@Modifier/@Actions/|@Modifier/Mechanical/|@Modifier/Communications/
+&CAPITAL_SHIP_SHIELDS Modifiers Database=@Modifier/@Actions/|@Modifier/Mechanical/|@Modifier/Capital Ship Shields/
+&CAPITAL_SHIP_PILOTING Modifiers Database=@Modifier/@Actions/|@Modifier/Mechanical/|@Modifier/Capital Ship Piloting/
+&CAPITAL_SHIP_GUNNERY Modifiers Database=@Modifier/@Actions/|@Modifier/Mechanical/|@Modifier/Capital Ship Gunnery/
+&BEAST_RIDING Modifiers Database=@Modifier/@Actions/|@Modifier/Mechanical/|@Modifier/Beast Riding/
+&ASTROGATION Modifiers Database=@Modifier/@Actions/|@Modifier/Mechanical/|@Modifier/Astrogation/
+&ARCHAIC_STARSHIP_PILOTING Modifiers Database=@Modifier/@Actions/|@Modifier/Mechanical/|@Modifier/Archaic Starship Piloting/
+&WILLPOWER Modifiers Database=@Modifier/@Actions/|@Modifier/Knowledge/|@Modifier/Willpower/
+&VALUE Modifiers Database=@Modifier/@Actions/|@Modifier/Knowledge/|@Modifier/Value/
+&SURVIVAL Modifiers Database=@Modifier/@Actions/|@Modifier/Knowledge/|@Modifier/Survival/
+&STREETWISE Modifiers Database=@Modifier/@Actions/|@Modifier/Knowledge/|@Modifier/Streetwise/
+&PLANETARY_SYSTEMS Modifiers Database=@Modifier/@Actions/|@Modifier/Knowledge/|@Modifier/Planetary Systems/
+&LAW_ENFORCEMENT Modifiers Database=@Modifier/@Actions/|@Modifier/Knowledge/|@Modifier/Law Enforcement/
+&INTIMIDATION Modifiers Database=@Modifier/@Actions/|@Modifier/Knowledge/|@Modifier/Intimidation/
+&CULTURES Modifiers Database=@Modifier/@Actions/|@Modifier/Knowledge/|@Modifier/Cultures/
+&BUSINESS Modifiers Database=@Modifier/@Actions/|@Modifier/Knowledge/|@Modifier/Business/
+&ALIEN_SPECIES Modifiers Database=@Modifier/@Actions/|@Modifier/Knowledge/|@Modifier/Alien Species/
+&VEHICLE_BLASTERS Modifiers Database=@Modifier/@Actions/|@Modifier/Dexterity/|@Modifier/Vehicle Blasters/
+&THROWN_WEAPONS Modifiers Database=@Modifier/@Actions/|@Modifier/Dexterity/|@Modifier/Thrown Weapons/
+&RUNNING Modifiers Database=@Modifier/@Actions/|@Modifier/Dexterity/|@Modifier/Running/
+&PICK_POCKET Modifiers Database=@Modifier/@Actions/|@Modifier/Dexterity/|@Modifier/Pick Pocket/
+&MISSILE_WEAPONS Modifiers Database=@Modifier/@Actions/|@Modifier/Dexterity/|@Modifier/Missile Weapons/
+&MELEE_COMBAT Modifiers Database=@Modifier/@Actions/|@Modifier/Dexterity/|@Modifier/Melee Combat/
+&LIGHTSABER Modifiers Database=@Modifier/@Actions/|@Modifier/Dexterity/|@Modifier/Lightsaber/
+&GRENADE Modifiers Database=@Modifier/@Actions/|@Modifier/Dexterity/|@Modifier/Grenade/
+&FIREARMS Modifiers Database=@Modifier/@Actions/|@Modifier/Dexterity/|@Modifier/Firearms/
+&DODGE Modifiers Database=@Modifier/@Actions/|@Modifier/Dexterity/|@Modifier/Dodge/
+&BRAWLING_PARRY Modifiers Database=@Modifier/@Actions/|@Modifier/Dexterity/|@Modifier/Brawling Parry/
+&BOWS Modifiers Database=@Modifier/@Actions/|@Modifier/Dexterity/|@Modifier/Bows/
+&BOWCASTER Modifiers Database=@Modifier/@Actions/|@Modifier/Dexterity/|@Modifier/Bowcaster/
+&BLASTER Modifiers Database=@Modifier/@Actions/|@Modifier/Dexterity/|@Modifier/Blaster/
+&ARCHAIC_GUNS Modifiers Database=@Modifier/@Actions/|@Modifier/Dexterity/|@Modifier/Archaic Guns/
+&WALKER_REPAIR Modifiers Database=@Modifier/@Actions/|@Modifier/Technical/|@Modifier/Walker Repair/
+&STARSHIP_WEAPON_REPAIR Modifiers Database=@Modifier/@Actions/|@Modifier/Technical/|@Modifier/Starship Weapon Repair/
+&STARFIGHTER_REPAIR Modifiers Database=@Modifier/@Actions/|@Modifier/Technical/|@Modifier/Starfighter Repair/
+&SPACE_TRANSPORTS_REPAIR Modifiers Database=@Modifier/@Actions/|@Modifier/Technical/|@Modifier/Space Transports Repair/
+&SECURITY Modifiers Database=@Modifier/@Actions/|@Modifier/Technical/|@Modifier/Security/
+&REPULSORLIFT_REPAIR Modifiers Database=@Modifier/@Actions/|@Modifier/Technical/|@Modifier/Repulsorlift Repair/
+&MEDICINE Modifiers Database=@Modifier/@Actions/|@Modifier/Technical/Medicine/|@Modifier/Medicine/
+&HOVER_VEHICLE_REPAIR Modifiers Database=@Modifier/@Actions/|@Modifier/Technical/|@Modifier/Hover Vehicle Repair/
+&GROUND_VEHICLE_REPAIR Modifiers Database=@Modifier/@Actions/|@Modifier/Technical/|@Modifier/Ground Vehicle Repair/
+&FIRST_AID Modifiers Database=@Modifier/@Actions/|@Modifier/Technical/|@Modifier/First Aid/
+&DROID_REPAIR Modifiers Database=@Modifier/@Actions/|@Modifier/Technical/|@Modifier/Droid Repair/
+&DROID_PROGRAMMING Modifiers Database=@Modifier/@Actions/|@Modifier/Technical/|@Modifier/Droid Programming/
+&DEMOLITION Modifiers Database=@Modifier/@Actions/|@Modifier/Technical/|@Modifier/Demolition/
+&COMPUTER_PROGRAMMING-REPAIR Modifiers Database=@Modifier/@Actions/|@Modifier/Technical/|@Modifier/Computer Programming-Repair/
+&CAPITAL_STARSHIP_WEAPON_REPAIR Modifiers Database=@Modifier/@Actions/|@Modifier/Technical/|@Modifier/Capital Starship Weapon Repair/
+&CAPITAL_STARSHIP_REPAIR Modifiers Database=@Modifier/@Actions/|@Modifier/Technical/|@Modifier/Capital Starship Repair/
+&BLASTER_REPAIR Modifiers Database=@Modifier/@Actions/|@Modifier/Technical/|@Modifier/Blaster Repair/
+&ARMOR_REPAIR Modifiers Database=@Modifier/@Actions/|@Modifier/Technical/|@Modifier/Armor Repair/
+&SCHOLAR Modifiers Database=@Modifier/@Actions/|@Modifier/Knowledge/|@Modifier/Scholar/
+&LANGUAGE_BASIC Modifiers Database=@Modifier/@Actions/|@Modifier/Knowledge/|@Modifier/Language Basic/
+&LANGUAGE_CALAMARI Modifiers Database=@Modifier/@Actions/|@Modifier/Knowledge/|@Modifier/Language Calamari/
+&LANGUAGE_HUTT Modifiers Database=@Modifier/@Actions/|@Modifier/Knowledge/|@Modifier/Language Hutt/
+&LANGUAGE_ITHORIAN Modifiers Database=@Modifier/@Actions/|@Modifier/Knowledge/|@Modifier/Language Ithorian/
+&LANGUAGE_JAWA Modifiers Database=@Modifier/@Actions/|@Modifier/Knowledge/|@Modifier/Language Jawa/
+&LANGUAGE_RODIAN Modifiers Database=@Modifier/@Actions/|@Modifier/Knowledge/|@Modifier/Language Rodian/
+&LANGUAGE_TWI'LEK Modifiers Database=@Modifier/@Actions/|@Modifier/Knowledge/|@Modifier/Language Twi'lek/
+&LANGUAGE_WOOKIEE Modifiers Database=@Modifier/@Actions/|@Modifier/Knowledge/|@Modifier/Language Wookiee/
+@tel Modifiers Database = Attribute Functions
+
+@create Skills Database
+@link Skills Database = Attribute Functions
+&LIGHTSABER Skills Database=Dexterity/|Dexterity/Lightsaber/
+&LIGHTSABER_REPAIR Skills Database=Technical/|Technical/Lightsaber Repair/
+&LANGUAGE_SULLUSTIAN Skills Database=Knowledge/|Knowledge/Language Sullustian/
+&POINTS_SKILL Skills Database=Points Skill/
+&POINTS_ATTRIBUTE Skills Database=Points Attribute/
+&TACTICS Skills Database=Knowledge/|Knowledge/Tactics/
+&BLASTER_ARTILLERY Skills Database=Dexterity/|Dexterity/Blaster Artillery/
+&BUREAUCRACY Skills Database=Knowledge/|Knowledge/Bureaucracy/
+&GLIDER Skills Database=Mechanical/|Mechanical/Glider/
+&PRIMITIVE_CONSTRUCTION Skills Database=Technical/|Technical/Primitive Construction/
+&ARMOR_REPAIR Skills Database=Technical/|Technical/Armor Repair/
+&BLASTER_REPAIR Skills Database=Technical/|Technical/Blaster Repair/
+&CAPITAL_STARSHIP_REPAIR Skills Database=Technical/|Technical/Capital Starship Repair/
+&CAPITAL_STARSHIP_WEAPON_REPAIR Skills Database=Technical/|Technical/Capital Starship Weapon Repair/
+&COMPUTER_PROGRAMMING-REPAIR Skills Database=Technical/|Technical/Computer Programming-Repair/
+&DEMOLITION Skills Database=Technical/|Technical/Demolition/
+&DROID_PROGRAMMING Skills Database=Technical/|Technical/Droid Programming/
+&DROID_REPAIR Skills Database=Technical/|Technical/Droid Repair/
+&FIRST_AID Skills Database=Technical/|Technical/First Aid/
+&GROUND_VEHICLE_REPAIR Skills Database=Technical/|Technical/Ground Vehicle Repair/
+&HOVER_VEHICLE_REPAIR Skills Database=Technical/|Technical/Hover Vehicle Repair/
+&MEDICINE Skills Database=NULL/|Technical/Medicine/
+&REPULSORLIFT_REPAIR Skills Database=Technical/|Technical/Repulsorlift Repair/
+&SECURITY Skills Database=Technical/|Technical/Security/
+&SPACE_TRANSPORTS_REPAIR Skills Database=Technical/|Technical/Space Transports Repair/
+&STARFIGHTER_REPAIR Skills Database=Technical/|Technical/Starfighter Repair/
+&STARSHIP_WEAPON_REPAIR Skills Database=Technical/|Technical/Starship Weapon Repair/
+&WALKER_REPAIR Skills Database=Technical/|Technical/Walker Repair/
+&ARCHAIC_GUNS Skills Database=Dexterity/|Dexterity/Archaic Guns/
+&BLASTER Skills Database=Dexterity/|Dexterity/Blaster/
+&BOWCASTER Skills Database=Dexterity/|Dexterity/Bowcaster/
+&BOWS Skills Database=Dexterity/|Dexterity/Bows/
+&BRAWLING_PARRY Skills Database=Dexterity/|Dexterity/Brawling Parry/
+&DODGE Skills Database=Dexterity/|Dexterity/Dodge/
+&FIREARMS Skills Database=Dexterity/|Dexterity/Firearms/
+&GRENADE Skills Database=Dexterity/|Dexterity/Grenade/
+&MELEE_COMBAT Skills Database=Dexterity/|Dexterity/Melee Combat/
+&MISSILE_WEAPONS Skills Database=Dexterity/|Dexterity/Missile Weapons/
+&PICK_POCKET Skills Database=Dexterity/|Dexterity/Pick Pocket/
+&RUNNING Skills Database=Dexterity/|Dexterity/Running/
+&THROWN_WEAPONS Skills Database=Dexterity/|Dexterity/Thrown Weapons/
+&VEHICLE_BLASTERS Skills Database=Dexterity/|Dexterity/Vehicle Blasters/
+&ALIEN_SPECIES Skills Database=Knowledge/|Knowledge/Alien Species/
+&BUSINESS Skills Database=Knowledge/|Knowledge/Business/
+&CULTURES Skills Database=Knowledge/|Knowledge/Cultures/
+&INTIMIDATION Skills Database=Knowledge/|Knowledge/Intimidation/
+&LAW_ENFORCEMENT Skills Database=Knowledge/|Knowledge/Law Enforcement/
+&PLANETARY_SYSTEMS Skills Database=Knowledge/|Knowledge/Planetary Systems/
+&STREETWISE Skills Database=Knowledge/|Knowledge/Streetwise/
+&SURVIVAL Skills Database=Knowledge/|Knowledge/Survival/
+&VALUE Skills Database=Knowledge/|Knowledge/Value/
+&WILLPOWER Skills Database=Knowledge/|Knowledge/Willpower/
+&ARCHAIC_STARSHIP_PILOTING Skills Database=Mechanical/|Mechanical/Archaic Starship Piloting/
+&ASTROGATION Skills Database=Mechanical/|Mechanical/Astrogation/
+&BEAST_RIDING Skills Database=Mechanical/|Mechanical/Beast Riding/
+&CAPITAL_SHIP_GUNNERY Skills Database=Mechanical/|Mechanical/Capital Ship Gunnery/
+&CAPITAL_SHIP_PILOTING Skills Database=Mechanical/|Mechanical/Capital Ship Piloting/
+&CAPITAL_SHIP_SHIELDS Skills Database=Mechanical/|Mechanical/Capital Ship Shields/
+&COMMUNICATIONS Skills Database=Mechanical/|Mechanical/Communications/
+&GROUND_VEHICLE_OPERATION Skills Database=Mechanical/|Mechanical/Ground Vehicle Operation/
+&HOVER_VEHICLE_OPERATION Skills Database=Mechanical/|Mechanical/Hover Vehicle Operation/
+&POWERSUIT_OPERATION Skills Database=Mechanical/|Mechanical/Powersuit Operation/
+&REPULSORLIFT_OPERATION Skills Database=Mechanical/|Mechanical/Repulsorlift Operation/
+&SENSORS Skills Database=Mechanical/|Mechanical/Sensors/
+&SPACE_TRANSPORTS Skills Database=Mechanical/|Mechanical/Space Transports/
+&STARFIGHTER_PILOTING Skills Database=Mechanical/|Mechanical/Starfighter Piloting/
+&STARSHIP_GUNNERY Skills Database=Mechanical/|Mechanical/Starship Gunnery/
+&STARSHIP_SHIELDS Skills Database=Mechanical/|Mechanical/Starship Shields/
+&SWOOP_OPERATION Skills Database=Mechanical/|Mechanical/Swoop Operation/
+&WALKER_OPERATION Skills Database=Mechanical/|Mechanical/Walker Operation/
+&BARGAIN Skills Database=Perception/|Perception/Bargain/
+&COMMAND Skills Database=Perception/|Perception/Command/
+&CON Skills Database=Perception/|Perception/Con/
+&FORGERY Skills Database=Perception/|Perception/Forgery/
+&GAMBLING Skills Database=Perception/|Perception/Gambling/
+&HIDE Skills Database=Perception/|Perception/Hide/
+&INVESTIGATION Skills Database=Perception/|Perception/Investigation/
+&PERSUASION Skills Database=Perception/|Perception/Persuasion/
+&SEARCH Skills Database=Perception/|Perception/Search/
+&SNEAK Skills Database=Perception/|Perception/Sneak/
+&BRAWLING Skills Database=Strength/|Strength/Brawling/
+&CLIMBING-JUMPING Skills Database=Strength/|Strength/Climbing-Jumping/
+&LIFTING Skills Database=Strength/|Strength/Lifting/
+&STAMINA Skills Database=Strength/|Strength/Stamina/
+&SWIMMING Skills Database=Strength/|Strength/Swimming/
+&STRENGTH Skills Database=Strength/
+&DEXTERITY Skills Database=Dexterity/
+&KNOWLEDGE Skills Database=Knowledge/
+&PERCEPTION Skills Database=Perception/
+&TECHNICAL Skills Database=Technical/
+&MECHANICAL Skills Database=Mechanical/
+@DESCRIBE Skills Database=|
+&FORCE_CONTROL Skills Database=Force Control/
+&FORCE_SENSE Skills Database=Force Sense/
+&FORCE_ALTER Skills Database=Force Alter/
+&MELEE_PARRY Skills Database=Dexterity/|Dexterity/Melee Parry/
+&CHAR_POINTS Skills Database=Char Points/
+&FORCE_POINTS Skills Database=Force Points/
+&DARKSIDE_POINTS Skills Database=DarkSide Points/
+&FORCE_SENSITIVITY Skills Database=Force Sensitivity/
+&LIFE Skills Database=Life/
+&SCHOLAR Skills Database=Knowledge/|Knowledge/Scholar/
+&LANGUAGE_BASIC Skills Database=Knowledge/|Knowledge/Language Basic/
+&LANGUAGE_CALAMARI Skills Database=Knowledge/|Knowledge/Language Calamari/
+&LANGUAGE_HUTT Skills Database=Knowledge/|Knowledge/Language Hutt/
+&LANGUAGE_ITHORIAN Skills Database=Knowledge/|Knowledge/Language Ithorian/
+&LANGUAGE_JAWA Skills Database=Knowledge/|Knowledge/Language Jawa/
+&LANGUAGE_RODIAN Skills Database=Knowledge/|Knowledge/Language Rodian/
+&LANGUAGE_TWI'LEK Skills Database=Knowledge/|Knowledge/Language Twi'lek/
+&LANGUAGE_WOOKIEE Skills Database=Knowledge/|Knowledge/Language Wookiee/
+&LANGUAGE_BINARY Skills Database=Knowledge/|Knowledge/Language Binary/
+@tel Skills Database = Attribute Functions
+
+@tel Attribute Functions = ThunderCombat Skill System Commands
+
+@create Backup Functions
+@link Backup Functions = ThunderCombat Skill System Commands
+@set Backup Functions = WIZARD
+@set Backup Functions = SAFE
+&DISPLAY_SHEET Backup Functions=[header([get(%0/rank)] [name(%0)](%0))]%r[u(print_base_stuff,%0)]%r[u(print_background,%0)]%r[header(Stats and Attributes)][iter(Dexterity Perception|Knowledge Strength|Mechanical Technical,ulocal(display_two_stats,%0,first(##),rest(##)),|)]%r[header(Misc Points)]%r[ulocal(print_points,%0)]%r[header(Weapons and Armor)]%r[u(print_weapons,%0)]%r[trailer(End of Sheet)]
+&GET_LIST Backup Functions=iter(graball(get(%0/char_data),%1*,|),last(before(##,/%b),/),|,|)
+&IS_ATTRIBUTE Backup Functions=gt(strlen(grab(get(%0/char_data),%1*/ *,|)),0)
+&FMT_ENTRY Backup Functions=switch(gt(strlen(%1),0),1,ansi(ulocal(color_choice,%2), ljust(%b[switch(ulocal(is_attribute,%0,%1),1,[ljust(left(%1,30),30)][rjust(fmt_die(get_char_data(%0, %1)),6)],[ljust(%b[left(%1,20)],21)][rjust(([fmt_die(peek_char_data(%0, %1))]),8)]%b[rjust(fmt_die(get_char_data(%0,%1)),6)])],38)),ljust(%b,38))
+&DISPLAY_TWO_STATS Backup Functions=[setq(0,ulocal(get_list,%0,%1))][setq(1,ulocal(get_list,%0,%2))][iter(lnum(max(words(%q0,|),words(%q1,|))),%r[ulocal(fmt_entry, %0,index(%q0,|,inc(##),1),%1)]%b[ulocal(fmt_entry,%0,index(%q1,|,inc(##),1),%2)])]
+&COLOR_CHOICE Backup Functions=switch(%0,Dex*,rh,Kno*,gh,Mec*,bh,Per*,yh,Str*,ch,Tec*,mh,h)
+@DESCRIBE Backup Functions=Backup functions for my globals.
+&SKILL_CHECK_DIFF Backup Functions=[switch(1,gte(%0,31),Heroic success,gte(%0,21),Very Difficult success,gte(%0,16),Difficult success,gte(%0,11),Moderate success,gte(%0,6),Easy success,gte(%0,1),Very Easy success,Failed)][switch(%0,-1,%b[ansi(whuf,Critical Problem!)])] (%0)
+&SKILL_CHECK Backup Functions=ansi(u(skill_check_color,add(first(%4),%2)),GAME: [name(%0)] skill checks [left(%1,1)][lcstr(right(%1,dec(strlen(%1))))][switch(gt(strlen(%2),0),1,%bwith modifier of %2)][switch(gt(strlen(%3),0),1,%band using [switch(%3,c*f,a Force Point and [words(graball(%3,c))] Char Points,f,a Force Point,[words(graball(%3,c))] Char Points)],)]: [u(skill_check_diff,add(first(%4),%2),rest(%4))]!)
+&SKILL_CHECK_COLOR Backup Functions=switch(1,gte(%0,31),rh,gte(%0,21),yh,gte(%0,16),gh,gte(%0,11),ch,gte(%0,6),bh,gte(%0,1),mh,wh)
+&PRINT_POINTS Backup Functions=%b[ansi(gh,Char Points: [repeat(*,setr(0,get_char_data(%0,char points)))](%q0))]%b[ansi(wh,Force Points: [repeat(*,setr(0,get_char_data(%0,force points)))](%q0))]%b[ansi(bh,Darkside Points: [repeat(*,setr(0,get_char_data(%0,darkside points)))](%q0))][switch(gt(add(get_char_data(%0,points attribute),get_char_data(%0,points skill)),0),1,%r%b[ansi(hc,Attribute points to allocate: [fmt_die(get_char_data(%0,points attribute))])]%b[ansi(hc,Skill points to allocate: [fmt_die(get_char_data(%0,points skill))])])]
+&PRINT_HP Backup Functions=switch(secure(%0),5,ansi(gh,Normal),4,ansi(ch,Stunned),3,ansi(bh,Wounded),2,ansi(mh,Incapacitated),1,ansi(rh,Mortally Wounded),ansi(bhuf,Dead))
+&PRINT_BACKGROUND Backup Functions=[ansi(h,%bQuick Background:)] [left(default(%0/quick_background,No quick background written. (+chelp quick_background)),480)][switch(gt(strlen(get(%0/quick_background)),480),1,pemit(%0,ansi(rhf,YOUR QUICK BACKGROUND SHOULD BE NO MORE THAN 5 LINES OF 80 COLUMN TEXT LONG! PLEASE SHORTEN YOUR QUICK BACKGROUND. (+chelp quick_background if you don't remember how))))]
+&PRINT_BASE_STUFF Backup Functions=%b[ansi(h,Full Name:)] [ljust(default(%0/fullname,name(%0)),27)]%b%b[ansi(h,Sex:)] [ljust(default(%0/sex,Unset),33)]%r%b[ansi(h,Race:)] [ljust(default(%0/race,Unset),32)]%b%b[ansi(h,Age:)] [ljust(default(%0/age,Unset),32)]%r%b[ansi(h,Character Health:)] [u(print_hp,get_char_data(%0,life))]
+&PRINT_WEAPONS Backup Functions=%b[ansi(rh,Weapons:)] [ansi(r,iter(u(get(owner(me)/CS_PLAYER_DATA)/get_data,%0,weapon),name(##), ,%b-%b))]%r%b[ansi(yh,Armor:)] [ansi(y,iter(u(get(owner(me)/CS_PLAYER_DATA)/get_data,%0,armor),name(##), ,%b-%b))]
+@tel Backup Functions = ThunderCombat Skill System Commands
+
+@tel ThunderCombat Skill System Commands=#2
+
+@tel #2
+@tel ThunderCombat V2.1
+
+@create Skill_Levels
+@link Skill_Levels = Help
+@DESCRIBE Skill_Levels=Approxamations for Die-code skill levels:%r%t1D%tBelow human average for an attribute.%r%t2D%tHuman average for an attribute and many skills.%r%t3D%tAverage level of training for a human.%r%t4D%tProfessional level of training for a human%r%t5D%tAbove average expertise.%r%t6D%tConsidered about the best in a city of geographic area. (1/100,000)%r%t7D%tAmoung the best on a continent. (1/10,000,000)%r%t8D%tAmoung the best on a planet. (1/100,000,000)%r%t9D%tOne of the best for several systems in the area. (1/1,000,000,000)%r%t10D%tOne of the best in sector.%r%t11D%tOne of the best in region of space.%r%t12D+%tAmount or the best in galaxy.
+@tel Skill_Levels = Help
+
+@create Char_Improvement
+@link Char_Improvement = Help
+@DESCRIBE Char_Improvement=This is the helpfile for the post-chargen points received allocation system.%r%rTo use the system, go into the chargen area, and go into the character improvement room, then [ansi(rh,enter the extra allocation points object.)] From inside there, use the following commands:%r%r%t+raise <skill | attribute>=XD+Y%r%t+lower <skill | attribute>=XD+Y%r%rNote that to allocate to skills, you need skill points to allocate, attributes use attribute points. You cannot lower a skill below that with which you entered the object (so don't leave till you're happy -- once you leave your skills are locked down).%r%rYou don't *have* to use XD+Y notation, the system also accepts 'XD' and 'Y' notation in place of 'XD+Y'.%r IF YOU WANT A skill AT or above 6D (or 1D above racial attrib max if not human) YOU MUST @mail HJ /BEFORE/ you alloc the skill with a reason why.
+@tel Char_Improvement = Help
+
+@create quick_background
+@link quick_background = Help
+@DESCRIBE quick_background=To set your quick background, type '&quick_background me=<a quick background>'.
+@tel quick_background = Help
+
+@create Functions
+@link Functions = Help
+@DESCRIBE Functions=These are the global functions that have been written by Combatwiz.
+
+@create skill_parent
+@link skill_parent = Functions
+@DESCRIBE skill_parent=Syntax: skill_parent(<skill>)%r%rReturns the parent attribute of skill (must be specified fully, eg: Capital Starship Repair).
+@tel skill_parent = Functions
+
+@create peek_char_data
+@link peek_char_data = Functions
+@DESCRIBE peek_char_data=Syntax: peek_char_data(<dbref>,<attrib | skill>)%r%rReturns the <dbref>'s die added in <attrib | skill>. Does not add in modifiers, or the base attributes of skills.
+@tel peek_char_data = Functions
+
+@create guess_skill
+@link guess_skill = Functions
+@DESCRIBE guess_skill=Syntax: guess_skill(<attrib | skill>)%r%rReturns any skills or attributes that match given string. For example, guess_skill(blas) will return 'BLASTER_REPAIR BLASTER'.
+@tel guess_skill = Functions
+
+@create get_char_data
+@link get_char_data = Functions
+@DESCRIBE get_char_data=Syntax: get_char_data(<dbref>,<attrib | skill>)%r%rGets character sheet data <attrib | skill> (must be specified full named, eg: Capital Starship Weapon Repair) from <dbref>.
+@tel get_char_data = Functions
+
+@create set_char_data
+@link set_char_data = Functions
+@DESCRIBE set_char_data=Syntax: set_char_data(<dbref>,<attrib | skill>,<value>)%r%rSets character sheet data <attrib | skill> (must be specified full named, eg: Capital Starship Weapon Repair) on <dbref> to <value>.If <value> is...%r%t=<num> then it sets absolutly to <num> (use with caution!)%r%t%b<num> then it adds <num> to current modifier value.%r%t-<num> then it subtracts <num> from current modifier value.
+@tel set_char_data = Functions
+
+@create fmt_die
+@link fmt_die = Functions
+@DESCRIBE fmt_die=Syntax: fmt_die(<diecode>)%r%rFormats <diecode> into the standard RPG format.
+@tel fmt_die = Functions
+
+@create sw_die
+@link sw_die = Functions
+@DESCRIBE sw_die=Syntax: sw_die(<diecode>)%r%rRolls the starwars RPG type dice roll on <diecode>. Diecode is expressed as the following function: For a stat of XD+Y, <diecode> is add(mul(3,X),Y). A -1 returned indicates a disasterous failure. Values <-1 are simply failures. Treat them just like 0.
+@tel sw_die = Functions
+
+@create set_modifier
+@link set_modifier = Functions
+@DESCRIBE set_modifier=Syntax: set_modifier(<dbref>,<what>,<value>)%r%rSets modifier <what> (must be specified fully, eg: @Modifier/Dexterity/) on <dbref>. If <value> is...%r%t=<num> then it sets absolutly to <num> (use with caution!)%r%t%b<num> then it adds <num> to current modifier value.%r%t-<num> then it subtracts <num> from current modifier value.
+@tel set_modifier = Functions
+
+@tel Functions = Help
+
+

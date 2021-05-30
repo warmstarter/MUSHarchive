@@ -1,0 +1,285 @@
+@@
+@@ Double-blind contact system for Whitewolf
+@@   System concept and UI design by Aconite
+@@   System engine design by David Sauvrete aka Javelin
+@@   Code by David Sauvrete aka Javelin
+@@   Originally for Paris: Les Fleurs Du Mal
+@@
+@@ Copyright (c) 2000 by Alan Schwartz ("Javelin")
+@@ May be distribtued under the same terms as PennMUSH
+@@ NO SUPPORT PROVIDED. GOOD LUCK.
+@@
+@@ The concept:
+@@
+@@ Some players have the "Contacts" background. Players with unspent
+@@ points in this background can solicit a contact who they wish to
+@@ have; the player soliciting and the contact player are anonymous
+@@ to one another until they agreed to make the contact.
+@@ Contacts are players who've volunteered to be contacts. Each
+@@ contact is assigned an ID beginning with C and a number.
+@@ Each inquirer gets an ID beginning with I and a number.
+@@
+@@
+@@ Revelant player attributes:
+@@  MAX_CONTACTS  -  How many people you can be a contact to.
+@@                   If not set, defaults to 10
+@@  CONTACTS	  -  Who your contacts are and who has you as a contact
+@@		     Format: <dblist> | <dblist>
+@@                   (where dblist is a list of dbrefs)
+@@
+
+@@
+@@ Create the basic objects
+@@
+
+@create Contact Commands
+@set Commands=safe
+@desc commands=This object contains the commands for the contact system
+@startup commands=@drain me; @notify me
+@tr commands/startup
+
+@create Contact Functions
+@desc functions=This object contains the functions for the contact system
+@set func=safe
+@listen func=Contact DB created as object *
+@aahear func=&db me=%0; @listen me; @aahear me
+@fo func=@create Contact DB
+@fo func=drop Contact DB
+
+@desc DB=This object contains the database for the contact system%r
+	Attributes beginning with C denote contacts, and include
+	the contact's db# and description%r
+	Attributes beginning with I denote inquiries, and include
+	the inquirer's db# and the contact's id.
+@set db=safe
+&lastc db=1
+&lasti db=1
+
+
+@parent commands=functions
+
+@@ +contacts [player]  -- This command shows you who your Major Contacts are 
+@@ and what people have you as a Major Contact. (Remember, one Major Contact 
+@@ per dot in Contacts). Something to note, the number of people you can be a 
+@@ contact for should be limited by, say, &max_contacts (wizlocked and 
+@@ wizdark attribute). If no max_contacts is set it's assumed to be some 
+@@ arbitrary number like 10. The optional arguement of [player] is staff 
+@@ only, and displays the information for that player.
+
+&fn_getcontacts functions=[get(%0/CONTACTS)]
+&fn_contacts functions=[before(u(fn_getcontacts,%0),|)]
+&fn_contactors functions=[after(u(fn_getcontacts,%0),|)]
+&fil_myinquiries functions=[not(comp(first(get([v(db)]/%0)),%q0))]
+
+&fn_show_contacts functions=
+  [name(%0)] has these contacts: [iter(u(fn_contacts,%0),name(##))]%r
+  [name(%0)] is a contact for: [iter(u(fn_contactors,%0),name(##))]%r
+  [name(%0)] has these inquiries outstanding: [setq(0,%0)][filter(fil_myinquiries,lattr([v(db)]/I*))]
+
+&do_contacts commands=$+contacts: 
+   @pemit %#=[u(fn_show_contacts,%#)]
+
+&do_contacts_staff commands=$+contacts *:
+   @pemit %#=[switch(0,isstaff(%#),Permission denied.,
+		      u(fn_show_contacts,num(*%0)))]
+
+ 
+@@ +contacts/list -- This command shows the master list of available 
+@@ contacts. These are players who have volounteered to work as Major 
+@@ Contacts for players. Each line should contain an ID used for contacting 
+@@ them anonymously and a description, properly truncated to fit on one 
+@@ line, of what kind of contact they are. Optionally the command can check 
+@@ for a staffer (see odds and ends below) and also display the name of the 
+@@ contact to them. Format can be anything you like, but might be something 
+@@ like "12 (David Sauvrete) Jewish Rabbi", with the name only showing up to 
+@@ staff.
+
+&fn_cnum functions=[first(get([v(db)]/%0))]
+&fn_cname functions=[name(u(fn_cnum,%0))]
+&fn_cdesc functions=[rest(get([v(db)]/%0))]
+
+&do_contacts_list commands=$+contacts/list:
+   @pemit %#=Available contacts:;
+   @dol [sort(lattr([v(db)]/C*))]=@pemit %#=
+	{## [switch(isstaff(%#),1,%b([u(fn_cname,##)]))] [u(fn_cdesc,##)]}
+
+
+@@ +contacts/inquire <ID>=<text of inquiry> -- This command will not work if 
+@@ the person using it has used all of their Major Contacts (stored 
+@@ in the temporary field of their Contacts stat). If it does work, it 
+@@ removes a point from their temporary contacts field (see odds & ends for 
+@@ more info on this) and sends the inquiry. 
+@@
+
+&do_contacts_inquire commands=$+contacts/inquire *=*:
+  @wait me={
+    @switch/first 0=[setq(0,stat(%#,contacts,t))]%q0,
+      { @pemit %#=You have no more Contacts available.; @notify me },
+     [member(lattr([v(db)]/C*),ucstr(%0))],
+      { @pemit %#=There is no contact with id %0.; @notify me },
+      { 
+        &ADV-BACKGROUNDS %#=[setq(1,get(%#/ADV-BACKGROUNDS))][setq(2,stat(%#,contacts,p))][replace(%q1,match(%q1,Contacts*,|),Contacts/%q2/[sub(%q0,1)],|)];
+        &I[get([v(db)]/LASTI)] [v(db)] = %# %0 %1;
+	@pemit %#=Your inquiry about %0 has been noted.%r
+		  You may cancel it with +contacts/uninquire I[get([v(db)]/LASTI)];
+	&LASTI [v(db)] = [add(1,get([v(db)]/LASTI))];
+	@notify me
+      }
+  }
+
+&fn_inum functions=[first(get([v(db)]/%0))]
+&fn_iname functions=[name(u(fn_inum,%0))]
+&fn_icont functions=[extract(get([v(db)]/%0),2,1)]
+&fn_idesc functions=[setq(9,get([v(db)]/%0))][extract(%q9,3,words(%q9))]
+
+&do_contacts_uninquire commands=$+contacts/uninquire *:
+  @wait me={
+    @switch/first 0=[member(lattr([v(db)]/I*),ucstr(%0))],
+      { @pemit %#=There is no inquiry with id %0.; @notify me },
+     [not(comp(%#,u(fn_inum,%0)))],
+      { @pemit %#=You did not originate that inquiry.; @notify me },
+      { 
+        &ADV-BACKGROUNDS %#=[setq(0,stat(%#,contacts,t))][setq(1,get(%#/ADV-BACKGROUNDS))][setq(2,stat(%#,contacts,p))][replace(%q1,match(%q1,Contacts*,|),Contacts/%q2/[add(%q0,1)],|)];
+	@pemit %#=Your inquiry about [u(fn_icont,%0)] is cancelled.;
+        &%0 [v(db)];
+        @notify me
+      }
+  }
+
+
+
+@@ +contacts/check -- Command run by the global @aconnect. It displays any 
+@@ pending inquiries. It can either display the text of the inquiry or take 
+@@ an arguement for showing that text, doesn't matter to me. Important thing 
+@@ is if there are no inquiries, there is no string returned by the 
+@@ command, so as to make it transparent. The bottom line should include a 
+@@ note about typing +contacts/check to see this message again.
+
+&fil_inquiries functions=[not(comp(%#,u(fn_cnum,u(fn_icont,%0))))]
+
+&do_contacts_check commands=$+contacts/check:
+  @pemit %#=[setq(1,filter(fil_inquiries,lattr([v(db)]/I*)))]
+    [switch(%q1,,,You have contact inquiries pending: %q1%r
+	To view inquiries\, use +contacts/check <id#>%r
+	To see this message again\, use +contacts/check
+    )]
+
+&do_contacts_check_id commands=$+contacts/check *:
+  @pemit %#=[switch(0,member(lattr([v(db)]/I*),ucstr(%0)),
+	There is no inquiry with that id number.,
+	not(comp(%#,u(fn_cnum,u(fn_icont,%0)))),
+	That inquiry does not pertain to you.,
+	Inquiry %0: [u(fn_idesc,%0)]
+     )]
+
+     
+
+@@ +contacts/accept <ID> -- This accepts the applicant as a contact. It adds 
+@@ the applicant's name to the contact's list of who they are a contact for 
+@@ (see +contacts above) and the contact's name to the applicant's list of 
+@@ contacts. 
+@@ At this time it also does a check against the contact's 
+@@ &max_contacts, and if the limit has been reached automatically removes 
+@@ them from the list (+contacts/list).
+@@
+@@ We also have to remove any other inquiries for this person!
+
+&fn_overmax functions=[not(lt(words(u(fn_contactors,%0)),
+                              default(%0/MAX_CONTACTS,10)))]
+
+&fil_contact functions=[switch(%0,C*,not(comp(%#,u(fn_cnum,%0))),
+                                  I*,not(comp(%#,u(fn_cnum,u(fn_icont,%0)))),
+                                  0)]
+
+&do_contacts_accept commands=$+contacts/accept *:
+  @wait me={
+    @switch/first 0 = [member(lattr([v(db)]/I*),ucstr(%0))],
+	{ @pemit %# = There is no inquiry with that id number.; @notify me},
+      [not(comp(%#,u(fn_cnum,u(fn_icont,%0))))],
+	{ @pemit %# = That inquiry does not pertain to you.; @notify me},
+	{ 
+	  @pemit %# = You have accepted contact inquiry %0.%r
+		      Use +contacts to see the inquirer's name.;
+	  @fo *contactmaster=
+	    { +mail [name(u(fn_inum,%0))]=Contact inquiry %0 accepted;
+	      @wait 1=-%N has accepted your inquiry and is now one of your contacts.;
+	      @wait 2=--
+	    };
+          &CONTACTS %#=[default(%#/CONTACTS,|)] [u(fn_inum,%0)];
+	  &CONTACTS [u(fn_inum,%0)]=%# [default([u(fn_inum,%0)]/CONTACTS,|)];
+	  &%0 [v(db)];
+	  @switch/first u(fn_overmax,%#)=0, @notify me,
+	    @dol/notify [filter(fil_contact,lattr([v(db)]/I*))] [filter(fil_contact,lattr([v(db)]/C*))] DUMMYATTRIB=
+		&## [v(db)]
+	}
+  }
+
+
+@@ +contacts/decline <ID> -- This declines the applicant. In doing so it 
+@@ returns 1 point to the inquirer's temporary contact field. You'll notice 
+@@ +contacts/inquire removes this point. This is to avoid time wasting with 
+@@ people sending out a dozen inquiries to possible Contacts, and limits 
+@@ them to as many active inquiries as they have points in Contacts.
+
+
+&do_contacts_decline commands=$+contacts/decline *:
+  @wait me={
+    @switch/first 0 = [member(lattr([v(db)]/I*),ucstr(%0))],
+	{ @pemit %# = There is no inquiry with that id number.; @notify me},
+      [not(comp(%#,u(fn_cnum,u(fn_icont,%0))))],
+	{ @pemit %# = That inquiry does not pertain to you.; @notify me},
+	{ 
+	  @pemit %# = You have declined contact inquiry %0.;
+	  @fo *contactmaster=
+	    { +mail [name(u(fn_inum,%0))]=Contact inquiry %0 declined;
+	      @wait 1=-Your inquiry to Contact [u(fn_icont,%0)] has been declined.;
+	      @wait 2=--
+	    };
+          &ADV-BACKGROUNDS [u(fn_inum,%0)]=[setq(3,u(fn_inum,%0))][setq(0,stat(%q3,contacts,t))][setq(1,get(%q3/ADV-BACKGROUNDS))][setq(2,stat(%q3,contacts,p))][replace(%q1,match(%q1,Contacts*,|),Contacts/%q2/[add(%q0,1)],|)];
+	  &%0 [v(db)];
+	  @notify me
+	}
+  }
+
+
+@@ +contacts/add <text> -- This adds the person to the +contacts/list list, 
+@@ with <text> as their description. This is truncated to fit on one line. 
+@@ If their MAX_CONTACTS aren't used up, that is.
+
+&do_contacts_add commands=$+contacts/add *:
+  @wait me={
+    @switch/first 0=[not(u(fn_overmax,%#))],
+      { @pemit %#=You can't be a contact for any more people.; @notify me},
+      { &C[get([v(db)]/LASTC)] [v(db)] = %# [mid(%0,0,70)];
+	@pemit %#=You are now listed as a contact C[get([v(db)]/LASTC)].;
+	&LASTC [v(db)] = [add(1,get([v(db)]/LASTC))];
+	@notify me
+      }
+  }
+
+
+@@
+@@ +contacts/remove -- This removes the person from the +contacts/list list.
+@@
+
+&do_contacts_remove commands=$+contacts/remove:
+	@wait me= {
+	    @pemit %#=You have been removed from the contacts list.;
+	    @dol/notify [filter(fil_contact,lattr([v(db)]/I*))] [filter(fil_contact,lattr([v(db)]/C*))] DUMMYATTRIB=
+			&## [v(db)]
+	}
+  
+
+@@ ODDS & ENDS:
+@@ 
+@@ isstaff(DB#) -- returns 1 if object is staff, 0 if not.
+@@ 
+@@ stat(DB#,contacts,#) -- returns information on the contacts trait. # is 
+@@ either p, t or b. p = permanent, t = temporary, b = both. Both will take 
+@@ the form of either one number, if both permanent and temporary values are 
+@@ the same, or <permanent>/<temporary> (e.g. 3/2)
+@@ 
+@@ +setstat *<name>/t:contacts=<number> -- this sets the temporary field if 
+@@ <name>'s contacts field to <number>.
+@@ 
+

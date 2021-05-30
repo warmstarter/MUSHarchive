@@ -1,0 +1,19 @@
+@create NPC Supplier Parent
+@lock/Basic NPC Supplier Parent==me
+@set NPC Supplier Parent = WIZARD
+@set NPC Supplier Parent = SAFE
+@set NPC Supplier Parent = NO_COMMAND
+&CMD_RETRIEVE_PACKAGE NPC Supplier Parent=$retrieve package:th [if(hasattr(v(jobdb),HASJOB_%#),[if(hasattr(me,RESERVE_JOB_[get(v(jobdb)/HASJOB_%#)]),[u(fun_give_package,[get(v(jobdb)/HASJOB_%#)])],[pemit(%#,You have not accepted any job here.)])],[pemit(%#,You have not accepted a job.)])]
+&DAILY NPC Supplier Parent=[iter(v(dat_producing),[if(hasattr(me,storage_##),[set(me,storage_##:[add(v(storage_##),v(prod_##))])],[set(me,storage_##:[v(prod_##)])])]
+&DAT_AHEAR NPC Supplier Parent=@ahear courier pack=th [switch([strmatch([num(*%0)],[v(driver)])],1,[switch([strmatch([zone(here)],[zone([loc([v(driver)])])])],1,[tel(me,[loc([v(driver)])])],0,[pemit([v(driver)],[name(me)] can't go there.%rYou stop driving the [name(me)].)][wipe(me/driver)])])]
+&DAT_PRODUCING NPC Supplier Parent=<PUT COMMODS THAT ARE PRODUCED HOURLY, SEPERATED BY SPACES IN HERE. PLACE HOW MANY OF EACH ARE PRODUCED HOURLY IN &PROD_<COMMOD>>
+@DESCRIBE NPC Supplier Parent=[edit([name(me)],%b%(Supplier%),)] is busily at work in the back corner.
+@set NPC Supplier Parent/DESCRIBE=no_command visual
+&FUN_GIVE_PACKAGE NPC Supplier Parent=[setq(8,[u(fun_jobinfo,TAKEN_%0)])][setq(0,[create(Courier Package)])][parent(%q0,#665)][set(%q0,wiz)][set(%q0,!no_command)][set(%q0,TO:[extract(%q8,6,1)])][set(%q0,FROM:[num(me)])][set(%q0,STORAGE_[extract(%q8,3,1)]:[extract(%q8,4,1)])][lock(%q0,=me)][set(%q0,driver:%#)][set(%q0,monitor)][set(%q0,listen:* has left.)][set(%q0,ahear:[v(dat_ahear)])][set(%q0,commod:[extract(%q8,3,1)])][set(me,BAK_RESERVE_JOB_%0:[v(reserve_job_%0)])][wipe(me/reserve_job_%0)][trigger(%q0/fun_calc_capacity_used)][trigger(me/tri_give,%n)][set(%#,haspackage:%q0)]
+&FUN_JOBINFO NPC Supplier Parent=[edit([edit([get(v(jobdb)/%0)],%b,_)],|,%b)]
+&NPC NPC Supplier Parent=yes
+@set NPC Supplier Parent/NPC=visual
+&SELLING_PRICE_FOOD NPC Supplier Parent=50
+&STORAGE_FOOD NPC Supplier Parent=100
+&TRI_GIVE NPC Supplier Parent=drop Courier Package
+&VERSION NPC Supplier Parent=3.0

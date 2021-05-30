@@ -1,0 +1,15 @@
+@create CD jukebox 
+@Desc CD jukebox=An%barch%bof%bchrome,%bstreaked%bwith%bneon%btubes%bof%bblue%band%bpink,%bbacklit%rbubbles%band%bart%bdeco%bfinishing;%byes,%bit's%ba%bjukebox!
+&ADDCD CD jukebox=$addcd *:@switch [not(v(top%#))]=1,{&top%# me=2;@set me/top%#=no_command;@create platter%#;@desc platter%#=[name(%#)]'s CD collection.;&cd1%# platter%#=%0;@set platter%#/cd1%#=no_command;&colls me=[remove(v(colls),%#)] %#},{&cd[v(top%#)]%# platter%#=%0;@set platter%#/cd[v(top%#)]%#=no_command;&top%# me=[add(1,v(top%#))]};@pemit %#=CD added.
+&DELCD CD jukebox=$delcd *:@switch lt(%0,v(top%#))=0,}@pemit %#=You have entered an invalid command.{,{&cd%0%# platter%#=[get(platter%#/cd[sub(v(top%#),1)]%#)];&top%# me=[sub(v(top%#),1)];@pemit %#=That CD has been deleted.}
+&LISTCD CD jukebox=$listall *:@pemit %#=[name(*%0)]'s CDs:;@trigger me/lister=%#,[num(*%0)],1,[sub(v(top[num(*%0)]),1)]
+&PICKCD CD jukebox=$cd *:@switch member(v(colls),num(*%0))=0,{@pemit %#=Invalid name.},{@emit [name(%#)] picks [get(platter[num(*%0)]/cd[add(1,rand(sub(v(top[num(*%0)]),1)))][num(*%0)])] from [name(*%0)]'s cd collection.}
+&LISTER CD jukebox=@pemit %0=[iter(extract(lnum(v(top%1)),%2,min(add(1,sub(%3,%2)),50)),%r[add(1,##)]. [get([num(platter%1)]/cd[add(1,##)]%1)])];@switch [gte(sub(%3,%2),50)]=1,{@trigger me/lister=%0,%1,[add(50,%2)],%3}
+&RANDCD CD jukebox=$cd:@emit [name(%#)] selects a new CD and [setq(1,extract(v(colls),add(1,rand(words(v(colls)))),1))][setq(2,add(1,rand(sub(v(top[r(1)]),1))))][get(platter[r(1)]/cd[r(2)][r(1)])] starts playing.;&curr me=[get(platter[r(1)]/cd[r(2)][r(1)])];&cdplaying here=[get(platter[r(1)]/cd[r(2)][r(1)])]
+&RANDplay CD jukebox=@emit With a slight whir and hum [setq(1,extract(v(colls),add(1,rand(words(v(colls)))),1))][setq(2,add(1,rand(sub(v(top[r(1)]),1))))][get(platter[r(1)]/cd[r(2)][r(1)])] starts playing.;&curr me=[get(platter[r(1)]/cd[r(2)][r(1)])];&cdplaying here=[get(platter[r(1)]/cd[r(2)][r(1)])];@wait 600=@trigger me/randplay
+&startrand CD Jukebox=$startrand:@trigger me/randplay
+&SUMMARY CD jukebox=$cdsummary:@pemit %#=[iter(v(colls),%r[name(##)]: [sub(v(top##),1)] cds)];@pemit %#=Total number of cds: [fold(add_nums,iter(v(colls),sub(v(top##),1)))]
+&ADD_NUMS CD jukebox=add(%0,%1)
+&CDHELP CD jukebox=$cdhelp:@pemit %#=Jukebox%bCommands:%r%rcd%b<name>%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b:%brandomly%bselect%ba%bcd%bfrom%b<name>'s%bcollection%rcd%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b:%bpick%ba%bcd%bat%brandom%bfrom%banyone's%bcds%raddcd%b<"album"%bby%bArist>%b:%badd%ba%bcd%bto%byour%bcollection%rdelcd%b<index%bnum>%b%b%b%b%b%b%b%b:%bdelete%bcd%b#%bwhatever%bfrom%byour%bcollection%rlistall%b<name>%b%b%b%b%b%b%b%b%b%b%b:%blist%ball%bof%b<name>'s%bcds%rcdsummary%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b:%bsee%ba%bshort%bsummary%bof%bcds%bentered%rlist%bs#-e#%b<name>%b%b%b%b%b%b%b%b:%blist%b<name>'s%bcds%bfrom%bs#%bto%be#
+&STATE CD jukebox=ready
+&LIST2CD CD jukebox=$list *-* *:@pemit %#=[name(*%2)]'s CDs:;@trigger me/lister=%#,[num(*%2)],%0,[min(%1,sub(v(top[num(*%2)]),1))]

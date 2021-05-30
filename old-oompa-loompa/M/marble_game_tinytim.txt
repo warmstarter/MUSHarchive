@@ -1,0 +1,26 @@
+
+@create Marble game
+@desc Marble game=This is the classic game in which marbles are positioned in a cross shape with the center space vacant. The object is to jump one marble (represented by distinct characters here) over another into a free space (.)... thereby removing the marble so jumped. To win you must remove all but one marble (and preferably have it in the center after last jump). Type 'instructions' for more.
+@Osucc Marble game=CAREFULLY picks up the marble game.
+@Succ Marble game=You carefully pick up the game.
+@Odrop Marble game=puts the marble game to the floor.
+@Drop Marble game=You set the game on the floor.
+@VA Marble game=@if eq(v(vr),31)={@emit The game has been won!!;@trigger me/vq;@trigger #56543/vb;@trigger me/vd},{@trigger me/vq}
+@VB Marble game=  ABC    D.F  GHI.KLMNOPEponmlkjihg  fed    cba  
+@VC Marble game=##ABC####D.F##GHI.KLMNOPEponmlkjihg##fed####cba##
+@VD Marble game=$new game:@vr me=0;@emit The game has been reset... good luck.;@vc me=##ABC####DEF##GHIJKLMNOP.ponmlkjihg##fed####cba##;@trigger me/va
+@VE Marble game=$jump * u:@vz me=v(#);@vf me=instr(v(vc),v(0));@vg me=sub(instr(v(vc),v(0)),7);@vh me=sub(instr(v(vc),v(0)),14);@if eq(or(ne(mid(v(vc),v(vh),1),.),eq(mid(v(vc),v(vg),1),.)),1)=@emit that is not a legal move!,{@vr me=add(v(vr),1);@vj me=mid(v(vc),0,v(vh));@vk me=mid(v(vc),add(v(vh),1),6);@vl me=mid(v(vc),add(v(vg),1),6);@vm me=mid(v(vc),add(v(vf),1),sub(48,v(vf)));@vi me=concat(v(vj),v(0),v(vk),.,v(vl),.,v(vm));@vi me=edit(v(vi),spaces(1),);@vc me=v(vi);@trigger me/va}
+@VF Marble game=10
+@VG Marble game=17
+@VH Marble game=24
+@VI Marble game=##ABC####D.F##GHI.KLMNOPEponmlkjihg##fed####cba##
+@VJ Marble game=##ABC####D
+@VK Marble game=F##GHI
+@VL Marble game=KLMNOP
+@VM Marble game=ponmlkjihg##fed####cba##
+@VN Marble game=$jump * r:@vz me=v(#);@vf me=instr(v(vc),v(0));@vg me=add(instr(v(vc),v(0)),1);@vh me=add(instr(v(vc),v(0)),2);@if eq(or(ne(mid(v(vc),v(vh),1),.),eq(mid(v(vc),v(vg),1),.),eq(mod(v(vf),7),6)),1)=@emit that is not a legal move!,{@vr me=add(v(vr),1);@vj me=mid(v(vc),0,v(vf));@vm me=mid(v(vc),add(v(vf),3),sub(46,v(vf)));@vi me=concat(v(vj),..,v(0),v(vm));@vi me=edit(v(vi),spaces(1),);@vc me=v(vi);@trigger me/va}
+@VO Marble game=$jump * d:@vz me=v(#);@vf me=instr(v(vc),v(0));@vg me=add(instr(v(vc),v(0)),7);@vh me=add(instr(v(vc),v(0)),14);@if eq(or(ne(mid(v(vc),v(vh),1),.),eq(mid(v(vc),v(vg),1),.)),1)=@emit that is not a legal move!,{@vr me=add(v(vr),1);@vj me=mid(v(vc),0,v(vf));@vk me=mid(v(vc),add(v(vf),1),6);@vl me=mid(v(vc),add(v(vg),1),6);@vm me=mid(v(vc),add(v(vh),1),sub(48,v(vh)));@vi me=concat(v(vj),.,v(vk),.,v(vl),v(0),v(vm));@vi me=edit(v(vi),spaces(1),);@vc me=v(vi);@trigger me/va}
+@VP Marble game=$jump * l:@vz me=v(#);@vf me=instr(v(vc),v(0));@vg me=sub(instr(v(vc),v(0)),1);@vh me=sub(instr(v(vc),v(0)),2);@if eq(or(ne(mid(v(vc),v(vh),1),.),eq(mid(v(vc),v(vg),1),.),eq(mod(v(vf),7),0)),1)=@emit that is not a legal move!,{@vr me=add(v(vr),1);@vj me=mid(v(vc),0,v(vh));@vm me=mid(v(vc),add(v(vh),3),sub(46,v(vh)));@vi me=concat(v(vj),v(0),..,v(vm));@vi me=edit(v(vi),spaces(1),);@vc me=v(vi);@trigger me/va}
+@VQ Marble game=@vb me=edit(v(vc),#,spaces(1));@emit;@emit Letters remaining: [sub(32,v(vr))];@emit;@dolist 0 7 14 21 28 35 42=@emit mid(v(vb),##,7)
+@VR Marble game=1
+@VS Marble game=$instructions:@emit;@emit You may jump a marble over another by typing 'jump * #' where * is the name of the MARBLE YOU MOVE (note case sensitivity) and # is either 'u','d','r',or 'l' and represents the direction you are jumping the marble. For example... 'jump G u' would mean you were jumping marble G upward over whatever marble was just above it. You may only jump to a vacant space (.), and MUST jump over another marble (not a space). Type 'new game' to begin.

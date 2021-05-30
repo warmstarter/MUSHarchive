@@ -1,0 +1,34 @@
+@create Matt's Computer Parent
+@link Matt's Computer Parent==*me
+@lock/Basic Matt's Computer Parent==*me
+@lock/Enter Matt's Computer Parent==*me
+@set Matt's Computer Parent=LINK_OK
+@set Matt's Computer Parent=STICKY
+@set Matt's Computer Parent=VISUAL
+@ASUCCESS Matt's Computer Parent=@oemit %#=[ansi(c,Types something on the [name(me)].)]
+@AUSE Matt's Computer Parent=@oemit %#=[ansi(c,Types something on the [name(me)].)]
+&LIST Matt's Computer Parent=$list:@pemit %#=[ansi(g,The following files are available..)]%r%r[ansi(c,[iter(lattr(me/data_*),after(##,_))])]%r%r[ansi(g,Type [ansi(y,display <topic>)] [ansi(g,to see that topic)])]%r
+&DISPLAY Matt's Computer Parent=$display *:@sel 1=[not([match([lattr(me/data_*)],*%0*)])],@pemit %#=[ansi(r,That file does not seem to exist.)],{@pemit %#=%r[ansi(g,Newbie Computer File: [capstr(%0)])]%r%r[ansi(c,[eval(me,data_%0)])]%r}
+@DESCRIBE Matt's Computer Parent=A standardised computer. Type [ansi(y,comphelp)] for help.
+&ADD_FILE Matt's Computer Parent=$addfile *=*:@sel 1=[not([match([get(me/list_have_access)],*%N*)])],@pemit %#=[ansi(r,You are not permitted to add files.)],[match([lattr(me/data_*)],*data_%0*)],@pemit %#=[ansi(r,There is already a file of that name.)],{&data_%0 me=%1;@pemit %#=[ansi(y,You add a file called '%0' to the computer.)]}
+&DEL_FILE Matt's Computer Parent=$delfile *:@sel 1=[not([match([get(me/list_have_access)],*%N*)])],@pemit %#=[ansi(r,You are not permitted to delete files.)],[not([match([lattr(me/data_*)],*data_%0*)])],@pemit %#=[ansi(r,There is no file of that name.)],{&data_%0 me=;@pemit %#=[ansi(y,You remove a file called '%0' from the computer.)]}
+&DEL_SUPER Matt's Computer Parent=$delsuper *:@sel 1=[not([isdbref([owner(me)])])],@pemit %#=[ansi(r,You are not permitted to do that.)],{&list_have_access me=[remove([get(me/list_have_access)],%0)];@pemit %#=[ansi(y,You remove [capstr(%0)] from the superusers list.)]
+&DO_+COMPHELP Matt's Computer Parent=$comphelp:@pemit %#=[ansi(g,Computer Help Topics Available:)]%r%r[ansi(c,[iter(lattr(#370/help_*),after(##,_))])]%r%r[ansi(g,Type [ansi(y,comphelp <topic>)] [ansi(g,to see that topic)])]%r
+&DO_COMPHELP_TOPIC Matt's Computer Parent=$comphelp *:@sel 1=[not([match([lattr(#370/help_*)],*%0*)])],@pemit %#=[ansi(r,There is no help on that topic.)],{@pemit %#=%r[ansi(g,Computer Help File: [capstr(%0)])]%r%r[ansi(c,[eval(#370,help_%0)])]%r}
+&HELP_DELSUPER Matt's Computer Parent=This command allows the OWNER of the computer to remove a superuser fromte computer.%r%rUsage: delsuper <name>
+&HELP_ADDSUPER Matt's Computer Parent=This command allows the computer's OWNER to add someone as a computer superuser.%r%rUsage: addsuper <name>
+&HELP_DELFILE Matt's Computer Parent=This command allows a SUPERUSER to remove a file from the computer.%r%rusage: delfile <name>
+&HELP_ADDFILE Matt's Computer Parent=This command allows a SUPERUSER to add a file to the computer.%r%rusage: addfile <name>=<text>
+&HELP_DISPLAY Matt's Computer Parent=This command displays an existing file on the computer.%r%rUsage: display <name of file>
+&HELP_LIST Matt's Computer Parent=This command lists all of the available files on the computer.%r%rUsage: list
+&HELP_BUGS-ETC Matt's Computer Parent=Please report any bugs & send any suggestions for this computer to Matt. The parent for this computer is available in the OOC Nexus Code Museum. If you do use this computer, please contact Matt so he can add you to the +mail list for updates and suggestions.
+&ADD_SUPER Matt's Computer Parent=$addsuper *:@sel 1=[not([isdbref([owner(me)])])],@pemit %#=[ansi(r,You are not permitted to do that.)],{&list_have_access me=[get(me/list_have_access)] [capstr(%0)];@pemit %#=[ansi(y,You add [capstr(%0)] as a superuser.)]}
+&LIST_SUPERUSERS Matt's Computer Parent=$listsuper:@pemit %#=[ansi(g,Computer Superusers: [get(me/list_have_access)])]
+&HELP_LISTSUPER Matt's Computer Parent=This command lists the computer superusers.%r%rUsage: listsuper
+&COPY_FILE Matt's Computer Parent=$copyfile *=*:@sel 1=[not([match([get(me/list_have_access)],*%N*)])],@pemit %#=[ansi(r,You are not permitted to copy files.)],[not([match([lattr(me/data_*)],*data_%0*)])],@pemit %#=[ansi(r,There is no file of that name.)],[match([lattr(me/data_*)],*data_%1*)],@pemit %#=[ansi(r,There is already a file of that name.)],{@cpattr me/data_%0=me/data_%1;@pemit %#=[ansi(y,You copy '%0' as '%1'.)]}
+&HELP_COPYFILE Matt's Computer Parent=This command allows any superuser to copy a file on the computer.%r%rUsage: copyfile <name to copy from>=<name to copy to>
+&MOVE_FILE Matt's Computer Parent=$movefile *=*:@sel 1=[not([match([get(me/list_have_access)],*%N*)])],@pemit %#=[ansi(r,You are not permitted to move files.)],[not([match([lattr(me/data_*)],*data_%0*)])],@pemit %#=[ansi(r,There is no file of that name.)],[match([lattr(me/data_*)],*data_%1*)],@pemit %#=[ansi(r,There is already a file of that name.)],{@mvattr me/data_%0=me/data_%1;@pemit %#=[ansi(y,You move '%0' as '%1'.)]}
+&HELP_MOVEFILE Matt's Computer Parent=This command allows any superuser to move a file, ie copy it to a new name and delete the old one (rename it:)%r%rUsage: movefile <file to move>=<new name>
+&PRINT_FILE Matt's Computer Parent=$print *:@sel 1=[not([match([lattr(me/data_*)],*%0*)])],@pemit %#=[ansi(r,That file does not seem to exist.)],{@pemit %#=[ansi(y,You request a printout of '%0'.)];@emit [ansi(c,The [name(me)] begins to print.)];@wait 10={@oemit %#=[ansi(c,The [name(me)] finishes printing and %N takes the printout.)];@pemit %#=[ansi(c,The [name(me)] finishes printing and you take the printout.)];[setq(0,[create(CP,0)])];@desc %q0=%rComputer Printout of - [capstr(%0)]%r%r[get(me/data_%0)]%r;@name %q0=Computer Printout-<%q0>;@set %q0=destroy_ok;@set %q0=chown_ok;@fo [owner(me)]=@chown %q0=%N;give %#=%q0}}
+&HELP_PRINT Matt's Computer Parent=This command allows anyone to obtain a printout of a file.%r%rUsage: print <file>%r%rThe resultant 'printout' obhect is chown_ok and destroy_ok so anyone can @dest or @chown it.
+&LIST_HAVE_ACCESS Matt's Computer Parent= Temp YALE Zammier

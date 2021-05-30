@@ -1,0 +1,470 @@
+@@   .-----.    ____
+@@  /  o  /|   /\   \
+@@ /_____/o|  /o \ o \
+@@ | o   | | /o o \___\
+@@ |  o  |o/ \ o  /o  /
+@@ |   o |/   \  / o /
+@@ '-----' jgs \/__o/
+@@ 
+@@ 
+@@ Craps 1.4 by Javelin <dunemush@pennmush.org>
+@@ Released under the same license terms as the PennMUSH server.
+@@ (I.e. no commercial use without prior permission from me,
+@@ you must return improvements to me, you must maintain the
+@@ credit line in the help text).
+@@
+@@ This code is in mpp format. It requires a recent Penn 1.7.3 server
+@@ that supports @switch/notify (1.7.3p14 or later) and @break.
+@@
+@@ This code provides a craps table. Features include:
+@@ * Automated croupier calls rolls and handles chips
+@@ * The pass, don't pass, come, don't come, odds on all four, and
+@@   place bets are supported, as well as the field bet,
+@@   "hard ways", big 6/big 8, and proposition bets, including the horn bet.
+@@ * Pretty table display, including showing what's bet on
+@@
+@@ A few things are slightly different than the casino:
+@@ * Winnings are rounded off, we don't force horn bets to be multiples of 4
+@@ * No buy bets or hop bets are supporetd
+@@ * Odds on a come bet are always working, even after a point is made
+@@
+@@ Currently assumes that you track player chips by using a bank object
+@@ (dbref in table/BANK) that records chips in attributes named by
+@@ player dbrefs. You'll probably have to modify these attributes
+@@ to work with your money system:
+@@ If you prefer a female croupier, set SUBJ to 'She'
+
+@create Craps table
+
+@DESCRIBE Craps table=
+   You glance from the well-coiffed croupier down to the felt of the table.
+   %r[u(table,%#)]%r[switch(v(shooter),,No one has the dice. Type 'pick up dice' to pick them up.%r,[name(v(shooter))] has the dice.%b)]Type 'bet <amount> on <type of bet>' to bet.%rType 'use table' for full instructions.
+
+
+&table craps table=
+ %b/--+---+[repeat(-,6)][iter(4 5 6 8 9 10,+-----, ,)]+%b%b.-----.[space(4)]____%b%b%b%r
+  | %b | D | DONT [iter(4 5 6 8 9 10,|[center(u(betmarks,dontcome##,4,%0),5)], ,)]|%b/%b%bo%b%b/|%b%b%b/\\%b%b%b\\%b%b%r
+  | P | O | COME |[iter(4 5 6 8 9 10,center(u(pointon,##),5), ,|)]|/_____/o|%b%b/o%b\\%bo%b\\%b%r
+  | A | N | [u(betmarks,dontcome,4,%0)] |[iter(4 5 6 8 9 10,center(## [u(betmark,##,%0)],5), , |)]||%bo%b%b%b|%b|%b/o%bo%b\\___\\%r
+  | S | T | %b[u(oddsmark,dontcome,%0)] %b |[iter(4 5 6 8 9 10,center(u(betmarks,come##,4,%0),5), ,|)]||%b%bo%b%b|o/%b\\%bo%b%b/o%b%b/%r
+  | S | P |[repeat(_,6)][iter(4 5 6 8 9 10,|[center(u(oddsmarks,come##,4,%0,_),5,_)], ,)]||%b%b%bo%b|/%b%b%b\\%b%b/%bo%b/%b%r
+  | %b | A |[space(40)]|%b%b'-----'%bjgs%b\\/__o/%b%b%r
+  | L | S |[space(14)]C O M E[space(19)]+-------+-------+[space(6)]%r
+  | I | S |[center(trim(u(betmarks,come,30,%0)),40)]|%b%b%b[center(Seven,9)]%b[u(betmark,seven,%0)]%b|[space(6)]%r
+  | N |___|[repeat(_,40)]+-------+-------+[space(6)]%r
+  | E | %b%b \\[space(4)][iter(2 3 4 9 10 11 12,center(##,4), ,*)] | 3-3 [u(betmark,hard6,%0)] | 5-5 [u(betmark,hard10,%0)] |[space(6)]%r
+  | %b | %b[u(betmark,big6,%0)]%b \\[space(3)][center(FIELD,34)] | 4-4 [u(betmark,hard8,%0)] | 2-2 [u(betmark,hard4,%0)] |[space(6)]%r
+  | %b | %b6%bB \\[space(3)][center(trim(u(betmarks,field,20,%0)),33)] | 1-1 [u(betmark,crap2,%0)] | 6-6 [u(betmark,crap12,%0)] |[space(6)]%r
+  | %b | %b%bI%b%b \\[repeat(_,36)]|[center(\[[u(betmark,horn,%0)]\],15)]|[space(6)]%r
+  | %b \\ %bG%b8%b[u(betmark,big8,%0)] |[space(10)]Don't Pass Box%b%b[u(betmarks,dontpass,7,%0)][space(2)]| 1-2 [u(betmark,crap3,%0)] | 6-5 [u(betmark,eleven,%0)] |[space(6)]%r
+  \\ %b%b \\[repeat(_,7)]|[repeat(_,26)][u(oddsmarks,dontpass,7,%0,_)][repeat(_,2)]+-------+-------+[space(6)]%r
+  %b\\[space(18)]PASS LINE%b%b[u(betmarks,pass,12,%0)][space(6)]|%b%b%b[center(Any Craps,9)]%b[u(betmark,anycraps,%0)]%b|[space(6)]%r
+  %b%b\\[repeat(_,28)][u(oddsmarks,pass,12,%0,_)][repeat(_,6)]|_______________|[space(6)]
+
+@@ u(betmark,bet,%#,optional char)
+&isyourbet craps table=[words(lattr(me/BET-%1-%0))]
+&isbet craps table=[words(lattr(me/BET-*-%0))]
+&betmark craps table=[switch(1,t(u(isyourbet,%0,%1)),ansi(hg,$),t(u(isbet,%0)),$,mid(%2%b,0,1))]
+&oddsmark craps table=[u(betmark,%0ODDS,%1,%2)]
+@@ u(betmarks,bet,length,%#,optional char)
+&betmarks craps table=[ljust([switch(1,t(u(isyourbet,%0,%2)),ansi(hg,$),t(u(isbet,%0)),$)][repeat($,min(dec(%1),max(0,dec(u(isbet,%0)))))],%1,mid(%3%b,0,1))]
+&oddsmarks craps table=[u(betmarks,%0ODDS,%1,%2,%3)]
+&pointon craps table=[switch(v(point),%0,ON)]
+
+@set craps table=monitor
+&cmd_shooterleft craps table=^^.* has (left|disconnected)\.$:
+	@switch %#=[v(shooter)], {
+	&SHOOTER me;
+	@emit The croupier notes %N's departure and waits for someone else to pick up the dice.}
+
+@set craps table/cmd_shooterleft=regexp
+
+@use Craps table=
+       CRAPS by Javelin%r
+        [wrap(
+	[space(2)]Craps is a game of dice that takes place in rounds.
+        The first roll of the round is the "come out". If the come out
+        roll is a 2\, 3\, 7\, 11\, or 12\, the round is over. Otherwise\,
+        the number rolls is the "point" and the player continues to
+        roll the dice until the point is rolled again or a 7 is rolled.
+	,76,76,%r[space(2)])]%r
+	COMMANDS:%r
+	* bet <amount> on <type of bet>%r
+	* bet odds on \[pass, dontpass, come<#>, or dontcome<#>\]%r
+	* roll dice%r
+	* pass dice%r
+	* pick up dice%r
+ 	BET TYPES: (type 'what is <betname>' for an explanation)%r
+	* On a comeout roll: pass, dontpass%r
+	* After comeout: come, dontcome, 4, 5, 6, 8, 9, 10, big6, big8, hard4, hard6, hard 8, hard10%r
+        * Any time: field, crap2, crap3, crap12, anycraps, seven, eleven, horn
+       
+&cmd_whatis craps table=$what is *:
+	@pemit %#=[setq(0,lcstr(%0))][switch(1,
+  t(member(pass dontpass,%q0)),
+	A pass bet is made before a comeout roll. It pays 1:1 if the comeout 
+	is a 7 or 11\, or if shooter makes the point later.%r
+	A dontpass bet is the opposite. It pays 1:1 if the comeout is a 
+	2 or 3\, or if a 7 is rolled before a point is made. If the comeout 
+	is a 12\, your money is returned.,
+  t(member(come dontcome,%q0)),
+	A come bet is the same as a pass bet\, but is made after a comeout 
+	roll. It either pays off on a 7 or 11\, loses on a 2\, 3\, or 12\, 
+	or establishes a "come-point" that must be made before the next 7
+        is rolled.%r
+	A dontcome bet is the "come" version of a dontpass bet.,
+  t(member(4 5 6 8 9 10,%q0)),
+	A "place bet" is a bet on a number (4\, 5\, 6\, 8\, 9\, or 10) made 
+	after a comeout roll. It wins if the number is rolled before a 7. 
+	It pays 9:5 if the bet is on 4 or 10\, 7:5 if it's on 5 or 9\, and
+	7:6 if it's on 6 or 8.,
+  strmatch(%q0,big*),
+	The big6 pays 1:1 if a 6 is rolled before a 7.%r
+	The big8 pays 1:1 if an 8 is rolled before a 7.,
+  strmatch(%q0,hard*),
+	The "hard ways" bets (hard4, hard6, hard8, and hard10) win when 
+	the given number is rolled as a pair of dice of equal value 
+	(i.e.\, a hard6 is a roll of two 3's) before either a 7 is rolled
+        or the given number is rolled any other way. 
+	It pays 7:1 if the bet is on hard4 or hard10\, 
+	and 9:1 on hard6 or hard8.,
+  not(comp(%q0,field)),
+ 	The field bet wins if a 2\, 3\, 4\, 9\, 10\, 11\, or 12 is rolled 
+	on the next roll. It pays 2:1 if a 2 or 12 is rolled on the next 
+	roll\, and 1:1 if one of the other field numbers is rolled.,
+  strmatch(%q0,*crap*),
+	The crap2\, crap3\, and crap12 bets win if a 2\, 3\, or 12\, 
+	respectively\, is rolled on the next roll. It pays 30:1 for 
+	bets on crap2 and crap12\, and 15:1 for bets on crap3.%r
+	The anycraps bet wins if any of those numbers are rolled on the 
+	next roll\, and pays 7:1.,
+  strmatch(%q0,*even),
+	The seven bet wins if a 7 is rolled on the next roll\, and pays
+	4:1.%rThe eleven bet wins if an 11 is rolled on the next roll\, 
+	and pays 15:1.,
+  not(comp(%q0,horn)),
+	The horn bet wins if 2\, 3\, 11\, or 12 is rolled on the next 
+	roll. If the roll is a 2 or 12\, this bet pays 6:1. If it's a 
+	3 or 11\, this bet pays 3:1.,
+  not(comp(%q0,odds)),
+	An odds bet is an additional wager of the same amount as an 
+	existing pass\, dontpass\, come\, or dontcome bet\, made once a 
+	point (or come-point) has been established. They win or lose with 
+	their corresponding bet. Pass and come odds bets pay 6:5 if the  
+	point is 6 or 8\, 3:2 if the point is 5 or 9\, and 2:1 if the 
+	point is 4 or 10.%rDontpass and dontcome odds bets pay 5:6 if 
+	the point is 6 or 8\, 2:3 if the point is 5 or 9\, and 1:2 if 
+	the point is 4 or 10.,
+   I'm sorry but I've never heard of that bet.)]
+
+
+@@ Attributes are named BET-<DBREF>-<BETTYPE> and contain amount bet
+@@ Bets resolved on the next roll: field, crap, any craps, seven, eleven, horn
+@@ Resolves at next comeout: pass, dontpass, place bets, big 6/8
+@@ We don't know when: hard ways, come/dontcome
+
+@@ Bets that can only be made on the come-out
+&cmd_bet_comeout craps table=
+	$^bet (\d+) on (pass|dontpass):
+	@break [switch(0,
+	  not(comp(v(status),comeout)),
+	    1[pemit(%#,That bet can only be made on a come-out roll.)],
+          gte(u(money,%#),%1), 
+	    1[pemit(%#,You can not afford that bet.)],
+          lte(v(minimum),%1),
+            1[pemit(%#,The table minimum is [v(minimum)].)],
+	0)]; 
+     @emit %N places [u(count,%1)] on [switch(%2,pass,the pass line,the don't pass box)].;
+      &%# [v(bank)] = [sub(u(money,%#),%1)];
+      &bet-%#-%2 me=[add(default(me/bet-%#-%2,0),%1)]
+
+@set craps table/cmd_bet_comeout=regexp
+
+@@ Bets that can only be made after the comeout
+&cmd_bet_notcomeout craps table=
+	$^bet (\d+) on ([45689]|10|big[68]|hard[468]|hard10):
+	  @break [null(regmatch(%2,\\d+,1))][switch(0,
+	  comp(v(status),comeout),
+	    1[pemit(%#,That bet can only be made after a come-out roll.)],
+          gte(u(money,%#),%1), 
+	    1[pemit(%#,You can not afford that bet.)],
+          lte(v(minimum),%1),
+            1[pemit(%#,The table minimum is [v(minimum)].)],
+	0)]; 
+     @emit %N places [u(count,%1)] on [switch(%2,big*,the big %q1,hard*,%q1 the hard way,%q1)].;
+      &%# [v(bank)] = [sub(u(money,%#),%1)];
+      &bet-%#-%2 me=[add(default(me/bet-%#-%2,0),%1)]
+
+@set craps table/cmd_bet_notcomeout=regexp
+
+@@ Come and don't come bets
+@@ These are tricky. We need to set them as 'pending' bets and
+@@ see what happens on the next roll before we know what they'll really
+@@ be called.
+&cmd_bet_come craps table=
+	$^bet (\d+) on (come|dontcome):
+	  @break [switch(0,
+	  comp(v(status),comeout),
+	    1[pemit(%#,That bet can only be made after a come-out roll.)],
+          gte(u(money,%#),%1), 
+	    1[pemit(%#,You can not afford that bet.)],
+          lte(v(minimum),%1),
+            1[pemit(%#,The table minimum is [v(minimum)].)],
+	0)]; 
+     @emit %N places [u(count,%1)] on [switch(%2,come,come,dontcome,don't come)].;
+      &%# [v(bank)] = [sub(u(money,%#),%1)];
+      &bet-%#-%2 me=[add(default(me/bet-%#-%2,0),%1)]
+
+@set craps table/cmd_bet_come=regexp
+
+@@ Bets that can be made any time
+&cmd_bet_any craps table=
+	$^bet (\d+) on (field|crap[23]|crap12|anycraps|seven|eleven|horn):
+	  @break [null(regmatch(%2,\\d+,1))][switch(0,
+          gte(u(money,%#),%1), 
+	    1[pemit(%#,You can not afford that bet.)],
+          lte(v(minimum),%1),
+            1[pemit(%#,The table minimum is [v(minimum)].)],
+	0)]; 
+     @emit %N places [u(count,%1)] on [switch(%2,field,the field,
+	crap*,craps %q1,anycraps,any craps,seven,seven,eleven,eleven,horn,
+	the horn)];
+      &%# [v(bank)] = [sub(u(money,%#),%1)];
+      &bet-%#-%2 me=[add(default(me/bet-%#-%2,0),%1)]
+
+@set craps table/cmd_bet_any=regexp
+@@ Odds bets, after comeout, by someone who has a pass/dont/come/dont bet
+@@ We need to find out if this player has such a bet in which the odds
+@@ bet, if present, is less than the total bet.
+&cmd_bet_odds craps table=
+	$^bet odds on (pass|dontpass|come\d+|dontcome\d+):
+	  @break [switch(0,
+	not(and(strmatch(%1,*pass),not(comp(v(status),comeout)))),
+	 1[pemit(%#,That bet can only be made after a come-out roll.)],
+	hasattr(me,BET-%#-%1),
+	 1[pemit(%#,You must have a bet on %1 before you can bet odds.)],
+	[setq(1,sub(v(BET-%#-%1),v(BET-%#-%1ODDS)))][gt(%q1,0)],
+	 1[pemit(%#,You've already placed odds on that bet.)],
+        gte(u(money,%#),%q1), 
+         1[pemit(%#,You can not afford that bet.)],
+        lte(v(minimum),%q1),
+         1[pemit(%#,The table minimum is [v(minimum)].)],
+	0)];
+     @emit %N places [u(count,%q1)] as an odds bet on 
+	[switch(%1,pass,the pass line,dontpass,the don't pass box,
+	u(prettyname,%1))].;
+      &%# [v(bank)] = [sub(u(money,%#),%q1)];
+      &bet-%#-%1ODDS me=[v(BET-%#-%1)]
+
+@set craps table/cmd_bet_odds=regexp
+
+
+&bank craps table=#255
+&ok_to_bet craps table=1
+@startup craps table=@drain me; @notify me; @drain me/RESOLVE; @tr me/reset
+&reset craps table=$+clear: @wipe me/bet-*; &status me=comeout; &point me
+&minimum craps table=4
+
+&roll craps table=[die(1,6)] [die(1,6)]
+&betname craps table=[comp(last(%0,-),last(%1,-))]
+&prettyname craps table=[switch(%0,ANYCRAPS,any craps,
+	lcstr(regedit(edit(%0,DONT,don't%b,ODDS,%bODDS),(\\D)(\\d),$1 $2)))]
+
+
+@@ Odds for various bets
+&odds-horn-2 craps table=7.75
+&odds-horn-12 craps table=7.75
+&odds-horn craps table=4
+&odds-anycraps craps table=8
+&odds-crap2 craps table=31
+&odds-crap12 craps table=31
+&odds-crap3 craps table=16
+&odds-field craps table=2
+&odds-field-2 craps table=3
+&odds-field-12 craps table=3
+&odds-seven craps table=5
+&odds-eleven craps table=16
+&odds-4 craps table=2.8
+&odds-10 craps table=2.8
+&odds-5 craps table=2.4
+&odds-9 craps table=2.4
+&odds-6 craps table=2.16667
+&odds-8 craps table=2.16667
+&odds-big6 craps table=2
+&odds-hard4 craps table=8
+&odds-hard10 craps table=8
+&odds-hard6 craps table=10
+&odds-hard8 craps table=10
+&odds-pass craps table=2
+&odds-come craps table=2
+&odds-dontpass craps table=2
+&odds-dontpass-12 craps table=1
+&odds-dontcome craps table=2
+&odds-dontcome-12 craps table=1
+&odds-passodds-6 craps table=2.2
+&odds-passodds-8 craps table=2.2
+&odds-passodds-5 craps table=2.5
+&odds-passodds-9 craps table=2.5
+&odds-passodds-4 craps table=3
+&odds-passodds-10 craps table=3
+&odds-dontpassodds-4 craps table=1.5
+&odds-dontpassodds-10 craps table=1.5
+&odds-dontpassodds-5 craps table=1.6667
+&odds-dontpassodds-9 craps table=1.6667
+&odds-dontpassodds-6 craps table=1.8333
+&odds-dontpassodds-8 craps table=1.8333
+&odds-comeodds-6 craps table=2.2
+&odds-comeodds-8 craps table=2.2
+&odds-comeodds-5 craps table=2.5
+&odds-comeodds-9 craps table=2.5
+&odds-comeodds-4 craps table=3
+&odds-comeodds-10 craps table=3
+&odds-dontcomeodds-4 craps table=1.5
+&odds-dontcomeodds-10 craps table=1.5
+&odds-dontcomeodds-5 craps table=1.6667
+&odds-dontcomeodds-9 craps table=1.6667
+&odds-dontcomeodds-6 craps table=1.8333
+&odds-dontcomeodds-8 craps table=1.8333
+
+@@ getodds: %0 - bet name, %1 - number rolled
+@@ Only applies to bets above.
+&getodds craps table=[setq(0,regediti(%0,come\\d+,come))][switch(%q0,dont*odds,
+	v(ODDS-%q0-[v(oldpoint)]),
+	first([v(ODDS-%q0-%1)] [v(ODDS-%q0)]))]
+@@ winnings: %0 - bet attribute name, %1 - number rolled
+&winnings craps table=
+	[round(mul(ulocal(getodds,extract(%0,3,1,-),%1),first(v(%0))),0)]
+
+&subj craps table=He
+
+&cmd_pick_up craps table=$pick up dice:
+	@break [switch(1,nearby(me,v(SHOOTER)),
+	  1[pemit(%#,Someone else has the dice.)],
+	0)];
+	 &SHOOTER me=%#;
+	  @emit %N picks up the dice. "New shooter," announces the croupier.
+
+&cmd_pass craps table=$pass dice:
+	@break [switch(0,
+	not(comp(%#,v(SHOOTER))),
+	 1[pemit(%#,You don't have the dice now.)],
+	not(comp(v(status),comeout)),
+	 1[pemit(%#,Don't pass the dice until the end of a round.)],
+	0)];
+	 &SHOOTER me;
+	  @emit %N puts down the dice. The croupier waits for someone to pick them up. 
+
+&cmd_roll craps table=$roll dice:
+    @break [switch(0,
+	not(comp(%#,v(SHOOTER))),
+	 1[pemit(%#,You don't have the dice now.)],
+	hasattr(me,BET-%#-PASS), 
+	 1[pemit(%#,You must bet on the pass line before you can roll the dice.)],
+	0)];
+     @wait me={
+      	@emit %N rolls the dice: [setr(0,die(1,6))] [setr(1,die(1,6))];
+	@emit The croupier announces, "[setr(2,add(%q0,%q1))], 
+	  [first(shuffle(v(NAME-[min(%q0,%q1)]-[max(%q0,%q1)]),|),|)].";
+	@switch/first [v(status)]:%q2=
+	  comeout:2, {&WINPAT me=DONTPASS|CRAP2|FIELD|ANYCRAPS|HORN;
+		@emit The croupier collects the dice and waits for someone else to pick them up.;
+		&shooter me},
+	  comeout:3, {&WINPAT me=DONTPASS|CRAP3|FIELD|ANYCRAPS|HORN;
+		@emit The croupier collects the dice and waits for someone else to pick them up.;
+		&shooter me},
+	  comeout:7, {&WINPAT me=PASS|SEVEN|DONTCOME\\\\d+},
+	  comeout:11, {&WINPAT me=PASS|ELEVEN|HORN|FIELD},
+	  comeout:12, {&WINPAT me=DONTPASS|CRAP12|ANYCRAPS|HORN|FIELD;
+		@emit The croupier collects the dice and waits for someone else to pick them up.;
+		&shooter me},
+	  comeout:*, {
+		&WINPAT me=[switch(member(4 9 10,%q2),0,,FIELD|)]COME%q2;
+		@emit The croupier flips the puck onto the %q2 point.;
+		&point craps table=%q2;
+		&status craps table=point
+	  },
+	  point:7, { 
+	     &WINPAT me=DONTPASS(ODDS)?|SEVEN|DONTCOME\\\d+|COME;
+	     @wipe me/BET-*-DONTCOME;
+	     @wipe me/BET-*-COME4*;
+	     @wipe me/BET-*-COME5*;
+	     @wipe me/BET-*-COME6*;
+	     @wipe me/BET-*-COME8*;
+	     @wipe me/BET-*-COME9*;
+	     @wipe me/BET-*-COME10*;
+	     &OLDPOINT me=[v(point)];
+	     @emit The croupier says, "Seven out, line in." [v(subj)] collects the dice and waits for someone else to pick them up.;
+	     &status me=comeout;
+		&shooter me;
+             &point me
+	  },
+	  point:11, { 
+	     &WINPAT me=COME|ELEVEN|HORN|FIELD;
+	     @wipe me/BET-*-DONTCOME
+	  },
+	  point:2, { 
+	     &WINPAT me=DONTCOME|CRAP2|HORN|FIELD|ANYCRAPS;
+	     @wipe me/BET-*-COME
+	  },
+	  point:3, { 
+	     &WINPAT me=DONTCOME|CRAP3|HORN|FIELD|ANYCRAPS;
+	     @wipe me/BET-*-COME
+	  },
+	  point:12, { 
+	     &WINPAT me=DONTCOME|CRAP12|HORN|FIELD|ANYCRAPS;
+	     @wipe me/BET-*-COME
+	  },
+	  point:*, {
+	     @emit [switch(%q2,v(point),The croupier says\, "Point made.")];
+	     &status [switch(%q2,v(point),me,#-1)]=comeout;
+	     &WINPAT me=%q2|COME%q2[switch(member(4 9 10,%q2),0,,|FIELD)][switch(%q2,v(point),|PASS|PASSODDS)][if(eq(%q0,%q1),|HARD%q2|BIG%q2)][switch(%q2,2,|ANYCRAPS|CRAP2|HORN,3,|ANYCRAPS|CRAP3|HORN,11,|ELEVEN|HORN,12,|ANYCRAPS|CRAP12|HORN)];
+	     &point [switch(%q2,v(point),me,#-1)];
+	     @wipe [if(eq(%q0,%q1),#-1,me)]/BET-*-HARD%q2;
+	     @wipe me/BET-*-DONTCOME*%q2
+          };
+          @wait 0={@dol [regraball(sortby(BETNAME,lattr(me/BET-*)),-([s(\[v(WINPAT)\])])(ODDS)?$)]
+		= { @emit [v(subj)] glances at [name(setr(4,extract(##,2,1,-)))], and slides over [u(count,u(winnings,##,%q2))]. "[capstr(u(prettyname,extract(##,3,1,-)))] wins.";
+		    &%q4 [v(bank)] = [add(u(money,%q4),u(winnings,##,%q2))];
+		    &## me
+          	};
+		@dol [lattr(me/BET-*-COME)]={&##%q2 [switch(member(4 5 6 8 9 10,%q2),0,#-1,me)]=[add(default(me/##%q2,0),v(##))]; &## me};
+		@dol [lattr(me/BET-*-DONTCOME)]={&##%q2 me=[add(default(me/##%q2,0),v(##))]; &## me};
+	    @wait 0={@switch [v(status)]=comeout, 
+	  	{@wipe me/BET-*-HORN; @wipe me/BET-*-FIELD; @wipe me/BET-*-*CRAP*; @wipe me/BET-*-*EVEN; @wipe me/BET-*-PASS*; @wipe me/BET-*-DONTPASS*; @wipe me/BET-*-BIG*; @wipe me/BET-*-HARD*; @wipe me/BET-*-4; @wipe me/BET-*-5; @wipe me/BET-*-6; @wipe me/BET-*-8; @wipe me/BET-*-9; @wipe me/BET-*-10},
+		{@wipe me/BET-*-HORN; @wipe me/BET-*-FIELD; @wipe me/BET-*-*CRAP*; @wipe me/BET-*-*EVEN};
+		     @notify me
+            }}
+    }
+
+
+
+@@ Fancy bet names, dice in sorted order
+&name-1-1 craps table=a pair of aces in the wrong places|snake eyes|craps|double in the bubble|twice in the rice|eleven in a shoe store|two bad boys from Illinois|aces|to me, they look like mice
+&name-1-2 craps table=an ace caught a loose deuce|craps|ace-deuce|small ace deuce, can't produce
+&name-1-3 craps table=Little Joe|ace trey, the country way
+&name-1-4 craps table=little Phoebe|we got the fever|handy Andy
+&name-1-5 craps table=sixie from Dixie
+&name-1-6 craps table=six ace, end of the race|front line winner, back line skinner|six one, you're all done
+&name-2-2 craps table=a ballerina special|the hard way
+&name-2-3 craps table=after five, the field's alive|fiver, fiver, racetrack driver
+&name-2-4 craps table=Jimmie Hicks
+&name-2-5 craps table=five two, you're all through|up pops the devil
+&name-2-6 craps table=catching eight and feeling great
+&name-3-3 craps table=the hard way|a Brooklyn forest|pair o'treys, waiter's roll
+&name-3-4 craps table=seven's a bruiser, the front line's a loser
+&name-3-5 craps table=eighter from decatur
+&name-3-6 craps table=Nina from Pasadena|Nina at the Marina|center field
+&name-4-4 craps table=the hard way|square pair|a square pair, like mother and dad|the windows
+&name-4-5 craps table=Jesse James|ocean liner niner
+&name-4-6 craps table=big one on the end
+&name-5-5 craps table=the hard way|puppy paws|pair o'roses|pair of sunflowers
+&name-5-6 craps table=Yo|Yo 'leven|Yo Levine the dancing queen|six five, no jive
+&name-6-6 craps table=a hobo's delight on a cold and rainy night|boxcars|midnight|atomic craps|all the spots we got|outstanding in your field|triple dipple, in the lucky ducky|double saw on boxcars
+
+
+
+&status craps table=comeout
+&money craps table=[default([v(bank)]/%0,0)]
+&count craps table=[switch(%0,1,a chip,%0 chips)]
+
+@dol lattr(craps table)=@switch ##=cmd_*,,semaphore,,@set craps table/##=no_command

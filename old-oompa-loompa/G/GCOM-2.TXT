@@ -1,0 +1,24 @@
+@create Command Objects
+@link Command Objects = #2
+@lock Command Objects==#2
+@set Command Objects = INHERIT
+@set Command Objects = OPAQUE
+@set Command Objects = WIZARD
+@set Command Objects = SAFE
+&BEEP Command Objects=$@beep *:@pemit %#=[name(*%0)] has been +beeped.;@pemit *%0=[repeat(=,79)]%r[beep(5)]You have been beeped by [name(%#)]. Please Respond.[beep(5)]%r[repeat(=,79)]
+&LASTON-1 Command Objects=$+laston *:@pemit/silent %#=[name(*%0)] was last on: [get(*%0/last)]
+&CMD_ROY Command Objects=$@roy*: th [pemit(%#, [u(me/header, Royalty List)][iter([iter([lsearch(all, flags, r)], [switch([hastype(##, PLAYER)], 1, ##, )], , [space(1)])], [u(me/ADD_ENTRY, ##)], ,%r)][eval(me, footer)])]
+&CMD_WIZARD-1 Command Objects=$@wiz*: th [pemit(%#, [u(me/header, Wizard List)][iter([iter([lsearch(all, flags, W)], [switch([hastype(##, PLAYER)], 1, ##, )], , [space(1)])], [u(me/ADD_ENTRY, ##)], ,%r)][eval(me, footer)])]
+&CMD_EBUILDER-1 Command Objects=$ebui*: th [pemit(%#, [u(me/header, [get(%#/EMPIRE)] Builder List)][iter([iter([lsearch(all, type, PLAYER)], [switch([haspower(##, BUILDER)], 1, [switch([strmatch([get(%#/EMPIRE)], [get(##/EMPIRE)])], 1, ##, )], )], , [space(1)])], [u(me/ADD_ENTRY, ##)], ,%r)][eval(me, footer)])]
+&HEALTH Command Objects=$@health *=*:&health %n=%p
+@ACONNECT Command Objects=+bbscan
+@set Command Objects/ACONNECT=no_command
+&CMD_HELP Command Objects=$$help *:th [switch([hasattr([rnum(%L, %0)], HELP_MSG)], 0, [pemit(%#, [name(rnum(%L, %0))] has now help message.)],#-1*, [pemit(%#, There is no object by that name!)], [pemit(%#, [name([rnum(%L, %0)])]%r%R[eval([rnum(%L, %0)], HELP_MSG)]%r)])]
+&CMD_OOC Command Objects=$ooc *:@remit loc(%#)=[ansi(r,%[)][ansi(bh,OOC)][ansi(r,%])] [ansi(ch,[name(v(#))])] [switch({[mid(%0,0,1)]},:,{[squish([ansi(ch,[edit([v(0)],:,)])])]},{[ansi(c,says, ")][ansi(ch,[v(0)])][ansi(c,")]})]
+&CMD_INSPECT Command Objects=$insp* *:th pemit(%#,udefault(%L/inspect_[secure(%1)],"[secure(%1)]" is not inspectable.))
+&FUN_TIME Command Objects=[setq(0,div(%0,3600))][switch(gt(%q0,9),0,0)]%q0:[setq(1,[div(sub(%0,[mul(div(%0,3600),3600)]),60)])][switch(gt(%q1,9),0,0)]%q1:[setq(2,[sub(%0,[mul(div(%0,60),60)])])][switch(gt(%q2,9),0,0)]%q2
+&CMD_WIZARD Command Objects=$+wiz*: th [pemit(%#, [u(me/header, Wizard List)][iter([iter([lsearch(all, flags, W)], [switch([hastype(##, PLAYER)], 1, ##, )], , [space(1)])], [u(me/ADD_ENTRY, ##)], ,%r)][eval(me, footer)])]
+&CMD_ROYALTY Command Objects=$+roy*: th [pemit(%#, [u(me/header, Royalty List)][iter([iter([lsearch(all, flags, r)], [switch([hastype(##, PLAYER)], 1, ##, )], , [space(1)])], [u(me/ADD_ENTRY, ##)], ,%r)][eval(me, footer)])]
+&ADD_ENTRY Command Objects=[ansi(hb, |  |)][space(1)][ljust([ansi(hg, [name(%0)])], 20)][space(2)][ljust([ansi(r, [get(%0/ALIAS)])], 10)][ansi(y, %[)][switch([conn(%0)], -1, [space(2)], [ansi(hw, %]%[)])][ansi(y, %])][space(3)][switch([conn(%0)], -1, [ansi(hr, Last On:)][space(3)][ansi(r, [laston(%0)])], [space(1)][ljust([ansi(g, [u(me/fun_time, [idle(%0)])] )], 9)][ansi(g, [repeat(-, 4)])][space(1)][ljust([ansi(g, [u(me/FUN_TIME, [conn(%0)])])], 12)])]
+&HEADER Command Objects=[ansi(hb,%b_)]%r[ansi(hb,|)]%b[ansi(hb,|)][center([ansi(hw,[mudname()] - %0)],79)]%r[ansi(hb,|)]%b[ansi(hb,`)][repeat([ansi(hb,_)],76)]%r[ansi(hb,|)][repeat([ansi(hb,_)],78)][ansi(hb,%))]%r%r[u(mush_motd)]%r%b[repeat([ansi(hb,_)],78)]%r[ansi(hb,|[repeat(_, 3)])][ljust([ansi(hb, Name[repeat(_, 18)])],22)][ljust([ansi(hb, Alias___)],8)][ansi(hb, __CONN)][ansi(hb, [repeat(_, 4)])][ljust([ansi(hb, Idle/Last On__)], 14)][ljust([ansi(hb, On For______________)], 20)] [ansi(hb,%))]%r
+&FOOTER Command Objects=%r[ansi(hb, | %\[repeat(_, 77)]%r|[repeat(_,77)]|)]

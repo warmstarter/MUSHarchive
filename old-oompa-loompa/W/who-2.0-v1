@@ -1,0 +1,273 @@
+################################################################################
+#                                                   code written by Jack_Daniels
+#					  for MUSH 2.0.10 patch level 5 or later
+# Notes on the formating of this file:
+#  - is used to seperate attributes
+#  # in the first column means a comment
+#  all leading blanks should be stripped, but tailing ones should not
+#
+# This 'who' code is available via anonymous FTP from
+# caisr2.caisr.cwru.edu (129.22.24.22) in file:
+#   /pub/mush/mushcode/2.0_who.1
+#
+# A tool that parses this format is available in the same directory in file:
+#   amolitor_mush_unformatter.c
+#
+# Questions/Problems/Requests go to 
+#   i7579909@wsuaix.csc.wsu.edu
+################################################################################
+#
+# create Master Object parent to place main attributes on, since the parents of
+# objects in the master room are not checked for commands
+@create Master Object parent
+-
+#
+# your generic lock command
+#
+@lock Master Object parent=me
+-
+#
+# WHO_TITLE - the title section of the who screen, this sets the mood
+#
+&WHO_TITLE Master Object parent=
+	[setq(4,add(30,v(loca_len),v(name_len),v(alias_len)))]
+	[center([mudname()] who,r(4),-)]
+	%R- S - Name
+	[switch(
+	  hasflag(v(0),wizard),0,
+	   {[space(sub(v(name_len),4))]},
+            {(#Flags)[space(sub(v(name_len),12))]}
+	)] 
+	- Alias[space(sub(v(alias_len),5))] 
+	- On For 
+	- Idle 
+	- Location[switch(
+	  hasflag(v(0),wizard),0,
+	   {[space(sub(v(loca_len),8))]},
+	    {(#Flags)[space(sub(v(loca_len),16))]}
+	)] 
+	- %R[center(,r(4),-)]
+-
+#
+# WHO_TRAILER - the closing section of the WHO screen, this wraps it all up
+#
+&WHO_TRAILER Master Object parent=
+	[center(,r(4),-)]
+	%R- [setq(6,
+	  [setq(5,0)]
+	    [iter(lwho(),
+	      {[switch(hasflag(##,dark),0,[setq(5,add(r(5),1))])]}
+	    )]
+	    [r(5)]
+	  )]
+	[r(5)] Players Connected.
+	[space(sub(r(4),add(strlen(r(5)),23)))] 
+	-%R[center(,r(4),-)]
+-
+#
+# WHO_FORMAT - Format everything Between the title and the trailer
+#
+&WHO_FORMAT Master Object parent=
+	[switch(hasflag(v(0),dark),1,,
+	{
+	- [switch(Capstr(mid(get(v(0)/sex),0,1)),F,F,M,M,O)] - 
+	 [setq(1,u(who_name,v(0),v(1)))]
+	 [mid(r(1),0,v(name_len))]
+	 [space(sub(v(name_len),strlen(mid(r(1),0,v(name_len)))))] 
+	- [mid(get(v(0)/alias),0,v(alias_len))]
+	 [space(sub(v(alias_len),strlen(mid(get(v(0)/alias),0,
+	   v(alias_len)))))] 
+	-[u(who_onfor,v(0),v(1))] 
+	- [u(location_format,v(0),v(1))]
+	}
+	)]
+-
+#
+# WHO_NAME - Define what parts of the name user gets to see
+#            Wizards see flags and db#'s in addition to name
+#	     Also give priority to db# and flags when in wizard
+#	     mode (cut the end of the name instead the end of the flags)
+#
+&WHO_NAME Master Object parent=
+	[setq(7,name(v(0)))]
+	[setq(8,
+	 [switch(hasflag(v(1),wizard),0,,
+	 {
+	  ([v(0)][flags(v(0))])
+	 }
+	 )]
+	)]
+	[mid(r(7),0,sub(v(name_len),strlen(r(8))))]
+	[mid(r(8),0,v(name_len))]
+	[space(sub(v(name_len),
+	  add(strlen(mid(r(7),0,sub(v(name_len),strlen(r(8))))),
+	   strlen(mid(r(8),0,v(name_len)))))
+	)]
+-
+#
+# NAME_LEN, ALIAS_LEN, LOCA_LEN - length of name, alias, and location
+#				  columns
+#
+&NAME_LEN Master Object parent=21
+-
+&ALIAS_LEN Master Object parent=6
+-
+&LOCA_LEN Master Object parent=21
+-
+#
+# WHO_ONFOR - parser to convert idle time, and connected time to standard
+#    	      WHO format.
+#
+&WHO_ONFOR Master Object parent=
+#
+# start On For column
+#
+	[setq(2,conn(v(0)))]
+	[setq(3,idle(v(0)))]
+	[switch(div(r(2),86400),
+	 0,
+	    [space(2)]
+	  ,
+	   {
+	     [div(r(2),86400)]
+	     [setq(2,sub(r(2),mul(div(r(2),86400),86400)))]d 
+	   }
+	)]
+	[switch(div(r(2),3600),
+	 0,
+	    00
+	  ,
+	   {
+	     [switch(lt(9,div(r(2),3600)),0,0)]
+	     [div(r(2),3600)]
+	     [setq(2,sub(r(2),mul(div(r(2),3600),3600)))]
+	   }
+	)]
+	:
+	[switch(div(r(2),60),
+	 0,
+	    00
+	  ,
+	   {
+	     [switch(lt(9,div(r(2),60)),0,0)]
+	     [div(r(2),60)]
+	     [setq(2,sub(r(2),mul(div(r(2),60),60)))]
+	   }
+	)] -
+#
+# start idle
+#
+	[switch(cat(lt(86399,r(3)),lt(3599,r(3)),lt(59,r(3))),
+	  1 1 1,
+	   {
+	     [space(sub(4,strlen(div(r(3),86400))))]
+	     [div(r(3),86400)]d
+	    },
+	  0 1 1,
+	   {
+	     [space(sub(4,strlen(div(r(3),3600))))]
+	     [div(r(3),3600)]h
+	    },
+	  0 0 1,
+	   {
+	     [space(sub(4,strlen(div(r(3),60))))]
+	     [div(r(3),60)]m
+	    },
+	  0 0 0,
+           {
+	     [space(sub(4,strlen(r(3))))]
+             [r(3)]s
+	    }
+	)]
+-
+#
+# LOCATION_FORMAT - Determine and Display the Location part of the who list
+#
+&LOCATION_FORMAT Master Object parent=
+	[setq(7,
+	  [switch(
+	    or(
+               hasflag(v(1),wizard),
+               not(hasflag(v(0),unfindable))
+            ),
+	    1,
+	      [name(loc(v(0)))]
+	     ,
+  	      *UNFINDABLE*
+ 	   )]
+	)]
+	[setq(8,
+	  [switch(
+	    or(
+	       hasflag(v(1),wizard),
+	       and(
+		   hasflag(loc(v(0)),jump_ok),
+		   not(hasflag(v(0),unfindable))
+	       )
+	    ),
+	  0,
+	   ,
+	  {
+	   ([loc(v(0))][flags(loc(v(0)))])
+	  }
+          )]
+	)]
+	[mid(r(7),0,sub(v(loca_len),strlen(r(8))))]
+	[mid(r(8),0,v(loca_len))]
+	[space(
+	 sub(
+	  v(loca_len),
+	  add(
+	      strlen(
+	       mid(r(7),0,
+	        sub(v(loca_len),strlen(r(8)))
+	       )
+	      ),
+	      strlen(mid(r(8),0,v(loca_len)))
+           )
+	  )
+	)] -
+-
+#
+# general safeness (I suggest you do this to all your master objects)
+#
+@set Master Object parent=SAFE
+-
+#
+# Create The actual Master Room Object
+#
+@create Master Object
+-
+#
+# General All Purpose Lock
+#
+@lock Master Object=me
+-
+#
+# CMD_WHO - call WHO_TITLE, then WHO_FORMAT, and finally WHO_TRAILER
+#
+&CMD_WHO Master Object=
+	$who:
+	  @pemit %#=
+	    [u(who_title,v(#))]
+	    [iter(
+	     lwho(),
+	      {%R[u(who_format,##,v(#))]}
+	    )]
+	    %R
+	    [u(who_trailer,v(#))]
+-
+#
+# General All Purpose Safety (again, I advise to do this)
+#
+@set Master Object=SAFE
+-
+#
+# enable Master Room Object to use attributes from parent
+#
+@parent Master Object=Master Object Parent
+-
+#
+# Thats it
+#
+

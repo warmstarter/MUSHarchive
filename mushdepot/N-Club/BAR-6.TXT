@@ -1,0 +1,32 @@
+@create PARENT: Bartender
+@lock PARENT: Bartender=*[owner(me)]
+@Desc PARENT: Bartender=%b To create your own bartender, do the following:%r%r%t%t@create <bartender>%r%t%t@parent <bartender>=#732%r%t%tdrop <bartender>%r%r%b This is a bartender object. Once you get your copy, @name it (if not already done), @set it !NO_COMMAND, @lock it to yourself, set it's sex using 'sex_it <male, female, or neuter>', and load your descs for it into desc_1 through desc_6 by typing:%r%r%t'&desc_<1,2,3,etc> <bartender name>=<put your desc here.>%r%r%b After descs are loaded use the `Ldesc <desc_1 thru 6>' command to make the chosen desc visible.
+&BARHELP PARENT: Bartender=$barhelp:@pemit %#=[name(me)] has the following commands%r%r%torder <drink name>%t%t%tSpeaks for itself.%r%t+order <pers> a <drink>%t%tOrder someone else a drink.%r%trequest <song> by <band>%tRequest the bartender to play some music.%r%tround%t%t%t%t%t%tBuys everyone in the bar a drink.%r%ttable%t%t%t%t%t%tBuys new drinks for everyone at your table.%r%tmen%t%t%t%t%t%t%tBuys all the men in the bar a drink.%r%tladies%t%t%t%t%t%tBuys all the women in the bar a drink.%r%ttoast <name>%t%t%t%tToasts said person.%r%tsummon%t%t%t%t%t%tPages request for owners presence.%r%r%t%t%t%t%t%t%t%t%tEnjoy your drinks - [name(me)].
+&ORDER PARENT: Bartender=$order *:@pemit %#=You order %0 from [name(me)];@oemit %#=%n has ordered %0.;@wait 10=@pemit %#=[name(me)] brings you your %0;@wait 10=@oemit %#=[name(me)] brings %n %p %0.
+&ORDERFOR PARENT: Bartender=$+order * a *:@pemit %#=You order a %1 from [name(me)] for %0.;@oemit %#=%n orders %1 for %0.;@wait 10=@pemit %#=[name(me)] brings %0 the %1.;@wait 10=@oemit %#=[name(me)] brings %0 the %1, and [u(me/ssex)] smiles at %n.
+&ROUND PARENT: Bartender=$round:@emit [name(me)] smiles at %n, realizing this is a joyous occasion for %o. [name(me)] does [u(me/psex)] thing behind the bar with style, busily mixing a number of drinks.;@WAIT 10=@emit [name(me)] moves throughout the room refreshing the drinks of all, and smiling at %n, has a drink [u(me/osex)]self.
+&TABLE PARENT: Bartender=$table:@emit [name(me)] smiles at %n, looking over the party at %p table. [name(me)] busily mixes a number of drinks, showing a little flare as [u(me/ssex)] does so.;@WAIT 10=@emit [name(me)] moves through the room approaching the table of %n, [u(me/ssex)] places the new drinks in front of each person at the table.
+&MEN PARENT: Bartender=$men:@pemit %#=[name(me)] looks your way and smiles.;@oemit %#=%n approaches [name(me)], whispering in [u(me/psex)] ear. [name(me)] smiles, and turns to work at a frantic pace, mixing several drinks.;@wait 10=@emit [name(me)] circulates throughout the room refreshing the drinks of all the men present. [name(me)] indicates the buyer to be %n, and smiles at the receipient of each drink.
+&SUMMON PARENT: Bartender=$Summon:@oemit %#=%n speaks to [name(me)] for a moment.;@pemit %#=You ask [u(me/osex)] to request the owners presence.%r[name(me)] nods and smiles, "I'll see if the owner is busy, hold on a sec.";page [owner(me)]=%n requests your presence here.
+@Fail PARENT: Bartender=[name(me)] looks at you, and [u(me/ssex)] asks you to leave the bar.
+&TOAST PARENT: Bartender=$Toast *:@oemit %#=%n holds up %p glass and shouts, "A toast to %0!";@pemit %#=You hold your glass aloft and shout, "A Toast to %0!"
+@Odesc PARENT: Bartender=glances at [name(me)]
+&MUSIC PARENT: Bartender=$request * by *:@switch [u(playing)]=Yes,{@pemit %#=The bartender looks at you and smiles, "There is a selection already playing."},No,{&playing me=Yes;@pemit %#=You walk up to the bartender and make your request.;@oemit %#=%n walks up to the bartender and requests a song.;@wait 5={@emit [name(me)] places a CD into the player, while smiling at %n.};@wait 10={@emit The stereo system suddenly launches into, "%0" by %1.};@wait 50={@emit The song, "%0" is being played by the stereo system, the rhythm pulsing throughout the room.};@wait 90={@emit The room is filled with the sounds of "%1" as the massive speakers assault you with waves of sound.};@wait 140={@emit The stereo drones on playing, "%0" shaking the room with the power of its sound.};@wait 190={@emit The song "%0" is being played, the sound reverberating through the room.};@wait 270={@emit The stereo winds down, finishing "%0" by %1;&playing me=No}}
+&PLAYING PARENT: Bartender=No
+&HEAR1 PARENT: Bartender=^* has Arriv*::smiles and waves to [name(*%0)].
+&LADIES PARENT: Bartender=$ladies:@pemit %#=[name(me)] looks your way and [u(me/ssex)] smiles.;@oemit %#=[name(me)] smiles wide, as %n gives [u(me/osex)] a signal. [name(me)] works at a frantic pace, mixing several drinks.;@wait 10=@emit [name(me)] circulates throughout the room refreshing the drinks of all the ladies present. [name(me)] winks at %n, and a smile crosses [u(me/osex)] lips as [u(me/ssex)] returns to the bar.
+@Sex PARENT: Bartender=male
+&SEX_IT PARENT: Bartender=$sex_it *:@switch %0=female,{@sex me=female;&osex me=her;&psex me=hers;&ssex me=she},male,{@sex me=male;&osex me=him;&psex me=his;&ssex me=he},neuter,{@sex me=neuter;&osex me=it;&psex me=its;&ssex me=it}
+&OSEX PARENT: Bartender=him
+&PSEX PARENT: Bartender=his
+&SSEX PARENT: Bartender=he
+&STOP PARENT: Bartender=$stop song:@pemit %#={[name(me)] nods and presses stop.};@oemit %#={%n whispers something to [name(me)] and slips [u(psex)] some money.};@halt me;@emit {The music comes to an abrupt halt.};&playing me=No
+&LDESC PARENT: Bartender=$Ldesc *:@desc me=[get_eval(me/%0)];@pemit [owner(me)]=[name(me)] is now wearing %0
+@set PARENT: Bartender=MONITOR
+@set PARENT: Bartender=VISUAL
+@set PARENT: Bartender=PARENT_OK
+@set PARENT: Bartender=NO_COMMAND
+@set PARENT: Bartender=AUDIBLE
+@set PARENT: Bartender=ENTER_OK
+@set PARENT: Bartender=HALT
+@set PARENT: Bartender=SAFE

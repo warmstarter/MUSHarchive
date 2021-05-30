@@ -1,0 +1,65 @@
+@create 25000
+@link 25000=#6
+@lock/Parent 25000=isfed/1
+@set 25000=HALT
+@set 25000=WIZARD
+@set 25000=ROYALTY
+@set 25000=LINK_OK
+@set 25000=OPAQUE
+@set 25000=!NO_COMMAND
+&ACCESSLIST 25000=COMMAND CREW SECURITY ENGINEERING SCIENCE GUEST
+&LIST_PSHOW 25000=$sec*list show *:@remit %l=%N [v(msg_access)];@swi [gt(member(v(accesslist),ucstr(%1)),0)][u(secfn,v(setting_lpshow),%#)]=0?,{@pemit %#=On the console you can read "[ansi(r,THAT SECURITY LIST DOES NOT EXIST)]".},?0,{@remit %l=[s(v(msg_noaccess))]},11,{@pemit %#=[u(header,ACCESS LIST:[TRIM(UCSTR(%1))])][iter([v(ACC_%1)],%r[ljust([rankname(##)] [name(##)],40)] [position(##)])]%r[s(v(line))]}
+&LIST_PREM 25000=$sec*list remove *=*:@remit %l=%N [v(msg_access)];@swi [member(v(accesslist),ucstr(%1))][u(secfn,v(setting_lprem),%#)][true([pmatch(%2)])][member(v(ACC_%1),pmatch(%2))]=0???,{@pemit %#=On the console you can read "[ansi(r,THAT SECURITY LIST DOES NOT EXIST)]".},?0??,{@remit %l=[s(v(msg_noaccess))]},??0?,{@pemit %#=On the console you can read, "[ansi(r,THIS NAME DOES NO EXIST IN THE UNIVERSAL DATABASE)]".},1110,{@pemit %#=On the console you can read, "[ansi(r,DOES NOT EXIST ON THAT LIST)]".},1111,{@pemit %#=On the console you can read, "[ansi(c,[ucstr(%2)] as been removed from list)].";&acc_%1 [v(num)]=[remove([v(acc_%1)],[pmatch(%2)])]}
+&LIST_PADD 25000=$sec*list add *=*:@remit %l=%N [v(msg_access)];@swi [gt(member(v(accesslist),ucstr(%1)),0)][u(secfn,v(setting_lpadd),%#)][true([pmatch(%2)])][member(v(ACC_%1),pmatch(%2))]=0???,{@pemit %#=On the console you can read "[ansi(r,THAT SECURITY LIST DOES NOT EXIST)]".},?0??,{@remit %l=[s(v(msg_noaccess))]},??0?,{@pemit %#=On the console you can read, "[ansi(r,THIS NAME DOES NO EXIST IN THE UNIVERSAL DATABASE)]".},1111,{@pemit %#=On the console you can read, "[ansi(r,ALREADY ON LIST)]".},1110,{@pemit %#=On the console you can read, "[ansi(c,[ucstr(%2)] as been added to list)].";&acc_%1 [v(num)]=[v(acc_%1)] %2}
+&SETTING_LPSHOW 25000=COMMAND
+&SETTING_LPREM 25000=COMMAND
+&SETTING_LPADD 25000=COMMAND
+&SETTING_LCREATE 25000=COMMAND
+&SETTING_LREMOVE 25000=COMMAND
+&SETTING_LSHOW 25000=COMMAND
+&LIST_REMOVE 25000=$sec*list remove *:@remit %l=%N [v(msg_access)].;@swi [gt(member(v(accesslist),ucstr(%1)),0)][u(secfn,[v(setting_lremove)],%#)]=0?,{@pemit %#=On the console you can read: Security List Does Not Exist},?0,{@remit %l=[s(v(msg_noaccess))]},11,{@pemit %#=On the console you can read: Security list "[ansi(c,[ucstr(%1)])]" removed.;&accesslist [v(num)]=[remove([v(accesslist)],[ucstr(%1)])];&ACC_%1 [v(num)]}
+&LIST_SHOW 25000=$sec*list all:@remit %l=%N [v(msg_access)].;@swi [u(secfn,[v(setting_lshow)],%#)]=0,{@remit %l=[s(v(msg_noaccess))]},1,{@pemit %#=[u(header,SECURITY LIST: ALL)]%r[u(columnize,v(accesslist))]%r[s(v(line))]},
+&LIST_CREATE 25000=$sec*list create *:@remit %l=%N [v(msg_access)].;@swi [member(v(accesslist),ucstr(%1))][u(secfn,[v(setting_lcreate)],%#)]=?0,{@remit %l=[s(v(msg_noaccess))]},1?,{@pemit %#=On the console you can read: Security List Already Exist},01,{@pemit %#=On the console you can read: Security list "[ansi(c,[ucstr(%1)])]" created.;&accesslist [v(num)]=[v(accesslist)] [ucstr(%1)]}
+&NUM 25000=#25000
+&ACC_FLAG 25000=#6709 #1439 #20414 #7362 #11148 #12287
+&ASLEEP 25000=[ljust(Asleep,7)][ansi(g,|)][ljust(mid(cat(class(v(0)),name(v(0))),0,20),20)][ansi(g,|)][ljust(get(v(0)/race),10)][ansi(g,|)][mid(name(loc(v(0))),0,26)]%r
+&AWAKE 25000=[ansi(hc,[ljust(Awake,7)])][ansi(g,|)][ansi(hc,[ljust(mid(cat(class(v(0)),name(v(0))),0,20),20)])][ansi(g,|)][ansi(hc,[ljust(get(v(0)/race),10)])][ansi(g,|)][ansi(hc,[ljust([mid(name(loc(v(0))),0,26)],26)]%r)]
+&ON 25000=[truth([conn([v(0)])])]
+&ENTRY 25000=[iter([pinzone(#19)],[ansi(g,[name(##)])]%r)]
+&ENDBAR 25000=%b[ansi(b,[repeat(_,5)])][space(13)][ansi(b,[repeat(_,22)][space(14)][ansi(b,[repeat(_,9)])]%r[ansi(b,\()][ansi(b,[repeat(_,5)])][ansi(b,|)]%b[ansi(g,[get(me/shipname)])]%b[ansi(b,|)][ansi(b,[repeat(_,22)])][ansi(b,|)]%b[ansi(g,LCARS [rand(9)][rand(9)][rand(9)][rand(9)]%b[ansi(b,|)][ansi(b,[repeat(_,9)])][ansi(b,\))]
+&BAR 25000=%b[ansi(b,[repeat(_,5)])][space(45)][ansi(b,[repeat(_,17)]%r[ansi(b,\()][ansi(b,[repeat(_,5)])][ansi(b,|)]%b[ansi(r,Internal Sensors)]%b[ansi(g,[time()])]%b[ansi(b,|)][ansi(b,[repeat(_,17)])][ansi(b,\))]%r
+&LISTON2 25000=$$List onboard:@pe %#=You say, "Computer, list onboard.";@oemit %L/%#=%n says, "Computer, list onboard";@pe %#=[u(bar)]%r%b[u(entry)]%r[u(endbar)]
+&LISTON 25000=$list onboard:@pe %#=You say, "Computer, list onboard.";@oemit %L/%#=%n says, "Computer, list onboard";@pe %#=[u(bar)]%r%b[ljust(Status,7)][ansi(g,|)][ljust(Name,20)][ansi(g,|)][ljust(Race,10)][ansi(g,|)] Location%r[ansi(g,--------+[repeat(-,20)]+[repeat(-,10)]+[repeat(-,27)])];@pe %#=[space(1)][iter(pinzone([zone(loc(%#))]),[ifelse(isconn(##),u(awake,##),u(asleep,##))])];@wait 1=@pe %#=[u(endbar)]
+&LOCATE 25000=$locate *:[pemit(%#,You say, "Computer, locate %0.")][oemit(%L/%#,%n says, "Computer, locate %0.")][switch([isinzone([num(*%0)],[zone(loc(*%#))])],1,{[remit([loc(%#)],[ansi(b,The computer chirps, ")][ansi(g,[class(%0)] [name(*%0)] is located at [name([loc(*%0)])])][ansi(b,")].)]},0,{[switch([hastype(*%0,player)],1,[remit([loc(%#)],[ansi(b,The computer chirps, ")][ansi(g,[class(%0)] [name(*%0)] is not onboard the [v(shipname)])][ansi(g,.")])],#-1,[remit([loc(%#)],The computer chirps, "[ansi(c,%0 is not onboard the [v(shipname)])].")])]})]
+&MOTD_HELP 25000=$smotd help:@pemit %#=[u(header,HELP SYSTEM: Smotd)]%r[s(xget(#13426,HELP_MOTD))]%r[s(v(line))]
+&MOTD_SHOW 25000=$smotd:@remit %l=%n types something on a nearby console.;@switch [u(secfn,COMMAND CREW GUEST DEPT_HEAD,%#)]=0,{@remit %l=[s(v(msg_noaccess))]},1,{@pemit %#=[s(v(motd))]%r},
+&MOTD_SET 25000=$smotd/set *:@remit %l=%n types something on a nearby console.;@switch [u(secfn,COMMAND,%#)]=0,{@remit %l=[s(v(msg_noaccess))]},{&motd [v(num)]=%[ansi%(c,repeat%(=,78))]%r%[center%([s(v(shipname))] MOTD,78)]%[ansi%(c,repeat%(=,78))]%r%[ansi%(g,Stardate:)] [stardate(secs())]%t<[time()]>%r%r%0%r%r%[ansi%(g,[rankname(%#)] %N)]%r%[ansi%(c,repeat%(=,78))];@pemit %#=On the console you see, "Message of the day as been set."}
+&LIGHTS_HELP 25000=$light*help:@pemit %#=[u(header,HELP SYSTEM: LIGHTING)]%r[s(xget(#13426,help_light))]%r[s(v(line))]
+&LIGHTS_OFF 25000=$dim:@remit %l=[name(%#)] says, "Computer dim lights.";@swi [true(xget(%l,DIM_STAT))][true(xget(%l,desc_copy))]=0*,{&DIM_STAT %l=Bright},*0,{@cpa %l/desc=%l/desc_copy},;@swi [setq(0,[xget(%l,DIM_STAT)])][strmatch(%q0,Dim)][strmatch(%q0,Dark)]=00,{&dim_stat %l=Dim;@desc %l=[xget(%l,dim_desc)];@remit %l=The Computer says, "[ansi(c,Illumination intensity decreased to 50%%.)]" as the lights to the room dim.},10,{@remit %l=The Computer says, "[ansi(c,Illumination intensity decreased to 0%%.)]" as the lights shifts off and darkness shrouds the room.;&DIM_STAT %l=Dark;@set %l=dark;@desc %l=Darkness prevails everywhere.},01,{@remit %l=The computer says, "[ansi(c,Illumination already at is lowest setting.)]"}
+&LIGHTS_ON 25000=$raise:@remit %l=[name(%#)] says, "Computer raise lights.";@swi [true(xget(%l,DIM_STAT))][true(xget(%l,desc_copy))]=0*,{&DIM_STAT %l=Bright},*0,{@cpa %l/desc=%l/desc_copy},**0,;@swi [setq(0,[xget(%l,DIM_STAT)])][strmatch(%q0,Dim)][strmatch(%q0,Dark)]=00,{@remit %l=The Computer says, "[ansi(c,Illumination already at it's maximum intensity.)]"},01,{@remit %l=The Computer says, "[ansi(c,Illumination intensity increased to 50%%.)]" as the lights of the room increase.;&DIM_STAT %l=Dim;@desc %l=[xget(%l,dim_desc)];@set %l=!dark},10,{@remit %l=The Computer says, "[ansi(c,Illumination raised maximum.)]" as the lights increase to full lighting.;&DIM_STAT %l=Bright;@desc %l=[xget(%l,desc_copy)]}
+&DIM_DESC 25000=The room lights have been dimmed to a soft glow. Flood lights illuminate the doors, shining brigthly in the semi darkness.
+&MSG_ACCESS 25000=walks to the nearest console and types something on it.
+&MSG_NOACCESS 25000=The computer emits a beep and says "[ansi(r,Access Denied.)]"
+&CORE 25000=#25000
+&HELP 25000=$comp*help:@pemit %#=[u(header,HELP SYSTEM: General Help)]%r%r[s(xget(#13426,HELP_GENERAL))]%r[s(v(line))]
+&SHIPNAME 25000=USS Tester
+&LINE 25000=[ansi(c,[repeat(-=,38)]-)]
+&HEADER 25000=[s(v(line))]%r[ansi(y,[ucstr(v(shipname))] MAIN COMPUTER)] [rjust(%b[v(0)],sub(60,strlen(v(shipname))),-)]%r[s(v(line))]
+&SECFN 25000=[switch([member([iter(%0 FLAG,[switch(mid(##,0,1),#,##,[v(ACC_##)] )])],[%1])],0,0,1)]
+&LONGEST_WORD 25000=[setq(8,strlen(first(%0)))][iter(rest(%0),[switch(gt(strlen(##),r(8)),1,setq(8,strlen(##)))])][r(8)]
+&COLUMNIZE 25000=[setq(0,0)][setq(2,u(longest_word,%0))][setq(1,div(70,r(2)))][iter(%0,[switch(r(0),r(1),[setq(0,0)]%R)][ljust(##,r(2))] [setq(0,add(r(0),1))])]
+&PARSE_DATE 25000=[rjust(member(v(months),extract(%0,2,1))/[rjust(extract(%0,3,1),2,0)]/[mid(extract(%0,5,1),2,2)],9)]
+
+@create Computer Help
+@link Computer Help=[owner(me)]
+@set Computer Help=SAFE
+@set Computer Help=!NO_COMMAND
+@set Computer Help=INHERIT
+@set Computer Help=OPAQUE
+@set Computer Help=ROYALTY
+&HELP_SECURITY Computer Help=%rSecurity commands necessary to provide proper security for your ship/base.%r%r[ansi(y,ljust(ACTIVE SCAN,20))]Displays list of those onboard %& their current location.%r%r[ansi(y,ljust(MAXIMUM SECURITY,20))]Activates ship/base-wide security system.%r[space(20)][ansi(c,NOTE%:)] This command automatically activates the Intruder%r[space(26)]Detection and notification systems.%r%r[ansi(y,ljust(NORMAL SECURITY,20))]Reinstates normal security operations.%r%r[ansi(y,ljust(SEC CODE <Exit>=<Password>,30))]Sets the Overrides password on the door.%R[ansi(y,ljust(OVERRIDE <Exit>=<Password>,30))]Overrides security feature on a specified door.%r%r[ansi(c,NOTE%:)] Commands are restricted, Authorized Use Only.
+&HELP_COMM Computer Help=%rThe ship/base communications system allows communication with others via the intercom or compin system. Either a 'broadcast to all personnel' message may be sent or, for more private communications, a 'person to person' individual message may be used.%r%r%r[ansi(y,ljust(BROADCAST <message>,25))]Allows any member on the Command List to send a%r[space(25)]ship/base wide message. All personnel will hear%r[space(25)]the message simultaneously.%r%r[ansi(y,ljust(SCOM <Person>=<Message>,25))]Allows those onboard to send a Person to Person%r[space(25)]comlink communication to another onboard.%r[space(25)][ansi(c,NOTE%:)] Aliases are acceptable.%r
+&HELP_LIGHT Computer Help=%r[ansi(hy,Raise)][space(10)]Increase lighting intensity.%r[ansi(hy,Dim)][space(12)]Decrease Lighting intensity.%r%rThe room @description must be stored in DESC_STORE. A different description for low lighting conditions may be placed in DIM_DESC. If there is nothing%rin DIM_DESC, the shipwide default is used.%r%r[ansi(hc,NOTE:)] [ansi(c,This function has been disabled.)]%r
+&HELP_NEWS Computer Help=%r[ansi(y,[ljust(SNEWS,18)])]Displays all messages on ship/base news system%r%r[ansi(y,[ljust(SNEWS READ #,18)])]Displays specified message #%r%r[ansi(y,[ljust(SNEWS POST *=*,18)])]Post message to ship/base news system%r[space(18)][ansi(c,Example%:)] SNEWS POST 'subject'='text'%r%r[ansi(y,[ljust(SNEWS REMOVE #,18)])]Removes specified message%r[space(18)][ansi(c,Note%:)] You cannot delete others messages%r%r[ansi(y,[ljust(SNEWS RESET,18)])]Clears all messages from news system%r%r[ansi(y,[ljust(SNEWS HELP,18)])]Displays this menu%r
+&HELP_MOTD Computer Help=%rThe SMOTD system will allow ship/base command personnel to leave a Message Of The Day to the station personnel or access-approved visitor.%r%r%r[ansi(y,[ljust(SMOTD,20)])]Displays current ship/base MOTD.%r%r[ansi(y,[ljust(SMOTD/SET <MSG>,20)])]Sets the Message Of The Day.%r[space(20)][ansi(c,NOTE%:)] Restricted, Authorized Use only.%r
+&HELP_GENERAL Computer Help=[ansi(c,[center(**** General Use Command ***,78)])]%r%r[ansi(g,ljust(Roster,16))]To show the current crew roster of the installation or ship%R[ansi(g,ljust(Smotd,16))]To see the current ship/base message of the day%r[ansi(g,ljust(Locate <name>,16))]To locate someone on the ship%r[ansi(g,ljust(Medalert,16))]To call a medical alert in your position%r[ansi(g,ljust(Secalert,16))]To call a security alert at your position%r%r[ansi(c,[center(**** Other commands with specific help menu ****,78)])]%r%r[ansi(g,ljust(ALERT HELP,16))]Ship/Base Alert System%r[ansi(g,ljust(COMM HELP,16))]Ship/Base Communication System%r[ansi(g,ljust(DOOR HELP,16))]Door locking system%r[ansi(g,ljust(LIGHT HELP,16))]Lighting manipulations help%r[ansi(g,ljust(LIST HELP,16))]Security lists system%r[ansi(g,ljust(ROSTER HELP,16))]Roster system%r[ansi(g,ljust(SECURITY HELP,16))]Security Measures system%r[ansi(g,ljust(SMOTD HELP,16))]Message of the day additional help%r[ansi(g,ljust(SNEWS HELP,16))]Ship/Base news system%r

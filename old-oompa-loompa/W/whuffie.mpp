@@ -1,0 +1,100 @@
+@@ The whuffie machine, by Javelin@M*U*S*H. No support, etc.
+@@ Use this code under the Artistic License.
+@@
+@@ Based on the concept of whuffie in Down and Out in the Magic Kingdom,
+@@ a novel by Corey Doctorow.
+@@
+@@ Whuffie is a measure of respect or regard in which you hold someone.
+@@ In this version, any player can assign whuffie on a 0-10 scale
+@@ to any other player, and players can see their total whuffie
+@@ rating. They can also check other players' whuffie ratings,
+@@ which come in four flavors:
+@@   Unweighted - just the sum of whuffie assigned
+@@   Weighted - each whuffie rating assigned is weighted by how much the
+@@              onlooker respects the assigner
+@@   % Righthand - righthand whuffie is that part of unweighted whuffie
+@@                 that was assigned by someone the onlooker rates at least '2'
+@@                 (the rest is called lefthand whuffie)
+@@
+@@ If you want whuffie to have coded effects:
+@@
+@@ Use &whuffie_set_effects to set commands to run when a player's
+@@ whuffie changes and when they connect. The player's dbref will be 
+@@ passed as %0.
+@@ This can be used to grant abilities, etc. based on whuffie.
+
+@create Whuffie
+
+@link Whuffie = #2
+
+@lock/Basic Whuffie==me
+
+@lock/Use Whuffie=
+  TYPE^PLAYER&!POWER^GUEST&!FLAG^GAGGED&!FLAG^NO_WHUFFIE
+
+@set Whuffie = WIZARD
+
+@DESCRIBE Whuffie=The whuffie machine.
+
+&DO_WHUFFIE_CHECK Whuffie=
+  $whuffie/check: 
+    @pemit %#=
+      [setq(0,iter(setdiff(if(orflags(%#,Wr),lwho(),mwho()),#8809 #1455),if(hasflag(##,no_whuffie),,##)))]You have assigned whuffie to online players as follows:%r
+      [table(sort(squish(iter(squish(get(%#/outwhuffie),|),[if(member(%q0,first(itext(0))),[ljust([name(first(itext(0)))]:,13)] [rjust(last(itext(0)),3)])],|,|),|),a,|,|),18,78,|)]%r
+      You have not assigned whuffie to: [ansi(h,itemize(iter(setdiff(%q0,%# [iter(get(%#/outwhuffie),first(itext(0)),|)]),name(itext(0)),%b,|),|))]
+
+&DO_WHUFFIE_ME Whuffie=$whuffie:@pemit %#=[u(fn_show_whuffie,%#,%#)]
+
+&DO_WHUFFIE_OTHER Whuffie=
+  $^whuffie ([^=]+)$: 
+    @break [switch(setr(0,pmatch(%1)),#-1*,1[pemit(%#,No such player.)],#-2*,1[pemit(%#,I can't tell which player you mean.)],0)];
+    @break [if(or(not(comp(%#,owner(me))),gt(objeval(%#,conn(%q0)),-1)),0,1[pemit(%#,That player isn't connected.)])];
+    @break [if(hasflag(%q0,no_whuffie),1[pemit(%#,That player isn't a whuffie participant.)],0)];
+    @pemit %#=[ulocal(fn_show_whuffie,%q0,%#)]
+
+@set Whuffie/DO_WHUFFIE_OTHER=regexp
+
+&DO_WHUFFIE_OTHERS Whuffie=
+  $whuffie/group *: 
+    @pemit %#=
+      [lmath(add,iter(%0,whuffie(itext(0))))]
+
+&DO_WHUFFIE_SET Whuffie=
+  $whuffie *=*:
+    @break [switch(setr(0,pmatch(%0)),#-1*,1[pemit(%#,No such player.)],#-2*,1[pemit(%#,I can't tell which player you mean.)],0)];
+    @break [switch(0,not(hasflag(%q0,no_whuffie)),1[pemit(%#,That player isn't a whuffie participant.)],cand(isint(%1),lte(%1,10),gte(%1,0)),1[pemit(%#,Whuffie is an integer from 0 to 10.)],comp(%#,%q0),1[pemit(%#,You can't give yourself whuffie.)],lte(%1,u(fn_get_whuffie,%#)),1[pemit(%#,You can't give more whuffie than you have.)],0)];
+    &inwhuffie %q0 = [setunion(%# %1,iter(get(%q0/inwhuffie),switch(first(itext(0)),%#,,itext(0)),|,|),|)];
+    &outwhuffie %# = [setunion(%q0 %1,iter(get(%#/outwhuffie),switch(first(itext(0)),%q0,,itext(0)),|,|),|)];
+    @pemit %#=Whuffie assigned.;
+    @tr me/whuffie_set_effects=%q0
+
+&FN_GET_WEIGHTED_WHUFFIE Whuffie=
+  [lmath(add,iter(get(%0/inwhuffie),if(not(hasflag(first(itext(0)),no_whuffie)),fdiv(mul(last(itext(0)),u(xy_whuffie,%1,first(itext(0)))),10)),|))]
+
+&FN_GET_WHUFFIE Whuffie=
+  [lmath(add,iter(get(%0/inwhuffie),if(not(hasflag(first(itext(0)),no_whuffie)),last(itext(0))),|))]
+
+&FN_SHOW_WHUFFIE Whuffie=
+  [name(%0)]'s whuffie: [setr(t,u(FN_GET_WHUFFIE,%0))] unweighted [if(%qt,(About [mul(10,round(mul(10,fdiv(u(RIGHTHAND_WHUFFIE,%0,%1),%qt)),0))]\% righthand))];
+  about [mul(round(fdiv(u(fn_get_weighted_whuffie,%0,%1),10),0),10)] weighted
+
+&FN_UFUN_WHUFFIE Whuffie=
+  [localize(switch([setq(0,pmatch(%0))]1,[match(%q0,#-*)],%q0,[lt(objeval(%#,conn(%q0)),0)],#-1 NOT CONNECTED,hasflag(%q0,no_whuffie),#-1 NOT A WHUFFIE PARTICIPANT,u(fn_get_whuffie,%q0)))]
+
+&LASTSORT Whuffie=[sub(last(%0),last(%1))]
+
+&LEFTHAND_WHUFFIE Whuffie=
+  [lmath(add,iter(get(%0/inwhuffie),switch(u(xy_whuffie,%1,first(itext(0))),>1,0,last(itext(0))),|))]
+
+&RIGHTHAND_WHUFFIE Whuffie=
+  [lmath(add,iter(get(%0/inwhuffie),if(not(hasflag(first(itext(0)),no_whuffie)),switch(u(xy_whuffie,%1,first(itext(0))),<6,0,last(itext(0)))),|))]
+
+&SORT_WHUFFIE Whuffie=[sub(whuffie(%1),whuffie(%0))]
+
+@STARTUP Whuffie=@function whuffie=#7052/fn_ufun_whuffie
+
+&XY_WHUFFIE Whuffie=
+  [@@(how much whuffie has %0 given to %1?)]
+  [if(comp(%0,%1),last(grab(get(%1/inwhuffie),%0 *,|)),10)]
+
+@aconnect whuffie=@tr me/whuffie_set_effects=%#

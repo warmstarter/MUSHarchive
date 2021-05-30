@@ -1,0 +1,32 @@
+@create Teleportation Watch
+@link Teleportation Watch = #3799
+@lock/Basic Teleportation Watch==#1778
+@set Teleportation Watch = LINK_OK
+@set Teleportation Watch = VISUAL
+@set Teleportation Watch = NO_COMMAND
+&TJOIN Teleportation Watch=$+tjoin *:@remit %l=%n taps a few buttons on %p watch.;@fo here=@tel [loc(*%0)];@wait 1=@switch strmatch(%l,[loc(*%0)])=1,@pemit/silent %n=[name(me)] beeps and says\, "Teleport successful.",@pemit/silent %n=[name(me)] beeps and says\, "Teleport failed."
+&CREDITS Teleportation Watch=Kyieren@M*U*S*H...c752312@showme.missouri.edu
+&TTIME Teleportation Watch=$+ttime:@remit %l=%n taps a few buttons on %p watch.;@pemit/silent %n=[name(me)] beeps and says, "It is currently [time()], and it is [timeofday()]."
+&DEST_NNB Teleportation Watch=#4656
+@set Teleportation Watch/DEST_NNB=no_command
+&DEST_GAME Teleportation Watch=#11
+@set Teleportation Watch/DEST_GAME=no_command
+&DEST_BUILD Teleportation Watch=#2229
+@set Teleportation Watch/DEST_BUILD=no_command
+@DESCRIBE Teleportation Watch=A silver watch that handles multiple teleport destinations. There are several colored buttons on it. Type '+thelp' for help.
+@set Teleportation Watch/DESCRIBE=no_command visual
+&TADD Teleportation Watch=$+tadd *=*:@remit %l=%n taps a few buttons on %p watch.;&dest_%0 me=%1;@pemit/silent %n=[name(me)] beeps and says, "Teleport destination '%0' set."
+&TDEL Teleportation Watch=$+tdel *:@remit %l=%n taps a few buttons on %p watch.;@switch hasattrp(me,dest_%0)=1,{@wipe me/dest_%0;@pemit/silent %n=[name(me)] beeps and says\, "Teleport destination '%0' removed."},@pemit/silent %n=[name(me)] beeps and says\, "Teleport destination '%0' does not exist."
+&TEL Teleportation Watch=$+tel *:@switch hasattrp(me,dest_%0)=1,{@remit %l=%n taps a few buttons on %p watch.;@fo here=@tel [u(me/dest_%0)];@wait 1=@switch strmatch(%l,[u(me/dest_%0)])=1,@pemit/silent %n=[name(me)] beeps and says\, "Teleport successful.",@pemit/silent %n=[name(me)] beeps and says\, "Teleport failed."},@pemit/silent %n=[name(me)] beeps and says\, "Teleport destination '%0' does not exist."
+&TLIST Teleportation Watch=$+tlist:@remit %l=%n taps a few buttons on %p watch.;@pemit/silent %n=[name(me)] beeps and says, "Stored destinations are: [iter([setunion(lattr(me/dest_*),lattr(parent(me)/dest_*))],[after(##,DEST_)])]."
+&DEST_PARK Teleportation Watch=#0
+@set Teleportation Watch/DEST_PARK=no_command
+&DEST_DM Teleportation Watch=#2116
+@set Teleportation Watch/DEST_DM=no_command
+&DEST_101 Teleportation Watch=#10
+@set Teleportation Watch/DEST_101=no_command
+&DEST_CODE Teleportation Watch=#2747
+@set Teleportation Watch/DEST_CODE=no_command
+&DEST_APT Teleportation Watch=#2090
+@set Teleportation Watch/DEST_APT=no_command
+&THELP Teleportation Watch=$+thelp:@remit %l=%n taps a few buttons on %p watch.;@pemit/silent %n=[name(me)] beeps and says, "This customizable watch handles multiple teleport destinations and generally makes getting around easier. To list destinations currently stored, use '+tlist'. Several have been preprogrammed. To teleport to a destination, use '+tel <location name>'. To add a destination to your list, use '+tadd <location name>=<dbref #>'. To delete a destination from your list, use '+tdel <location name>'. To join a player's location, use '+tjoin <player name>'. To get the current time, use '+ttime'. In all instances, <location name> must be only one word or separated by underscores (_) and <dbref #> must either have the JUMP_OK flag or be owned by you."

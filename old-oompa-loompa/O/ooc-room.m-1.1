@@ -1,0 +1,61 @@
+#
+#  ooc-room.m - OOC Room Installation
+#  Copyright (C) 1992 by T. Alexander Popiel
+#
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 1, or (at your option)
+#  any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#
+
+#
+#  Bug fixes thanks to: Jeremy Parsons parsoj2@rpi.edu (Xequilon@Mua'Kaar)
+#
+
+&command ("@version");
+$flag_to_use = "INHERIT";
+$flag_to_use = "ROYALTY" if $block =~ /PennMUSH version 1.50/;
+
+&think ("[hasflag(me, wizard)]");
+if ($block ne "1\n") {
+	die "You need WIZARD permissions to make an OOC Room.\n";
+}
+
+&tel ("#2");
+
+$ooc_room = &think ("[loc(OOC)]");
+chop $ooc_room;
+if ($ooc_room eq "I don't see that here.\n#-1") {
+	$ooc_room = &make ("room", "OOC Room");
+}
+print "$ooc_room\tOOC Room\n";
+
+$ooc_exit = &make_one ("exit", "OOC;OOC Room", "#2", $ooc_room);
+print "$ooc_exit\tOOC exit\n";
+
+$ic_exit = &make_one ("exit", "IC;real life;rl;real world;rw;real;back;exit;out;o;leave",
+		      $ooc_room, $ooc_room);
+print "$ic_exit\tIC exit\n";
+
+&lock ($ooc_exit, "", "#0");
+&attr ($ooc_exit, "AFAILURE", "&p%# $rw_exit=%l; @tel %#=[loc(me)]");
+&attr ($ooc_exit, "OFAILURE", "disappears to the OOC room.");
+&attr ($ooc_exit, "FAILURE",  "You are whisked away to the OOC room.");
+&flag ($ooc_exit, $flag_to_use);
+
+&lock ($ic_exit, "", "#0");
+&attr ($ic_exit, "AFAILURE", "@switch [v(p[v(#)])]=, {@tel %#=#0}, {@tel %#=[v(p[v(#)])]; &p%# me}");
+&attr ($ic_exit, "OFAILURE", "returns to the IC world.");
+&attr ($ic_exit, "FAILURE",  "You return to the IC world.");
+&flag ($ic_exit, $flag_to_use);
+
+1;

@@ -1,0 +1,24 @@
+@create PARENT: Bunk
+@link PARENT: Bunk=#2
+@lock PARENT: Bunk=[owner(me)]
+@set PARENT: Bunk=LINK_OK
+@set PARENT: Bunk=VISUAL
+@set PARENT: Bunk=NO_COMMAND
+@AENTER PARENT: Bunk=@name me=[name(owner(me))]'s Bunk (%N - Resting);@set me=!enter_ok;&occupant me=%N
+&DO_SETUP PARENT: Bunk=$bunk setup:@name me=[name(owner(me))]'s Bunk (Empty);@set me=quiet;@set me=monitor;@set me=safe;@cpattr #3855/infilter=me/infilter;@cpattr #3855/filter=me/filter;@cpattr #3855/listen_sleep=me/listen_sleep;@cpattr #3855/listen_wake=me/listen_wake;@cpattr #3855/lalias=me/lalias;@listen me=*;@set me=transparent;@set me=audible;@set me=enter_ok;@lock me=%L;@desc me=[u(desc_after)];&credits me=Designed & Coded by Bret Prichard (10/4/94);@lock me/credits=#0;@set me/credits=visual;@pemit %#=[u(msg_setupdone)];@ealias me=[name(owner(me))];&do_setup me=Blocker;@lock me/do_setup=#0
+@LALIAS PARENT: Bunk=out;ou;o;barracks
+@LISTEN PARENT: Bunk=*
+@PREFIX PARENT: Bunk=(Bunk) -
+@INPREFIX PARENT: Bunk=(Outside) -
+@FILTER PARENT: Bunk=*has arrived*,*has left*,*name set*
+&LISTEN_SLEEP PARENT: Bunk=^*has disconnected*:@name me=[name(owner(me))]'s Bunk ([v(occupant)]:Sleeping);@oemit %L/%#=[u(msg_sleep,%N)]
+&LISTEN_WAKE PARENT: Bunk=^*has connected*:@name me=[name(owner(me))]'s Bunk ([v(occupant)]:Resting);@pemit/silent %#=[u(msg_wakeup-s)];@oemit %L/%#=[u(msg_wakeup-o,%N)]
+&MSG_WAKEUP-S PARENT: Bunk=%RYou wake up rested and relaxed from a deep sleep.%R
+&MSG_WAKEUP-O PARENT: Bunk=%0 wakes up seemingly rested and relaxed from a deep sleep.
+&MSG_SLEEP PARENT: Bunk=%0 lies down and falls asleep on a bunk.
+@INFILTER PARENT: Bunk=*has connected*,*has disconnected*,*name set*
+@ALEAVE PARENT: Bunk=@name me=[name(owner(me))]'s Bunk (Empty);@set me=enter_ok;&occupant me
+&MSG_SETUPDONE PARENT: Bunk=%RBunk Setup Completed%R
+@DESCRIBE PARENT: Bunk=[s(v(desc1))]%R
+&DESC_AFTER PARENT: Bunk=This small yet comfortable looking bunk has one pillow, two blankets, and is constructed of a sturdy wood frame.%R
+&DESC1 PARENT: Bunk=This is an item for you to use as your own little 'private residence'.%R%RTo make your own bunk, type the following commands:%R%R,@CREATE BUNK%R@SET <BUNK #>=!NO_COMMAND%R@PARENT <BUNK #>=#3855%RDROP BUNK%TNote: Set bunk in final location before setup%R,BUNK SETUP%R%RYour bunk should now be all set.. hop on in and enjoy.%R%RAny questions or comments on this item see Gecko...%R

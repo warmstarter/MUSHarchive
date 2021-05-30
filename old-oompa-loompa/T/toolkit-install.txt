@@ -1,0 +1,239 @@
+@@ This is Trispis' Toolkit
+@@ Yes, I (Chuc McGuire, aka Trispis at M*U*S*H) finally got around to
+@@ making an installation script. This script is only guaranteed to
+@@ work in PennMUSH. Same applies to the toolkit itself.
+@@ It is coded in PennMUSH, for PennMUSH, on a PennMUSH MUSH.
+@@ This installation script was tested on a PennMUSH MUSH and worked.
+@@ Send bug reports to nemo@mmind.net (that's me).
+@@
+@@ Terms of use: GPL
+@@
+@@ Creating Installation object.
+@@
+@create TKInstall
+@@
+@@ Creating Toolkit objects.
+@@
+@set TKInstall=tkhelp:[create(TKHelp)]
+@set TKInstall=tklists:[create(TKlists)]
+@set TKInstall=tkprocesses:[create(TKProcesses)]
+@set TKInstall=tkcommands:[create(TKCommands)]
+@@
+@@ Configuring @parent sequence.
+@@
+@set [get(TKInstall/tkhelp)]=parent.to.me:[get(TKInstall/tkhelp)]
+@parent [get(TKinstall/tkhelp)]=[get(TKInstall/tklists)]
+@parent [get(TKInstall/tklists)]=[get(TKInstall/tkprocesses)]
+@parent [get(TKInstall/tkprocesses)]=[get(TKinstall/tkcommands)]
+@dolist TKHelp TKLists TKProcesses=@link ##=[get(TKInstall/tkcommands)]
+@dolist TKHelp TKLists TKProcesses TKCommands=@set ##=no_command
+@dolist TKHelp TKLists TKProcesses TKCommands=@lock/Basic ##==me
+@set TKHelp = LINK_OK
+@dolist TKHelp TKLists TKProcesses TKCommands=@set ## = OPAQUE
+@dolist TKHelp TKLists TKProcesses TKCommands=@set ## = STICKY
+@dolist TKHelp TKLists TKProcesses TKCommands=@set ## = VISUAL
+@@
+@@ Setting up TKHelp thing.
+@@
+@DESCRIBE TKHelp=%r[u(u.header)]%r%r[space(5)]This is your [v(txt.name)]. It is equiped with several useful tools for object and attribute management. It also has several commands for shortening, condensing, and/or combining @channel commands as well as a full-featured, built-in, batchpaging system.%r%rFor help with this gadget, do: [ansi(bh,tkhelp)]%r
+@ADESCRIBE TKHelp=[pemit(%#,[switch(%#,owner(me),To help someone else get a toolkit\, type: share with <player>,For instructions on how to get your own Toolkit\, type: share with me)]%r[u(u.footer)])]
+@set TKHelp/DESCRIBE=no_command visual
+@set TKHelp/ADESCRIBE=no_command
+@@
+&TXT.VERSION TKHelp=3.2.0
+&TXT.NAME TKHelp=Tool Kit
+@@
+@@ Installing help files.
+@@
+&HLP.SHARE_WITH TKHelp=[switch(%0,me,,%r[name(%#)] shares these instructions with you...%r)]%rTo create your own [v(txt.name)]%, do the following:%r%r@create [v(txt.name)]%r@lock [v(txt.name)]=me%r@lock/use [v(txt.name)]=me%r@link [v(txt.name)]=me%r@set [v(txt.name)]=inherit (optional)%r@set [v(txt.name)]=!halt%r@set [v(txt.name)]=!no_command%r@parent [v(txt.name)]=[v(parent.to.me)]%r%rThen 'look' at it.%r
+&HLP.CREDITS2 TKHelp=%r[u(u.indent)]Although this object has grown considerably since I first began (with a whopping TWO COMMANDS *smirk*), I could not have made it the object it is without the assistance of the following players: Caleb of PrairieMUSH, Garthorn of CDI, CJ of PrairieMUSH, Rhyanna of CDI, Kimmi of CDI, Shae of Guardians, Nysil of CDI, Cerestais of CDI, Octavian of CDI/M*U*S*H, Talek of M*U*S*H, Raevnos of M*U*S*H, Javelin of M*U*S*H, and 'mom'.%r[space(5)]These players have provided debugging and revision assistance in one form or another, be it coding assistance, challenges to do more, or just enthusiastic interest. They all have my gratitude.%r%r[space(5)]Lastly, but most significantly, I wish to express a personal 'thanks' to Tamsin of IEC, Nig of IEC/CDI, Nylream of CDI, and Arathorn of CDI. I will never forget the kind support and motivation you have given me.%r
+&HLP.CALCULATOR2 TKHelp=%r[u(u.indent)]Courtesy of Raevnos, a [ansi(rh,new command)] has been added which allows [ansi(bh,complex, combined operations)] using parenthetical grouping and supports a [ansi(rh,new feature)], [ansi(bh,exponential operation \(^\))]. It has been added in a post-beta state (i.e., we tested it pretty heavily and believe it to be as accurate as the PennMUSH math functions allow). The syntax is:%r%r[ansi(bh,calc <equation>)]%r%rIt may require inclusion of the * symbol where normal mathematics will imply multiplication. Example:%r%r[ansi(bh,calc \(\(2+2\)*\(3^2\)\)/\(12-3\))]%r%rTry it out to see how it works. (Thanks, Raevnos!)%r
+&HLP.OTHER TKHelp=[u(hlp.tabbed,%q2)]
+&HLP.TOOLS TKHelp=[u(hlp.tabbed,%q2)]
+&HLP.COMMUNICATION TKHelp=[u(hlp.tabbed,%q2)]
+&HLP.TABBED TKHelp=%r[u(u.indent)][space(5)]Help is available on the following '%q0' topics:%r[space(10)][repeat(_,18)]%b%b[repeat(_,18)]%b%b[repeat(_,18)][iter(lnum(1,3),setq(##,n))][setq(switch(%0,communication,1,tools,2,other,3),h)]%r[space(9)]/[center([ansi(%q1,Communication)],18)]\\/[center([ansi(%q2,Tools)],18)]\\/[center([ansi(%q3,Other)],18)]\\%r[space(8)]/[switch(%0,communication,[space(20)]\\[repeat(_,19)]\\[repeat(_,19)],tools,[repeat(_,19)]/[space(20)]\\[repeat(_,19)],other,[repeat(_,19)]/[repeat(_,19)]/[space(20)])]\\%r[space(7)]|[space(62)][iter(rest(rest(u(lst.ans.%0))),[switch(mod(#@,3),1,|%r[space(7)]|,%b)][center(ansi(before(##,-),after(##,-)),19)][switch(#@,words(rest(rest(u(lst.ans.%0)))),[switch(mod(#@,3),1,space(41),2,space(21))]%b|)])]%r[space(7)]|[space(62)]|%r[space(8)]\\[center(Type: [ansi(bh,tkhelp <topic>)],60)]/%r[space(9)]\\[repeat(_,58)]/%r
+&HLP.LCON TKHelp=%r[u(u.indent)]Nothing real fancy. This command simply lists the contents of an object/room/player that you have privilege to see.%r%rSyntax: [ansi(bh,lcon <object>)]%r%rIt supports 'me' and 'here'.%r
+&HLP.TOPICS TKHelp=%r[u(u.indent)][space(12)]Help is available on the following topics:%r[iter(lnum(words(u(lst.ans.tools))),%r[space(10)][u(u.hlp.communication,inc(##))][u(u.hlp.tools,inc(##))][u(u.hlp.other,inc(##))])]%r%r[center(Do: [ansi(bh,tkh\[elp\] <t\[opic\]>)],77)]%r
+&HLP.SEECH TKHelp=%r[u(u.indent)]It shows who's on the channels, but it does so with convenient or informative display. Syntax:%r%r[space(5)][ansi(bh,seech %[<channel>%])][space(5)]%(short for [ansi(yh,see ch)]annel%)%r%r[space(5)]If no <channel> is provided, this command returns a list of connected players on all channels.%r%r[space(5)]If the optional <channel> argument is supplied, it returns a list of connected players on the specified channel, accompanied by each player's flags. This command is a modified version of [ansi(rh,'@chan%/who <channel>')].%r%rIf you would simply like a short command for '@chan%/who <channel>', you can use the command:%r%r[space(5)][ansi(bh,seesh <channel>)][space(5)]%(short for [ansi(yh,see sh)]ort%)%r%r'seesh <channel>' is identical to '@chan%/who <channel>'.%r
+&HLP.RULER TKHelp=%r[u(u.indent)]It's just a ruler, similar to those in word processors.%r%rThe syntax is:%r%r[space(5)][ansi(bh,ruler)]%r%rPretty tough. Eh?%r
+&HLP.PROBLEMS TKHelp=%r[u(u.indent)]If you can't get some of your commands to work, please read the following file:%r%r[space(5)][ansi(bh,tkhelp notes)]%r%r[space(5)]To report problems which are not covered in the online help, do one of the following:%r%r[space(5)][ansi(rh,a%))] Contact an Admin%ror...%r[space(5)][ansi(rh,b%))] Send @mail to [name(owner(%!))] explaining the problem. Please state the command used, the circumstance, and the resulting malfunction.%r%r[space(5)]I %([ansi(bh,[name(owner(%!))] of [mudname()])]%) make every attempt to keep my machines operational and up to date with the MUSH %(both the World and the software versions and patchlevels%). Your cooperation is appreciated.%R
+&HLP.PALETTE TKHelp=%r[u(u.indent)]This command displays an extensive color palette which shows the result of ansi%(%) color codes. The syntax is:%r%r[space(5)][ansi(bh,palette)]%r%rPretty tough, eh?%r%rIt includes all possible combinations of foreground and background colors, both standard and hilited. It is displayed in a progressive format. And, you must have all of the following:%r%r[space(5)][ansi(rh,a%))] a color monitor (you can get one at a computer store)%r[space(5)][ansi(rh,b%))] a color client (you can get one from the WWW)%r[space(5)][ansi(rh,c%))] the ANSI flag set on your player %(@set me=ANSI%)%r[space(5)][ansi(rh,d%))] the COLOR flag set on your player %(@set me=COLOR).%r%rOtherwise, you'll just see a bunch of letters.%r%rNOTE: The color combinations you can't read... you probably shouldn't use. (;%r
+&HLP.PAGER TKHelp=%r[u(u.indent)]The batchpaging features work identically to the MUSH's normal paging system. It supports poses, allows repeat paging without relisting the pagees, and will recall the last group paged. %r%r[ansi(bh,bp <space separated player list>%=<message>)][space(5)]To begin paging a group.%r%r[ansi(bh,bp <message>)][space(35)]To repeat pages to the group.%r%r[ansi(bh,bp)][space(45)]To recall the pagee list.%r%r[space(5)]You might be asking, "What benefit is this, when the MUSH paging system supports group pages?" %r[space(5)]The answer is: It allows 'repeat paging' to be applied to both a group (via 'bp') and to an individual (via 'p'), simultaneously, without clobbering each other.%r
+&HLP.ONCH TKHelp=%r[u(u.indent)]One of the finer features of the [u(txt.name)], this command turns channels on. When combined with the '[ansi(h,offch)]' command, it becomes a very useful tool for despamming one's screen. Syntax:%r%r[space(5)][ansi(bh,onch %[<channel list>%])][space(5)]%(short for [ansi(yh,on ch)]annel%)%r%r[space(5)]This is a modified version of '[ansi(rh,@chan%/on <channel>)]'%, with the added luxury of being able to turn several channels on with a single command. '[ansi(h,<channel list>)]' can be a single channel or a space-separated list of channels. You must only enter enough of the channel's name to distinguish it from all other channels. Wizards%, for example must distinguish between the Wizard channel and the Wave channel %(wi or wa%, respectively%, is sufficient to make this distinction%)..%r%r[space(5)]If no <channel list> is provided%, this command will turn on all channels which had been previously turned off by its [ansi(h,offch)] counterpart.%r
+&HLP.OFFCH TKHelp=%r[u(u.indent)]One of the finer features of the [u(txt.name)], this command turns channels off. When combinded with the '[ansi(h,onch)]' command, it becomes a very useful tool for despamming one's screen. Syntax:%r%R[space(5)][ansi(bh,offch %[<channel list>%])][space(5)]%(short for [ansi(yh,off ch)]annel%)%r%r[space(5)]This is a modified version of '[ansi(rh,@chan%/off <channel>)]'%, with the added luxury of being able to turn several channels off with a single command. '[ansi(h,<channel list>)]' can be a single channel or a space-separated list of channels. You must only enter enough of the channel's name to distinguish it from all other channels. Wizards%, for example must distinguish between the Wizard channel and the Wave channel %(wi or wa%, respectively%, is sufficient to make this distinction%)..%r%r[space(5)]If no <channel list> is provided%, this command will turn off all channels to which you are currently connected.%r
+&HLP.NOTES2 TKHelp=%r[u(u.indent)]If you wish to transport this code to some other MU*, there really isn't much I can do to prevent it. So, I only ask the following courtesies. Do not modify the code except as necessary for conversion to other MU* softwares (i.e, MUX, Pern, etc.). Do not change the text of the credits help screen. And, above all, maintain part b of the first 'notes' screen so that YOU are responsible for the object's upkeep (I have coded this screen to refer to the owner of the object containing the hlp.files. Unless your specific MU-design requires elsewise, you should leave this in tact.). Thus, YOU, if you transport this code, become its caretaker. Please be responsible with it.%r%r[space(5)]Now that I've given you the conditions for transporting this code, I wish to also impress upon you my own sincere willingness to cooperate in it's net-wide maintenance. Therefore, please... feel free to check in with me from time to time to make certain your code is current - Note the version number on the copy at M*U*S*H (which is where I do most of my updating). If your copy has a different version number, it might be a good idea to check with me regarding recent changes.%r%r[space(5)]Thanks. (:%r
+&HLP.NOTES TKHelp=%r[u(u.indent)]Note: In order for the 'onch' and 'offch' commands (with or without arguments) to work: a%) the object must be INHERIT, and b%) you cannot be INHERIT. To achieve this, do:%r%r[ansi(bh,@set <object>%=inherit)]%r[ansi(bh,@set me%=!inherit)]%r%rAlso note: Where an argument <channel> is possible, you need only supply enough of the channel name to distinguish it from other channels %(in most cases the first letter or two is sufficient%), not the whole channel name. Also, where multiple arguments are possible, they must be space-separated. Examples:%r%roffch p[space(20)]Turns off the +public channel.%ronch p c w[space(17)]Turns on the +public, +code, and +wave channels.%rbp Joe Jill=<message>[space(6)]Pages Joe and Jill with <message>.%r%rOriginal code by [ansi(bh,Trispis of [mudname()])], who points you toward: [ansi(bh,tkhelp credits)]%r%r[space(5)]See also: [ansi(bh,tkhelp notes2)]%r
+&HLP.INFO TKHelp=%r[u(u.indent)]MultiMU*ers and builders might find this command useful. I got the idea from the 'lastpaged' feature of MUSH paging (i.e., 'p' by itself to remember whom you last paged). The syntax of this command is:%r%r[space(5)][ansi(bh,info <#dbref>)]%ror...%r[space(5)][ansi(bh,info <space separated list of #dbrefs>)]%r%rI have coded two other optional inputs: %r%r[space(5)][ansi(bh,info me)]%rand...%r[space(5)][ansi(bh,info here)]%r%r[space(5)]These two <word> inputs return info about the player and the player's location, respectively. They are the *only* <word> inputs guaranteed to function as expected. This is due to the fact that the gadget only "sees" objects in its current location (i.e., normally "inside" your character). Specifying a #dbref may be necessary for some inputs.%r
+&HLP.GREP2 TKHelp=%r[u(u.indent)]This command supports space separated lists of objects and attributes, however, the lists can only be input in one of two ways:%r%r[space(5)][ansi(rh,1%))] Manually enter lists: [ansi(bh,grep #2 #4 #6/<list of attrib-patterns>%=<string>)]%ror...%r[space(5)][ansi(rh,2%))] Use [ansi(bh,%[get%(%)%])] or [ansi(bh,%[xget%(%)%])] to input a list of #dbrefs from an attribute on an object: [ansi(bh,%[get%(<obj>%/<attr>%)%]%/<list of attrib-patterns>%=<string>)]%r%r[space(5)]The only thing which makes this command justifiable (as MUSHes have @grep) is its ability to process lists of both objects and attribute-patterns (and, of course, its output neatness).%r
+&HLP.GREP TKHelp=%r[u(u.indent)]This is simply a user-command version of the 'grepi%()' fuction. It performs a case-insensitive search for a <string> within a user-defined set of attributes on an object list.%r%rSyntax:%r%r[space(5)][ansi(bh,grep <object list>%/<attrib-pattern list>%=<string>)]%r%r[space(5)]Like '[ansi(bh,info)]' and '[ansi(bh,alist)]', this is only guaranteed to function as expected when <object list> is a list of #dbrefs. Note, however, that <attrib-pattern> may contain the wildcards * and ?, to extend your search to a group of attributes (yes, 'grep <obj>/*=<string>' searches all attributes on <obj> for <string>).%r[space(5)]When combined with 'info', 'alist' and the MUSH's built-in user commands (examine, @edit, @mvattr, etc.), this command makes for a very powerful editing tool. Have fun with it. [ansi(r,*)][ansi(rh,CAUTION)][ansi(r,*)]: This is a raw grep. Dangerous characters %( [ansi(rh,%{ %} %[ %] %( %) %; %, %% %\)] %) are NOT escaped out, so be careful when using such characters in <string>.%r[space(5)]See '[ansi(bh,tkhelp grep2)]' for more on the grep command.%r
+&HLP.CREDITS TKHelp=%r[u(u.indent)]This is just a note to those of you who think you /deserve/ credit. This toolkit isn't about fame and glory and recognition. It's about making MUSHing easier for the user. The only people who deserve credit are those who use it. So, you folks who think you deserve some kind of recognition for something you contributed, all I can say is%r%r[center(BYTE ME,77)]%r[rjust(\(,77)]%r[center(If you wanna see the old credits screen\, you'll have to dig for it.,77)]\)%r[rjust(\(,77)]%r
+&HLP.CALCULATOR TKHelp=%r[u(u.indent)]There are five commands. The syntax for the first four commands is as follows:%r%r[ansi(bh,add <number>+<number>%[+<number>%]etc.)]%r[ansi(bh,sub <number>-<number>%[-<number>%]etc.)]%r[ansi(bh,mul <number>*<number>%[*<number>%]etc.)]%r[ansi(bh,div <number>/<number>%[/<number>%]etc.)]%r%rThe above commands cannot be combined, but CAN operate on a successive list... like%r%r[ansi(bh,add 1+3+5+7+11+13+17)]%r%r[space(5)]Courtesy of Raevnos, a fifth command has been added which allows complex, combined operations using parenthetical grouping and supports a new feature, exponential operation \(^\). For details, see: [ansi(bh,tkhelp calculator2)]%r
+&HLP.ALIST2 TKHelp=%r[u(u.indent)]This command also supports space separated lists of objects, however, the list can only be input in one of two ways:%r%r[space(5)][ansi(rh,1%))] Manually enter a list: [ansi(bh,alist #123 #456 #789%[%/<attrib-pattern>%])]%ror...%r[space(5)][ansi(rh,2%))] Use [ansi(bh,%[xget%(%)%])]: [ansi(bh,alist %[xget%(obj,attr%)%]%[%/<attrib-pattern>%])]%r[space(8)][ansi(r,*)][ansi(rh,WARNING)][ansi(r,*)]: Do not use the [ansi(rh,get%(%))] function.%r%rI am working on a way to input lists of <attrib-pattern>'s too, but right now, it is only an idea in my mind. Watch this space for updates on this upcoming feature.%r
+&HLP.ALIST TKHelp=%r[u(u.indent)]A useful command for objects with lots and lots of attributes.  It returns a default sorted (alphabetically, for the most part) list of attributes on the specified object.%r%rThe syntax is:%r%r[space(5)][ansi(bh,alist <object>%[%/<attrib-pattern>%])]%r%rIf the optional <attrib-pattern> is supplied, it will limit its output to attributes containing a wildcarded attribute pattern.%r%rFor instance: 'alist #54321/f*r' might return FAR FOR and FUBAR.%r%rLike the '[ansi(bh,info)]' command, this is only guaranteed to work where <object> is a #dbref. '[ansi(rh,alist [elements(revwords(lparent(me)),1 2 3 4)])]' will display all of the attributes on the parents of this object.%r[space(5)]See '[ansi(bh,tkhelp alist2)]' for more on the alist command.%r
+&HLP.ADMIN TKHelp=%r[u(u.indent)][ansi(mh,1%))] If you are a Wizard%, an Admin%, or a player with chat_privs%, and you wish to reap full benefit from the [ansi(bh,seech)] command %(for all channels%)%, you can add the following custom attribute to your local object:%r%r[space(5)][ansi(yh,&LST.CHANNELS <object>%=Admin|)][ansi(bh,other|channels|like|this)][ansi(yh,%[|Wizard%])]%r%r[u(u.indent)][ansi(mh,2%))] This local attribute replaces the one on the master parent%,%r[space(4)]therefore it MUST:%r%r[space(5)][ansi(mh,a%))] be named 'LST.CHANNELS' (no misspellings)%, and...%r[space(5)][ansi(mh,b%))] contain every channel you wish to include in [ansi(bh,seech)] %(for all channels%)%r%r[u(u.indent)][ansi(mh,3%))] The above attribute is not necessary for the [ansi(bh,seech <channel>)] command to work. This command is based on the [ansi(rh,cwho%(%))] function and will accept any valid channel as input.%r
+&HLP.CHANNELS TKHelp=%r[u(u.indent)]Commands available for channel manipulation are:%r%r[ansi(bh,seech <channel>)][space(8)]Lists all players on the specified channel.%r[ansi(bh,seech)][space(18)]Lists all players on all channels.%r%r[ansi(bh,onch <channel)][ansi(yh,%[s%])][ansi(bh,>)][space(6)]Turns on the specified channel(s).%r[ansi(bh,offch <channel)][ansi(yh,%[s%])][ansi(bh,>)][space(5)]Turns off the specified channel(s).%r%r[ansi(bh,offch)][space(18)]Turns off all channels you are connected to.%r[ansi(bh,onch)][space(19)]Resumes all channels which were turned off by [ansi(bh,offch)].%r%rFor detailed help on a specific command, do: [ansi(bh,tkhelp <command>)]%r%rSee also: [ansi(bh,tkhelp notes)]%r
+&HLP.AEXAMINE TKHelp=%r[u(u.indent)]This command is intended as a suppliment to Talek's 'pcheck' command. The syntax is:%r%r[space(5)][ansi(bh,aexamine%[/switch%] <object>/<attrib>)]%r%r[space(5)]It works similar to the 'examine' command. But, it only works on single or wildcarded attributes. It returns the 'examination' hilighted in user-definable ways -- Specifically, parens, brackets, and braces are colored and hilited for counting and matching.%r[space(5)]Available switches are: /parens, /brackets, or /braces (for selecting /only/ that particular enclosure for identification). And, it may be shortened to 'aex'.%r[space(5)]Colors can be user-defined by placing the appropriate ansi code into the following attribs on your child object: &ans.aex.parens, &ans.aex.brackets, &ans.aex.braces, and &ans.aex.text. (for normal text on any of these, use the ansi code 'n').%r
+&HLP.FLIST TKHelp=%r[u(u.indent)]Nearly identical to 'alist', this command lists attributes (default sorted) with any/all attribute flags applied to each attribute.%r%rThe syntax is:%r%r[space(5)][ansi(bh,flist <object>\[/<attrib-pattern>\])]%r%rIt can be useful for reminding you about that no_command flag you put on some specific command which now seems broken. (;%r
+@@
+@@ Setting up TKLists thing.
+@@
+@dolist TKLists TKProcesses TKHelp TKCommands=@set TKLists=##:[get(TKInstall/##)]
+@DESCRIBE TKLists=Tool Kit lists.
+@set TKLists/DESCRIBE=no_command visual
+@@
+@@ Installing TKLists and data.
+@@
+&LST.ANS.COMMUNICATION TKLists=h-Communication n- bh-channels bh-offch bh-onch rh-onchs bh-seech bh-pager
+&LST.CHANNELS.AUTO TKLists=[iter(channels(),switch(comp(##,capstr(##)),0,setq(0,%q0[trim(|##)]),setq(0,%q0 ##)))][trim(%q0,|)]
+&ANS.AEX.PARENS TKLists=r
+&ANS.AEX.BRACES TKLists=g
+&ANS.AEX.BRACKETS TKLists=b
+&ANS.AEX.TEXT TKLists=h
+&LST.CHANNELS TKLists=Code|Public|Tplot|Wave
+&LST.TOOLS TKLists=alist|calculator|info|palette|ruler
+&LST.NEWS TKLists=admin|communication|news|notes|problems|tools|topics
+&LST.FUN.Z TKLists=ZEMIT ZFUN ZONE
+&LST.FUN.X TKLists=XGET XOR
+&LST.FUN.W TKLists=WHERE WORDPOS WORDS
+&LST.FUN.V TKLists=V VAL VALID VERSION VISIBLE
+&LST.FUN.U TKLists=U UCSTR UDEFAULT UFUN ULOCAL
+&LST.FUN.T TKLists=T TABLE TEL TIME TIMESTRING TRIM TRUNC TYPE
+&LST.FUN.SCI TKLists=VADD VSUB VMUL VMAG VDIM VUNIT ACOS ASIN ATAN CEIL COS E EXP FDIV FLOOR LOG LN PI POWER ROUND SIN SQRT TAN
+&LST.FUN.S TKLists=S SCRAMBLE SEARCH SECS SECURE SET SETQ SETDIFF SETINTER SETUNION SHL SHR SHUFFLE SIGN SORT SORTBY SOUNDEX SOUNDLIKE SOUNDSLIKE SPACE SPLICE SQUISH STARTTIME STATS STRCAT STRIPANSI STRLEN STRMATCH SUB SUBJ SWITCH
+&LST.FUN.R TKLists=R RAND REMIT REMOVE REPEAT REPLACE REST REVERSE REVWORDS RIGHT RJUST RLOC RNUM ROOM
+&LST.FUN.P TKLists=PARENT PEMIT PLAYERMEM PMATCH PORTS POS POSS
+&LST.FUN.O TKLists=OBJ OBJEVAL OBJMEM OEMIT OPEN OR ORFLAGS OWNER
+&LST.FUN.N TKLists=NAME NEARBY NEQ NEXT NOT NUM
+&LST.FUN.M TKLists=MAIL MAILFROM MAILSTATUS MAILSUBJECT MAILTIME MAP MATCH MATCHALL MAX MEMBER MERGE MID MIN MIX MOD MONEY MTIME MUDNAME MUL MUNGE MWHO
+&LST.FUN.L TKLists=LAST LATTR LCON LCSTR LDELETE LEFT LEMIT LEXITS LINK LIT LJUST LNUM LOC LOCATE LOCK LPARENT LSEARCH LSEARCHR LSTATS LT LTE LWHO
+&LST.FUN.I TKLists=IDLE IDLESECS INC INDEX INSERT ISDAYLIGHT ISDBREF ISNUM ISWORD ITER ITEMS
+&LST.FUN.H TKLists=HASATTR HASATTRP HASFLAG HASPOWER HASTYPE HIDDEN HOME
+&LST.FUN.G TKLists=GET GET_EVAL GRAB GREP GREPI GT GTE
+&LST.FUN.F TKLists=FILTER FINDABLE FIRST FLAGS FLIP FOLD FOLDERSTATS FOREACH FUNCTIONS FULLNAME
+&LST.FUN.E TKLists=EDEFAULT EDIT ELEMENT ELEMENTS ELOCK EMIT ENCRYPT EQ EVAL ESCAPE EXIT EXTRACT
+&LST.FUN.D TKLists=DEC DECRYPT DEFAULT DELETE DIE DIG DIST2D DIST3D DIV DOING
+&LST.FUN.C TKLists=CAPSTR CAT CENTER CHANNELS CLONE COMP CON CONN CONTROLS CONVSECS CONVTIME CREATE CTIME CWHO
+&LST.FUN.BOO TKLists=AND ANDFLAGS COMP
+&LST.FUN.B TKLists=BEEP BEFORE
+&LST.FUN.ALL TKLists=ABS ADD AFTER ALPHAMAX ALPHAMIN AND ANDFLAGS ANSI APOSS ART ATRLOCK BEEP BEFORE CAPSTR CAT CENTER CHANNELS CLONE COMP CON CONN CONTROLS CONVSECS CONVTIME CREATE CTIME CWHO DEC DECRYPT DEFAULT DELETE DIE DIG DIST2D DIST3D DIV DOING EDEFAULT EDIT ELEMENT ELEMENTS ELOCK EMIT ENCRYPT EQ EVAL ESCAPE EXIT EXTRACT FILTER FINDABLE FIRST FLAGS FLIP FOLD FOLDERSTATS FOREACH FUNCTIONS FULLNAME GET GET_EVAL GRAB GREP GREPI GT GTE HASATTR HASATTRP HASFLAG HASPOWER HASTYPE HIDDEN HOME IDLE IDLESECS INC INDEX INSERT ISDAYLIGHT ISDBREF ISNUM ISWORD ITER ITEMS LAST LATTR LCON LCSTR LDELETE LEFT LEMIT LEXITS LINK LIT LJUST LNUM LOC LOCATE LOCK LPARENT LSEARCH LSEARCHR LSTATS LT LTE LWHO MAIL MAILFROM MAILSTATUS MAILSUBJECT MAILTIME MAP MATCH MATCHALL MAX MEMBER MERGE MID MIN MIX MOD MONEY MTIME MUDNAME MUL MUNGE MWHO NAME NEARBY NEQ NEXT NOT NUM OBJ OBJEVAL OBJMEM OEMIT OPEN OR ORFLAGS OWNER PARENT PEMIT PLAYERMEM PMATCH PORTS POS POSS R RAND REMIT REMOVE REPEAT REPLACE REST REVERSE REVWORDS RIGHT RJUST RLOC RNUM ROOM S SCRAMBLE SEARCH SECS SECURE SET SETQ SETDIFF SETINTER SETUNION SHL SHR SHUFFLE SIGN SORT SORTBY SOUNDEX SOUNDLIKE SOUNDSLIKE SPACE SPLICE SQUISH STARTTIME STATS STRCAT STRIPANSI STRLEN STRMATCH SUB SUBJ SWITCH T TABLE TEL TIME TIMESTRING TRIM TRUNC TYPE UCSTR UDEFAULT UFUN ULOCAL U V VAL VALID VERSION VISIBLE WHERE WORDPOS WORDS XGET XOR ZEMIT ZFUN ZONE
+&LST.FUN.A TKLists=ABS ADD AFTER ALPHAMAX ALPHAMIN AND ANDFLAGS ANSI APOSS ART ATRLOCK
+&LST.TOPICS TKLists=admin|aexamine|alist|alist2|calculator|calculator2|channels|communication|credits|credits2|flist|grep|grep2|info|lcon|notes|notes2|offch|onch|other|pager|palette|problems|ruler|seech|tools|topics
+&LST.ATR.FLAGS TKLists=no_command/$ visual/v no_inherit/i no_clone/c mortal_dark/m wizard/w
+&LST.ANS.COLORS TKLists=w m b c g y r x
+&LST.ANS.TOPICS TKLists=bh-admin|bh-alist|bh-calculator|bh-channels|bh-credits|bh-flist|bh-grep|bh-info|bh-lcon|bh-notes|bh-offch|bh-onch|rh-onchs|bh-pager|bh-palette|bh-problems|bh-ruler|bh-seech|bh-topics
+&LST.ANS.COMM TKLists=h-Communication n- bh-channels bh-offch bh-onch rh-onchs bh-seech bh-pager
+&LST.ANS.OTHER TKLists=h-Other n- bh-admin bh-credits bh-notes bh-problems bh-topics
+&LST.ANS.TOOLS TKLists=h-Tools n- bh-alist bh-aexamine bh-calculator bh-flist bh-grep bh-info bh-lcon bh-palette bh-ruler
+&LST.POWERS TKLists=announce boot builder cemit chat_privs functions guest halt hide idle login long_fingers no_pay no_quota open_anywhere pemit_all poll player_create queue quota search see_all see_queue tport_anything tport_anywhere unkillable
+&VAR.LINELENGTH TKLists=78
+@@
+@@ Setting up TKProcesses.
+@@
+@DESCRIBE TKProcesses=Tool Kit processes (ufuns, maps, etc.)
+@set TKProcesses/DESCRIBE=no_command visual
+@@
+@@ Installing TKProcesses.
+@@
+&U.HLP.COMMUNICATION TKProcesses=[setq(0,elements(u(lst.ans.communication),%0))][setq(1,sub(25,strlen(after(%q0,-))))][ansi(before(%q0,-),[after(%q0,-)][space(%q1)])]
+&U.FOOTER TKProcesses=[rjust([ansi(h,[repeat(_,30)]%))],78)]
+&U.INDENT TKProcesses=[ansi(h,%(____)]
+&U.HEADER.NEW TKProcesses=%b[ansi(bh,repeat(_,20))]%r[ansi(bh,%()][space(20)][ansi(bh,\\[repeat(_,9)].-\{)][space(2)][u(#1618/txt.name)] [v(txt.version)][space(2)][ansi(b,#)] [ansi(bh,=)] [ansi(ch,-)]
+&U.HEADER.OLD TKProcesses=[space(27)][ansi(ch,-)] [ansi(bh,=)] [ansi(b,#)][space(2)][u(#1618/txt.name)] [v(txt.version)][space(2)][ansi(b,#)] [ansi(bh,=)] [ansi(ch,-)]
+&U.NUM-FLAGS-NAME TKProcesses=[num(%0)]-[ansi(rh,flags(%0))]-[ansi(bh,name(%0))][space(2)]
+&U.RETURN-SPACE-11.NUM-FLAGS-NAME TKProcesses=%r[space(11)][num(%0)]-[ansi(rh,flags(%0))]-[ansi(bh,name(%0))][space(2)]
+&U.RETURN-SPACE-11.NAME-NUM-FLAGS TKProcesses=%r[space(11)][ansi(bh,name(%0))]-[num(%0)]-[ansi(rh,flags(%0))][space(2)]
+&U.RETURN.NAME-NUM-FLAGS TKProcesses=%r[ansi(bh,name(%0))]-[num(%0)]-[ansi(rh,flags(%0))][space(2)]
+&HANGINGINDENT2.RAEV TKProcesses=setq(0,insert(%q0,wordpos(%q0,%0),-NEWLINE-))
+&HANGINGINDENT1.RAEV TKProcesses=if(lte(strlen(%0),%1),%0,[setq(0,%0)][map(insert_break,vmul(%1,lnum(1,div(strlen(%0),%1))))][edit(%q0,-NEWLINE-,%r[space(3)])])
+&U.AEX.EDIT TKProcesses=[switch(%0,%{,[ansi(setr(9,[u(ans.aex.braces)]%q2),%0)],%},[ansi(%q9,%0)],%[,[ansi(setr(8,[u(ans.aex.brackets)]%q3),%0)],%],[ansi(%q8,%0)],%(,[ansi(setr(7,[u(ans.aex.parens)]%q4),%0)],%),[ansi(%q7,%0)],[ansi(u(ans.aex.text),%0)])]
+&U.BP.SEND TKProcesses=[set(me,vn:[setinter(%vl,lwho())])];[iter(setdiff(%vl,%vn),pemit(%0,[name(##)] is not connected.))];[switch(words(%vn),0,pemit(%0,No players to page.),1,pemit(%0,Use normal paging for a single player.),switch(%1,:*,[iter(%vn,[pemit(##,From afar %(to%: [map(u.name,%vn)]%)%, [name(%0)] [delete(%1,0,1)])])][pemit(%0,Long distance to %([map(u.name,%vn)]%)%: [name(%0)] [delete(%1,0,1)])],;*,[iter(%vn,[pemit(##,From afar %(to%: [map(u.name,%vn)]%)%, [name(%0)][delete(%1,0,1)])])][pemit(%0,Long distance to %([map(u.name,%vn)]%)%: [name(%0)][delete(%1,0,1)])],[iter(%vn,[pemit(##,[name(%0)] pages %([map(u.name,%vn)]%)%: %1)])][pemit(%0,You paged %([map(u.name,%vn)]%) with%: %1)]))];[switch(comp(%vn,%vl),0,,set(me,vl:%vn))]
+&U.RULER TKProcesses=....:....1....:....2....:....3....:....4....:....5....:....6....:....7....:....
+&U.HEADER TKProcesses=%b[ansi(h,repeat(_,18))]%r[ansi(h,%()][space(2)][ansi(bh,[u(txt.name)] [v(txt.version)])][space(2)][ansi(h,\\[repeat(_,12)])]
+&U.NAME TKProcesses=[name(%0)]
+&U.COLOR.HI TKProcesses=[ansi(%0h,%0h)][space(2)]
+&U.COLOR.BAK.HI TKProcesses=[ansi(ucstr(%0)h,ucstr(%0)h)][space(1)]
+&U.COLOR.BAK TKProcesses=[ansi(ucstr(%0),ucstr(%0))][space(2)]
+&U.COLOR TKProcesses=[ansi(%0,%0)][space(2)]
+&U.ALIST TKProcesses=[setq(3,sort(objeval(%0,lattr(%1/%2))))][switch(objeval(%0,hasflag(%0,visual)),1,setq(4,owner(%1)),setq(4,%0))][iter(%q3,u(u.hasatrflags,%1,##,%q4))]
+&U.HASATRFLAGS TKProcesses=[setq(5,[])][iter(v(lst.atr.flags),switch(hasflag(%0/%1,before(##,/)),1,setq(5,%q5[after(##,/)]),setq(5,%q5_)))][switch(atrlock(%0/%1),1,setq(5,+%q5),setq(5,_%q5))] [%q5]:[%1]
+&U.NAME-NUM-FLAGS TKProcesses=[ansi(bh,name(%0))]-[num(%0)]-[ansi(rh,flags(%0))][space(2)]
+&U.HLP.TOOLS TKProcesses=[setq(0,elements(u(lst.ans.tools),%0))][setq(1,sub(25,strlen(after(%q0,-))))][ansi(before(%q0,-),[after(%q0,-)][space(%q1)])]
+&U.HLP.OTHER TKProcesses=[setq(0,elements(u(lst.ans.other),%0))][ansi(before(%q0,-),after(%q0,-))]
+&U.COLOR.2 TKProcesses=[ansi(%1%0,%1%0)][space(1)]
+&U.COLOR.HI.2 TKProcesses=[ansi(%1%0h,%1%0h)][space(1)]
+&U.GREP TKProcesses=[grepi(%0,%1,%vg)]
+&U.AEX.EDIT2 TKProcesses=[setq(7,[u(ans.aex.parens)]%q4)][setq(8,[u(ans.aex.brackets)]%q3)][setq(9,[u(ans.aex.braces)]%q2)][edit([edit([edit([edit([edit([edit(%0,\(,[ansi(%q7,\()])],\),[ansi(%q7,\))])],\[,[ansi(%q8,\[)])],\],[ansi(%q8,\])])],\{,[ansi(%q9,\{)])],\},[ansi(%q9,\})])]
+&U.NAME.HANGING.INDENT TKProcesses=[switch(gte(strlen(elements(%q0,lnum(%q1,element(%q0,%0,%b)))),sub(%q3,%q2)),1,%r[space(%q2)][edit(%0,~,%b)][setq(1,element(%q0,%0,%b))],edit(%0,~,%b))]
+&U.NAME.ENWORD TKProcesses=[edit(name(%0),%b,~)]
+&U.SET TKProcesses=[set(%q0,%0)]
+&U.AND.KEYWORDS TKProcesses=setinter(%0,grepi(#122,*,%1))
+@@
+@@ Setting up TKCommands.
+@@
+@DESCRIBE TKCommands=Tool Kit $commands.
+@set TKCommands/DESCRIBE=no_command visual
+@@
+@@ Installing TKCommands.
+@@
+&CMD.COMPCH TKCommands=$compch * *:@pemit %#=[setq(0,setdiff(cwho(%0),cwho(%1)))][setq(2,setdiff(cwho(%1),cwho(%0)))][setq(1,setinter(cwho(%0),cwho(%1)))]%r[center(ucstr(grab(v(lst.channels),%0*,|)),25)][center(BOTH,25)][center(ucstr(grab(v(lst.channels),%1*,|)),25)]%r[iter(lnum(1,max(words(%q0),words(%q1),words(%q2))),%r[center(name(elements(%q0,##)),25)][center(name(elements(%q1,##)),25)][center(name(elements(%q2,##)),25)])]%r
+&CMD.SORTEX TKCommands=$sortex *:@pemit %#=[switch(%0,*/*,[setq(0,before(%0,/))][setq(1,after(%0,/))],[setq(0,%0)][setq(1,*)])][setq(0,locate(%#,%q0,*))]%r[u(name-num-flags,%q0)][iter(sort(lattr(%q0/%q1)),%r[ansi(h,[ucstr(##)]:)] [get(%q0/##)])]
+&CMD.LCON_X TKCommands=$lcon *:@pemit %#=[switch(setr(0,locate(%#,%0,*)),*#-*,Invalid input.,%r[tagwrap(PRE,Contents of [u(u.name-num-flags,%q0)]:%r[iter(lcon(%q0),%r [ljust(left(name(##),38),40,.)][rjust(%b[flags(##)],28,.)][rjust(##,7)])]%r)])]
+&CMD.LCON TKCommands=$lcon:@pemit %#=%r[tagwrap(PRE,Contents of [u(u.name-num-flags,%l)]:%r[iter(lcon(%l),%r [ljust(left(name(##),38),40,.)][rjust(%b[flags(##)],28,.)][rjust(##,7)])]%r)]
+&CMD.ALIST_X TKCommands=$alist *:@pemit %#=[switch(%0,*/*,[setq(0,locate(%#,before(%0,/),*))][setq(1,after(%0,/))],[setq(0,locate(%#,%0,*))][setq(1,*?)])][iter(%q0,%r[u(u.name-num-flags,setr(3,locate(%#,##,*)))]%r[table(sort(lattr(%q3/%q1)),18,79)]%r)]
+&CMD.AEX TKCommands=$aex* */*:th [setq(1,switch(%1,me,%#,here,%l,objeval(%#,num(%1))))][switch(%0,*/braces,[setq(2,h)][setq(3,)][setq(4,)],*/brackets,[setq(2,)][setq(3,h)][setq(4,)],*/parens,[setq(2,)][setq(3,)][setq(4,h)],[setq(2,)][setq(3,)][setq(4,)])];@dol [lattr(%q1/%2)]=@pemit %#=[ansi(wh,%[%q1/##%]:)] [foreach(u.aex.edit,get(%q1/##))]
+&CMD.+FUN TKCommands=$*fun:@pemit %#=[table(get(me/lst.fun.%0),10,79)]
+&CMD.TKHELP TKCommands=$tkh*:@pemit %#=[switch(words(%0),0,[setq(9,elp)][setq(8,elp)],1,[switch(%0,%b*,[setq(9,elp)][setq(8,trim(%0))],switch(grab(elp,%0*),elp,[setq(9,elp)][setq(8,elp)],[setq(9,%0)][setq(8,%0)]))],[setq(9,grab(elp,[first(%0)]*))][setq(8,rest(%0))])][switch(%q9,elp,switch(%q8,elp,[tagwrap(PRE,[u(u.header)]%r [ansi(h,%))][u(hlp.topics)][u(u.footer)])],[setq(1,ifelse(isnum(mid(%q8,dec(strlen(%q8)),1)),[mid(%q8,0,sub(strlen(%q8),1))]*[mid(%q8,dec(strlen(%q8)),1)],%q8*))][ifelse(setr(2,grab(u(lst.topics),%q1,|)),[tagwrap(PRE,[u(u.header)]%r [ansi(h,%))][u(hlp.%q2)][u(u.footer)])],No help available on %0.)]),Huh? Type "help" for help.)]
+&CMD.SEESH TKCommands=$seesh *:@fo %#=@chan/who %0
+&CMD.SEECH.1 TKCommands=$seech *:@pemit %#=[switch(setr(0,cwho(%0)),,There are no connected players on that channel.,Connected players on that channel are:%r[iter(%q0,[ifelse(mod(#@,2),%r,|)]%b[ljust([ljust(u(u.name-num-flags,##),29)] \([idle(##)]\),36)])]%r)]
+&CMD.SEECH TKCommands=$seech:@pemit %#=[tagwrap(PRE,%r[rjust(CHANNEL NAME,15)]:[space(2)]PLAYERS%r[iter(u(lst.channels),%r[rjust(##,15)]:[space(2)][setq(0,edit(map(u.name.enword,cwho(##)),%b,\,%b))][setq(1,)][setq(2,18)][map(u.name.hanging.indent,%q0)],|)]%r)]
+&CMD.RULER TKCommands=$ruler:@pemit %#=[u(u.ruler)]
+&CMD.PALETTE TKCommands=$palette:@pemit %#=[setq(0,v(lst.ans.colors))]%r [map(u.color,%q0)]| [map(u.color.hi,%q0)][iter(%q0,%r [mix(u.color.2,%q0,repeat([ucstr(##)]%b,8))]| [mix(u.color.hi.2,%q0,repeat([ucstr(##)]%b,8))])]%r
+&CMD.ONCHS.YOU TKCommands=$onchs *:th [iter(u(lst.channels),switch(member(cwho(left(##,3)),num(*%0)),0,,switch(lte(strlen(%q1),1),1,setq(1,##),setq(1,%q1%, ##))),|)];@pemit %#=[name(*%0)] [switch(gte(strlen(%q1),1),0,cannot be found on any channels at this time.,can be found on the following channels%:%r%q1)]
+&CMD.ONCHS.ME TKCommands=$onchs:th [iter(u(lst.channels),switch(member(cwho(left(##,3)),%#),0,,switch(lte(strlen(%q1),1),1,setq(1,##),setq(1,%q1%, ##))),|)];@pemit %#=You are [switch(gte(strlen(%q1),1),0,not on any channels at this time.,on the following channels%:%r%q1)]
+&CMD.ONCH.1 TKCommands=$onch *:@dolist %0=@fo %#=@channel/on ##
+&CMD.ONCH TKCommands=$onch:@dolist [v(lst.resume)]=@fo %#=@channel/on ##
+&CMD.OFFCH.1 TKCommands=$offch *:@dolist %0=@fo %#=@channel/off ##
+&CMD.OFFCH TKCommands=$offch:&lst.resume me=[squish(iter(v(lst.channels),switch(member(cwho(mid(##,0,3)),%#),0,,mid(##,0,3)),|))];@wait 1=@dolist [v(lst.resume)]=@fo %#=@channel/off ##
+&CMD.INFO TKCommands=$info *:@pemit %#=[iter(%0,switch(setr(0,locate(%#,##,*)),*#-1*,I can't see that here.,%r[type(%q0)]: [u(u.name-num-flags,%q0)][switch(owner(%q0),%#,,%q0,,%rOwner: [u(u.name-num-flags,owner(%q0))])][u(where.is.it,%q0)][switch(zone(%q0),#-1,,%rZone: [u(u.name-num-flags,zone(%q0))])][switch(words(lparent(%q0)),1,,%rParent%(s%): [u(u.num-flags-name,first(lparent(%q0)))][map(u.return-space-11.num-flags-name,rest(lparent(%q0)))])]%r))]
+&CMD.CALC.SUB TKCommands=$sub *:th [setq(0,first(%0,-))][iter(rest(%0,-),setq(0,sub(%q0,##)),-)];@pemit %#=Difference of %0 = %q0
+&CMD.CALC.MUL TKCommands=$mul *:th [setq(0,1)][iter(%0,setq(0,mul(%q0,##)),*)];@pemit %#=Product of %0 = %q0
+&CMD.CALC.DIV TKCommands=$div *:th [setq(0,first(%0,/))][iter(rest(%0,/),setq(0,fdiv(%q0,##)),/)];@pemit %#=Quotient of %0 = %q0
+&CMD.CALC.ADD TKCommands=$add *:th [setq(0,0)][iter(%0,setq(0,add(%q0,##)),+)];@pemit %#=Sum of %0 = %q0
+&CMD.GREP TKCommands=$grep */*=*:[set(me,vg:%2)][set(me/vg,no_command)][iter(%0,[setq(1,mix(u.grep,repeat(##%b,words(%1)),%1))][switch(words(%q1),0,pemit(%#,%r[u(u.name-num-flags,##)]%rNo matches found in this object.),pemit(%#,%r[u(u.name-num-flags,##)]%r[table(sort(%q1),18,79)])))]
+&CMD.FLIST TKCommands=$flist *:th [switch(%0,*/*,[setq(0,before(%0,/))][setq(1,after(%0,/))],[setq(0,%0)][setq(1,)])];@pemit %#=[iter(%q0,%r[u(u.name-num-flags,locate(%#,##,*))][switch(%q1,,[setq(2,*?)],%b/ [setr(2,%q1)])]%r[table(u(u.alist,%#,locate(%#,##,*),%q2),25,79)]%r)]
+&CMD.BP.Q TKCommands=$bp:@pemit %#=[switch(gt(words(%vn),0),1,You last paged:[space(2)]%([map(u.name,%vn)]%),Your last page had no recipients. Register cleared.)]
+&CMD.BP.2 TKCommands=$bp *:[switch(%0,*=*,,u(me/u.bp.send,%#,%0))]
+&CMD.BP.1 TKCommands=$bp *=*:[set(me,vl:)];[iter(%0,switch(pmatch(##),#-1,pemit(%#,No such player as ##.),#-2,pemit(%#,I don't know which ## you mean.),[set(me,vl:{%vl [num(*##)]})]))];[u(me/u.bp.send,%#,%1)]
+&CMD.ALIST TKCommands=$alist:@pemit %#=%r[u(u.name-num-flags,%l)]%r[table(sort([objeval(%#,lattr(%l))]),18,79)]
+&CMD.SHARE_WITH TKCommands=$share with *:@switch %0/[comp(locate(%#,Trispis' Tool Kit,Tn),#943)]=me/0,,{@pemit [setr(0,switch(%0,me,%#,num(*%0)))]={[u(hlp.share_with,%0)]};@pemit %#={You share the instructions with [switch(%0,me,yourself,name(%q0))].}}
+&CMD.MSET TKCommands=$mset *=*:@pemit %#=Set.[iter(%0,[setq(0,locate(%#,##,*))][map(u.set,%1)])]
+&CMD.TEST.FOR.JAV TKCommands=$ltest *:@pemit %#=[table(lattr(locate(%#,%0,*)),18,78)]
+&CMD.GAGCH TKCommands=$gagch:&lst.gagged me=[squish(iter(v(lst.channels),switch(member(cwho(mid(##,0,3)),%#),0,,mid(##,0,3)),|))];@wait 1=@dolist [v(lst.gagged)]=@fo %#=@channel/gag ##=yes
+&CMD.GAGCH.1 TKCommands=$gagch *:@dolist %0=@fo %#=@channel/gag ##=yes
+&CMD.UNGAGCH TKCommands=$ungagch:@dolist [v(lst.gagged)]=@fo %#=@channel/gag ##=no
+&CMD.UNGAGCH.1 TKCommands=$ungagch *:@dolist %0=@fo %#=@channel/gag ##=no
+&FOO.CMD.TKHELP TKCommands=tkh*:@pemit %#=[switch(words(%0),0,[setq(9,elp)][setq(8,elp)],1,[switch(%0,%b*,[setq(9,elp)][setq(8,trim(%0))],switch(grab(elp,%0*),elp,[setq(9,elp)][setq(8,elp)],[setq(9,%0)][setq(8,%0)]))],[setq(9,grab(elp,[first(%0)]*))][setq(8,rest(%0))])][switch(%q9,elp,switch(%q8,elp,[tagwrap(PRE,[u(#1618/u.header)]%r [ansi(h,%))][u(#1618/hlp.topics)][u(#1618/u.footer)])],[setq(1,ifelse(isnum(mid(%q8,dec(strlen(%q8)),1)),[mid(%q8,0,sub(strlen(%q8),1))]*[mid(%q8,dec(strlen(%q8)),1)],%q8*))][ifelse(setr(2,grab(u(#1619/lst.topics),%q1,|)),[tagwrap(PRE,[u(#1618/u.header)]%r [ansi(h,%))][u(#1618/hlp.%q2)][u(#1618/u.footer)])],No help available on %0.)]),Huh? Type "help" for help.)]
+&CMD.FUNSEARCH TKCommands=$funsearch *:@pemit %#=Matches for keword\(s\): %0%r[trim(iter(switch(words(%0),1,grepi(#122,*,%0),fold(u.and.keywords,rest(%0),grepi(#122,*,first(%0)))),[after(##,.)]\(\)\,),\,,r)]%rEnd of search.
+@@
+@@ Storing objects
+@@
+@dolist TKHelp TKLists TKProcesses=@tel [get(TKInstall/##)]=[get(TKInstall/TKCommands)]
+@@
+@@ Creating first child object for you.
+@@
+@create ToolKit
+@parent ToolKit=[get(TKInstall/TKHelp)]
+@set ToolKit=!no_command
+@lock/use ToolKit==me
+@lock Toolkit==me
+@link toolkit=me
+@set toolkit=!halt
+@@
+@@ Cleanup.
+@@
+@recycle TKInstall
+@nuke TKInstall
+
+
+
+

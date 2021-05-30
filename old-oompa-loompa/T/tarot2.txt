@@ -1,0 +1,399 @@
+# File: Configureable Tarot Deck
+# Purpose: Game and IC fortune telling prop.
+# Author: Ellan West
+# Format: Ellan West
+# Description: This Tarot Deck includes an average set of definitions
+# for standard tarot cards. It allows private readings and display to
+# others as well as configurable 'suit' names and 'names' for Major Arcana
+# cards that can be changed to complement a roleplay theme.
+#
+# Setup: The script, once run through the unformatter, should do all the
+# necessary setup. Check to be sure, when done, that the deck is parented
+# to the Library object.
+# Optional: Edit the &name* attributes below to suit your mu* theme, for
+# instance, change cups to bowls, wands to staves, coins to disks... 
+# or change your Heirophant to a Priest, or your Emperor to a High King.
+# These edits may be done after downloading the code, the &name*
+# attributes are for display only, and will not disable the draw or
+# interpretation code. 
+#
+# Note: The meanings or definitions are ordinary, from common RL tarot
+# decks. No 'Reversed' meanings are provided. The definitions are on 
+# attributes of the form t3-1 (tarot-suit-#3)-(card-denomination-1), ie,
+# the ace of cups, in this basic deck. A user might add 'reversed' or 'ill
+# dignified alternate definitions by appending to the current 'standard' 
+# definitions. Or custom definitions might be inserted, to suit your 
+# theme, whether medieval or science fiction/fantasy.
+# 
+# The finished 'parent deck' maybe @clone/parented without making further
+# copies of the 'library' object.
+# 
+@create Parent: Tarot Deck
+-
+@Desc Parent: Tarot Deck=A Tarot Deck, 80 cards of various suits. For help, type 'tarot/help'.
+-
+&CMD-HELP Parent: Tarot Deck=$tarot/help:
+     @pemit %#=
+         %r[repeat(~,78)]
+         %r[center(Tarot Commands,78)]
+         %r%b[ljust(TAROT/SHUFFLE,20)]: Shuffle the cards
+         %r%b[ljust(TAROT/DRAW,20)]: Draw one card
+         %r%b[ljust(TAROT/LOOK,20)]: Display cards in the current reading
+         %r%b[ljust(TAROT/READ <Card ID>,20)]: Read the interpretation of
+                                                  <Card ID>
+         %r%b[ljust(TAROT/SHOW,20)]: Shows the cards to everyone in the
+                                                      room
+-
+# If you want to add non standard cards to the deck, insert their
+# code-attribute-names below, for example t1-0, t2-0 etc might be used to
+# add a 'princess' card or a 'dragon' card to each deck, increasing the
+# number of total tarot cards. Alternately, rename one of the stock cards
+# and alter the meaning later in the library. 
+&DATA-MASTER-CARDLIST Parent: Tarot Deck=t1-1 t1-2 t1-3 t1-4 t1-5 t1-6 t1-7 t1-8 t1-9 t1-10 t1-p t1-j t1-q t1-k t2-1 t2-2 t2-3 t2-4 t2-5 t2-6 t2-7 t2-8 t2-9 t2-10 t2-p t2-j t2-q t2-k t3-1 t3-2 t3-3 t3-4 t3-5 t3-6 t3-7 t3-8 t3-9 t3-10 t3-p t3-j t3-q t3-k t4-1 t4-2 t4-3 t4-4 t4-5 t4-6 t4-7 t4-8 t4-9 t4-10 t4-p t4-j t4-q t4-k m-0 m-1 m-2 m-3 m-4 m-5 m-6 m-7 m-8 m-9 m-10 m-11 m-12 m-13 m-14 m-15 m-16 m-17 m-18 m-19 m-20 m-21
+-
+&CMD-SHUFFLE Parent: Tarot Deck=$tarot/shuffle:
+        @wipe me/reading
+         ;@emit %N shuffles the deck of cards.
+         ;&card-list me=[shuffle(shuffle(v(data-master-cardlist)))]
+-
+&CMD-DRAW Parent: Tarot Deck=$tarot/draw:
+        &reading me=[edit(v(reading),$,
+             %b[first(v(card-list))])][switch(rand(2),0,,-r)]
+        ;&card-list me=[remove(v(card-list),first(v(card-list)))]
+        ;@emit %N draws one card.
+-
+&FUN-SUIT Parent: Tarot Deck=
+         [switch(first(%0,-),
+            t1,[u(name-t1)],
+            t2,[u(name-t2)],
+            t3,[u(name-t3)],
+            t4,[u(name-t4)])]
+-
+# If you add another 'named' card, a T1-Z for instance, add it here, into
+# the switch, among the K, Q, J entries.
+#
+&FUN-CARD Parent: Tarot Deck=
+        [switch(first(%0,-),
+          M,{[u(name-m-[first(rest([%0],-),-)])]},
+              {[switch([first([rest([%0],-)],-)],
+		  K,King,
+		  Q,Queen,
+                  J,Knave,
+                  P,Prince,
+                    [first(rest(%0,-),-)])]})]
+-
+&CMD-READ Parent: Tarot Deck=$tarot/read *:
+        @pemit %#=[center([u(fun-card,%0)] 
+               %b[switch(first(%0,-),m,,%bof%b)]
+               %b[u(fun-suit,%0)],78)]
+               %r[repeat(~,78)]
+               %r[u(%0)]
+               %r[repeat(-,78)]
+-
+&CMD-INFO Parent: Tarot Deck=$tarot/info:@pemit %#=Spreads vary with the reader, but the simplest is a single card. Drawn at the beginning of the day, this is used as a symbolic or meditative focus for what is expected.%r%rWith the three card spread, the first card represents the past, the second is the present, and the third is the future. This deck is preset with a spread named the 'Celtic Cross' which uses 11 cards. Draw 11 cards and see what it looks like. You can edit the existing attributes for &cross-* or make a set of your own, and insert its 'keyword' into &spread me=<keyword> instead of &spread deck=cross
+-
+# The only 'spread' supplied here for display is the 'celtic cross', an
+# eleven card spread. The traditional 'position names' are provided in the
+# library in the form &cross1, &cross2. If you want other 'patterns' or
+# 'spreads' to do readings. A 'three card' one, for instance, add
+# &tri1 library=Past &tri2 library=Present &tri3 library=Future
+# and change &spread parent=tri. There is no command to do this change.
+#
+&SPREAD Parent: Tarot Deck=cross
+-
+&CMD-LOOK Parent: Tarot Deck=$tarot/look:
+        @pemit %#=[center(Tarot Reading,78)]
+        %r[repeat(~,78)]
+        %r%b[center(Position,20)][center(Card,20)][center(Suit,12)]ID#
+        %r[repeat(~,78)]
+        %r%b[iter([setq(0,[v(reading)])][r(0)],
+           [center([u([v(spread)]-[member([r(0)],##)])],20)]
+           [center([u(fun-card,##)],20)]
+           [center(u(fun-suit,##),12)]##%r)]
+        %r[repeat(~,78)]
+        %rCards:[words(v(reading))]
+-
+# Same as previous, but display to all in the room
+&CMD-SHOW-ALL Parent: Tarot Deck=$tarot/show:
+        @emit/room [center(Tarot Reading,78)]
+        %r[repeat(~,78)]
+        %r%b[center(Position,20)][center(Card,20)][center(Suit,12)]ID#
+        %r[repeat(~,78)]
+        %r%b[iter([setq(0,[v(reading)])][r(0)],
+           [center([u([v(spread)]-[member([r(0)],##)])],20)]
+           [center([u(fun-card,##)],20)]
+           [center(u(fun-suit,##),12)]##%r)]
+        %r[repeat(~,78)]
+        %rCards:[words(v(reading))]
+-
+# Don't worry about the contents of this next attribute. It is
+# automatically reset when you shuffle the first time.
+# It keeps track of the 'order' after a shuffle.
+&CARD-LIST Parent: Tarot Deck=t1-6 m-21 m-3 t1-2 t3-5 t1-j t1-k m-12 t4-1 t4-3 t4-7 t2-8 t3-k t2-10 t2-3 t3-10 t4-5 t2-q m-13 t4-4 m-9 m-20 t1-8 t4-2 t2-5 t2-p t2-7 m-6 m-2 t3-4 t1-3 t3-6 m-10 t2-1 m-5 t4-8 t2-4 m-19 m-16 t2-9 t1-7 t3-p t1-4 t4-j t4-p t3-2 t4-6 t2-6 t2-2 t1-10 t3-9 t3-7 t1-9 t3-1 t1-5 t3-q m-8 t4-9 m-15 t3-3 m-4 t2-j m-18 t1-q m-0 t3-j t4-k m-1 t4-q m-17 t2-k t1-p m-7 t3-8 t4-10 m-11 m-14 t1-1
+-
+@set Parent: Tarot Deck=COMMANDS
+-
+@create Tarot: Text Library
+-
+# These are the 'spread' defaults mentioned earlier. You can alter
+# the contents of these to such things as 'The Questioner', 'The Dream'
+# and so on, or 'The Dangers' and 'The Promise', whatever suits
+# your theme. 
+#
+&CROSS-1 Tarot: Text Library=Significator
+-
+&CROSS-2 Tarot: Text Library=Covering
+-
+&CROSS-3 Tarot: Text Library=Crossing
+-
+&CROSS-4 Tarot: Text Library=Crown
+-
+&CROSS-5 Tarot: Text Library=Foundation
+-
+&CROSS-6 Tarot: Text Library=Past
+-
+&CROSS-7 Tarot: Text Library=Future
+-
+&CROSS-8 Tarot: Text Library=Querant
+-
+&CROSS-9 Tarot: Text Library=Family
+-
+&CROSS-10 Tarot: Text Library=Fears
+-
+&CROSS-11 Tarot: Text Library=Outcome
+-
+# Here, you can edit the names of the four suits, again, to complement
+# your game's theme. Fire, Earth, Water, Air. Bowls for Cups, Staves
+# for Wands.
+#
+&NAME-T1 Tarot: Text Library=Coins
+-
+&NAME-T2 Tarot: Text Library=Wands
+-
+&NAME-T3 Tarot: Text Library=Cups
+-
+&NAME-T4 Tarot: Text Library=Swords
+-
+# The reason for a separate library at this point is to make it easy to
+# switch custom decks for themes. If you design a 'themed' library, please
+# feel free to send a copy, and I will include it in the release of this
+# code with appropriate credits.
+@parent deck=library -
+-
+# As above, this is another place for custom changes. If you don't have 
+# Kings in your theme, but do have Dukes, Duchesses, Generals
+# These can be renamed without effecting the underlying code.
+&NAME-K Tarot: Text Library=King
+-
+&NAME-Q Tarot: Text Library=Queen
+-
+&NAME-J Tarot: Text Library=Knave
+-
+&NAME-P Tarot: Text Library=Prince
+-
+# And again, custom names for major arcana cards can lend authenticity
+# to the fortunetelling roleplay. Change the Empress to the Starship
+# Captain and alter the mood to science fiction, and so on.
+# Do take time to read the meaning attributed to each of the 22 cards
+# including '0', so that your 'new name' relates to it somewhat.
+&NAME-M-21 Tarot: Text Library=World
+-
+&M-21 Tarot: Text Library=Completion, reward, success, triumph in all undertakings. Travel, change of residence, arrival at a state of Cosmic Consciousness. The path of liberation.
+-
+&NAME-M-20 Tarot: Text Library=Judgement
+-
+&M-20 Tarot: Text Library=A life well lived, a work well done. Awakening, renewal. Legal judgements in one's favor. A change of personal consciousness, which is now on the verge of blending with the universal.
+-
+&NAME-M-19 Tarot: Text Library=Sun
+-
+&M-19 Tarot: Text Library=Material happiness, success, attainment. A good marriage. Happy reunions. Achievements in the arts, science, and agriculture. Studies completed, liberation. Pleasure in the simple life.
+-
+&NAME-M-18 Tarot: Text Library=Moon
+-
+&M-18 Tarot: Text Library=Intuition, imagination, deception. Undfoldment of latent psychic powers. Unforeseen perils, secret foes. Bad luck for one you love.
+-
+&NAME-M-17 Tarot: Text Library=Star
+-
+&M-17 Tarot: Text Library=Insight, inspiration, hope. Unselfish aid. The gifts of the spirit. Great love will be given and received.
+-
+&NAME-M-16 Tarot: Text Library=Tower
+-
+&M-16 Tarot: Text Library=Change, conflict, catastrophe. Overthrow of existing ways of life, old notions upset. Disruption will bring enlightenment in its wake. Selfish ambition is about to come to naught. Bankruptcy.
+-
+&NAME-M-15 Tarot: Text Library=Devil
+-
+&M-15 Tarot: Text Library=Black magic, discontent, depression. Illness. Wrong use of force. Bondage to the material, sensation divorced from understanding.
+-
+&NAME-M-14 Tarot: Text Library=Temperance
+-
+&M-14 Tarot: Text Library=Adaptation, coordination, self-control, modification. Working in harmony with others, good management. What we have imagined will come to pass. Successful combinations will be achieved.
+-
+&NAME-M-13 Tarot: Text Library=Death
+-
+&M-13 Tarot: Text Library=Transformation, change, destruction followed by renewal. The change may be in consciousness. Birth of new ideas, new opportunities.
+-
+&NAME-M-12 Tarot: Text Library=Hanged Man
+-
+&M-12 Tarot: Text Library=In spiritual matters, wisdom, prophetic power. A pause in one's life, suspended decisions. Self-surrender leads to the transformation of the personality. Material temptation is conquered
+-
+&NAME-M-11 Tarot: Text Library=Justice
+-
+&M-11 Tarot: Text Library=Justice will be done. Balance is required. Lawsuits will be won. The balanced personality demands elimination of excess baggage, wrong ideas, useless forms of education. A mixture of the right ingredients is welcomed - as in science, chemistry, a
+-
+&NAME-M-10 Tarot: Text Library=Fortune
+-
+&M-10 Tarot: Text Library=Success, unexpected turn of luck, change of fortune for the better, new conditions. Creative evolution within the laws of chance.
+-
+&NAME-M-9 Tarot: Text Library=Hermit
+-
+&M-9 Tarot: Text Library=Silent council, prudence, discretion. Receiving wisdom from above, instruction from an expert in your field. A meeting with one who will guide the seeker on the path to the material or spiritual needs. Attainment of goals. A journey may be necessa
+-
+&NAME-M-8 Tarot: Text Library=Strength
+-
+&M-8 Tarot: Text Library=Force of character, spiritual power overcoming material power, love triumphing over hate, the higher nature over carnal desires.
+-
+&NAME-M-7 Tarot: Text Library=Chariot
+-
+&M-7 Tarot: Text Library=Triumph, success, control over the forces of nature--thus triumph over ill health as well as money difficulties or enemies of any sort, including one's own lower animal passions. This is a card of those who achieve greatness. It may also indicate
+-
+&NAME-M-6 Tarot: Text Library=Lovers
+-
+&M-6 Tarot: Text Library=Choice, temptation, attraction. The struggle between sacred and profane love. Harmony of the inner and outer aspects of life.
+-
+&NAME-M-5 Tarot: Text Library=Heirophant
+-
+&M-5 Tarot: Text Library=Preference for the outer forms of religion, the ritual, the creed, the ceremony. The importance of social approval, the need to conform to society.
+-
+&NAME-M-4 Tarot: Text Library=Emperor
+-
+&M-4 Tarot: Text Library=Leadership, mental activity, domination. War-making power, authority, paternity. The fruits of toil, the results of action. Controlled and directed sexual drive.
+-
+&NAME-M-3 Tarot: Text Library=Empress
+-
+&M-3 Tarot: Text Library=Material wealth, marriage, fertility for would-be parents, for farmers, or for people in the creative arts. If its position is not the best placement in relation to the other cards, it sometimes indicates luxury or dissipation.
+-
+&NAME-M-2 Tarot: Text Library=High Priestess
+-
+&M-2 Tarot: Text Library=The unrevealed future, the hidden things at work. This is a card that favors artists, poets, composers, mystics. The perfect woman all men dream of; the woman of true heart that can befriend another woman. The Empath.
+-
+&NAME-M-1 Tarot: Text Library=Magician
+-
+&M-1 Tarot: Text Library=Will, mastery, organizational skills, creative talents. The ability to take the aeir and direct it through desire into manifestation.
+-
+&NAME-M-0 Tarot: Text Library=Fool
+-
+&M-0 Tarot: Text Library=The dreamer, the fool, the innocent man, prey to others and easily lead.
+-
+&T1-K Tarot: Text Library=This is a chief of industry, a banker, or an owner of large estates. He is a reliable married man and a mathematician with great financial gifts. The card can also betoken a steady temperament, slow to anger, success where money matters are concerned and reliability.
+-
+&T1-Q Tarot: Text Library=This is a woman who is the Earth Mother, generous with her gifts. She is rich but charitable, a truly noble soul. A creator on the physical plane. Other meanings are opulence, security. Trust of those around one. At times melancholy or moody. Good use of practical talents.
+-
+&T1-J Tarot: Text Library=A man of upright nature who accepts responsibility. He is laborious and patient. The card can also mean utility, serviceableness, trustworthiness. Or the coming or going of an important matter connected with money.
+-
+&T1-P Tarot: Text Library=Respect for learning and new ideas. A scholar. A typical introvert. Can also mean application, reflection. Good management, carefulness. The bringer of good news and message about money.
+-
+&T1-10 Tarot: Text Library=Riches, inheritance. Attention to family matters, interest in one's ancesteral tree. A problem concerning a will or pension. May refer to the acquiring of a house or a business property.
+-
+&T1-9 Tarot: Text Library=Solitary enjoyment of the good things in life. Inheritance. Wisdowm where one's own interests lie. A person with a green thumb. Material well-being. Caution-be prudent! Great love of gardens and home.
+-
+&T1-8 Tarot: Text Library=Learning a trade or profession. The beginning of a profitable undertaking. Employment or commission to come. Skill in material affairs, handiwork, and the arts -- sometimes remaining only in the apprenticeship stage.
+-
+&T1-7 Tarot: Text Library=Pause during the development of an enterprise. Unprofitable speculations. Loss of promising fortune. Disappointment. Anxiety about a loan. Success not attained.
+-
+&T1-6 Tarot: Text Library=Alms dispensed with justice. Gifts, inheritance. Gain in material undertaking. Others will share with you justly. You will receive what you deserve.
+-
+&T1-5 Tarot: Text Library=Unemployment, destitution. Loss of home. Loneliness. Lovers unable to find a meeting place. Affinities discovered through similar troubles. Dark night of the soul.
+-
+&T1-4 Tarot: Text Library=Assured material gain, success. Earthly power, but leading to nothing beyond it. Gifts, legacy, inheritance. May indicate a miserly, ungenerous character.
+-
+&T1-3 Tarot: Text Library=Material increase. The master craftsman, the skilled artist. Gain in a commercial transaction. This is the card for members of Guilds and other groups and societies.
+-
+&T1-2 Tarot: Text Library=The ability to juggle two situations at one time. Lightheartedness, gaiety. Recreation. Harmony in the midst of change. New projects may be difficult to launch. News and messages.
+-
+&T1-1 Tarot: Text Library=The beginning of wealth and material gain. Gold, prosperity, combined with pleasure and beauty.
+-
+&T2-1 Tarot: Text Library=Root of the powers of fire. Energy. Strength. Force. Vigor. Natural force as opposed to invoked force.
+-
+&T2-2 Tarot: Text Library=Dominion. Harmony of rule and justice. Influence over another. Boldness. Courage. Fierceness.
+-
+&T2-3 Tarot: Text Library=Virtue. Established strength. Success after struggle. Pride and arrogance. Realization of hope. Nobility.
+-
+&T2-4 Tarot: Text Library=Completion. Perfected work. Settlement. Completion after much labor. Rest. Subtlety. Conclusions from previous knowledge.
+-
+&T2-5 Tarot: Text Library=Strife. Quarreling. Fighting. Competition. Cruelty. Violence. Lust and desire.
+-
+&T2-6 Tarot: Text Library=Victory. Energy in balanced manifestation. Love. Gain and success. Triumph after strife.
+-
+&T2-7 Tarot: Text Library=Valour. Struggles. Possible victory. Obstacles and difficulties - courage to meet them. Triumph after strife.
+-
+&T2-8 Tarot: Text Library=Swiftness. Speed. Light. Electricity. Energy. Activity. Approach to goal. Rapidity. Boldness. Freedom.
+-
+&T2-9 Tarot: Text Library=Strength. Power. Health. Success. Force. Recovery. Victory.
+-
+&T2-10 Tarot: Text Library=Oppresion. Destructive. Cruelty. Malice. Selfishness. Lying. Repression. Slander. Ill will.
+-
+&T2-J Tarot: Text Library=A man. Qualities: Active. Generous. Impetuous. Proud. Swiftness.
+-
+&T2-Q Tarot: Text Library=A woman. Adapbtable. Persistent. Calm authority. Power to attract. Generous. Impateint of opposition.
+-
+&T2-P Tarot: Text Library=A young man. Swift. Strong. Impulsive. Violent. Just. Noble. Generous. Sense of humor.
+-
+&T2-K Tarot: Text Library=King of Wands
+-
+&T3-P Tarot: Text Library=A young man. Subtle. Secretly violent. An artist. Intensely passionate. Caring for power and wisdom and ruthless in his aims.
+-
+&T3-K Tarot: Text Library=A man of power, a leader or parental figure, loving but quiet. A man lead by his emotions, but who can be trusted.
+-
+&T3-Q Tarot: Text Library=A woman reflecting the nature of the observer. Dreamy. Tranquil. Poetic. Imaginative. Kind.
+-
+&T3-J Tarot: Text Library=A graceful dilettante. Amiable. Quick to respond to attraction. Easily enthusiastic. Exceedinly Sensitive. Little depth of character.
+-
+&T3-10 Tarot: Text Library=Happiness, Tranquility, Stability.
+-
+&T3-9 Tarot: Text Library=Satiety. Pride. Ostentation possible.
+-
+&T3-8 Tarot: Text Library=Search for meaning. Discontent with material wealth.
+-
+&T3-7 Tarot: Text Library=Grandiose plans. Debauchery. All Talk, no Completion.
+-
+&T3-6 Tarot: Text Library=Pleasure. Nostalgia. Old Relationships.
+-
+&T3-5 Tarot: Text Library=Disappointment. Salvageable losses.1
+-
+&T3-4 Tarot: Text Library=Luxury. Weakness. Abandonment to pleasure mixed with anxiety. Injustice. The seeds of decay.
+-
+&T3-3 Tarot: Text Library=Abundance. Love of Family and Friends.
+-
+&T3-2 Tarot: Text Library=Love. Pleasure. Warm Friendship. New Relationships.
+-
+&T3-1 Tarot: Text Library=Fertility. Productiveness. Beauty Pleasure. Happiness.
+-
+&T4-0 Tarot: Text Library=A young woman of rank, diplomatic, a graceful manipulator of people, a potential leader. A message in secret, spying, secrecy in general.
+-
+&T4-1 Tarot: Text Library=Strong, courageous, enthusiastic beginnings.
+-
+&T4-K Tarot: Text Library=This is a man who may be a lawyer, a judge, a general, or a governor. He gives wise council, is firm in enmity as well as in friendship. A man of many thoughts, ideas, and designs. The card may also mean power, strength, authority, or military intelligence. A legal challenge may be made or a boon asked.
+-
+&T4-Q Tarot: Text Library=A subtle, keen, and quick-witted woman who may represent a widow or one who is unable to bear children. Perhaps she is mourning for those she loves who are far away from her. This card may also mean widowhood, mourning, privation. Kindness but also firmness. Keen observation. Gracefulness, fondess for dancing.
+-
+&T4-10 Tarot: Text Library=Though the Nine of Swords depicts despair, the Ten is even more serious. Ruin of plan and project. Defeat in war. Disruption of home life. Tears will fall. Trouble will come in spite of riches and high position. Not a card of violent death. A suggestion to give charity freely to those in trouble.
+-
+&T4-J Tarot: Text Library=A dashing, brave young man. Though he may be domineering, he has a clean heart and is full of courage. This card may also mean the coming or going of misfortune.
+-
+&T4-P Tarot: Text Library=A young person who might be a page in the diplomatic or government service. He or she already has great understanding and knows how to use diplomacy. This card can also mean a message and certain types of spying, as well as grace and dexterity.
+-
+&T4-9 Tarot: Text Library=Suffering, loss, misery. Doubt and desolation. Illness. May mean death of a loved one.
+-
+&T4-8 Tarot: Text Library=Narrow or restricted surroundings. Bondage. Imprisionment through indecision. Betrayal. Fear to move out of a situation. Temporary sickness.
+-
+&T4-7 Tarot: Text Library=A plan that may fail. An unwise attempt to make away with what is not yours. Unstable effort. Arguments over plans. Spying on another. Partial success.
+-
+&T4-6 Tarot: Text Library=The future will be better. Success after anxieties. Journey to a new home, by water. Sending someone to represent you in an undertaking. Also a journey in consciousness.
+-
+&T4-5 Tarot: Text Library=Failure, defeat. Degredation. Conquest of others. Unfairness, slander, cruelty, cowardliness.
+-
+&T4-4 Tarot: Text Library=Hermit's repose. Rest after war. Banishment. Relaxation of anxiety, release from suffering. There will soon be a change for the better.
+-
+&T4-3 Tarot: Text Library=Stormy weather for the affections. Tears, seperation, quarreling. A general upheaval of the environment. Possibility of civil war. Political strife.
+-
+&T4-2 Tarot: Text Library=Tension in relationships. Indecision. Balanced Forces. Military friendships. A well-developed sense of balance and rhytnm but needed direction. Stalemate.

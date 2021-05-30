@@ -1,0 +1,365 @@
+#!/usr/bin/perl
+
+=head1 NAME
+
+who.cgi
+
+=head1 SYNOPSIS
+
+http[s]://<parent-url>/who.cgi[?host=<host>[:<port> || &port=<port>]&quiet=1]
+
+=head1 DESCRIPTION
+
+who.cgi is a I<Perl5> CGI program (that is fully compatible with
+Apache::Registry) that shows a highlighted list of players on a MUSH (with any
+URLS automatically converted into links), or any type of server that supports
+the WHO command at login. It recognizes PUEBLO enhanced servers and can show a
+prettier PUEBLO login screen for them.
+
+=head1 USAGE
+
+who.cgi
+
+Will show a screen allowing the user to supply all the possible options.
+
+who.cgi?host=mush.pennmush.org
+
+Shows the login screen and WHO listing for M*U*S*H, my home MUSH. Since I
+didn't give the port number 4201 (the default for PennMUSH) is assumed.
+"quiet=1" would tell it not to show the whole login screen.
+
+who.cgi?host=mush.pennmush.org:4201
+
+Same thing, but the port is specified explicitly.
+
+who.cgi?host=mush.pennmush.org:4201&quiet=1
+
+Same, but the login screen is not shown.
+
+=head1 TODO
+
+Add INFO command support with a header line that includes a telnet:/ link.
+
+Support for RWHO and any other WHO formats is needed.
+And for server-side bots is needed to support a greater number of functions
+(such as finger), this might be better done in a separate system.
+
+=head1 HISTORY
+
+0.5	06/01/2000
+	Started keeping track. Made non-blocking on socket more portable, and
+	improved the error messages. Released on SourceForge.
+
+0.6	06/06/2000
+	Made "show login" and port 4201 the defaults.
+	Highlights ads in @doings as invokations of the script.
+	Links highlighted in login screen.
+	Some very simple, but working ANSI support.
+	Much more compatible with other types of MU*s.
+	Doesn't use POST for form anymore, works better with history.
+	SIGNIFICANTLY cleaner code.
+
+=head1 AUTHOR
+
+Rafael Kitover <caelum@debian.org>
+
+=head1 COPYRIGHT
+
+who.cgi Copyright (c) 2000 Rafael Kitover
+
+This program is free software; you can distribute and/or modify it under the
+same terms as Perl itself.
+
+=cut
+
+$VERSION = 0.6;
+
+use strict;
+use IO::Socket;
+use Fcntl;
+use CGI::Carp 'fatalsToBrowser';
+use CGI qw/:all/;
+
+sub delay ($);
+sub splitLines ($);
+sub highlightLoginScreen (@);
+
+# Turn off buffering.
+local $| = 1;
+
+use constant SPACE	=> '&nbsp;';
+use constant CR		=> "\015";
+use constant LF		=> "\012";
+use constant CRLF	=> CR.LF;
+
+my $CR = CR; my $LF = LF; my $CRLF = CRLF;
+
+use constant ANSI => {
+	'30'   => 'black',
+	'34'   => 'blue',
+	'37'   => 'higray',
+	'32'   => 'green',
+	'36'   => 'cyan',
+	'31'   => 'red',
+	'35'   => 'purple',
+	'33'   => 'brown',
+	'0;30' => 'black',
+	'0;34' => 'blue',
+	'0;37' => 'higray',
+	'0;32' => 'green',
+	'0;36' => 'cyan',
+	'0;31' => 'red',
+	'0;35' => 'purple',
+	'0;33' => 'brown',
+	'1;30' => 'dark gray',
+	'1;34' => 'hiblue',
+	'1;32' => 'higreen',
+	'1;36' => 'hicyan',
+	'1;31' => 'hired',
+	'1;35' => 'hipurple',
+	'1;33' => 'yellow',
+	'1;37' => 'white'
+};
+
+use constant LINK	=> qr{
+	(?<=[^\w"=/])	# Must begin with non-word that's probably not from an
+			# <a> link, nor a part of http:// which could have
+			# matched earlier.
+	(http://([\w/\.-]+)|(www\.\S+))
+}xi;
+
+# This will match MU* ads, which are of the form:
+# somewhere.something 4201
+use constant MU_AD	=> qr{
+	(?<=[^\w"=])	# Must begin with non-word that's probably not from an
+			# <a> link.
+	([\w-]+(?:\.[\w-]+)+) # Match a word followed by .words .
+	(\s+)		# Then some whitespace.
+	(\d\d\d+)	# Then the port number.
+	(?=\W|$)	# Ended by either EOL or non-word.
+}x;
+
+use constant HIGHLIGHT_NUMBERS => qr{
+	(
+		(?<=\s)(\d+)(?=[smhd:])	# eg.: 01d, 20h, 05m, 10:
+		|
+		(?<=\s\d\d:)(\d\d\W)	# eg.: the 05 in 04:05
+	)
+}sxi;
+
+use constant ANSI_COLOR => qr{
+	\033\[		# ANSI escape.
+	(?:\d\d;)?	# Possible background color.
+	([01];)?	# $1 = possible bold/normal prefix.
+	(3[0-7])m	# $2 = the code.
+	([^\033]*)	# $3 = what is highlighted up to next escape.
+	(?:\033\[0m)?	# Possibly terminated with reset.
+}x;
+
+use constant WHO_HEADER => qr{
+	^(?:<[^>]*>|\s*)*	# Preceded by any number of tags or whitespace.
+	(?:player|name)		# With the word "player" or "name" as first on
+				# the line.
+}xi;
+
+# Help for those who want it.
+if (param('Help!')) {
+	use Pod::Html;
+	use IO::File;
+
+	print header;
+
+	pod2html(
+	 "--infile=$0",
+	 "--outfile=/tmp/who.cgi-help-$$",
+	 "--netscape",
+	 "--noindex",
+	 "--title=who.cgi help"
+	);
+
+	print ((new IO::File "/tmp/who.cgi-help-$$")->getlines);
+	unlink "/tmp/who.cgi-help-$$";
+
+	exit;
+}
+
+# Allow host:port syntax for the host param.
+(my $host = param('host')) =~ s/([^:]+)(?::(\d+))?/$1/;
+ my $port = $2 || param('port') || 4201;
+
+if (!$host) {
+	print header,
+	      start_html ({
+	      	title   => 'MUSH Who',
+		bgcolor => 'lightblue',
+	      }),
+	      start_form(-method => "GET"),
+	      table (
+		Tr(td(['Host:', textfield(-name => 'host',
+					  -default => 'mush.pennmush.org')])),
+		Tr(td(['Port:', textfield(-name => 'port',
+					  -default => '4201')])),
+	      ),
+	      br,
+	      checkbox ({
+	      	name  => 'quiet',
+		label => " Don't show the login screen."
+	      }),
+	      br() x 2,
+	      submit("See who's on."), SPACE x 18, submit("Help!"),
+	      end_form,
+	      end_html;
+
+	exit;
+}
+
+# The Timeout part of this requires Perl 5.6 or a newer IO::Socket to work
+# correctly in some instances.
+my $socket = new IO::Socket::INET(PeerAddr => "$host:$port", Timeout => 4)
+or do {
+	print header,
+	      start_html ({
+		title	=> "$host:$port Who Listing",
+		bgcolor	=> 'black',
+		text	=> 'white'
+	      }),
+	      h2("Could not connect to $host:$port."),
+	      a({href => url(-query => 1)}, "Try again"), " if you like.";
+	exit;
+};
+
+print header,
+      start_html ({
+	title	=> "$host:$port Who Listing",
+	bgcolor	=> 'black',
+	text	=> 'white'
+      }),
+      '<pre wrap>';
+
+# Check whether or not to turn on Pueblo compatibility.
+my $text;
+
+my $have_pueblo = 0;
+$_ = scalar <$socket>;
+if (/pueblo/i) {
+	$have_pueblo = 1;
+	print $socket "PUEBLOCLIENT $CRLF";
+} elsif (!/^\s*$/) {
+	$text = $_;
+}
+
+delay(0.5);
+print $socket "WHO$CRLF";
+delay(0.5);
+print $socket "QUIT$CRLF$CRLF";
+
+# Read the rest, protect from unterminated lines.
+# Make socket non-blocking.
+fcntl($socket, F_SETFL, O_NDELAY || O_NONBLOCK);
+while ($socket->read(my $chunk, 10)) {
+	$text .= $chunk;
+}
+
+# Give it 2 seconds in case of net-burp.
+# FIXME: this could be more elegant maybe?
+delay(1);
+while ($socket->read(my $chunk, 10)) {
+	$text .= $chunk;
+}
+
+# Done with socket, close it.
+$socket->close;
+
+# If it's an unterminated line world, it's probably not a MUSH type.
+# Just dump out the login screen and error.
+if ($text !~ /$LF$/s) {
+	my @lines = splitLines $text;
+	unless (param('quiet')) {
+		highlightLoginScreen @lines;
+		print @lines;
+	}
+	print '</pre>',
+	      hr, br,
+	      h3("Sorry, either the connection is bad or I don't know how to get a WHO listing for that type of world."),
+	      a({href => url(-query => 1)}, "Try again"), " if you like.",
+	      hr,
+	      end_html;
+	exit;
+}
+
+my @lines = splitLines($text);
+
+# Some display a big nasty DISCONNECT line, get rid of it.
+pop @lines if $lines[-1] =~ /DISCONNECT/i;
+
+# Find the Who portion.
+my ($line, @who);
+
+if (not $have_pueblo) {
+	while ($_ = pop @lines) {
+		last if /^\s*$/; # empty line
+		unshift @who, $_;
+		last if /@{[WHO_HEADER]}/;
+	}
+	push @lines, "$CRLF";	# Add a blank line.
+} else {
+# Get rid of non-pueblo login screen.
+	while ((shift @lines) !~ /<body/i) {}
+		
+	while ($_ = pop @lines) {
+		unshift @who, $_;
+		last if /@{[WHO_HEADER]}/;
+	}
+}
+
+unless (param('quiet')) {
+	highlightLoginScreen @lines;
+	print @lines;
+}
+
+# Beautify the 'WHO' output a bit.
+
+# Bold first line.
+$who[0]		= '<b>'.$who[0].'</b>';
+
+# Bold trailer with red player count.
+($who[-1]	= '<b>'.$who[-1].'</b>') =~
+	s{(\d+)}{<font color="red">$1</font>};
+
+# Process the WHO list.
+for (@who) {
+	s(@{[ANSI_COLOR]})
+	 ('<font color="'.ANSI->{$1.$2}.qq|">$3</font>|)eg;
+	s|@{[LINK]}|a({href => "http://$2$3/"}, $1)|e;
+	s(@{[MU_AD]})
+	 (a({href => url(-relative => 1)."?host=$1:$3"}, "$1$2$3"))e;
+	s|@{[HIGHLIGHT_NUMBERS]}|<font color="lightblue">$1</font>|g;
+	s|</?pre>||ig; # Remove any pre tags.
+}
+
+print	@who,
+	'</pre>',
+	end_html;
+
+exit;
+
+### Helper Subroutines
+
+# Waits $ seconds (where $ can be a decimal).
+sub delay ($) {
+	select (undef, undef, undef, $_[0])
+}
+
+# Split a text scalar into an array of lines.
+sub splitLines ($) {
+	return map { "$_$CR$LF" } (split /$CR?$LF/s, $_[0]);
+}
+
+sub highlightLoginScreen (@) {
+	for (@_) {
+		s(@{[ANSI_COLOR]})
+		 ('<font color="'.ANSI->{$1.$2}.qq|">$3</font>|)eg;
+		s|@{[LINK]}|a({href => "http://$2$3/"}, $1)|e;
+		s|@{[MU_AD]}|a({href => "telnet://$1:$3/"}, "$1$2$3")|e;
+	}
+}

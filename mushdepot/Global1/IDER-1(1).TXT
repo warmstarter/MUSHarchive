@@ -1,0 +1,14 @@
+@create ID Command
+@link ID Command=#2
+@set ID Command=VISUAL
+@set ID Command=WIZARD
+&FN_ID_PERSONAL ID Command=%r[ansi(hw,Full Name:)] [ansi(hc,[mid(ljust(get(*%0/fullname),25),0,25)])] [ansi(hw,Alias:)] [ansi(hc,[mid(ljust(get(*%0/alias),4),0,4)])] [ansi(hw,Origin:)] [ansi(hc,[mid(ljust(get(*%0/origin),16),0,16)%r[ansi(hw,Race:)]%b%b%b%b%b%b[ansi(hc,[mid(ljust(get(*%0/race),25),0,25) [ansi(hw,Age:)]%b%b%b[ansi(hc,[mid(ljust(get(*%0/age),4),0,4)])] [ansi(hw,Gender:)] [ansi(hc,[mid(ljust(get(*%0/sex),16),0,16)])]
+&COMMAND_ID ID Command=$+id *:@switch hasflag(*%0,player)=0,{@pemit %#=[s(v(HEADER_ID))][s(v(FN_ID_PERSONAL))][s(v(FN_ID_EMPIRE))] [s(v(FN_NOTE))][ansi(b,[repeat(-,79)])]},#-1,{@pemit %#=[ansi(h,Identifaction Computer: That player isnt on my records.)]}
+&HEADER_ID ID Command=[s(v(FN_LINE))][ansi(hw,Identification Report for)]%b[ansi(hy,[name(num(*%0))])]%b[s(v(WIZ_ROY_CHECK))]%r[s(v(FN_LINE))]
+&FN_LINE ID Command=[ansi(b,[repeat(-,78)])]%r
+@DESCRIBE ID Command=A object that has the new +ID command.%r%bType [ansi(hw,'+ID <player>')] to identify a player.
+&FN_ID_EMPIRE ID Command=%r%r[ansi(hw,Empire:)]%b%b%b%b%b%b%b[ansi(g,[get(*%0/empire)])]%r[ansi(hw,Organization:)] [ansi(g,[get(*%0/organization)])]%r[ansi(hw,Class:)]%b%b%b%b%b%b%b%b[ansi(g,[get(*%0/class)])] [ansi(hw,<)][ansi(hg,[get(*%0/rank)])][ansi(hw,>)]%r[ansi(hw,Division:)]%b%b%b%b%b[ansi(g,[get(*%0/division)])]%r[ansi(hw,Memory:)]%b%b%b%b%b%b%b[ansi(g,playermem(*%0))] bytes
+&FN_NOTE ID Command=%r%r[ansi(hw,Note:)] [s(get(*%0/note))]%r
+&COLOR ID Command=hy
+&CREDITS ID Command=Original Coding done by Falco. Editing and refining done by Jesse and Falco.
+&WIZ_ROY_CHECK ID Command=[switch(hasflag(*%0,wizard),1,[ansi(hw,<<)][ansi(hr,WIZARD)][ansi(hw,>>)],0,[switch(hasflag(*%0,royal),1,[ansi(hw,<<)][ansi(hy,ROYALTY)][ansi(hw,>>)])])]

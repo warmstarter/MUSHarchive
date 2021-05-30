@@ -1,0 +1,138 @@
+##################################################################
+#                  Jail Guard               by Jon               #
+##################################################################
+
+&LISTEN-NEW-ARRIVAL #5825=^* has arrived.: 
+	@switch [u(me/U-WHO-IS-IT,%#)]=
+	Prisoner, {
+		@trigger me/TRIG-PRISONER=%#
+	}, Guard, {
+		@trigger me/TRIG-GUARD=%#
+	}, Ranivor, {
+		@trigger me/TRIG-RANIVOR
+	}, Other, {
+		@trigger me/TRIG-OTHER=%#
+	}, {
+		@trigger me/TRIG-BUG=%#
+	}
+
+-
+
+&U-WHO-IS-IT #5825=
+	[switch(t(match(default(me/LIST-PRISONERS,None),[name(%0)],|)),
+		1, Prisoner,
+		0, [switch(t(match(Sentry|Centurion|Sailor|Commander|General| 			Admiral, default(%0/MILITARY-RANK,None),|)),
+			1, Guard,
+			0, [switch(hastag(%0, ranivor),
+				1, Ranivor,
+				0, Other)])])]
+
+-
+
+&TRIG-PRISONER #5825=
+
+	say Halt! You are a prisoner and are not to be released without 
+		the permission of my superiors!;
+	ooc If you go any further, you will be severely injured, killed, 
+		or simply brought back to the cell. Go back now.;
+	@mail/quick barik/Attempted escape!=There has been an attempted 
+		escape by the prisoner [name(%0)].
+
+-
+
+&TRIG-GUARD #5825=
+
+	@fo me=pose salutes. "Sir, if you have a prisoner, remember to 
+		report them with me.";
+	ooc To report a prisoner, type 'report prisoner'.;
+
+-
+
+&TRIG-RANIVOR #5825=
+
+	pose bows. "Honored Ranivor, I hope your visit to the prison 
+		is not because of that big of a problem."
+
+-
+
+&TRIG-OTHER #5825=
+
+	pose stops you before you enter. "I am sorry, but not just 
+		anyone can enter the prison."
+
+-
+
+&TRIG-BUG #5825=
+
+	pose studies the scene questioningly. "I'm sorry, but I just 
+		wasn't trained for this situation!";
+	@qmail jon/Bug in Puppet Guard=I didn't know how to greet %0.
+
+-
+
+&CMD-PRISONER #5825=$report prisoner:
+	@switch hasattr(%#, military-rank)=
+	0, {
+		@force %#=pose tries to report a prisoner.;
+		say Sorry, but only people in the military may 
+			report prisoners.
+	}, 1, {
+		@force %#=pose begins to report a prisoner.;
+		say Yes, sir. What is the name of the prisoner?;
+		@program %#=me/PROG-PRISONER:
+			Please enter the name of the prisoner. You 
+			may enter the word 'cancel' if you have none.
+	}
+
+-
+
+&PROG-PRISONER #5825=
+	@switch strmatch(%0, cancel)=
+	1, {
+		say Now you don't want to report a prisoner? Fine with me.
+	}, 0, {
+		think setq(0, t(locate(me,%0,n)));
+		@switch %q0=
+		0, {
+			say Sir, you need to have the prisoner here with you!
+		}, {
+			@fsay me=Yes, sir. I now have %0 reported as a prisoner.;
+			&LIST-PRISONERS me=[v(LIST-PRISONERS)]|[capstr(%0)]
+		}
+	}
+
+-
+
+&CMD-RELEASE #5825=$release prisoner:
+	@switch hasattr(%#, military-rank)=
+	0, {
+		@force %#=pose tries to release a prisoner.;
+		say Sorry, but only people in the military may 
+			release prisoners.
+	}, 1, {
+		@force %#=pose begins to release a prisoner.;
+		say Yes, sir. What is the name of the prisoner?;
+		@program %#=me/PROG-RELEASE:
+			Please enter the name of the prisoner. You 
+			may enter the word 'cancel' if you have none.
+	}
+
+-
+
+&PROG-RELEASE #5825=
+
+	@switch strmatch(%0, cancel)=
+	1, {
+		say Now you don't want to release a prisoner? Fine with me.
+	}, 0, {
+
+		@switch t(member(%0, default(me/LIST-PRISONERS,None)))=
+		0, {
+			say Sir, that isn't a prisoner here.
+		}, {
+			@fsay me=Yes, sir. [capstr(%0)] is now released.;
+			&LIST-PRISONERS me=[remove(v(LIST-PRISONERS),%0,|)]
+		}
+	}	
+
+-

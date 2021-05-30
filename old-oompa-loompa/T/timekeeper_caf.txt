@@ -1,0 +1,12 @@
+@create Timekeeper
+@lock Timekeeper==me
+@set Timekeeper=!NO_COMMAND
+&CREDITS Timekeeper=Caffeinator@SluggyMUX
+@Desc Timekeeper=%cgTime %chUTC[ifelse(lt(v(timezone),0),,+)][v(timezone)]:%cn [convsecs(add(convtime(time(utc)),mul(v(timezone),3600)))][iter(u(counterlist),%r%ccCounter %ch[edit(##,_,%b)]:%cn [exptime(add(u(stop_##),ifelse(hasattr(me,start_##),sub(secs(),u(start_##)),0)))] [ifelse(hasattr(me,start_##),%ch%cb(%ccRunning%cb)%cn,%cb(%ccStopped%cb)%cn)])]%rType %chtimehelp%cn for help.
+&HELP Timekeeper=$timehelp:@pemit %#=%chTimekeeper%cn Help%r%rThe Timekeeper allows you to keep track of time in different time zones, and has a theoretically infinite number of stopwatch counters. Commands:%r%chtimezone=#%cn > Set your timezone to # hours ahead of UTC.%r%chpush=#%cn > Start/stop stopwatch counter #.%r%chreset=#%cn > Clear stopwatch counter #.%r%chreset++%cn > Clear all stopwatch counters.%r%chtimehelp%cn > Display this help.%r
+&TIMEZONE Timekeeper=-5
+&SET_TIMEZONE Timekeeper=$timezone=*:&timezone me=%0;@pemit %#=Timezone changed to %ch%cg%0%cn.
+&SET_PUSH Timekeeper=$push=*:@switch [hasattr(me,start_[edit(%0,%b,_)])]=0,{@pemit %#=Counter %ch%cc%0%cn started.;&start_[edit(%0,%b,_)] me=[secs()]},{@pemit %#=Counter %ch%cc%0%cn stopped.;&stop_[edit(%0,%b,_)] me=[add(u(stop_[edit(%0,%b,_)]),sub(secs(),u(start_[edit(%0,%b,_)])))];&start_[edit(%0,%b,_)] me}
+&SET_RESET Timekeeper=$reset=*:@pemit %#=Counter %ch%cc%0%cn reset.;&start_[edit(%0,%b,_)] me;&stop_[edit(%0,%b,_)] me
+&COUNTERLIST Timekeeper=[setunion(iter(lcstr(lattr(me/stop_*)),after(##,stop_)),iter(lcstr(lattr(me/start_*)),after(##,start_)))]
+&SET_RESETALL Timekeeper=$reset++:@pemit %#=All counters reset.;@wipe me/start_*;@wipe me/stop_*

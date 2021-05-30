@@ -1,0 +1,61 @@
+@create +Commands_Executioner
+@link +Commands_Executioner = #2
+@parent +Commands_Executioner=#90
+@set +Commands_Executioner = OPAQUE
+@set +Commands_Executioner = WIZARD
+@set +Commands_Executioner = SAFE
+&COMMAND_WHO +Commands_Executioner=$who:@pemit %#=%r[ansi(r,[repeat(*,77)])]%r[ansi(hw,[center(GargMUSH,77,%b)])]%r[ansi(r,[repeat(*,77)])]%r%b[ansi(hw,On For:[ansi(g,|)][ansi(hw,[center(Name,17)])][ansi(g,|)][ansi(hw,Status)][ansi(g,|)][ansi(hw,%b%bFaction%b%b)][ansi(g,|)][ansi(hw,%b%b%bSpecies%b%b%b)][ansi(g,|)][ansi(hw,OC**FC)][ansi(g,|)][ansi(hw,%b%b%bIdle%b%b)])]%r[ansi(g,[repeat(-,8)]+[repeat(-,17)]+[repeat(-,6)]+[repeat(-,11)]+[repeat(-,13)]+[repeat(-,6)]+[repeat(-,10)])][iter(u(fn_who_list,%#),[u(code_who,##)])]%r[ansi(r,[repeat(*,77)])][ansi(hw,)]%r[ansi(r,*)][mid(ljust(get_eval(#24/who_msg),75),0,75)][ansi(r,*)]%r[ansi(r,[repeat(*,77)])][ansi(hw,)]
+&COMMAND_+WHO +Commands_Executioner=$+who:@pemit %#=%r[ansi(r,[repeat(*,77)])]%r[ansi(hw,[center(GargMUSH,77,%b)])]%r[ansi(r,[repeat(*,77)])]%r%b[ansi(hw,On For:[ansi(g,|)][ansi(hw,[center(Name,17)])][ansi(g,|)][ansi(hw,Status)][ansi(g,|)][ansi(hw,%b%bFaction%b%b)][ansi(g,|)][ansi(hw,%b%b%bSpecies%b%b%b)][ansi(g,|)][ansi(hw,OC**FC)][ansi(g,|)][ansi(hw,%b%b%bIdle%b%b)])]%r[ansi(g,[repeat(-,8)]+[repeat(-,17)]+[repeat(-,6)]+[repeat(-,11)]+[repeat(-,13)]+[repeat(-,6)]+[repeat(-,10)])][iter(u(fn_who_list,%#),[u(code_who,##)])]%r[ansi(r,[repeat(*,77)])][ansi(hw,)]%r[ansi(r,*)][mid(ljust(get_eval(#24/who_msg),75),0,75)][ansi(r,*)]%r[ansi(r,[repeat(*,77)])][ansi(hw,)]
+&CMD_STAFFLIST +Commands_Executioner=$+staff:@pemit %#=[u(fn_staff_header)][u(fn_wizard_list)][ansi(hc,[repeat(~,77)])][u(fn_staff_list)][u(fn_footer)][ansi(w,)]
+&CLUE +Commands_Executioner=$+clue *:@pemit *%0=A bicycle messager comes up to you and spits on the sidewalk and hands you a package. The card says, "Here is the clue that you need my dear [name(*%0)]. Use it wisely. Signed: Yours truly, %N.";@pemit %#=You have given [name(*%0)] a clue. What a pal.
+&BAP +Commands_Executioner=$+bap *:@pemit *%0=%N's hand comes down out of the sky and BAPS you on the head!;@pemit %#=You have +bapped [name(*%0)].
+&KNOCK1 +Commands_Executioner=$+knock:@pe/s %#=You need to type "+knock <chose one of numbers below>=<message>"%r[iter(lexits(loc(%#)),%r%b[ljust(#@,3)]= [name(##)])]
+&ANSWER +Commands_Executioner=$+answer *=*:[setq(0,isnum(%0))][setq(1,extract(lexits(loc(%#)),%0,1))][setq(2,gt(match(lexits(loc(%#)),%q1),0))];@pe/s %#=[u(answermess_%q0_%q2,%0,%1,%#,%q1)];@tri me/doanswer_%q0_%q2=%0,%1,%q1,%#
+&KNOCK +Commands_Executioner=$+knock *=*:[setq(0,isnum(%0))][setq(1,extract(lexits(loc(%#)),%0,1))][setq(2,gt(match(lexits(loc(%#)),%q1),0))];@pe/s %#=[u(knockmess_%q0_%q2,%0,%1,%#,%q1)];@tri me/doknock_%q0_%q2=%0,%1,%q1,%#
+&DOLAST +Commands_Executioner=$+last *:@switch [orflags(%#,Wr)] [orflags(*%0,D!c)] [type(pmatch(%0))]= 1 * P*,{@pe/s %#=[u(last1,%0)]}, 0 1 P*,{@pe/s %#=[u(last2,%0)]}, 0 0 P*,{@pe/s %#=[u(last3,%0)]},{@pe/s %#=That is not valid player's name.}
+&MP2 +Commands_Executioner=$mp *:@sel strmatch(%0,*=*)=0,{[setq(0,switch(mid(first(%0),0,1),:,%N%b[after(%0,:)],;,%N[after(%0,;)],{%N says, "%0"}))][setq(1,u(mp-list,xget(#241,[%#])))][setq(2,iter([r(1)],[name(##)]))];@pe/l [r(1)]=To ([r(2)]): [r(0)];@pe %#=You sent to ([r(2)]): [r(0)]}
+&MP +Commands_Executioner=$mp *=*:[setq(0,switch(mid(first(%1),0,1),:,%N%b[after(%1,:)],;,%N[after(%1,;)],{%N says, "%1"}))][setq(1,u(mp-list,%0))][setq(2,iter([r(1)],[name(##)]))];@pe/l [r(1)]=To ([r(2)]): [r(0)];@pe %#=You sent to ([r(2)]): [r(0)];&[%#] #241=%0
+@ADISCONNECT +Commands_Executioner=&LASTDISCONN %#=[time()];@set %#/lastdisconn=wiz;&%# #241=
+&ANSWER1 +Commands_Executioner=$+answer:@pe/s %#=%rThat is not correct way to +answer the door. The correct formation of +answer is:%r+answer <chose one of exits below>=<message>%r%r[iter(lexits(loc(%#)),%r%b[ljust(#@,3)]= [name(##)])]
+&LUCKYRLTIME +Commands_Executioner=$+rltime:@pemit %#=%r[center([The time IRL at this MUSH site in Louisville, Kentucky USA is:],77, )]%r%r[center([time()] EDT.,77, )]%r
+&OOCSAY +Commands_Executioner=$ooc *:@switch [strmatch(get(%#/oocstyle),*%%N*)]=0,{@remit %l=\[OOC] %N[switch(mid(%0,0,1),:,{%b[after(%0,:)]},;,{[after(%0,;)]},{%bsays "%0"})]},{@remit %l=[u(%#/oocstyle)][switch(mid(%0,0,1),:,{%b[after(%0,:)]},;,{[after(%0,;)]},{%bsays "%0"})]}
+&CMD_ONSTAFF +Commands_Executioner=$+admins:@pemit %#=[u(fn_onstaff_header)][u(fn_onstaff_list)][u(fn_footer)][ansi(w,)]
+&DO_ADMINMAIL +Commands_Executioner=$+adminmail *:@fo #240=@mail [v(admins)]=Admin Mail from %N/%r%0%r;@pemit %#=You have sent your mail to the admins.
+&SETPOLL +Commands_Executioner=$+setpoll *:@swi gt(money(%#),49)=0,{@pe %#=Sorry you're broke,...Go sign up for welfare!},{@poll %0;give %#=-49;@wallemit %N has changed the poll!  The new poll is "%0."}
+&DO_WIZARDMAIL +Commands_Executioner=$+wizardmail *:@fo #240=@mail [v(wizard_list)]=Wizard Mail from %N/%r%0%r;@pemit %#=You have sent your mail to the wizards.
+&SHOUT +Commands_Executioner=$+shout *:@swi [u(%#/status)]=IC,{@oemit [loc(%#)]/%#=[ansi(h,[name(%#)] shouts, "%0")];@pe/s %#=[ansi(h,You shout, "%0")];@dol [lexits([loc(%#)])]=@remit [loc(##)]=[ansi(h,A [switch([get(%#/sex)],M*,male voice,F*,female voice,voice)] in the distance shouts, "%0")]},{@pe/s %#=You must be In-Character (IC) to use +shout.}
+&BEEP +Commands_Executioner=$+beep/* *=*:@swi [strmatch([u(*%1/beeper)],*%0*)]=1,{@pe/s *%1=[name(%#)] beeps: %2[beep(3)];@pe/s %#=You +beep [name(*%1)].},{@pe/s %#=[ansi(hr,That is not the correct password or not a valid player name.)]}
+
+@create +Commands_Functions
+@link +Commands_Functions = #89
+@set +Commands_Functions = OPAQUE
+@set +Commands_Functions = WIZARD
+@set +Commands_Functions = NO_COMMAND
+&FN_IDLE +Commands_Functions=[setq(0,idle(name(%0)))][switch(lt([r(0)],60),1,[r(0)]s,switch(lt(r(0),3600),1,[div(r(0),60)]m,[div(r(0),3600)]h))]
+&FN_CONN +Commands_Functions=[switch(gt(conn(%0),3600),1,[div(conn(%0),3600)]h,[switch(gt(conn(%0),60),1,[div(conn(%0),60)]m,[conn(%0)]s)])]
+&CODE_WHO +Commands_Functions=%r%b[ansi(hw,[[center(u(fn_conn,%0),7)]][ansi(g,|)][ansi(hw,[mid(ljust([name(%0)],17),0,17)])][ansi(g,|)][ansi(hw,[mid(ljust(get(%0/IC-OOC_Status),6),0,6)])][ansi(g,|)][ansi(hw,[mid(ljust(get(%0/faction),11),0,11)])][ansi(g,|)][ansi(hw,[mid(ljust(get(%0/species),13),0,13)])][ansi(g,|)][ansi(hw,[space(2)][mid(ljust(get(%0/oc**fc),4),0,4)])][ansi(g,|)][ansi(hw,[center(u(idletime,%0),8)])]
+&FN_WHO_LIST +Commands_Functions=[iter(lwho(),switch(or(u(isadmin,%0),not(or([hasflag(##,dark)],[hidden(##)]))),1,##,))]
+&IDLETIME +Commands_Functions=[setq(0,idle(name(%0)))][switch(lt([r(0)],60),1,[r(0)]s,switch(lt(r(0),3600),1,[div(r(0),60)]m,[div(r(0),3600)]h))]
+&FN_STAFF_HEADER +Commands_Functions=[ansi(r,[repeat(*,77)])]%r[ansi(hw,[center( Garg MUSH Production Staff,76,%b)])]%r[ansi(r,[repeat(*,77)])]%r[ansi(m,[ljust(Name:,12)][space(4)][ljust(Position:,18)][ljust(Last On:,20)][ljust(Last Off:,20)][ljust(Idle,4)])]
+&FN_WIZARD_LIST +Commands_Functions=[iter(sort(iter(v(wizard_list),name(##)),a),%r[ansi(hw,[ljust([mid(##,0,12)],12)])][ansi(hr,[ljust([mid([get(num(*##)/status)],0,4)],4)])][ansi(hw,[ljust([mid([get(num(*##)/adminpos)],0,17)],18)])][ansi(hw,[ljust([mid(u(num(*##)/last),0,19)],20)])][ansi(hy,[switch(or(orflags(num(*##),D!c),hidden(*##)),1,[ansi(hw,[ljust([mid([xget(*##,lastdisconn)],0,19)],20)])],[ljust(Currently connected,20,%b)][ansi(hy,[ljust(u(fn_idle,num(*##)),4,%b)])])])])]%r
+&FN_FOOTER +Commands_Functions=[ansi(r,[repeat(*,77)])]
+&FN_STAFF_LIST +Commands_Functions=[iter(sort(iter(v(royal_list),name(##)),a),%r[ansi(hw,[ljust([mid(##,0,12)],12)])][ansi(hr,[ljust([mid([get(num(*##)/status)],0,4)],4)])][ansi(hw,[ljust([mid([get(num(*##)/adminpos)],0,17)],18)])][ansi(hw,[ljust([mid(u(num(*##)/last),0,19)],20)])][ansi(hy,[switch(or(orflags(num(*##),D!c),hidden(*##)),1,[ansi(hw,[ljust([mid([xget(*##,lastdisconn)],0,19)],20)])],[ljust(Currently connected,20,%b)][ansi(hy,[ljust(u(fn_idle,num(*##)),4,%b)])])])])]%r
+&WIZARD_LIST +Commands_Functions=#4 #8 #9 #15 #16 #17 #34 #39 #82 #150 #157
+&ROYAL_LIST +Commands_Functions=#27 #207
+&FN_ONSTAFF_HEADER +Commands_Functions=[ansi(r,[repeat(*,77)])]%r[ansi(hw,[center(GargMUSH Staff,76,%b)])]%r[ansi(r,[repeat(*,77)])]%r[ansi(m,[ljust(Name:,15)][ljust(Status:,8)][ljust(Position:,30)][ljust(On For:,12)][ljust(Idle:,10)])]
+&FN_ONSTAFF_LIST +Commands_Functions=[iter(mwho(),switch(orflags(##,Wr),1,%r[ansi(hw,[ljust([mid(name(##),0,15)],15)])][ansi(hr,[ljust([mid([get(num(*##)/IC-OOC_STATUS)],0,8)],8)])][ansi(hw,[ljust([mid([get(num(*##)/pos)],0,29)],30)])][ansi(hy,[ljust(u(fn_conn,num(*##)),12,%b)][ljust(u(idletime,num(*##)),10,%b)])]))]%r
+&MP-LIST +Commands_Functions=[squish([iter(%0,[switch(and(hasflag(*##,connected),not(hasflag(*##,Haven)),hastype(*##,PLAYER)),1,[num(*##)])])])]
+&LAST3 +Commands_Functions=%r[name(*%0)] has been on since [xget(*%0,last)]
+&LAST2 +Commands_Functions=%r[name(*%0)] was last logged on at [xget(*%0,last)]
+&LAST1 +Commands_Functions=%r[name(*%0)] [switch(hasflag(*%0,connected),1,has been connected since,was last on at)] [xget(*%0,last)].
+&HASATTR_FN +Commands_Functions=[switch(get(%0/%1),,0,1)]
+&ISADMIN +Commands_Functions=[or(hasflag(%0,W),hasflag(%0,roy))]
+&DOKNOCK_1_1 +Commands_Functions=@remit [room(%2)]=You hear knocking on [name(%2)] door[switch(%1,,.,%bfrom [name(loc(%3))] and someone said "%1")]
+&DOANSWER_1_1 +Commands_Functions=@remit [room(%2)]=You hear answering [name(%2)] door and someone said, "%1".
+&ANSWERMESS_0_0 +Commands_Functions=%rGood, keep answer at an empty air which you got nothing but that in your head...%r%rThat is not correct way to +answer the door. The correct formation of +answer is:%r%r%b%b%b"+answer <number of exit>=<message>"%r
+&ANSWERMESS_1_0 +Commands_Functions=%0 is not valid number of door or exit.%rThere are only [words(lexits(loc(%2)))] doors in your location. The correct formation of +answer is:%r+answer <chose one of exits below>=<message>%r%r[iter(lexits(loc(%#)),%r%b[ljust(#@,3)]= [name(##)])]
+&ANSWERMESS_1_1 +Commands_Functions=You answered the [name(%3)] door and said, "%1".
+&KNOCKMESS_0_0 +Commands_Functions=That is not the correct way to +knock at the door. The correct formation of +knock is:%r%r%b%b%b"+knock <number of exit>=<message>"%ror%r%b%b%b"+knock <number of exit>="%r
+&KNOCKMESS_1_1 +Commands_Functions=You knocked at the [name(%3)] door[switch(%1,,.,%b and said "%1")]
+&KNOCKMESS_1_0 +Commands_Functions=%0 is not a valid number for a door or exit.%rThere are only [words(lexits(loc(%2)))] doors in your location.
+

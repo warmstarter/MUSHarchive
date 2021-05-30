@@ -1,0 +1,13 @@
+@create Register Machine
+@link Register Machine=#2
+@lock Register Machine=*Jesse
+@set Register Machine=INHERIT
+@set Register Machine=WIZARD
+&ROOM Register Machine=#192
+@DESCRIBE Register Machine=Type `Register' To join the [v(empire)].
+&JOINEMP Register Machine=the Ferengi Alliance
+&EMPIRE Register Machine=Ferengi
+&CLASS Register Machine=Citizen
+&CHANNELS Register Machine=Ferengi
+@VA Register Machine=@pemit %0=You join [v(joinemp)]!;@oemit %0=[name(%0)] joins [v(joinemp)]!;@dolist v(channels)={@fo %0=@chan/on ##;@cemit ##=<##> [name(%0)] has joined [v(joinemp)]!};@tel %0=[v(room)];&class %0=[v(class)];&rank %0=4;&empire %0=[v(empire)];&icloc *%0=#192;@lock *%0/icloc=wizard
+@VB Register Machine=$register:@switch [get(%#/empire)]=None,@tr me/va=%#,,@tr me/va=%#,@pemit %#=You are already part of an empire. Please contact a Wizard if you wish to defect to [v(joinemp)].;@mail Jesse=%n joined the Ferengi Alliance.

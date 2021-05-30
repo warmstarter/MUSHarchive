@@ -1,0 +1,15 @@
+@@                                                                      
+@@ Tic Tac Toe!  Just copy/paste the lines below and look at it. :)     
+@@ It may also be used as a parent object.                              
+@@                                                                      
+@create Tic Tac Toe
+@lock Tic Tac Toe==me
+@lock/EnterLock Tic Tac Toe=#0
+@set Tic Tac Toe=!no_command
+@Desc Tic Tac Toe=%b%b________________%r%b|[space(16)]|%r%b|[space(5)][default(me/va,%b)]|[default(me/vb,%b)]|[default(me/vc,%b)][space(6)]|[space(4)]a|b|c[space(6)]Commands:[space(6)]Players:%r%b|[space(3)]---------[space(4)]|%b%b---------[space(6)]play <x/o>[space(5)](X) [name(get(me/X))]%r%b|[space(5)][default(me/vd,%b)]|[default(me/ve,%b)]|[default(me/vf,%b)][space(6)]|[space(4)]d|e|f[space(8)]mark <a-i>[space(5)](O) [name(get(me/0))]%r%b|[space(3)]---------[space(4)]|%b%b---------[space(6)]reset%r%b|[space(5)][default(me/vg,%b)]|[default(me/vh,%b)]|[default(me/vi,%b)][space(6)]|[space(4)]g|h|i%r%b|________________|%r
+&CMD-RESET Tic Tac Toe=$reset:think iter(lattr(me/v?),set(me,##:));&x me;&o me;@pemit/contents %l=%N crumples up the piece of paper and gets out a new one.
+&CMD-PLAY Tic Tac Toe=$play *:think setq(0,ucstr(secure(%0)));@switch/first [hasattr(me,%q0)]:[u(u-inlist,X O,%q0)]=1:1,{@pemit %#=%q0 is already taken.},0:1,{@pemit/contents %l=%N takes up a marker with a big %q0 on top.;&%q0 me=%#},{@pemit %#=Pick X or O!}
+&CMD-MARK Tic Tac Toe=$mark *:@switch 1=u(u-inlist,a b c d e f g h i,%0),{think [setq(0,secure(%0))][setq(1,switch(1,match(get(me/x),%#),X,match(get(me/o),%#),O,NULL))];@switch %q1=X,{&v%q0 me=X;@pemit/contents %l=%N marks an X in square [lcstr(%q0)].},O,{&v%q0 me=O;@pemit/contents %l=%N marks an O in square [lcstr(%q0)].},@pemit %#=Please select either X or O.},{@pemit %#=Pick a letter between a and i!}
+&U-INLIST Tic Tac Toe=[gt(match(%0,%1),0)]
+@@
+@@ -- END OF FILE --

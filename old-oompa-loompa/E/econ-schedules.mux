@@ -1,0 +1,452 @@
+################################################################
+#		ECONOMIC SCHEDULES FOR MUSHCRON                #
+################################################################
+
+#--------------------------------------------------------------#
+# DISTRIBUTE DAILY VARIABLE DEMAND 
+# 
+# There are two types of
+# demand. Fixed and variable. Fixed demand is the kind of demand
+# that doesn't change on a daily basis -- that is to say, a
+# carpenter is going to need a hammer every single day (he doesn't
+# need to buy a new one every day, but he needs to have one). 
+# That's fixed. However, that same carpenter may want strawberries 
+# today and fish tommorrow. It varies. So for variable needs, 
+# I set up code that semi-randomly chooses what the carpenter 
+# wants to eat or wear on a given day.
+#
+# DETERMINE AGGREGATE SUPPLY AND DEMAND
+#
+# The trig-open-market takes care of both of these routines
+#----------------------------------------------------------------#
+
+&cronic_time_openmarket #63=|||08|00|@@ every ic morning at 8 am @@
+-
+# COMMENTED OUT FOR THE TIME BEING
+
+&cronic_job_openmarket #63= 
+#  @tr #25/trig-open-market;
+  @wall/emit/no_prefix %ch%cgThe city begins to come alive with noise 
+       as the merchants prepare to open the market for the day.%cn
+
+-
+
+#------------------------------------------------------------------#
+#               SET THE DAILY PRICE LIST                           #
+#------------------------------------------------------------------#
+
+&cronic_time_pricelist #63=|||08|30|@@ every ic morning at 8:30 am @@
+-
+
+&cronic_job_pricelist #63=
+  @tr #99/cronic_job_pricelist;
+  @wall/emit/no_prefix %ch%cgMerchants throughout the city busily 
+        shout to one another, determining the prices to be charged 
+        for today!
+-
+# Sets the daily price of each commodity.
+# Old price list cancelled out.
+
+&cronic_job_pricelist #99=
+#   think setq(0, lattr(#24/demand-*));
+#   think setq(0, iter(%q0, clip(##), %b, |));
+#   think setq(1, lattr(#26/supply-*));
+#   think setq(1, iter(%q1, clip(##), %b, |));
+#   think setq(2, setunion(%q0, %q1, |));
+
+    think setq(2, laccounts(#26));
+  
+#  @dolist/delimit | {%q2}=
+
+   @dolist %q2=
+       &price-[makeattr(##)] #27=[cost(##)]
+-
+#--------------------------------------------------------------#
+# HAVE REPS SELL THEIR WARES                                   #
+#                                                              #
+# If all the reps did this at the same time, you'd lag the     #
+# mux, so we first take the list of representatives and        #
+# divide it up into chunks and then trigger them at different  #
+# times.                                                       #
+#--------------------------------------------------------------#
+
+&cronic_time_reps-sell #63=|||09|00|@@ every ic morning at 9 am @@
+-
+# COMMENTED OUT FOR THE TIME BEING
+
+&cronic_job_reps-sell #63=
+#  @tr #99/cronic_job_reps-sell = [shuffle(get(#99/rep-dbrefs))];
+  @wall/emit/no_prefix %ch%cgMany people crowd into the 
+     marketplaces to sell their goods.%cn
+-
+# %0 = shuffled list of rep dbrefs
+
+&cronic_job_reps-sell #99=
+  @switch [lte(words(%0), 0)]=
+    1, {@@ all the reps have sold their wares, no more to process @@},
+    0, {think setq(1, extract(%0, 1, 10));
+        think setq(2, after(%0, last(%q1));
+        @dolist %q1={@tr #99/trig-sell-products = ##};
+        @wait 900=@tr me/cronic_job_reps-sell %q2}
+-
+#--------------------------------------------------------------#
+# HAVE REPS BUY THEIR DAILY NEEDS                              #
+#                                                              #
+#--------------------------------------------------------------#
+
+&cronic_time_reps-buy #63=|||14|15|@@ every ic day at 2:15 pm @@
+-
+# COMMENTED OUT FOR THE TIME BEING
+
+&cronic_job_reps-buy #63=
+# @tr #99/cronic_job_reps-buy = [shuffle(get(#99/rep-dbrefs))];
+ @wall/emit/no_prefix %ch%cgShoppers crowd the marketplace trying to 
+   find good deals.%cn
+-
+# %0 = list of shuffled dbrefs of representatives
+
+&cronic_job_reps-buy #99=
+  @switch [lte(words(%0), 0)]=
+    1, {@@ all the reps have gone shopping @@},
+    0, {think setq(1, extract(%0, 1, 10));
+        think setq(2, after(%0, last(%q1)));
+        @dolist %q1=
+           {@tr #99/trig-buying-spree = ##, [get(##/buying-priority)]};
+        @wait 900=@tr me/cronic_job_reps-buy= %q2}
+-
+#---------------------------------------------------------------#
+#  REACT TO SHORTAGES AND INSUFFICIENT FUNDS                    #
+#---------------------------------------------------------------#
+
+&cronic_time_reps-react #63=|||18|15|@@ every ic day at 6:15 pm @@
+-
+# COMMENTED OUT FOR THE TIME BEING
+
+&cronic_job_reps-react #63=
+#  @tr #99/cronic_job_reps-react=[shuffle(get(#99/rep-dbrefs))];
+  @wall/emit/no_prefix %ch%cgFirans head home after a long day's work 
+       to talk to their friends and neighbors about their lots in life.%cn
+-
+# %0 = shuffled list of rep dbrefs
+
+&cronic_job_reps-react #99=
+  @switch [lte(words(%0), 0)]=
+    1, {@@ all the reps have already reacted today @@},
+    0, {think setq(1, extract(%0, 1, 10));
+        think setq(2, after(%0, last(%q1)));
+        @dolist %q1=
+           {@tr #99/trig-reaction-parser = ##};
+        @wait 300=@tr me/cronic_job_reps-react = %q2}
+-
+#-----------------------------------------------------------------#
+#              SECOND ROUND OF BUYING                             #
+#-----------------------------------------------------------------#
+
+&cronic_time_reps-buyagain #63=|||16|45|@@ every ic day at 4:45pm @@
+-
+# COMMENTED OUT FOR THE TIME BEING
+&cronic_job_reps-buyagain #63=
+# @tr #99/cronic_job_reps-buy = [shuffle(get(#99/rep-dbrefs))];
+ @wall/emit/no_prefix %ch%cgFirans do their last minute shopping 
+       before heading home for the day.%cn
+-
+
+
+#-----------------------------------------------------------------#
+#  HAVE REPRESENTATIVES EAT                                       #
+#-----------------------------------------------------------------#
+
+&cronic_time_reps-eat #63=|||19|30|@@ every ic day at 7:30 pm @@
+-
+# COMMENTED OUT FOR THE TIME BEING
+&cronic_job_reps-eat #63=
+
+#  @tr #99/cronic_job_reps-eat;
+  @wall/emit/no_prefix %ch%cgFirans settle in for their evening meals.%cn
+-
+
+&cronic_job_reps-eat #99=
+  think setq(0, v(rep-dbrefs));
+  @dolist %q0=
+    {@tr me/trig-deplete-food = ##}
+
+-
+#----------------------------------------------------------------#
+#    HAVE THE REPS DO THEIR WORK LIKE LITTLE ELVES               #
+#----------------------------------------------------------------#
+
+&cronic_time_reps-work #63=|||20:30|@@ every ic day at 8:30 pm @@
+-
+# COMMENTED OUT FOR THE TIME BEING
+&cronic_job_reps-work #63=
+  @wall/emit/no_prefix %ch%cgA few lights can be seen burning bright 
+                       this evening as some hard working Firans tend 
+                       to their chores.%cn;
+#  @tr #99/cronic_job_reps-work=[shuffle(get(#99/rep-dbrefs))];
+
+-
+# %0 = shuffled list of rep dbrefs
+# 
+# %q1 = the first ten reps to be triggered
+# %q2 = the rest of the reps
+# %q3 = a list of the products that the rep can make in order of price
+#       with the most expensive product first
+
+
+&cronic_job_reps-work #99=
+  @switch [lte(words(%0), 0)]=
+    1, {@@ all the reps have already worked today @@},
+    0, {think setq(1, extract(%0, 1, 10));
+        think setq(2, after(%0, last(%q1)));
+        @dolist %q1=
+           {think setq(3, u(##/products));
+            think setq(3, sortby(#99/sortby-price, %q3, |));
+            think setq(3, revwords(%q3, |));
+            @tr #99/trig-make-products = ##, %q3 };
+        @wait 300=@tr me/cronic_job_reps-work = %q2}
+
+
+
+-
+################################################################
+#             UPDATING LISTS OF COMMODITIES                    #
+################################################################
+
+&cron_time_minedlist #63=||Mon|04|30|@@ every monday at 4:30 am @@
+-
+&cron_job_minedlist #63=
+  think setq(0, search(ething=and(hasflag(##, parent), hastag(##, mined))));
+  think setq(1, iter(%q0, get(##/currency), %b, |));
+  @@ Set a list of mineable resources on the Generic Inorganic object @@;
+  &mined #1443=%q1
+-
+
+&cron_time_foodlist #63=|||05|19|@@ every morning at 5:19 am @@
+-
+
+&cron_job_foodlist #63=@tr #99/cron_job_foodlist
+-
+# This list is sorted by price
+
+&cron_job_foodlist #99=
+
+  think setq(0, setunion(grains(), fruits(), |));
+  think setq(0, setunion(%q0, vegetables(), |));
+  think setq(0, setunion(%q0, meats-dairy(), |));
+  think setq(0, setunion(%q0, dishes(), |));
+
+  think setq(1, map(me/map-price, %q0, |));
+  think setq(2, munge(me/munge-sort, %q1, %q0, |));
+  &foods #1796=%q2  
+-
+
+&cron_time_fruitlist #63=||Sun|03|05|@@ every sunday night at 3:05 am @@
+
+-
+
+&cron_job_fruitlist #63=
+  @tr #99/cron_job_fruitlist
+-
+# Get a list of all official parent items (+ = symbol for parent flag)
+# Return only the dbrefs of the fruit objects
+# Return a | separated list of the fruit currencies
+# Set that | list as the new fruit list
+
+&cron_job_fruitlist #99=
+  @@ Update the list of all Fruit Currencies on the MUX @@;
+  think setq(0, search(ething=and(hasflag(##, parent), hastag(##, fruit))));
+  think setq(0, iter(%q0, get(##/currency), %b, |));
+  think setq(0, filter(filter-has-parent, %q0, |));
+  &fruits #1796=%q0
+
+-
+&filter-has-parent #99=[isdbref(paccount(%0))]
+-
+
+&filter-is-currency #99=[iscurrency(%0)]
+-
+
+&cron_time_meatlist #63=||Mon|03|15|@@ every monday night at 3:15 am @@
+
+-
+
+&cron_job_meatlist #63=
+  @tr #99/cron_job_meatlist
+-
+&cron_job_meatlist #99=
+  @@ Update the list of all meat currencies on the MUX @@;
+  think setq(0, search(ething=and(hasflag(##, parent), 
+                                  or(hastag(##, meat), hastag(##, dairy)))));
+  think setq(0, iter(%q0, get(##/currency), %b, |));
+  think setq(0, filter(filter-has-parent, %q0, |));
+
+  &meats-dairy #1796=%q0
+
+-
+
+&cron_time_grainlist #63=||Tue|03|25| @@ every tuesday night at 3:25 am @@
+-
+
+&cron_job_grainlist #63=
+  @tr #99/cron_job_grainlist
+-
+&cron_job_grainlist #99=
+  @@ Update the list of all the grain currencies on the MUX @@;
+  think setq(0, search(ething=and(hasflag(##, parent), hastag(##, grain))));
+  think setq(0, iter(%q0, get(##/currency), %b, |));
+  think setq(0, filter(filter-has-parent, %q0, |));
+  &grains #1796=%q0
+
+-
+
+&cron_time_vegetablelist #63=||Wed|03|35|@@ every wednesday night at 3:35 am @@
+
+-
+&cron_job_vegetablelist #63=
+  @tr #99/cron_job_vegetablelist
+-
+&cron_job_vegetablelist #99=
+  @@ Update the list of all the vegetables on the MUX @@;
+  think setq(0, search(ething=and(hasflag(##, parent), 
+                                  hastag(##, vegetable))));
+  think setq(0, iter(%q0, get(##/currency), %b, |));
+  think setq(0, filter(filter-has-parent, %q0, |));
+  &vegetables #1796=%q0
+
+-
+&cron_time_preparedlist #63=||Thu|03|55|@@ every thursday night at 3:55 am @@
+
+-
+&cron_job_preparedlist #63=
+ @tr #99/cron_job_preparedlist
+-
+&cron_job_preparedlist #99=
+
+  @@ Update the list of all the prepared dishes on the MUX @@;
+  think setq(0, search(ething=and(hasflag(##, parent), 
+                                  hastag(##, prepared))));
+  think setq(0, iter(%q0, get(##/currency), %b, |));
+  think setq(0, filter(filter-has-parent, %q0, |));
+
+
+  &dishes #1796=%q0
+-
+
+&cron_time_clothinglist #63=
+  |||05|05|@@ every morning at 5:05 am @@
+
+-
+&cron_job_clothinglist #63=
+ @tr #99/cron_job_clothinglist
+-
+&cron_job_clothinglist #99=
+  @@ Update the list of all the clothing on the MUX @@;
+  think setq(0, search(ething=and(hasflag(##, parent), 
+                                  and(hastag(##, clothing),
+                                      hastag(##, make)))));
+  think setq(0, iter(%q0, get(##/currency), %b, |));
+  think setq(0, filter(filter-has-parent, %q0, |));
+
+
+
+  think setq(1, map(me/map-price, %q0, |));
+  think setq(2, munge(me/munge-sort, %q1, %q0, |));
+  &clothing #1879=%q2
+
+
+-
+
+&cron_time_weaponlist #63=
+  ||Sat|05|05|@@ every saturday night at 5:05 am @@
+
+-
+&cron_job_weaponlist #63=
+ @tr #99/cron_job_weaponlist
+
+-
+
+&cron_job_weaponlist #99=
+  @@ Update the list of all the weapons on the MUX @@;
+  think setq(0, search(ething=and(hasflag(##, parent), 
+                                  hastag(##, weapon))));
+  think setq(0, iter(%q0, get(##/currency), %b, |));
+  think setq(0, filter(filter-has-parent, %q0, |));
+
+  &weapons #1648=%q0
+-
+
+&cron_time_fishlist #63=
+  ||Sun|06|15|@@ every Sunday morning at 6:15 am @@
+-
+&cron_job_fishlist #63=
+  @tr #99/cron_job_fishlist
+-
+&cron_job_fishlist #99=
+ @@ update the list of fish on the mux @@;
+ think setq(0, search(ething=and(hasflag(##, parent), 
+                                  hastag(##, fish))));
+  think setq(0, iter(%q0, get(##/currency), %b, |));
+  think setq(0, filter(filter-has-parent, %q0, |));
+
+  &fishes #3331=%q0
+-
+
+
+
+
+######################################################################
+#                       FUNCTIONS                                    #
+######################################################################
+
+&function-fishes #50=
+ [get(#3331/fishes)]
+-
+
+
+&function-dishes #50=
+ [get(#1796/dishes)]
+-
+
+&function-vegetables #50=
+ [get(#1796/vegetables)]
+-
+
+&function-grains #50=
+ [get(#1796/grains)]
+
+-
+&function-meats-dairy #50=
+ [get(#1796/meats-dairy)]
+-
+
+&function-fruits #50=
+ [get(#1796/fruits)]
+-
+
+&function-clothing #50=
+ [get(#1879/clothing)]
+-
+&function-weapons #50=
+ [get(#1648/weapons)]
+
+-
+
+&filter-makeable #99=
+ [hastag(%0, make)]
+
+-
+
+&map-price #99= [price(%0)]
+-
+
+
+&munge-sort #99= [sort(%0, f, |)]
+-
+
+
+
+
+
+
+
+

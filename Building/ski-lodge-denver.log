@@ -1,0 +1,73 @@
+@@
+@@ While this is named Ski Lodge, it's probably better to describe it
+@@ as Hotel Code.
+@@ It was coded and desced by Gwen Morse
+@@ I'm pretty sure there's a lingering issue with rooms not clearing
+@@ when they should.
+@@
+@@ It's meant to have a parent room with a starter grouping of descs.
+@@ I can't find it. You'll have to make your own.
+@@
+@@ Dbrefs will have to be tracked down and updated.
+
+@dig/teleport Main Room -- Ski Lodge
+@Desc here=%r[space(5)]The interior of this retreat is both rustic and luxurious, built around a gigantic center room shaped like a hexagon. The soaring wooden ceiling is supported by hefty crossbeams of rough-hewn cedar. Perfectly-fitted cedar planks gleam in an elongated patchwork on the floor. A winding staircase leads up to a loft lined with handsome bookcases. Four of the six walls are made entirely of crystal-clear shatterproof glass, offering a breaktaking view in any sort of weather. The fifth wall is built of local stone with an enormous fireplace carved into the center above a raised hearth. Silver and green seating pillows decorate the hearth. More pairs of chairs are arranged near the windows, and a small and sturdy cedar secretary is tucked kittycorner where two walls meet.%r
+@Succ here=[space(5)]Up the stairs is the loft, where the individual rooms can be found. The 'places' provide dining and conversational areas. You can 'ask rates' to get help booking a room.%r
+&PLACESMAX here=5
+&PLACESCLEANUP1 here=^* has left.:placescleanup(%#)
+&PLACESCLEANUP2 here=^* has disconnected.:placescleanup(%#)
+&PLACENUMS here=|||||
+&PLACE1 here=Hearth Pillows|4|4||I'm sorry, there's no room to add a place there.|I'm sorry, there's no place to move there.|You sit down at|sits down at|You stand and leave|stands and leaves|At your place
+&PLACE2 here=Secretary|2|2||I'm sorry, there's no room to add a place there.|I'm sorry, there's no place to move there.|You sit down at|sits down at|You stand and leave|stands and leaves|At your place
+&PLACE3 here=Table 1|4|4||I'm sorry, there's no room to add a place there.|I'm sorry, there's no place to move there.|You sit down at|sits down at|You stand and leave|stands and leaves|At your table
+&PLACE4 here=Table 2|6|6||I'm sorry, there's no room to add a place there.|I'm sorry, there's no place to move there.|You sit down at|sits down at|You stand and leave|stands and leaves|At your table
+&PLACE5 here=Table 3|2|2||I'm sorry, there's no room to add a place there.|I'm sorry, there's no place to move there.|You sit down at|sits down at|You stand and leave|stands and leaves|At your table
+&CMD_GUEST_LIST here=$guest list:@pemit %#=%r[space(5)]**Registered Guests of [u(HOTEL)];@pemit %#=[iter(iter(edit([lattr(me/r_*)],R_, ),%%r ## %%b %%b [get(me/r_##)]),[ifelse(isdbref(##),name(##),##)])]
+&CHECKOUT_ROOM2 here=$check * out:@switch %#=[owner(me)]=0,{@pemit %# = You are not authorized to 'check out' guests.},{@switch member(iter(lattr(#2812/r_*),get(#2812/##)),[num(*%0)]) = 0,{@pemit %#=[u(clerk)] quickly informs you that %0 is not registered.},{@pemit %# = [u(clerk)] clears %0's guest registration and unbooks the room/suite.; @trigger #2812/dest_room=[num(*%0)]}}
+&MAPAY-SUITE here=$book suite:@switch member(iter(lattr(#2812/r_*),get(#2812/##)),%#) = 0,{@switch [hasattr(me,SUITENUMS)]=0,{@pemit %# = %r[u(clerk)] informs you that you must choose two names to be registered to the suite before you book it. 'suite <Name1>+<Name2>' will work. Be sure to include the '+' sign between the names.%r},{@trigger #2812/MAKE_SUITE = %#; @set me = suite_count:[add(v(SUITE_COUNT),1)]; @pemit %# = %rYou register for a suite with [u(clerk)]%r%rYou are informed "If you head up to the Loft, you will find the door to the suite, with both names on it. If you did not register your own name on the suite, you will not be able to access it. If there is anything you need, please let the [v(HOTEL)] staff know. Enjoy your stay."%r}},{@pemit %# = [u(clerk)] notifies you that you are already a registered guest of [v(HOTEL)];}
+&MAPAY-ROOM here=$book room:@switch member(iter(lattr(#2812/r_*),get(#2812/##)),%#) = 0,{@trigger #2812/MAKE_ROOM=%#; @set me = room_count:[add(v(ROOM_COUNT),1)]; @pemit %# = %rYou register for a room with [u(clerk)].%r%rYou are informed "If you head up to the Loft, you will find the door to your room, with your name on it. If there is anything you need, please let the [v(HOTEL)] staff know. Enjoy your stay."%r},{@pemit %#=[u(clerk)] notifies you that you are already a registered guest of [v(HOTEL)].;}
+&CHECK-EARN here=$check earn:@switch %#=[owner(me)]=0,{pemit %#=You are not authorized to 'check earn'ings.},{@pemit %#=[u(clerk)] has registered [v(ROOM_COUNT)] room(s) and [v(SUITE_COUNT)] suite(s).}
+&CMD_CHECKOUT here=$check out:@switch member(iter(lattr(#2812/r_*),get(#2812/##)),%#)=0,{@pemit %#=[u(clerk)] efficiently informs you that you are not registered in the [u(HOTEL)], but if you would like information about staying here, just 'ask rates'.},{@pemit %#=[u(clerk)] clears your guest registration and unbooks the room/suite. Don't forget to +mail the owner "[name(owner(me))]" about how you liked your visit.; @tr #2812/dest_room=%#}
+&CMD_SUITENAMES here=$suite *+*:@switch type(*%0)=PLAYER,{@switch type(*%1)=PLAYER,{@pemit %#=%rBoth names you entered are players. You may now 'book suite'. If at least one of the names submitted was not yours, you will not have control over the room, and you will not be able to check out%r;&suitenums me=[num(*%0)] [num(*%1)]},{@pemit %#=%r"%1" is not a player but "%0" is. Please try 'suite <Name1>+<Name2>' again.}},{@pemit %#=%r"%0" is not a player. Please try 'suite <Name1>+<Name2>' again.}
+&HOTEL here=Eldora Resort Ski Lodge
+&RATES here=$ask rates:@pemit %#=%r[u(clerk)] informs you "We have two ways to register. A single room (which allows full access for one guest), and a suite (which allows full access for 2 guests). These accommodations will be registered for 30 RL days before they will be automatically destroyed (however, we prefer you 'check out' when you're done here)."%r%r[space(5)]'book room' for a room.%r[space(5)]'suite <Name1>+<Name2>' to set up the names for the suite, and then %r[space(5)]'book suite' for a suite.%r
+&ROOM_COUNT here=2
+&SUITE_COUNT here=0
+&CLERK here=Darla the Clerk
+@set here=MONITOR
+@set here=COMMANDS
+You head up the stairs to the Loft level.
+Loft -- Ski Lodge(#1829RM)
+
+     A long loft with individual doors leading off in either direction. Bookcases between each door are loaded with old hardcover books, and some popular paperbacks. A small seating area has been designated. There's a long "L"-shaped sofa in buttery-soft silver leather. Opposite the sofa are a circle of chunky chairs and ottoman rests upholstered in silver and green canvas. The same colors are repeated in throw pillows on the couch.
+
+     Down the stairs is the main level. The 'places' provide a conversational area.
+
+Obvious exits:
+Stairs <D>
+@dig/teleport Loft -- Ski Lodge
+@Desc here=%r[space(5)]A long loft with individual doors leading off in either direction. Bookcases between each door are loaded with old hardcover books, and some popular paperbacks. A small seating area has been designated. There's a long "L"-shaped sofa in buttery-soft silver leather. Opposite the sofa are a circle of chunky chairs and ottoman rests upholstered in silver and green canvas. The same colors are repeated in throw pillows on the couch.%r
+&PLACESMAX here=3
+&PLACESCLEANUP1 here=^* has left.:placescleanup(%#)
+&PLACESCLEANUP2 here=^* has disconnected.:placescleanup(%#)
+&PLACENUMS here=|||
+&PLACE1 here=Couch|4|4||I'm sorry, there's no room to add a place there.|I'm sorry, there's no place to move there.|You sit down at|sits down at|You stand and leave|stands and leaves|At your place
+&PLACE2 here=Circle of Chairs|6|6||I'm sorry, there's no room to add a place there.|I'm sorry, there's on place to move there.|You sit down at|sits down at|You stand and leave|stands and leaves|At your place
+&PLACE3 here=Ottoman Seats|3|3||I'm sorry, there's no room to add a place there.|I'm sorry, there's on place to move there.|You sit down at|sits down at|You stand and leave|stands and leaves|At your place
+@Succ here=[space(5)]Down the stairs is the main level. The 'places' provide a conversational area.%r
+@set here=MONITOR
+@create Sign=10
+@lock Sign=#1829
+&MAKE_ROOM Sign=@dig [name(%0)]'s Room -- Ski Lodge=[name(%0)]'s Room; [setq(0,[loc([name(%0)]'s Room)])]; [setq(2,[num([name(%0)]'s Room)])]; [setq(1,Room [after(%q2,#)])]; [setq(3,[num(%0)])]; &R_%q2 me=%q3; @parent %q0=[v(parent-room)]; @name %q2={Room [after(%q2,#)];Room %q2;%q2;[after(%q2,#)];[mid([name(%0)],0,3)]R;[mid([name(%0)],0,2)]R;[mid([nam e(%0)],0,1)]R;R[mid([name(%0)],0,3)];R[mid([name(%0)],0,2)];R[mid([name(%0)],0 ,1)]}; @desc %q2=This is a plain wooden door leading into %q1. There is the small, round, glassy-looking circle of a peephole at eye level. You notice an information plaque that reads: "Every room is protected by an automatic locking mechanism. Whenever the guest registered to this room leaves or goes to sleep (disconnects), the exit into the room automatically locks. At any time, they can re-enter the room. Friends of this guest may be allowed into the room by having the registered guest <unlock exit> from within the room itself."; @succ %q2=You enter %q1.; @osucc %q2=enters %q1.; @odrop %q2=enters the room from the door to the hallway.; @fail %q2=You try to enter %q1, but the door is locked. If you are a friend of the guest registered to this room, you may be allowed into the room by having the registered guest <unlock exit> from within the room itself.; @ofail %q2=tries to enter %q1, but the door is locked.; @set %q0 = UNFINDABLE; @set %q0 = MONITOR; @set %q0 = INHERIT; @set %q0 = ABODE; @set %q0 = COMMANDS; &CHECK-IN %q0=time(); &DOOR-IN %q0=%q2; &OWNER %q0=[num(*%0)]; &OWNER %q1=[num(%0)]; &KEY-LOCK %q2=%[match(u(OWNER),%%#)%]; &STATE %q2=unlocked; &colors %q0=[switch(rand(4),0,{black, white, and red},1,dark blue and bold yellow,2,teal and mauve,3,silver and blue,4,{ivory, mauve, and seafoam green})]; &descnum %q0=[rand(4)]; @trigger me/cmd_locks1=%q0
+&DEST_ROOM Sign=[first(iter(lattr(me/r_*),switch(match(v(##),%0),0,,setq(0,extract(##,2,6,_ )))))]; &r_%q0 me; @dest [loc(%q0)]; @wait 1=@dest %q0
+&CMD_LOCKS1 Sign=&DISCONNECT %0=^* has disconnected.:@switch %%0=%[name(u(OWNER))%]=0,,%{@fo me=@lock %[v(DOOR-IN)%]=!KEY-LOCK/0%; &STATE %[v(DOOR-IN)%]=locked%}; {&placescleanup1 %0=^* has left.:placescleanup%(%%#%)}; {&placescleanup2 %0=^* has disconnected.:placescleanup%(%%#%)}; @trigger me/cmd_locks2=%0
+&CMD_LOCKS2 Sign=&LEFT %0=^* has left.:@switch %%0=%[name(u(OWNER))%]=0,,%{@fo me=@lock %[v(DOOR-IN)%]=!KEY-LOCK/0{;} &STATE %[v(DOOR-IN)%]=locked{;} @pemit %%#=%%rThe exit to the room locks behind you with an audible >>click<<.%; @trigger me/startup=%%0%}; @trigger me/cmd_locks3=%0
+&CMD_LOCKS3 Sign=&UNLOCK_DOOR_CODE %0=$unlock exit:@switch %[u(v(DOOR-IN)/STATE)%]=unlocked,%{@pemit %%#=The exit is already unlocked.%},locked,%{&state %[v(DOOR-IN)%]=unlocked{;} @pemit %%#=The exit is now unlocked.{;} @unlock %[v(DOOR-IN)%]%},%{@pemit %%#=WARNING: The unlocking command has malfunctioned. Please +mail [name(owner(me))] and let them know what happened!%}; @trigger me/cmd_startup=%0,num(me)
+&CMD_STARTUP Sign=@Startup %0=@switch %[gte(sub(convtime(time()),convtime(u(CHECK-IN))),2592000)%]=1,%{p %%0=<<You have spent at least 30 days in this room without checking out. Your registration has been revoked. You may register for a new room at any time.>> %; @trigger %1/DEST_ROOM=%%0%; &r_%[v(DOOR-IN)%] %1%;%},%{p %%0=<<You have %[trunc(div(sub(2592000,sub(convtime(time()),convtime(u(CHECK-IN)))),86400))%] more days until your registration expires.>> %}
+&MAKE_SUITE Sign=[setq(3,[u(#1903/suitenums)])]; @dig Suite: [iter(%q3,name(##))] -- Ski Lodge={Suite: [iter(%q3,name(##)]}; [setq(0,[loc(Suite: [iter(%q3,name(##)])])]; [setq(2,[num(Suite: [iter(%q3,name(##)])])]; [setq(1,Suite [after(%q2,#)])]; &R_%q2 me=%q3; @parent %q0=[v(parent-suite)]; @name %q2={Suite [after(%q2,#)];Suite %q2;%q2;[after(%q2,#)];[edit(S[iter(%q3,mid(name(##),0,1))],%b,)];[edit([iter(%q3,mid(name(##),0,1))],%b,)];[reverse(edit([iter(%q3,mid(name(##),0,1))],%b,))];[edit([iter(%q3,mid(name(##),0,1))]S,%b,)]}; @desc %q2=This is a carved wooden door leading into %q1. There is the small, round, glassy-looking circle of a peephole at eye level. You notice an information plaque that reads: "Every suite is protected by an automatic locking mechanism. Whenever one of the guests registered to this suite leaves or goes to sleep, the exit into the suite locks. At any time, guests can re-enter the suite. Friends of either guest may be allowed into the suite by having someone <unlock exit> from within the suite itself."; @succ %q2=You enter %q1.; @osucc %q2=enters %q1.; @odrop %q2=enters the suite from the door to the hallway.; @fail %q2=You try to enter %q1, but the door is locked. If you are a friend of either of the guests registered to this suite, you may be allowed into the suite by having someone <unlock exit> from within the suite itself.; @ofail %q2 = tries to enter %q1, but the door is locked.; @set %q0 = UNFINDABLE; @set %q0 = MONITOR; @set %q0 = INHERIT; @set %q0 = ABODE; @set %q0 = COMMANDS; &CHECK-IN %q0=time(); &DOOR-IN %q0=%q2; &OWNER %q0=[u(#1903/suitenums)]; &OWNER %q1=[u(#1903/suitenums)]; &KEY-LOCK %q2=%[match(u(OWNER),%%#)%]; &STATE %q2=unlocked; &SUITENUMS #1903; &colors %q0=[switch(rand(4),0,{black, white, and red},1,dark blue and bold yellow,2,teal and mauve,3,silver and blue,4,{ivory, mauve, and seafoam green})]; &descnum %q0=[rand(4)]; @trigger me/cmd_locks1=%q0
+&PARENT-ROOM Sign=#2055
+&PARENT-SUITE Sign=#2055
+&HOTEL Sign=Denver Heights Ski Lodge
+@set Sign=DARK
+@set Sign=STICKY
+@set Sign=SAFE

@@ -1,0 +1,1224 @@
+@@ This is a decomp of an NCS combat system in actual working use as of 
+@@ 10/10/2002. No support, but it works somewhere.
+@@ 
+
+
+combat command
+@create Combat Commands Alpha=10
+@lock Combat Commands Alpha=*TW_Coder
+&UNWEAR Combat Commands Alpha=$unwear *:@wait me={&temp 
+me=[switch(match(v(0),#*
+),1,v(0),locate(v(#),secure(v(0)),Ti))]; @switch/first 
+0=[strmatch(xget(v(#),arm
+or),*[v(temp)]*)], {@pemit %#=I can't seem to find that armor. You might try 
+unw
+ear #<db#>.; @notify me}, {@remit [room(v(#))]=%N takes off %p 
+[name(v(temp))].;
+&armor 
+%#=[before(xget(v(#),armor),[xget(v(temp),type)]:[v(temp)])][after(xget(
+v(#),armor),[xget(v(temp),type)]:[v(temp)])]; @notify me}}
+&WEAPONTYPE Combat Commands Alpha=[xget(u(chooseweap,v(0)),type)]
+&STRENGTHREQ Combat Commands Alpha=[xget(u(chooseweap,v(0)),wgt)]
+&CHOOSEWEAP Combat Commands Alpha=[first(cat(xget(v(0),weapon),num(me)))]
+&PFIND Combat Commands Alpha=[locate(v(0),v(1),P*)]
+@Desc Combat Commands Alpha=NCS v1.0 controller object. This baby runs 
+combat fr
+om the master room.
+&DBOBJ Combat Commands Alpha=Combat Database
+&LISTOBJ Combat Commands Alpha=Combat Lists
+&UNWIELD Combat Commands Alpha=$unwield: &weapon %#=%b; @pemit %#=You stop 
+wield
+ing your weapon.
+@Aconnect Combat Commands Alpha=@switch xget(v(#),health)=, {&health 
+%#=[add(100
+,rand(20))]; &strength %#=[add(80,die(2,20))]; &agility 
+%#=[add(80,die(2,20))];
+&weapon %#=%b; &armor %#=%b; &posture %#=none; @dol health strength weapon 
+armor
+agility posture=@atrlock %#/##=on}
+&LUNGE Combat Commands Alpha=$lunge *: @wait me={&victim 
+me=[u(PFIND,v(#),v(0))]
+; @switch/first 0 = 
+[not(and(match(xget(v(#),weapon),*#*),match(locate(v(#),xget
+(v(#),weapon),Ti),#-1)))], {@pemit %#=You seem to have lost your wielded 
+weapon.
+Unwield or wield something.; @notify me}, [not(match(v(victim),v(#)))], 
+{@pemit
+%#=You're not that limber.; @notify me}, [not(hasflag(room(v(#)),Haven))], 
+{@pe
+mit %#=No fighting in HAVEN rooms!; @notify me}, 
+[or(hasflag(v(victim),CONNECTED
+),hasflag(v(victim),head))], {@pemit %#=You don't see that player here.; 
+@notify
+me}, [hasflag(v(victim),combat)], {@pemit %#=That is not attackable.;@notify 
+me
+},[hasflag(%#,combat)],{@pemit %#=You are not combat ready.;@notify 
+me},[not(mat
+ch(xget(v(#),posture),ATTACK*))], {@pemit %#=You're already attacking 
+someone!;
+@notify me}, [gte(xget(v(#),strength),u(strengthreq,v(#)))], {@pemit 
+%#=You're t
+oo weak to lift your weapon.; @notify me}, 
+[match(u(weapontype,v(#)),*point*)],
+{@pemit %#=You can't lunge with a weapon like that.; @notify me}, {@tr 
+me/attack
+= %#,[v(victim)],lunge}}
+&ATTACK Combat Commands Alpha=@wait %1/4={@tr me/eval_[extract(hit 
+miss,add(1,gt
+e(rand(100),u(me/HITCHANCE,v(0)))),1)] = %0, %1, 
+[u(me/dbcode,v(2),xget(v(1),pos
+ture))], [u(me/hitquality,v(0),v(1),u(me/dbcode,v(2),xget(v(1),posture)))]}; 
+@pe
+mit %1=[name(v(0))] 
+[switch(v(2),lunge,lunges,slash,slashes,bash,swings,punch,pu
+nches,kick,kicks)] at you.%rYou can 'block [name(v(0))]', 'parry 
+[name(v(0))]',
+or 'dodge [name(v(0))]'.; &posture %1=DODGE; &posture %0=ATTACK %1; @notify 
+me;
+&TYPE Combat Commands Alpha=none
+&PHERE Combat Commands 
+Alpha=[and(not(match(u(PFIND,v(0),v(1)),#-1)),or(not(hasf
+lag(u(PFIND,v(0),v(1)),player)),hasflag(u(PFIND,v(0),v(1)),connected)))]
+&PARRY Combat Commands Alpha=$parry *: @switch/first 0 = 
+[match(xget(v(#),postur
+e),DODGE)], {@pemit %#=You haven't been attacked!}, 
+[u(phere,v(#),secure(v(0)))]
+, {@pemit %#=You don't see that player here.}, 
+[match(xget(u(PFIND,v(#),v(0)),po
+sture),strcat(*,v(#)))], {@pemit %#=That player hasn't attacked you!}, 
+{&posture
+%#=PARRY; @notify %#}
+&FUNCTIONOBJ Combat Commands Alpha=#316
+&STATUS Combat Commands Alpha=$status:@pemit %#=Status:%r%tStrength: 
+[xget(v(#),
+strength)]/[xget(v(#),ste)]%r%t%bAgility: 
+[xget(v(#),agility)]/[xget(v(#),dex)]%
+r%t%b%bHealth: [xget(v(#),health)]/[xget(v(#),hp)]%r%t%b%bWeapon: 
+[name(xget(v(#
+),weapon))]%r%t%bWearing: 
+[iter(xget(v(#),armor),{\[before(##,:)\]:\[name(after(
+##,:))\]})]
+&BLOCK Combat Commands Alpha=$block *: @switch/first 0 = 
+[match(xget(v(#),postur
+e),DODGE)], {@pemit %#=You haven't been attacked!}, 
+[u(phere,v(#),secure(v(0)))]
+, {@pemit %#=You don't see that player here.}, 
+[match(xget(u(PFIND,v(#),v(0)),po
+sture),strcat(*,v(#)))], {@pemit %#=That player hasn't attacked you!}, 
+{&posture
+%#=BLOCK; @notify %#}
+&DODGE Combat Commands Alpha=$dodge *: @switch/first 0 = 
+[match(xget(v(#),postur
+e),DODGE)], {@pemit %#=You haven't been attacked!}, 
+[u(phere,v(#),secure(v(0)))]
+, {@pemit %#=You don't see that player here.}, 
+[match(xget(u(PFIND,v(#),v(0)),po
+sture),strcat(*,v(#)))], {@pemit %#=That player hasn't attacked you!}, 
+{&posture
+%#=DODGE; @notify %#}
+&HITCHANCE Combat Commands 
+Alpha=[div(mul(xget(v(0),agility),min(100,mul(2,xget(
+v(0),strength)))),100)]
+&HITQUALITY Combat Commands 
+Alpha=[min(2,div(add(add(add(add(die(2,50),xget(v(db
+obj),strcat(v(2),bonus))),u(weaponlenbonus,v(0))),sub(xget(v(0),agility),xget(v(
+1),agility))),sub(xget(v(0),strength),xget(v(1),strength))),30))]
+&DAMAGE Combat Commands 
+Alpha=[mul(gt(v(1),0),add(die(max(v(1),1),div(max(xget(v
+(0),strength),30),10)),u(weaponwgtbonus,v(0))))]
+&WEAPONLENBONUS Combat Commands 
+Alpha=[div(sub(xget(u(chooseweap,v(0)),len),36),
+3)]
+&WGT Combat Commands Alpha=0
+&WEAPONWGTBONUS Combat Commands Alpha=[div(xget(u(chooseweap,v(0)),wgt),5)]
+&DBCODE Combat Commands Alpha=[strcat(mid(v(0),0,3),mid(v(1),0,3))]
+&EVAL_MISS Combat Commands Alpha=@remit [room(v(0))]= 
+u([v(dbobj)]/%2%3,%0,%1);
+@tr [v(functionobj)]/fatigue = %0, 
+[add(1,div(xget(u(chooseweap,v(0)),wgt),5))];
+@tr [v(functionobj)]/fatigue = %1, 1; &posture %0=NONE; &posture %1=NONE; 
+@tr [
+v(listobj)]/log_attack=%0,%1,[strcat(v(2),m)], [u(chooseweap,v(0))]
+&SLASH Combat Commands Alpha=$slash *: @wait me={&victim 
+me=[u(PFIND,v(#),v(0))]
+; @switch/first 0 = 
+[not(and(match(xget(v(#),weapon),*#*),match(locate(v(#),xget
+(v(#),weapon),Ti),#-1)))], {@pemit %#=You seem to have lost your wielded 
+weapon.
+Unwield or wield something.; @notify me}, [not(match(v(victim),v(#)))], 
+{@pemit
+%#=You're not that limber.; @notify me}, [not(hasflag(room(v(#)),Haven))], 
+{@pe
+mit %#=No fighting in HAVEN rooms!; @notify me}, 
+[or(hasflag(v(victim),CONNECTED
+),hasflag(v(victim),head))], {@pemit %#=You don't see that player here.; 
+@notify
+me}, [hasflag(v(victim),combat)], {@pemit %#=That is not attackable.;@notify 
+me
+},[hasflag(%#,combat)],{@pemit %#=You are not combat ready.;@notify 
+me},[not(mat
+ch(xget(v(#),posture),ATTACK*))], {@pemit %#=You're already attacking 
+someone!;
+@notify me}, [gte(xget(v(#),strength),u(strengthreq,v(#)))], {@pemit 
+%#=You're t
+oo weak to lift your weapon.; @notify me}, 
+[match(u(weapontype,v(#)),*edge*)], {
+@pemit %#=You can't slash with a weapon like that.; @notify me}, {@tr 
+me/attack
+= %#,[v(victim)],slash}}
+&BASH Combat Commands Alpha=$bash *: @wait me={&victim 
+me=[u(PFIND,v(#),v(0))];
+@switch/first 0 = 
+[not(and(match(xget(v(#),weapon),*#*),match(locate(v(#),xget(v
+(#),weapon),Ti),#-1)))], {@pemit %#=You seem to have lost your wielded 
+weapon. U
+nwield or wield something.; @notify me}, [not(match(v(victim),v(#)))], 
+{@pemit %
+#=You're not that limber.; @notify me}, [not(hasflag(room(v(#)),Haven))], 
+{@pemi
+t %#=No fighting in HAVEN rooms!; @notify me}, 
+[or(hasflag(v(victim),CONNECTED),
+hasflag(v(victim),head))], {@pemit %#=You don't see that player here.; 
+@notify m
+e}, [hasflag(v(victim),combat)], {@pemit %#=That is not attackable.;@notify 
+me},
+[hasflag(%#,combat)],{@pemit %#=You are not combat ready.;@notify 
+me},[not(match
+(xget(v(#),posture),ATTACK*))], {@pemit %#=You're already attacking 
+someone!; @n
+otify me}, [gte(xget(v(#),strength),u(strengthreq,v(#)))], {@pemit %#=You're 
+too
+weak to lift your weapon.; @notify me}, [match(u(weapontype,v(#)),*blunt*)], 
+{@
+pemit %#=You can't bash with a weapon like that.; @notify me}, {@tr 
+me/attack =
+%#,[v(victim)],bash}}
+&PUNCH Combat Commands Alpha=$punch *: @wait me={&victim 
+me=[u(PFIND,v(#),v(0))]
+; @switch/first 0 =[not(match(v(victim),v(#)))], {@pemit %#=You're not that 
+limb
+er.; @notify me}, [not(hasflag(room(v(#)),Haven))], {@pemit %#=No fighting 
+in HA
+VEN rooms!; @notify me}, 
+[or(hasflag(v(victim),CONNECTED),hasflag(v(victim),head
+))], {@pemit %#=You don't see that player here.; @notify me}, 
+[hasflag(v(victim)
+,combat)], {@pemit %#=That is not attackable.;@notify 
+me},[hasflag(%#,combat)],{
+@pemit %#=You are not combat ready.;@notify 
+me},[not(match(xget(v(#),posture),AT
+TACK*))], {@pemit %#=You're already attacking someone!; @notify me}, {@tr 
+me/att
+ack = %#,[v(victim)],punch}}
+&KICK Combat Commands Alpha=$kick *: @wait me={&victim 
+me=[u(PFIND,v(#),v(0))];
+@switch/first 0 =[not(match(v(victim),v(#)))], {@pemit %#=You're not that 
+limber
+.; @notify me}, [not(hasflag(room(v(#)),Haven))], {@pemit %#=No fighting in 
+HAVE
+N rooms!; @notify me}, 
+[or(hasflag(v(victim),CONNECTED),hasflag(v(victim),head))
+], {@pemit %#=You don't see that player here.; @notify me}, 
+[hasflag(v(victim),c
+ombat)], {@pemit %#=That is not attackable.;@notify 
+me},[hasflag(%#,combat)],{@p
+emit %#=You are not combat ready.;@notify 
+me},[not(match(xget(v(#),posture),ATTA
+CK*))], {@pemit %#=You're already attacking someone!; @notify me}, {@tr 
+me/attac
+k = %#,[v(victim)],kick}}
+&HASPRIVS Combat Commands 
+Alpha=[or(hasflag(v(#),royalty),hasflag(v(#),Wizard))]
+&XWIELD Combat Commands Alpha=wield *: @wait me={&temp 
+me=[locate(v(#),secure(v(
+0)),Ti)]; @switch/first 0=[not(match(v(temp),#-1))], {@pemit %#=You don't 
+see th
+at here.; @notify me}, [hasflag(u(me/temp),weapon)], {@pemit %#=That object 
+is n
+ot registered as a weapon.; @notify me}, {@remit [room(v(#))]=%N readies %p 
+[nam
+e(v(temp))] with the easy grace of one who understands steel.; &weapon 
+%#=[v(tem
+p)]}; @notify me}
+&VICTIM Combat Commands Alpha=#857
+&TEMP Combat Commands Alpha=#777
+&XWEAR Combat Commands Alpha=$wear *:@wait me={&temp 
+me=[locate(v(#),secure(v(0)
+),Ti)]; @switch/first 0=[not(match(v(temp),#-1))], {@pemit %#=You don't see 
+that
+here.; @notify me}, [hasflag(u(me/temp),armor)], {@pemit %#=That object is 
+not
+registered as armor.; @notify me}, {@remit [room(v(#))]=%N puts on %p 
+[name(v(te
+mp))]; @switch 
+[match(xget(v(#),armor),strcat(strcat(*,xget(v(temp),type)),*))]=
+0, {&armor %#=[xget(v(#),armor)] [xget(v(temp),type)]:[v(temp)]}, {&armor 
+%#=[be
+fore(xget(v(#),armor),xget(v(temp),type))][xget(v(temp),type)]:[v(temp)] 
+[after(
+after(xget(v(#),armor),xget(v(temp),type)), )]}}; @notify me}
+&XATTACK Combat Commands Alpha=@wait %1/4={@tr me/eval_[extract(hit 
+miss,add(1,g
+te(rand(100),u(me/HITCHANCE,v(0)))),1)] = %0, %1, 
+[u(me/dbcode,v(2),xget(v(1),po
+sture))], 
+[u(me/hitquality,v(0),v(1),u(me/dbcode,v(2),xget(v(1),posture)))]}; @p
+emit %1=[name(v(0))] 
+[switch(v(2),lunge,lunges,slash,slashes,bash,swings,punch,p
+unches,kick,kicks)] at you.%rYou can 'block [name(v(0))]', 'parry 
+[name(v(0))]',
+or 'dodge [name(v(0))]'.; &posture %1=DODGE; &posture %0=ATTACK %1; @notify 
+me;
+&armor1 me=[mid(xget(v(0),armor),0,5)];&armor2 
+me=[mid(xget(v(1),armor),0,5)]
+&STUCK Combat Commands Alpha=$hit:@tr me/attack
+@Listen Combat Commands Alpha=*
+&XHITQUALITY Combat Commands 
+Alpha=[min(2,div(add(add(add(add(die(2,50),xget(v(d
+bobj),strcat(v(2),bonus))),u(weaponlenbonus,v(0))),sub(xget(v(0),agility),xget(v
+(1),agility))),sub(xget(v(0),strength),xget(v(1),strength))),30))]
+&XDAMAGE Combat Commands 
+Alpha=[mul(gt(v(1),0),add(die(max(v(1),1),div(max(xget(
+v(0),strength),30),10)),u(weaponwgtbonus,v(0))))]
+&FIREBREATH Combat Commands Alpha=$FB *: @wait me={&victim 
+me=[u(PFIND,v(#),v(0)
+)]; @switch/first 0 = [not(match(v(victim),v(#)))], {@pemit %#=You're not 
+that l
+imber; @notify me}, [not(hasflag(room(v(#)),Haven))], {@pemit %#=No fighting 
+in
+HAVEN rooms!; @notify me}, 
+[and(not(match(v(victim),#-1),or(not(hasflag(v(victim
+),player)),hasflag(v(victim),connected)))], {@pemit %#=You don't see that 
+player
+here.; @notify me}, [not(match(xget(v(#),posture),ATTACK*))], {@pemit 
+%#=You're
+already attacking someone!; @notify me}, {@tr 
+me/attack2=%#,[v(victim)],firebre
+ath}}
+&ATTACK2 Combat Commands Alpha=@wait %1/3={@tr me/eval_[extract(hit 
+miss,add(1,g
+te(rand(100),u(me/HITCHANCE,v(0)))),1)] = %0, %1, 
+[u(me/dbcode,v(2),xget(v(1),po
+sture))], 
+[u(me/hitquality,v(0),v(1),u(me/dbcode,v(2),xget(v(1),posture)))]}; @p
+emit %1=[name(v(0))] [switch(v(2),firebreath,breathes fire)] at you!%rYou 
+can 'd
+odge [name(v(0))]'.; &posture %1=DODGE; &posture %0=ATTACK %1; @notify me
+&SHOOTFIRE Combat Commands Alpha=$sfire *: @wait me={&victim 
+me=[u(PFIND,v(#),v(
+0))]; @switch/first 0 = [not(match(v(victim),v(#)))], {@pemit %#=You're not 
+that
+limber; @notify me}, [not(hasflag(room(v(#)),Haven))], {@pemit %#=No 
+fighting i
+n HAVEN rooms!; @notify me}, 
+[and(not(match(v(victim),#-1),or(not(hasflag(v(vict
+im),player)),hasflag(v(victim),connected)))], {@pemit %#=You don't see that 
+play
+er here.; @notify me}, [not(match(xget(v(#),posture),ATTACK*))], {@pemit 
+%#=You'
+re already attacking someone!; @notify me}, {@tr 
+me/attack3=%#,[v(victim)],sfire
+}}
+&ATTACK3 Combat Commands Alpha=@wait %1/3={@tr me/eval_[extract(hit 
+miss,add(1,g
+te(rand(100),u(me/HITCHANCE,v(0)))),1)] = %0, %1, 
+[u(me/dbcode,v(2),xget(v(1),po
+sture))], 
+[u(me/hitquality,v(0),v(1),u(me/dbcode,v(2),xget(v(1),posture)))]}; @p
+emit %1=[name(v(0))] [switch(v(2),sfire,shoots fire)] at you!%r; &posture 
+%1=DOD
+GE; &posture %0=ATTACK %1; @notify me
+&XEVAL_HIT Combat Commands Alpha=@remit [room(v(0))] = 
+u([v(dbobj)]/%2%3,%0,%1);
+@tr [v(functionobj)]/damage=%1,[u(damage,v(0),v(3))],%0; @tr 
+[v(functionobj)]/f
+atigue = %0, [add(1,div(xget(u(chooseweap,v(0)),wgt),5))]; @tr 
+[v(functionobj)]/
+fatigue = %1, 1; &posture %0=NONE; &posture %1=NONE; @tr 
+[v(listobj)]/log_attack
+=%0,%1,[strcat(v(2),v(3))], [u(chooseweap,v(0))]
+&ARMORSTR Combat Commands 
+Alpha=[switch(isnum(xget(%0,str)),1,max(0,xget(%0,str)
+),0)]
+&CHOOSEARMOR Combat Commands 
+Alpha=[setq(0,after(extract(xget(%0,armor),add(1,ra
+nd(2)),1),:))][switch(loc(%q0),%0,%q0,num(me))]
+&SET Combat Commands Alpha=trace
+&EVAL_HIT Combat Commands Alpha=@remit [room(v(0))] = 
+[u([v(dbobj)]/%2%3,%0,%1)]
+;@switch/first [setq(0, ulocal(damage,%0,%3))][setq(1, 
+ulocal(choosearmor,%1))][
+setq(2, u(armorstr,%q1))][setq(3, 
+max(0,sub(%q0,%q2)))][setq(4,min(%q2,%q0))] %q
+3:%q4 =0:0,{ @@ No damage. Do nothing @@ },*:0,{ @@ Full damage to player, 
+not a
+rmor - because armor's worthless @@;@tr 
+[v(functionobj)]/damage=%1,%q3,%0},0:*,{
+@@ Full damage to armor, and player's safe. @@;@tr 
+[v(functionobj)]/armordamage
+=%q1,%q4;@remit [room(%0)] = [name(%1)]'s [name(%q1)] protects [obj(%1)] 
+from da
+mage!},{ @@ Split damage between armor and player @@;@tr 
+[v(functionobj)]/damage
+=%1,%q3,%0;@tr [v(functionobj)]/armordamage=%q1,%q4;@remit [room(%0)] = 
+[name(%1
+)]'s [name(%q1)] absorbs some of the damage!};@tr [v(functionobj)]/fatigue 
+=%0,[
+add(1,div(xget(u(chooseweap,v(0)),wgt),5))];@tr [v(functionobj)]/fatigue = 
+%1, 1
+;&posture %0=NONE;&posture %1=NONE;@tr 
+[v(listobj)]/log_attack=%0,%1,[strcat(v(2
+),v(3))], [u(chooseweap,v(0))]
+&PROBEVALHIT Combat Commands Alpha=@remit [room(v(0))] 
+=[u([v(dbobj)]/%2%3,%0,%1
+)];@switch/first 
+[setq(0,ulocal(damage,%0,%3))][setq(1,ulocal(choosearmor,%1))][
+u(canabsorb,%q1,%q0)]= 1,{@tr 
+[v(functionobj)]/armordamage=%q1,[min(u(armorstr,%
+q1),%q0)];@remit [room(%0)] = [name(%1)]'s [name(%q1)] protects [obj(%1)] 
+from d
+amage!},{@tr [v(functionobj)]/damage=%1,%q0,%0};@tr [v(functionobj)]/fatigue 
+= %
+0,[add(1,div(xget(u(chooseweap,v(0)),wgt),5))];@tr [v(functionobj)]/fatigue 
+= %1
+, 1;&posture %0=NONE;&posture %1=NONE;@tr 
+[v(listobj)]/log_attack=%0,%1,[strcat(
+v(2),v(3))], [u(chooseweap,v(0))]
+&ARMORDAMAGE Combat Commands Alpha=&str %0=[sub(xget(%0,str),%1)];@switch 
+[lte(x
+get(%0,str),0]=1,{@pemit [loc(%0)]=Your [name(%0)] is in pieces, totally 
+useless
+as a defense.}
+&WIELD Combat Commands Alpha=$wield *: @wait me={&temp 
+me=[locate(v(#),secure(v(
+0)),Ti)]; @switch/first 0=[not(match(v(temp),#-1))], {@pemit %#=You don't 
+see th
+at here.; @notify me}, [hasflag(u(me/temp),weapon)], {@pemit %#=That object 
+is n
+ot registered as a weapon.; @notify me}, {@remit [room(v(#))]=%N readies %p 
+[nam
+e(v(temp))] with the easy grace of one who understands steel.; &weapon 
+%#=[v(tem
+p)]}; @notify me}
+@set Combat Commands Alpha=INHERIT
+@set Combat Commands Alpha=AUDIBLE
+@set Combat Commands Alpha=FIXED
+@set Combat Commands Alpha=CONTROL_OK
+
+
+Functions
+@create Combat Functions=10
+@lock Combat Functions=*TW_Coder
+&MAKEWEAP Combat Functions=@set %0=SAFE; &len %0=%1; &wgt %0=%2; &type 
+%0=%3; @d
+ol len wgt type=@atrlock %0/##=on;&weapons [v(listobj)] = 
+[xget(v(listobj),weapo
+ns)] [v(0)];
+&MAKEARMOR Combat Functions=@swi parent(%#)=#330,{@set %0=SAFE; &type %0=%1; 
+&ma
+terial %0=%2; &str %0=%3; @dol type material str=@atrlock %0/##=on;
+&ADDARMOR Combat Functions=&armor [v(listobj)]=[remove(v(listobj),v(0))] 
+[v(0)]
+&ADDWEAP Combat Functions=&weapons [v(listobj)]=[remove(v(listobj),v(0))] 
+[v(0)]
+&FATIGUE Combat Functions=@@ %1 points of fatigue to %0 @@; &strength 
+%0=[sub(xg
+et(v(0),strength),v(1))]; @switch/first 
+[div(mul(xget(v(0),strength),100),xget(v
+(0),ste))] = <10, {@remit [room(v(0))]=[name(v(0))] is exhausted and can 
+barely
+stand.}, <30, {@remit [room(v(0))]=[name(v(0))] looks very fatigued.}, <50, 
+{@re
+mit [room(v(0))]=[name(v(0))] is getting worn out.}, <70, {@remit 
+[room(v(0))]=[
+name(v(0))] is tiring.}; @tr me/recover=%0
+&LOWER_AGILITY Combat Functions=@@ %1 points less agility to %0 @@; &agility 
+%0=
+[sub(xget(v(0),agility),v(1))]; @switch/first 
+[div(mul(xget(v(0),agility),100),x
+get(v(0),dex))] = <10, {@remit [room(v(0))]=[name(v(0))] is staggering, 
+tripping
+over [poss(v(0))] own feet.}, <30, {@remit [room(v(0))]=[name(v(0))] looks 
+extr
+emely clumsy.}, <50, {@remit [room(v(0))]=[name(v(0))]'s motions are 
+jerky.}, <7
+0, {@remit [room(v(0))]=[name(v(0))] staggers slightly.}; @tr me/recover=%0
+&RECOVER Combat Functions=@switch 
+or(member(xget(v(listobj),rec_health),v(0)),eq
+(xget(v(0),health),xget(v(0),hp)))=0, {&rec_health [v(listobj)] = 
+[xget(v(listob
+j),rec_health)] [v(0)]; @tr me/rechealth=%0}; @switch 
+or(member(xget(v(listobj),
+rec_strength),v(0)),eq(xget(v(0),strength),xget(v(0),ste)))=0, 
+{&rec_strength [v
+(listobj)] = [xget(v(listobj),rec_strength)] [v(0)]; @tr me/recstrength=%0}; 
+@sw
+itch 
+or(member(xget(v(listobj),rec_agility),v(0)),eq(xget(v(0),agility),xget(v(0
+),dex)))=0, {&rec_agility [v(listobj)] = [xget(v(listobj),rec_agility)] 
+[v(0)];
+@tr me/recagility=%0}
+&RECHEALTH Combat Functions=@wait [v(waittime)]={@switch 
+member(xget(v(listobj),
+rec_health),v(0))=0,{},{&health %0=[add(xget(v(0),health),v(healthrate))]; 
+@swit
+ch gte(xget(v(0),health),xget(v(0),hp))=1, {&health %0=[xget(v(0),hp)]; 
+&rec_hea
+lth [v(listobj)]=[remove(xget(v(listobj),rec_health),v(0))]}; @pemit %0=You 
+begi
+n to feel healthier.; @tr me/rechealth=%0}}
+&WAITTIME Combat Functions=10800
+&HEALTHRATE Combat Functions=10
+&LISTOBJ Combat Functions=#317
+&RECSTRENGTH Combat Functions=@wait [v(waittime)]={@switch 
+member(xget(v(listobj
+),rec_strength),v(0))=0,{},{&strength 
+%0=[add(xget(v(0),strength),v(strengthrate
+))]; @switch gte(xget(v(0),strength),xget(v(0),ste))=1, {&strength 
+%0=[xget(v(0)
+,ste)]; &rec_strength 
+[v(listobj)]=[remove(xget(v(listobj),rec_strength),v(0))]}
+; @pemit %0=You begin to feel stronger.; @tr me/recstrength=%0}}
+&RECAGILITY Combat Functions=@wait [v(waittime)]={@switch 
+member(xget(v(listobj)
+,rec_agility),v(0))=0,{},{&agility 
+%0=[add(xget(v(0),agility),v(agilityrate))];
+@switch gte(xget(v(0),agility),xget(v(0),dex))=1, {&agility 
+%0=[xget(v(0),dex)];
+&rec_agility [v(listobj)]=[remove(xget(v(listobj),rec_agility),v(0))]}; 
+@pemit
+%0=You begin to feel more agile again.; @tr me/recagility=%0}}
+&AGILITYRATE Combat Functions=10
+&STRENGTHRATE Combat Functions=10
+@Startup Combat Functions=@dol [xget(v(listobj),rec_health)]=@tr 
+me/rechealth=##
+; @dol [xget(v(listobj),rec_agility)]=@tr me/recagility=##; @dol 
+[xget(v(listobj
+),rec_strength)]=@tr me/recstrength=##
+&DEAD Combat Functions=@tr #301/beep
+&ARMORDAMAGE Combat Functions=&str %0 = [sub(xget(%0,str),%1)];@switch 
+[lte(xget
+(%0,str),0)]=1,{@remit [loc(loc(%0))]=[name(loc(%0))]'s [name(%0)] breaks 
+apart.
+;@name %0=Broken [name(%0)] }
+&BAKDAMAGE Combat Functions=@@ %1 points of damage to %0 by %2 @@; &health 
+%0=[s
+ub(xget(v(0),health),v(1))]; @pemit %0=You take %1 points of damage.; 
+@switch/fi
+rst [div(mul(xget(v(0),health),100),xget(v(0),hp))] = <1, {@remit 
+[room(v(0))]=[
+name(v(0))] is DEAD!;&loot me=lcon([v(0)]);@cpattr 
+[v(0)]/money=#1281/money;@clo
+ne/inherit #1281;@dolist [get(#316/loot)]=@tel ##=[num(corpse)];@name 
+corpse=Cor
+pse of [name(v(0))]; @wait 2=@tel [num(corpse)]=[room(v(0))];@wait 3=@tel 
+[v(0)]
+=#242;&weapon [v(0)];&money [v(0)];}, <10, {@remit [room(v(0))]=[name(v(0))] 
+is
+at death's door, and knocking.; @tr me/recover=%0}, <30, {@remit 
+[room(v(0))]=[n
+ame(v(0))] looks weak.; @tr me/recover=%0}, <50, {@remit 
+[room(v(0))]=[name(v(0)
+)] is shaken.; @tr me/recover=%0}, <70, {@remit [room(v(0))]=[name(v(0))] is 
+wou
+nded.; @tr me/recover=%0}, {@remit [room(v(0))]=[name(v(0))] still looks 
+hardy.;
+@tr me/recover=%0}
+&DAMAGE Combat Functions=@@ %1 points of damage to %0 by %2 @@; &health 
+%0=[sub(
+xget(v(0),health),v(1))]; @pemit %0=You take %1 points of damage.; 
+@switch/first
+[div(mul(xget(v(0),health),100),xget(v(0),hp))] = <1, {@remit 
+[room(v(0))]=[nam
+e(v(0))] 
+[u(msg-greeting-[rand(words(lattr(me/msg-greeting-*)))],%N,%0)];@set [v
+(0)]=!combat;&loot me=lcon([v(0)]);@cpattr 
+[v(0)]/money=#1281/money;@clone/inher
+it #1281;&storcorp me=[num(corpse)];@dolist [get(#316/loot)]=@tel 
+##=[v(storcorp
+)];@set corpse=!control;@name corpse=Corpse of [name(v(0))]; @tel 
+[v(storcorp)]=
+[room(v(0))];@set [v(0)]=blind;@wait 10=@set [v(0)]=!blind;@tel 
+[v(0)]=#242;ds [
+v(0)];@tr me/recover=%0;&weapon [v(0)];&armor [v(0)];&money [v(0)];@wait 
+50=@tel
+[v(0)]=#1379;}, <10, {@remit [room(v(0))]=[name(v(0))] is at death's door, 
+and
+knocking.; @tr me/recover=%0}, <30, {@remit [room(v(0))]=[name(v(0))] looks 
+weak
+.; @tr me/recover=%0}, <50, {@remit [room(v(0))]=[name(v(0))] is shaken.; 
+@tr me
+/recover=%0}, <70, {@remit [room(v(0))]=[name(v(0))] is wounded.; @tr 
+me/recover
+=%0}, {@remit [room(v(0))]=[name(v(0))] still looks hardy.; @tr 
+me/recover=%0}
+&STORCORP Combat Functions=#693
+&NEWDAMAGEBAK Combat Functions=@@ %1 points of damage to %0 by %2 @@; 
+&health %0
+=[sub(xget(v(0),health),v(1))]; @pemit %0=You take %1 points of damage.; 
+@switch
+/first [div(mul(xget(v(0),health),100),xget(v(0),hp))] = <1, {@remit 
+[room(v(0))
+]=[name(v(0))] is DEAD!;&loot me=lcon([v(0)]);@cpattr 
+[v(0)]/money=#1281/money;@
+clone/inherit #(ENTER NUMBER OF CORPSE OBJECT);&storcorp 
+me=[num(corpse)];@dolist [get(#316/loot)]=@tel ##=
+[v(storcorp)];@name corpse=Corpse of [name(v(0))]; @tel 
+[v(storcorp)]=[room(v(0)
+)];@set [v(0)]=blind;@wait 10=@set [v(0)]=!blind;@tel [v(0)]=#242;&weapon 
+[v(0)]
+;&money [v(0)];}, <10, {@remit [room(v(0))]=[name(v(0))] is at death's door, 
+and
+knocking.; @tr me/recover=%0}, <30, {@remit [room(v(0))]=[name(v(0))] looks 
+wea
+k.; @tr me/recover=%0}, <50, {@remit [room(v(0))]=[name(v(0))] is shaken.; 
+@tr m
+e/recover=%0}, <70, {@remit [room(v(0))]=[name(v(0))] is wounded.; @tr 
+me/recove
+r=%0}, {@remit [room(v(0))]=[name(v(0))] still looks hardy.; @tr 
+me/recover=%0}
+&MSG-GREETING-0 Combat Functions=is DEAD!
+&MSG-GREETING-1 Combat Functions=spouts great gobbets of blood and crumples 
+slow
+ly to the ground.
+&MSG-GREETING-2 Combat Functions=is gutted and dies like a DOG!
+&MSG-GREETING-3 Combat Functions=falls, pierced through and through. A death 
+rat
+tle breaks the newfound%rsilence.
+&MSG-GREETING-4 Combat Functions=gasps at your savage attack, drops to the 
+groun
+d, and dies.
+&MSG-GREETING-5 Combat Functions=is gutted and expires.
+&MSG-GREETING-6 Combat Functions=screams in pain and terror then DIES!
+&MSG-GREETING-7 Combat Functions=cries out "Mother" and kicks the bucket.
+&MSG-GREETING-8 Combat Functions=curses your name and drops, stilled.
+&DEADSTAT Combat Functions=$ds *:&strength %0=[add(10,[rand(30)])];&health 
+%0=[a
+dd(10,[rand(30)])];&agility %0=[add(10,[rand(30)])];
+&ADD Combat Functions=$add *:&msg-greeting-[v(greestart)] me=%0;&greestart 
+me=in
+c([v(greestart)])
+&GREESTART Combat Functions=9
+&LOOT Combat Functions=#14
+@set Combat Functions=DARK
+@set Combat Functions=INHERIT
+
+
+Database
+@create Combat Database=10
+@lock Combat Database=*TW_Coder
+@Desc Combat Database=NCS v1.0 database object. All the pretty emits and 
+stuff.
+&LUNPARM Combat Database=[name(v(0))] lunges at [name(v(1))], but 
+[poss(v(0))] p
+oint goes wide.
+&LUNPAR0 Combat Database=[name(v(0))] lunges toward [name(v(1))] with 
+[poss(v(0)
+)] blade, but [name(v(1))] deftly parries the attack.
+&LUNPAR1 Combat Database=[name(v(0))] lunges out at [name(v(1))], who 
+parries th
+e attack but is nicked on [poss(v(1))] [u(BODYPART)].
+&LUNPAR2 Combat Database=[name(v(0))] lunges out at [name(v(1))], who 
+attempts t
+o parry the lunge, but fails, and is stung by the attack.
+&BODYPART Combat 
+Database=[extract(v(bodyparts),add(1,rand(words(v(bodyparts))))
+,1)]
+&BODYPARTS Combat Database=arm leg hand thigh stomach hip shoulder forearm 
+neck
+face chest side groin knee
+&LUNDODM Combat Database=[name(v(0))] lunges clumsily and misses.
+&LUNDOD0 Combat Database=[name(v(0))] lunges at [name(v(1))], but 
+[subj(v(1))] s
+pins, dodging the strike gracefully.
+&LUNDOD1 Combat Database=[name(v(1))] whirls, attempting to evade 
+[name(v(0))]'s
+darting blade, but is struck lightly in the [u(BODYPART)].
+&LUNDOD2 Combat Database=[name(v(1))] scampers to avoid [name(v(0))]'s 
+lunge, bu
+t is too slow and is struck.
+&LUNBLOM Combat Database=[name(v(1))] moves to block [name(v(0))]'s lunge, 
+but i
+t goes wk de.
+&LUNBLO0 Combat Database=[name(v(0))] lunges out toward [name(v(1))] who 
+blocks
+the lunge adroitly.
+&LUNBLO1 Combat Database=[name(v(0))] lunges at [name(v(1))], who responds 
+by sw
+eeping [poss(v(0))] point aside, taking it on [poss(v(1))] shield arm.
+&LUNBLO2 Combat Database=[name(v(0))] lunges out at [name(v(1))], knocking 
+aside
+[poss(v(1))] attempt to block the attack and scoring.
+&SLAPARM Combat Database=[name(v(0))] aims a slash at [name(v(1))], but 
+misses b
+y a mile.
+&SLAPAR0 Combat Database=[name(v(1))] cleverly parries the slash 
+[name(v(1))] di
+rects at [obj(v(1))].
+&SLAPAR1 Combat Database=[name(v(0))] slashes at [name(v(1))], who parries 
+the s
+lash but is scratched in the [u(BODYPART)] by the blade.
+&SLAPAR2 Combat Database=[name(v(0))] aims a slash at 
+[name(v(1))].%r[name(v(1))
+] attempts to parry the slash, but fails and is struck.
+&SLADODM Combat Database=[name(v(0))] aims a slash at [name(v(1))], and just 
+mis
+ses.
+&SLADOD0 Combat Database=[name(v(0))] directs a slash at [name(v(1))], who 
+nimbl
+y dodges the attack and is unharmed.
+&SLADOD1 Combat Database=[name(v(1))] dodges a slash from [name(v(0))], but 
+rece
+ives a small wound in the process.
+&SLADOD2 Combat Database=[name(v(1))] dodges to the 
+[switch(rand(2),1,left,right
+)] to evade [name(v(0))]'s feint, but is struck by the true attack, a wicked 
+sla
+sh to [poss(v(1))] [u(BODYPART)].
+&SLABLOM Combat Database=[name(v(0))] slashes at [name(v(1))], but misses.
+&SLABLO0 Combat Database=[name(v(0))] slashes at [name(v(1))] who brings up 
+[pos
+s(v(1))] own weapon and blocks the slash!
+&SLABLO1 Combat Database=[name(v(0))] slashes at [name(v(1))], who vainly 
+attemp
+ts to block the strike, but succeeds only in deflecting most of its force.
+&SLABLO2 Combat Database=[name(v(0))] slashes [name(v(1))], who blocks 
+ineffectu
+ally, and is hit in the [u(BODYPART)].
+&BASDODM Combat Database=[name(v(0))] swings wildly at [name(v(1))], missing 
+com
+pletely.
+&KICDODM Combat Database=[name(v(0))] aims a kick at [name(v(1))], but is 
+too sl
+ow and fails to connect.
+&PUNDODM Combat Database=[name(v(0))] throws a wild punch at [name(v(1))].
+&BASDOD0 Combat Database=[name(v(0))] swings [poss(v(0))] weapon at 
+[name(v(1))]
+, who sidesteps the blow.
+&KICDOD0 Combat Database=[name(v(0))] aims a kick at [name(v(1))], who 
+neatly ev
+ades the attack.
+&PUNDOD0 Combat Database=[name(v(0))] sends [poss(v(0))] fist flying toward 
+[nam
+e(v(1))] who ducks beneath it.
+&BASDOD1 Combat Database=[name(v(0))] swings [poss(v(0))] weapon at 
+[name(v(1))]
+, who ducks beneath the swing, but takes a glancing blow.
+&KICDOD1 Combat Database=[name(v(0))] kicks [name(v(1))], who steps out of 
+the w
+ay, but still gets hurt.
+&PUNDOD1 Combat Database=[name(v(0))] throws a punch at [name(v(1))], who 
+twists
+to avoid it, but still manages to get hit in the [u(BODYPART)].
+&BASDOD2 Combat Database=[name(v(0))] bashes [name(v(1))] solidy with 
+[poss(v(0)
+)] weapon, and [subj(v(1))] reels from the blow.
+&KICDOD2 Combat Database=[name(v(0))]'s foot lashes out at [name(v(1))], 
+faster
+than [subj(v(1))] can evade it, and connects.
+&PUNDOD2 Combat Database=[name(v(0))] punches [name(v(1))] solidly in the 
+head,
+making [obj(v(1))] reel.
+&BASBLOM Combat Database=[name(v(0))] attempts to clobber [name(v(1))], but 
+[pos
+s(v(0))] swing goes wide.
+&KICBLOM Combat Database=[name(v(0))] kicks at [name(v(1))], but missteps, 
+and t
+he kick misses.
+&PUNBLOM Combat Database=[name(v(0))] aims a right hook at the space next to 
+[na
+me(v(1))].
+&BASBLO0 Combat Database=[name(v(1))] blocks [name(v(0))]'s swing and is 
+unharme
+d, but shivers with the force of the blow.
+&KICBLO0 Combat Database=[name(v(0)))] directs a kick at [name(v(1))], who 
+block
+s it solidly.
+&PUNBLO0 Combat Database=[name(v(0))] swings [poss(v(0))] fist at 
+[name(v(1))],
+who blocks the punch.
+&BASBLO1 Combat Database=[name(v(0))] swings [poss(v(0))] weapon at 
+[name(v(1))]
+, who deflects the blow, taking a glancing hit to the [u(BODYPART)].
+&KICBLO1 Combat Database=[name(v(0))] swings [poss(v(0))] foot at 
+[name(v(1))],
+who blocks it but is knocked down by the attack.
+&PUNBLO1 Combat Database=[name(v(0))] throws a punch at [name(v(1))]'s 
+[u(BODYPA
+RT)].%r[name(v(1))] blocks the punch. Too bad [subj(v(1))] blocked it with 
+[poss
+(v(1))] [u(BODYPART)].
+&BASBLO2 Combat Database=[name(v(0))] bashes [name(v(1))] with [poss(v(0))] 
+weap
+on, barely taking notice of [poss(v(1))] feeble attempt to block the blow.
+&KICBLO2 Combat Database=[name(v(0))] bats aside [name(v(1))]'s shield arm 
+and l
+ands a devestating kick.
+&PUNBLO2 Combat Database=[name(v(1))] sees [name(v(0))]'s fist rapidly 
+approachi
+ng, and tries to block its progress, but is too slow and gets knocked to the 
+gro
+und.
+&BASPARM Combat Database=[name(v(0))] tries to bash [name(v(1))], but misses 
+by
+a mile.
+&KICPARM Combat Database=[name(v(0))] directs a kick at 
+[name(v(1))].%r[name(v(0
+))] misses.
+&PUNPARM Combat Database=[name(v(0))] jabs at [name(v(1))], missing the 
+mark.
+&BASPAR0 Combat Database=[name(v(0))] aims a mighty blow at [name(v(1))], 
+who am
+azingly parries it.
+&KICPAR0 Combat Database=[name(v(0))] aims a kick at [name(v(1))], who 
+sweeps it
+aside.
+&PUNPAR0 Combat Database=[name(v(0))] aims a jab at [name(v(1))], who sweeps 
+it
+aside.
+&BASPAR1 Combat Database=[name(v(0))] swings [poss(v(0))] weapon at 
+[name(v(1))]
+, who nearly succeeds in parrying the attack, only to fall prey to a 
+backhand sw
+eep.
+&KICPAR1 Combat Database=[name(v(0))] kicks [name(v(1))], who deflects the 
+blow,
+thwarting most of its power.
+&PUNPAR1 Combat Database=[name(v(0))] punches at [name(v(1))]'s 
+head.%r[name(v(1
+))] sweeps the punch aside, but it glances off [poss(v(1))] shoulder.
+&BASPAR2 Combat Database=[name(v(0))] knocks aside [name(v(1))]'s attemp to 
+parr
+y [poss(v(0))] weapon, and deals [obj(v(1))] a resounding blow.
+&KICPAR2 Combat Database=[name(v(0))] plants a powerful kick on 
+[name(v(1))]'s [
+u(bodypary)], ignoring [poss(v(1))] feeble attempt to deflect the blow.
+&PUNPAR2 Combat Database=[name(v(0))] aims an uppercut at [name(v(1))], who 
+trie
+s to knock it aside, but fails, and staggers from the blow.
+&SLADODBONUS Combat Database=5
+&SLAPARBONUS Combat Database=-10
+&SLABLOBONUS Combat Database=0
+&LUNDODBONUS Combat Database=-5
+&LUNPARBONUS Combat Database=0
+&LUNBLOBONUS Combat Database=10
+&BASDODBONUS Combat Database=-5
+&BASPARBONUS Combat Database=10
+&BASBLOBONUS Combat Database=0
+&PUNDODBONUS Combat Database=0
+&PUNPARBONUS Combat Database=0
+&PUNBLOBONUS Combat Database=-10
+&KICDODBONUS Combat Database=0
+&KICPARBONUS Combat Database=0
+&KICBLOBONUS Combat Database=0
+@Listen Combat Database=*
+&FIRDODBONUS Combat Database=-20
+&FIRDOD0 Combat Database=[name(v(0))] breathes [poss(v(0))] terrible fire at 
+[na
+me(v(1))], who dodges to the right,%rslightly cooking [poss(v(1))] left 
+side.
+&FIRDOD2 Combat Database=[name(v(0))] burns [name(v(1))] solidy with 
+[poss(v(0))
+] firebreath, and [subj(v(1))] reels from%Rthe fierce heat!
+&FIRDOD1 Combat Database=[name(v(0))] breathes [poss(v(0))] fire at 
+[name(v(1))]
+, who drops to the ground beneath the%rplume, but is burned slightly.
+&FIRDODM Combat Database=[name(v(0))] roars fire wildly at [name(v(1))], 
+missing
+completely.
+@set Combat Database=INHERIT
+@set Combat Database=STICKY
+@set Combat Database=AUDIBLE
+@set Combat Database=CONTROL_OK
+
+@create Corpse=10
+@Desc Corpse=A bloodied remnant of a sentient being.
+&LOOT Corpse=$loot corpse:@dolist lcon(me)=give %#=##;$give 
+%#=[v(money)];&money
+me;&timer me=rand(2000);@wait [v(timer)]=@emit %R%RA faint wisp passes into 
+the
+heavens as dust returns to dust.;@wait [add(v(timer),1)]=@nuke/instant me;
+&MONEY Corpse=7000
+@set Corpse=BLIND
+@set Corpse=INHERIT
+@set Corpse=SAFE
+
+Lists
+@create Combat Log=10
+@lock Combat Log=*TW_Coder
+@Desc Combat Log=NCS v1.0 object to maintain lists of things.
+&LOG_ATTACK Combat Log=&attack_trace me=[v(attack_trace)]%r[name(v(0))] (%0) 
+att
+acked [name(v(1))] (%1)%r%tLoc: [name(room(v(0)))] ([room(v(0))])%tOn: 
+[time()]%
+r%tAttack index: %2%tWeapon: [name(v(3))] (%3)
+&WEAPONS Combat Log=Combat Lists #240 #240 #240
+&ARMOR Combat Log=#281
+@set Combat Log=CONTROL_OK
+
+Judge
+@create Combat Judge Object=10
+@lock Combat Judge Object=*TW_Coder
+@lock/UseLock Combat Judge Object=HASPRIVS/1
+&SMITH Combat Judge Object=$smith/* *:@switch/first 
+0=[or(match(v(0),w*),match(v
+(0),a*))], {@pemit %#=You must use smith/weapon <player> or smith/armor 
+<player>
+.}, [not(match(v(1),#*))], {&[
+&COMSTAT_RESTRICT Combat Judge Object=@ulock [v(controlobj)]=hasprivs/1; 
+@pemit
+%0=Combat restricted to admins.; &comstat me=restricted
+&COMSTAT_ON Combat Judge Object=@set [v(functionobj)]=!halt; @tr 
+[v(functionobj)
+]/startup; @set [v(controlobj)]=!halt; @uunlock [v(controlobj)]; @pemit 
+%0=Comba
+t enabled for all players.; &comstat me=on
+&COMSTAT_OFF Combat Judge Object=@halt [v(functionobj)]; @halt 
+[v(controlobj)];
+&comstat me=halted; @pemit %0=Combat system halted. Use 'comstat on' to 
+re-enabl
+e.
+&HELPOBJ Combat Judge Object=Combat Help
+&COMSTAT2 Combat Judge Object=$comstat *:@switch/first 1=[match(v(0),on)], 
+{@tr
+me/comstat_on=%#}, [match(v(0),off)], {@tr me/comstat_off=%#}, 
+[match(v(0),restr
+ict)], {@tr me/comstat_restrict=%#}, [match(v(0),log)], {@set 
+[v(listobj)]=!halt
+; @pemit %#=Combat logging enabled.}, [match(v(0),nolog)], {@set 
+[v(listobj)]=ha
+lt; @pemit %#=Combat logging disabled.}, {@pemit 
+%#=[xget(v(helpobj),chelpcomsta
+t)]}
+&COMSTAT Combat Judge Object=on
+&COMSTAT1 Combat Judge Object=$comstat: @pemit %#=NCS version 1.0 
+alpha%rCombat
+system is [v(comstat)] and logging is 
+[switch(hasflag(v(listobj),halt),1,off,on)
+].
+&CLEARATTACKS Combat Judge Object=&attack_trace [v(listobj)]; @pemit 
+%0=Attack l
+og cleared.
+&CLEAR Combat Judge Object=$clear *:@tr me/clear%0=%#
+&LISTATTACKS Combat Judge Object=@pemit %0=[xget(v(listobj),attack_trace)]
+&LISTHEALS Combat Judge Object=@pemit %0=Healing 
+players:%rHealth:%b%b%b[iter(xg
+et(v(listobj),rec_health),{\[name(##)\]})]%rAgility:%b%b[iter(xget(v(listobj),re
+c_agility),{\[name(##)\]})]%rStrength:%b[iter(xget(v(listobj),rec_strength),{\[n
+ame(##)\]})]
+&LIST Combat Judge Object=$list *:@tr me/list%0=%#
+&HASPRIVS Combat Judge 
+Object=[or(hasflag(v(#),royalty),hasflag(v(#),Wizard))]
+&ATTRIBS Combat Judge Object=strength ste agility dex health hp
+&ADJUST Combat Judge Object=$adjust */*=*: @switch/first 0 = 
+[not(match(pmatch(%
+0),#-1))], {@pemit %#=I can't find that player.}, 
+[member(v(attribs),secure(v(1)
+))], {@pemit %#=Syntax: adjust <player>/<attrib>=<value>.%rAttrib must be 
+one of
+: [v(attribs)]}, {&%1 [pmatch(secure(v(0)))] = %2; @pemit 
+%#=[name(pmatch(secure
+(v(0))))]'s %1 set to %2.}
+@Desc Combat Judge Object=NCS v1.0 Judge commands.
+&CONTROLOBJ Combat Judge Object=Combat Commands
+&LISTOBJ Combat Judge Object=Combat Lists
+&FUNCTIONOBJ Combat Judge Object=Combat Functions
+&STATUS Combat Judge Object=$status *:@pemit %#=Status of 
+[name(pmatch(v(0)))] (
+[pmatch(v(0))][flags(pmatch(v(0)))]):%r%tStrength: 
+[xget(pmatch(v(0)),strength)]
+/[xget(pmatch(v(0)),ste)]%r%t%bAgility: 
+[xget(pmatch(v(0)),agility)]/[xget(pmatc
+h(v(0)),dex)]%r%t%b%bHealth: 
+[xget(pmatch(v(0)),health)]/[xget(pmatch(v(0)),hp)]
+%r%t%b%bWeapon: [xget(pmatch(v(0)),weapon)] - 
+[name(xget(pmatch(v(0)),weapon))]%
+r%t%bWearing: 
+[iter(xget(pmatch(v(0)),armor),{\[before(##,:)\]:\[name(after(##,:
+))\](\[after(##,:)\])})]
+&LISTWEAPONS Combat Judge Object=@pemit %0=Weapons: 
+[iter(xget(v(listobj),weapon
+s),{\[name(##)\](##)})]
+&LISTARMOR Combat Judge Object=@pemit %0=Armor: 
+[iter(xget(v(listobj),armor),{\[
+name(##)\](##)})]
+&UNWEAP Combat Judge Object=$unweap *: &weapons [v(listobj)] = 
+[remove(xget(v(li
+stobj),weapons),secure(v(0)))]; @pemit %#=Unweaponed: 
+[name(owner(secure(v(0))))
+]'s [name(secure(v(0)))] ([secure(v(0))])
+&UNARMOR Combat Judge Object=$unarmor *: &armor [v(listobj)] = 
+[remove(xget(v(li
+stobj),armor),secure(v(0)))]; @pemit %#=Unarmored: 
+[name(owner(secure(v(0))))]'s
+[name(secure(v(0)))] ([secure(v(0))])
+@set Combat Judge Object=INHERIT
+@set Combat Judge Object=CONTROL_OK
+
+help
+@create Combat Help=10
+@lock Combat Help=*TW_Coder
+&CHELPARMOR Combat Help=Armor made by armorsmiths can be used by players to 
+prot
+ect themselves in combat. As armor absorbs damage, it wears out, and 
+eventually
+falls apart. Armorsmiths can mend worn-out armor. Each piece of armor fits a 
+cer
+tain body part, and only one armor of a given type can be worn on a given 
+body p
+art. Armor commands are:%r%twear <armor>%tPut on a piece of armor%r%tunwear 
+<arm
+or>%tRemove a piece of armor%rAll armors are objects owned by the combat 
+master.
+&CHELPWEAPONS Combat Help=Weapons forged by weaponsmiths can be used by 
+players
+to improve their chances of striking and the damage they do in combat (see 
+chelp
+commands for attack commands by weapon type). The following commands support 
+we
+apons:%r%twield <weapon>%tWield a weapon%r%tunwield%t%tStop wielding your 
+wielde
+d weapon.%rAll weapons are objects owned by the combat master.
+&CHELPUNARMOR Combat Help=The 'unarmor <obj#>' command removes the object 
+from t
+he list of combat armor. It is used to correct corruption in the armor list.
+&CHELPUNWEAP Combat Help=The 'unweap <obj#>' command removes the object from 
+the
+list of combat weapons. It is used to correct corruption in the weapon list.
+&CHELPCLEAR Combat Help=The clear command has only one form right 
+now:%r%tclear
+attacks%tClear the attacks log%rThis is a good idea now and then, since if 
+it ge
+ts too large, it won't keep logging.
+&CHELPLIST Combat Help=The list command accesses various combat lists and 
+logs:%
+r%tlist heals%tList healing players%r%tlist weapons%tList combat 
+weapons%r%tlist
+armor%tList combat armor%r%tlist attacks%tList the attack log%rThe list 
+weapons
+and list armor commands are useful for looking for corruption in the 
+weapon/arm
+or lists, and more than one combat cheat has been revealed by inspection of 
+the
+attack log. :)
+&CHELPADJUST Combat Help=The adjust command is used to modify a player's 
+combat
+attribs. Syntax:%r%tadjust <player>/<attrib>=<new value>%rThe attrib must be 
+one
+of: [ucstr(xget(v(judgeobj),attribs))]. Judges should remember to adjust 
+both t
+he current and max levels of attribs as appropriate.
+&CHELPCOMSTAT Combat Help=The comstat command gives judges control over the 
+stat
+e of the combat system:%r%tcomstat on%t%tEnable combat for all 
+players%r%tcomsta
+t restrict%tRestrict combat commands to judges%r%tcomstat off%t%tHALT the 
+combat
+system%rThese commands affect the logging of combat activity:%r%tcomstat 
+log%t%
+tEnable combat logging%r%tcomstat nolog%t%tDisable combat logging%rCalling 
+'coms
+tat' without parameters returns the current state of the system.
+&CHELPDEFENSE Combat Help=If you are attacked, you will be given a chance to 
+def
+end yourself. You can:%r%tdodge <attacker>%tAttempt to evade the 
+attack%r%tparry
+<attacker>%tUse your weapon to deflect the attack%r%tblock <attacker>%tUse 
+your
+weapon to block the blow.%rIf you take no action within 3 seconds of the 
+attack
+, you will dodge by default. Be aware that different defenses may affect the 
+res
+ult of the attack.
+&CHELPATTACK Combat Help=Attack commands:%r%tpunch <player>%tHit them with 
+your
+hand%r%tkick <player>%tKick them%r%tlunge <player>%tAttack with a pointed 
+weapon
+%r%tslash <player>%tAttack with an edged weapon%r%tbash <player>%tAttack 
+with a
+blunt weapon%rAfter each attack, the victim gets a chance to select a 
+defense. T
+his makes the combat system both slower than attack-oriented systems and 
+more in
+teresting. :)
+&CHELPATTRIBS Combat Help=All players have 3 combat attributes which 
+represent t
+heir current status:%r%tStrength%tA combination of strength and 
+hardiness%r%tAgi
+lity%t%tSpeed and finesse in movement%r%tHealth%t%tA measure of your 
+condition.
+0 health is dead.%rThe 'status' command shows the player's current and 
+maximum v
+alues for these attributes. Attributes heal naturally over time to reach 
+maximum
+.
+&CHELPSTATUS Combat Help=The 'status' command shows your current attribute 
+level
+s, wielded weapon, and worn armor.%r%rJudges can use 'status <player>' to 
+view a
+ny player's status.
+&PLAYERTOPICS Combat Help=setcombat attribs status attack defense weapons 
+armor
+&DO_HELP Combat Help=$chelp *:@switch/first 
+1=[and(member(v(judgetopics),lcstr(v
+(0))),ufun(hasprivs,v(#)))], {@pemit 
+%#=[UCSTR(v(0))]%r[eval(me,strcat(chelp,v(0
+)))]}, [sign(member(v(playertopics),lcstr(v(0))))], {@pemit 
+%#=[UCSTR(v(0))]%r[e
+val(me,strcat(chelp,v(0)))]}, {@pemit %#=There's no chelp on topic '%0'. 
+Type 'c
+help' for a list of topics.}
+&JUDGETOPICS Combat Help=comstat status adjust list clear unweap unarmor
+@Desc Combat Help=NCS v1.0 Help Object for master room.
+&HELPLIST Combat Help=$chelp:@pemit %#=Combat help is available on the 
+following
+topics:%r[v(playertopics)]; @switch ufun(hasprivs,v(#))=1,{@pemit %#=Judge 
+Comb
+at help is available on the following topics:%r[v(judgetopics)]}
+&JUDGEOBJ Combat Help=#3333
+&HASPRIVS Combat Help=[elock(v(judgeobj)/use,v(0))]
+&CHELPSETCOMBAT Combat Help=All players must be set combat before they can 
+fight
+and/or take injury.%rSee your local administrator to be set combat ready. 
+Read
+and understand all%rother chelp topics first.
+@set Combat Help=CONTROL_OK
+
+
+pwf
+@create Parent Weapon Forge PWF=10
+@lock Parent Weapon Forge PWF=*TW_Coder
+&FUNCTIONOBJ Parent Weapon Forge PWF=Combat Functions
+&PAID Parent Weapon Forge PWF=no
+@Apay Parent Weapon Forge PWF=&paid me=yes
+&RESET Parent Weapon Forge PWF=$reset forge: &paid me=no
+&TYPECOST Parent Weapon Forge 
+PWF=[add(add(switch(strmatch(v(type),*blunt*),1,di
+v(v(weight),2),0),switch(strmatch(v(type),*point*),1,10,0)),add(switch(strmatch(
+v(type),*edge*),1,v(length),0),switch(strmatch(v(type),*thrown*),1,div(add(v(len
+gth),v(weight)),2),0)))]
+&WEIGHT Parent Weapon Forge PWF=50
+&DO_WEIGHT2 Parent Weapon Forge PWF=$weight *:@wait me={@switch %0=<1, 
+{@pemit %
+#=Why would anyone want a weapon that weighs so little?}, >50, {@pemit 
+%#=Kinda
+heavy, don't you think?}, {&paid me=no; &weight me=%0; &mcost 
+me=[u(pricefun)];
+@pemit %#=Weight set to: %0}; @notify me}
+&DO_WEIGHT1 Parent Weapon Forge PWF=$weight: @pemit %#=To set a weapon's 
+weight,
+use 'weight <weight>', where <weight> is in pounds.
+&LENGTH Parent Weapon Forge PWF=120
+&DO_LENGTH2 Parent Weapon Forge PWF=$length *: @wait me={@switch %0=<1, 
+{@pemit
+%#=Why would anyone want a weapon that small?}, >120, {@pemit %#=Yeah, 
+right.},
+{&length me=%0; &mcost me=[u(pricefun)]; @pemit %#=Length set to: %0}; 
+@notify m
+e}
+&DO_LENGTH1 Parent Weapon Forge PWF=$length : @pemit %#=To set a weapon's 
+length
+, use 'length <length>', where <length> is length in inches.
+@Cost Parent Weapon Forge PWF=1056
+&DO_TYPE1 Parent Weapon Forge PWF=$type: @pemit %#=To set a weapon's type, 
+use '
+type <type>', where <type> is one of: [v(types)]. Weapons can have multiple 
+type
+s (for example, knives might be point edge thrown), but each type adds to 
+the co
+st of the weapon. To remove a type, use 'type !<type>'.
+&DO_TYPE2 Parent Weapon Forge PWF=$type *: @wait me={@switch/first 
+1=[and(match(
+v(0),!*),member(v(types),after(v(0),!)))], {&type 
+me=[remove(v(type),after(v(0),
+!))]; &paid me=no; @pemit %#=Type is now set to: [v(type)]}, 
+[not(not(member(v(t
+ypes),v(0))))], {&type me=[remove(v(type),v(0))] [v(0)]; &paid me=no; @pemit 
+%#=
+Type is now set to: [v(type)]}, {@pemit %#=That is not a valid type. Use one 
+of:
+[v(types)]}; &mcost me=[u(pricefun)]; @notify me}
+&TYPE Parent Weapon Forge PWF=point blunt edge
+&PRICE Parent Weapon Forge PWF=$price:&Mmcost me=[u(pricefun)]; @pemit 
+%#=Weapon
+
+type: [v(type)]%tLength: [v(length)]%tWeight: [v(weight)]%rPrice for this 
+weapo
+n: [v(mcost)]
+&PRICEFUN Parent Weapon Forge 
+PWF=mul(25,[add(add(v(weight),div(v(length),2)),u(
+typemcost))])
+&TYPES Parent Weapon Forge PWF=blunt point edge
+@Desc Parent Weapon Forge PWF=Forging a weapon:%r1. Set the forge to the 
+proper
+'type', 'length' and 'weight'.%r2. Type 'price' to get the weapon price. Pay 
+the
+forge.%r3. Type 'forge weapon name.'%R%RReady made weapons:%R1)make axe - 
+Dwarv
+en Battle Axe - Cost is 20 gold.%R2)make dagger - Dwarven Dagger - Cost is 5 
+gol
+d.%R3)make mace - Mace - Cost is 15 gold.%r
+&MPAY Parent Weapon Forge PWF=Thank you. You may now forge the weapon.
+&MAPAY Parent Weapon Forge PWF=&paid me=yes
+&MMCOST Parent Weapon Forge PWF=2750
+&MCOST Parent Weapon Forge PWF=2750
+&MONEY Parent Weapon Forge PWF=30126
+&TEMP Parent Weapon Forge PWF=#-1
+&XFOR Parent Weapon Forge PWF=$forge *:@switch/first 0=[match(v(paid),yes)], 
+{@p
+emit %#=You have to pay me first.;@notify me},{@create %0;@set %0=SAFE;&len 
+%0=v
+(length); &wgt %0=v(weight);&type %0=v(type);@set %0=weapon;&paid me=no;@set 
+%0=
+blind;@fo me=drop %0}
+&AXEFOR Parent Weapon Forge PWF=$make axe:&mcost me=2000;@switch/first 
+0=[match(
+v(paid),yes)], {@pemit %#=Cost is 20 Gold.;@notify me},{@create Battle 
+Axe;@set
+Battle Axe=SAFE;&len Battle Axe=48; &wgt Battle Axe=60;&type Battle 
+Axe=blunt po
+int edge;@set Battle Axe=weapon;@parent Battle Axe=#3710;&paid me=no;@set 
+Battle
+Axe=blind;@fo me=drop Battle Axe}
+&SET Parent Weapon Forge PWF=trace
+&XPRICEFUN Parent Weapon Forge 
+PWF=add(1000,[add(add(v(weight),div(v(length),2))
+,u(typemcost))])
+&PAYOLA Parent Weapon Forge PWF=$payola:$give %#=[v(money)]
+&SHIELDFOR Parent Weapon Forge PWF=$make shield:&mcost me=2000;@switch/first 
+0=[
+match(v(paid),yes)], {@pemit %#=Cost is 20 Gold.;@notify me},{@create Iron 
+Shiel
+d;@set Iron Shield=SAFE;&material Iron Shield=plate; &type Iron 
+Shield=shield;&s
+tr Iron Shield=100;@set Iron Shield=armor;;&paid me=no;@set Iron 
+Shield=blind;@f
+o me=drop Iron Shield}
+&DAGFOR Parent Weapon Forge PWF=$make dagger:&mcost me=500;@switch/first 
+0=[matc
+h(v(paid),yes)], {@pemit %#=Cost is 5 Gold.;@notify me},{@create Dagger;@set 
+Dag
+ger=SAFE;&len Dagger=15; &wgt Dagger=10;&type Dagger=point edge;@set 
+Dagger=weap
+on;@parent Dagger=#9;&paid me=no;@set Dagger=blind;@fo me=drop Dagger}
+@Adesc Parent Weapon Forge PWF=@wait 1=@pemit/si %#=To change weapon name 
+type +
+eqset <oldname>=<newname>.
+&MACEFOR Parent Weapon Forge PWF=$make mace:&mcost me=1500;@switch/first 
+0=[matc
+h(v(paid),yes)], {@pemit %#=Cost is 15 Gold.;@notify me},{@create Mace;@set 
+Mace
+=SAFE;&len Mace=20; &wgt Mace=40;&str Mace=40;&type Mace=blunt point;@set 
+Mace=w
+eapon;@parent Mace=#11;&paid me=no;@set Mace=blind;@set mace=opaque;;@elock 
+mace
+=me;@fo me=drop Mace}
+@set Parent Weapon Forge PWF=PARENT_OK
+@set Parent Weapon Forge PWF=HALTED
+@set Parent Weapon Forge PWF=CONTROL_OK
+
+
+
+
+
+

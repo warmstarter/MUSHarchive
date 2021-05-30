@@ -1,0 +1,13 @@
+@create COMMANDS: GLOBAL: ECON
+@link COMMANDS: GLOBAL: ECON = #2
+@lock/Basic COMMANDS: GLOBAL: ECON=#58
+@set COMMANDS: GLOBAL: ECON = WIZARD
+&VERSION COMMANDS: GLOBAL: ECON=2.1
+&PAY_CMD COMMANDS: GLOBAL: ECON=$pay *=*:[switch([strmatch([loc(%#)],[loc(*%0)])][hastype(*%0,player)][lte(%1,[get(%#/money)])],110,{[pemit(%#,You do not have that much money.)]},101,{[pemit(%#,That is not a player.)]},011,{[pemit(%#,You must be in the same location as another player to exchange money.)]},000,{[pemit(%#,Error: Player does not exist.)]},100,{[pemit(%#,That is not a player.)]},010,{[pemit(%#,You must be in the same location as another player to exchange money.)]},111,{[pemit(%#,You pay [name(*%0)] [ansi(h,%1)] credits.)][pemit(*%0,%n pays you [ansi(h,%1)] credits.)][set(%#,money:[sub([get(%#/money)],%1)])][set(*%0,money:[add([get(*%0/money)],%1)])]})]
+&MONEY_CMD COMMANDS: GLOBAL: ECON=$money:[pemit(%#,You have [ansi(h,[get(%#/money)])] credits.)]
+@AMOVE COMMANDS: GLOBAL: ECON=@switch loc(me)=home(me),,home
+@set COMMANDS: GLOBAL: ECON/AMOVE=no_command
+&CREDITS COMMANDS: GLOBAL: ECON=Dave@GalacticMUSH (davemilford@home.com)
+@set COMMANDS: GLOBAL: ECON/CREDITS=no_command
+&CASH_CMD COMMANDS: GLOBAL: ECON=$cash:[pemit(%#,You have [ansi(h,[get(%#/money)])] credits.)]
+&CREDITS_CMD COMMANDS: GLOBAL: ECON=$credits:[pemit(%#,You have [ansi(h,[get(%#/money)])] credits.)]

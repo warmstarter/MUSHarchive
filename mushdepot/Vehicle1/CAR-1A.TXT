@@ -1,0 +1,51 @@
+@create PARENT: Master Car
+@lock PARENT: Master Car==*[owner(me)]
+&LOCK PARENT: Master Car=$lock car:@switch [v(cl)]=1,{@pemit %#=The [name(me)]'s doors are already locked.},{@pemit/contents me=%N locks the [name(me)]'s doors.;@emit %N locks the doors to the [name(me)].;@lock me=#0;@set me=!Enter_Ok;&cl me=1}
+&CL PARENT: Master Car=1
+&UNLOCK PARENT: Master Car=$unlock car:@switch [v(cl)]=0,{@pemit %#=The [name(me)]'s doors are already unlocked.},{@pemit/contents me=%N unlocks the [name(me)]'s doors.;@emit %N unlocks the doors to the [name(me)].;@unlock me;@set me=Enter_ok;&cl me=0}
+&START_ENGINE PARENT: Master Car=$start engine:@switch [v(engine)]=1,{@pemit %#=The [name(me)]'s engine is already running.},{@pemit/contents me=%N inserts the key into the ignition, and starts the car.;@emit The [name(me)]'s engine stirs to life.;&engine me=1;&speed me=0}
+&STOP_ENGINE PARENT: Master Car=$stop engine:@switch [v(engine)]=0,{@pemit %#=The [name(me)]'s engine is already off.},{@pemit/contents me=%N turns off the motor, and takes the key out of the ignition.;@emit The [name(me)]'s engine comes to a halt.;&engine me=0;&speed me=0}
+&ENGINE PARENT: Master Car=0
+&SPEED PARENT: Master Car=0
+&DRIVE PARENT: Master Car=$drive *:@switch [v(engine)]=0,{@pemit %#=The [name(me)]'s engine is not running.},{@switch [gt([v(speed)],0)]=0,{@pemit %#=The [name(me)] will not drive if you do not push on the gas.},{@pemit/contents me=%N is driving the [name(me)].;@emit The [name(me)] drives away at [v(speed)] MPH.;go %0}}
+&ACCELERATE PARENT: Master Car=$accelerate *:@switch [v(engine)]=0,{@pemit %#=The [name(me)]'s engine is not running.},{&speed me=[add([u(me/speed)],[v(0)])];@pemit/contents me=%N presses down on the gas pedal and the [name(me)] speeds up to [u(me/speed)] MPH.;@emit The [name(me)]'s engine accelerates, and its speed increases to approximately [u(me/speed)] MPH.}
+&DECELERATE PARENT: Master Car=$decelerate *:@switch [v(engine)]=0,{@pemit %#=The [name(me)]'s engine is not running..},{@switch [lte([sub([u(me/speed)],[v(0)])],0)]=1,{@pemit %#=The [name(me)]'s speed can not decrease below 1 MPH.},{&speed me=[sub([u(me/speed)],[v(0)])];@pemit/contents me=%N eases up on the gas pedal and the [name(me)] slows to [u(me/speed)] MPH.;@emit The [name(me)]'s engine decelerates, and its speed decreases to approximately [u(me/speed)] MPH.}}
+&BRAKE PARENT: Master Car=$brake:@switch [v(speed)]=0,{@pemit %#=You push on the brake, but since the [name(me)] was not moving nothing happens.},{@switch [gt([v(speed)],25)]=1,{@pemit/contents me=%N slams on the brakes and the [name(me)] comes to a complete stop.;@emit The [name(me)] skids to a firm stop after having its brakes applied rather hard.;&speed me=0},{@pemit/contents me=%N pushes on the brakes, slowing the [name(me)] down to a complete stop.;@emit The [name(me)] slows down to a complete stop.;&speed me=0}}
+&HORN PARENT: Master Car=$honk:@pemit/contents me=%N slams on the horn.;@emit The [name(me)]'s horn HOOOOOOOOOOOONKS loudly.
+&CD_PLAYER PARENT: Master Car=$cd *:@pemit/contents me=%N inserts a CD into the stereo system, and the latest song by %0 begins to fill your ears.;@emit The [name(me)]'s stereo system begins to loudly pump out the latest song by %0.
+&LIGHTS_ON PARENT: Master Car=$lights on:@switch [v(lights)]=1,{@pemit %#=The [name(me)]'s headlights are already on.},{@pemit/contents me=%N leans forward and switches on the [name(me)]'s headlights.;@emit The [name(me)]'s headlights flick on, illuminating the area.;&lights me=1}
+&LIGHTS_OFF PARENT: Master Car=$lights off:@switch [v(lights)]=0,{@pemit %#=The [name(me)]'s headlights are already off.},{@pemit/contents me=%N leans forward and turns off the [name(me)]'s headlights.;@emit The [name(me)]'s headlights turn off, returning the area to its normal light.;&lights me=0}
+&LIGHTS PARENT: Master Car=0
+&REV_ENGINE PARENT: Master Car=$rev engine:@switch [v(engine)]=0,{@pemit %#=The [name(me)]'s engine is not running.},{@pemit/contents me=%N pushes on the gas, revving up the [name(me)]'s engine.;@emit The [name(me)]'s engine revs loudly VROOOOOOOOOOOOM.}
+&ENG_IDLE PARENT: Master Car=$idle engine:@switch [v(engine)]=0,{@pemit %#=The [name(me)]'s engine is not running.},{@pemit/contents me=%N lets the [name(me)]'s engine settle into a soft idle.;@emit The [name(me)]'s engine idles down into a soft PUUUUUR.}
+&SQUEAL_TIRES PARENT: Master Car=$squeal:@switch [v(engine)]=0,{@pemit %#=The [name(me)]'s engine is not running.},{@pemit/contents me=%N holds down the brake, and floors the car, releasing the brake to squeal the tires.;@emit The [name(me)]'s tires burn rubber, and SQUEAL loudly before regaining traction.}
+&SCAN PARENT: Master Car=$scan:look
+&SCAN_OBJECT PARENT: Master Car=$scan *:look %0
+&WINDOW_UP PARENT: Master Car=$window up:@switch [v(window)]=1,{@pemit %#=The [name(me)]'s windows are already up.},{@pemit/contents me=%N rolls up the [name(me)]'s windows.;@emit The [name(me)]'s windows close.;&window me=1;&listen me=*}
+&WINDOW_DOWN PARENT: Master Car=$window down:@switch [v(window)]=0,{@pemit %#=The [name(me)]'s windows are already down.},{@pemit/contents me=%N rolls down the [name(me)]'s windows.;@emit The [name(me)]'s windows open.;&window me=0;&listen me=*}
+&WINDOW PARENT: Master Car=0
+@Listen PARENT: Master Car=*
+@Infilter PARENT: Master Car={*'s windows close.}
+@Enter PARENT: Master Car=You open the door and get in the [name(me)].
+@Oenter PARENT: Master Car=gets in the [name(me)] beside you.
+@Oxenter PARENT: Master Car=opens the door and gets in the [name(me)].
+@Filter PARENT: Master Car=[* has arrived.},{* has left.}
+@Leave PARENT: Master Car=You get out of the [name(me)] and close the door.
+@Oleave PARENT: Master Car=gets out of the [name(me)] and closes the door.
+@Oxleave PARENT: Master Car=gets out of the [name(me)] and closes the door.
+@Idesc PARENT: Master Car=The interior description of the [name(me)] is that of your normal everyday car. <Please insert your own desc.>
+@Fail PARENT: Master Car=You can't lift the [name(me)], it is too HEAVY.
+@Ofail PARENT: Master Car=tries to lift the [name(me)] and fails.
+@Efail PARENT: Master Car=If you want to steal the [name(me)] page a Judge.
+@Omove PARENT: Master Car=The [name(me)] drives down the street with its engine roaring.
+@Inprefix PARENT: Master Car=From the outside,
+&CAR_TALK PARENT: Master Car=$ct *:@pemit/contents me=%N says %0;@emit From inside the [name(me)] %N says %0
+&HELP PARENT: Master Car=$car help:@pemit %#=[center( CAR HELP ,80,*)]%r%r[space(10)]Lock Car[space(20)]--Locks the car%r[space(10)]Unlock Car[space(18)]--Unlocks the car%r[space(10)]Start Engine[space(16)]--Starts the engine%r[space(10)]Stop Engine[space(17)]--Stops the engine%r[space(10)]Accelerate <speed>[space(10)]--Increases the speed%r[space(10)]Decelerate <speed>[space(10)]--Decreases the speed%r[space(10)]Drive <direction>[space(11)]--Makes the car drive%r[space(10)]Brake[space(23)]--Stops the car%r[space(10)]Honk[space(24)]--Honks the horn%r[space(10)]Rev Engine[space(18)]--Revs the engine%r[space(10)]Idle Engine[space(17)]--Idles the engine%r[space(10)]Lights On[space(19)]--Turns the headlights on%r[space(10)]Lights Off[space(18)]--Turns the headlights off%r%r[space(10)]Car Help2 : For more%r%r[center(*,80,*)]
+&HELP_2 PARENT: Master Car=$car help2:@pemit %#=[center( CAR HELP 2 ,80,*)]%r%r[space(10)]Window Up[space(19)]--Rolls windows up%r[space(10)]Window Down[space(17)]--Rolls windows down%r[space(10)]Ct <message>[space(16)]--Talks to those outside%r[space(10)]Scan[space(24)]--Looks%r[space(10)]Scan <object>[space(15)]--Looks at <object>%r[space(10)]Squeal[space(22)]--Squeals the tires%r[space(10)]CD <group>[space(18)]--Play <group's> CD%r%r[space(10)]NOTE: Code specifics%r[space(15)]If the engine is not running the car will not drive, Also if you do not accelerate the car will not drive. The CT command will let you talk outside of the car. Any comments/suggestion Feel free to mail me. Connor LaRoche.%r%r[center(*,80,*)]
+@Desc PARENT: Master Car=This is a parent car. See <car help> for help details, and be sure to set the child Inherit, Enjoy.
+&CREDITS PARENT: Master Car=CODED By: Connor LaRoche@Veil of Seduction
+@set PARENT: Master Car=VISUAL
+@set PARENT: Master Car=PARENT_OK
+@set PARENT: Master Car=HALT
+@set PARENT: Master Car=TERSE
+@set PARENT: Master Car=SAFE

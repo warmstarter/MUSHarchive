@@ -1,0 +1,31 @@
+@create PARENT: Jacuzzi
+@link PARENT: Jacuzzi=*[owner(me)]
+@lock PARENT: Jacuzzi==*[owner(me)]
+@Desc PARENT: Jacuzzi=The Jacuzzi looks like it could contain about ten people. Along the side of the Jacuzzi is a sponge. There are many air jets within it, as weel as temperature and pressure controls against the wall. You can "PART" or "CLOSE" the curtains to let people outside hear and see what's going on outside. Right now, the curtain is [get(me/curtain)].
+@Listen PARENT: Jacuzzi=*
+@Leave PARENT: Jacuzzi=You step out of the warm water of the Jacuzzi and place your feet on the cold floor outside. You leave feeling invigorating, renewed.
+@Oenter PARENT: Jacuzzi=steps into the Jacuzzi.
+@Oxleave PARENT: Jacuzzi=steps out of the Jacuzzo, dripping wet.
+@Oxenter PARENT: Jacuzzi=steps into the Jacuzzi.
+@Oleave PARENT: Jacuzzi=steps out of the Jacuzzi.
+@Filter PARENT: Jacuzzi={* has arrived.},{* has left.}
+@Infilter PARENT: Jacuzzi={Cleared.},{Set.},{* has arrived.},{* has left.}
+@Enter PARENT: Jacuzzi=You enter the Jacuzzi and sit in the bubbling water. Warm water caresses you all over, soothing and refreshing your tired body.
+@Idesc PARENT: Jacuzzi=The Jacuzzi looks like it could contain about ten people. Along the side of the Jacuzzi is a sponge. There are many air jets within it, as weel as temperature and pressure controls against the wall. You can "PART" or "CLOSE" the curtains to let people outside hear and see what's going on outside. Right now, the curtain is [get(me/curtain)].
+&PART PARENT: Jacuzzi=$part:@switch [u(curtain)]=closed,{@set me=audible;@remit [loc(%#)]=%N parts the curtain that goes around the Jacuzzi so that everyone can see and hear %0 and everyone else inside the Jacuzzi.;@set me=!opaque;&prefix me=From the Jacuzzi,;&curtain me=open;&desc me=[get(me/idesc)]},open,{@pemit %n=Rem? The curtains are already open!}
+&CLOSE PARENT: Jacuzzi=$close:@switch [u(curtain)]=open,{@set me=opaque;&curtain me=closed;&prefix me=;@remit [loc(%#)]=%N closes the curtain around the Jacuzzi so you cannot see %o or anyone else.;@set me=!audible;&desc me=[get(me/out_desc)]},closed,{@pemit %n=The curtains are already closed!}
+&CURTAIN PARENT: Jacuzzi=open
+@Inprefix PARENT: Jacuzzi=From outside the Jacuzzi,
+&OUT_DESC PARENT: Jacuzzi=This is a large Jacuzzi. It is closed from main view by a large curtain that runs around the length.
+@LALIAS PARENT: Jacuzzi=o;ou;out;leave;exit
+@Fail PARENT: Jacuzzi=It is impossible to pick up the Jacuzzi, since It's bolted to the floor!
+&OUT PARENT: Jacuzzi=$outside:look/outside
+&BOOT PARENT: Jacuzzi=$boot *:drop %0
+&KICK PARENT: Jacuzzi=$kick:@dolist lcon([num(me)])=drop ##
+&SPLASH PARENT: Jacuzzi=$splash *:@pemit/contents me=%N splashes water all over %0!
+@Prefix PARENT: Jacuzzi=From the Jacuzzi,
+@set PARENT: Jacuzzi=MONITOR
+@set PARENT: Jacuzzi=AUDIBLE
+@set PARENT: Jacuzzi=ENTER_OK
+@set PARENT: Jacuzzi=SAFE
+@set PARENT: Jacuzzi=INHERIT

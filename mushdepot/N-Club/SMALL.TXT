@@ -1,0 +1,31 @@
+This code will create two Things: a can of Soda, here I have it as Alderan cola
+but you can change that, and a small Droid, The small Droid will act as a
+vending machine but it also does tricks. I used the parent code instead of the 
+clone command because it saves db space. All of this code is written for Tiny 
+MUSH or PennMUSH, the current versions.
+To make a can of Soda type the commands below.
+-
+@create Can of Soda parent
+@desc Can of Soda parent=This is a large can of Alderan cola.
+@charges Can of Soda parent=10
+@av Can of Soda parent=$drink :@pemit%N You take a sip of the Soda.
+@runout Can of Soda parent=@pemit %N=The can is now empty, you crumple it, you may give it back to Small Droid so he can recycle it.;@name me=crumpled can of Soda;@desc me=This is a crumpled plastic can.
+@listen can of Soda parent=* enters Small Droid*
+@ahear can of Soda parent=@emit You can barely hear a screech as Small Droid recycles the can.;@destroy me
+-
+To make a Small Droid vender that does tricks type these commands.
+-
+@create Small Droid
+@link Small Droid=[owner(me)]
+@lock Small Droid==*[num(owner(me))]
+@set Small Droid=OPAQUE
+@set Small Droid=!NO_COMMAND
+@set Small Droid=PUPPET
+@APAY Small Droid=@create Can of Soda;@parent Can of Soda=Can of Soda parent; drop Can of Soda
+@PAY Small Droid=here is your Soda, Sir.
+@COST Small Droid=1
+@DESC Small Droid=This is a small Droid it will do three tricks, jump, talk, and roll over, to make it do these say Small Droid jump or Small Droid talk ect. The Droid is also vending cans of Alderan cola, they cost 1 republic credit apiece.
+@AHEAR Small Droid=@switch %1=jump,: Jumps.,talk,"AWWWWWWWOGA!,roll over,: Rolls over displaying a coin slot and pop dispenser in his side.,
+@LISTEN Small Droid=*"Small Droid*"
+-
+all done!

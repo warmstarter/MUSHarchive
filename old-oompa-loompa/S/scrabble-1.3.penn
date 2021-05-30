@@ -1,0 +1,305 @@
+@@ To install Scrabble upload this file to the MUSH and type:
+@@
+@@   @create Scrabble
+@@   @set Scrabble=!no_command
+@@   @parent Scrabble=ScrabbleParent
+@@   scr/help
+@@
+@@ Have Fun!
+@@
+@create ScrabbleParent
+@create ScrabbleFunctions
+@create ScrabbleCommandSwitches
+@create ScrabbleHelp
+@create NL ScrabbleParent
+@@
+@parent ScrabbleFunctions=ScrabbleHelp
+@parent ScrabbleCommandSwitches=ScrabbleFunctions
+@parent ScrabbleParent=ScrabbleCommandSwitches
+@parent NL ScrabbleParent=ScrabbleParent
+@@
+@set ScrabbleParent=HALT
+@set ScrabbleFunctions=HALT
+@set ScrabbleCommandSwitches=HALT
+@set ScrabbleHelp=HALT
+@set NL ScrabbleParent=HALT
+@@ @@@@@@@@@@@@@@@@@@@@@@@ @@
+@@                         @@
+@@     ScrabbleParent      @@
+@@                         @@
+@@ @@@@@@@@@@@@@@@@@@@@@@@ @@
+&VERSION ScrabbleParent=v1.3
+&TILESET ScrabbleParent=US (Default)
+@XN ScrabbleParent=Scrabble:
+@VN ScrabbleParent=225
+@WR ScrabbleParent=#
+@WM ScrabbleParent=+
+@WB ScrabbleParent==
+@WC ScrabbleParent=-
+@WX ScrabbleParent=.
+@DESCRIBE ScrabbleParent=[ulocal(DESC.BOARD, %#, %#)]
+&DESC.BOARD ScrabbleParent=[pemit(%0, tag(PRE)[ansi(g, center(X A B C D E F G H I J K L M N O X, 77))]%r[center(ulocal(fun.score, 1), 20)]%b [ansi(g, 1)][set(me, vn:0)] [map(drawboard, elements(get(me/board), lnum(1, 105)))])][pemit(%0,[center(ulocal(fun.score, 8), 20)]%b [ansi(g, 8)] [map(drawboard, elements(get(me/board), lnum(106, 225)))]%r[ansi(g, center(X A B C D E F G H I J K L M N O X, 77))]%r[ulocal(fun.tilevalues, %1)][endtag(PRE)])]
+&DRAWBOARD ScrabbleParent=[set(me, vn:[inc(%vn)])][ulocal(color, %0)][if(not(mod(%vn, 15)), %b[ansi(g, ljust(setr(0, div(%vn, 15)), 3))][ulocal(fun.columnhelp, %q0)][ifelse(cor(eq(%q0, 15), eq(%q0, 7)),, %r[center(ulocal(fun.score, inc(%q0)), 20)][ansi(g, rjust(inc(%q0), 3))])])]
+&FUN.SCORE ScrabbleParent=switch(mod(%0, 3), 0, if(member(setr(4, elements(v(players), div(%0, 3))), v(turn)), *)[name(%q4)], 1, v([elements(v(players), div(%0, 3))].score), 2, .)
+&COL.R.1 ScrabbleParent=Type [ulocal(color, Scr[capstr(v(channel))]/help)]
+&COL.R.10 ScrabbleParent=if(words(v(channel)), Channel: [v(channel)])
+&COL.R.12 ScrabbleParent=ulocal(color, 2) 2x Letter
+&COL.R.13 ScrabbleParent=ulocal(color, 3) 3x Letter
+&COL.R.14 ScrabbleParent=ulocal(color, 4) 2x Word %b%b
+&COL.R.15 ScrabbleParent=ulocal(color, 5) 3x Word %b%b
+&COL.R.3 ScrabbleParent=if(words(v(players)), if(setr(0, words(v(tiles))), %q0) Tile[switch(%q0,1,,s)] Left[if(not(%q0), :)])
+&COL.R.5 ScrabbleParent=[setq(0, elements(v(players), 1))][if(cand(not(words(v(tiles))), words(%q0)), [ljust(name(%q0), 12)] [rjust(words(v(%q0.tiles)), 3)])]
+&COL.R.6 ScrabbleParent=[setq(0, elements(v(players), 2))][if(cand(not(words(v(tiles))), words(%q0)), [ljust(name(%q0), 12)] [rjust(words(v(%q0.tiles)), 3)])]
+&COL.R.7 ScrabbleParent=[setq(0, elements(v(players), 3))][if(cand(not(words(v(tiles))), words(%q0)), [ljust(name(%q0), 12)] [rjust(words(v(%q0.tiles)), 3)])]
+&COL.R.8 ScrabbleParent=[setq(0, elements(v(players), 4))][if(cand(not(words(v(tiles))), words(%q0)), [ljust(name(%q0), 12)] [rjust(words(v(%q0.tiles)), 3)])]
+&CMD ScrabbleParent=$scr*/*: @pemit %#=if(ulocal(isforme, secure(%0)), ifelse(cand(not(member(NEW RESTORE HELP INFO TILES TAKEOVER LISTGAMES REMOVEGAME LOAD JOIN V VIEW CHANNEL, ucstr(first(secure(%1))))), not(member(v(players), %#))), %xn You're not playing!, ifelse(cand(cor(member(EXCHANGE PASS, ucstr(first(secure(%1)))), cand(member(DO, ucstr(first(secure(%1)))), gt(words(secure(%1)), 2))), not(member(v(turn), %#))), %xn It is not your turn., udefault(cmd.[first(secure(%1))], %xn Invalid switch.,rest(secure(%1))))))
+&CMD2 ScrabbleParent=$Scrabble: @pemit %#=%xn For help type [ulocal(color, Scrabble/help)]
+&ALLTILES ScrabbleParent=setq(8,)[iter(v(abc), setq(8, %q8 [repeat(##%b, v(##.#))]),%b,)]%q8
+&ORIGINALBOARD ScrabbleParent=5 1 1 2 1 1 1 5 1 1 1 2 1 1 5 1 4 1 1 1 3 1 1 1 3 1 1 1 4 1 1 1 4 1 1 1 2 1 2 1 1 1 4 1 1 2 1 1 4 1 1 1 2 1 1 1 4 1 1 2 1 1 1 1 4 1 1 1 1 1 4 1 1 1 1 1 3 1 1 1 2 1 1 1 2 1 1 1 3 1 1 1 2 1 1 1 2 1 2 1 1 1 2 1 1 5 1 1 2 1 1 1 * 1 1 1 2 1 1 5 1 1 2 1 1 1 2 1 2 1 1 1 2 1 1 1 3 1 1 1 2 1 1 1 2 1 1 1 3 1 1 1 1 1 4 1 1 1 1 1 4 1 1 1 1 2 1 1 4 1 1 1 2 1 1 1 4 1 1 2 1 1 4 1 1 1 2 1 2 1 1 1 4 1 1 1 4 1 1 1 3 1 1 1 3 1 1 1 4 1 5 1 1 2 1 1 1 5 1 1 1 2 1 1 5
+&BOARD ScrabbleParent=5 1 1 2 1 1 1 5 1 1 1 2 1 1 5 1 4 1 1 1 3 1 1 1 3 1 1 1 4 1 1 1 4 1 1 1 2 1 2 1 1 1 4 1 1 2 1 1 4 1 1 1 2 1 1 1 4 1 1 2 1 1 1 1 4 1 1 1 1 1 4 1 1 1 1 1 3 1 1 1 2 1 1 1 2 1 1 1 3 1 1 1 2 1 1 1 2 1 2 1 1 1 2 1 1 5 1 1 2 1 1 1 * 1 1 1 2 1 1 5 1 1 2 1 1 1 2 1 2 1 1 1 2 1 1 1 3 1 1 1 2 1 1 1 2 1 1 1 3 1 1 1 1 1 4 1 1 1 1 1 4 1 1 1 1 2 1 1 4 1 1 1 2 1 1 1 4 1 1 2 1 1 4 1 1 1 2 1 2 1 1 1 4 1 1 1 4 1 1 1 3 1 1 1 3 1 1 1 4 1 5 1 1 2 1 1 1 5 1 1 1 2 1 1 5
+&TURN ScrabbleParent=Scrabble
+&ABC ScrabbleParent=@ A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
+&@.# ScrabbleParent=2
+&@.$ ScrabbleParent=0
+&A.# ScrabbleParent=9
+&A.$ ScrabbleParent=1
+&B.# ScrabbleParent=2
+&B.$ ScrabbleParent=3
+&C.# ScrabbleParent=2
+&C.$ ScrabbleParent=3
+&D.# ScrabbleParent=4
+&D.$ ScrabbleParent=2
+&E.# ScrabbleParent=12
+&E.$ ScrabbleParent=1
+&F.# ScrabbleParent=2
+&F.$ ScrabbleParent=4
+&G.# ScrabbleParent=3
+&G.$ ScrabbleParent=2
+&H.# ScrabbleParent=2
+&H.$ ScrabbleParent=2
+&I.# ScrabbleParent=9
+&I.$ ScrabbleParent=1
+&J.# ScrabbleParent=1
+&J.$ ScrabbleParent=8
+&K.# ScrabbleParent=1
+&K.$ ScrabbleParent=5
+&L.# ScrabbleParent=4
+&L.$ ScrabbleParent=1
+&M.# ScrabbleParent=2
+&M.$ ScrabbleParent=3
+&N.# ScrabbleParent=6
+&N.$ ScrabbleParent=1
+&O.# ScrabbleParent=8
+&O.$ ScrabbleParent=1
+&P.# ScrabbleParent=2
+&P.$ ScrabbleParent=3
+&Q.# ScrabbleParent=1
+&Q.$ ScrabbleParent=10
+&R.# ScrabbleParent=6
+&R.$ ScrabbleParent=1
+&S.# ScrabbleParent=4
+&S.$ ScrabbleParent=1
+&T.# ScrabbleParent=6
+&T.$ ScrabbleParent=1
+&U.# ScrabbleParent=4
+&U.$ ScrabbleParent=1
+&V.# ScrabbleParent=2
+&V.$ ScrabbleParent=4
+&W.# ScrabbleParent=2
+&W.$ ScrabbleParent=4
+&X.# ScrabbleParent=1
+&X.$ ScrabbleParent=8
+&Y.# ScrabbleParent=2
+&Y.$ ScrabbleParent=4
+&Z.# ScrabbleParent=1
+&Z.$ ScrabbleParent=10
+@@ @@@@@@@@@@@@@@@@@@@@@@@ @@
+@@                         @@
+@@    ScrabbleFunctions    @@
+@@                         @@
+@@ @@@@@@@@@@@@@@@@@@@@@@@ @@
+&A ScrabbleFunctions=ulocal(A.Check, inc(%0))
+&A.CHECK ScrabbleFunctions=switch(mod(%0, 15),1,0,%0)
+&COLOR ScrabbleFunctions=switch(%0, 1, %wX, 2, ansi(c, %wC), 3, ansi(b, %wB), 4, ansi(m, %wM), 5, ansi(r, %wR), @, ifelse(hasattr(me, blank.[%vn]), ansi(y, v(blank.[%vn])), @), if(eq(strlen(%0),1),%0, ansi(h, %0)))
+&D ScrabbleFunctions=ulocal(D.Check, add(%0, 15))
+&D.CHECK ScrabbleFunctions=ifelse(gt(%0, 225),0,%0)
+&FILTER.PLAYERS ScrabbleFunctions=[t(member(v(players), before(%0, .)))]
+&FUN.4DIRECTIONS.CHECK ScrabbleFunctions=squish(switch(mod(%0, 15), 1,, %0) [switch(mod(%1, 15), 0,, %1)] [if(lte(%2, 225), %2)] [if(gt(%3, 0), %3)])
+&FUN.CALCSCORE ScrabbleFunctions=[set(me, points:0)][set(me, words:)][set(me, vd:[%0])][ulocal(map.calcscore, first(v(poslist)))][set(me, vd:[ulocal(fun.invdir, %0)])][map(map.calcscore, v(poslist))][set(me, %#.score:[add(v(%#.score), v(points))])]
+&FUN.CALCWORD ScrabbleFunctions=setq(9, 1)[setq(4, %1)][set(me, wo:)][set(me, vv:1)][set(me, vp:0)][iter(lnum(15), [ifelse(cand(%q9, setq(6, %q4)1, setq(4, ulocal(%0, %q4))%q6, not(isnum(elements(v(tmpboard), %q6)))), set(me, vp:[add(%vp, mul(switch(elements(v(board), %q6), 2, 2, 3, 3, 4, set(me, vv:[mul(%vv, 2)])1, 5, set(me, vv:[mul(%vv, 3)])1, 1), v(elements(v(tmpboard), %q6).$)))])[set(me, wo:[%wo][elements(v(tmpboard), %q6)])][if(member(*, elements(v(board), %q6)), set(me, vv:[mul(%vv, 2)]))], setq(9, 0))],%b,)][set(me, points:[add(v(points), mul(%vv, %vp))])][set(me, words:[v(words)]%b[ifelse(eq(strlen(%0), 1), %wo, flip(%wo))])]
+&FUN.CHECKLETTER ScrabbleFunctions=ifelse(member(v(tilelist), %0), [set(me, tilelist:[remove(v(tilelist), %0)])][set(me, %#.tiles:[v(%#.tiles)] %0)][ulocal(fun.letterchecked, g, %0)],[ ulocal(fun.letterchecked, r, %0)])
+&FUN.COLUMNHELP ScrabbleFunctions=center(ulocal(COL.R.[%0]), 20)
+&FUN.EXTRA50 ScrabbleFunctions=[setq(0, words(v(poslist)))][if(eq(%q0, 7), emit(%xn %N played 7 tiles! %S gets 50 extra points.)[set(me, %#.score:[add(v(%#.score), 50)])])][ifelse(words(v(tiles)), [pemit(%#, %xn New tiles: [ulocal(fun.gettiles, %#, %q0)])][ulocal(fun.nextturn)], ifelse(words(v(%#.tiles)), ulocal(fun.nextturn), emit(%xn %N has used %p last tiles! The game ends.%r%r[ulocal(fun.finalscore, .won, setdiff(v(players), %#))][ulocal(fun.showscore)])[ulocal(fun.resetgame)]))]
+&FUN.FINALSCORE ScrabbleFunctions=[setq(0, 0)][iter(v(players), set(me, ##.scorebefore:[v(##.score)]),%b,)][map(map.score%0, %1)][ifelse(eq(words(setunion(setr(1, iter(v(players), v(##.score))), %q1)), 1), set(me, players:[sortby(fun.sortbyscorebefore, v(players))]), set(me, players:[sortby(fun.sortbyscore, v(players))]))]
+&FUN.FIRSTLETTER ScrabbleFunctions=[setq(9, 1)][setq(6, setr(4, %1))][iter(lnum(15), [if(%q9, ifelse(cand(setr(4, ulocal(%0, %q4)), not(isnum(elements(v(tmpboard), %q4)))), setq(6, %q4), setq(9,0)))],%b,)]%q6
+&FUN.FITS ScrabbleFunctions=[words(iter(ulocal(fun.4directions.check, inc(%0), dec(%0), add(%0, 15), sub(%0, 15)), if(not(ulocal(is.free, elements(v(board), ##))), HasAdjacent),%b,))]
+&FUN.GETTILES ScrabbleFunctions=set(me, %0.tiles:[setr(0, elements(v(tiles), lnum(1, %1)))] [v(%0.tiles)])[set(me, tiles:[shuffle(extract(v(tiles), inc(%1), words(v(tiles))))])]%q0
+&FUN.HELP ScrabbleFunctions=%r[center(Scrabble Help [v(version)] ---[if(strlen(v(cmd.%0)), %bSwitch:)] [capstr(%0)]%b, 77,-)]%r[ulocal(help.%0)]%r[repeat(-, 77)]%r
+&FUN.INVDIR ScrabbleFunctions=switch(%0, A, D, D, A)
+&FUN.LETTERCHECKED ScrabbleFunctions=ifelse(andflags(%#, AC), ansi(%0, %1), switch(%0, r, \[%1\], g, %1))
+&FUN.MAKELIST ScrabbleFunctions=%0%b
+&FUN.MATCHLETTER ScrabbleFunctions=cor(member(elements(v(tmpboard), %0), %1), cand(member(elements(v(tmpboard), %0), @), member(v(blank.%0), %1)))
+&FUN.NEXTTURN ScrabbleFunctions=setq(0, element(v(players), v(turn),%b))[set(me, turn:[switch(words(v(players)), %q0, first(v(players)), elements(v(players), inc(%q0)))])][pemit(v(turn), %xn It is now your turn.)][pemit(setdiff(v(players), v(turn)), %xn It is now [name(v(turn))]'s turn.)]
+&FUN.PUTLETTER ScrabbleFunctions=[ifelse(ulocal(is.free, elements(v(tmpboard), %0)),  ifelse(member(v(tilelist), %1), [set(me, tilelist:[remove(v(tilelist), %1)])][set(me, tmpboard:[replace(v(tmpboard), %0, %1)])][set(me, poslist:[setunion(v(poslist), %0)])][if(ulocal(fun.fits, %0), set(me, fit:1))]1  , 0), ifelse(ulocal(fun.matchletter, %0, %1),  set(me, fit:1)1, 0) )][if(member(elements(v(board), %0), *), set(me, fit:1))]
+&FUN.QUIT ScrabbleFunctions=[ifelse(eq(words(v(players)), 1), ulocal(cmd.end, game), if(member(v(turn), %0), ulocal(fun.nextturn))[set(me, players:[setdiff(v(players), %0)])][set(me, tiles:[v(tiles)] [v([%0].tiles)])][wipe(me/[%0].*)])]
+&FUN.RESETGAME ScrabbleFunctions=[iter(v(players), ulocal(desc.board, ##)[pemit(##, %r[tag(SAMP)][center(ulocal(color, G A M E %bO V E R), 77)][endtag(SAMP)]%r)])][wipe(me/undo.*)][wipe(me/blank.*)][wipe(me/#*)][wipe(me/players)][wipe(me/tiles)][set(me, board:[v(originalboard)])]
+&FUN.RESTORE ScrabbleFunctions=[ulocal(fun.resetgame)][iter(lattr(me/sav.*), set(me, [after(##, SAV.)]:[xget(me, ##)]),%b,)]
+&FUN.SAVEGAME ScrabbleFunctions=[wipe(me/SAV.*)][setq(0, setdiff(setdiff(lattr(me), lattr(me/SAVE.*)), lattr(me/SAV.*)))][map(map.savegameattrib, [filter(filter.players, graball(%q0, #*.*))] [graball(%q0, BLANK.*)] [graball(%q0, UNDO.*)] TURN PLAYERS BOARD TILES)]
+&FUN.SAVEUNDOINFO ScrabbleFunctions=iter(BOARD TILES [%#].TILES [%#].SCORE TURN, set(me, undo.##:[v(##)]))
+&FUN.SHOWSCORE ScrabbleFunctions=[tag(PRE)]%r[center(-= Final Score =-, 77)]%r[iter(v(players), center([ulocal(color, sub(6, #@))] [ljust(name(##), 20, .)][rjust(v(##.scorebefore), 10, .)][rjust(v(##.score), 10, .)], 77),%b,%r)]%r[endtag(PRE)]
+&FUN.SORTBYSCORE ScrabbleFunctions=sub(v(%1.score), v(%0.score))
+&FUN.SORTBYSCOREBEFORE ScrabbleFunctions=sub(v(%1.scorebefore), v(%0.scorebefore))
+&FUN.TILEVALUES ScrabbleFunctions=%r[center(iter(v(abc), rjust(##, strlen(v(##.$))))[space(5)][iter(v(%0.tiles), rjust(##, strlen(v(##.$))))], 77)]%r[center(iter(v(abc), v(##.$))[space(5)][iter(v(%0.tiles), v(##.$))], 77)]
+&IS.FREE ScrabbleFunctions=switch(%0, 1, 1, 2, 1, 3, 1, 4, 1, 5, 1, member(%0, *))
+&ISFORME ScrabbleFunctions=cor(member(v(channel), lcstr(%0)), cand(not(hasattr(me, channel)), member(lcstr(%0), abble)))
+&MAP.CALCSCORE ScrabbleFunctions=[ifelse(member(%0, setr(6, ulocal(fun.firstletter, %vd, %0))), [if(not(member(%0, setr(6, ulocal(fun.firstletter, REV.%vd, %0)))), ulocal(fun.calcword, %vd, %q6))], ulocal(fun.calcword, REV.%vd, %q6))]
+&MAP.LISTGAMES ScrabbleFunctions=%r[space(10)]- [iter(after(before(%0, .PLAYERS), SAVE.), name(##),-,%b)]
+&MAP.LOADATTRIB ScrabbleFunctions=set(me, [after(%0, SAVE.[v(savename)].)]:[v(%0)])
+&MAP.SAVEATTRIB ScrabbleFunctions=set(me, save.[v(savename)].%0:[v(%0)])
+&MAP.SAVEGAMEATTRIB ScrabbleFunctions=set(me, sav.%0:[v(%0)])
+&MAP.SCORE ScrabbleFunctions=[iter(v(%0.tiles), set(me, %0.score:[sub(v(%0.score), v(##.$))]))]
+&MAP.SCORE.WON ScrabbleFunctions=[iter(v(%0.tiles), set(me, %0.score:[sub(v(%0.score), v(##.$))])[set(me, %#.score:[add(v(%#.score), v(##.$))])])]
+&POS ScrabbleFunctions=add(%0, mul(dec(%1), 15))
+&REV.A ScrabbleFunctions=ulocal(REV.A.Check, dec(%0))
+&REV.A.CHECK ScrabbleFunctions=switch(mod(%0, 15),0,0,%0)
+&REV.D ScrabbleFunctions=ulocal(REV.D.Check, sub(%0, 15))
+&REV.D.CHECK ScrabbleFunctions=ifelse(lt(%0, 1),0,%0)
+@@ @@@@@@@@@@@@@@@@@@@@@@@ @@
+@@                         @@
+@@ ScrabbleCommandSwitches @@
+@@                         @@
+@@ @@@@@@@@@@@@@@@@@@@@@@@ @@
+&CMD.BLANK ScrabbleCommandSwitches=[setq(0, ucstr(right(%0, 1)))][setq(1, dec(element(v(abc), ucstr(left(%0, 1)), %b)))][setq(2, mid(%0, 1, sub(strlen(%0), 2)))][setq(3, ulocal(pos, %q1, %q2))][ifelse(cand(eq(words(%0), 1), member(setdiff(v(abc), @), %q0), gt(%q1, 0), gt(%q2, 0), lte(%q1, 15), lte(%q2, 15)), ifelse(member(elements(v(board), %q3), @), set(me, blank.[%q3]:[%q0])[emit(%xn %N has changed the blank at [ucstr(left(%0, 1))] %q2 to %q0.)], %xn That is not a blank tile.), %xn Usage: Scrabble/blank <X><Y><Letter>)]
+&CMD.BOOT ScrabbleCommandSwitches=[setq(0, pmatch(%0))][ifelse(member(v(players), %q0), [ulocal(fun.quit, %q0)]%xn You booted [name(%q0)].[oemit(%#, %xn %N booted [name(%q0)])], %xn %0 is not playing.)]
+&CMD.CHANNEL ScrabbleCommandSwitches=ifelse(member(owner(me), %#), ifelse(words(%0), set(me, channel:[lcstr(%0)])%xn Channel set to: [v(channel)][set(me, xn:Scrabble \[[lcstr(%0)]\]:)],  wipe(me/channel)%xn Channel deleted.[set(me, xn:Scrabble:)]), %xn You must own the board to use this switch.)
+&CMD.DO ScrabbleCommandSwitches=ifelse(eq(words(%0), 1), ulocal(cmd.order, %0),[setq(8,1)][setq(0, trim(foreach(fun.makelist, ucstr(first(%0)))))][setq(9, ucstr(rest(%0)))][setq(1, right(%q9, 1))][setq(2, dec(element(v(abc), left(%q9, 1), %b)))][setq(3, mid(%q9, 1, sub(strlen(%q9), 2)))][setq(4, ulocal(pos, %q2, %q3))][set(me, poslist:)][set(me, fit:0)][set(me, tmpboard:[v(board)])][set(me, tilelist:[v(%#.tiles)])][ifelse(cand(eq(words(%0), 2), member(A D, %q1), gt(%q2, 0), gt(%q3, 0), lte(%q2, 15), lte(%q3, 15)), [iter(%q0, ifelse(ulocal(fun.putletter, %q4, ##), if(cand(gt(words(%q0), #@), not(setr(4, ulocal(%q1, %q4)))), setq(8, 0)), setq(8,0)),%b,)][ifelse(cand(%q8, v(fit), words(v(poslist))), [ulocal(fun.saveundoinfo)][ulocal(fun.calcscore, %q1)][set(me, board:[v(tmpboard)])][set(me, %#.tiles:[v(tilelist)])][ulocal(fun.extra50)][emit(%xn %N made[iter(v(words), %b##,%b,\,)] starting at %q9 for [v(points)] points.)], %xn I cannot put %0 on the board.)], %xn Invalid input. Type [ulocal(color, Scrabble/help)] for help.)])
+&CMD.END ScrabbleCommandSwitches=ifelse(member(lcstr(%0), game), [emit(%xn %N has ended the game.%r[ulocal(fun.finalscore,, v(players))][ulocal(fun.showscore, Final Score)])] [ulocal(fun.resetgame)], %xn Usage: Scrabble/end game)
+&CMD.EXCHANGE ScrabbleCommandSwitches=ifelse(gte(words(v(tiles)), 7), ifelse(words(%0),setq(0,1)[setq(1, [v(%#.tiles)])][setq(2, setr(6, foreach(fun.makelist, ucstr(%0))))][setq(3, v(tiles))][setq(4, v(tiles))][iter(%q2, ifelse(cand(member(%q1, ##), %q0), setq(1, remove(%q1, ##))[setq(3, insert(%q3, 1, ##))], setq(0, 0)%xn Can't find ##!%r),%b,)][if(%q0, ifelse(gte(words(v(tiles)), words(%q6)), %xn You exchange them for: [revwords(iter(%q6, setr(9, first(shuffle(%q4)))[setq(4, remove(%q4, %q9))][setq(3, remove(%q3, %q9))][setq(1, insert(%q1, 1, %q9))],%b,%b))][set(me, %#.tiles:[%q1])][set(me, tiles:[shuffle(%q3)])][wipe(me/undo.*)][ulocal(fun.nextturn)][emit(%xn %N exchanged [words(%q6)] tiles.)], %xn I only have [words(v(tiles))] tiles left!))], %xn Exchange which tiles?), %xn You cannot exchange tiles if there are less than 7 tiles in the bag.)
+&CMD.HELP ScrabbleCommandSwitches=ifelse(cand(words(%0), words(setr(0, grab(v(helplist), lcstr(%0)*)))), ulocal(fun.help, %q0), ulocal(fun.help, index))
+&CMD.JOIN ScrabbleCommandSwitches=%xn [switch(1, not(words(v(players))), No game is running. See: Scrabble/Help New, t(member(v(players), %#)), You are already playing in this game., gte(words(v(players)), 4), %xn The game is full., You join the game.[oemit(%#, %xn %N joins the game.)][set(me, players:[v(players)] %#)][ulocal(fun.gettiles, %#, 7)][set(me, %#.score:0)])]
+&CMD.LISTGAMES ScrabbleCommandSwitches=%xn List of saved games: [ifelse(words(setr(0, map(map.listgames, lattr(me/SAVE.*.PLAYERS)))), %q0, None.)]
+&CMD.LOAD ScrabbleCommandSwitches=[set(me, savename:[sort(iter(%0, pmatch(##),%b,-), -)])][ifelse(hasattr(me, SAVE.[v(savename)].PLAYERS), map(map.loadattrib, lattr(me/SAVE.[v(savename)].*))[emit(%xn %N has loaded the game with[iter(v(savename), %b[name(##)],-,\,)].)], %xn No such game saved.)]
+&CMD.NEW ScrabbleCommandSwitches=ulocal(fun.savegame)[setq(0, %#)][set(me, tiles:[shuffle(ulocal(alltiles))])][wipe(me/undo.*)][wipe(me/blank.*)][wipe(me/#*)][set(me, board:[v(originalboard)])][squish(iter(%0, setq(1, pmatch(##))[if(%q1, setq(0, setunion(%q1, %q0)))],%b,))][ifelse(lte(words(%q0), 4), [set(me, players:[sort(%q0)])][set(me, turn:[first(shuffle(%q0))])][iter(%q0, pemit(me, ulocal(fun.gettiles, ##, 7))[set(me, ##.score:0)],%b,)][emit(%xn New game started with[iter(%q0, %b[name(##)],%b,\,)].)][emit(%xn Type Scrabble/restore to restore the old game.)], %xn Too many players.)]
+&CMD.NEW.BACKUP ScrabbleCommandSwitches=ulocal(fun.savegame)[setq(0, %#)][set(me, tiles:[shuffle(ulocal(alltiles))])][wipe(me/undo.*)][wipe(me/blank.*)][wipe(me/#*)][set(me, board:[v(originalboard)])][squish(iter(%0, setq(1, locate(me, ##, Pn))[if(%q1, setq(0, setunion(%q1, %q0)))],%b,))][ifelse(lte(words(%q0), 4), [set(me, players:[sort(%q0)])][set(me, turn:[first(shuffle(%q0))])][iter(%q0, pemit(me, ulocal(fun.gettiles, ##, 7))[set(me, ##.score:0)],%b,)][emit(%xn New game started with[iter(%q0, %b[name(##)],%b,\,)].)][emit(%xn Type Scrabble/restore to restore the old game.)], %xn Too many players.)]
+&CMD.ORDER ScrabbleCommandSwitches=%xn New order: [squish([set(me, tilelist:[v(%#.tiles)])][set(me, %#.tiles:)][map(fun.checkletter, squish(foreach(fun.makelist, ucstr(%0))))])] [v(tilelist)][set(me, %#.tiles:[squish([v(%#.tiles)] [v(tilelist)])])]
+&CMD.PASS ScrabbleCommandSwitches=[wipe(me/undo.*)][ulocal(fun.nextturn)][emit(%xn %N passes %p turn to [name(v(turn))].)]
+&CMD.QUIT ScrabbleCommandSwitches=[ulocal(fun.quit, %#)]%xn You quit the game.[oemit(%#, %xn %N quit the game.)]
+&CMD.REMOVEGAME ScrabbleCommandSwitches=[set(me, savename:[sort(iter(%0, pmatch(##),%b,-), -)])][ifelse(hasattr(me, SAVE.[v(savename)].PLAYERS), wipe(me/SAVE.[v(savename)].*)%xn The game with[iter(v(savename), %b[name(##)],-,\,)] has been deleted., %xn No such game saved.)]
+&CMD.RESTORE ScrabbleCommandSwitches=[ulocal(fun.restore)]%xn Game restored.
+&CMD.SAVE ScrabbleCommandSwitches=setq(0, setdiff(setdiff(lattr(me), lattr(me/SAVE.*)), lattr(me/SAV.*)))[set(me, savename:[iter(sort(v(players)),##,%b,-)])][map(map.saveattrib, [graball(%q0, *.SCORE)] [graball(%q0, *.TILES)] [graball(%q0, BLANK.*)] [graball(%q0, UNDO.*)] TURN PLAYERS BOARD TILES)][emit(%xn Game saved. Reload it with: Scrabble/load [iter(v(savename), name(##),-,%b)])]
+&CMD.SCORE ScrabbleCommandSwitches=%r[ljust(Player:,8)][iter(setr(0,lattr(me/#*.score)),[center([if(strmatch(before(##,.),v(turn)),*)][name(before(##,.))],16)])]%r[ljust(Idle:,8)][iter(%q0,center(first(timestring(idle(before(##,.)))),16))]%r[ljust(Score:,8)][iter(%q0,center(v(##),16))]%r
+&CMD.TAKEOVER ScrabbleCommandSwitches=ifelse(cand(setr(0, pmatch(%0)), member(v(players), %q0)), ifelse(member(v(players), %#), %xn You are already playing., iter(lattr(me/%q0.*), set(me, %#.[after(##, %q0.)]:[v(##)])[wipe(me/[##])],%b,)[setq(1, element(v(players), %q0,%b))][set(me, players:[remove(insert(v(players), %q1, %#), %q0)])][if(member(v(turn), %q0), set(me, turn:%#))][emit(%xn %N takes over [name(%q0)]'s place.)][pemit(%q0, %xn %N has taken over your place.)]), %xn %0 does not play in this game.)
+&CMD.UNDO ScrabbleCommandSwitches=[ifelse(hasattr(me, undo.turn), iter(BOARD TILES [v(undo.turn)].TILES [v(undo.turn)].SCORE, set(me, ##:[v(undo.##)]))[set(me, TILES:[shuffle(v(TILES))])][emit(%xn %N has undone [name(v(undo.turn))]'s turn!)][wipe(me/undo.*)], %xn Nothing to undo.)]
+&CMD.V ScrabbleCommandSwitches=ulocal(cmd.view, %0)
+&CMD.VIEW ScrabbleCommandSwitches=[ifelse(member(v(players), %#), switch(lcstr(%0), on, wipe(me/%#.noview)%xn Viewing on., off, set(me, %#.noview:1)%xn Viewing off., ulocal(desc)), setq(0, pmatch(%0))[ifelse(cand(%q0, member(v(players), %q0), not(hasattr(me, %q0.noview))), ulocal(desc.board, %#, %q0), %xn No such player or player does not allow watching.)])]
+@@ @@@@@@@@@@@@@@@@@@@@@@@ @@
+@@                         @@
+@@      ScrabbleHelp       @@
+@@                         @@
+@@ @@@@@@@@@@@@@@@@@@@@@@@ @@
+&HELP.# ScrabbleHelp=iter(v(abc), rjust(##, 2))%r[iter(v(abc), rjust(v(##.#), 2))]
+&HELP.BLANK ScrabbleHelp=If one of the tiles on the board is blank you can change the letter it represents by using this switch. The letter will be yellow.%rFor example: %r%r[ulocal(color, Scrabble/blank H5F)] changes the blank tile on position H5 to the letter F
+&HELP.BOOT ScrabbleHelp=To boot a player from the game type [ulocal(color, Scrabble/boot <player>)]. If you boot the last person in the game (yourself), the game ends and you will be shown your final score.%r%rSee also: Quit, End
+&HELP.CHANGES ScrabbleHelp=v1.3 Released on 22 October 2000%R%RBugs Fixed:%R%RThe UNDO switch now shuffles the bag. Suggested by Trispis.%R%RYou cannot exchange tiles if there are less than 7 tiles in the bag. Reported by Vexon.%R%RL has a value of 1 in the US tileset. Reported by Trispis.%R%RThe UNDO switch was not documented.%R%RNew Features:%R%RNew Scrabble/score by Trispis.%R%RUpdated help files.%R%R%Rv1.2 Released on 18 February 1999%R%RBugs Fixed:%R%RThe full 'Scrabble' command was broken. Reported by Raevnos.%RScrabble/view bug. Reported by Trispis.%R%RNew features:%R%RAdded channels and channel switch.%RDutch tile set parentable thing.%R%R%Rv1.1 Released on 16 February 1999%R%RBugs fixes:%R%RBug in the the tile bag. (Heh yuck) Reported by Javlin.%R%RNew features:%R%RFunctionality added to Scrabble/view. Idea by Trispis.%R%RTile bag updated thanks to Grinna.%R%R%Rv1.0 Released on 16 February 1999%R%RFirst public release
+&HELP.CHANNEL ScrabbleHelp=The Scrabble-channel system allows you to play more than one game in the same location. You must own the scrabble board to use this switch. %r%rTo set the channel identifier: [ulocal(color, Scrabble/channel <ChannelID>)]%rTo use the board: [ulocal(color, Scr<ChannelID>/<switch>)]
+&HELP.CREDITS ScrabbleHelp=M*U*S*H, February 1999%rMade by Halatir.%rBased on the board by Raevnos. %rHtml-client friendly thanks to Javlin.%rMany layout suggestions from Trispis%rThanks to all the beta-testers: %rTrispis, Javlin, Grinna, and Cecilia (a.k.a. H u m a n %be r r o r)
+&HELP.DO ScrabbleHelp=Use this switch to put a word on the board.%rFor example: %r%r[ulocal(color, Scrabble/do HOI G8A)] plays HOI starting at G8 and going across %r[ulocal(color, Scrabble/do HOI H6D)] plays HOI starting at H6 and going down%r%rSee also: Exchange, Pass
+&HELP.END ScrabbleHelp=When a player uses this switch the game ends. The final score of each player is listed, player with the highest score first. The first number is the score before ending the game. The second number is the score after subtracting the value of the tiles. The scores in the right column are, of course, most significant. But in case of a draw, the scores in the left column decide who wins.%r%rUsage: [ulocal(color, Scrabble/end game)]%r%rSee also: Quit, New
+&HELP.EXCHANGE ScrabbleHelp=Use this switch to exchange tiles. %rFor example: %r%r[ulocal(color, Scrabble/exchange XFE)] exchanges three tiles (X, F and E) for three others.%r%rSee also: Pass, Do
+&HELP.INDEX ScrabbleHelp=[tag(PRE)]This game has only one command: %r%r[center(Scrabble, 77)]%r%rHowever, it has many switches. A switch can be used like this:%r%r[center(Scrabble/<Switch>, 77)]%r%rThe Scrabble command can be shortened to '[ansi(h, Scr)]' for easier use.%rThe rules of the game can be found at http://207.121.191.95/corner/rules.html%r[if(words(v(channel)), This scrabble board uses a 'channel'. For this particular board\, the command is:%r%r[center(Scr[capstr(v(channel))]/<switch>, 77)] )] %r%rTopics & Switches: %r%r[table(iter(v(helplist), capstr(##)), 10, 77)]%r%rFor help on a topic type: Scrabble/help <topic>[endtag(PRE)]
+&HELP.JOIN ScrabbleHelp=To join a game in progress, type: [ulocal(color, Scrabble/join)]%r%rSee also: Quit, New, Takeover
+&HELP.LISTGAMES ScrabbleHelp=This switch lists all the games that have been saved.%r%rSee also: Save, Load, Removegame
+&HELP.LOAD ScrabbleHelp=To load a game, type: [ulocal(color, Scrabble/load <players>)]%r%rSee also: Listgames, Restore
+&HELP.NEW ScrabbleHelp=Start a game with [ulocal(color, Scrabble/new <players>)] and fill in the names of up to 3 other players. (Make sure nobody else is playing) %rThe board is cleared and all tiles go back in the bag. All scores are wiped out.%r%rSee also: Restore, End, Join
+&HELP.ORDER ScrabbleHelp=With this switch you can rearrange your tiles. %rFor example: %r%rYou have tiles X C B E P O G and use this command:%r[ulocal(color, Scrabble/order Beep)]%rNow your tiles are arranged like this: B E P X C O G
+&HELP.PASS ScrabbleHelp=Use this switch to skip a turn. If nobody can make a word, you may end the game with the [ulocal(color, /End)] switch.%r%rSee also: Do, Exchange, End
+&HELP.QUIT ScrabbleHelp=To quit type [ulocal(color, Scrabble/quit)]. If you are the last person in the game, the game ends and you will be shown your final score.%r%rSee also: New, Boot, End
+&HELP.REMOVEGAME ScrabbleHelp=To remove a saved game from the list, type: [ulocal(color, Scrabble/removegame <players>)]%r%rSee also: Listgames
+&HELP.RESTORE ScrabbleHelp=When a new game is started with the NEW switch, the old game is saved. With [ulocal(color, Scrabble/restore)] you can restore the game to its former state.%r%rSee also: Load
+&HELP.SAVE ScrabbleHelp=To save the current game, type: [ulocal(color, Scrabble/save)]%r%rSee also: Listgames
+&HELP.SCORE ScrabbleHelp=Use this switch to add to or subtract from your score. This switch is no longer needed, because the game counts the score automatically. But you never know if there is still a bug in the code. :)
+&HELP.SETUP ScrabbleHelp=This tells you how to setup your own scrabble game.%r%r[space(10)]@create Scrabble%r[space(10)]@parent Scrabble=[parent(me)]%r[space(10)]@set Scrabble=!No_Command%r[space(10)]Scrabble/new%r%rNow your game should be ready for use. %rAs an extra feature, you can change the signs for 2x word, 3x word, etc. To do this, set the following attributes. The defaults are:%r%r[space(10)]@WX Scrabble=. %r[space(10)]@WC Scrabble=- %r[space(10)]@WB Scrabble== %r[space(10)]@WM Scrabble=+ %r[space(10)]@WR Scrabble=#
+&HELP.TAKEOVER ScrabbleHelp=To take the place of one of the players type: [ulocal(color, Scrabble/takeover <player>)]%r%rSee also: New, Boot, Join
+&HELP.TILES ScrabbleHelp=tagwrap(PRE, %rTile Set: [v(tileset)]%r%r[table([iter(lnum(4), Tile $ %b # ,%b,-)][repeat(-, 5)][iter(v(abc), ## %b [rjust(v(##.$), 2)] [rjust(v(##.#), 3)],%b,-)], 17, 77,-)])
+&HELP.UNDO ScrabbleHelp=This switch returns the game to the state it was in before the last tiles were played, except it does not give back the player's turn.
+&HELP.VIEW ScrabbleHelp=To see the board you can simply look at it (look [name(me)]) or use:%r %b [ulocal(color, Scrabble/view)]%rIf you are an observer, you can look at the tiles of the players with:%r %b [ulocal(color, Scrabble/view <player>)]%rIf you are a player, you can turn watching on and off with:%r %b [ulocal(color, Scrabble/view \[on|off\])]%r%rSame as: [ulocal(color, Scr/V)]
+&HELPLIST ScrabbleHelp=# blank boot changes channel credits do end exchange join listgames load new order pass quit removegame restore save score setup takeover tiles undo view
+@@ @@@@@@@@@@@@@@@@@@@@@@@ @@
+@@                         @@
+@@   NL ScrabbleParent     @@
+@@                         @@
+@@ @@@@@@@@@@@@@@@@@@@@@@@ @@
+&ABC NL ScrabbleParent=@ A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
+&@.# NL ScrabbleParent=2
+&@.$ NL ScrabbleParent=0
+&A.# NL ScrabbleParent=6
+&A.$ NL ScrabbleParent=1
+&B.# NL ScrabbleParent=2
+&B.$ NL ScrabbleParent=3
+&C.# NL ScrabbleParent=2
+&C.$ NL ScrabbleParent=3
+&D.# NL ScrabbleParent=5
+&D.$ NL ScrabbleParent=1
+&E.# NL ScrabbleParent=18
+&E.$ NL ScrabbleParent=1
+&F.# NL ScrabbleParent=1
+&F.$ NL ScrabbleParent=5
+&G.# NL ScrabbleParent=4
+&G.$ NL ScrabbleParent=2
+&H.# NL ScrabbleParent=3
+&H.$ NL ScrabbleParent=2
+&I.# NL ScrabbleParent=6
+&I.$ NL ScrabbleParent=1
+&J.# NL ScrabbleParent=2
+&J.$ NL ScrabbleParent=4
+&K.# NL ScrabbleParent=2
+&K.$ NL ScrabbleParent=4
+&L.# NL ScrabbleParent=3
+&L.$ NL ScrabbleParent=2
+&M.# NL ScrabbleParent=2
+&M.$ NL ScrabbleParent=3
+&N.# NL ScrabbleParent=10
+&N.$ NL ScrabbleParent=1
+&O.# NL ScrabbleParent=6
+&O.$ NL ScrabbleParent=1
+&P.# NL ScrabbleParent=2
+&P.$ NL ScrabbleParent=3
+&Q.# NL ScrabbleParent=1
+&Q.$ NL ScrabbleParent=10
+&R.# NL ScrabbleParent=6
+&R.$ NL ScrabbleParent=1
+&S.# NL ScrabbleParent=3
+&S.$ NL ScrabbleParent=1
+&T.# NL ScrabbleParent=6
+&T.$ NL ScrabbleParent=1
+&U.# NL ScrabbleParent=2
+&U.$ NL ScrabbleParent=4
+&V.# NL ScrabbleParent=2
+&V.$ NL ScrabbleParent=4
+&W.# NL ScrabbleParent=2
+&W.$ NL ScrabbleParent=4
+&X.# NL ScrabbleParent=1
+&X.$ NL ScrabbleParent=8
+&Y.# NL ScrabbleParent=1
+&Y.$ NL ScrabbleParent=8
+&Z.# NL ScrabbleParent=2
+&Z.$ NL ScrabbleParent=6
+@@
+@@ Clean it up.
+@@
+@tel ScrabbleFunctions=ScrabbleParent
+@tel ScrabbleCommandSwitches=ScrabbleParent
+@tel ScrabbleHelp=ScrabbleParent
+think %r
+think center(-= Scrabble \([get(ScrabbleParent/version)]\) is now installed =-, 77)%r
+think Parentable thing: [num(ScrabbleParent)]
+think Parent for dutch tile set: [num(NL ScrabbleParent)]
+think %r
+think This tells you how to setup your own scrabble game.%r%r[space(10)]@create Scrabble%r[space(10)]@parent Scrabble=[num(ScrabbleParent)]%r[space(10)]@set Scrabble=!No_Command%r[space(10)]Scrabble/new%r%rNow your game should be ready for use.
+think For more help, create a scrabble game as shown above, and type:
+think %r[space(10)]Scrabble/help%r
+@@
+@tel NL ScrabbleParent=ScrabbleParent
+@@
+@@        -= The End =-
+@@

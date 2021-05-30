@@ -1,0 +1,39 @@
+@@ This is BMUSHCron.  It will allow you to set it to             @@
+@@ trigger certain commands at a given time.  Syntax              @@
+@@ is as follows:  CRON_TIME_<JobName> will contain               @@
+@@ the time the job occurs.  The delimiter is a |.                @@
+@@ Example: &CRON_TIME_BLEE BMUSHCron=Wed|Jul|31|01|00|blee       @@
+@@ This will set the job BLEE to occur at Wed Jul 31st at         @@
+@@ 1:00AM (Not time is in military time).  It will also           @@
+@@ send the last argument (blee) as a variable (%0) to the        @@
+@@ command triggered.  The command is stored as                   @@
+@@ CRON_JOB_<JobName>, IE: CRON_JOB_BLEE.  A variable in          @@
+@@ CRON_TIME_* attribute that is left as a blank is viewed        @@
+@@ to be nonessential.  IE:                                       @@
+@@ CRON_TIME_BLEE BMUSHCron=|||01|00|blee will cause the          @@
+@@ job to be triggered at 1:00AM on any day.  Any time attr       @@
+@@ can be configured as such.                                     @@
+@@ Once BMUSHCron is installed, be sure to @tr BMUSHCron/FUN_LOOP @@
+
+@create BMUSHCron
+@set BMUSHCron = WIZARD
+@set BMUSHCron = NO_COMMAND
+&CMD_CRON_INFO BMUSHCron=$@cron/info *:th if(hasattrval(%!,CRON_TIME_%0),pemit(%#,u(FUN_HEADER,ansi(wh,BMUSHCron Cron Info on: [ucstr(%0)]))%R[ljust(CRON:,12)] [ucstr(%0)][setq(0,v(CRON_TIME_%0))]%R[ljust(Day Name:,12)] [if(setr(1,extract(%q0,1,1,|)),iter(%q1,##,%b,%,%b),ANY)]%R[ljust(Month Name:,12)] [if(setr(1,extract(%q0,2,1,|)),iter(%q1,##,%b,%,%b),ANY)]%R[ljust(Date:,12)] [if(setr(1,extract(%q0,3,1,|)),iter(%q1,##,%b,%,%b),ANY)]%R[ljust(Hour:,12)] [if(setr(1,extract(%q0,4,1,|)),iter(%q1,##,%b,%,%b),ANY)]%R[ljust(Minute:,12)] [if(setr(1,extract(%q0,5,1,|)),iter(%q1,##,%b,%,%b),ANY)]%R[ljust(Variables,12)] [if(setr(1,extract(%q0,6,1,|)),%q1,NONE)]%R%R[ljust(Job:,12)] [if(v(CRON_JOB_%0),v(CRON_JOB_%0),NONE)]%R[u(FUN_FOOTER)]),pemit(%#,u(FUN_CRON_SYSTEM) [ansi(r,No such CRON.)]))
+&CMD_CRON_LIST BMUSHCron=$@cron/list:th pemit(%#,u(FUN_HEADER,ansi(wh,BMUSHCron List),78)%R[table(setinter(iter(lattr(%!/CRON_JOB_*),after(##,CRON_JOB_),%b,%b),iter(lattr(%!/CRON_TIME_*),after(##,CRON_TIME_),%b,%b)),38,78)]%r%rType @CRON/INFO <Cron> for specific information on the Cron.%R[u(FUN_FOOTER)]
+&CMD_CRON_REMOVE BMUSHCron=$@CRON/REMOVE *:th if(hasattrval(%!,CRON_TIME_%0),pemit(%#,u(FUN_CRON_SYSTEM) Removing CRON [ucstr(%0)].)[wipe(%!/CRON_TIME_%0)][wipe(%!/CRON_JOB_%0)],pemit(%#,u(FUN_CRON_SYSTEM) [ansi(r,No such CRON.)]))
+&FUN_CHECK_TIME BMUSHCron=if(cor(match(extract(%0,1,1,|),*%q1*),not(strlen(extract(%0,1,1,|)))),1,0)[if(cor(match(extract(%0,2,1,|),*%q2*),not(strlen(extract(%0,2,1,|)))),1,0)][if(cor(match(extract(%0,3,1,|),*%q3*),not(strlen(extract(%0,3,1,|)))),1,0)][if(cor(match(extract(%0,4,1,|),*%q4*),not(strlen(extract(%0,4,1,|)))),1,0)][if(cor(match(extract(%0,5,1,|),*%q5*),not(strlen(extract(%0,5,1,|)))),1,0)]
+&FUN_CRONCHECK BMUSHCron=@tr %![u(FUN_SET_REGISTERS)]/FUN_DO_JOBS=[setr(8,squish(iter(lattr(%!/CRON_TIME_*),switch(u(FUN_CHECK_TIME,v(##)),11111,##))))]
+&FUN_CRON_SYSTEM BMUSHCron=ansi(wh,@)[ansi(yh,B)][ansi(y,MUSHCron)] [ansi(yh,S)][ansi(y,ystem)]:
+&FUN_DO_JOBS BMUSHCron=@dol %0={@tr %!/CRON_JOB_[after(##,CRON_TIME_)]=[extract(v(##),6,1,|)];@chat MUSHCron-OOC=Executed Job [after(##,CRON_TIME_)]}
+&FUN_FOOTER BMUSHCron=[squish(setq(0,%?)[ansi(bh,[repeat(-,sub(74,strlen(%q0)))]\[)][ansi(wh,%q0)][ansi(bh,\]----)])]
+&FUN_HEADER BMUSHCron=[ansi(bh,----\[)]%0[ansi(bh,\][repeat(-,sub(74,strlen(stripansi(%0))))])]
+&FUN_ISWIZ BMUSHCron=hasflag(%#,WIZ)
+&FUN_LOOP BMUSHCron=@tr me/FUN_CRONCHECK;@wait [v(I_LOOP)]=@TR %!/FUN_LOOP
+&FUN_SET_REGISTERS BMUSHCron=setq(0,time())[setq(1,first(%q0))][setq(2,extract(%q0,2,1))][setq(3,extract(%q0,3,1))][setq(4,extract(extract(%q0,4,1),1,1,:))][setq(5,extract(extract(%q0,4,1),2,1,:))][setq(6,extract(extract(%q0,4,1),3,1,:))][setq(7,extract(%q0,5,1))]
+&I_LOOP BMUSHCron=60
+&VERSION BMUSHCron=v1.0
+&CREDITS BMUSHCron=Coded by Briggs of FreedomMUSH and New Frontiers TrekMUSH. (FreedomMUSH = anargo.qc.ca:4201, New Frontiers = aelfhame.net:4201)
+@QUEUE BMUSHCron=1
+@set BMUSHCron/QUEUE=no_inherit no_clone wizard mortal_dark
+@STARTUP BMUSHCron=@tr %!/FUN_LOOP
+@set BMUSHCron/STARTUP=no_command

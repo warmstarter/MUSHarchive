@@ -1,0 +1,56 @@
+@create PARENT: Turbolift Entrance
+@link PARENT: Turbolift Entrance=#987
+@lock/Basic PARENT: Turbolift Entrance=#2
+@set PARENT: Turbolift Entrance=LINK_OK
+@set PARENT: Turbolift Entrance=VISUAL
+@set PARENT: Turbolift Entrance=NO_COMMAND
+@DESCRIBE PARENT: Turbolift Entrance=A pair of sliding doors leading into a Turbolift.%rThe Turbolift is currently located on Deck [get(v(va)/t_loc)].
+&INSTRUCTIONS PARENT: Turbolift Entrance=Make sure the Turbolift room, exit, and panel have already been completed. Then, @open an entrance to the turbolift room, @parent it to this object, @set it inherit, and @trigger its setup attribute.
+&SETUP PARENT: Turbolift Entrance=@va me=[get(exit(loc(me))/panel)];@vb me=[extract(get(v(va)/l_names),member(get(v(va)/l_dbnums),%!),1)];@lock me=Wewp/1;@pemit %#=Entrance setup.
+&WEWP PARENT: Turbolift Entrance=[and(xget(v(va),lockout),and(xget(v(va),t_status),member(xget(v(va),t_loc),v(vb))))]
+@AFAILURE PARENT: Turbolift Entrance=@switch [and(get(v(va)/lockout),get(v(va)/t_status))]=1, {&t_status [v(va)]=0;@remit [loc(v(va))]=The Turbolift has been recalled to Deck [v(vb)].;@tr [v(va)]/vb=[v(vb)]}
+@OFAILURE PARENT: Turbolift Entrance=[switch(xget(v(va),lockout),1,switch(xget(v(va),t_status),activates the Turbolift recall panel.,glances toward the Turbolift recall panel.),approaches the Turbolift but is held back by a forcefield.)]
+@FAILURE PARENT: Turbolift Entrance=[switch(xget(v(va),lockout),1,switch(xget(v(va),t_status),1,You activate the Turbolift recall panel.,The recall panel shows that the turbolift is currently busy.  You need to wait a few moments before attempting to recall it.),You approach the Turbolift but are held back by a forcefield.)]
+@VB PARENT: Turbolift Entrance=Level #
+@VA PARENT: Turbolift Entrance=DB# of the Turbolift panel
+@ODROP PARENT: Turbolift Entrance=steps into the Turbolift.
+@OSUCCESS PARENT: Turbolift Entrance=enters the Turbolift.
+@SUCCESS PARENT: Turbolift Entrance=You enter the TurboLift.
+
+@create PARENT: Turbolift Exit
+@link PARENT: Turbolift Exit=#987
+@lock/Basic PARENT: Turbolift Exit=#0
+@set PARENT: Turbolift Exit=LINK_OK
+@set PARENT: Turbolift Exit=VISUAL
+@set PARENT: Turbolift Exit=NO_COMMAND
+@DESCRIBE PARENT: Turbolift Exit=A pair of sliding doors leading out of the turbolift.
+&INSTRUCTIONS PARENT: Turbolift Exit=@open the turbolift exit, @set it inherit, @parent it to this object, and set the PANEL attribute to the dbref# of the Turbolift Panel.
+@OFAILURE PARENT: Turbolift Exit=[switch(get(v(panel)/lockout),1,tries to leave the Turbolift but the doors are closed.,tries to leave the Turbolift but is stopped by a forcefield.)]
+&PANEL PARENT: Turbolift Exit=INSERT PANEL DBREF# HERE
+@ODROP PARENT: Turbolift Exit=enters from the turbolift.
+@OSUCCESS PARENT: Turbolift Exit=steps out of the turbolift.
+@SUCCESS PARENT: Turbolift Exit=You exit the Turbolift.
+@FAILURE PARENT: Turbolift Exit=[switch(get(v(panel)/lockout),1,The turbolift doors are closed.,The Turbolift exit is surrounded by a forcefield.)]
+&WOOP PARENT: Turbolift Exit=[and(get(v(panel)/lockout),get(v(panel)/t_status))]
+&T_LOC PARENT: Turbolift Exit=1
+&T_STATUS PARENT: Turbolift Exit=0
+&SETUP PARENT: Turbolift Exit=@lock me=Woop/1;@pemit %#=Exit setup.
+&LOCKOUT PARENT: Turbolift Exit=1
+
+@create PARENT: Turbolift Panel
+@link PARENT: Turbolift Panel=#987
+@lock/Basic PARENT: Turbolift Panel=#0
+@set PARENT: Turbolift Panel=LINK_OK
+@set PARENT: Turbolift Panel=VISUAL
+@set PARENT: Turbolift Panel=NO_COMMAND
+@DESCRIBE PARENT: Turbolift Panel=A Turbolift Panel. Instructions:%r%r%b%b%b%bDeck <#>%t- Instructs the Turbolift to go to that deck.%r%b%b%b%bList Decks%t- Gets a list of valid decks.%r%rThe Turbolift is currently located on Deck [v(t_loc)].
+&GET_NAME PARENT: Turbolift Panel=[switch(get(%0/Name),,name(%0),#$)]
+&INSTRUCTIONS PARENT: Turbolift Panel=@create a Turbolift Panel, @link it to the Turbolift Room, drop it there, @lock the panel to you, @parent the panel to this object, and set the EXIT attribute of the panel to the turbolift exit dbref#. And set the Panel inherit.
+&NOTE PARENT: Turbolift Panel=When it asks for the DBNUMS for levels, it means for the ENTRANCE to the Turbolift, not the room number...
+@VA PARENT: Turbolift Panel=$Deck *:@pemit %#=You say, "Deck %0";@oemit %#=%n says, "Deck %0";@select [v(lockout)]|[t([member(v(L_names),v(0))])]|[v(t_status)]|[t([member(v(t_loc),v(0))])]|[elock([home(extract(v(L_dbnums),member(v(L_names),v(0)),1))]/enter,%#)]=0|?|?|?|?, {@emit Computer says, "The Turbolift is currently under lock out restraints.}, ?|0|?|?|?, {@emit Computer says, "Invalid location choice."}, ?|?|0|?|?, {@emit Computer says, "The Turbolift is currently in use."}, ?|?|?|1|?, {@emit Computer says, "That is the Turbolift's current position."},?|?|?|?|0,{@emit Computer says, "That level is restricted."}, {@emit Computer says, "Command acknowledged.";&t_status me=0;@tr me/vb=%0}
+@VB PARENT: Turbolift Panel=@emit The Turbolift doors close and the Turbolift starts to move.;@remit [home(extract(v(L_dbnums),member(v(L_names),v(t_loc)),1))]=The Turbolift leaves.;@link [v(exit)]=[home(extract(v(L_dbnums),member(v(L_names),%0),1))];@wait 2={@emit The Turbolift arrives at Deck %0.;@remit [home(extract(v(L_dbnums),member(v(L_names),%0),1))]=The Turbolift arrives.;&t_status me=1;&t_loc me=%0}
+@VC PARENT: Turbolift Panel=$List Decks:@pemit %#=Valid decks are:%r[iter(v(L_names),%r[ljust(Deck ##,10)] - [left(u(get_name,home(extract(v(L_dbnums),member(v(L_names),##),1))),200)] [switch([elock([home(extract(v(L_dbnums),member(v(L_names),##),1))]/enter,%#)],1,{},%[RESTRICTED%])])]%r%rType 'Deck <#>' to go to a specific deck.
+&L_DBNUMS PARENT: Turbolift Panel=List of DB#s for levels
+&LOCKOUT PARENT: Turbolift Panel=1
+&EXIT PARENT: Turbolift Panel=INSERT TURBOLIFT EXIT DBREF# HERE
+

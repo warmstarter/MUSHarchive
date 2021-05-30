@@ -1,0 +1,21 @@
+@dig/teleport Residential Room Parent
+@set here = DARK
+@set here = MONITOR
+@VF here=$touch decorate=*|*:@switch [strmatch(get(me/user), %#)]=1, {&colour1 me=%0; &colour2 me=%1; @pemit %#=[ansi(get(me/colour1), Colour changed.)]}, {@pemit %#=[ansi(get(me/colour1), Permission denied.)]}
+@VE here=$touch unlock:@switch [get(me/doorstatus)]=LOCKED, {@lock [get(me/entrance)]=; @lock [get(me/exit)]=; @pemit %#=[ansi(Get(me/colour1), Unlocked.)]; &doorstatus me=UNLOCKED}, {@pemit %#=[ansi(get(me/colour1), You find that the door is already unlocked.)]}
+&EXIT here=#9118
+&ENTRANCE here=#9119
+@VD here=$touch lock:@switch [get(me/doorstatus)]=UNLOCKED, {@lock [get(me/entrance)]=#0; @lock [get(me/exit)]=#0; @pemit %#=[ansi(Get(me/colour1), Locked.)]; &doorstatus me=LOCKED}, {@pemit %#=[ansi(get(me/colour1), You find that the door is already locked.)]}
+@VC here=$touch desc=*:@switch [strmatch(get(me/user), %#)]=1, {&rdesc me=%0; @pemit %#=[ansi(get(me/colour1), Decscription changed.)]}, {@pemit %#=[ansi(get(me/colour1), Permission denied.)]}
+&USER here=#12129
+@VB here=$touch lights:@switch [strmatch(v(lights), on)]=1, {&lights me=off; @pemit %#=[ansi(get(me/colour1), You turn the lights off.)]}, {&lights me=on; @pemit %#=[ansi(get(me/colour1), You turn the lights on.)]}
+&LIGHTS here=on
+@VA here=$touch zmotd:@pemit %#=[ansi([get(me/colour1)], center(Grim Determination MOTD, 79, -))]%r[ansi([get(me/colour2)], stripansi(eval(#10503, gdzmotd)))]%r[ansi([get(me/colour1)], center(-, 79, -))]; @@ To display the GDT ZMOTD.  &gdzmotd is the attribute in which the zmotd is stored.
+&DOORSTATUS here=UNLOCKED
+&COLOUR2 here=ch
+&EXTDESC here=[ansi([get(me/colour2)], table([iter(lexits(me), center(name(##), 39), ,|)],39,78,|, ))]
+&COLOR2 here=ch
+&COLOUR1 here=bh
+&RDESC here=This room is rather spartan.  The only features in it are a bed, a desk and a chair.  There is a window to one side.  Tou can tell by looking around that no one has yet moved in, however, you notice that [name(get(me/user))] is registered for it's use.  Type 'touch help' for help.
+@SUCCESS here=[switch(v(lights), on, {[ansi([get(me/colour2)], stripansi(eval(me, rdesc)))]%r[ansi([get(me/colour2)], A panel by the door reads: )] [ansi(get(me/colour1), [get(me/doorstatus)])]%r[switch(lcon(me),%#,[ansi([get(me/colour1)], The room is empty.)]%r,[ansi([get(me/colour1)],Contents:)][iter(remove(lcon(me),%#), [switch(type(##),PLAYER,%r[ansi([get(me/colour2)], [class(##)] [name(##)] [get_eval(##/[switch(idle(##),-1,ddesc,sdesc)])])],THING,[switch(flags(##),*D*, ,%r[ansi([get(me/colour2)], [name(##)] [get(##/sdesc)])])])])]%r)][ansi([get(me/colour1)], Obvious Exits:)]%r[switch(get(me/extdesc),none,[iter([lexits(me)],  [ansi([get(me/colour2)], [name(##)])], ,%r)], [eval(me, extdesc)])]}, off, [ansi(get(me/colour1), The room is pitch dark.)])]
+@ACONNECT here=@pemit %#=[ansi([get(me/colour1)], center(Grim Determination MOTD, 79, -))]%r[ansi([get(me/colour2)], stripansi(eval(#10503, gdzmotd)))]%r[ansi([get(me/colour1)], center(-, 79, -))]%r[ansi([get(me/colour2)], Type)] [ansi([get(me/colour1)], touch help)] [ansi([get(me/colour2)], for help.)]; @@ To display the GDT ZMOTD.  &gdzmotd is the attribute in which the zmotd is stored.

@@ -1,0 +1,17 @@
+@create portal object
+@link portal object=#2
+@set portal object=OPAQUE
+@set portal object=WIZARD
+@set portal object=SAFE
+@DESCRIBE portal object=Portal Object.
+&DO_CLOSE portal object=@switch get(%1/opened)=1,{&opened %1=0; @lock %1=me&!me; @set %1=!transparent; &opened %4=0; @lock %4=me&!me; @set %4=!transparent; @pemit %0=You close the [name(%1)]; @oemit %0=[name(%0)] closes the [name(%1)].},{@pemit %0=The [name(%1)] is not open.}
+&DO_OPEN portal object=@switch get(%1/opened)=0,{@switch get(%1/lokked)=0,{&opened %1=1; @lock %1= ;@set %1=transparent; &opened %4=1; @lock %4= ;@set %4=transparent; @pemit %0=You open the [name(%1)]; @oemit %0=[name(%0)] opens the [name(%1)].},{@pemit %0=The [name(%1)] is locked.; @oemit %0=[name(%0)] jiggles the handle on the [name(%1)].}},{@pemit %0=The [name(%1)] is not closed.}
+&CLOSE_CMD portal object=$close *:@trigger me/exitt=do_close,%#,%0,0,0
+&EXITT portal object=[setq(9,[locate(%1,%2,en)])];@switch %q9=#-1,{@pemit %1=I don't see that exit here.},#-2,{@pemit %1=I don't know which [%2] you mean!},{@trigger me/%0=%1,%q9,%3,%4,[get(%q9/myother)]}
+&OPEN_CMD portal object=$open *:@trigger me/exitt=do_open,%#,%0,0,0
+&DO_LOCK portal object=@switch get(%1/lokked)=0,{@switch get(%1/opened)=0,{&lokked %1=1; &lokked %4=1; @pemit %0=You lock the [name(%1)]; @oemit %0=[name(%0)] locks the [name(%1)].},{@pemit %0=The [name(%1)] is not closed.}},{@pemit %0=The [name(%1)] is not unlocked.}
+&DO_UNLOCK portal object=@switch get(%1/lokked)=1,{&lokked %1=0; &lokked %4=0; @pemit %0=You unlock the [name(%1)]; @oemit %0=[name(%0)] unlocks the [name(%1)].},{@pemit %0=The [name(%1)] is not locked.}
+&LOCK_CMD portal object=$lock * with *:@trigger me/exitt=do_check_lock,%#,%0,%1,do_lock
+&UNLOCK_CMD portal object=$unlock * with *:@trigger me/exitt=do_check_lock,%#,%0,%1,do_unlock
+&DO_CHECK_LOCK portal object=[setq(8,[locate(%0,%2,i)])];@switch %q8=#-1,{@pemit %0=You dont have a %2.},#-2,{@pemit %0=I don't know which %2 you mean!},{@switch element(get(%1/mykeys),%q8, )=0,{@pemit %0=The [name(%q8)] doesnt fit the lock!; @oemit %0=[name(%0)] tries to jam the [name(%q8)] in the lock of [name(%1)]},{@trigger me/[%3]=%0,%1,0,0,%4}}
+&SETUP_PORT portal object=$setup * * *:@switch get(%0/mykeys)=,{@fo %#={&opened %0=1; &lokked %0=0; @fail %0=The door is closed.; &myother %0=%1; &mykeys %0=%2; &opened %1=1; &lokked %1=0; @fail %1=The door is closed.; &myother %1=%0; &mykeys %1=%2; @pemit %#=Doors Set}},{@pemit %#=Sorry Charlie}

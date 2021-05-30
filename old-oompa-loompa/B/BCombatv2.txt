@@ -1,0 +1,285 @@
+@@ This file is the installation for BCombat v2.4 @@
+@@ A few attributes will need to be set, though they @@
+@@ are rather self explanatory.  FUN_IC may need to be @@
+@@ modified to work with how you detect ICness @@
+@@ Questions can be sent to Briggs @ FreedomMUSH @@
+@@ FreedomMUSH = anargo.qc.ca, port 4201. @@
+@@ Also be sure to download the Combat Clock File as well @@
+
+
+@create BCombat Globals v2.0
+@link BCombat Globals v2.0 = #374
+@lock/Use BCombat Globals v2.0=FUN_ISIC/1
+@set BCombat Globals v2.0 = WIZARD
+&ADMIN BCombat Globals v2.0=[ansi(bh,<)][ansi(wh,Admin)][ansi(bh,>)]
+&CMD_AIM BCombat Globals v2.0=@$aim *:$shoot:th [if(not(combat(%#,,12,1)),pemit(%#,ansi(r,No free moves.)),[if(not(combat(%#,,1,2)),pemit(%#,ansi(r,No valid targets selected.)),[if(not(setr(0,ulocal(#12772/fun_hitloc,%0))),[pemit(%#,ansi(r,That is not a valid body location.%RValid body locations are: head, neck, chest, abdomen, right arm, left arm, right hand, left hand, groin, left leg, right leg, left foot, and right foot.))],[combat(%#,,12,2)][pemit(%#,ansi(y,You set up and prepare to attack [name(xget(%#,C_TARGET))] in the %0.))][combat(%#,[xget(%#,C_TARGET)],17,3,1,%q0,#856)])])])]
+&CMD_DODGE BCombat Globals v2.0=$dodge:th [if([not([combat(%#,,12,1)])],[pemit(%#,[ansi(r,No free moves.)])],[combat(%#,,12,2)][set(%#,is_dodge:1)][set(%#,dodge_mod:5)][pemit(%#,[ansi(y,You prepare to dodge.)])][oemit([loc(%#)]/%#,[ansi(y,[name(%#)] prepares to dodge.)])][set(%#,last_combat:[secs()])])]
+&CMD_EBE BCombat Globals v2.0=$ebe:th [if([not([hasattrval([race(%#)],D_EBE_NAME)])],[pemit(%#,[ansi(r,You don't have any Energy Beam attacks.)])],[if([not([combat(%#,,12,1)])],[pemit(%#,[ansi(r,No free moves.)])],[combat(%#,,12,2)][if([not([combat(%#,,1,2)])],[pemit(%#,[ansi(r,No valid targets selected.)])],[setq(1,[xget(%#,c_target)])][set(%#,is_dodge:0)][wipe(%#/dodge_mod)][if([combat(%#,%q1,2,1)],[setq(0,[combat(%#,%q1,16,1,1,0,0)])][combat(%#,%q1,16,1,2,0,0,%q0)][combat(%#,%q1,4,%q0)],[combat(%#,%q1,16,1,3,0)])])])]
+&CMD_EBP BCombat Globals v2.0=$ebp:th [if([not([hasattrval([race(%#)],D_EBP_NAME)])],[pemit(%#,[ansi(r,You don't have any Physical Projectile attacks.)])],[if([not([combat(%#,,12,1)])],[pemit(%#,[ansi(r,No free moves.)])],[combat(%#,,12,2)][if([not([combat(%#,,1,2)])],[pemit(%#,[ansi(r,No valid targets selected.)])],[setq(1,[xget(%#,c_target)])][set(%#,is_dodge:0)][wipe(%#/dodge_mod)][if([combat(%#,%q1,2,1)],[setq(0,[combat(%#,%q1,16,2,1,0,0)])][combat(%#,%q1,16,2,2,1,0,%q0)][combat(%#,%q1,4,%q0)],[combat(%#,%q1,16,2,3,0)])])])]
+&CMD_EGOA BCombat Globals v2.0=$egoa:th [if([not([hasattrval([race(%#)],D_EGOA_NAME)])],[pemit(%#,[ansi(r,You don't have any EGOA Attacks.)])],[if([not([combat(%#,,12,1)])],[pemit(%#,[ansi(r,No free moves.)])],[combat(%#,,12,2)][if([not([combat(%#,,1,2)])],[pemit(%#,[ansi(r,No valid targets selected.)])],[setq(1,[xget(%#,c_target)])][set(%#,is_dodge:0)][wipe(%#/dodge_mod)][if([combat(%#,%q1,2,1)],[setq(0,[combat(%#,%q1,16,3,1,0,0)])][combat(%#,%q1,16,3,2,1,0,%q0)][combat(%#,%q1,4,%q0)],[combat(%#,%q1,16,3,3,0)])])])]
+&CMD_HEADBUTT BCombat Globals v2.0=$headbutt:th [if([not([combat(%#,,12,1)])],[pemit(%#,[ansi(r,No free moves.)])],[combat(%#,,12,2)][if([not([combat(%#,,1,2)])],[pemit(%#,[ansi(r,No valid targets selected.)])],[setq(1,[xget(%#,c_target)])][set(%#,is_dodge:0)][wipe(%#/dodge_mod)][if([combat(%#,%q1,2,1)],[setq(0,[combat(%#,%q1,3,1,-12,0,0,1)])][combat(%#,%q1,5,%q0,headbutt,0)][combat(%#,%q1,4,%q0)],[combat(%#,%q1,6,headbutt,0)])])])]
+&CMD_HEALTH BCombat Globals v2.0=$health:th [pemit(%#,[ansi(y,You are [u([v(resource)]/fun_health,[xget(%#,d_body)],%#)]%R[round([xget(%#,d_body)],0)]%/[xget([truerace(%#)],d_body)] Body, [round([xget(%#,d_stun)],0)]%/[xget([truerace(%#)],d_stun)] Stun.%R[round([xget(%#,moves)],0)]%/[xget([truerace(%#)],d_speed)] Moves, [round([xget(%#,D_endurance)],0)]%/[xget([truerace(%#)],d_endurance)] Endurance.)])]
+&CMD_INSTAKILL BCombat Globals v2.0=$@instakill *:th if(hasflag(%#,wizard),if(isdbref(setr(0,pmatch(%0))),pemit(%#,ansi(wh,You smite [name(%q0)] with your Godly power!))[pemit(%q0,ansi(wh,name(%#) smites you with [poss(%#)] Godly power!))][combat(%#,%q0,10)],pemit(%#,ansi(rh,No Such Player.))),pemit(%#,ansi(rh,Permission Denied.)))
+&CMD_KAHE BCombat Globals v2.0=$KAHE:th [if([not([hasattrval([race(%#)],D_KAHE_NAME)])],[pemit(%#,[ansi(r,You don't have any Energy Killing Attacks.)])],[if([not([combat(%#,,12,1)])],[pemit(%#,[ansi(r,No free moves.)])],[combat(%#,,12,2)][if([not([combat(%#,,1,2)])],[pemit(%#,[ansi(r,No valid targets selected.)])],[setq(1,[xget(%#,c_target)])][set(%#,is_dodge:0)][wipe(%#/dodge_mod)][if([combat(%#,%q1,2,1)],[setq(0,[combat(%#,%q1,16,4,1,0,0)])][combat(%#,%q1,16,4,2,1,0,%q0)][combat(%#,%q1,4,%q0)],[combat(%#,%q1,16,4,3,0)])])])]
+&CMD_KAHP BCombat Globals v2.0=$KAHP:th [if([not([hasattrval([race(%#)],D_KAHP_NAME)])],[pemit(%#,[ansi(r,You don't have any Physical Killing Attacks.)])],[if([not([combat(%#,,12,1)])],[pemit(%#,[ansi(r,No free moves.)])],[combat(%#,,12,2)][if([not([combat(%#,,1,2)])],[pemit(%#,[ansi(r,No valid targets selected.)])],[setq(1,[xget(%#,c_target)])][set(%#,is_dodge:0)][wipe(%#/dodge_mod)][if([combat(%#,%q1,2,1)],[setq(0,[combat(%#,%q1,16,5,1,0,0)])][combat(%#,%q1,16,5,2,1,0,%q0)][combat(%#,%q1,4,%q0)],[combat(%#,%q1,16,5,3,0)])])])]
+&CMD_KARE BCombat Globals v2.0=$KARE:th [if([not([hasattrval([race(%#)],D_KAHE_NAME)])],[pemit(%#,[ansi(r,You don't have any Ranged Energy Killing Attacks.)])],[if([not([combat(%#,,12,1)])],[pemit(%#,[ansi(r,No free moves.)])],[combat(%#,,12,2)][if([not([combat(%#,,1,2)])],[pemit(%#,[ansi(r,No valid targets selected.)])],[setq(1,[xget(%#,c_target)])][set(%#,is_dodge:0)][wipe(%#/dodge_mod)][if([combat(%#,%q1,2,1)],[setq(0,[combat(%#,%q1,16,6,1,0,0)])][combat(%#,%q1,16,6,2,1,0,%q0)][combat(%#,%q1,4,%q0)],[combat(%#,%q1,16,6,3,0)])])])]
+&CMD_KARP BCombat Globals v2.0=$KARE:th [if([not([hasattrval([race(%#)],D_KAHE_NAME)])],[pemit(%#,[ansi(r,You don't have any Ranged Physical Killing Attacks.)])],[if([not([combat(%#,,12,1)])],[pemit(%#,[ansi(r,No free moves.)])],[combat(%#,,12,2)][if([not([combat(%#,,1,2)])],[pemit(%#,[ansi(r,No valid targets selected.)])],[setq(1,[xget(%#,c_target)])][set(%#,is_dodge:0)][wipe(%#/dodge_mod)][if([combat(%#,%q1,2,1)],[setq(0,[combat(%#,%q1,16,7,1,0,0)])][combat(%#,%q1,16,7,2,1,0,%q0)][combat(%#,%q1,4,%q0)],[combat(%#,%q1,16,7,3,0)])])])]
+&CMD_KICK BCombat Globals v2.0=$kick:th [if([not([combat(%#,,12,1)])],[pemit(%#,[ansi(r,No free moves.)])],[combat(%#,,12,2)][if([not([combat(%#,,1,2)])],[pemit(%#,[ansi(r,No valid targets selected.)])],[setq(1,[xget(%#,c_target)])][set(%#,is_dodge:0)][wipe(%#/dodge_mod)][if([combat(%#,%q1,2,1)],[setq(0,[combat(%#,%q1,3,1,4,0,0)])][combat(%#,%q1,5,%q0,kicks,0)][combat(%#,%q1,4,%q0)],[combat(%#,%q1,6,kick,0)])])])]
+&CMD_LISTCHARACTERISTICS BCombat Globals v2.0=$@listchar*:think [if([not([hasattrval(%#,TRUERACE)])],[pemit(%#,[ansi(r,You've no race.  Sorry.)])],[setq(0,[truerace(%#)])][pemit(%#,[bcenter([ansi(bh,%[)][ansi(wh,[name(%#)]'s Characteristics)][ansi(bh,%])],80,[ansi(bh,-)])]%R[ansi(wh,[ljust(Body:,16)][ljust([xget(%q0,d_body)],15)][ljust(Stun:,16)][ljust([rjust([xget(%q0,d_stun)],3)],15)]Endurance:[rjust([xget(%q0,d_endurance)],8)])]%R[ansi(b,[repeaT(-,80)])]%R[ansi(wh,[ljust(Dexterity:,16)][ljust([lmath(add,[xget(%#,D_DEXTERITY)] [if([hasattrval(%#,armor)],[xget([xget(%#,armor)],D_DEXTERITY)],0)] [xget(%q0,d_dexterity)])],15)][ljust(Strength:,16)][ljust([rjust([lmath(add,[xget(%#,D_Strength)] [if([hasattrval(%#,armor)],[xget([xget(%#,armor)],D_strength)],0)] [xget(%q0,d_strength)])],3)],15)]Intelligence:[rjust([lmath(add,[xget(%#,D_intelligence)] [xget(%q0,d_intelligence)])],5)]%R[ljust(Constitution:,16)][ljust([lmath(add,[xget(%#,D_Constitution)] [if([hasattrval(%#,armor)],[xget([xget(%#,armor)],D_Constitution)],0)] [xget(%q0,d_Constitution)])],15)][ljust(Speed:,16)][rjust([xget(%q0,d_speed)],3)])]%r[repeat([ansi(b,-)],80)]%R%B[ansi(wh,[ljust(Type,10)][ljust(Name,45)][ljust(Mod,20)]Dam)]%R[ansi(b,%b[ljust(----,9)]%b[repeat(-,39)][space(4)][ljust([repeat(-,7)],22)][repeat(-,3)])]%R[ansi(wh,[iter([lattr(%q0/D_*_NAME)],[setq(1,[extract(##,2,1,_)])]%b[ljust(%q1,10)][ljust([xget(%q0,##)],43)][ljust([rjust([first([xget(%q0,D_%q1_MOD)])],3)],4)][ljust([rjust([rest([xget(%q0,D_%q1_MOD)])],3)],18)][rjust([xget(%q0,D_%q1_DAM)],3)],%b,%r)]%R[ansi(b,[repeat(-,80)])]%R[ansi(wh,[ljust(Physical:,16)][ljust([lmath(add,[xget(%q0,D_Physical)] [if([hasattrval(%#,armor)],[xget([xget(%#,armor)],D_Physical)],0)])],15)][ljust(Energy:,16)][ljust([rjust([lmath(add,[xget(%q0,D_ENERGY)] [if([hasattrval(%#,armor)],[xget([xget(%#,armor)],D_ENERGY)],0)])],3)],15)][ljust(Mental:,16)][lmath(add,[xget(%q0,D_MENTAL)] [if([hasattrval(%#,armor)],[xget([xget(%#,armor)],D_MENTAL)],0)])])]%r[repeaT([ansi(b,-)],80)]%r[ansi(wh,[ljust(Recovery:,16)][ljust([xget(%q0,d_recovery)],15)][ljust(Shapeshift:,16)][ljust([if([xget(%q0,d_shapeshift)],Yes,No)],15)][ljust(NPC:,15)][rjust([if([hasattrval(%q0,npc)],Yes,No)],3)])]%R[ansi(b,[repeat(-,80)])]%r[ansi(wh,Special Info:[if([hasattrval(%q0,d_special)],%R%T[xget(%q0,d_special)],%bNone)])]%R[ansi(bh,----\[)][ansi(yh,[setr(1,%?)])][ansi(bh,\][repeat(-,[sub(74,[strlen(%q1)])])]
+&CMD_LISTPOWERS BCombat Globals v2.0=$@listpow*:th [pemit(%#,[bcenter([ansi(bh,\[)][ansi(wh,[name(%#)]'s Powers[ansi(bh,\])])],80,[ansi(bh,-)])]%R%b[ansi(wh,[ljust(Name,32)][ljust(Val,7)]Description)]%R%b[repeat([ansi(bh,-)],31)]%b[repeat([ansi(bh,-)],5)]%b%b[repeat([ansi(bh,-)],40)]%R%b[ljust(Energy Protection,31)][ljust([rjust([if([hasattrval(%#,armor)],[add([xget([truerace(%#)],d_energy)],[xget([xget(%#,armor)],d_energy)])],[xget([truerace(%#)],d_energy)])],6)],8)]Protection from Energy Attacks%R%b[ljust(Physical Protection,31)][ljust([rjust([if([hasattrval(%#,armor)],[add([xget([truerace(%#)],d_physical)],[xget([xget(%#,armor)],d_physical)])],[xget([truerace(%#)],d_physical)])],6)],8)]Protection from Physical Attacks%R%b[ljust(Mental Protection,31)][ljust([rjust([if([hasattrval(%#,armor)],[add([xget([truerace(%#)],d_physical)],[xget([xget(%#,armor)],d_mental)])],[xget([truerace(%#)],d_mental)])],6)],8)]Protection from Mental Attacks%R%b[ljust(Miscellaneous,31)][ljust([rjust([strcat([xget([truerace(%#)],d_protection)],[if([hasattrval(%#,armor)],[right([xget([xget(%#,armor)],d_protection)],[sub(4,[strlen([xget([truerace(%#)],d_protection)])])])])])],6)],8)]Breath/Disease/Radiation/Death%R[ansi(bh,----%[)][ansi(yh,[setr(0,%?)])][ansi(bh,%][repeaT(-,[sub(74,[strlen(%q0)])])])]
+&CMD_LISTRACES BCombat Globals v2.0=$@listrace*:th [pemit(%#,[bcenter([ansi(bh,\[)][ansi(wh,[mudname()] Races)][ansi(bh,\])],80,[ansi(bh,~)])]%r[ansi(wh,%bNPC%b[ljust(Name,21)]%bNPC%b[ljust(Name,21)]%BNPC%BName)]%R[ansi(b,%b---%B[repeat(-,21)]%b---%b[repeat(-,21)]%b---%b[repeat(-,23)])]%r[squish([iter([lcon(#12624)],[if([cand([not([hasattrval(##,hidden)])],[hastype(##,thing)])],[if([hasattrval(##,npc)],[setq(0,%q0%b%b*%b%b[ljust([name(##)],14)][if([orflags(%#,Wr)],[rjust(##,6)])]|)],[setq(0,%q0%b%b%b%b%b[ljust([left([name(##)],13)],14)][if([orflags(%#,Wr)],[rjust(##,6)])]|)])])])][setq(0,[sort(%q0,a,|)])][setq(0,[after(%q0,|)])])][table(%q0,25,78,|)]%r[ansi(bh,----\[)][ansi(yh,[setr(0,%?)])][ansi(bh,\][repeat(-,[sub(74,[strlen(%?)])])])]
+&CMD_PARAMEDIC BCombat Globals v2.0=$paramedic *:th [switch([setr(0,[rnum([loc(%#)],%0)])],#-*,[pemit(%#,[ansi(r,I don't see that person here.)])],[if([combat(%#,%q0,12,1)],[combat(%#,,12,2)][if([match([xget(%#,skills)],[v(med_skill)])],[combat(%#,%q0,9,3)][pemit(%#,[ansi(y,[name(%q0)] is [ulocal([v(resource)]/fun_health,[xget(%q0,d_body)],%q0)]%R%([round([xget(%q0,D_Body)],0)]%/[xget([truerace(%q0)],D_BODY)]%) Body%,%b%([round([xget(%q0,D_Stun)],0)]%/[xget([truerace(%q0)],D_Stun)]%) Stun)])],[combat(%#,%q0,9,2)][pemit(%#,[ansi(y,[name(%q0)] is [ulocal([v(resource)]/fun_health,[xget(%q0,d_body)],%q0)]%R%([round([xget(%q0,D_Body)],0)]%/[xget([truerace(%q0)],D_BODY)]%) Body%,%b%([round([xget(%q0,D_Stun)],0)]%/[xget([truerace(%q0)],D_Stun)]%) Stun)])])],[pemit(%#,[ansi(r,No free moves.)])])]
+&CMD_PUNCH BCombat Globals v2.0=$punch:th [if([not([combat(%#,,12,1)])],[pemit(%#,[ansi(r,No free moves.)])],[combat(%#,,12,2)][if([not([combat(%#,,1,2)])],[pemit(%#,[ansi(r,No valid targets selected.)])],[setq(1,[xget(%#,c_target)])][set(%#,is_dodge:0)][wipe(%#/dodge_mod)][if([combat(%#,%q1,2,1)],[setq(0,[combat(%#,%q1,3,1,3,0,0)])][combat(%#,%q1,5,%q0,punches,0)][combat(%#,%q1,4,%q0)],[combat(%#,%q1,6,punche,0)])])])]
+&CMD_RACEINFO BCombat Globals v2.0=$@RaceInfo *:th if(not(hasflag(%#,wiz)),pemit(%#,ansi(r,Permission Denied.)),[if([not([isdbref([setr(0,[rnum(#12624,%0)])])])],[pemit(%#,[ansi(r,No such race.)])],[pemit(%#,[bcenter([ansi(bh,\[)][ansi(wh,[name(%q0)] Race Information)][ansi(bh,\])],80,[ansi(bh,-)])]%r[ansi(wh,[ljust(Body:,16)][ljust([xget(%q0,d_body)],15)][ljust(Stun:,16)][ljust([rjust([xget(%q0,d_stun)],3)],15)]Endurance:[rjust([xget(%q0,d_endurance)],8)])]%R[ansi(b,[repeaT(-,80)])]%R[ansi(wh,[ljust(Dexterity:,16)][ljust([xget(%q0,d_dexterity)],15)][ljust(Strength:,16)][ljust([rjust([xget(%q0,d_strength)],3)],15)]Intelligence:[rjust([xget(%q0,d_intelligence)],5)]%R[ljust(Constitution:,16)][ljust([xget(%q0,d_constitution)],15)][ljust(Speed:,16)][rjust([xget(%q0,d_speed)],3)])]%r[repeat([ansi(b,-)],80)]%r%b[ansi(wh,[ljust(Type,10)][ljust(Name,45)][ljust(Mod,20)]Dam)]%R[ansi(b,%b[ljust(----,9)]%b[repeat(-,39)][space(4)][ljust([repeat(-,7)],22)][repeat(-,3)])]%R[ansi(wh,[iter([lattr(%q0/D_*_NAME)],[setq(1,[extract(##,2,1,_)])]%b[ljust(%q1,10)][ljust([xget(%q0,##)],43)][ljust([rjust([first([xget(%q0,D_%q1_MOD)])],3)],4)][ljust([rjust([rest([xget(%q0,D_%q1_MOD)])],3)],18)][rjust([xget(%q0,D_%q1_DAM)],3)],%b,%r)]%R[ansi(b,[repeat(-,80)])]%R[ansi(wh,[ljust(Physical:,16)][ljust([xget(%q0,d_physical)],15)][ljust(Energy:,16)][ljust([rjust([xget(%q0,d_energy)],3)],15)][ljust(Mental:,16)][xget(%q0,d_mental)])]%r[repeaT([ansi(b,-)],80)]%r[ansi(wh,[ljust(Recovery:,16)][ljust([xget(%q0,d_recovery)],15)][ljust(Shapeshift:,16)][ljust([if([xget(%q0,d_shapeshift)],Yes,No)],15)][ljust(NPC:,15)][rjust([if([hasattrval(%q0,npc)],Yes,No)],3)])]%R[ansi(b,[repeat(-,80)])]%r[ansi(wh,Special Info:[if([hasattrval(%q0,d_special)],%R%T[xget(%q0,d_special)],%bNone)])]%R[ansi(bh,----\[)][ansi(yh,[setr(1,%?)])][ansi(bh,\][repeat(-,[sub(74,[strlen(%q1)])])]
+&CMD_REVIVE BCombat Globals v2.0=$@revive *:th [if([not([orflags(%#,Wr)])],[pemit(%#,[ansi(r,Permission Denied.)])],[switch([setr(0,[pmatch(%0)])],#-*,[pemit(%#,[ansi(r,No such player.)])],[combat(%#,%q0,9,1)])]
+&CMD_SHOOT BCombat Globals v2.0=$shoot:th [if([not([xget([xget(%#,drawn)],c_beam)])],[pemit(%#,[ansi(r,You don't have a gun drawn.)])],[if([not([combat(%#,,12,1)])],[pemit(%#,[ansi(r,No free moves.)])],[combat(%#,,12,2)][if([not([combat(%#,,1,2)])],[pemit(%#,[ansi(r,No valid targets selected.)])],[setq(9,[xget(%#,drawn)])][if([gte([xget(%q9,breakdown_points)],[xget(%q9,breakdown_max)])],[pemit(%#,Sparks shoot from your weapon but it doesn't fire.)][oemit([loc(%#)]/%#,[name(%#)]'s weapon sparks, but doesn't fire.)],[setq(1,[xget(%#,c_target)])][set([xget(%#,drawn)],breakdown_points:[inc([xget([xget(%#,drawn)],breakdown_points)])])][set(%#,is_dodge:0)][wipe(%#/dodge_mod)][if([lte([xget([xget(%#,drawn)],ammo)],0)],[pemit(%#,[ansi(r,You're out of ammo!)])],[set([xget(%#,drawn)],ammo:[dec([xget([xget(%#,drawn)],ammo)])])][if([combat(%#,%q1,2,1)],[setq(0,[combat(%#,%q1,3,0,0,,,[if(first(xget(%#,C_AIM)),last(xget(%#,C_AIM)))])])][combat(%#,%q1,5,%q0,shoots,1)][combat(%#,%q1,4,%q0)],[combat(%#,%q1,6,shoot,1)])])])])])])]
+&CMD_STRIKE BCombat Globals v2.0=$strike:th [if([not([combat(%#,,12,1)])],[pemit(%#,[ansi(r,No free moves.)])],[combat(%#,,12,2)][if([not([combat(%#,,1,2)])],[pemit(%#,[ansi(r,No valid targets selected.)])],[setq(1,[xget(%#,c_target)])][set(%#,is_dodge:0)][wipe(%#/dodge_mod)][if([combat(%#,%q1,2,1)],[setq(0,[combat(%#,%q1,3,0,0,,,[if(not(first(xget(%#,C_AIM))),last(xget(%#,C_AIM)))])])][combat(%#,%q1,5,%q0,strikes,1)][combat(%#,%q1,4,%q0)],[combat(%#,%q1,6,strike,1)])])])]
+&CMD_TARGET BCombat Globals v2.0=$target *:[if([setr(0,[combat(%#,[rnum([loc(%#)],%0)],1,1)])],[combat(%#,[rnum([loc(%#)],%0)],1,3)],[switch(%q0,#-1,[pemit(%#,[ansi(r,That player is not connected.)])],#-2,[pemit(%#,[ansi(r,That player is not configured for combat.)])],#-3,[pemit(%#,[ansi(r,That player can not be attacked.)])],0,[pemit(%#,[ansi(r,Invalid Target.)])])]
+&CMD_TRIP BCombat Globals v2.0=$trip:th [if([not([combat(%#,,12,1)])],[pemit(%#,[ansi(r,No free moves.)])],[combat(%#,,12,2)][if([not([combat(%#,,1,2)])],[pemit(%#,[ansi(r,No valid targets selected.)])],[setq(1,[xget(%#,c_target)])][set(%#,is_dodge:0)][wipe(%#/dodge_mod)][if([combat(%#,%q1,2,1)],[combat(%#,%q1,15,1)][combat(%#,%q1,15,2)],[combat(%#,%q1,15,3)])])])]
+&CMD_WREPAIR BCombat Globals v2.0=$@WRepair *:th [if(nor(hasflag(%#,Wiz),match(xget(%#,skills),#13447)),pemit(%#,ansi(r,You don't know how!)),if(not(isdbref(setr(0,rnum(%#,%0)))),pemit(%#,ansi(rh,You don't have that item.)),if(nor(xget(%q0,C_WEAPON),xget(%q0,C_ARMOR)),pemit(%#,ansi(rh,That is not a valid weapon or armor.)),if(lt(xget(%#,MONEY),xget(%q0,BREAKDOWN_POINTS)),pemit(%#,ansi(rh,You don't have the money to fix that item.)),[pemit(%#,ansi(ch,You repair the [name(%q0)].))][set(%#,MONEY:[sub(xget(%#,MONEY),xget(%q0,BREAKDOWN_POINTS))])][set(%q0,BREAKDOWN_POINTS:0)]))))
+&CREDITS BCombat Globals v2.0=BCombat coded by Briggs of New Frontiers TrekMUSH (aelfhame.net:4201) and FreedomMUSH (anargo.qc.ca:4201)
+&FUN_ISIC BCombat Globals v2.0=OrFlags(%#,W$r)
+&MED_SKILL BCombat Globals v2.0=#10818
+&RESOURCE BCombat Globals v2.0=#12772
+&VERSION BCombat Globals v2.0=v2.4 Active Beta
+
+@@ Below is the Combat Resource @@
+
+@create $Combat Resource v2.0
+@link $Combat Resource v2.0 = #12811
+@lock/Use $Combat Resource v2.0=ISWIZ/1
+@set $Combat Resource v2.0 = WIZARD
+&ADMIN $Combat Resource v2.0=[ansi(bh,<)][ansi(wh,Combat-OOC)][ansi(bh,>)]
+&ADMIN_CHAN $Combat Resource v2.0=Combat-OOC
+@ATPORT $Combat Resource v2.0=@tel [home(#12772)]
+@set $Combat Resource v2.0/ATPORT=no_command
+&CMD_AIM $Combat Resource v2.0=$aim *:$shoot:th [if(not(combat(%#,,12,1)),pemit(%#,ansi(r,No free moves.)),[if(not(combat(%#,,1,2)),pemit(%#,ansi(r,No valid targets selected.)),[if(not(setr(0,ulocal(#12772/fun_hitloc,%0))),[pemit(%#,ansi(r,That is not a valid body location.%RValid body locations are: head, neck, chest, abdomen, right arm, left arm, right hand, left hand, groin, left leg, right leg, left foot, and right foot.))],[combat(%#,,12,2)][pemit(%#,ansi(y,You set up and prepare to attack [name(xget(%#,C_TARGET))] in the %0.))][oemit(loc(%#)/%#,ansi(y,[name(%#)] sets up and prepares to attack [name(xget(%#,C_TARGET))] in the %0.))][combat(%#,[xget(%#,C_TARGET)],17,3,1,%q0,#856)])])])]
+&DEATH_ROOM $Combat Resource v2.0=#3679
+&FUN_AIM $Combat Resource v2.0=[switch(%2,1,if(hasattrval(%0,C_AIM),1,0),2,xget(%0,C_AIM),3,set(%0,C_AIM:%3 [if(lte(rand(100),if(match(xget(%0,SKILLS),%5),50,25)),%4,inc(rand(15)))]),4,wipe(%0/C_AIM))]
+&FUN_BOMB $Combat Resource v2.0=#-1 NOT YET IMPLEMENTED
+&FUN_CALC_PROTECTION $Combat Resource v2.0=ulocal(#12772/fun_roll,lmath(add,xget(%0,if(match(%1,1),d_physical,d_energy)) [xget(race(%0),if(match(%1,1),d_physical,d_energy))] [if(cand(lt(xget(xget(%0,armor),BREAKDOWN_POINTS),xget(xget(%0,armor),BREAKDOWN_MAX)),hasattrval(%0,armor)),xget(xget(%0,armor),if(match(%1,1),d_physical,d_energy)),0)]))
+&FUN_CHECK_DEATH $Combat Resource v2.0=if(lt(xget(%1,d_body),-10),combat(%0,%1,10))
+&FUN_CHECK_STUN $Combat Resource v2.0=if(cor(lt(xget(%1,d_stun),0),lt(xget(%1,d_body),0)),combat(%0,%1,11))
+&FUN_CHECK_WAKE $Combat Resource v2.0=if(cand(gt(xget(%0,d_body),0),gt(xget(%0,d_stun),0),cor(hasflag(%0,gag),hasflag(%0,halt))),[set(%0,!halt)][set(%0,!gag)][oemit(loc(%0)/%0,ansi(y,[name(%0)] has regained consciousness.))][pemit(%0,ansi(y,You regain consciousness.))])
+&FUN_COMBAT $Combat Resource v2.0=if(not(hasflag(%@,wizard)),#-1 KINDLY KISS MY ASS,switch(%2,1,ulocal(fun_target,%0,%1,%3),2,ulocal(fun_hit,%0,%1,%3),3,ulocal(fun_damage,%0,%1,%3,%4,%5,%6,%7),4,ulocal(fun_do_damage,%0,%1,%3),5,ulocal(fun_display_hit,%0,%1,%3,%4,%5),6,ulocal(fun_display_miss,%0,%1,%3,%4),7,ulocal(fun_check_stun,%0,%1,%3),8,ulocal(fun_check_death,%0,%1),9,ulocal(fun_heal,%0,%1,%3),10,ulocal(fun_kill,%0,%1),11,ulocal(fun_stun,%0,%1),12,ulocal(fun_moves,%0,%1,%3),13,ulocal(fun_gas,%0,%1,%3,%4),14,ulocal(fun_bomb,%0,%1,%3),15,ulocal(fun_trip,%0,%1,%3),16,ulocal(FUN_COMBAT_NATURAL,%0,%1,%3,%4,%5,%6,%7),17,ulocal(FUN_AIM,%0,%1,%3,%4,%5,%6,%7),#-1 OUT OF BOUNDS)
+&FUN_COMBAT_NATURAL $Combat Resource v2.0=[setq(0,ulocal(FUN_NUM_TO_ATTACK,truerace(%0),%2))][switch(%3,1,ulocal(fun_combat_natural_damage,%0,%1,%q0,first(xget(truerace(%0),D_%q0_MOD)),last(xget(truerace(%0),D_%q0_MOD))),2,combat(%0,%1,5,%6,xget(truerace(%0),D_%q0_NAME),0),3,combat(%0,%1,6,xget(truerace(%0),D_%q0_NAME),0))]
+&FUN_COMBAT_NATURAL_CALC_DAMAGE $Combat Resource v2.0=ulocal(fun_roll,lmath(add,[[if(%4,first,last)](v(MUL_%3))] [xget(race(%0),D_%2_DAM)] [if(%5,[xget(race(%0),D_STRENGTH)] [xget(%0,D_STRENGTH)] [if(hasattrval(%0,ARMOR),xget(xget(%0,ARMOR),D_STRENGTH))])] [if(%6,[xget(%0,D_INTELLIGENCE)] [xget(race(%0),D_INTELLIGENCE)])]))
+&FUN_COMBAT_NATURAL_CALC_PROTECTION $Combat Resource v2.0=ulocal(fun_roll,lmath(add,switch(%2,EGOA,[xget(race(%1),D_MENTAL)] [if(hasattrval(%1,ARMOR),xget(xget(%1,ARMOR),D_MENTAL))] [xget(%1,D_MENTAL)],EBE,[xget(race(%1),D_ENERGY)] [if(hasattrval(%1,ARMOR),xget(xget(%1,ARMOR),D_ENERGY))],EBP,[xget(race(%1),D_PHYSICAL)] [if(hasattrval(%1,ARMOR),xget(xget(%1,ARMOR),D_PHYSICAL))],KAHE,[xget(%1,D_STRENGTH)] [if(hasattrval(%1,ARMOR),[xget(xget(%1,ARMOR),D_STRENGTH)] [xget(xget(%1,ARMOR),D_ENERGY)])] [xget(race(%1),D_ENERGY)],KAHP,[xget(truerace(%1),D_PHYSICAL)] [if(hasattrval(%1,ARMOR),xget(xget(%1,ARMOR),D_PHYSICAL))],KARE,xget(race(%1),D_ENERGY) [if(hasattrval(%1,ARMOR),xget(xget(%1,ARMOR),D_ENERGY))],KARP,[xget(race(%1),D_PHYSICAL)] [if(hasattrval(%1,ARMOR),xget(xget(%1,ARMOR),D_PHYSICAL))]))
+&FUN_COMBAT_NATURAL_DAMAGE $Combat Resource v2.0=[setq(0,if(match(%2,EGOA),1,inc(rand(15))))][setq(2,[ulocal(FUN_COMBAT_NATURAL_CALC_PROTECTION,%0,%1,%2)] [ulocal(FUN_COMBAT_NATURAL_CALC_PROTECTION,%0,%1,%2)])][setq(3,[if(hasflag(loc(%0),SAFE),0,div(ulocal(FUN_COMBAT_NATURAL_CALC_DAMAGE,%0,%1,%2,%q0,1,first(xget(truerace(%0),D_%2_MOD)),last(xget(truerace(%0),D_%2_MOD))),2))] [ulocal(FUN_COMBAT_NATURAL_CALC_DAMAGE,%0,%1,%2,%q0,0)])]%q0 %q3 [if(gte(first(%q2),first(%q3)),setq(3,0 [last(%q3)]),setq(3,[sub(first(%q3),first(%q2))] [rest(%q3)]))][if(gte(last(%q2),last(%q3)),[setq(3,[first(%q3)] 0)],[setq(3,[first(%q3)] [sub(last(%q3),last(%q2))])])]%q3
+&FUN_CREATE_CORPSE $Combat Resource v2.0=[setq(0,create([name(%0)]'s Corpse))][tel(%q0,xget(%0,death_loc))][lock(%q0,loc(%q0))][lock(%q0/enter,)][iter(lattr(%0),set(%q0,##:[xget(%0,##)]))][set(%q0,describe:[ulocal(%0/describe)]%R%RContact an Admin to remove this item.)][set(%0,corpse:%q0)][iter(lcon(%0),tel(##,%q0))][set(%q0,player:%0)][set(%q0,enter_ok)]
+&FUN_DAMAGE $Combat Resource v2.0=[setq(1,if(%6,%6,inc(rand(15))))][setq(2,[ulocal(fun_calc_protection,%1,%2)] [ulocal(fun_calc_protection,%1,%2)])][setq(0,[if(cor(hasflag(loc(%#),safe),%4,match(xget(xget(%0,drawn),mode),stun)),0,div(ulocal(fun_get_damage,%0,%2,%q1,1,%3,%5),2))] [ulocal(fun_get_damage,%0,%2,%q1,2,%3,%5)])][setq(3,[if(gt(first(%q2),first(%q0)),0,sub(first(%q0),first(%q2)))] [if(gt(last(%q2),last(%q0)),0,sub(last(%q0),last(%q2)))])][null(set(xget(%1,ARMOR),BREAKDOWN_POINTS:[inc(xget(xget(%1,ARMOR),BREAKDOWN_POINTS))]))]%q1 %q0 %q3
+&FUN_DISPLAY_HIT $Combat Resource v2.0=oemit([loc(%1)]/%1 %0,ansi(y,[name(%0)][if(cand(%4,hasattrval(%0,drawn)),%b%(with [extract(name(xget(%0,drawn)),1,sub(words(name(xget(%0,drawn))),2))]%))] %3 [name(%1)] and hits [obj(%1)] in the [u(fun_hitloc,first(%2))].))[if(not(match(%0,%1)),pemit(%0,ansi(y,[name(%0)][if(cand(%4,hasattrval(%0,drawn)),%b%(with [extract(name(xget(%0,drawn)),1,sub(words(name(xget(%0,drawn))),2))]%))] %3 [name(%1)] and hits [obj(%1)] in the [u(fun_hitloc,first(%2))].%r[extract(%2,2,1)] Body, [extract(%2,3,1)] Stun Done.[if(gte(extract(%2,5,1),10),%r[name(%1)] seems to falter for a moment as [subj(%1)] is stunned.)])))][pemit(%1,ansi(y,[name(%0)][if(cand(%4,hasattrval(%0,drawn)),%b%(with [extract(name(xget(%0,drawn)),1,sub(words(name(xget(%0,drawn))),2))]%))] %3 you and hits you in the [u(fun_hitloc,first(%2))].%r[extract(%2,4,1)] Body%, [extract(%2,5,1)] Stun Taken.))][if(gte(last(%2),10),[pemit(%1,ansi(y,You falter for a moment as you are stunned by the blow.))][oemit(loc(%1)/%0 %1,ansi(y,[name(%1)] seems to falter for a moment as [subj(%1)] is stunned.))])]
+&FUN_DISPLAY_MISS $Combat Resource v2.0=[oemit(loc(%0)/%1,ansi(y,[name(%0)][if(cand(%3,hasattrval(%0,drawn)),%b%(with [xget(xget(%0,drawn),name)] %([edit(xget(%0,drawn),#,)]%)%))] %2 [name(%1)] but misses.))][pemit(%1,ansi(y,[name(%0)][if(cand(%3,hasattrval(%0,drawn)),%b%(with [xget(xget(%0,drawn),name)] %([edit([xget(%0,drawn)],#,)]%)%))] %2s at you but misses.))]
+&FUN_DO_DAMAGE $Combat Resource v2.0=[set(%1,d_body:[sub(xget(%1,d_body),extract(%2,4,1))])][set(%1,d_stun:[sub(xget(%1,d_stun),extract(%2,5,1))])][if(gte(extract(%2,5,1),10),set(%1,moves:[xget(truerace(%1),d_speed)])])][combat(%0,%1,7,%2)][combat(%0,%1,8,%2)]
+&FUN_DROPBOMB $Combat Resource v2.0=[setq(0,[ulocal(fun_getbomb,%0)])][set(%q0,bombs:[inc([xget(%q0,ammo)])])][setq(1,[create([xget(%q0,name)])])][name(%q1,[name(%q1)] <[edit(%q1,#)]>)]
+&FUN_GAS $Combat Resource v2.0=switch(%2,1,if(not(%1),if(not(%0),0,if(hasattrval(%0,c_gas),xget(%0,c_gas),0)),if(hasattrval(loc(%1),c_gas),xget(loc(%1),c_gas),0)),2,if(%1,if(%3,[pemit(%#,[name([loc(%1)])] %([loc(%1)]%) has been gassed.)][oemit([loc(%1)]/%#,An odd gas begins to seep into the room...)][set([loc(%1)],c_gas:%3)]1,[pemit(%#,[name([loc(%1)])] %([loc(%1)]%)is no longer gassed.)][oemit([loc(%1)]/%#,The gas in the room slowly seeps into vents and vanishes.)][wipe([loc(%1)]/c_gas)]1),0),3,if(hastype(%0,room),if(%3,[pemit(%#,[name(%0)] %(%0%) has been gassed.)][oemit(%0/%#,An odd gas begins to seep into the room...)][set(%0,c_gas:%3)]1,[pemit(%#,[name(%0)] %(%0%)is no longer gassed.)][oemit(%0/%#,The gas in the room slowly seeps into vents and vanishes.)][wipe(%0/c_gas)]1),0),#-1 NO SWITCH SPECIFIED)
+&FUN_GETBOMB $Combat Resource v2.0=[setq(0,#-1 NO BOMB)][squish([iteR([lcon(%0)],[if([hasattrval(##,c_bomb)],[setq(0,##)])])])]%q0
+&FUN_GET_DAMAGE $Combat Resource v2.0=[if(match(%1,1),ulocal(fun_roll,lmath(add,%4  [if(match(%3,1),first(v(mul_%2)),last(v(mul_%2)))] [sub(xget(race(%0),d_strength),4)] [if(cand(lt(xget(xget(%0,armor),BREAKDOWN_POINTS),xget(xget(%0,armor),BREAKDOWN_MAX)),hasattrval(%0,armor)),xget(xget(%0,armor),d_strength),0)] [if(cand(hasattrval(%0,drawn),%5),xget(xget(%0,drawn),bonus),0)])),[ulocal(fun_roll,lmath(add,[if(match(%3,1),first(v(mul_%2)),last(v(mul_%2)))] [if(hasattrval(%0,drawn),mul(fdiv(xget(xget(%0,drawn),level),100),xget(xget(%0,drawn),damroll)),0)]))]
+&FUN_HASBOMB $Combat Resource v2.0=[setq(0,0)][squish([iter([lcon(%0)],[if([hasattrval(##,c_bomb)],[setq(0,1)])])])]%q0
+&FUN_HEAL $Combat Resource v2.0=switch(%2,1,[set(%1,!gag)][set(%1,!halt)][if(hasattrval(%1,C_IC),set(%1,IC)[wipe(%1/C_IC)])][set(%!,FIXED)][set(%1,d_stun:[xget(race(%1),d_stun)])][set(%1,d_body:[xget(race(%1),d_body)])][set(%1,moves:0)][lock(%1,[xget(%1,C_LOCK)])][wipe(%1/C_LOCK)][cemit(u(admin_chan),[u(admin)] [ansi(wh,[name(%#)] %(%#%) has revived [name(%q0)] %(%q0%).)])][pemit(%1,ansi(y,You have been completely healed.))][pemit(%0,ansi(y,You heal [name(%1)].))][if(hasattrval(%1,corpse),[iter(lcon(xget(%1,corpse)),tel(##,%1))][tel(%1,xget(%1,death_loc))][wipe(%0/death_loc)][tel(xget(%1,corpse),v(nuker))][wipe(%1/dead)][wipe(%1/corpse)])][oemit(loc(%1)/%0 %1,ansi(y,[name(%1)] has been completely healed.))],2,ulocal(fun_paramedic,%0,%1),3,ulocal(fun_Medical,%0,%1),pemit(%0,Error, please contact Briggs.))]
+&FUN_HEALTH $Combat Resource v2.0=if(lte(%0,-10),DEAD!,if(lte(%0,5),DYING!,if(lt(%0,xget(race(%1),d_body)),injured.,if(lte(xget(%1,d_stun),0),unconscious!,in perfect health!)))
+&FUN_HIT $Combat Resource v2.0=[set(%0,last_combat:[secs()])][setq(2,ulocal(fun_roll,lmath(add,[xget(race(%0),d_dexterity)] [if(%2,%2,0)] [if(hasattrval(%0,armor),xget(xget(%0,armor),d_dexterity),0)] [if(cand(hasattrval(%0,drawn),%2),xget(xget(%0,drawn),aimbonus),0)])))][setq(1,ulocal(fun_roll,lmath(add,[if(hastype(%1,Player),xget(race(%1),d_dexterity),0)] [if(hasattrval(%1,armor),xget(xget(%1,armor),d_dexterity),0)] [if(xget(%1,is_dodge),xget(%1,dodge_mod),0)])))][if(gt(%q2,%q1),1,0)]
+&FUN_HITLOC $Combat Resource v2.0=switch(%0,1,head,2,neck,3,chest,4,abdomen,5,right arm,6,left arm,7,right hand,8,left hand,9,groin,10,chest,11,abdomen,12,left leg,13,right leg,14,left foot,15,right foot,head,1,neck,2,chest,3,abdomen,4,right arm,5,left arm,6,right hand,7,left hand,8,groin,9,chest,10,abdomen,11,left leg,12,right leg,13,left foot,14,right foot,15,0)
+&FUN_KILL $Combat Resource v2.0=[if(xget(%1,DEAD),,[oemit(loc(%1)/%0 %1,ansi(y,[name(%1)] dies from the attack of [name(%0)].))][pemit(%0,ansi(y,Your attack kills [name(%1)].))][pemit(%1,ansi(wh,The attack from [name(%0)] doesn't really hurt that bad..in fact the pain seems to be fading..as is everything else.  A white light envelops your vision as you feel your soul leave your body...You've died.))][set(%1,KILLED_BY:%0)][set(%1,dead:1)][set(%1,death_loc:[loc(%1)])][tel(%1,[v(death_room)])][ulocal(fun_create_corpse,%1)][set(%1,!gag)][set(%1,!halt)][if(hasflag(%1,IC),set(%1,C_IC:1))][cemit(u(admin_chan),[u(admin)]%b[ansi(wh,COMBAT NOTICE: [name(%0)] %([pmatch(%0)]%) killed [name(%1)] %([pmatch(%1)]%).)])])]
+&FUN_MEDICAL $Combat Resource v2.0=[if(not(xget(loc(%0),C_MEDBAY)),combat(%0,%1,9,2),if(cand(lt(xget(%1,d_body),xget(race(%1),d_body)),gte(sub(xget(race(%1),d_body),xget(%1,d_body)),1.5)),set(%1,d_body:[add(xget(%1,d_body),1.5)])],set(%1,d_body:[xget(race(%1),d_body)]))][if(cand(lt(xget(%1,d_stun),xget(race(%1),d_stun)),gte(sub(xget(race(%1),d_stun),xget(%1,d_stun)),6)),if(xget(loc(%1),C_MEDBAY),set(%1,d_stun:[add(xget(%1,d_stun),6))]),if(xget(loc(%1),C_MEDBAY),set(%1,d_stun:[xget(race(%1),d_stun)]))))
+&FUN_MOVES $Combat Resource v2.0=switch(%2,1,if(lt(xget(%0,moves),xget(race(%0),d_speed)),1,0),2,set(%0,moves:[inc(xget(%0,moves))]),3,set(%0,moves:0))
+&FUN_NUM_TO_ATTACK $Combat Resource v2.0=switch(%1,1,EBE,2,EBP,3,EGOA,4,KAHE,5,KAHP,6,KARE,7,KARP,#-1 NO SUCH VALUE)
+&FUN_PARAMEDIC $Combat Resource v2.0=[if(cand(lt(xget(%1,d_body),xget(truerace(%1),d_body)),gte(sub(xget(truerace(%1),d_body),xget(%1,d_body)),.5)),set(%1,d_body:[add(xget(%1,d_body),.5)]),set(%1,d_body:[xget(truerace(%1),d_body)])])][if(cand(lt(xget(%1,d_stun),xget(truerace(%1),d_stun)),gte(sub(xget(truerace(%1),d_stun),xget(%1,d_stun)),3)),if(xget(loc(%1),C_MEDBAY),set(%1,d_stun:[add(xget(%1,d_stun),3)])),if(xget(loc(%1),C_MEDBAY),set(%1,d_stun:[xget(truerace(%1),d_stun)])))]
+&FUN_ROLL $Combat Resource v2.0=add(inc(mod(rand(600),20)),%0)
+&FUN_ROLL_2 $Combat Resource v2.0=[add([inc([div([rand(600)],20)])],%0)]
+&FUN_STUN $Combat Resource v2.0=[if(not(cor(hasflag(%1,halt),hasflag(%1,gag))),[oemit(loc(%1)/%1,ansi(y,[name(%1)] has lost consciousness.))][pemit(%1,ansi(y,You have lost consciousness.))][set(%1,C_LOCK:[lock(%1)])][iter(enter basic,lock(%1/##,))][if(not(orflags(%1,Wr)),[set(%1,gag)])][set(%1,halt)])]
+&FUN_TARGET $Combat Resource v2.0=switch(%2,1,if(isdbref(%1),if(hastype(%1,player),if(isconn(%1),if(cor(haspower(%1,builder),haspower(%1,guest)),#-3[cemit(u(admin_chan),[u(admin)]%b[ansi(wh,COMBAT NOTICE: %(%0%) [name(%0)] tried to attack protected character %(%1%) [name(pmatch(%1))].)])],if(not(hasattrval(%1,TRUERACE)),#-2[cemit(u(admin_chan),[u(admin)]%b[ansi(wh,COMBAT NOTICE: %(%1%) [name(%1)] has no TRUERACE set.)])],if(nor(orflags(%0,Wr),hasflag(%1,IC)),#-4[pemit(%0,ansi(r,Invalid target.))][cemit(u(admin_chan),[u(admin)]%b[ansi(wh,COMBAT NOTICE: %(%0%) [name(%0)] attempted to attack OOC player %(%1%) [name(%1)].)])],1))),#-1[cemit(u(Admin_chan),[u(admin)]%b[ansi(wh,COMBAT NOTICE: %(%0%) [name(%0)] tried to attack D/C Player %(%1%) [name(%1)].)])]),xget(%1,combat_ready)),0),2,cor(cand(not(hastype(xget(%0,c_target),player)),xget(xget(%0,c_target),combat_ready)),cand(isconn(xget(%0,c_target)),match(loc(%0),loc(xget(%0,c_target))))),3,[set(%0,c_target:%1)][oemit([loc(%0)]/%0,[name(%0)] prepares for combat.)][pemit(%0,You prepare for combat.)][set(%0,last_combat:[secs()])])
+&FUN_TRIP $Combat Resource v2.0=switch(%2,1,[set(%1,MOVES:[xget(truerace(%1),D_SPEED)])][wipe(%1/DODGE_MOD)][set(%1,IS_DODGE:0)][set(%1,D_TRIPPED:1)][set(%1,gag)][set(%1,halt)]1,2,[oemit(loc(%1)/%1,ansi(y,[name(%0)] sweeps at [name(%1)]'s legs and trips [obj(%1)].%R[name(%1)] falls to the ground, [poss(%1)] balance lost.))][pemit(%1,ansi(y,[name(%0)] sweeps at your legs and trips you.%RYou falls to the ground, your balance lost.))],3,[set(%0,MOVES:[xget(truerace(%0),D_SPEED)])][oemit(loc(%1)/%0,ansi(y,[name(%0)] attempts to trip [name(%1)] but misses!%R[name(%0)] falls offbalance and lands on [poss(%0)] face.))][pemit(%0,ansi(y,You attempt to trip [name(%1)] but miss!%RYou fall offbalance and land on your face.))][combat(%1,%0,15,1)])
+&ISWIZ $Combat Resource v2.0=[hasflag(%#,wiz)]
+&MUL_1 $Combat Resource v2.0=10 15
+&MUL_10 $Combat Resource v2.0=5 5
+&MUL_11 $Combat Resource v2.0=-8 -7
+&MUL_12 $Combat Resource v2.0=-8 -7
+&MUL_13 $Combat Resource v2.0=-8 -6
+&MUL_14 $Combat Resource v2.0=-8 -6
+&MUL_15 $Combat Resource v2.0=8 8
+&MUL_2 $Combat Resource v2.0=5 7
+&MUL_3 $Combat Resource v2.0=5 5
+&MUL_4 $Combat Resource v2.0=-8 -7
+&MUL_5 $Combat Resource v2.0=-8 -7
+&MUL_6 $Combat Resource v2.0=-8 -6
+&MUL_7 $Combat Resource v2.0=-8 -6
+&MUL_8 $Combat Resource v2.0=-8 4
+&MUL_9 $Combat Resource v2.0=5 7
+&NUKER $Combat Resource v2.0=#11526
+@STARTUP $Combat Resource v2.0=@function combat=%!,fun_combat
+@set $Combat Resource v2.0/STARTUP=no_command
+
+
+@@ Below is the Combat Clock @@
+
+@create Combat Clock
+@link Combat Clock = #374
+@set Combat Clock = WIZARD
+&ACTIVE Combat Clock=1
+&COMBAT_ROUND Combat Clock=12
+&DEATH_ROOM Combat Clock=#3679
+&DO_RESET Combat Clock=iter(lwho(),if(not(cor(not(hasattrval(##,truerace)),hasattrval(##,C_GAG),match(xget(##,dead),1),not(hasflag(##,ic)),haspower(##,guest),haspower(##,builder))),if(cand(combat(loc(##),##,13,1),not(cor(match(xget(truerace(##),d_protection),B*),match(xget(xget(##,armor),d_protection),B*)))),ulocal(fun_gas,##,combat(loc(##),##,13,1))[ulocal(fun_check_con,##)][ulocal(fun_check_dead,##)],if(not(match(xget(loc(##),C_GAS),3)),ulocal(fun_check_target,##)[ulocal(fun_check_dodge,##)][ulocal(fun_check_moves,##)][ulocal(fun_check_end,##)][ulocal(fun_check_bod,##)][ulocal(fun_check_stun,##)][ulocal(fun_check_con,##)][ulocal(fun_check_wake,##)][ulocal(fun_check_dead,##)][ulocal(FUN_CHECK_AIM,##)]))))
+&D_RESET Combat Clock=[iter([lwho()]%b[lsearch(all,ething,\[match(xget(##,truerace),#7364)\])],[if([not([cor([match([xget(##,dead)],1)],[hastype(##,thing)],[not([hasflag(##,in-character)])],[haspower(##,guest)],[haspower(##,builder)])])],[if([cand([combat([loc(##)],##,13,1)],[not([cor([match([xget([truerace(##)],d_protection)],B*)],[match([xget([xget(##,armor)],d_protection)],B*)])])])],[ulocal(fun_gas,##,[combat([loc(##)],##,13,1)])][ulocal(fun_check_con,##)][ulocal(fun_check_dead,##)],[ulocal(fun_check_target,##)][ulocal(fun_check_dodge,##)][ulocal(fun_check_moves,##)][ulocal(fun_check_end,##)][ulocal(fun_check_bod,##)][ulocal(fun_check_stun,##)][ulocal(fun_check_con,##)][ulocal(fun_check_wake,##)][ulocal(fun_check_dead,##)])])])]
+&ECON Combat Clock=#7691
+&FUN_CHECK_AIM Combat Clock=[if(hasattrval(%0,C_AIM),[combat(%0,%0,17,4)][pemit(%0,[ansi(y,You are no longer aiming.)])][oemit([loc(%0)]/%0,[ansi(y,[name(%0)] is no longer targetting.)])])]
+&FUN_CHECK_BOD Combat Clock=[if([lt([xget(%0,d_body)],[xget([setr(0,[race(%0)])],d_body)])],[setq(2,[round([fdiv([xget([race(%0)],d_recovery)],60)],2)])][if([gte([xget(%0,d_body)],5)],[if([gte([add([xget(%0,d_body)],%q2)],[xget([race(%0)],d_body)])],[set(%0,d_body:[xget([race(%0)],d_body)])],[set(%0,d_body:[add([xget(%0,d_body)],%q2)])])],[set(%0,d_body:[sub([xget(%0,d_body)],.5)])])])]
+&FUN_CHECK_CON Combat Clock=[if([cand([cor([lt([xget(%0,d_body)],0)],[lt([xget(%0,d_stun)],0)])],[not([hasflag(%0,gag)])],[not([hasflag(%0,halt)])])],[if([not(corflags(%0,Wr))],[set(%0,gag)][set(%0,halt)],[set(%0,HALT)])][set(%0,C_LOCK:[lock(%0)])][oemit([loc(%0)]/%0,[ansi(y,[name(%0)] has lost consciousness.)])][pemit(%0,[ansi(y,You have lost consciousness.)])])]
+&FUN_CHECK_DEAD Combat Clock=[if([lt([xget(%0,d_body)],-10)],[oemit([loc(%0)]/%0,[ansi(y,[name(%0)] has died.)])][pemit(%0,[ansi(y,You have died.)])][set(%0,dead:1)][set(%0,death_loc:[loc(%0)])][tel(%0,[v(death_room)])][ulocal([v(resource)]/fun_create_corpse,%0)][set(%0,!gag)][set(%0,!halt)])]
+&FUN_CHECK_DODGE Combat Clock=[if([cand([hasattrval(%0,last_combat)],[xget(%0,is_dodge)],[gte([sub([secs()],[xget(%0,last_combat)])],30)])],[wipe(%0/is_dodge)][wipe(%0/dodge_mod)][pemit(%0,[ansi(y,You are no longer dodging.)])][oemit([loc(%0)]/%0,[ansi(y,[name(%0)] is no longer dodging.)])])]
+&FUN_CHECK_END Combat Clock=[if([lt([xget(%0,d_endurance)],[xget([race(%0)],d_endurance)])],[setq(2,[round([fdiv([xget([race(%0)],D_RECOVERY)],2)],2)])][if([lte([add([xget(%0,d_endurance)],%q2)],[xget([race(%0)],d_endurance)])],[set(%0,d_endurance:[add([xget(%0,d_endurance)],%q2)])],[set(%0,d_endurance:[xget([race(%0)],d_endurance)])])])]
+&FUN_CHECK_MOVES Combat Clock=[set(%0,moves:0)]
+&FUN_CHECK_STUN Combat Clock=[if([lt([xget(%0,d_stun)],[xget([setr(0,[race(%0)])],d_stun)])],[if([lte([add([xget(%0,d_stun)],[round([fdiv([xget([race(%0)],d_recovery)],5)],2)])],[xget([race(%0)],d_stun)])],[set(%0,d_stun:[add([xget(%0,d_stun)],[round([fdiv([xget([race(%0)],d_recovery)],5)],2)])])],[set(%0,d_stun:[xget([race(%0)],d_stun)])])][if(match(xget(%0,D_STUN),xget(race(%0),D_STUN)),pemit(%0,ansi(y,Stun fully recovered.)))])]
+&FUN_CHECK_TARGET Combat Clock=[if([cand([hasattrval(%0,last_combat)],[hasattrval(%0,c_target)],[gte([sub([secs()],[xget(%0,last_combat)])],45)])],[wipe(%0/last_combat)][wipe(%0/C_target)][pemit(%0,[ansi(y,You are no longer targetting.)])][oemit([loc(%0)]/%0,[ansi(y,[name(%0)] is no longer targetting.)])])]
+&FUN_CHECK_WAKE Combat Clock=[if([cand([gt([xget(%0,d_body)],0)],[gt([xget(%0,d_stun)],0)],[cor([hasflag(%0,gag)],[hasflag(%0,halt)])])],[set(%0,!halt)][set(%0,!gag)][iter(enter basic,[lock(%0/##,[xget(%0,C_LOCK)])])][wipe(%0/C_LOCK)][if([xget(%0,D_TRIPPED)],[wipe(%0/D_TRIPPED)][oemit([loc(%0)]/%0,[ansi(y,[name(%0)] scrambles back to [poss(%0)] feet.)])][pemit(%0,[ansi(y,You scramble back to your feet.)])],[oemit([loc(%0)]/%0,[ansi(y,[name(%0)] has regained consciousness.)])][pemit(%0,[ansi(y,You regain consciousness.)])])])]
+&FUN_CREATE_CORPSE Combat Clock=[setq(0,[create([name(%0)]'s Corpse)])][tel(%q0,[xget(%0,death_loc)])][set(%q0,describe:[ulocal(%0/describe)]%R%RContact an Admin to remove this item.)][set(%0,corpse:%q0)][iter([lcon(%0)],[tel(##,%q0)])][set(%q0,player:%0)][set(%q0,enter_ok)]
+&FUN_GAS Combat Clock=[switch(%1,1,[if([not([hasflag([loc(%0)],safe)])],[set(%0,d_body:[sub([xget(%0,d_body)],2)])])][if([lt([xget(%0,D_STUN)],0)],,[set(%0,d_stun:[sub([xget(%0,d_stun)],5.2)])][pemit(%0,You feel odd as you breathe the strange gas in the room.)])],2,[if([lt([xget(%0,D_STUN)],0)],,[set(%0,d_stun:[sub([xget(%0,d_stun)],10)])][pemit(%0,You feel light headed as you breathe the strange gas in the room.)])],3,)]
+&FUN_OLD_RESET Combat Clock=[iter([lwho()],[if([not([cor([not([hasattrval(##,truerace)])],[hasattrval(##,C_GAG)],[match([xget(##,dead)],1)],[not([hasflag(##,ic)])],[haspower(##,guest)],[haspower(##,builder)])])],[if([cand([combat([loc(##)],##,13,1)],[not([cor([match([xget([truerace(##)],d_protection)],B*)],[match([xget([xget(##,armor)],d_protection)],B*)])])])],[ulocal(fun_gas,##,[combat([loc(##)],##,13,1)])][ulocal(fun_check_con,##)][ulocal(fun_check_dead,##)],[if([not([match([xget([loc(##)],C_GAS)],3)])],[ulocal(fun_check_target,##)][ulocal(fun_check_dodge,##)][ulocal(fun_check_moves,##)][ulocal(fun_check_end,##)][ulocal(fun_check_bod,##)][ulocal(fun_check_stun,##)][ulocal(fun_check_con,##)][ulocal(fun_check_wake,##)][ulocal(fun_check_dead,##)][ulocal(FUN_CHECK_AIM,##)])])])])]
+&GLOBALS Combat Clock=#12811
+&LAST_ROUND Combat Clock=1028094046
+&LOOP Combat Clock=@wait 12={@tr [squish([if([v(active)],%![if([gte([sub([secs()],[v(ROUND_TIME)])],12)],[ulocal(do_reset)][set(%!,last_round:[secs()])])])])]/loop}
+&OUTPUT Combat Clock=
+@QUEUE Combat Clock=1
+@set Combat Clock/QUEUE=no_inherit no_clone wizard mortal_dark
+&RESOURCE Combat Clock=#12772
+&ROUND_TIME Combat Clock=12
+@STARTUP Combat Clock=@tr me/loop
+@set Combat Clock/STARTUP=no_command
+
+
+@@ The below is a template race I call Solarians @@
+
+@create Solarian
+@link Solarian = #374
+@chzone Solarian = #10805
+@set Solarian = NO_COMMAND
+&D_BODY Solarian=10
+@set Solarian/D_BODY=wizard mortal_dark
+&D_CONSTITUTION Solarian=13
+@set Solarian/D_CONSTITUTION=wizard mortal_dark
+&D_DEXTERITY Solarian=14
+@set Solarian/D_DEXTERITY=wizard mortal_dark
+&D_EBE_DAM Solarian=100
+&D_EBE_MOD Solarian=0 0
+&D_EBE_NAME Solarian=Energy Blast
+&D_EGO Solarian=Solar Blast
+&D_EGOA_DAM Solarian=3
+&D_EGOA_MOD Solarian=0 0
+&D_EGOA_NAME Solarian=Psi Blast
+&D_EGO_DAM Solarian=15
+&D_ENDURANCE Solarian=26
+@set Solarian/D_ENDURANCE=wizard mortal_dark
+&D_ENERGY Solarian=10
+@set Solarian/D_ENERGY=wizard mortal_dark
+@DESCRIBE Solarian=Admin Race
+@set Solarian/DESCRIBE=no_command visual
+&D_INTELLIGENCE Solarian=13
+@set Solarian/D_INTELLIGENCE=wizard mortal_dark
+&D_KAHE_DAM Solarian=6
+&D_KAHE_MOD Solarian=1 0
+&D_KAHE_NAME Solarian=punches, with fists of lightning,
+&D_KAHP_DAM Solarian=20
+&D_KAHP_MOD Solarian=1 0
+&D_KAHP_NAME Solarian=Energy Blast
+&D_MENTAL Solarian=10
+@set Solarian/D_MENTAL=wizard mortal_dark
+&D_PHYSICAL Solarian=10
+@set Solarian/D_PHYSICAL=wizard mortal_dark
+&D_RECOVERY Solarian=15
+@set Solarian/D_RECOVERY=wizard mortal_dark
+&D_SHAPESHIFT Solarian=1
+@set Solarian/D_SHAPESHIFT=no_command
+&D_SPEED Solarian=3
+@set Solarian/D_SPEED=no_command
+&D_STRENGTH Solarian=18
+@set Solarian/D_STRENGTH=wizard mortal_dark
+&D_STUN Solarian=26
+@set Solarian/D_STUN=wizard mortal_dark
+&HIDDEN Solarian=1
+&KAHP_TYPE Solarian=2
+&NPC Solarian=1
+@set Solarian/NPC=wizard mortal_dark
+
+@@ Below is the GUN weapon parent @@
+
+@create Gun Weapon Parent (12663)
+@link Gun Weapon Parent (12663) = #374
+@set Gun Weapon Parent (12663) = TRUST
+@set Gun Weapon Parent (12663) = WIZARD
+@set Gun Weapon Parent (12663) = NO_COMMAND
+@ADROP Gun Weapon Parent (12663)=think [if([v(C_OWNER)],[wipe([v(C_OWNER)]/drawn)][wipe(%!/C_OWNER)][name(%!,[v(name)] %([edit(%!,#,)]%))])]
+@set Gun Weapon Parent (12663)/ADROP=no_command
+&AIMBONUS Gun Weapon Parent (12663)=0
+@AMOVE Gun Weapon Parent (12663)=[if([not([hastype(%L,Player)])],[if([v(C_OWNER)],[wipe([v(C_OWNER)]/DRAWN)][wipe(%!/C_OWNER)][name(%!,[v(name)] %([edit(%!,#,)]%))])])]
+@set Gun Weapon Parent (12663)/AMOVE=no_command
+@ASUCCESS Gun Weapon Parent (12663)=th [iter([lcon(%L)],[if([match([xget(##,drawn)],%!)],[wipe(##/drawn)])])][name(me,[v(name)] %([edit(%!,#,)]%))]
+@set Gun Weapon Parent (12663)/ASUCCESS=no_command
+&BONUS Gun Weapon Parent (12663)=1
+@BREAKDOWN_MAX Gun Weapon Parent (12663)=100
+@set Gun Weapon Parent (12663)/BREAKDOWN_MAX=wizard mortal_dark
+@BREAKDOWN_POINTS Gun Weapon Parent (12663)=0
+@set Gun Weapon Parent (12663)/BREAKDOWN_POINTS=wizard mortal_dark
+&C_BEAM Gun Weapon Parent (12663)=1
+&CMD_DRAW Gun Weapon Parent (12663)=$draw *:think [if([cand([strmatch([name(me)],*%0*)],[match([loc(me)],%#)])],[if([hasattr(%#,drawn)],[pemit(%#,[ansi(r,You already have a weapon drawn.)])],[if([not([match([xget(%#,skills)],[v(req_skill)])])],[pemit(%#,[ansi(r,You don't know how to use that.)])],[set(%#,last_combat:[secs()])][set(%#,drawn:%!)][set(%!,C_OWNER:%#)][pemit(%#,[ansi(y,You draw your [name(%!)].)])][oemit([loc(%#)]/%#,[name(%#)] draws %p [name(%!)].)][name(%!,[xget(%!,name)] %([edit(%!,#,)]%) <Drawn>)])])])]
+&CMD_LEVEL Gun Weapon Parent (12663)=$level *:th [if([not([match([xget(%#,drawn)],%!)])],,[if([not([cand([isint(%0)],[lte(%0,[v(max_level)])],[gte(%0,[v(min_level)])])])],[pemit(%#,[ansi(r,Invalid setting.)])],[set(me,level:%0)][pemit(%#,You set your weapon to a level of %0%%.)][oemit([loc(%#)]/%#,[name(%#)] adjusts some settings on %p weapon.)])])]
+&CMD_MODE Gun Weapon Parent (12663)=$mode *:th [if([not([match([xget(%#,drawn)],%!)])],,[if([not([gt([match([v(modes)],%0)],0)])],[pemit(%#,[ansi(r,Invalid mode.)])],[set(%!,mode:%0)][pemit(%#,You set your weapon to a [lcstr(%0)] setting.)][oemit([loc(%#)]/%#,[name(%#)] adjusts some settings on %p gun.)])])]
+&CMD_RELOAD Gun Weapon Parent (12663)=$reload:th [if([match([setr(0,[xget(%#,drawn)])],%!)],[if([not([xget([xget(%#,drawn)],c_beam)])],[pemit(%#,[ansi(r,That's not a gun!)])],[if([xgeT([loc(%#)],C_Armory)],[set(%q0,clip:[xget(%q0,clip_max)])][set(%q0,ammo:[xget(%q0,ammo_max)])][pemit(%#,You fully reload your weapon.)][oemit([loc(%#)]/%#,[name(%#)] fully reloads [poss(%#)] [name(%!)].)],[if([gt([xget(%q0,ammo)],0)],[pemit(%#,[ansi(r,You still have ammo in this clip!)])],[if([not([gt([xget(%q0,clip)],0)])],[pemit(%#,[ansi(r,You're out of clips!)])],[set(%q0,ammo:[xget(%q0,ammo_max)])][set(%q0,clip:[dec([xget(%q0,clip)])])][pemit(%#,You reload your weapon.)][oemit([loc(%#)]/%#,[name(%#)] reloads [poss(%#)] [name(%!)].)])])])])]
+&CMD_SLING Gun Weapon Parent (12663)=$sling *:think [ifelse([strmatch([name(me)],*%0*)],[ifelse([match([xget(%#,drawn)],%!)],[name(%!,[xget(%!,name)] %([edit(%!,#,)]%))][set(%#,last_combat:[secs()])][wipe(%!/C_OWNER)][pemit(%#,[ansi(y,You sling your [name(%!)].)])][oemit([loc(%#)]/%#,[name(%#)] slings %p [name(%!)].)][wipe(%#/drawn)],[pemit(%#,[ansi(r,[name(%!)] is not drawn.)])])],)]
+&C_WEAPON Gun Weapon Parent (12663)=1
+&DAMROLL Gun Weapon Parent (12663)=0
+@DESCRIBE Gun Weapon Parent (12663)=[ansi(y,You see a standard [squish([before([name(%!)],%()])].  [if([strmatch([name(%!)],*<Drawn>)],It is drawn,It is slung)].%R%(+[round([fdiv([v(damroll)],10)],0)] DC/[if([lt([v(aimbonus)],0)],,+)][v(aimbonus)] OCV%)%b%b%b[v(ammo)]%/[v(ammo_max)] Shots, [v(clip)]%/[v(clip_max)] Clips%RMode: [capstr([v(mode)])], Level: [v(level)]%%%RSkill Required: [name([v(req_skill)])]%R[ljust(Status:,10)][v(BREAKDOWN_POINTS)]/[v(BREAKDOWN_MAX)])]
+@set Gun Weapon Parent (12663)/DESCRIBE=no_command visual
+@DROP Gun Weapon Parent (12663)=You drop you [name(me)].
+@set Gun Weapon Parent (12663)/DROP=no_command
+@FAILURE Gun Weapon Parent (12663)=You try to take your [name(me)] but fail.
+@set Gun Weapon Parent (12663)/FAILURE=no_command
+&F_HELPMSG Gun Weapon Parent (12663)=Draw <Name of Weapon>%RSling <Name of Weapon>%RMode <[iter([v(MODES)],##,%b,%/)]>%RLevel <[v(MIN_LEVEL)] - [v(MAX_LEVEL)]>%RTarget <Player> (IE: Head, Chest, Neck, etc)%RAim <Hit Location>%RShoot%RStrike
+&HELP_MSG Gun Weapon Parent (12663)=Draw [name(me)]%RLevel <1-100>%RMode <Stun/Kill>%RSling [name(me)]
+@I_VALUE Gun Weapon Parent (12663)=100000
+@set Gun Weapon Parent (12663)/I_VALUE=wizard mortal_dark
+&LEVEL Gun Weapon Parent (12663)=100
+&MODE Gun Weapon Parent (12663)=stun
+&MODES Gun Weapon Parent (12663)=Stun kill
+&NAME Gun Weapon Parent (12663)=Gun Weapon Parent
+@NAMEFORMAT Gun Weapon Parent (12663)=Weapon Parent (#7498)
+@set Gun Weapon Parent (12663)/NAMEFORMAT=no_command
+@ODROP Gun Weapon Parent (12663)=drops %p [name(me)].
+@set Gun Weapon Parent (12663)/ODROP=no_command
+@OFAILURE Gun Weapon Parent (12663)=tries to take %p [name(me)] but fails.
+@set Gun Weapon Parent (12663)/OFAILURE=no_command
+@OSUCCESS Gun Weapon Parent (12663)=takes %p [name(me)].
+@set Gun Weapon Parent (12663)/OSUCCESS=no_command
+@SUCCESS Gun Weapon Parent (12663)=You take your [name(me)].
+@set Gun Weapon Parent (12663)/SUCCESS=no_command
+
+@@ Below is the Melee Weapon Parent @@
+
+@create Generic Melee Weapon (12662)
+@link Generic Melee Weapon (12662) = #374
+@set Generic Melee Weapon (12662) = VISUAL
+@set Generic Melee Weapon (12662) = NO_COMMAND
+@ADROP Generic Melee Weapon (12662)=think [if([match([xget(%#,drawn)],%!)],[wipe(%#/drawn)][name(me,[v(name)] %([edit(%!,#,)]%))])]
+@set Generic Melee Weapon (12662)/ADROP=no_command
+&AIMBONUS Generic Melee Weapon (12662)=0
+@AMOVE Generic Melee Weapon (12662)=[if([not([hastype(%L,Player)])],[if([v(C_OWNER)],[wipe([v(C_OWNER)]/DRAWN)][wipe(%!/C_OWNER)][name(%!,[v(name)] %([edit(%!,#,)]%))])])]
+@set Generic Melee Weapon (12662)/AMOVE=no_command
+@ASUCCESS Generic Melee Weapon (12662)=th [iter([lcon(%L)],[if([match([xget(##,drawn)],%!)],[wipe(##/drawn)])])][name(me,[v(name)] %([edit(%!,#,)]%))]
+@set Generic Melee Weapon (12662)/ASUCCESS=no_command
+&BONUS Generic Melee Weapon (12662)=Damage Bonus
+&CMD_DRAW Generic Melee Weapon (12662)=$draw *:think [if([cand([strmatch([name(me)],*%0*)],[match([loc(me)],%#)])],[if([hasattr(%#,drawn)],[pemit(%#,[ansi(r,You already have a weapon drawn.)])],[if([not([match([xget(%#,skills)],[v(req_skill)])])],[pemit(%#,[ansi(r,You don't know how to use that.)])],[set(%#,last_combat:[secs()])][set(%!,C_OWNER:%#)][set(%#,drawn:[num(me)])][pemit(%#,[ansi(y,You draw your [name(%!)].)])][oemit([loc(%#)]/%#,[name(%#)] draws %p [name(%!)].)][name(%!,[xget(%!,name)] %([edit(%!,#,)]%) <Drawn>)])])])]
+&CMD_SLING Generic Melee Weapon (12662)=$sling *:think [ifelse([strmatch([name(me)],*%0*)],[ifelse([match([xget(%#,drawn)],%!)],[name(%!,[xget(%!,name)] %([edit(%!,#,)]%))][set(%#,last_combat:[secs()])][wipe(%!/C_OWNER)][pemit(%#,[ansi(y,You sling your [name(%!)].)])][oemit([loc(%#)]/%#,[name(%#)] slings %p [name(%!)].)][wipe(%#/drawn)],[pemit(%#,[ansi(r,[name(%!)] is not drawn.)])])],)]
+&C_WEAPON Generic Melee Weapon (12662)=1
+@DESCRIBE Generic Melee Weapon (12662)=[ansi(y,You see a standard [v(name)].  It is [if([strmatch([name(%!)],*<Drawn>)],drawn,slung)].%R%(+[v(bonus)] DC[if([hasattrval(%!,aimbonus)],%/[if([gte([v(aimbonus)],0)],+[v(aimbonus)],[v(aimbonus)])] OCV)]%)%RSkill Required: [name([v(req_skill)])]
+@set Generic Melee Weapon (12662)/DESCRIBE=no_command visual
+@DROP Generic Melee Weapon (12662)=You drop your [v(name)] %([edit(%!,#,)]%)
+@set Generic Melee Weapon (12662)/DROP=no_command
+&HASSKILL Generic Melee Weapon (12662)=[cor([hasflag(%#,wiz)],[if([hasattrval(me,req_skill)],[match([xget(%#,skills)],[v(REQ_SKILL)])],1)])]
+&MODE Generic Melee Weapon (12662)=KILL
+&NAME Generic Melee Weapon (12662)=Generic Melee Weapon
+@ODROP Generic Melee Weapon (12662)=drops %p [v(name)] %([edit(%!,#,)]%)
+@set Generic Melee Weapon (12662)/ODROP=no_command
+@OSUCCESS Generic Melee Weapon (12662)=takes %p [name(me)].
+@set Generic Melee Weapon (12662)/OSUCCESS=no_command
+&REQ_SKILL Generic Melee Weapon (12662)=#7253
+@SUCCESS Generic Melee Weapon (12662)=You take your [name(me)].
+@set Generic Melee Weapon (12662)/SUCCESS=no_command

@@ -1,0 +1,48 @@
+@create Jesse's Wooden Clock
+@link Jesse's Wooden Clock=[owner(me)]
+@lock/Basic Jesse's Wooden Clock=#0
+@set Jesse's Wooden Clock=INHERIT
+@set Jesse's Wooden Clock=OPAQUE
+@set Jesse's Wooden Clock=WIZARD
+@set Jesse's Wooden Clock=SAFE
+@set Jesse's Wooden Clock=!NO_COMMAND
+@STARTUP Jesse's Wooden Clock=@trig me/timer
+&THIRD Jesse's Wooden Clock=[switch(%0,9,%b__/%b%b,7,%b%b%b/%b%b,6,%b/_/%b%b,5,%b__/%b%b,4,%b%b%b/%b%b,3,%b__/%b%b,2,%b/_%b%b%b,1,%b%b%b/%b%b,%b/_/%b%b)]
+&SECOND Jesse's Wooden Clock=[switch(%0,9,%b%b/_/%b,8,%b%b/_/%b,7,%b%b%b%b/%b,6,%b%b/_%b%b,5,%b%b/_%b%b,4,%b%b/_/%b,3,%b%b%b_/%b,2,%b%b__/%b,1,%b%b%b%b/%b,%b%b/%b/%b)]
+&FIRST Jesse's Wooden Clock=[switch(%0,4,%b%b%b%b%b%b,1,%b%b%b%b_%b,%b%b%b__%b)]
+&TZONE Jesse's Wooden Clock=EST
+&TIMEZONE Jesse's Wooden Clock=EST CST MST PST
+&TIMEZONE_RATIO Jesse's Wooden Clock=0 -1 -2 -3
+&F_CLOCK Jesse's Wooden Clock=[setq(0,mid(%0,0,1))][setq(1,mid(%0,1,1))][setq(2,mid(%0,2,1))][setq(3,mid(%0,3,1))]%b[space(25)][repeat(_,25)]%b%r[space(25)]|[u(FIRST,r(0))][u(FIRST,r(1))] [u(FIRST,r(2))][u(FIRST,r(3))]|%r[space(25)]|[u(SECOND,r(0))][u(SECOND,r(1))]o[u(SECOND,r(2))][u(SECOND,r(3))]|%r[space(25)]|[u(THIRD,r(0))][u(THIRD,r(1))]o[u(THIRD,r(2))][u(THIRD,r(3))]|%r[space(25)]|[repeat(_,25)]|%R
+&ADD_T Jesse's Wooden Clock=$clockadd *=*:@switch [member(v(options),v(0))]=0,@pemit *%N=Huh?%rusage: clockadd <day|hour|half|quarter>=<dbref>,{@switch [member(v(t_[v(0)]),v(1))]=0,&t_[v(0)] me=[v(t_[v(0)])] %1;@pemit *%N=[name(v(1))] added to [v(0)] trigger.}
+&CTIME Jesse's Wooden Clock=edit(extract(time(),4,1),:,space(1))
+&DAY_T Jesse's Wooden Clock=@dolist [v(t_day)]=@trigger ##/t_day
+&D_LOG Jesse's Wooden Clock=#28 @ Sun Oct 18 00:00:07 1992
+&HALF_HOUR_MESS Jesse's Wooden Clock=A large wooden clock chimes for the half hour.
+&HALF_HOUR_T Jesse's Wooden Clock=@dolist [v(t_half)]=@trigger ##/t_half_hour
+&HOUR Jesse's Wooden Clock=add(extract(u(ctime),1,1),0)
+&HOUR_T Jesse's Wooden Clock=@dolist [v(t_hour)]=@trigger ##/t_hour
+&LAST_Q Jesse's Wooden Clock=3
+&LIST_T Jesse's Wooden Clock=$clockls *:@switch [member(v(options),v(0))]=>0,{@pemit *%N=%rItems on [name(me)]'s [v(0)] trigger:%r[iter(v(t_[v(0)]),{%t\[name(##)\]\[space(sub(30,strlen(name(##))))\]##%r})]},@pemit *%N=Huh?%rusage: clockls <day|hour|half|quarter>
+&MIN Jesse's Wooden Clock=add(extract(u(ctime),2,1),0)
+&NEW_HOUR_MESS Jesse's Wooden Clock=A small bird peeks out of the large wooden clock to sing in the new hour.
+&OPTIONS Jesse's Wooden Clock=day hour half quarter
+&QHOUR Jesse's Wooden Clock=3
+&QUARTER Jesse's Wooden Clock=div(u(min),15)
+&QUARTER0 Jesse's Wooden Clock=@emit [v(new_hour_mess)];@trig me/quarter_t;@trig me/half_hour_t;@trig me/hour_t;@@ @switch/first [u(hour)]=0,@trig me/day_t,7,{@wall/emit/no_pre You here a rooster crow in the distance! Signaling the End is Neigh.;@wait 600=@shutdown}
+&QUARTER1 Jesse's Wooden Clock=@emit [v(quarter_hour_mess)];@trig me/quarter_t
+&QUARTER2 Jesse's Wooden Clock=@emit [v(half_hour_mess)];@trig me/quarter_t;@trig me/half_hour_t
+&QUARTER_HOUR_MESS Jesse's Wooden Clock=The large wooden clock chimes once for the quarter hour.
+&QUARTER_T Jesse's Wooden Clock=@dolist [v(t_quarter)]=@trigger ##/t_quarter
+&RESYNCH Jesse's Wooden Clock=@wait [u(rset,add(1,u(min)))]=@trig me/timer
+&RM_T Jesse's Wooden Clock=$clockrm *=*:@switch [member(v(options),v(0))]=0,@pemit *%N=Huh?%rusage: clockrm <day|hour|half|quarter>=<dbref>,{&t_[v(0)] me=remove([v(t_[v(0)])],v(1)); @pemit *%N=[name(v(1))] removed from [v(0)] trigger.}
+&RSET Jesse's Wooden Clock=sub(add(mul(60,sub(v(0),u(min))),sub(60,u(sec))),60)
+&SEC Jesse's Wooden Clock=add(extract(u(ctime),3,1),0)
+&TIMER Jesse's Wooden Clock=&qhour me=[u(quarter)];@switch/first [v(last_q)]=[v(qhour)],,{&last_q me=[v(qhour)];@trig me/quarter[v(qhour)]};@trig clock/resynch
+@DESCRIBE Jesse's Wooden Clock=You see an old wooden upright cuckcoo clock. The wood is old and the stain is so dark it looks almost black. Upon the sides of the clock are curious carvings of dragons and other mythical animals.%r[u(f_clock,[add(mid(time(),11,2),[EXTRACT(v(timezone_ratio),element(v(timezone),v(tzone), ),1)])][mid(time(),14,2)])]
+@DROP Jesse's Wooden Clock=You set down the clock.
+@FAILURE Jesse's Wooden Clock=You try to pick up the clock and you trip over it.
+@ODROP Jesse's Wooden Clock=sets down the large wooden clock.
+@OFAILURE Jesse's Wooden Clock=trips over the clock.
+@OSUCCESS Jesse's Wooden Clock=picks up the the large wooden clock.
+@SUCCESS Jesse's Wooden Clock=You pick up the the large wooden clock.

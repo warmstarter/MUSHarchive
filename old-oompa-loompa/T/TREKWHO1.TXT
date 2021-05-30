@@ -1,0 +1,39 @@
+@create Jesse's TrekWHO V1.0
+@link Jesse's TrekWHO V1.0=#2
+@lock Jesse's TrekWHO V1.0=#2
+@set Jesse's TrekWHO V1.0=ROYALTY
+@set Jesse's TrekWHO V1.0=OPAQUE
+@set Jesse's TrekWHO V1.0=SAFE
+@set Jesse's TrekWHO V1.0=!NO_COMMAND
+@set Jesse's TrekWHO V1.0=WIZARD
+&RECORD Jesse's TrekWHO V1.0=1
+&LINE2 Jesse's TrekWHO V1.0=[repeat([ansi(c,~)],79)]
+&LINE Jesse's TrekWHO V1.0=[repeat([ansi(r,*)],79)]
+&EENTRY Jesse's TrekWHO V1.0=%b%b[ansi(switch(u(Flag,%0),JUDGE,hc,SPACE,hg,HEAD,hm,THEME,hb,WIZARD,r,ROYALTY,hy,BUILDER,c,b),ljust([class(%0)] [Name(%0)],20))] [ansi(r,rjust(u(Onfor,%0),9))] [ansi(m,rjust(u(Idle,%0),4))] [ansi(hr,ljust([org(%0)] <[get(%0/division)]>,30))]
+&EHEADER Jesse's TrekWHO V1.0=[ansi(c,%b_)]%r[ansi(c,|)]%b[ansi(c,|)][ansi(hw,[rjust([get(%#/empire)],74,%b)])]%r[ansi(c,|)]%b[ansi(c,`)][ansi(c,[repeat(_,75)])]%r[ansi(c,|)][ansi(c,_)][ansi(c,Name/Rank_____________On For___Idle_____Organization)][ansi(c,[repeat(_,24)])][ansi(c,%))]
+&ONFOR Jesse's TrekWHO V1.0=[ufun(fun_time,conn(name(%0)))]
+&FUN_TIME Jesse's TrekWHO V1.0=[setq(0,div(%0,3600))][switch(gt(%q0,9),0,0)]%q0:[setq(1,[div(sub(%0,[mul(div(%0,3600),3600)]),60)])][switch(gt(%q1,9),0,0)]%q1:[setq(2,[sub(%0,[mul(div(%0,60),60)])])][switch(gt(%q2,9),0,0)]%q2
+&WHO_ENTRY Jesse's TrekWHO V1.0=[ansi(c,|)][switch(get(%0/PlayStatus),BLD,ansi(c,BLD),WIZ,ansi(r,WIZ),ROY,ansi(hy,ROY),SPC,ansi(hg,SPC),OOC,ansi(hc,OOC),IC,ansi(hg,%bIC),GOD,ansi(hr,GOD),THM,ansi(hb,THM),ansi(hx,ljust(#$,3)))][ansi(c,|)]%b[ansi(switch(u(Flag,%0),SPACE,hg,HEAD,hm,THEME,hb,WIZARD,r,ROYALTY,hy,BUILDER,c,JUDGE,hc,b),ljust([get(%0/class)] [name(%0)],26,%b))] [ansi(y,ljust(get(%0/Alias),5,%b))] [ansi(hr,ljust(get(%0/Empire),14,%b))] [ansi(r,rjust(u(Onfor,%0),9,%b))] [ansi(m,rjust(u(Idle,%0),9,%b))]
+&EMPIRE_FILTER Jesse's TrekWHO V1.0=[switch(get(%0/Empire),get(%#/Empire),1,0)]
+&SEE_ALL Jesse's TrekWHO V1.0=[or(hasflag(%0,wizard),haspower(%0,see_all))]
+&IDLESCALE Jesse's TrekWHO V1.0=[switch(lt(%0,60),1,seconds,switch(lt(%0,3600),1,minutes,switch(lt(%0,86400),1,hours,days)))]
+&DAYS Jesse's TrekWHO V1.0=[div(%0,86400)]
+&CAN_SEE Jesse's TrekWHO V1.0=[or(u(see_all,%0),not(hidden(%1)))]
+&MINUTES Jesse's TrekWHO V1.0=[switch(lt(div(mod(%0,3600),60),10),1,0[div(mod(%0,3600),60)],div(mod(%0,3600),60))]
+&HOURS Jesse's TrekWHO V1.0=[switch(lt(div(mod(%0,86400),3600),10),1,0[div(mod(%0,86400),3600)],div(mod(%0,86400),3600))]
+@SEX Jesse's TrekWHO V1.0=[switch(poss(%0),his,M,her,F,its,O)]
+@IDLE Jesse's TrekWHO V1.0=[ufun(fun_time,idle(%0))]
+&FLAG Jesse's TrekWHO V1.0=[switch(get(%0/Class),Builder,BUILDER,switch(get(%0/admin),space,SPACE,switch(get(%0/admin),head,HEAD,switch(get(%0/admin),theme,THEME,switch(hasflag(%0,Judge),1,JUDGE,switch(hasflag(%0,WIZARD),1,WIZARD,switch(hasflag(%0,Royalty),1,ROYALTY,,OTHER)))))))]
+&EALL_HEADER Jesse's TrekWHO V1.0=[ansi(hb,repeat(-,79))]%r[center([mudname()],79)]%r[center([eval(%#,empire)] Members,79)]%r[ansi(hb,repeat(-,79))]%r[ansi(c,Name%b%b%b%b%b%b%b%b%b%b%bAlias%bDivision%b%b%b%b%b%bClass%b%b%b%b%b%b%b%b%b%bOrganization%b%b%b%b%b%bConn.)]%r[ansi(hr,repeat(~,79))]
+&EALL_ENTRY Jesse's TrekWHO V1.0=[ansi(switch(u(Flag,%0),JUDGE,hc,SPACE,hg,HEAD,hm,THEME,hb,WIZARD,r,ROYALTY,hy,BUILDER,c,b),ljust(Name(%0),15))][ansi(y,ljust(get(%0/Alias),6))][ansi(r,ljust(mid(get(%0/Division),0,14),14))][ansi(g,ljust(get(%0/class),15))][ansi(hr,ljust(get(%0/organization),17))][switch(conn(%0),-1,{[ansi(hc,[ljust(mid([get(%0/last)],3,7),5)])]},{[ansi(c,[ljust(Connected,5)])]})]
+&EANN Jesse's TrekWHO V1.0=$@eann *:@swi [gte([get(%#/rank)],12)]=1,{@dolist [filter(Empire_Filter,lwho())]=@pe ##=[ansi(r,Official [get(%#/empire)] Empire Announcement from %n:)] %0},0,{@pe %#=Permission Denied.}
+&FOOTER Jesse's TrekWHO V1.0=[ansi(c,|)]%b%b%b[ansi(c,`)][ansi(c,[repeat(_,73)]%r[ansi(c,|)][space(5)][ansi(hb,Connected Players:)] [ansi(hw,[words(lwho())])][space(10)][ansi(hb,Hidden Players:)] [ansi(hw,[sub([words(lwho())],[words(mwho())])])][space(10)][ansi(hb,Record:)] [ansi(hw,[get(me/record)])][space(5)][ansi(c,|)]%r[ansi(c,|)][ansi(c,[repeat(_,77)])][ansi(c,|)]
+&HEADER Jesse's TrekWHO V1.0=[ansi(c,%b_)]%r[ansi(c,|)]%b[ansi(c,|)][center([ansi(hw,[mudname()])],79)]%r[ansi(c,|)]%b[ansi(c,`)][repeat([ansi(c,_)],76)]%r[ansi(c,|)][repeat([ansi(c,_)],78)][ansi(c,%))]%r%r[u(mush_motd)]%r%b[repeat([ansi(c,_)],78)]%r[ansi(c,|)]Sta[ansi(c,%b_)][ansi(c,[ljust(Rank/Name,27,_)])][ansi(c,[ljust(Alias,6,_)])][ansi(c,[ljust(Empire,16,_)])][ansi(c,[ljust(On For,10,_)])][ansi(c,[ljust(Idle,14,_)])][ansi(c,%))]
+&WHO-1 Jesse's TrekWHO V1.0=$who:&record me=[ifelse(lt(words(lwho()),get(me/record)),get(me/record),words(lwho()))];@pemit %#=[u(header)][iter(lwho(),switch(u(can_see,%#,##),1,{%r[u(who_entry,##)]}))]%r[u(footer)]%r[ansi(r,Wizard)] - [ansi(hy,Royalty)] - [ansi(c,Builder)] - [ansi(hg,Space)] - [ansi(hb,Theme)] - [ansi(hc,Judge)] - [ansi(b,Player)]
+&EWHO-1 Jesse's TrekWHO V1.0=$ewho:@pemit %#=[u(EHeader)][iter(filter(Empire_Filter,lwho()),switch(u(Can_See,%#,##),1,%r[u(EEntry,##)]))]%r[ansi(hm,There are [words(filter(Empire_Filter,lwho()))] players in Empire [get(%#/Empire)] connected.)]%r[ansi(r,Wizard)] - [ansi(hy,Royalty)] - [ansi(c,Builder)] - [ansi(hg,Space)] - [ansi(hc,Judge)] - [ansi(b,Player)] - [ansi(hb,Theme)]
+&EALL-1 Jesse's TrekWHO V1.0=$eall:@pemit %#=[u(EALL_HEADER)][iter(filter(Empire_Filter,lsearch(all, type, player)),switch(u(Can_See,%#,##),1,%r[u(EALL_ENTRY,##)]))]%r[ansi(hm,There are [words([filter(Empire_Filter,lsearch(all, type, player)])])] players in Empire [get(%#/empire)]%r[ansi(r,Wizard)] - [ansi(hy,Royalty)] - [ansi(c,Builder)] - [ansi(hg,Space)] - [ansi(hm,Empire Head)] - [ansi(b,Player)] - [ansi(hb,Theme)]
+&EALL-2 Jesse's TrekWHO V1.0=$eall *:@pemit %#=[u(EALL_HEADER)][iter(pempire(%0),%r[u(EALL_ENTRY,##)])]%r[ansi(r,Wizard)] - [ansi(hy,Royalty)] - [ansi(c,Builder)] - [ansi(hg,Space)] - [ansi(hm,Empire Head)] - [ansi(b,Player)] - [ansi(hb,Theme)]
+&EALL_FILTER Jesse's TrekWHO V1.0=[switch(get(%0/Empire),%0,1,0)]
+&MUSHMOTD-1A Jesse's TrekWHO V1.0=$+amotd *:&mush_motd me=%0;@pemit %0=MUSH Motd Changed.;@dol [lwho()]=@pemit ##=New MUSH Motd!
+&MUSH_MOTD Jesse's TrekWHO V1.0=Welcome to [mudname()]!
+@DESCRIBE Jesse's TrekWHO V1.0=Jesse's TrekWHO version 1.0

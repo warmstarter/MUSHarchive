@@ -1,0 +1,302 @@
+# File: Generic Horses
+# Purpose: IC Prop, Transportation
+# Author: Ellan West
+# Gene Parent courtesy Rocio@Conspiracy!
+#
+# Description: Generic vehicle objects set up to look and act like horses.
+# Rideable, configureable, with 'soft' owners and the ability to steal,
+# sell and trace original 'soft' owner.
+#
+# Setup: Recommend that a separate owner be set up to handle these
+# objects. If &species is a restricted attribuyte, the owner may need to
+# be a wizard, otherwise, this player-object can be mortal.
+#
+# When all the objects are done downloading, check for the atttributes
+# &source on 'commands'
+# &command-parent and &gene-parent on 'stall' and edit as needed.
+# use #dbref, with the # sign included. 
+#
+# Basic help is displayed on the @use attribute. 
+#
+# I recommend locking the enterlock of each 'stall' to the people allowed
+# to make the horse objects. 
+#################################################################
+-
+@create Genotype: Random Generic Horses
+-
+&AHR Genotype: Random Generic Horses=:glances at %N.
+-
+@VC Genotype: Random Generic Horses=1 0
+-
+&SELFDESC Genotype: Random Generic Horses=&str me=[add(v(no1), v(no2))];&dex me=[add(v(no3), v(no4))];&sta me=[add(v(no5), v(no6))];&will me=[add(v(no7), v(no8))];&size me=[div(add(v(str), v(sta)), 2)];@tr me/dohstats;@wait me=@tr me/locks
+-
+&DOHSTATS Genotype: Random Generic Horses=&hstr me=u(dostr,v(str));&hsta me=u(dosta,v(sta));&hdex me=u(dosta,v(sta));&hdex me=u(dodex,v(dex));&hwill me=u(dowill,v(will));&hsize me=u(dosize,v(size));@no me
+-
+&SETCOLOR Genotype: Random Generic Horses=&color me=[switch(u(getshade),,,[u(getshade)]%b)][u(getcolor)] [switch(%0,female,mare,male,stallion)][switch(u(getmt),,,%bwith a [u(getmt)] mane and tail)];@tr me/selfdesc
+-
+&GETSHADE Genotype: Random Generic Horses=extract(v(shades[u(addit,v(cgene))]),u(addit,v(sgene)),1,|)
+-
+&GETCOLOR Genotype: Random Generic Horses=extract(v(colors),u(addit,v(cgene)),1,|)
+-
+&GETMT Genotype: Random Generic Horses=extract(v(manes[u(addit,v(cgene))]),u(addit,v(mgene)),1,|)
+-
+&CGENE Genotype: Random Generic Horses=2 4
+-
+&SGENE Genotype: Random Generic Horses=1 1
+-
+&MGENE Genotype: Random Generic Horses=1 1
+-
+&ADDIT Genotype: Random Generic Horses=add(extract(%0,1,1),extract(%0,2,1))
+-
+&COLORS Genotype: Random Generic Horses=white|grey|black|brown|bay|chestnut|dun|palomino
+-
+&SHADES2 Genotype: Random Generic Horses=light|smoky|dark
+-
+&SHADES3 Genotype: Random Generic Horses=coal|night|shiny
+-
+&SHADES4 Genotype: Random Generic Horses=light|medium|dark
+-
+&SHADES5 Genotype: Random Generic Horses=light|blood|dark
+-
+&SHADES6 Genotype: Random Generic Horses=golden|reddish|deep
+-
+&SHADES7 Genotype: Random Generic Horses=light|yellow|dusty
+-
+&SHADES8 Genotype: Random Generic Horses=pale|bright|golden
+-
+&MANES2 Genotype: Random Generic Horses=light grey|grey|dark grey
+-
+&MANES3 Genotype: Random Generic Horses=black|coal black|silky black
+-
+&MANES4 Genotype: Random Generic Horses=brown|dark brown|black
+-
+&MANES5 Genotype: Random Generic Horses=dark bay|black|bay
+-
+&MANES6 Genotype: Random Generic Horses=pale flaxen|flaxen|chestnut
+-
+&MANES7 Genotype: Random Generic Horses=flaxen|dun|dark brown
+-
+&MANES8 Genotype: Random Generic Horses=cream|golden|hoary umber
+-
+@VA Genotype: Random Generic Horses=3 2
+-
+@VB Genotype: Random Generic Horses=1 1
+-
+&CGENES Genotype: Random Generic Horses=0 4
+-
+&LOCKS Genotype: Random Generic Horses=@dolist iter(lnum(9),add(##,1))=@lock me/no##;@dolist CGENE SGENE MGENE BIRTH BIRTHSECS STR DEX STA WILL SIZE HSTR HSTA HDEX HWILL HSIZE COLOR=@lock me/##;@no here
+-
+&DOSTR Genotype: Random Generic Horses=switch(1,gt(%0,74),very strong,gt(%0,49),strong,gt(%0,24),of average strength,delicate-looking)
+-
+&DOSTA Genotype: Random Generic Horses=switch(1,gt(%0,74),lots of,gt(%0,49),plenty of,gt(%0,24),average,low)
+-
+&DODEX Genotype: Random Generic Horses=switch(1,gt(%0,74),light-footedly,gt(%0,30),sure-footedly,{steadily, not quite looking where [subj(me)]'s going})
+-
+&DOWILL Genotype: Random Generic Horses=switch(1,gt(%0,74),full of fire,gt(%0,54),stubborn,gt(%0,30),well-behaved,docile)
+-
+&DOSIZE Genotype: Random Generic Horses=switch(1,gt(%0,74),large,gt(%0,54),medium-sized,gt(%0,34),small,very small)
+-
+&MANES1 Genotype: Random Generic Horses=white|snowy|icy white
+-
+&SHADES1 Genotype: Random Generic Horses=snowy|icy|gleaming
+-
+@set Genotype: Random Generic Horses=AUDIBLE
+-
+@set Genotype: Random Generic Horses=ENTER_OK
+-
+@create Horse - Commands
+-
+&CMD-PET Horse - Commands=$pet *:@emit [switch(%0,name(me),%N reaches out to pet [name(me)].%r[name(me)] [u([u(source)]/txt-pet-[rand(5)],%N,%p,[obj(me)],[poss(me)])])] 
+-
+&CMD-GRAZE Horse - Commands=$graze *:@pemit %N=[setq(0,%N)][setq(1,[poss(me)])][setq(2,[name(me)])][setq(3,[loc(me)])][setq(4,[owner(me)])][r(2)] nickers softly.;@switch/first %0=r(2),{@listen me=*has arrived.;:lowers [r(1)] head and begins to graze.;&status-grazing me=1;@wait 30=@emit [u([u(source)]/txt-graze-[rand(5)],r(0),r(1),r(2),r(3),r(4))];@wait 60=@emit [u([u(source)]/txt-graze-[rand(5)],r(0),r(1),r(2),r(3),r(4))];@wait 150=@emit [u([u(source)]/txt-graze-[rand(5)],r(0),r(1),r(2),r(3),r(4))]},
+-
+&CMD-LEAD Horse - Commands=$lead *:@switch/first %0=[name(me)],{@switch/first %l=[num(me)],{@pemit %#=You cannot lead a horse you are sitting on!},{@switch/first %#=[v(owner-vr)],{@pemit %#=You take [name(me)] by the reins.;@oemit %#=%N takes [name(me)] by the reins.;&mon-follow me=^%N has left.:[v(func-follow-exits)];&data-leader me=%#},{@switch/first [hasflag(%l, haven)]=1,{@pemit %#=Only the virtual owner can lead a horse from a Haven'd room.},{@pemit %#=You take [name(me)] by the reins.;@oemit %#=%N takes [name(me)] by the reins.;&mon-follow me=^%N has left.:[v(func-follow-exits)];&data-leader me=%#}}}},
+-
+&FUNC-FOLLOW-EXITS Horse - Commands=go [iter(lexits(here),switch(loc(##),loc(v(data-leader)),name(##)))];enter [iter(lcon(here),switch(##,loc(v(data-leader)),name(##)))];@fo me=[switch(loc(here),loc(v(data-leader)),leave)];@wait 1=@tel [switch(loc(me),loc(v(data-leader)),,loc(v(data-leader)))]
+-
+&CMD-RELEASE Horse - Commands=$release *:@switch/first %0=[name(me)],{@pemit %#=You drop [name(me)]'s reins.;@pemit %#=%N drops [name(me)]'s reins;&MON-FOLLOW me=;&DATA-LEADER me=},
+-
+&CMD-SADDLE Horse - Commands=$saddle *:@switch/first %0=[name(me)],{@emit [u([u(source)]/txt-saddle-[div(v(will),25)],%N, %o, [name(me)], [obj(me)], [subj(me)])];&status-saddled me=1;&status-hitched me=0},
+-
+@Succ Horse - Commands=You call [name(me)], and the horse comes to stand beside you, nuzzling for a treat.
+-
+@Osucc Horse - Commands=calls [name(me)], who moves close beside %N, nuzzling for a treat.
+-
+@Drop Horse - Commands=You release [name(me)], who moves off a few paces, watching you.
+-
+@Odrop Horse - Commands=releases [name(me)], letting the lead rope hang to the ground. [name(me)] stands quietly, watching %N.
+-
+@Desc Horse - Commands=[u(desc-[u(config-desc)])]
+-
+&CMD-GRAZE-STOP Horse - Commands=$whoa *:@switch/first %0=[name(me)],{:raises [poss(me)] head from the grass and looks around.;@ahear me=;@listen me=*;&status-grazing me=0;@halt me},
+-
+@Idesc Horse - Commands=[switch(v(status-hitched),1,{You sit in a wagon hitched to [name(me)].},{You sit atop a [v(hsize)] [lcstr(v(color))],[switch(v(status-saddled),1,%bholding the reins lightly.,%bbalancing on [poss(me)] bare back.)]})]
+-
+@Leave Horse - Commands=You [switch([v(status-saddled)]/[v(status-hitched)],1/0,slide out of the saddle.,0/0,slip off [v(truename)]'s bare back.,0/1,climb out of the wagon.)]
+-
+@Adesc Horse - Commands=@switch/first [hasflag(v(owner-vr),connect)=1,{@switch/first %#=[v(owner-vr)],,@pemit [v(owner-vr)]=[v(truename)]> %N just looked at me.},
+-
+@Oxleave Horse - Commands=slips [switch(v(status-saddled),1,out of the saddle.,off [name(me)]'s bare back.)]
+-
+&SOURCE Horse - Commands=DBREF## OF 'Data Object'
+-
+@Listen Horse - Commands=*
+-
+&SPECIES Horse - Commands=horse
+-
+@Filter Horse - Commands={*has arrived.},{*has left.}
+-
+@Prefix Horse - Commands=On horseback,
+-
+&DESC-GRAZING Horse - Commands=[u([v(source)]/desc-grazing,[subj(me)],[poss(me)])]
+-
+&DESC-BASE Horse - Commands=This is a [v(hsize)] [v(color)]. [capstr(subj(me))]'s [v(hstr)], with [v(hsta)] stamina, and [subj(me)] walks around [v(hdex)], looking [v(hwill)].
+-
+&CMD-UNSADDLE Horse - Commands=$unsaddle *:@switch/first %0=name(me),{&status-saddled me=0;@emit [switch(%#,[u(owner-vr)],%N unsaddles [name(me)].,[name(me)] figits restlessly but allows %N to unsaddle [obj(me)].)]},
+-
+&CMD-RIDE Horse - Commands=$ride *:@switch/first %l=[num(me)],{@switch/first %#=[v(owner-vr)],@force me=go %0,{@switch/first [hasflag([loc(me)], haven)]=1,{@pemit %#=Only the virtual owner can ride a horse from a Haven'd room.},@force me=go %0 }},
+-
+&CMD-POSE Horse - Commands=$* pose *:@switch/first %0=[name(me)],{@switch/first %#=[v(owner-vr)],@force me=:[secure(%1)],@force me=:swishes [poss(me)] tail.},
+-
+@Inprefix Horse - Commands=Nearby,
+-
+&CMD-REVEAL Horse - Commands=$reveal *:@switch/first %0=name(me),{@pemit %#=My truename is [v(truename)] and my last legal owner was [name([v(owner-vr)])].},
+-
+&CMD-AGE Horse - Commands=$age *:@switch/first %0=[name(me)],@pemit %#=[u(func-age-exact)]
+-
+&FUNC-AGE-EXACT Horse - Commands=[name(me)] appears to be about [u(func-get-years,div(div(sub(secs(), v(birthsecs)), 604800), 12))], [mod(div(sub(secs(), v(birthsecs)), 604800), 12)] months, and [mod(div(sub(secs(), v(birthsecs)), 21600), 28)] days old.
+-
+&FUNC-AGE Horse - Commands=[name(me)] appears to be about [u(func-get-years,div(div(sub(secs(),v(birthsecs)),604800), 12))]
+-
+&FUNC-GET-YEARS Horse - Commands=switch(%0,1,1 year old, %0 years old)
+-
+@Use Horse - Commands=[center(** WARNING **,70)]%r[center(This horse can be stolen unless stabled in a public stable.,70)]%r[center(Generic Horse Commands,70)]%r%r[ljust(Ride <direction or exitname>,35)]Moves [name(me)] in <direction>%r[space(35)]or through <exitname>%r[space(35)]Only useable when mounted.%r%r[ljust(Mount [name(me)],35)]Dismount%r[ljust(Saddle [name(me)],35)]Unsaddle [name(me)]%r[ljust(Hitch [name(me)],35)]Unhitch [name(me)]%r%r[ljust(Lead [name(me)],35)]Makes [name(me)] follow you.%r[ljust(Release [name(me)],35)]Stops [name(me)] from following.%r[ljust(Graze [name(me)],35)]Set [name(me)] to grazing.%r[ljust(Whoa [name(me)],35)]Stop [name(me)] from grazing.%r[ljust(Pet [name(me)],35)]%r[ljust(Rename [name(me)]=<newname>,35)]%r[ljust(Sell [name(me)]=<new owner>,35)]%r%r%t(for owner-only commands try '[name(me)] owner commands')
+-
+@Ouse Horse - Commands=peers with curiousity at a nearby horse.
+-
+&CMD-SELL Horse - Commands=$sell *=*:@switch/first %0=name(me),{@switch/first %#=[v(owner-vr)],{&owner-vr me=num(*%1);@remit %l=%N sells %0 to %1.},{@remit %l=%N sells %0 to %1.}},
+-
+&CMD-RENAME Horse - Commands=$rename *=*:@switch/first %0=name(me),{@switch/first %#=[v(owner-vr)],{@name me=%1;&truename me=%1;@pemit [v(owner-vr)]=You have renamed your horse %1.;&ealias me=mount %1},{&ealias me=mount %1;@name me=%1;@pemit %#=You have renamed your horse %1.}},
+-
+&CMD-CONFIG Horse - Commands=$config *=*:@switch %0=name(me),{@switch %#=[v(owner-vr)],{@switch %1=fancy,{@pemit %#=You have changed your config for %0 to 'fancy'.;&config me=fancy},{@pemit %#=You have changed your config for %0 to 'plain'.;&config me=plain}}},{@pemit %#=You are not the vr-owner of this horse. You may not use this command.}},
+-
+&CONFIG Horse - Commands=plain
+-
+@Aenter Horse - Commands=@listen me=*;&status-grazing me=0;&riders me=[v(riders)] %N;@switch/first [v(config)]=plain,,@name me=[switch(words(v(riders)),0,[v(truename)],1,[v(truename)] carrying [first(v(riders))],[v(truename)] carrying [first(v(riders))] [iter(rest(v(riders)),and ##)])]
+-
+@Aleave Horse - Commands=&riders me=[remove([v(riders)],%N)];@switch/first [v(config)]=plain,,@name me=[switch(words(v(riders)),0,[v(truename)],1,[v(truename)] carrying [first(v(riders))],[v(truename)] carrying [first(v(riders))] [iter(rest(v(riders)),and ##)])]
+-
+@Infilter Horse - Commands={*has arrived.},{*has left.}
+-
+&STATUS-SADDLED Horse - Commands=0
+-
+&CMD-DESC Horse - Commands=$paint * *=*:@switch/first %0=name(me),{@switch/first %#=[v(owner-vr)],{&desc-[switch(%1,detail,detail,saddle,saddle,wagon,wagon,detail)] me=[mid(%2,0,800)];@pemit %#=You have added a [switch(%1,detail,detail,saddle,saddle,wagon,wagon,detail)] description to %0's memory.},{@pemit %#=Only %0's virtual owner can add desc details.}},
+-
+&USE1 Horse - Commands=Commands that only work for the virtual-owner:%r[ljust(Config [name(me)]=<plain or fancy>,30)]%rThe plain setting will keep the horse's name always the same, the fancy setting will alter the name each time a rider mounts or dismounts, to something like 'Steed carrying Bob' or 'Steed carrying Bob and Sue'.%r%r[ljust(Paint [name(me)] <detail|saddle|wagon>=<text>,40)]%rRecord <text> to add 'detail' to your horse's desc, to add a custom 'saddle' desc instead of the default, or add a 'wagon' desc if your horse might pull one.%r%rCustom [name(me)]=<all|basic|owner>%rThis one lets you choose whether your horse's desc shows only it's birth desc, your 'detail' owner desc, or all-of-the-above. All three of these include the saddled/hitched/grazing display and age at the end.%r%r[ljust([name(me)] pose <action>,30)]%rForces [name(me)] to do a pose..remember that what you type here will be treated as if it .already. has a \: in front of it.. poses only.
+-
+&CMD-HELP-OWNER Horse - Commands=$* owner commands:@switch %0=name(me),{@pemit %#=[u(use1)]},
+-
+&FUNC-FOLLOW-LEADER Horse - Commands=@set me=dark;@tel *[v(data-leader)];leave;@set me=!dark
+-
+@Oenter Horse - Commands=mounts up.
+-
+@Oxenter Horse - Commands=mounts [name(me)].
+-
+@Lalias Horse - Commands=dismount
+-
+&CONFIG-DESC Horse - Commands=all
+-
+&DESC-ALL Horse - Commands=[u(desc-base)] [u(desc-detail)] [switch(v(status-grazing),1,[space(2)][capstr(subj(me))] has [poss(me)] nose buried deep in some grass.)] [switch(v(status-hitched),1,[u(desc-wagon)],[switch(v(status-saddled),1,[u(desc-saddle)])])]%r[u(func-age)]
+-
+&CMD-CONFIG-DESC Horse - Commands=$custom *=*:@switch %0=name(me),{@switch %#=[v(owner-vr)],{@switch %1=all,{&config-desc me=all;@pemit %#=You set your desc to 'all'.},basic,{&config-desc me=basic;@pemit %#=You set your desc to 'basic'.},owner,{&config-desc me=owner;@pemit %#=You set your desc to 'owner'.},@pemit %#=Please use 'all' 'basic' or 'owner' only with 'custom'},{@pemit %#=Only the vr-owner of this horse may use that command.}},
+-
+&DESC-BASIC Horse - Commands=[u(desc-base)] [switch(v(status-grazing),1,[space(2)][capstr(subj(me))] has [poss(me)] nose buried deep in some grass.)] [switch(v(status-hitched),1,[u(desc-wagon)],[switch(v(status-saddled),1,[u(desc-saddle)])])]%r[u(func-age)]
+-
+&DESC-OWNER Horse - Commands=[u(desc-detail)] [switch(v(status-grazing),1,[space(2)][capstr(subj(me))] has [poss(me)] nose buried deep in some grass.)] [switch(v(status-hitched),1,[u(desc-wagon)],[switch(v(status-saddled),1,[u(desc-saddle)])])]%r[u(func-age)]
+-
+&CMD-HITCH Horse - Commands=$hitch *:@switch/first %0=[name(me)],{@emit %N harnesses up [name(me)];&status-hitched me=1;&status-saddled me=0},
+-
+&CMD-UNHITCH Horse - Commands=$unhitch *:@switch %0=[name(me)],{&status-hitched me=0;@emit %N unhitches [name(me)].},
+-
+&STATUS-HITCHED Horse - Commands=0
+-
+&DESC-WAGON Horse - Commands=[name(me)] is hitched to a wagon.
+-
+&DESC-SADDLE Horse - Commands=[u([v(source)]/desc-saddled,[poss(me)])]
+-
+&SHORT-DESC Horse - Commands=[before(u(color),tail)]tail
+-
+@set Horse - Commands=VISUAL
+-
+@set Horse - Commands=COMMANDS
+-
+@create Horse - Data Object
+-
+&TXT-PET-0 Horse - Data Object=whickers softly as %0 rubs %1 hand along %3 neck.
+-
+&TXT-PET-1 Horse - Data Object=nickers at %0.
+-
+&TXT-PET-2 Horse - Data Object=swishes %3 tail at %0.
+-
+&TXT-PET-3 Horse - Data Object=looks happy when %0 pets %2.
+-
+&TXT-PET-4 Horse - Data Object=ducks %3 head so %0 can scratch %3 ears.
+-
+&TXT-GRAZE-0 Horse - Data Object=%2 chomps a large bite out of a patch of grass.
+-
+&TXT-GRAZE-1 Horse - Data Object=%2 snuffles around in the grass underfoot for a particularly tasty bit.
+-
+&TXT-GRAZE-2 Horse - Data Object=%2 snuffles %1 muzzle in the grass, intent on grazing.
+-
+&TXT-GRAZE-3 Horse - Data Object=%2 whuffles at you and then resumes grazing.
+-
+&TXT-GRAZE-4 Horse - Data Object=[switch(%3,[loc(%4)],%2 rubs %1 head against [name(%4)]'s shoulder.,%2 scratches %1 head against a leg and goes intently back to grazing.)]
+-
+&TXT-SADDLE-0 Horse - Data Object=%0 approaches %2 with a saddle; the horse stands quietly as %4 is tacked up.
+-
+&TXT-SADDLE-1 Horse - Data Object=%0 approaches %2 with a saddle; the horse shies away, then settles down and allows %3self to be tacked up quietly.
+-
+&TXT-SADDLE-2 Horse - Data Object=%0 approaches %2 with a saddle; the horse shies away, leading %1 for a brief, if merry chase before allowing %3self to be tacked up.
+-
+&TXT-SADDLE-3 Horse - Data Object=%0 approaches %2 with a saddle; the horse shies away, leading %1 for a merry chase before very reluctantly standing not so still to be saddled up.
+-
+&DESC-SADDLED Horse - Data Object=There's a saddle settled securely on %0 back, and a well-oiled bridle on %0 head.
+-
+&DESC-GRAZING Horse - Data Object=capstr(%0) has %1 nose buried in the grass.
+-
+&ERROR-WHICH Horse - Data Object=That command needs to know .which. horsename you want to deal with. If you retype with <command> <horsename> it may work.
+-
+@set Horse - Data Object=HALTED
+-
+@create Private Stall
+-
+@lock Private Stall=#1
+-
+&CMD-CREATE-RANDOM Private Stall=$make horse * * *:@create [%0];@dolist [1 2 3 4 5 6 7 8]=&no## [%0]=rand(50);&cgene [%0]=[rand(4)] [add(rand(5),1)];&mgene [%0]=1 [rand(3)];&sgene [%0]=1 [rand(3)];@parent [%0]=[v(gene-parent)];@tr [%0]/selfdesc;@tr [%0]/setcolor=%2;&ealias [%0]=mount %0;&birthsecs [%0]=sub(secs(),mul(%1,7257600));@set [%0]=Monitor;@set [%0]=audible;@set [%0]=enter_ok;@listen [%0]=*;@set [%0]=sex:%2;&owner-vr [%0]=%#;@wait 3=@parent [%0]=[v(command-parent)];@wait 4=@pemit %#=You have created a [switch([%2],female,mare,stallion)] named %0.;@drain me;@link %0=me;@lock [%0] =*horse-owner;&truename [%0]=[%0];@wait 6=@chown %0=horse-owner
+-
+&COMMAND-PARENT Private Stall=DBREF## of COMMANDS OBJECT
+-
+&GENE-PARENT Private Stall=DBREF## of GENOTYPE OBJECT
+-
+@Use Private Stall=To make a horse, type carefully: 'make horse <one word name of horse> <age in a numeral 1-9> <gender female or male only>'
+-
+@Desc Private Stall=A large box stall with a sturdy lock to keep the curious away.
+-
+@Ealias Private Stall=stall
+-
+@Lalias Private Stall=Out;o;outside;leave;le;exit
+-
+@Enter Private Stall=You enter the ooc horse creating widget, to get instructions, type 'use here'.
+-
+@Oxleave Private Stall=comes out of the private stall.
+-
+@Leave Private Stall=Remember you have to 'lead <horsename> to get em out.
+-
+@Oxenter Private Stall=enters the private stall.
+-
+@set Private Stall=OPAQUE
+-
+@set Private Stall=ENTER_OK
+-
+@set Private Stall=COMMANDS
+

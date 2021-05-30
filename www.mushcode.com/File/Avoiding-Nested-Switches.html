@@ -1,0 +1,352 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Code: Avoiding Nested Switches</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <!-- Apple devices fullscreen -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <!-- Apple devices fullscreen -->
+    <meta names="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <!-- Bootstrap -->
+	<link rel="stylesheet" href="../Theme/Flat/html/css/bootstrap.min.css">
+	<!-- Bootstrap responsive -->
+	<link rel="stylesheet" href="../Theme/Flat/html/css/bootstrap-responsive.min.css">
+	<!-- jQuery UI -->
+	<link rel="stylesheet" href="../Theme/Flat/html/css/plugins/jquery-ui/smoothness/jquery-ui.css">
+	<link rel="stylesheet" href="../Theme/Flat/html/css/plugins/jquery-ui/smoothness/jquery.ui.theme.css">
+	<!-- Theme CSS -->
+	<link rel="stylesheet" href="../Theme/Flat/html/css/style.css">
+	<!-- Color CSS -->
+	<link rel="stylesheet" href="../Theme/Flat/html/css/themes.css">
+
+
+    <link rel="stylesheet" href="../Content/site.css">
+
+    <!-- jQuery -->
+    <script src="../Theme/Flat/html/js/jquery.min.js"></script>
+    <!-- Nice Scroll -->
+    <script src="../Theme/Flat/html/js/plugins/nicescroll/jquery.nicescroll.min.js"></script>
+    <!-- jQuery UI -->
+    <script src="../Theme/Flat/html/js/plugins/jquery-ui/jquery.ui.core.min.js"></script>
+    <script src="../Theme/Flat/html/js/plugins/jquery-ui/jquery.ui.widget.min.js"></script>
+    <script src="../Theme/Flat/html/js/plugins/jquery-ui/jquery.ui.mouse.min.js"></script>
+    <script src="../Theme/Flat/html/js/plugins/jquery-ui/jquery.ui.resizable.min.js"></script>
+    <script src="../Theme/Flat/html/js/plugins/jquery-ui/jquery.ui.sortable.min.js"></script>
+    <!-- slimScroll -->
+    <script src="../Theme/Flat/html/js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+    <!-- Bootstrap -->
+    <script src="../Theme/Flat/html/js/bootstrap.min.js"></script>
+    <!-- Form -->
+    <script src="../Theme/Flat/html/js/plugins/form/jquery.form.min.js"></script>
+
+    <!-- Theme framework -->
+    <script src="../Theme/Flat/html/js/eakroko.min.js"></script>
+    <!-- Theme scripts -->
+    <script src="../Theme/Flat/html/js/application.min.js"></script>
+
+    <!--[if lte IE 9]>
+		<script src="js/plugins/placeholder/jquery.placeholder.min.js"></script>
+		<script>
+			$(document).ready(function() {
+				$('input, textarea').placeholder();
+			});
+		</script>
+	<![endif]-->
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="http://www.mushcode.com/File/img/favicon.ico" />
+    <!-- Apple devices Homescreen icon -->
+    <link rel="apple-touch-icon-precomposed" href="http://www.mushcode.com/File/img/apple-touch-icon-precomposed.png" />
+
+</head>
+
+<body class="theme-green">
+    <div id="navigation">
+        <div class="container-fluid">
+            <a href="../index.html" id="brand">MUSHCode.com</a>
+        </div>
+    </div>
+    <div class="container-fluid" id="content">
+        <div id="left">
+            <div class="subnav">
+                <div class="subnav-title">
+                    <a href="Avoiding-Nested-Switches.html#" class='toggle-subnav'>
+                        <i class="icon-angle-down"></i>
+                        <span>About</span>
+                    </a>
+                </div>
+                <ul class="subnav-menu">
+                    <li>
+                        <a href="../index.html">Overview</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="subnav">
+                <div class="subnav-title">
+                    <a href="Avoiding-Nested-Switches.html#" class='toggle-subnav'>
+                        <i class="icon-angle-down"></i>
+                        <span>Files</span>
+                    </a>
+                </div>
+                <ul class="subnav-menu">
+                    <li class='dropdown'>
+                        <a href="Avoiding-Nested-Switches.html#" data-toggle="dropdown">Code</a>
+                        
+<ul class="dropdown-menu">
+        <li>
+            <a href="../Category/Administration.html">Administration</a>
+        </li>
+        <li>
+            <a href="../Category/Building.html">Building</a>
+        </li>
+        <li>
+            <a href="../Category/Bulletin-Board.html">Bulletin Board</a>
+        </li>
+        <li>
+            <a href="../Category/Combat.html">Combat</a>
+        </li>
+        <li>
+            <a href="../Category/Dynamic-Space.html">Dynamic Space</a>
+        </li>
+        <li>
+            <a href="../Category/Fonts.html">Fonts</a>
+        </li>
+        <li>
+            <a href="../Category/Functions.html">Functions</a>
+        </li>
+        <li>
+            <a href="../Category/Games.html">Games</a>
+        </li>
+        <li>
+            <a href="../Category/Globals.html">Globals</a>
+        </li>
+        <li>
+            <a href="../Category/Mail-Systems.html">Mail Systems</a>
+        </li>
+        <li>
+            <a href="../Category/Other.html">Other</a>
+        </li>
+        <li>
+            <a href="../Category/Schedulers.html">Schedulers</a>
+        </li>
+        <li>
+            <a href="../Category/Time.html">Time</a>
+        </li>
+        <li>
+            <a href="../Category/Vehicles.html">Vehicles</a>
+        </li>
+        <li>
+            <a href="../Category/Vendors.html">Vendors</a>
+        </li>
+        <li>
+            <a href="../Category/Weather-Systems.html">Weather Systems</a>
+        </li>
+</ul>
+                    </li>
+                    <li class='dropdown'>
+                        <a href="Avoiding-Nested-Switches.html#" data-toggle="dropdown">Classes</a>
+                        
+<ul class="dropdown-menu">
+        <li>
+            <a href="../Category/Administration.html">Administration</a>
+        </li>
+        <li>
+            <a href="../Category/Building.html">Building</a>
+        </li>
+        <li>
+            <a href="../Category/Globals.html">Globals</a>
+        </li>
+        <li>
+            <a href="../Category/Hardcode.html">Hardcode</a>
+        </li>
+        <li>
+            <a href="../Category/Other.html">Other</a>
+        </li>
+        <li>
+            <a href="../Category/Softcode.html">Softcode</a>
+        </li>
+</ul>
+                    </li>
+                    <li>
+                        <a href="../Manuals.html">Manuals</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="subnav">
+                <div class="subnav-title">
+                    <a href="Avoiding-Nested-Switches.html#" class='toggle-subnav'>
+                        <i class="icon-angle-down"></i>
+                        <span>Misc</span>
+                    </a>
+                </div>
+                <ul class="subnav-menu">
+                    <li>
+                        <a href="../Ascii2Mu.html">ASCII To MUSHCode</a>
+                    </li>
+                    <li>
+                        <a href="../MushList.html">MUSH/MUX List</a>
+                    </li>
+                    <li>
+                        <a href="../MushRoom.html">MUSHRoom</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="subnav">
+                <div class="subnav-title">
+                    <a href="Avoiding-Nested-Switches.html#" class='toggle-subnav'>
+                        <i class="icon-angle-down"></i>
+                        <span>Contribute</span>
+                    </a>
+                </div>
+                <ul class="subnav-menu">
+                    <li>
+                        <a href="../Submit.html">Submit</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div id="main">
+            <div class="container-fluid">
+                <div class="breadcrumbs">
+                    <ul>
+                        
+    <li>
+        <a href="../index.html">Home</a>
+        <i class="icon-angle-right"></i>
+    </li>
+    <li>
+        <a href="../Category/Softcode.html">Softcode</a>
+        <i class="icon-angle-right"></i>
+    </li>
+    <li>
+        <a href="Avoiding-Nested-Switches.html#">Avoiding Nested Switches</a>
+    </li>
+
+                    </ul>
+                </div>
+                <div class="row-fluid">
+                    <div class="span12">
+                        
+
+
+
+<div class="box">
+    <div class="box-title title">
+        <h2>
+            Avoiding Nested Switches
+        </h2>
+    </div>
+    <div class="box-content">
+
+        <div class="description">
+            <p>Raevnos illustrates how to avoid nesting the @switch command on @switch and switch().</p>
+        </div>
+
+        <div class="author">
+            <strong>Author:</strong>
+                <a href="../Author/Raevnos.html">Raevnos</a>
+        </div>
+
+        <div class="author">
+            <strong>Category:</strong>
+            <a href="../Category/Softcode.html">Softcode</a>
+        </div>
+
+            <div class="commands">
+            <strong>Commands:</strong>
+                    <a href="http://www.mushcode.com/Command/@pemit" class="command">@pemit</a>,
+                    <a href="../Command/@select.html" class="command">@select</a>,
+                    <a href="http://www.mushcode.com/Command/@switch" class="command">@switch</a>.
+            </div>
+
+            <div class="functions">
+                <strong>Functions:</strong>
+                        <a href="../Function/comp.html" class="function">comp&#40;&#41;</a>,
+                        <a href="../Function/cor.html" class="function">cor&#40;&#41;</a>,
+                        <a href="../Function/default.html" class="function">default&#40;&#41;</a>,
+                        <a href="../Function/get.html" class="function">get&#40;&#41;</a>,
+                        <a href="../Function/gte.html" class="function">gte&#40;&#41;</a>,
+                        <a href="../Function/hasflag.html" class="function">hasflag&#40;&#41;</a>,
+                        <a href="../Function/hastype.html" class="function">hastype&#40;&#41;</a>,
+                        <a href="../Function/if.html" class="function">if&#40;&#41;</a>,
+                        <a href="../Function/ifelse.html" class="function">ifelse&#40;&#41;</a>,
+                        <a href="../Function/inc.html" class="function">inc&#40;&#41;</a>,
+                        <a href="../Function/lcon.html" class="function">lcon&#40;&#41;</a>,
+                        <a href="../Function/name.html" class="function">name&#40;&#41;</a>,
+                        <a href="../Function/nearby.html" class="function">nearby&#40;&#41;</a>,
+                        <a href="../Function/num.html" class="function">num&#40;&#41;</a>,
+                        <a href="../Function/obj.html" class="function">obj&#40;&#41;</a>,
+                        <a href="../Function/or.html" class="function">or&#40;&#41;</a>,
+                        <a href="../Function/pemit.html" class="function">pemit&#40;&#41;</a>,
+                        <a href="../Function/room.html" class="function">room&#40;&#41;</a>,
+                        <a href="../Function/setdiff.html" class="function">setdiff&#40;&#41;</a>,
+                        <a href="../Function/setq.html" class="function">setq&#40;&#41;</a>,
+                        <a href="../Function/switch.html" class="function">switch&#40;&#41;</a>,
+                        <a href="../Function/t.html" class="function">t&#40;&#41;</a>.
+            </div>
+
+
+            <div class="servers">
+                <strong>Compatibility:</strong>
+                        <a href="../Server/PennMUSH.html" class="server">PennMUSH</a>,
+                        <a href="../Server/TinyBit.html" class="server">TinyBit</a>,
+                        <a href="../Server/TinyMUX.html" class="server">TinyMUX</a>.
+            </div>
+
+    </div>
+</div>
+
+
+<div class="box box-bordered box-condensed">
+    <div class="box-title">
+        <h3>
+	        <i class="icon-reorder"></i>
+	        MUSHCode for Avoiding Nested Switches
+        </h3>
+        <div class="actions">
+	        <a class="btn btn-mini select-all" href="Avoiding-Nested-Switches.html#">
+                    <i class="icon-resize-full"></i> Select Content
+            </a>
+        </div>
+    </div>
+    <div id="code" class="box-content content">
+        Topic: Avoiding nested switches<br/>Author: Raevnos<br/>Summary: Raevnos illustrates how to avoid nesting the @switch command<br/>within itself.<br/><br/>It's 08:48 pm on Thursday, August 02 in Chicago, IL, but in the world of <br/>M*U*S*H, it's day.<br/><br/>Code Classroom(#1061RnJ)<br/>A chalkboard fills one wall, with an old beat-up lectern in front of it. The <br/>other three walls are painted off-white. A few long flourescent lights are <br/>attached to the ceiling making the room bright. Several chairs with attached <br/>desktop-like surfaces (standard classroom chairs) are scattered about the room<br/><br/>in no particular order.<br/><br/>Contents:<br/>Raveness(#3478PelACc)<br/>Reklaw(#6828np)<br/>The_Prof(#749PACc)<br/>Matt(#128PerACMc)<br/>Noltar(#1311PweACcm)<br/>Cheetah(#6388POaeACcm)<br/>Obvious exits:<br/>Hallway &lt;O&gt;<br/><br/>Raevnos says, "Okay. Tonight I'll talk about nested @switches, why they're<br/>bad, and what to do about them. At times I'll ask for questions, so please <br/>save any till then."<br/><br/>Raevnos says, "First question time. Anyone NOT know what @switch is?"<br/><br/>Raevnos says, "Well, either you all do or you're idle. Good enough. :)"<br/><br/>Reklaw is idle, that's for sure.<br/><br/>Cheetah can sign for either category. Oh, we're not playing bingo?<br/><br/>Raveness is not idle :)<br/><br/>Raevnos says, "Nested @switches happen when a @switch's actions include <br/>further @switches. @switch test=val,something,{@switch test2=val2, something2,<br/><br/>...} is a typical form."<br/><br/>Raevnos will be using a basic mutter command as a working example.<br/><br/>Raevnos mutters to Matt<br/><br/>Matt icks at the code. :) Nestorama, dude. :)<br/><br/>Naive @switch(#215V)<br/>Type: Thing Flags: VISUAL<br/>Owner: Raevnos	Zone: *NOTHING*  Ducats: 10<br/>Parent: *NOTHING*<br/>Powers: <br/>Warnings checked: none<br/>Created: Thu May  3 00:24:47 2001<br/>Last Modification: Thu Aug  2 20:53:36 2001<br/>MUTTER_CMD [#1622]: $mutter *=?*:@switch hastype(*%0, player)=#-1, @pemit <br/>%#=That's not a player, {@switch nearby(%#, *%0)=0, @pemit %#=You can't mutter<br/><br/>to [obj(*%0)] here., {@switch %1=:, {@pemit/list %# [num(*%0)]=\[mutter\] %N <br/>%2; @pemit/list setdiff(lcon(%L), %# [num(*%0)])=%N mutters to [name(*%0)]}, <br/>\;, {@pemit/list %# [num(*%0)]=%N%2; @pemit/list setdiff(lcon(%L), %# <br/>[num(*%0)])=%N mutters to \[name(*%0)]}, {@pemit %#=You mutter to [name(*%0)];<br/><br/>@pemit *%0=%N mutters, "%1%2"; @pemit/list setdiff(lcon(%L), %# [num(*%0)])=%N<br/><br/>mutters to [name(*%0)].}}}<br/>Home: Rec Room<br/>Location: Code Classroom<br/><br/>Raevnos says, "The object is visual if you'd like to examine it."<br/><br/>Raveness peeks.<br/><br/>Cheetah tries to read the code, but decides to stop doing that 1/3 through.<br/><br/>Raevnos says, "It's also rather an extreme case of nested switches, 3 levels <br/>deep."<br/><br/>Raevnos says, "The first switch makes sure you try to mutter to a player. The <br/>second that you mutter to something nearby (No muttering across the mush!), <br/>and the third does the actual muttering, with the normal : and ; <br/>interpretation."<br/><br/>Raevnos says, "It's big and ugly, but it works, so why bother to make it <br/>better?"<br/><br/>Raevnos says, "Anyone?"<br/><br/>Cheetah says, "To help other people understand it better."<br/><br/>Raveness says, "to make it more easily upgradable?"<br/><br/>Reklaw says, "to make it work faster, more reliable."<br/><br/>Matt says, "To make it easier to change in the future (and to reduce your <br/>paracetamol intake)."<br/><br/>Matt snaps Raveness.<br/><br/>Raveness frowns.<br/><br/>Matt errs, 'snaps' at. :)<br/><br/>Raevnos says, "Reklaw and Raveness win."<br/><br/>Cheetah says, "Chances are this'll be a global, and other admin will look at <br/>it too. And you'll have problems reading this yourself after a year too."<br/><br/>Raevnos has problems reading it and he wrote it an hour ago! ;)<br/><br/>Cheetah says, "Or earlier.. :)"<br/><br/>Raveness says, "wouldn't this be better as a functioN?"<br/><br/>Raveness says, "Switch()?"<br/><br/>Cheetah says, "Or ifelse() is the situation lends iself for that."<br/><br/>Raevnos says, "Let's talk about speed and reliablity now, since ya'll semm<br/>to have covered the maintainability bit without me. Each action argument that <br/>@switch executues gets put on the command queue, and actually happens at a <br/>later time, with up to a 1 second delay. So for that mutter, it takes up to 4 <br/>queue entries (One for the initial mutter command, and one per @switch in it).<br/><br/>Other commands can happen between the ones used by mutter. This isn't a <br/>problem with mutter, but it can be with some other things. ex naive/stat_cmd"<br/><br/>STAT_CMD [#1622]: $strength:@switch hasflag(%#, fighter)=1, @pemit %#=You've <br/>already been set up with stats and stuff!, {@switch <br/>get(%#/strength)=&gt;[get(stat database/max_strength)], @pemit %#=Your strength <br/>can't be raised any more., &amp;strength %#=inc(default(%#/strength, 1))}<br/><br/>Raevnos says, "That's a typical bit of code for a basic character generation, <br/>for increasing a stat. It does a check to make sure the player hasn't maxxed <br/>out the stat already, and if not, queues another command to raise it. If <br/>someone uses the strength command multiple times really quickly (Or by doing <br/>something like @force me={strength;strength;strength;strengh}, all the checks <br/>to see if the stat is maxxed will happen right after one another... and then <br/>it gets raised multiple times. It's easy to raise it above the max, which you<br/>don't want."<br/><br/>Raevnos says, "In cases like that, you want the whole thing (Checking and <br/>setting) to happen in one atomic queue entry. For things like the mutter <br/>command, though, you just want to reduce the number of queue cycles. This next<br/><br/>object takes one approach to it. Still uses @switch, but only one of them."<br/><br/>Better @switch(#216Vn)<br/>Type: Thing Flags: VISUAL NO_COMMAND<br/>Owner: Raevnos	Zone: *NOTHING*  Ducats: 10<br/>Parent: *NOTHING*<br/>Powers: <br/>Warnings checked: none<br/>Created: Thu May  3 00:24:45 2001<br/>Last Modification: Thu Aug  2 19:35:38 2001<br/>MUTTER_CMD [#1622]: $mutter *=?*:@select 0=t(hastype(*%0, player)), @pemit <br/>%#=That's not a player, nearby(%#, *%0), @pemit %#=You can't mutter to <br/>[obj(*%0)] here., comp(%1, :), {@pemit/list %# [num(*%0)]=\[mutter\] %N %2; <br/>@pemit/list setdiff(lcon(%L), %# [num(*%0)])=%N mutters to [name(*%0)]}, <br/>comp(%1, \;), {@pemit/list %# [num(*%0)]=%N%2; @pemit/list setdiff(lcon(%L), <br/>%# [num(*%0)])=%N mutters to \[name(*%0)]}, {@pemit %#=You mutter to <br/>[name(*%0)]; @pemit *%0=%N mutters, "%1%2"; @pemit/list setdiff(lcon(%L), %# <br/>[num(*%0)])=%N mutters to [name(*%0)].}<br/>Home: Rec Room<br/>Location: Code Classroom<br/><br/>Raevnos says, "First big difference: It uses @select, not @switch. The two <br/>commands are very similar, with one small difference: @switch will queue every<br/><br/>action argument who's value matches the test case. In '@switch 1=1, think Hi!,<br/><br/>1, think Hello again!', both thinks happen. With @select (Also known as <br/>@switch/first), only the first matching case happens."<br/><br/>Raevnos says, "This is important because of how the nested switches are <br/>eliminated. Instead of @switch test=value,code, value2,code2, we reverse the <br/>test and value arguments. The value you want to compare against is on the left<br/><br/>of the =, and what you compute to compare against the value in the arguments <br/>to the right. Since multiple things can match, you normally only want the <br/>first. So, @select value=test1,code,test2,code."<br/><br/>Raevnos says, "Anyone utterly lost and confused yet?"<br/><br/>Raveness isn't sure if she's lost yet.<br/><br/>Raveness is reading and rereading that one :)<br/><br/>Cheetah says, "That's a clever way if doing it, actually.."<br/><br/>Raveness says, "where is the peice that decides the ; and :"<br/><br/>Raveness can't find it.<br/><br/>Raveness says, "in the better."<br/><br/>Raevnos says, "So, stepping through this version of the code. 0 is going to be<br/><br/>compared against a variety of test cases, and the first one that matches has <br/>its action argument go off. First the player check happens. <br/>t(hastype(*%0, player)) will return 1 if the player argument to mutter is a <br/>player, and 0 otherwise. If it returns 0, the error message happens. <br/>Otherwise, the next check happens."<br/><br/>Raevnos says, "That's the nearby() test. If nearby() returns 0, the two <br/>objects aren't close to each other. (You can see HELP NEARBY for the exact <br/>rules of what's considered close.) If it returns 1, they're nearby, so the <br/>next test happens."<br/><br/>Raveness says, "Ah.. I see it now."<br/><br/>Raevnos says, "Now the : and ; part. comp() is a function that returns 0 if <br/>its arguments are identical. And we're comparing these test cases against 0. <br/>In these cases, 0 is success, not failure."<br/><br/>Raevnos says, "So it checks for a pose mutter and after that, a semipose one. <br/>Finally, if neither one match, the default case of the @select happens, which <br/>is normal speech."<br/><br/><br/>Raveness says, "I get it now."<br/><br/>Raevnos says, "There is another, similar, way of getting rid of the nested<br/>@switches. Instead of '@select value=test,code,test2,code2', all of the tests <br/>are combined into one, with value patterns that look at the <br/>currently-important bit. Something like <br/>'@select test1|test2=value1|*,code,*|value2,code2'"<br/><br/>Another better @switch(#232Vn)<br/>Type: Thing Flags: VISUAL<br/>Owner: Raevnos	Zone: *NOTHING*  Ducats: 10<br/>Parent: *NOTHING*<br/>Powers: <br/>Warnings checked: none<br/>Created: Thu May  3 00:24:43 2001<br/>Last Modification: Thu Aug  2 19:31:39 2001<br/>MUTTER_CMD [#1622]: $mutter *=?*:@select [hastype(*%0,player)]|[nearby(%#, <br/>*%0)]|%1=#-1|*, @pemit %#=That's not a player, *|0|*, @pemit %#=You can't <br/>mutter to [obj(*%0)] here., 1|1|:, {@pemit/list %# [num(*%0)]=\[mutter\] %N <br/>%2; @pemit/list setdiff(lcon(%L), %# [num(*%0)])=%N mutters to [name(*%0)]}, <br/>1|1|\;, {@pemit/list %# [num(*%0)]=%N%2; @pemit/list setdiff(lcon(%L), %# <br/>[num(*%0)])=%N mutters to \[name(*%0)]}, 1|1|?, {@pemit %#=You mutter to <br/>[name(*%0)]; @pemit *%0=%N mutters, "%1%2"; @pemit/list setdiff(lcon(%L), %# <br/>[num(*%0)])=%N mutters to [name(*%0)].}<br/>Home: Rec Room<br/>Location: Code Classroom<br/><br/>Raevnos says, "The player, nearby, and mutter-type tests are all evaluated and<br/><br/>happen at the start of the switch. Then it looks at the result of the player <br/>test, ignoring the rest. Next the nearby test, ignoring the others. Then, the <br/>pose-type tests, ignoring the other tests."<br/><br/>Raevnos says, "This works well, and is fairly common practice, but there are a<br/><br/>few problems with it over the prior example. First, all the tests always <br/>happen, rather than the bare minimum needed. While this is nice when you <br/>expect the tests to normally succeed, understanding it takes more work. Since <br/>the tests and actions are seperated, instead of being right next to each <br/>other, it's harder to figure out what goes with what... especially if you have<br/><br/>a problem with the matching patterns. You could think one bit checks to see if<br/><br/>a given test succeeded when it's actually checking another test. Adding new <br/>tests at a later date is also tedious, because you have to check ever pattern <br/>to see if you need to change it to account for the extra test."<br/><br/>Raevnos pauses for questions.<br/><br/>The_Prof says, "So would then it not be best practice to use the second <br/>example... kind of like using cor() vs or()"<br/><br/>Raevnos says, "Unless you use and are familiar with the potential maintence<br/>problems with it, yup, the first should be used in preference to the second."<br/><br/>Raevnos says, "Okay. That about covers getting rid of those ugly nested <br/>@switches by compressing them into a single @switch. Now back to the <br/>stat-setting example, where any @switch at all presented problems."<br/><br/>Eliminating @switch completely(#234Vn)<br/>Type: Thing Flags: VISUAL<br/>Owner: Raevnos	Zone: *NOTHING*  Ducats: 10<br/>Parent: *NOTHING*<br/>Powers: <br/>Warnings checked: none<br/>Created: Thu May  3 00:24:38 2001<br/>Last Modification: Thu Aug  2 21:37:11 2001<br/>MUTTER_CMD [#1622]: $mutter *=?*:@break switch(0, t(hastype(*%0, player)), <br/>pemit(%#, That's not a player.)1, nearby(%#, *%0), pemit(%#, You can't mutter <br/>to [obj(*%0)] here.)1, 0); @pemit/list setiff(lcon(%L), %# [num(*%0)])=%N <br/>mutters to [name(*%0)]; @break setq(0, switch(%1, :, \[mutter\] %N %2, \;, <br/>\[mutter\] %N%2))[if(%q0, 1[pemit(%# [num(*%0)], %q0)], 0)]; @pemit %#=You <br/>mutter to [name(*%0)]; @pemit *%0=%N mutters, "%1%2"<br/>STAT_CMD [#1622]: $strength:@break switch(1, hasflag(%#, fighter), pemit(%#, <br/>You're already set up with the combat system!), gte(get(%#/strength), get(stat<br/>database/max_strength)), pemit(%#, Your strength is maxxed out!)1, 0); <br/>&amp;strength %#=inc(default(%#/strength, 1))<br/>Home: Rec Room(#1580RntA)<br/>Location: Code Classroom(#1061RnJ)<br/><br/>Raevnos says, "PennMUSH (And RhostMUSH, and, in its next release, MUX) have a <br/>command called @break. It takes one argument. If that argument evaluates to a <br/>true value, any futher commands in the current ;-seperated list of them is <br/>ignored. Command processing just stops. If the argument is false, @break does <br/>nothing."<br/><br/>Raevnos says, "This means you can get rid of the @switch, by using a @break<br/>that does all the error checking and halts command processing if any errors <br/>happened, and following it by the real work. Everything happens in one atomic <br/>queue cycle, so trying the same command over and over really fast won't cause <br/>timing problems."<br/><br/>Raevnos says, "This error checking frequently involves a switch(), with the<br/>same nested-@switch-elimination techniques applied to it to avoid nested <br/>switch()'s."<br/><br/>Raveness says, "Do you have to have a break between each thing or does<br/>it act sorta like @sel?"<br/><br/>Raevnos says, "Mutter re-written to use @break is a bit complex. In order to <br/>avoid any @switch, it ends up using two @breaks. The strength command is much <br/>easier to follow."<br/><br/>Raevnos says, "The @break would usually be the very first command."<br/><br/>Raevnos says,, "Now, instead of using @break to get everything working in one <br/>queue cycle, I suppose you /could/ do it all in one command, with side-effect <br/>functions galore... but I don't like that, and won't go into it any more. <br/>@switch is the topic, after all. :)"<br/><br/>Raevnos says, "Okay. Questions?"<br/><br/>Raevnos checks pulses.<br/><br/>Raevnos pronouces you all dead and sells your bodies to a medical school. <br/>Class over, thanks for coming! This will be up on Mush 101's web page <br/>sometime fairly soon.<br/><br/>Cheetah gets woken up by Raev checking his pulse.<br/><br/>Raevnos hits Cheetah on the head and sells him anways.<br/><br/>Reklaw says, "Bring out your dead! Bring out your dead!"<br/><br/>Cheetah shrugs it off and runs.<br/><br/>Raveness laughs.<br/><br/>Raevnos is going to stop logging now unless someone wakes up with a question.<br/><br/>Raveness says, "I don't really have a question.. but I'm not clear on @break."<br/><br/>Raveness says, "I guess I have to practice with it."<br/><br/>Raevnos says, "Yup. Practice is good."<br/><br/>Raevnos stops logging.
+    </div>
+</div>
+<script type="text/javascript">
+    var selectText = function(element) {
+        var doc = document;
+        var text = doc.getElementById(element);
+
+        if (doc.body.createTextRange) { // ms
+            var range = doc.body.createTextRange();
+            range.moveToElementText(text);
+            range.select();
+        } else if (window.getSelection) { // moz, opera, webkit
+            var selection = window.getSelection();
+            var range = doc.createRange();
+            range.selectNodeContents(text);
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
+    }
+
+    $('a.select-all').click(function () {
+        selectText('code');
+    });
+</script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</body>
+
+</html>
+<script src="../Scripts/Google.js" type="text/javascript"></script>

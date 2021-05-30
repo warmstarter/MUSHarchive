@@ -1,0 +1,137 @@
+@@ Variable Exit DS Code
+@@ By Raevnos, based loosely on the DS code on ftp.pennmush.org
+@create DS Room Parent
+@lock/Use DS Room Parent==me
+@lock/Link DS Room Parent==#0
+@lock/Parent DS Room Parent=$me
+@lock/Basic DS Room Parent==me
+@set DS Room Parent = LINK_OK
+@set DS Room Parent = NO_COMMAND
+@ALEAVE DS Room Parent=@switch cor(words(cat(lcon(me),lexits(me))),hasflag(me,sticky),ulocal(%va/dealloc_room,%!))=0,{@name me=Soon to be destroyed;@destroy me}
+@set DS Room Parent/ALEAVE=no_command
+&BLOCK_EXIT_CMD DS Room Parent=$block *:@switch isdbref(locate(%vc,%0,cE))=0,@pemit %#=That's not a blockable exit.,{@pemit %#=Exit blocked for room at [v(coords)].;&blocked me=[setunion(v(blocked),name(locate(%vc,%0,cE)),|)];&blocked-[v(coords)] %vb=[setunion(v(blocked),name(locate(%vb,%0,cE)),|)]}
+&CLEAR_DESC_CMD DS Room Parent=$clear desc:@pemit %#=Description for room at [v(coords)] cleared.;&desc-[v(coords)] %vb
+&CLEAR_NAME_CMD DS Room Parent=$clear name:@pemit %#=Name for room at [v(coords)] cleared.;@wipe %vb/name-[v(coords)];@name me=u(%va/get_name,v(coords))
+&COORDS_CMD DS Room Parent=$coords:@pemit %#=The coordinates of your current room are [iter(v(coords),[extract(X Y Z,#@,1)] = ##,.,\,%b)]
+@DESCRIBE DS Room Parent=[u(%va/get_desc,v(coords))]
+@set DS Room Parent/DESCRIBE=no_command visual
+&DS_HELP_CMD DS Room Parent=$ds help:@pemit %#=DS builder commands:%rset name to <name> & clear name - Set/clear a custom name.%rset desc to <desc> & clear desc - Set/clear a custom description.%rhide <exit> & unhide <exit> - Remove and restore a exit from the exits list.%rshow <exit> & unshow <exit> - Display a non-standard virtual exit and un-display it.%rblock <exit> & unblock <exit> - Hide a virtual exit and make it impossible to travel in that direction/undo blocking%rfix room & unfix room - Save room from being recycled.
+@ENTER DS Room Parent=switch(elock(me/use,%#),1,Type DS HELP for help with builder commands.)
+@set DS Room Parent/ENTER=no_command
+@EXITFORMAT DS Room Parent=[switch(setdiff(lcstr(iter(setdiff(%0,filter(isdark,%0)),name(##), ,|)|[v(exitlist)]|[v(shown)]),lcstr(v(blocked)|[v(hidden)]),|),,,Obvious exits:%r[iter(sort(#$,a),capstr(##),|)])]
+@set DS Room Parent/EXITFORMAT=no_command
+&EXITLIST DS Room Parent=North|East|South|West
+&FIX_CMD DS Room Parent=$fix room:@pemit %#=Room at [v(coords)] will no longer be recycled.;@set me=sticky
+&HIDE_EXIT_CMD DS Room Parent=$hide *:@switch isdbref(locate(%vc,%0,cE))=0,@pemit %#=That's not a hidable exit. [if(isdbref(locate(%l,%0,cE)),Try setting it DARK.)],{@pemit %#=Exit hidden for room at [v(coords)].;&hidden me=[setunion(v(hidden),name(locate(%vc,%0,cE)),|)];&hidden-[v(coords)] %vb=[setunion(v(hidden),name(locate(%vb,%0,cE)),|)]}
+&ISDARK DS Room Parent=hasflag(%0,dark)
+&SET_DESC_CMD DS Room Parent=$set desc to *:@pemit %#=Description for room at [v(coords)] set.;&desc-[v(coords)] %vb=%0
+&SET_NAME_CMD DS Room Parent=$set name to *:@switch valid(name,%0)=0,@pemit %#=That's not a valid name.,{@pemit %#=Name for room at [v(coords)] set.;@name me=%0;&name-[v(coords)] %vb=%0
+&SHOW_EXIT_CMD DS Room Parent=$show *:@pemit %#=Exit shown for room at [v(coords)].;&shown me=[setunion(v(shown),capstr(lcstr(%0)),|)];&shown-[v(coords)] %vb=[setunion(v(hidden),capstr(lcstr(%0)),|)]
+&UNBLOCK_EXIT_CMD DS Room Parent=$unblock *:@switch isdbref(locate(%vc,%0,cE))=0,@pemit %#=That's not a blockable exit.,{@pemit %#=Exit unblocked for room at [v(coords)].;&blocked me=[setdiff(v(blocked),name(locate(%vc,%0,cE)),|)];&blocked-[v(coords)] %vb=[v(blocked)];@switch hasattrval(%vb,blocked-[v(coords)])=0,@wipe %vb/blocked-[v(coords)]}
+&UNFIX_ROOM_CMD DS Room Parent=$unfix room:@pemit %#=Room at [v(coords)] will now be recycled when empty of contents and exits.;@set me=!sticky
+&UNHIDE_EXIT_CMD DS Room Parent=$unhide *:@switch isdbref(locate(%vc,%0,cE))=0,@pemit %#=That's not a hidable exit.,{@pemit %#=Exit unhidden for room at [v(coords)].;&hidden me=[setdiff(v(hidden),name(locate(%vc,%0,cE)),|)];&hidden-[v(coords)] %vb=[v(hidden)];@switch hasattrval(%vb,hidden-[v(coords)])=0,@wipe %vb/hidden-[v(coords)]}
+&UNSHOW_EXIT_CMD DS Room Parent=$unshow *:@pemit %#=Exit unshown for room at [v(coords)].;&shown me=[setdiff(v(shown),capstr(lcstr(%0)),|)];&shown-[v(coords)] %vb=[v(shown)];@switch hasattrval(%vb,shown-[v(coords)])=0,@wipe %vb/shown-[v(coords)]}
+@create DS Room Data
+@lock DS Room Data==me
+@set DS Room Data = NO_COMMAND
+&DESC-0.0.0 DS Room Data=This is the center of the DS grid.
+@set DS Room Data/DESC-0.0.0=no_command
+&MAXQ DS Room Data=10
+&MAXX DS Room Data=5
+&MAXY DS Room Data=5
+&MAXZ DS Room Data=5
+&MINX DS Room Data=-2
+&MINY DS Room Data=-5
+&MINZ DS Room Data=-2
+&ROOM-QUEUE DS Room Data=
+@create DS Functions
+@link DS Functions = #3912
+@lock/Link DS Functions==#0
+@lock/Parent DS Functions=$me
+@lock/Basic DS Functions==me
+@set DS Functions = LINK_OK
+@set DS Functions = NO_COMMAND
+&ALLOC_ROOM DS Functions=switch(words(setr(0,xget(%vb,room-queue))),0,dig(%wa),setr(1,first(%q0))[set(%vb,room-queue:[rest(%q0)])][setq(2,name(%q1,%0))])
+&DEALLOC_ROOM DS Functions=wipe(%vb/num-[xget(%0,coords)])[switch(words(xget(%vb,room-queue)),xget(%vb,maxq),0,set(%vb,room-queue:[trim(cat(xget(%vb,room-queue),%0))])[setq(0,name(%0,Waiting to be recycled))]1)]
+&GET_BLOCKED DS Functions=xget(%vb,blocked-%0)
+&GET_DESC DS Functions=udefault(%vb/desc-%0,s(%wb))
+&GET_HIDDEN DS Functions=xget(%vb,hidden-%0)
+&GET_NAME DS Functions=default(%vb/name-%0,%wa %0)
+&GET_ROOM DS Functions=udefault(%vb/num-%0,[setr(0,ulocal(alloc_room,u(get_name,%0)))][set(%vb,num-%0:%q0)][setq(1,zone(%q0,%vc))][setq(2,parent(%q0,%vd))][set(%q0,coords:%0)][set(%q0,floating)][set(%q0,blocked:[u(get_blocked,%0)])][set(%q0,hidden:[u(get_hidden,%0)])][set(%q0,shown:[u(get_shown,%0)])][set(%q0,!no_command)][lock(%q0/use,@%vd)])
+&GET_SHOWN DS Functions=xget(%vb,shown-%0)
+&IS_IB DS Functions=cand(lte(first(%0,.),xget(%vb,maxx)),gte(first(%0,.),xget(%vb,minx)),lte(extract(%0,2,1,.),xget(%vb,maxy)),gte(extract(%0,2,1,.),xget(%vb,miny)),lte(last(%0,.),xget(%vb,maxz)),gte(last(%0,.),xget(%vb,minz)))
+@WA DS Functions=DS Room
+@WB DS Functions=An empty room.
+@dig/teleport DS ZMR
+@lock/Zone here==me
+@set here = NO_COMMAND
+@set here = FLOATING
+@open North;n
+@link North = VARIABLE
+@lock/Basic North=inrange/1&open/1
+&DESTINATION North=ulocal(%va/get_room,vadd(xget(%l,coords),v(direction),.))
+&DIRECTION North=0.1.0
+@FAILURE North=You find you can't travel further [lcstr(name(me))].
+@set North/FAILURE=no_command
+&INRANGE North=u(%va/is_ib,vadd(xget(%l,coords),v(direction),.))
+@ODROP North=comes [switch(name(me),up,down,down,up,from the [switch(name(me),north,south,northeast,southwest,east,west,southeast,northwest,south,north,southwest,northeast,west,east,northwest,southeast)])].
+@set North/ODROP=no_command
+&OPEN North=not(member(ucstr(xget(%l,blocked)),ucstr(name(me))))
+@OSUCCESS North=goes [lcstr(name(me))].
+@set North/OSUCCESS=no_command
+@SUCCESS North=You go [lcstr(name(me))].
+@set North/SUCCESS=no_command
+@open Down;d
+@link Down = VARIABLE
+@parent Down=North
+@lock/Basic Down=inrange/1&open/1
+&DIRECTION Down=0.0.-1
+@open Up;u
+@link Up = VARIABLE
+@parent Up=North
+@lock/Basic Up=inrange/1&open/1
+&DIRECTION Up=0.0.1
+@open Northwest;nw
+@link Northwest = North
+@parent Northwest=#3908
+@lock/Basic Northwest=inrange/1&open/1
+&DIRECTION Northwest=-1.1.0
+@open West
+@link West = VARIABLE
+@parent West=North
+@lock/Basic West=inrange/1&open/1
+&DIRECTION West=-1.0.0
+@open Southwest;sw
+@link Southwest = VARIABLE
+@parent Southwest=North
+@lock/Basic Southwest=inrange/1&open/1
+&DIRECTION Southwest=-1.-1.0
+@open South;s
+@link South = VARIABLE
+@parent South=North
+@lock/Basic South=inrange/1&open/1
+&DIRECTION South=0.-1.0
+@open Southeast
+@link Southeast = VARIABLE
+@parent Southeast=North
+@lock/Basic Southeast=inrange/1&open/1
+&DIRECTION Southeast=1.-1.0
+@open East
+@link East = VARIABLE
+@parent East=North
+@lock/Basic East=inrange/1&open/1
+&DIRECTION East=1.0.0
+@open Northeast
+@link Northeast = VARIABLE
+@parent Northeast=North
+@lock/Basic Northeast=inrange/1&open/1
+&DIRECTION Northeast=1.1.0
+@set DS Room Parent=VA:[num(DS Functions)]
+@set DS Room Parent=VB:[num(DS Room Data)]
+@set DS Room Parent=VC:[num(here)]
+@set DS Room Parent=VD:[num(DS Room Parent)]
+@set DS Functions=VB:[num(DS Room data)]
+@set DS Functions=VC:[num(here)]
+@set DS Functions=VD:[num(DS Room Parent)]
+@set North=VA:[num(DS Functions)]
+@tel me=[u(DS Functions/GET_ROOM,0.0.0)]

@@ -1,0 +1,216 @@
+------------------------------------------------------------------------
+
+Maas-Neotek Robot User's Guide.          Last Updated: February 26, 1990
+
+------------------------------------------------------------------------
+
+Chapter 1: Source Code
+Maas-Neotek Robot source code is available for anonymous ftp from
+NL.CS.CMU.EDU [128.2.222.56] in directory /usr/mlm/ftp (the file is
+called robot.tar.Z). Be sure to FTP in binary mode, and cd to
+/usr/mlm/ftp in one step.
+
+------------------------------------------------------------------------
+
+Chapter 2: General Functions
+This chapter describes the general functions of all Maas-Neotek
+Exploration robots.
+
+Section 2.1: Information Services
+The primary purpose of each Mass-Neotek robot is to aid humans by
+answering questions about the Universe and things in it.  This includes
+questions about finding other players, rooms, and general information.
+
+Section 2.2: Paging
+Most Maas-Neotek robots will answer pages from players if they can find
+a path to the caller's room. This feature is controllable by the robots
+owner.  In any case, the robots page back to display their own
+location.
+
+Section 2.3: Exploration
+The secondary purpose of some Mass-Neotek robots is to explore the
+Universe to build up a map for moving about and answering questions
+about paths.  Some robots actively explore, and some rely other robot's
+maps.
+
+Section 2.4: Note taking
+All Maas-Neotek robots have a note taking feature, that allows their
+owners to direct them to sit in a certain room, logging all activity in
+the room.
+
+Section 2.5: Philanthropy
+All Maas-Neotek robots (unless modified by their owners) will gladly
+give small amounts of money to players who need it.
+
+Section 2.6: Other functions
+Maas-Neotek robots are modifiable by the owner to fulfill a variety of
+other functions.
+
+------------------------------------------------------------------------
+
+Chapter 3: The Natural Language Interface
+Maas-Neotek robots are controlled by spoken natural language generated
+by the "say" command. Some commands are reserved for the owner, some
+depend on the robot's mode, and most are usable by anyone.
+
+Section 3.1: Overview of Language Interface
+A Maas-Neotek robot will assume a message is directed at it if: (1) the
+robot is alone with the speaker (2) the robot's name appears in the
+message, or (3) the speaker recently talked to the robot.
+
+Section 3.2: Owner control
+To deactivate a robot, the owner must say "Goodbye <name>".  Merely
+saying "bye" will not work, the name must appear in the utterance.
+
+Section 3.3: Robot configuration
+Robot owners may set the robot configuration by saying "<switch> on" or
+"<switch> off", where switch is one of: exploration, paging, terse,
+generous, or debugging.
+
+Section 3.4: Motion control
+To cause the robot to move, either the owner, or anyone (if paging is
+on) may tell the robot to "go <direction>" or "go to <room>".  Also, if
+paging is on, the robot can be paged to rooms with unique names.
+
+Section 3.5: Note taking
+The owner can tell a robot to "take notes in <room>" or "stop taking
+notes" to control the note taking feature.
+
+Section 3.6: File commands
+Anyone can tell the robot to "checkpoint" its database files.  The
+owner can also tell the robot to "coredump" or "dump map".  "Write
+small map" and "Write reachable map" dump smaller versions of the
+current map file.
+
+Section 3.7: Money
+The robot's owner can tell it to "give me all your money" or "give me
+<amount> pennies".  Other players can ask for handouts by saying "give
+me some pennies".
+
+Section 3.8: Waiting
+When paged to a location, the robot will hang around for a few minutes.
+If you are done, you may tell the robot to "leave" or "stop hanging
+around".
+
+Section 3.9: Objects
+Maas-Neotek robots do not pick up objects, and will politely demure
+when asked to do so.
+
+------------------------------------------------------------------------
+
+Chapter 4: Information Services*
+This Chapter describes the various information queries handled by most
+Maas-Neotek robots.
+
+Section 4.1: Who is here
+It can be difficult to tell which people in a room are awake or not.
+You may ask the robot "who is here?" to see a list of people in the
+room who are connected.
+
+Section 4.2: Who is around
+You may also ask "Who have you seen?" to find out the players seen most
+recently by the robot.  "Who is connected" will show the players logged
+into the MUD.
+
+Section 4.3: Who is <player>
+Maas-Neotek robots now store other player's descriptions and
+inventories.  Asking "Who is X?" will give these as an answer.  You may
+also ask "Who matches Y?" and "Who carries a Z?"
+
+Section 4.4: Time and Date
+All Maas-Neotek robots understand "What time is it?" and "What day is
+it?"
+
+Section 4.5: Location
+All Maas-Neotek robots understand "Where are we", "Where are you", and
+"Where am I".
+
+Section 4.6: Status, Wealth
+Robot owners may ask "How much money do you have" and "What is your
+status".
+
+Section 4.7: Help
+Anyone may ask for information and assistance by asking "Who is your
+owner", "Help", Help <topic>", "How do I <action>",  and "Where is your
+manual?".
+
+------------------------------------------------------------------------
+
+Chapter 5: Mapping functions
+This Chapter describes the map query functions common to all
+Maas-neotek robots.
+
+Section 5.1: What rooms
+To see which rooms have been added to the robot's map most recently,
+you may ask "where have you been".  To find out about exploration, ask
+"how many rooms have you explored".
+
+Section 5.2: What rooms match <string>
+To find out what rooms the robot knows about, you may ask "what rooms
+match <string>", or "what room descriptions match <string>".
+
+Section 5.3: Shortest Paths
+Anyone may ask for a shortest path by saying "How do I get from X to
+Y?", "How do I get to X?"  Either X or Y may be the special string
+"here".  Note that the robot may not know all routes.
+
+Section 5.4: Exits
+Anyone may ask "What exits go to <room>" or "What exits leave <room>?"
+
+Section 5.5: Anyone may ask "How many rooms are reachable?" to find out
+the number of rooms currently connected to the robot's home.
+
+------------------------------------------------------------------------
+
+Chapter 6: Long term memory
+Maas-Neotek Robots keep two database files: one is the map containing
+information about rooms and exits (often very large), and the other
+records information about players.  These are checkpointed every hour.
+
+------------------------------------------------------------------------
+
+Chapter 7: Exploration
+This chapter describes briefly the exploration strategy used by
+Maas-Neotek robots.
+
+Section 7.1: Exit names
+Each Maas-Neotek robot has a list of standard exit names that are used
+to explore rooms. If directed to go a different direction by another
+player, that exit name is used only for that room.
+
+Section 7.2: Exit list 1
+Exit names: 0-12, aft, back, ccw, close, cw, door, down, e, east, ene,
+ese, fore, in, leave, left, look around.
+
+Section 7.3: Exit list 2
+Exit names: move around, n, ne, nne, nnw, north, nw, open, out, port,
+rec, right, s, se, south, sse, ssw, starboard, sw, town, up, w, wait,
+west, wnw, wsw.
+
+Section 7.4: Strategy
+The robot's exploration scheme is simple: (1) find the first reachable
+unexplored room in the map and (2) try all standard exits in that room.
+Most rooms are found by this simple process.
+
+Section 7.5: Directed learning
+Other players may direct the robot to "go <direction>" and so teach the
+robot new paths (or show the robot that old paths no longer work).
+Such exits are stored and become part of the map.
+
+Section 7.6: Room descriptions
+When exploring, Maas-Neotek robots may use room descriptions to suggest
+additional exit names.  This feature is enabled/disabled by saying "Use
+room descriptions" or "Do not use room descriptions."
+
+------------------------------------------------------------------------
+
+Chapter 8: Specialization
+Some Maas-Neotek robots may be specialized to perform functions not
+described in this manual.  Examples include menial labor, specialized
+information retrieval, and quotation services.
+
+------------------------------------------------------------------------
+
+Dr. Michael L. Mauldin (Fuzzy)		School of Computer Science
+ARPA: Michael.Mauldin@NL.CS.CMU.EDU	Carnegie Mellon University
+Phone: (412) 268-3065			Pittsburgh, PA  15213-3890

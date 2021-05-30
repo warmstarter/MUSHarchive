@@ -1,0 +1,682 @@
+& ECON
+------------------------------ Economy ------------------------------
+       		      GalacticEcon System (v3.0)
+		         -------------------
+
+  	The GalacticMUSH Economy system is constantly being developed,
+  updated, and revised by Dave@Galactic.  The system may appear 
+  quite complicated at first, but it is very easy once you understand 
+  how it works.
+
+  New to the Econ system?  Type HELP ECON NEWBIE before anything else.
+  Type HELP ECON <topic>
+  Type HELP <command> for examples and a better explanation.
+
+  General Information:
+  --------------------
+  premise	    changes		  credits
+  newbie
+
+  Commerce:
+  ---------
+  payment	    market  		  banker	       
+  NPCs		    courier packages      business portfolio
+  +JOB
+
+  Transportation/Storage:
+  -----------------------
+  warehouse	    cargo transport 	  courier packages
+
+  Production:
+  -----------
+  power plant  	    water pump    	  mine
+  factory	    farm		  ECV		    
+  housing unit
+------------------------------ Economy ------------------------------
+& ECON CREDITS
+------------------------------ Economy ------------------------------
+  GalacticEcon was coded by Dave Milford (Dave@Galactic).
+
+  Contact Info:
+  -------------
+  Email: DaveMilford@home.com
+  ICQ:   8516328
+  MUSH:  galacticmush.dhs.org:8000
+------------------------------ Economy ------------------------------
+& ECON PREMISE
+------------------------------ Economy ------------------------------
+  	In GalacticEcon, each part of Economy depends on another, 
+  simulating the real world.  Currently, we have the following 
+  'system's: Power Plant, Water Pumping Station, Farm, Warehouse, 
+  Cargo Transports, Banker, Mining Console, and Factories.
+
+  	The Power Plant produces and allocates power to those which 
+  need power (Mining Console and Factory).
+
+  	The Water Pumping Station generates water and then pumps this
+  water to those which need water (Farm, Mining Console, and Factory).
+
+  	The Farm produces Food, and then this food is sent hourly to 
+  the systems you select.  The Mining Console and Factory need food 
+  for the workers.
+
+Continued in ECON PREMISE2.
+------------------------------ Economy ------------------------------
+& ECON PREMISE2
+------------------------------ Economy ------------------------------
+	The Mining Console produces the raw materials that are needed
+  for the Factory to produce commodities (commods).  The Mining
+  Console can mine different thinks at different locations.  It also
+  employs workers, meaning you have to supply these workers with food
+  and water (from the Farm and Water Pumps).  They require one
+  food and one water for each worker employed.  If you do not supply
+  enough food or water, the workers health slowly decreases.  As
+  their health decreases, production decreases.  If they previously
+  had not enough food and/or water, and their health is low, it 
+  slowly regenerates back to full health.
+
+Continued in ECON PREMISE3
+------------------------------ Economy ------------------------------
+& ECON PREMISE3
+------------------------------ Economy ------------------------------
+	The Factories are similar to the Mining Consoles, except they
+  take the required raw materials, and turn them into finished
+  commodities.  These finished commodities can be used for many
+  things.  Ships are built with certain commods, and can be upgraded
+  with commods aswell.  You can expand your systems by producing
+  commodities that increase your Power Plant Capacity, for example.
+
+	You can also sell raw materials or finished commods to people
+  for a profit, or you could trade with them.  The banks exist incase
+  you'd like to store your money somewhere safe, where they can
+  collect interest.
+
+	Commodities and Raw Materials are stored in the Warehouse
+  after being produced.  From there, you use Cargo Transports or
+  ships to move them around.  You'd most likely send Raw Materials
+  to the Factory to make finished products.
+
+Continued in ECON PREMISE4
+------------------------------ Economy ------------------------------
+& ECON PREMISE4
+------------------------------ Economy ------------------------------
+	Commodities and Raw Materials can be bought and sold at
+  Markets.  These Markets can be operated by a person, allowing
+  price customizability, or using default prices.
+------------------------------ Economy ------------------------------
+& ECON CHANGES
+------------------------------ Economy ------------------------------
+  3.0   * (Market) Added in sale and buying restrictions setable by
+	  the operator.  (Allows operator to set max/min storage of
+	  each commod to have, aswell as block users from buying
+	  and selling)
+	* (All) Extensive security enhancements.
+	* (Market) Added in seperate buying/selling prices.
+	* (Market) Journal feature added -- records transactions.
+	* (Help Files) Reorganized to assist in learning.
+	* (Business Portfolio) Added in the business portfolio.
+	* (ECV) Added in the Econ Construction Vehicle.
+	* (Corp. Server) Added in this admin tool to keep track
+ 	  of business information.
+	* (Warehouse) Warehouses now have set maximum capacities.
+	* (Commods) All commodities and materials now have a 'mass'
+	  set to add realism.  For example, 10 steel takes up 1 point
+	  of capacity now, while 1 fusion_reactor takes up 15 points.
+	* (Housing) Added in the housing unit, moved all commands
+	  for hiring workers to the new unit.
+	* (All) Added in multiple sources/destinations/pumps/power
+	  plants/farms, this was mainly for the ECV.  But you can
+	  now select from a list of the buildings in the same zone.
+	* (Mine) Added in limited materials as an option.
+	* (Power Plants) Added in batteries.
+	* (Farms/Water Pumps) Added in Food/Water stores.
+	* (Cargo Transports) Added locks.
+	* (All) Portability enhancements.
+
+Previous Versions in ECON CHANGES2
+------------------------------ Economy ------------------------------
+& ECON CHANGES2
+------------------------------ Economy ------------------------------
+  2.1
+	* (Cargo Transport) Added in the ability to load empty cargo
+ 	  transports to ships.
+	* (Factory & Mine) Fixed the workforce-upgrade command to
+ 	  deduct money.
+	* (Mining Console) Fixed typo in the disallow command.
+	* (Cargo Transport) Squashed bug that allowed users to use
+	  @dolist's to overload ships and cargo transports.
+	* (Banker) Default interest rate fixed.
+	* (Cargo Transport) You can now expand a cargo transport's
+	  maximum capacity.
+	* (Cargo Transport) Fixed the torpedo loading command.  
+
+  2.0
+	* (Market) Added in the Market.
+	* (Help files) Updated to support the Market.
+ 	* (Econ Maker) Updated the maker to support the market.
+ 	* (Economy Parent) Added default prices, command to set
+	  prices.
+	* (Cargo Container) Fixed ship loading/unloading.
+	* (All) Now @lock/use'd to players and non-builders.
+	* (Cargo Container) Torpedoes can now be reloaded.
+	* (Factory & Mine) Added automated workforce addition.
+	* (Econ-BC) Added makeall command, making econ making much
+	  faster.
+Continued in ECON CHANGES3
+------------------------------ Economy ------------------------------
+& ECON CHANGES3
+------------------------------ Economy ------------------------------
+  1.3
+	* (Factory & Mining Console) Removed the function between()
+  	  and made it a local function.
+	* (All) Alignment fixes.
+	* (Factory & Mining Console) Fixed the 'add destination'
+	  command.
+	* (Farm) Added command to set the water pump.
+
+
+  1.2
+	* (Factory) Commod list command updated to be far less spammy.
+	* (Factory) New command: commod info <commod>
+	* (Economy Parent) Production balancing.
+	* (Economy Parent) Redid the code that distinguishes a commod
+	  from a material.  Admin: You must seperate the commodities
+	  on your list with | instead of spaces now.
+	* (Cargo Transport) Added in the upgrade command.  It takes
+	  commodities that upgrade the Power Plants, Farms, and
+	  water transports and converts it into output.
+	* (Mining Console) New command: material info <material>
+	* (Factory/Mining Console/Economy Parent) Added material &
+	  commod descriptions.  They show up in commod info <commod>
+	  and material info <material>
+	* (Banker) Withdraw command now works properly.
+	* (Help Files) Misc. spelling errors fixed.
+	* (Econ Maker) Make Factory now uses the correct syntax.
+
+Continued in ECON CHANGES4
+------------------------------ Economy ------------------------------
+& ECON CHANGES4
+------------------------------ Economy ------------------------------
+  1.1
+	* (Cargo Transport) Now you must know the ship boarding code
+ 	  to load/unload cargo from a ship.  
+	* (Factory) Commods can now produce parts of it per day (IE:
+	  0.1 pulse_laser)
+	* (All) Added default commodities and materials.
+	* (Factory) Fixed commod list to show everything correctly.
+	* (Factory) Production is now halted if you do not have the
+ 	  amount of raw materials needed.
+
+  1.0
+	* (All) Added customized color code.  Now admin can customize
+	  the Econ system's color.
+	* (All) Added many commands that are Wizard-only to make
+	  the econ system easier to use.  Updated admin helpfiles.
+	* (Factory) Added multiple destinations.
+	* (Factory) Added multiple sources.
+	* (Power Plant) When allocations are reset, the remaining
+	  power is calculated right.
+Continued in ECON CHANGES5
+------------------------------ Economy ------------------------------
+& ECON CHANGES5
+------------------------------ Economy ------------------------------
+  0.9b  
+	* (Banker) Rewrite of some of the code (didn't work right
+	  without a user-defined integer() function, now it works
+	  on any PennMUSH system.)
+        * (Warehouse & Cargo Transport) Now displays commodities
+	  in green and raw materials in normal.
+	* (Factory & Mining Console) Fixed the FREE_POWER bug that
+	  displayed an error message if you do not have a power
+	  plant set.
+	* (All) Now when the objects are not set up, the desc shows
+	  message saying 'None', etc instead of big error messages
+	  that screwed up some code.
+	* (Mining Console) Destination is now displayed right on
+	  the desc.
+	* (Cargo Transport) Removed the need for &isoutside set on
+	  rooms it could go too, too much of a hassle.
+	* (Econ Maker) Added the Econ Maker.
+	* (Help Files) Added extensive Economy Admin help files.
+
+  0.9a  
+	* (Factory) Added the Factory.
+	* (Mining Console) Sets alloc to 0 for a newly mined material
+	  and keeps original setting if already alloced to.
+	* (Mining Console) Added variable destinations.  Now materials
+	  can be directly delivered to the Factory hourly, or sent
+	  to the warehouse for storage.
+
+Continued in ECON CHANGES6
+------------------------------ Economy ------------------------------
+& ECON CHANGES6
+------------------------------ Economy ------------------------------
+  0.8
+	* (Mining Console) Now when you employ more people and set
+	  what you're mining, energy allocations are not reset.
+	* (Mining Console) Stop Mining now calculates the proper
+	  power available.  Removed un-needed food/water calculations.
+	* (Mining Console) Mine command no longer has un-needed food
+	  and water calculations.
+	* (Mining Console) Now uses default production speeds/energy
+	  costs if none are specified.
+	* (Mining Console) Worker Health is now actually calculated
+	  every hour.  It now improves/declines, depending on if
+	  enough food and water is supplied.
+	* (Mining Console) Shows Worker Health Percentage beside
+	  status now.  
+
+  0.7b
+	* (Mining Console) Fixed power allocation bug, now calculates 
+	  free power and used power after every allocation.
+	* (Mining Console) Fixed POWER_SWEEP to reset allocations if
+	  there is an energy shortfall.
+	* (Farm) Fixed the bug which allowed the farmer to produce 
+	  food without water.
+
+  0.7a
+	* (All) Added the Econ Controller object.  This prevents
+	  queue-spamming by only having 2 @waits.  1 @wait for
+	  hourly events and one for daily events.  These @waits
+	  trigger all object's functions without needing a @wait per
+	  object.
+	* (Mining Console) Production is done hourly instead of
+	  daily.
+------------------------------ Economy ------------------------------
+& ECON POWER PLANT
+------------------------------ Economy ------------------------------
+  	The Power Plant is an essential part of the Economy system.  
+  It produces and supplies power to most other systems.  The commands
+  are basic and easy to use.  You basically tell it to produce X 
+  amount of power, and then tell that power to go to a system.
+  You get most of your information by looking at the power plant.
+
+  Commands:
+  ---------
+  set reactor <output>          - Set the reactor output.
+  power <system #>=<power>      - Allocate power to a system.
+
+  Advanced commands are in ECON POWER PLANT2
+------------------------------ Economy ------------------------------
+& ECON POWER PLANT2
+------------------------------ Economy ------------------------------
+  list destinations		  - List available battery destinations
+  set destination <#>		  - Set the destination.
+  toggle battery production	  - Allow excess energy to be made into
+				    batteries.  400 energy/battery.
+  untoggle battery production	  - Stops battery production.
+------------------------------ Economy ------------------------------
+& ECON WATER PUMP
+------------------------------ Economy ------------------------------
+	The Water Pump produces water and pumps it to essential
+  systems.  It currently can pump water to the Farm,
+  Mining Console, and Factory.  The pumping gives the farm water to
+  produce food, and the Mining Console and Factory use it to give
+  the workers water.
+
+  Commands:
+  ---------
+  set water <amount of water>  - Tell the generator to produce water.
+  pump <system>=<amount>       - Pump water to a system.
+
+  Advanced commands are in ECON WATER PUMP2
+------------------------------ Economy ------------------------------
+& ECON WATER PUMP2
+------------------------------ Economy ------------------------------
+  list destinations		  - List available water store
+				    destinations
+  set destination <#>		  - Set the destination.
+  toggle water store production
+				  - Allow excess water to be made into
+				    water stores.  400 water/store.
+  untoggle water store production
+				  - Stops water store production.
+------------------------------ Economy ------------------------------
+& ECON BANKER
+------------------------------ Economy ------------------------------
+	The Bank system can store money you have with a small
+  interest rate, aswell as loan out money, with a heavy interest
+  rate.
+
+  Commands:
+  ---------
+  info                          - Information on the bank.
+  check debt                    - Checks current debt status.
+  check balance                 - Check your Bank accout balance.
+  summary			- Summary of your account
+  open account                  - Open an account.
+  close account                 - Close an account.
+  borrow <amount>               - Borrows money. Heavy interest.
+  repay <amount>                - Repays borrowed money.
+  deposit <amount>              - Deposit money into your account.
+  withdraw <amount>             - Withdraw money from your account.
+
+  Corporate Accounts:
+  -------------------
+  open corporate account <password>
+	* This opens a new corporate account with the password you
+ 	  wish to use.
+  close corporate account <password>
+	* Self explanitory.
+  corpdeposit <amount>
+	* This deposits money to the corporate account.
+  corpwithdraw <amount>=<password>
+	* This withdraws money from the corporate account.
+  change corp password <old pass>=<new pass>
+	* This command changes the account password.  CEO only.
+------------------------------ Economy ------------------------------
+& ECON WAREHOUSE
+------------------------------ Economy ------------------------------
+	The Warehouse stores commodities aswell as raw materials. The
+  commods and raw materials are automatically moved here after
+  production.  You can unload the raw materials and send them to the
+  factory via a Cargo Transport, or you can let them stockpile.  You
+  can also store the Commods here until you have enough to purchase
+  something you'd like, or trade with them.
+
+  When you view the contents, it'll show it in the following format:
+  <COMMODITY NAME>	<# of commod>  	   [<capacity used>]
+------------------------------ Economy ------------------------------
+& ECON CARGO TRANSPORT
+------------------------------ Economy ------------------------------
+	The Cargo Transport allows you to move commodities and raw
+  materials around a planet.  It can only travel into outdoor rooms, 
+  and cannot leave the planet you're on.  Each Transport has a
+  specific capacity it can hold, and can be "driven" by a person;
+  making it follow a person.
+
+  When you view the contents, it'll show it in the following format:
+  <COMMODITY NAME>	<# of commod>  	   [<capacity used>]
+
+  Basic Commands:
+  ---------------
+  drive <cargo transport>      		- "Drive" the transport
+  stop driving <cargo transport>	- Stop driving
+  transfer <# or ALL> of <commod> from <origin> to <destination> 
+	* This moves commods.
+  transfer all from <origin> to <destination>
+  	* This moves the entire contents.
+  load <#> of <commod> from <origin> to <ship>=<ship boarding code>
+	* This loads commods to a ship.
+  unload <#> of <commod> from <ship> to <container>=<ship board code>
+	* This unloads commods from a ship.
+
+Advanced commands are in ECON CARGO TRANSPORT2
+------------------------------ Economy ------------------------------
+& ECON CARGO TRANSPORT2
+------------------------------ Economy ------------------------------
+  Advanced Commands:
+  ------------------
+  lock <cargo transport>=<password>	- Prevents movement/theft.
+  unlock <cargo transport>=<password>   - Unlocks it.
+  change password <cargo transport>=<old>/<new>	
+	* Changes the password.	 "changeme" is the default.
+  drive <cargo transport> into <ship>=<boarding code>	
+  	* Moves to a ship.
+  drive <cargo transport> from <ship>=<boarding code>	
+	* Removes from a ship.
+  reload <#> of <torpedo commod> to <ship> from <cargo transport>
+	* This replenishes a ship's torpedo supply.
+------------------------------ Economy ------------------------------
+& ECON MINE
+------------------------------ Economy ------------------------------
+	The Mining Console is used to produce the raw materials
+  needed by the Factory to produced the finished goods.  The raw
+  materials are transferred to the warehouse or factory after they 
+  are produced.
+
+  	You can mine multiple raw materials at one time, and assign
+  different amounts of workers to each material, or none at all.
+  Each material requires a certain amount of energy per unit mined,
+  to simulate that it is sometimes harder to get to some materials
+  then others.
+
+	Some materials are limited in quantity, so watch out.
+
+  Basic Commands:
+  ---------------
+  prospects                     - Shows the mineable materials.
+  material info <material>	- Shows a material's information.
+  mine <material>=<# of workers>- Assigns workers to mine something.
+  stop mining <material>        - Stops mining a mineral.
+  alloc <material>=<power>      - Allocate power.
+
+Advanced commands are in ECON MINE2
+------------------------------ Economy ------------------------------
+& ECON MINE2
+------------------------------ Economy ------------------------------
+  Advanced Commands:
+  ------------------
+  list destinations		- Lists the valid destinations.
+  set destination <#>		- Sets the destination of materials.
+  list power sources		- Lists the valid power plants.
+  set power plant <#>		- Sets the power plant to use.
+  house list			- Lists the valid houses.
+  set house <#>			- Sets the house to use.
+  storehouse			- Shows whats currently in your 
+				  warehouse.
+------------------------------ Economy ------------------------------
+& ECON FACTORY
+------------------------------ Economy ------------------------------
+	The Factory takes your raw materials and converts them into 
+  finished products.  These finished products are then shipped to the 
+  warehouse.
+
+  Basic Commands:
+  ---------------
+  commod list			- Shows the producable commods.
+  commod info <commod>		- Shows a commod's information.
+  storehouse			- Shows the raw materials available.
+  manufacture <commod>=<#>	- Assigns workers to manufacture.
+  stop manufacturing <commod>	- Halts production of a commod.
+  alloc <commod>=<power>	- Allocate power.
+
+Advanced commands are in ECON FACTORY2
+------------------------------ Economy ------------------------------
+& ECON FACTORY2
+------------------------------ Economy ------------------------------
+  Advanced Commands:
+  ------------------
+  list destinations		- Lists the available destinations.
+  set destination <#>		- Make finished commods go directly
+				  to a destination.
+  source list			- Lists the available sources of raw
+			 	  materials.
+  set source <#>		- Use a source to get raw materials.
+  list power sources		- Lists the valid power plants.
+  set power plant <#>		- Sets the power plant to use.
+  house list			- Lists the valid houses.
+  set house <#>			- Sets the house to use.
+------------------------------ Economy ------------------------------
+& ECON FARM
+------------------------------ Economy ------------------------------
+	The Farm uses the Water from the Water Pump to water it's
+  crops.  The Farm then ships these crops hourly to the places you
+  assign.  For example, you could send 500 food to the Factory,
+  because it has 500 hired workers, and requires 500 food to operate.
+
+  Commands:
+  ---------
+  set yield <amount>           - Sets the farm yield.
+  send <system #>=<amount>     - Send food to a system hourly.
+  pump list		       - Lists the valid water pumps.
+  set pump <#>		       - Sets the water pump to use.
+
+  Advanced commands are in ECON FARM2
+------------------------------ Economy ------------------------------
+& ECON FARM2
+------------------------------ Economy ------------------------------
+  list destinations		  - List available food store
+				    destinations
+  set destination <#>		  - Set the destination.
+  toggle food store production	  - Allow excess food to be made into
+				    food stores.  400 food/store.
+  untoggle food store production  - Stops food store production.
+------------------------------ Economy ------------------------------
+& ECON MARKET
+------------------------------ Economy ------------------------------
+	The Market can be operated by a player or use the default
+  prices set by the supply/demand curve.  You can buy or sell your
+  commodities here.
+
+  General Commands:
+  -----------------
+  for sale			- Lists the items for sale.
+  check money			- Checks the market's money.
+  calc <#> of <item>		- Calculates a price.
+  buy <#> of <item>=<dest.>	- Buys items.
+  sell <#> of <item>=<source>	- Sells items.
+  list restrictions		- Lists the market restrictions.
+
+Operator-only commands are in ECON MARKET2
+------------------------------ Economy ------------------------------
+& ECON MARKET2
+------------------------------ Economy ------------------------------
+  Operator Commands:
+  ------------------
+  add money <#>			  - Put money into the market.
+  del money <#>			  - Remove money from the market.
+  view journal			  - Views the transactions.
+  delete entry <#>		  - Delete a journal entry.
+  [un]restrict <person> from use  - Bans/Unbans a person from use.
+  set price <item>=<price>	
+	* Sets a price (sale & purchase are the same price)
+  set [buying|selling] price <item>=<price>
+	* Sets the price of an item that the market sells/buys to/from
+	  people.
+  add <#> of <item> from <source>
+	* This adds an item into a market.
+  remove <#> of <item> to <destination>
+	* This remove an item from a market.
+  set [min|max] storage of <commod> to <#>
+	* Sets the restrictions that prevent having too much or
+	      too little of a commod being sold at a market.
+  unrestrict [min|max] storage of <commod>
+	* Undoes storage restrictions.
+------------------------------ Economy ------------------------------
+& ECON PAYMENT
+------------------------------ Economy ------------------------------
+  These are global Economy commands and can be used anywhere.
+
+  Commands:
+  ---------
+  money				- Displays your money.
+  pay <person>=<amount>		- Pays someone, you must be in the
+			 	  same room.
+------------------------------ Economy ------------------------------
+& ECON ECV
+------------------------------ Economy ------------------------------
+	The ECV is the Econ Construction Vehicle, and is used to
+  build and upgrade economy structures.
+  
+  Valid Buildings:  Factory, Mine, Power Plant, Farm, House, Market,  
+  ----------------  Water Pump, Cargo Transport
+
+  Commands:
+  ---------
+  drive	ecv		        - Makes the ECV follow you.
+  stop driving ecv		- Self explanitory.
+  info <building>		- Displays info for constructing
+				  the building.
+  build <building> for <corp.>  - Begins building construction.
+  cancel building		- Self explanitory.
+  refuel from <warehouse or cargo transport>
+	Note:  Refuels the ECV.
+  upgrade <building>	
+	Note:  This can only be used on the Power Plant, Water Pump,
+	       Housing Unit, Farm, and Cargo Transport.  You will 
+ 	       need the commodities required for building 
+	       construction (see the info command on the building)
+------------------------------ Economy ------------------------------
+& ECON BUSINESS PORTFOLIO
+------------------------------ Economy ------------------------------
+	The business portfolio manages the people and assets of your
+  corporation.
+
+  Commands:
+  ---------
+  list members			- Lists the members of your corp.
+  add member <name>		- Self explanitory.
+  remove member <name>		- Self explanitory.
+  list <econ structure>		- Displays info on the structures you
+				  own.  Valid options are:
+					* Factories
+					* Mines
+					* Cargo Transports
+					* Warehouses
+					* Water Pumps
+					* Farms
+					* Power Plants
+					* Markets
+					* Houses
+  payroll			- Lists people on your payroll & how
+				  much they get paid daily.
+  set salary <person>=<money>	- Sets the daily salary for a person.
+  current balance		- Shows current corp. bank account
+				  balance.
+------------------------------ Economy ------------------------------
+& ECON HOUSING UNIT
+------------------------------ Economy ------------------------------
+	The housing unit houses the workers needed at Factories
+  and mines.  Each workers requires 1 food and 1 water at all times
+  from the farm and water pumps, or workers' health decreases and 
+  hurts productivity.
+
+  Commands:
+  ---------
+  set workforce to <#>		- Hires workers.
+  send workers <system #>=<#>   - Sends workers to a system.
+  pump list			- Lists the valid water pumps.
+  set pump <#>			- Sets the pump to use.
+  farm list			- Lists the valid farms.
+  set farm <#>			- Sets the farm to use.
+------------------------------ Economy ------------------------------
+& ECON NPCS
+------------------------------ Economy ------------------------------
+  	There are 2 types of NPCs:  Merchants and Suppliers.  There 
+  are no commands on the suppliers, they just give you Courier
+  Packages to deliver to NPC Merchants.
+
+  NPC Merchant Commands:
+  ----------------------
+  for sale			- Lists the items for sale
+  purchase <#> of <item>=<place to put them>
+		* This purchases an item you see.
+------------------------------ Economy ------------------------------
+& ECON COURIER PACKAGES
+------------------------------ Economy ------------------------------
+  	Courier Packages are given to you by NPC Suppliers.  You
+  must first accept a job (see HELP +JOB) to be given one.  Once
+  you receive it, you are to deliver it to the NPC Merchant as fast
+  as you can, and you will receive payment for it.
+
+  Commands:
+  ---------
+  retrieve package	* Type this at the Supplier.  He'll give you
+  			  the package.
+  deliver package	* Type this when you're at the destination
+			  Merchant.  He'll then pay you.
+  load package <ship>=<boarding code>
+			* This will load the package into your ship.
+  unload package <ship>=<boarding code>
+			* This will unload the package from your ship.
+------------------------------ Economy ------------------------------
+& ECON +JOB
+------------------------------ Economy ------------------------------
+	+Job is a command that lists available jobs for you to make
+  some money with.  As of now, all of these jobs are "cargo runs"
+  from an NPC (Non Player Character) Supplier to an NPC Merchant.
+  See HELP ECON NPC for more information on them.
+
+  Commands:
+  ---------
+  +Jobs			  	- Lists the current available jobs.
+  +Jobs/Taken			- Lists the current taken jobs.
+  +Job/Info <job #>		- Displays more information on a job.
+  +Job/Accept <job #>		- Accept a job.
+  +Job/Cancel			- Cancel the accepted job.
+  +Job/Current			- Information on your current job.
+
+  Note:  Type @CHAN/ON JOBS to be notified of new jobs as they are
+  	 available.
+------------------------------ Economy ------------------------------

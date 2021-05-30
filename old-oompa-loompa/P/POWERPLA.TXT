@@ -1,0 +1,38 @@
+@create Power Plant Parent
+@lock/Basic Power Plant Parent==me
+@lock/Use Power Plant Parent=canuse/1
+@set Power Plant Parent = WIZARD
+@set Power Plant Parent = SAFE
+@set Power Plant Parent = NO_COMMAND
+&CMD_DESTINATION_LIST Power Plant Parent=$list destinations:th [pemit(%#,[ansi(v(border_color),[repeat(=,76)])]%r[center([ansi(v(title_color),[name(me)] Destination List)],76)]%r[ansi(v(border_color),[repeat(=,76)])]%r [iter([edit([v(destination_list)],|,%b)],[ljust(##,8)][name(##)]%r)][ansi(v(border_color),[repeat(=,76)])])]
+&CMD_POWER Power Plant Parent=$power *=*:th [switch([u(fun_issystem,%0)][lte(%1,[add([v(remaining_power)],[v(POWER_[v(SYSTEM_%0)])])])][isnum(%1)],111,[switch([gte(%1,0)],1,[u(fun_transfer_power,%0,%1)][trigger(v(system_%0)/fun_calc_power_available)],0,[pemit(%#,Number must be above 0.)])],011,[pemit(%#,That is not a system.)],101,[pemit(%#,You do not have that much free power.)],001,[pemit(%#,That is not a system.)],[pemit(%#,Argument must be a number.)])]
+&CMD_SET_DESTINATION Power Plant Parent=$set destination *:th [switch([strmatch([v(destination_list)],*|%0|*)],1,[set(me,destination:%0)][pemit(%#,The batteries are now transferred to [name(%0)] hourly.)],0,[pemit(%#,Invalid destination.)])]
+&CMD_SET_MAX_REACTOR Power Plant Parent=$set max reactor *:th [switch([hasflag(%#,Wiz)],1,[set(me,max_reactor:%0)][pemit(%#,[name(me)] can now generate up to %0 energy.)],0,[pemit(%#,Permission denied.)])]
+&CMD_SET_POWER Power Plant Parent=$set power *:th [switch([hasflag(%#,Wiz)],1,[switch([strmatch([zone([loc(%0)])],[zone([loc(me)])])],1,[u(fun_set_power,%0)],0,[pemit(%#,Error: Zones do not match.)])],0,[pemit(%#,Permission denied.)])]
+&CMD_SET_REACTOR Power Plant Parent=$set reactor *:th [switch([lte(%0,[v(max_reactor)])][gte(%0,0)],01,{[pemit(%#,The reactor cannot produce that much output.%rPlease chose a number between 0 and [v(max_reactor)].)]},10,[pemit(%#,Reactor setting must be above 0.)],00,[pemit(%#,Reactor setting must be above 0.)],11,{[u(fun_set_reactor,[secure(%0)])]})]
+&CMD_TOGGLE_BATTERY_PRODUCTION Power Plant Parent=$toggle battery production:th [if(hasattr(me,build_batteries),[pemit(%#,Already producing batteries.)],[if(strmatch(v(destination),[v(none)]),[pemit(%#,No available destination.)],[set(me,build_batteries:yes)][pemit(%#,Now producing batteries with left-over energy.)])])]
+&CMD_UNSET_POWER Power Plant Parent=$unset power *:th [switch([hasflag(%#,Wiz)],1,[switch([hasattr(me,POWER_%0)],1,[wipe(me/power_%0)][pemit(%#,No longer able to send power to [name(%0)] %(%0%))],0,[pemit(%#,Not currently sending power to there.)])],0,[pemit(%#,Permission denied.)])]
+&CMD_UNTOGGLE_BATTERY_PRODUCTION Power Plant Parent=$untoggle battery production:th [if(hasattr(me,build_batteries),[wipe(me/build_batteries)][pemit(%#,No longer producing batteries.)])]
+&CREDITS Power Plant Parent=Dave@GalacticMUSH [EMAIL: davemilford@home.com] [ICQ: 8516328]
+&CURRENT_POWER_NUM Power Plant Parent=1
+@DESCRIBE Power Plant Parent=[set(me,REMAINING_POWER:[v(reactor_setting)])][set(me,SYSTEMS:)]%b[ansi(v(border_color),[repeat(_,74)]%r/)]%b[ljust([ansi(v(name_color),[v(type)] Power Plant)],73)][ansi(v(border_color),\\%r|[repeat(-,74)]|%r|)]%b[ljust([ansi(v(title_color),Owner:)] [v(owner)],73)][ansi(v(border_color),|%r|)]%b[ljust([ansi(v(title_color),Maximum Output:)] [v(max_reactor)],73)][ansi(v(border_color),|%r|[repeat(-,74)]|%r|)]%b[ljust([ansi(v(title_color),Current Output:)] [v(reactor_setting)]%b%([mul([fdiv([v(reactor_setting)],[v(max_reactor)])],100)]%%%),73)][ansi(v(border_color),|%r|)]%b[ljust([ansi(v(title_color),Powering:)],73)][if([lattr(me/POWER_*)],{[ansi(v(border_color),|%r|%b)][iter([lattr(me/POWER_*)],[set(me,SYSTEM_[v(current_power_num)]:[edit(##,POWER_,)])][ljust({[ansi(v(subtitle_color),[v(current_power_num)]:)] [name([edit(##,POWER_,)])]},39)][ljust([ansi(nc,[u(##)])],4)][rjust([ansi(v(border_color),|%r|)],34)][u(fun_calc_power,[u(##)])][set(me,SYSTEMS:[v(systems)] [v(current_power_num)])][set(me,CURRENT_POWER_NUM:[inc([v(current_power_num)])])])]},{[ansi(v(border_color),|%r|%b)][ljust(None.,73)][ansi(v(border_color),|%r|)]})][ansi(v(border_color),[repeat(-,74)]|%r|)]%b[ljust([ansi(v(title_color),Remaining Power:)]%b[v(remaining_power)],73)][ansi(v(border_color),|%r[if(hasattr(me,build_batteries),[ansi(hb,|[repeat(-,74)]|%r|%b)][ljust(ansi(h,%[)[ansi(hg,X)][ansi(h,%])] Extra Power Diverted to Battery Production,73)][ansi(hb,|%r|)]%b[ljust([ansi(h,Destination:)]%b[name(v(destination))]%b%b%([v(destination)]%),73)][ansi(hb,%|%r)])][ansi(hb,\\[repeat(_,74)]/)][set(me,CURRENT_POWER_NUM:1)]
+@set Power Plant Parent/DESCRIBE=no_command visual
+&DESTINATION Power Plant Parent=[v(none)]
+&DESTINATION_LIST Power Plant Parent=|
+&FUN_BUILD_BATTERIES Power Plant Parent=[if(gte(v(remaining_power),0),[setq(0,[div(v(remaining_power),400)])][setq(1,[mod(v(remaining_power),400)])][if(gte(%q0,1),[set(me,storage_batteries:%q0)])][set(me,leftover_energy:[add(v(leftover_energy),%q1)])][if(gte(v(leftover_energy),400),[if(hasattr(me,storage_batteries),[set(me,storage_batteries:[inc(v(storage_batteries))])],[set(me,storage_batteries:1)])][set(me,leftover_energy:[sub(v(leftover_energy),400)])])])]
+&FUN_CALC_POWER Power Plant Parent=[set(me,REMAINING_POWER:[sub([v(remaining_power)],%0)])]
+&FUN_CHECK_POWER Power Plant Parent=[iter([lattr(me/POWER_*)],[set(me,REMAINING_POWER:[sub([v(remaining_power)],[u(##)])])])]
+&FUN_ISSYSTEM Power Plant Parent=[hasattr(me,SYSTEM_%0)]
+&FUN_MOVE_COMMODS Power Plant Parent=[iter([lattr(me/STORAGE_*)],[set([v(destination)],##:[switch([hasattr([v(destination)],##)],1,[add([get([v(destination)]/##)],[v(##)])],0,[v(##)])])][wipe(me/##)])][trigger([v(destination)]/fun_calc_capacity_used)][trigger([v(destination)]/fun_calc_capacity_remaining)]
+&FUN_SET_POWER Power Plant Parent=[set(me,power_%0:0)][pemit(%#,[name(me)] can now provide power to [name(%0)] %(%0%))]
+&FUN_SET_REACTOR Power Plant Parent=[set(me,reactor_setting:%0)][pemit(%#,Reactor is now producing %0 energy.%rReactor output now at [mul([fdiv([v(reactor_setting)],[v(max_reactor)])],100)]%%.)][set(me,REMAINING_POWER:%0)][u(fun_check_power)][switch([lte([v(remaining_power)],0)],1,[iter([lattr(me/POWER_*)],[set(me,##:0)])][pemit(%#,Global energy shortage. Resetting allocations.)][set(me,remaining_power:%0)])]
+&FUN_TRANSFER_POWER Power Plant Parent=[set(me,POWER_[v(SYSTEM_%0)]:%1)][pemit(%#,System %0 %([name([v(SYSTEM_%0)])]%) now has %1 power.)][set(me,REMAINING_POWER:[v(reactor_setting)])][u(fun_check_power)][u([v(system_%0)]/power_sweep)]
+&LEFTOVER_ENERGY Power Plant Parent=0
+&MAX_REACTOR Power Plant Parent=500
+&OWNER Power Plant Parent=Administration Power Corp.
+&REACTOR_SETTING Power Plant Parent=500
+&REMAINING_POWER Power Plant Parent=500
+&SWEEP Power Plant Parent=[if(hasattr(me,build_batteries),[u(fun_build_batteries)][wait(1,[lit([u(fun_move_commods)])])])]
+&SYSTEMS Power Plant Parent=
+&TYPE Power Plant Parent=Type VI
+&VERSION Power Plant Parent=3.0

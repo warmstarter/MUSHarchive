@@ -1,0 +1,10 @@
+@create Music box
+@lock Music box=*Taisch
+&PLAY Music box=@emit/room [name(me)] plays %0;&in-play me=1;@wait 30={&in-play me=0;@emit/room %0 comes to an end.}
+&NO-PLAY Music box=@pemit %0=[name(me)] is already playing something.
+&IN-PLAY Music box=0
+@Desc Music box=You can clone one of these for your own establishment, and mess with the code as you like.
+&REQUEST Music box=$request *:@switch [v(in-play)]=0,@trig me/play=%0,@trig me/no-play=%#
+@Adesc Music box=@pemit %#=Type 'request <songname>' to request a song.
+@set Music box=VISUAL
+@set Music box=HALTED

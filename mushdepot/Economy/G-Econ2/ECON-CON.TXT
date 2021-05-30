@@ -1,0 +1,13 @@
+@create Econ Control
+@lock Econ Control==me
+@set Econ Control = WIZARD
+@set Econ Control = SAFE
+@set Econ Control = !NO_COMMAND
+&CREDITS Econ Control=Dave@GalacticMUSH [EMAIL: davemilford@home.com] [ICQ: 8516328]
+&DAILY Econ Control=@switch [gte(86400,[sub([secs()],[v(lastdaily)])])]=1,{@wait [sub(86400,[sub([secs()],[v(lastdaily)])])]={@dol lsearch(econ-bc,type,obj)=@trigger ##/daily;&lastdaily me=[secs()]}},0,{@dol lsearch(econ-bc,type,obj)=@trigger ##/daily;&lastdaily me=[secs()]
+&FUN_BETWEEN Econ Control=[and([gte(%0,%1)],[lte(%0,%2)])]
+&LASTDAILY Econ Control=954734311
+&LASTPROD Econ Control=954798661
+@STARTUP Econ Control=@tr me/daily;@tr me/sweep;@attr/access/retroactive cargocan=wiz mortal_dark
+&SWEEP Econ Control=@switch [gte(3600,[sub([secs()],[get(me/lastprod)])])]=1,{@wait [sub(3600,[sub([secs()],[get(me/lastprod)])])]={@dol lsearch(econ-bc,type,obj)=@trigger ##/sweep;&lastprod me=[secs()]}},0,{@dol lsearch(econ-bc,type,obj)=@trigger ##/sweep;&lastprod me=[secs()]}
+&VERSION Econ Control=3.0

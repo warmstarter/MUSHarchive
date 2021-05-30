@@ -1,0 +1,35 @@
+&MAIL-SENDING Mail Object (MO)=$+mail *=*:@fo %#=@mail %0=%1
+&MAIL-EDIT-TEXT Mail Object (MO)=$+edit text=%0/%1:@fo %#=@mail/edit %0=%1
+&MAIL-EDIT-TO Mail Object (MO)=$+edit to=%0/%1:@fo %#=@mail/cc %0
+&MAIL-EDIT-CC Mail Object (MO)=$+edit cc=%0/%1:@fo %#=@mail/cc %0
+&MAIL-ABORT Mail Object (MO)=$+toss:@fo %#=@mail/abort
+&MAIL-PROOF Mail Object (MO)=$+proof:@fo %#=@mail/proof
+&MAIL-SEND Mail Object (MO)=$+send:@fo %#=@mail/send
+&MAIL-SKIM Mail Object (MO)=$+skim:@fo %#=@mail
+&MAIL-SKIM-RANGE Mail Object (MO)=$+skim *:@fo %#=@mail/list %0
+&MAIL-READ-RANGE Mail Object (MO)=$+read *:@fo %#=@mail/read %0
+&MAIL-HELP Mail Object (MO)=$+help mail:@fo %#=help @mail
+&MAIL-HELP-TOPIC Mail Object (MO)=$+help mail *:@fo %#=help mail-%0
+&MAIL-REVIEW Mail Object (MO)=$+review letters *=*:@fo %#=@mail/review %0=%1
+&MAIL-RETRACT Mail Object (MO)=$+retract letter *=*:@fo %#=@mail/retract %0=%1
+&MAIL-CLEAR Mail Object (MO)=$+clear *:@switch [get(%#/mail-option-delete)]=soft,{@fo %#=@mail/clear %0},hard,{@fo %#=@mail/clear %0;@fo %#=@mail/purge}
+&MAIL-OPTIONS-DELETE Mail Object (MO)=$+set mail option delete=*:@switch %0=hard,{@fo %#=&mail-option-delete me=hard},soft,{&@fo %#=mail-option-delete me=soft}
+&MAIL-DELETE Mail Object (MO)=$+delete *:@switch [get(%#/mail-option-delete)]=soft,{@fo %#=@mail/clear %)},hard,{@fo %#=@mail/clear %0;@fo %#=@mail/purge}
+&MAIL-UNDELETE Mail Object (MO)=$+undelete *:@fo %#=@mail/unclear *
+&MAIL-FLUSH Mail Object (MO)=$+flush:@fo %#=@mail/purge
+&MAIL-MARK Mail Object (MO)=$+mark *:@fo %#=@mail/tag %0
+&MAIL-UNMARK Mail Object (MO)=$+unmark *:@fo %#=@mail/untag %0
+&MAIL-SAFE Mail Object (MO)=$+safe *:@fo %#=@mail/safe %0
+&MAIL-DELETE-PLAYER Mail Object (MO)=$+destroy mailbox for *:@fo %#=@mail/debug clear=%0
+&MAIL-STATUS-REPORT Mail Object (MO)=$+mail status report:@dolist [search(type=player)]=@fo %#=@mail/stats ##
+&MAIL-ALIAS-PERSONAL Mail Object (MO)=$+add personal alias *=*:@fo %#=@malias *%0=%1
+&MAIL-ALIAS-PERSONAL-LIST Mail Object (MO)=$+list personal aliases:@fo %#=@malias
+&MAIL-ALIAS-PERSONAL-LIST-EXP Mail Object (MO)=$+expand personal alias *:@fo %#=@malias *%0
+&MAIL-ALIAS-PERSONAL-REMOVE Mail Object (MO)=$+remove personal alias *:@fo %#=@malias/delete %0
+&MAIL-ALIAS-GLOBAL Mail Object (MO)=$+add global alias *=*:@fo %#=@malias *%0=%1
+&MAIL-ALIAS-GLOBAL-LIST Mail Object (MO)=$+list global aliases:@fo %#=@malias
+&MAIL-ALIAS-GLOBAL-LIST-EXP Mail Object (MO)=$+expand global alias *:@fo %#=@malias *%0
+&MAIL-ALIAS-GLOBAL-REMOVE Mail Object (MO)=$+remove global alias *:@fo %#=@malias/delete %0
+&MAIL-FORWARD Mail Object (MO)=$+forward *=*:@fo %#=@mail/fwd %1=%0
+&MAIL-NOTES Mail Object (MO)=$+note *=*:@fo %#=@mail/quick me/%0=%1
+@set Mail Object (MO)=INHERIT

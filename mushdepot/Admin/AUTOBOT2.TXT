@@ -1,0 +1,12 @@
+@create PARENT: Registration Machine
+@link PARENT: Registration Machine=#0
+@set PARENT: Registration Machine=INHERIT
+@set PARENT: Registration Machine=WIZARD
+&ROOM PARENT: Registration Machine=#160
+@DESCRIBE PARENT: Registration Machine=Type `Register' to join the [v(empire)] Empire.
+@VB PARENT: Registration Machine=$register:@switch [get(%#/empire)]=None,@tr me/va=%#,,@tr me/va=%#,@pemit %#=You are already part of an empire. Please contact a Wizard if you wish to defect to [v(joinemp)].
+&JOINEMP PARENT: Registration Machine=the Tallaxian Empire
+@VA PARENT: Registration Machine=@pemit %0=You join [v(joinemp)]!;@oemit %0=[name(%0)] joins [v(joinemp)]!;@dolist v(channels)={@fo %0=@chan/on ##;@cemit ##=<##> [name(%0)] has joined [v(joinemp)]!};@tel %0=[v(room)];@reclass [name(%0)]=[v(class)]/4;&empire %0=[v(empire)];&icloc *%0=[v(room)];@lock *%0/icloc=wizard;@link %0=[v(room)]
+&CHANNELS PARENT: Registration Machine=Federation
+&CLASS PARENT: Registration Machine=Citizen
+&EMPIRE PARENT: Registration Machine=Federation

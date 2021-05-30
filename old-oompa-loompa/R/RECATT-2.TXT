@@ -1,0 +1,7 @@
+@create Reclass-Attach Commands
+@link Reclass-Attach Commands=[owner(me)]
+@set Reclass-Attach Commands=WIZARD
+@set Reclass-Attach Commands=!NO_COMMAND
+&SETEMP Reclass-Attach Commands=$@setemp *=*:@switch [hasflag(%#,Wizard)]=0, {@pemit %#=Permission denied.%b%bWizard bit required.}, {@switch [setq(0,locate(%#,%0,Ppn))]%q0=#-1, {@pemit %#=I don't see %0 here.}, #-2, {@pemit %#=I don't know which %0 you mean.}, {&Empire %q0=%1;@pemit %#=[name(%q0)] is now part of the %1 Empire.;@pemit %q0=%n joins you to the %1 Empire.}}
+&RECLASS Reclass-Attach Commands=$@reclass *=*/*:@swi [and(hastype(%#,PLAYER),hastype([num(*%0)],PLAYER))]=1,{@swi [num(*%0)]=#-1[and(hastype(%#,PLAYER),hastype([num(*%0)],PLAYER))]=1,{@swi [num(*%0)]=#-1,@pemit %#=There is no such PLAYER.,{@swi [get(%#/rank)]=>10,{@swi [get(%#/rank)]=>[get(num(*%0)/rank)],{&class [num(*%0)]=%1;&rank [num(*%0)]=%2;@Pemit %#=[name(*%0)] has been reclassed %1 - <%2>;@Pemit [num(*%0)]=You have been reclassed %1 - <%2>.},@pemit %#=You have no authority to do that.},@pemit %#=You have no authority to do that.}},@pemit %#=You can only reclass PLAYERs.
+&ATTACH Reclass-Attach Commands=$@attach *=*/*:@swi [num(*%0)]=#-1,@pemit %#=That player does not exist.,{@swi [rank(%#)]=>10,{@swi [rank(%#)]=>[rank(*%0)],{&organization [num(*%0)]=%1;&division [num(*%0)]=%2;@pemit %#=[name(*%0)] has been attached to <%1 - %2>;@pe [num(*%0)]=You have been attached to <%1 - %2>.},@pe %#=You do not have the authority to do that.},@pe %#=You do not have the authority to do that.

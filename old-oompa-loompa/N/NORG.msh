@@ -1,0 +1,66 @@
+@@______________________________________________________________________________
+@@ Nefara's Org Object v.1
+@@
+@@ Nefara's Org Global and Leadership Object created by: Nefara 
+@@ [@Shmux, @Loneport, @Albion, @Redwall, @FDC, @Furry, @Keranset Island] 
+@@ (nefara@idea-inc.com) also see: http://web.idea-inc.com/~nefara/     
+@@ For use upon: pennmush-1.6.4p0 (untested on other platforms)
+@@ Please comment or suggest changes to: nefara@idea-inc.com
+@@
+@@ Instructions:
+@@ @create the two objects, NORG v.1 Global Object and the NORG v.1 Leadership Object.
+@@ It should be abled, by being set inherit and wizard, to let the Leadership Object to place &org_title
+@@ upon added members.
+@@ Then add the &dbref_lead and &dbref_obj to yourself with the proper dbrefs for the objects created.
+@@ Start the paste, and if you have problems or questions, please contact Nefara.
+@@______________________________________________________________________________
+@@
+@create NORG v.1 Global Object
+@create NORG v.1 Leadership Object
+@@
+&DBREF_OBJ me=[Put the dbref of the NORG v.1 Global Object here before pasting this file.]
+&DBREF_LEAD me=[Put the dbref of the NORG v.1 Leadership Object here before pasting this file.]
+@@
+@@______________________________________________________________________________
+@@
+@set me=quiet
+think Starting the Paste for the NORG v.1 Global Object
+@set NORG v.1 Global Object=INHERIT
+@set NORG v.1 Global Object=WIZARD
+&NUM_ORG NORG v.1 Global Object=[v(DBREF_LEAD)]
+@DESCRIBE NORG v.1 Global Object=[iter(setdiff(lattr(me),Desc),ljust(##,19))]
+&HELP_+ORG NORG v.1 Global Object=Commands:%R%T+orgs%T%T%Tshow all active orgs.%R%T+orgs *%T%T%Tuse the alias of the org to show information on that org.%R%Rthe attributes upon the NORG v.1 Global Object should have:%R%T&NUM_(alias of org) me=(clone dbref of NORG v.1 Leadership Object)%R%R And upon the NORG v.1 Leadership Object:%R%T&list me=(owner's dbref) - This is where the list of members begins.%R&org_info me=Information on your org.%R&org_name me=Full name of org. 
+&DO_+ORGS NORG v.1 Global Object=$+orgs:@pemit %#=[center(%bActive Orgs on [mudname()]%b,78,-)]%r%b%b[iter(lattr(me/num_*),[ljust(u(u(##)/org_name)\([after(##,NUM_)]\),37)][setq(0,[add(1,%q0)])][switch(mod(%q0,2),0,%r%b)])]%R(Type +org <alias> to see the roster!)%r[repeat(-,78)]
+&DO_+ORGS2 NORG v.1 Global Object=$+orgs *:@switch hasattr(me,NUM_%0)=1,{@pemit %#=[center(%BOrg List for [u([setr(0,[v(NUM_%0)])]/org_NAME)]%b,78,-)]%R Org Info:%B[u(%q0/ORG_INFO)]%R%BOrg Roster:%b[u(%q0/LIST)]%R[repeat(-,78)]},{@pemit %#=There is no org with that alias. Type '+orgs' for a list of the groups.}[u([setr(0,[v(NUM_%0)])]/org_NAME)]
+think Done.%RStarting the paste for the NORG v.1 Leadership Object
+@DESCRIBE NORG v.1 Leadership Object=[iter(setdiff(lattr(me),Desc),ljust(##,19))]
+&CREDITS NORG v.1 Leadership Object=Nefara's Org Global and Leadership Object created by: Nefara [@Shmux, @Loneport, @Albion, @Redwall, @FDC, @Furry, @Keranset Island]  (nefara@idea-inc.com) also see: http://web.idea-inc.com/~nefara/     For use upon: pennmush-1.6.4p0
+&LOCK_OWN NORG v.1 Leadership Object=[owner(me)]
+&LIST NORG v.1 Leadership Object=[Your dbref goes here.] 
+&LOCK_ORG NORG v.1 Leadership Object=[gt(match(get(me/list),%#),0)]
+@lock/Basic NORG v.1 Leadership Object=lock_org/1
+@lock/Enter NORG v.1 Leadership Object=lock_org/1
+@lock/Use NORG v.1 Leadership Object=lock_org/1
+&ORG_INFO NORG v.1 Leadership Object=[Put your Information About Org Here]
+&ORG_NAME NORG v.1 Leadership Object=[Your Org Name]
+&DO_+ORG NORG v.1 Leadership Object=$+org:@pemit %#=[center(%bCurrent Orginization Personel%b,79,-)]%r [ljust(On?,4)][ljust(Name,20)][ljust(Title,20)] [ljust(Location,20)]%r[repeat(-,78)]%r%b[iter(v(list),[ljust([switch(member(lwho(),##),0,N/A,YES)],4)][mid([ljust([name(##)] %([num(##)][flags(##)]%),20)],0,20)][mid([ljust([u(##/org_title)],20)],0,20)] [mid([ljust([switch(hasflag(##,U),0,[ljust([num([loc(##)])],5)]: [name(loc(##))],*Unfindable*)],20)],0,20)]%r)][repeat(-,79)]
+&DO_+ADD NORG v.1 Leadership Object=$+org/add *=*:&list me=[v(list)] [num(*%0)];&org_title *%0=%1;@pemit %#=You added [name(num(*%0))] to the [name(me)] with the title of %1.
+&DO_+REM NORG v.1 Leadership Object=$+org/del *:&list me=[ldelete(v(list),match(v(list),num(*%0)))];@pemit %#=[name(num(*%0))] removed from the [name(me)].;&org_title *%0=
+@FAILURE NORG v.1 Leadership Object=You are not a member of [name(me)], you are not permited access.
+@USE NORG v.1 Leadership Object=[center(%bCommands for the [name(me)]%b,78,-)]%R+org/add *=*%T%TAdds a member with a 'Title'%R+org/del *%T%TRemoves a member.%R+org%T%T%TShows the list of members.%R+org/list%T%TA simpler version of +org, with just names.%R+shout *%T%TShout a message across to only your members.%R+mail *%T%T%T@mail all of the members of [name(me)] with a message.%R%RFor those who are to use this object for a zone to lock exits or any commands with, use this line after parenting the exit to [name(me)]:%R@lock (exit)=lock_org/1%R%RThe +org/add, +org/del, and +shout is locked to the owner of [name(me)] (&lock_own), while the other commands can be used by anyone on the [name(me)].%R[repeat(-,78)]
+@ADESCRIBE NORG v.1 Leadership Object=@pemit %#=Type 'Use [name(me)]' for Orgizational help.
+@OUSE NORG v.1 Leadership Object=looks down upon the datapad and begins to look it over.
+@OFAILURE NORG v.1 Leadership Object=trys to enter a command on the datapad, and it beeps angerily.
+&DO_+SHOUT NORG v.1 Leadership Object=$+shout ?*:@dolist [u(list)] = @pemit *[owner(##)]=Org Announcecment:[space(1)]{[switch(%0,:,%n %1,;,%n%1,%n says "%0%1")]}
+&DO_+ORGLIST NORG v.1 Leadership Object=$+org/list:@pemit %#=[center(%bMembers%B,78,-)]%R%R[iter([u(me/list)],name(##))]%R[repeat(-,78)]
+@SUCCESS NORG v.1 Leadership Object=You pick up [name(me)].
+@OSUCCESS NORG v.1 Leadership Object=picks up [name(me)].
+@ODROP NORG v.1 Leadership Object=drops [name(me)].
+@DROP NORG v.1 Leadership Object=You reluctantly loosen your grasp upon the datapad and drop the [name(me)].
+&DO_+MAIL NORG v.1 Leadership Object=$+mail *:@mail [u(list)]=%0
+@parent NORG v.1 Leadership Object=[[v(DBREF_OBJ)]
+think Done.%RRemoving the Dbref_lead and Dbref_obj from you
+&DBREF_LEAD me=
+&DBREF_OBJ me=
+think Done Contact Nefara: nefara@idea-inc.com if you have any problems or suggestions.
+@set me=!quiet

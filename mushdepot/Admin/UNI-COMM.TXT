@@ -1,0 +1,18 @@
+@create Universal Commands
+@link Universal Commands=#2
+@lock Universal Commands==[owner(me)]
+@set Universal Commands=WIZARD
+&CMD_POWERS Universal Commands=$@powers *:@switch [locate(%#,%0,*)]=#-1, {@pemit %#=I don't see %0 here.}, #-2, {@pemit %#=I don't know which %0 you mean.}, {@pemit %#=[u(FN_Powers,#$)]}
+&FN_POWERS Universal Commands=[name(%0)]'s powers:[iter(powers(%0),%r%b%b%b%b[ljust(##,20)] - [rest(grab(v(Powers_Descs),## *,|))])][switch(flags(%0),*W*,{%r%b%b%b%b[ljust(Wizard,20)] - Wizard, unkillable, subject to fewer restrictions, and able to use wizard commands.},*r*,{%r%b%b%b%b[ljust(royalty,20)] - Can @tel anything to anywhere, examine anything, does not need money, not affected by quotas or restricted building.})][switch(num(%0),#1,%r%b%b%b%b[ljust(God,20)] - Can set WIZARD flag on anything.)]%r--- End ---
+&POWERS_DESCS Universal Commands=announce Can use @wall command.|boot Can use @boot command.|builder Can use Builder commands.|cemit Can use @cemit command.|chat_privs Can use Admin channels.|functions Can use @function command.|guest Guest. Restricted command set.|halt Can @halt others' objects and do @allhalt.|hide Can hide on the WHO list.|idle No inactivity timeout.|login Not subject to login restrictions.|long_fingers Can do things remotely, like "get".|no_pay Doesn't need money for anything.|no_quota Has an unlimited quota.|open_anywhere Can use @open command from anywhere to anywhere.|pemit_all Can @pemit to HAVEN/pagelocked players.|poll Can use @poll command.|player_create Can use @pcreate command.|queue Has queue limit equal to the size of the database.|quota Can use @quota commands on other players.|quotas Can set other players quota using @squota.|search Can do @search, @stats, and @entrances on anything.|see_all Sees everything as if it were Visual.|see_queue Can do @ps on anyone, and @ps/all.|tport_anything Can @teleport anything.|tport_anywhere Can @teleport to anywhere.|unkillable Can not be killed.
+&CMD_JOIN Universal Commands=$join *:@fo %#=@tel me=[switch(num(*%0),#-1,pemit(%#,No such player.),loc(*%0))]
+&CMD_SUMMON Universal Commands=$summon *:@fo %#=@tel *%0=here
+&OOC Universal Commands=$ooc *:@switch [strmatch(get(%#/oocstyle),*%%N*)]=0,{@remit %l=-[ansi(h,*)][ansi(m,<)][ansi(hm,OOC)][ansi(m,>)][ansi(h,*)]- %N[switch(mid(%0,0,1),:,{%b[after(%0,:)]},;,{[after(%0,;)]},{%bsays "%0"})]},{@remit %l=[u(%#/oocstyle)][switch(mid(%0,0,1),:,{%b[after(%0,:)]},;,{[after(%0,;)]},{%bsays "%0"})]}
+&COLORLIST Universal Commands=x r g y b m c w
+&CEMAIL Universal Commands=$+cemail *:@select [hasflag(%#,Wizard)]|[num(*%0)]|[get(*%0/STEmail)]=0|*|*, {@pemit %#=Permission denied, Wizard bit required.}, 1|#-1|*, {@pemit %#=No such player: %0.}, 1|*|, {@pemit %#=That player has not registered an e-mail address.}, {@pemit %#=[name(*%0)]'s e-mail address is: [get(*%0/STEmail)].}
+&ADDEMAIL Universal Commands=$+addemail *=*:@switch [hasflag(%#,Wizard)]|[setq(0,num(*%0))]%q0=0|*, {@pemit %#=Permission denied, Wizard bit required.}, 1|#-1, {@pemit %#=No such player: %0.}, {&STEmail %q0=%1;@lock %q0/STEmail=Wizard;@pemit %#=You have added [name(%q0)]'s e-mail address as: %1.}
+@LAST Universal Commands=$+last *:@switch [num(*%0)]=#-1, {@pemit %#=%0 does not seem to exist.}, {@pemit %#=[name(*%0)] [switch(u(Can_See_Conn,%#,num(*%0)),1,has been connected since,was last logged on)]: [get(*%0/last)].}
+&CAN_SEE_CONN Universal Commands=[and(conn(%1),u(Can_See,%0,%1))]
+&CAN_SEE Universal Commands=[or(u(see_all,%0),not(hidden(%1)))]
+&SEE_ALL Universal Commands=[or(or(hasflag(%0,wizard),hasflag(%0,royalty)),haspower(%0,see_all))]
+&CMD_ED Universal Commands=$ed */*:@pemit %#=FugueEdit > [setq(0,locate(%#,%0,*))]&%1 [name(%q0)]=[ulocal(%#,get(%q0/%1))]

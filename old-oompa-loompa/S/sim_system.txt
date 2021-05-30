@@ -1,0 +1,79 @@
+Mull's Sim System
+-----------------
+
+@create Mull's Sim System V2.0
+@chzone Mull's Sim System V2.0 = #10
+@set Mull's Sim System V2.0 = WIZARD
+&BAJ-AKOREM_II Mull's Sim System V2.0=#102
+&BAJ-KRIM_II Mull's Sim System V2.0=#103
+&BAJ-PROPHESY_II Mull's Sim System V2.0=#101
+&CAR-GALOR_V Mull's Sim System V2.0=#171
+&CAR-HARADAR Mull's Sim System V2.0=#167
+&CAR-KELDAN_V Mull's Sim System V2.0=#170
+&CAR-MIRAMAT_V Mull's Sim System V2.0=#168
+&CAR-RAVAKK_V Mull's Sim System V2.0=#169
+&CMD.COORDS Mull's Sim System V2.0=$COORDS=* * *:th sdb(put,[u(me/SDB)],[pc2su(%0)],coords,x);th sdb(put,[u(me/SDB)],[pc2su(%1)],coords,y);th sdb(put,[u(me/SDB)],[pc2su(%2)],coords,z);[emit([ansi(ch,Coordinates Set.)])]
+&CMD.DISPLAY-CLASSES Mull's Sim System V2.0=$@Classlist *:th [pemit(%#,Valid classes for %0%r%r[space(3)][iter(lattr(#825/%0-*),[edit([after(##,-)],ROARULZ,%b)],%b,%r[space(3)])]
+&CMD.RECLASS Mull's Sim System V2.0=$@RECLASS *=*:[iter([edit([edit(lattr([u(me/DBREF)]/*),SPACE,%b)],SDB,%b)],[set([u(me/DBREF)]/##,!Wizard)][wipe([u(me/DBREF)]/##)])];th sdb(read, [u(me/dbref)]);th [Switch([ifelse([lattr(#825/SIM-1)],1,0)][ifelse([match([v(EMPS)],%0)],1,0)][ifelse([lattr(#825/%0-%1)],1,0)],111,[parent([u(me/SIM-1)],[u(me/%0-%1)])][pemit(%#,Sim Vessel Reclassed.)],0??,[pemit(%#,Wrong Sim Room.)],?0?,[pemit(%#,Wrong Empire.)],??0,[pemit(%#,Wrong Class.)],[pemit(%#,Sorry. Try Again.)])];@space/refuel [u(me/DBREF)];th sdb(read, [u(me/dbref)])
+&CMD.RESTART.1 Mull's Sim System V2.0=$RESTART SIM:&SPACE [u(me/dbref)]=10;th sdb(read, [u(me/dbref)]);th sdb(function,[u(me/SDB)],fix);@emit [ansi(ch, Sim Restarted)];th sdb(put,[u(me/sdb)],[pc2su(0.000)],coords,x);th sdb(put,[u(me/SDB)],[pc2su(0.000)],coords,y);th sdb(put,[u(me/SDB)],[pc2su(0.000)],coords,z)
+&CREDITS Mull's Sim System V2.0=Made by Mull@ROA-TrekMUSH.  Thanks to Galen from ROA for helping with softcode, and the rest of the ROA staff for their support
+&DBREF Mull's Sim System V2.0=
+@DESCRIBE Mull's Sim System V2.0=%rTo RECLASS a Sim Room:%r%b%b%b@RECLASS <EMPIRE>=<CLASS>%r%rTo Show the Current Classes for the Sims:%r%b%b%b@CLASSLIST <EMPIRE>%r%rTo Restart a Sim:%R%B%B%BRESTART SIM%r%rTo change your current Coordinates:%R%B%B%BCOORDS=<x> <y> <z>%R%RAvaiable empires%R%B%B%BEMPIRE LIST
+&DOM-CALIBRAXIS_IV Mull's Sim System V2.0=#157
+&DOM-CHERNBORG_IV Mull's Sim System V2.0=#155
+&DOM-MAL_HAVOC_IV Mull's Sim System V2.0=#156
+&DOM-TRISTE_IV Mull's Sim System V2.0=#158
+&EMPLIST Mull's Sim System V2.0=$EMPIRE LIST:@pemit %#=BAJ - Bajoran%RCAR - Cardassian%RDOM - Dominion%RFER - Ferengi%RGEN - Generic%RGOR - Gorn%RKLI - Klingon%RMAQ - Maquis%RORI - Orion%RROM - Romulan%RUFP - Federation
+&EMPS Mull's Sim System V2.0=BAJ CAR DOM FER GEN GOR KLI MAQ ORI ROM UFP
+&FER-D'KORA_V Mull's Sim System V2.0=#114
+&FER-NAGUS Mull's Sim System V2.0=#111
+&FER-VORTAC_V Mull's Sim System V2.0=#107
+&GEN-COURIER_II Mull's Sim System V2.0=#65
+&GEN-MEDIUM_CRUISER_II Mull's Sim System V2.0=#70
+&GEN-MEGA_FREIGHTER_IV Mull's Sim System V2.0=#72
+&GEN-OUTPOSTII Mull's Sim System V2.0=#61
+&GEN-OUTPOSTIIB Mull's Sim System V2.0=#60
+&GEN-SHUTTLE Mull's Sim System V2.0=#66
+&GEN-STARBASEII Mull's Sim System V2.0=#64
+&GEN-STARBASEIIB Mull's Sim System V2.0=#37
+&GEN-STATIONIIB Mull's Sim System V2.0=#63
+&GOR-ALLOSAURUS Mull's Sim System V2.0=#80
+&GOR-APATOSAURUS Mull's Sim System V2.0=#84
+&GOR-MEGALOSAURUS Mull's Sim System V2.0=#79
+&GOR-STEGOSAURUS Mull's Sim System V2.0=#77
+&GOR-TYRANNOSAURUS Mull's Sim System V2.0=#85
+&GOR-VELOCIRAPTOR Mull's Sim System V2.0=#83
+&KLI-B'REL_V Mull's Sim System V2.0=#153
+&KLI-K'TINGA_IV Mull's Sim System V2.0=#151
+&KLI-K'VINGA_III Mull's Sim System V2.0=#150
+&KLI-K'VORT_IV Mull's Sim System V2.0=#149
+&KLI-NEGH'VAR Mull's Sim System V2.0=#147
+&KLI-TOQ Mull's Sim System V2.0=#135
+&KLI-VOR'CHA_IV Mull's Sim System V2.0=#137
+&MAQ-OPUS_MACH_IIA Mull's Sim System V2.0=#74
+&ORI-AEON_FLUX_III Mull's Sim System V2.0=#98
+&ORI-BLADEWING_IV Mull's Sim System V2.0=#99
+&ORI-HEAVY_CRUISER_IIIA Mull's Sim System V2.0=#87
+&ORI-MEDIUM_CRUISER_IIIA Mull's Sim System V2.0=#86
+&ORI-SUPER_CRUISER_IIIA Mull's Sim System V2.0=#88
+&ROM-AEL'SIENAE Mull's Sim System V2.0=#133
+&ROM-B'REL_III Mull's Sim System V2.0=#132
+&ROM-D'DERIDEX_V Mull's Sim System V2.0=#126
+&ROM-MORLASASI_STELAM_III Mull's Sim System V2.0=#130
+&SDB Mull's Sim System V2.0=
+&SIM-1 Mull's Sim System V2.0=[u(me/dbref)]
+&UFP-AKIRA Mull's Sim System V2.0=#179
+&UFP-EXCELSIOR_IV Mull's Sim System V2.0=#188
+&UFP-GALAXY_II Mull's Sim System V2.0=#181
+&UFP-INTREPID Mull's Sim System V2.0=#201
+&UFP-NEBULA Mull's Sim System V2.0=#198
+&UFP-OBERTH_III Mull's Sim System V2.0=#182
+&UFP-SABRE Mull's Sim System V2.0=#177
+&UFP-SOVREIGN Mull's Sim System V2.0=#196
+&UFP-STEAMRUNNER Mull's Sim System V2.0=#178
+
+There it is.  Create the bridge of a ship as usual with consoles.  @create a Sim System and @parent it to this parent.  Next, set the &SDB and &DBREF attribs on the newly made object and helm the ship you just made, and everything should work.  The sim space by default is 10, but you can change it in the &CMD.RESTART.1 where is sets the &SPACE attrib on the ship zone.  The parent also needs to be @chzoned to #10, because it uses some @space commands to work.  That should work.  If you have any questions, feel free to email me back.
+
+Mull (jpmull86@bellsouth.net)
+
+

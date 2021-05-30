@@ -1,0 +1,28 @@
+@@ This is a Global Bulletin Board System.
+@@ It was written for TinyMUSH 2.2 but should work ok with
+@@ other versions, save perhaps the @aconnect.
+@@ It only needs to be set inherit if you wish to use the
+@@ aconnect which announces the existance of new posts.
+@@ Once Quoted You should @create a Posts Data Object
+@@ and global edit dbref #4196 to the dbref # of your  Posts Data Object.
+@@ You should also adjust &FUNC_HASPOWER to your requirements.
+@@ Default is Author and Wizards.
+@@ Problems: Contact Shae@Together.net
+@@ Get Also: "bbhelp.txt" for +help files.
+@create Bulletin Board
+&COMMAND_ADD Bulletin Board=$+bb/add *=*:@pemit %#=You post a new message to the Bulletin Board.;&BB_%va #4196=[extract(time(),1,3)]|%#|%0|%1;@va me=[add(%va,1)];&last_update #4196=[secs()]
+&COMMAND_DEL Bulletin Board=$+bb/delete *:@swi [setq(0,[u(func_haspower,%#,%0)])]%q0=0,{@pemit %#=Permission Denied.},1,{@pemit %#=Error: No post numbered %0.},{&%q0 #4196=;@pemit %#=Post %0 deleted.}
+&COMMAND_EDIT Bulletin Board=$+bb/edit *=*||*:@swi [setq(0,[u(func_haspower,%#,%0)])]%q0=0,{@pemit %#=Permission Denied.},1,{@pemit %#=Error: No post numbered %0.},{@edit #4196/%q0={%1},{%2};@pemit %#=Edit Complete.}
+&COMMAND_READ Bulletin Board=$+bb/read *:@swi [setq(0,u(func_grab,%0))]%q0=,{@pemit %#=Invalid Post #.},{&bb_last %#=[secs()];@pemit %#=[setq(1,[u(#4196/%q0)])]Title:%t[extract(%q1,3,1,|)]%rDate:%t[extract(%q1,1,1,|)]%rAuthor:%t[name(extract(%q1,2,1,|))]%r%r[extract(%q1,4,1,|)]}
+&COMMAND_SCAN Bulletin Board=$+bb/scan:&bb_last %#=[secs()];@pemit %#=[center([mudname()] Global Bulletin Board,75)]%r[center(To read a post: '+bb/read #',75)]%r%rPost#%b[ljust(Title,35)][ljust(Date,15)]Author%r[repeat(_,75)]%r[setq(0,lattr(#4196/BB_* ))][iter(%q0,%r[ljust(%b[member(%q0,##)].,6)][setq(1,[get(#4196/[extract(%q0,[member(%q0,##)],1)])])][ljust([mid([extract(%q1,3,1,|)],0,34)],35)][ljust([extract(%q1,1,1,|)],15)][name(extract(%q1,2,1,|))])]%r[repeat(_,75)]
+&FUNC_GRAB Bulletin Board=[extract(lattr(#4196/bb_*),%0,1)]
+&FUNC_HASPOWER Bulletin Board=[setq(7,extract(lattr(#4196/bb_*),%1,1))][switch(%q7,,{1},{[switch(or(hasflag(%0,WIZARD),match([extract([u(#4196/%q7)],2,1,|)],%0)),1,{%q7})]})]
+@Aconnect Bulletin Board=@switch gte(v(last_update),u(%#/bb_last))=1,{@pemit %#=%tThere are New Messages on the Bulletin Board. (+bb/scan)}
+@Desc Bulletin Board=The Guardians MUSH Online Bulletin System
+@VA Bulletin Board=11
+@set Bulletin Board=INHERIT
+_______________________________________________________________________________
+think To Install:
+think %b%b@create Posts Data Object
+think %b%b@edit Bulletin Board/*=#4196,<that db number>
+think Commands: +bb/add *=*, +bb/delete *, +bb/edit *=*, +bb/read *, +bb/scan.

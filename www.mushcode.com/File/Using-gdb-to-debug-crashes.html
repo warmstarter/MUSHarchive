@@ -1,0 +1,327 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Code: Using gdb to debug crashes</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <!-- Apple devices fullscreen -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <!-- Apple devices fullscreen -->
+    <meta names="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <!-- Bootstrap -->
+	<link rel="stylesheet" href="../Theme/Flat/html/css/bootstrap.min.css">
+	<!-- Bootstrap responsive -->
+	<link rel="stylesheet" href="../Theme/Flat/html/css/bootstrap-responsive.min.css">
+	<!-- jQuery UI -->
+	<link rel="stylesheet" href="../Theme/Flat/html/css/plugins/jquery-ui/smoothness/jquery-ui.css">
+	<link rel="stylesheet" href="../Theme/Flat/html/css/plugins/jquery-ui/smoothness/jquery.ui.theme.css">
+	<!-- Theme CSS -->
+	<link rel="stylesheet" href="../Theme/Flat/html/css/style.css">
+	<!-- Color CSS -->
+	<link rel="stylesheet" href="../Theme/Flat/html/css/themes.css">
+
+
+    <link rel="stylesheet" href="../Content/site.css">
+
+    <!-- jQuery -->
+    <script src="../Theme/Flat/html/js/jquery.min.js"></script>
+    <!-- Nice Scroll -->
+    <script src="../Theme/Flat/html/js/plugins/nicescroll/jquery.nicescroll.min.js"></script>
+    <!-- jQuery UI -->
+    <script src="../Theme/Flat/html/js/plugins/jquery-ui/jquery.ui.core.min.js"></script>
+    <script src="../Theme/Flat/html/js/plugins/jquery-ui/jquery.ui.widget.min.js"></script>
+    <script src="../Theme/Flat/html/js/plugins/jquery-ui/jquery.ui.mouse.min.js"></script>
+    <script src="../Theme/Flat/html/js/plugins/jquery-ui/jquery.ui.resizable.min.js"></script>
+    <script src="../Theme/Flat/html/js/plugins/jquery-ui/jquery.ui.sortable.min.js"></script>
+    <!-- slimScroll -->
+    <script src="../Theme/Flat/html/js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+    <!-- Bootstrap -->
+    <script src="../Theme/Flat/html/js/bootstrap.min.js"></script>
+    <!-- Form -->
+    <script src="../Theme/Flat/html/js/plugins/form/jquery.form.min.js"></script>
+
+    <!-- Theme framework -->
+    <script src="../Theme/Flat/html/js/eakroko.min.js"></script>
+    <!-- Theme scripts -->
+    <script src="../Theme/Flat/html/js/application.min.js"></script>
+
+    <!--[if lte IE 9]>
+		<script src="js/plugins/placeholder/jquery.placeholder.min.js"></script>
+		<script>
+			$(document).ready(function() {
+				$('input, textarea').placeholder();
+			});
+		</script>
+	<![endif]-->
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="http://www.mushcode.com/File/img/favicon.ico" />
+    <!-- Apple devices Homescreen icon -->
+    <link rel="apple-touch-icon-precomposed" href="http://www.mushcode.com/File/img/apple-touch-icon-precomposed.png" />
+
+</head>
+
+<body class="theme-green">
+    <div id="navigation">
+        <div class="container-fluid">
+            <a href="../index.html" id="brand">MUSHCode.com</a>
+        </div>
+    </div>
+    <div class="container-fluid" id="content">
+        <div id="left">
+            <div class="subnav">
+                <div class="subnav-title">
+                    <a href="Using-gdb-to-debug-crashes.html#" class='toggle-subnav'>
+                        <i class="icon-angle-down"></i>
+                        <span>About</span>
+                    </a>
+                </div>
+                <ul class="subnav-menu">
+                    <li>
+                        <a href="../index.html">Overview</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="subnav">
+                <div class="subnav-title">
+                    <a href="Using-gdb-to-debug-crashes.html#" class='toggle-subnav'>
+                        <i class="icon-angle-down"></i>
+                        <span>Files</span>
+                    </a>
+                </div>
+                <ul class="subnav-menu">
+                    <li class='dropdown'>
+                        <a href="Using-gdb-to-debug-crashes.html#" data-toggle="dropdown">Code</a>
+                        
+<ul class="dropdown-menu">
+        <li>
+            <a href="../Category/Administration.html">Administration</a>
+        </li>
+        <li>
+            <a href="../Category/Building.html">Building</a>
+        </li>
+        <li>
+            <a href="../Category/Bulletin-Board.html">Bulletin Board</a>
+        </li>
+        <li>
+            <a href="../Category/Combat.html">Combat</a>
+        </li>
+        <li>
+            <a href="../Category/Dynamic-Space.html">Dynamic Space</a>
+        </li>
+        <li>
+            <a href="../Category/Fonts.html">Fonts</a>
+        </li>
+        <li>
+            <a href="../Category/Functions.html">Functions</a>
+        </li>
+        <li>
+            <a href="../Category/Games.html">Games</a>
+        </li>
+        <li>
+            <a href="../Category/Globals.html">Globals</a>
+        </li>
+        <li>
+            <a href="../Category/Mail-Systems.html">Mail Systems</a>
+        </li>
+        <li>
+            <a href="../Category/Other.html">Other</a>
+        </li>
+        <li>
+            <a href="../Category/Schedulers.html">Schedulers</a>
+        </li>
+        <li>
+            <a href="../Category/Time.html">Time</a>
+        </li>
+        <li>
+            <a href="../Category/Vehicles.html">Vehicles</a>
+        </li>
+        <li>
+            <a href="../Category/Vendors.html">Vendors</a>
+        </li>
+        <li>
+            <a href="../Category/Weather-Systems.html">Weather Systems</a>
+        </li>
+</ul>
+                    </li>
+                    <li class='dropdown'>
+                        <a href="Using-gdb-to-debug-crashes.html#" data-toggle="dropdown">Classes</a>
+                        
+<ul class="dropdown-menu">
+        <li>
+            <a href="../Category/Administration.html">Administration</a>
+        </li>
+        <li>
+            <a href="../Category/Building.html">Building</a>
+        </li>
+        <li>
+            <a href="../Category/Globals.html">Globals</a>
+        </li>
+        <li>
+            <a href="../Category/Hardcode.html">Hardcode</a>
+        </li>
+        <li>
+            <a href="../Category/Other.html">Other</a>
+        </li>
+        <li>
+            <a href="../Category/Softcode.html">Softcode</a>
+        </li>
+</ul>
+                    </li>
+                    <li>
+                        <a href="../Manuals.html">Manuals</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="subnav">
+                <div class="subnav-title">
+                    <a href="Using-gdb-to-debug-crashes.html#" class='toggle-subnav'>
+                        <i class="icon-angle-down"></i>
+                        <span>Misc</span>
+                    </a>
+                </div>
+                <ul class="subnav-menu">
+                    <li>
+                        <a href="../Ascii2Mu.html">ASCII To MUSHCode</a>
+                    </li>
+                    <li>
+                        <a href="../MushList.html">MUSH/MUX List</a>
+                    </li>
+                    <li>
+                        <a href="../MushRoom.html">MUSHRoom</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="subnav">
+                <div class="subnav-title">
+                    <a href="Using-gdb-to-debug-crashes.html#" class='toggle-subnav'>
+                        <i class="icon-angle-down"></i>
+                        <span>Contribute</span>
+                    </a>
+                </div>
+                <ul class="subnav-menu">
+                    <li>
+                        <a href="../Submit.html">Submit</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div id="main">
+            <div class="container-fluid">
+                <div class="breadcrumbs">
+                    <ul>
+                        
+    <li>
+        <a href="../index.html">Home</a>
+        <i class="icon-angle-right"></i>
+    </li>
+    <li>
+        <a href="../Category/Hardcode.html">Hardcode</a>
+        <i class="icon-angle-right"></i>
+    </li>
+    <li>
+        <a href="Using-gdb-to-debug-crashes.html#">Using gdb to debug crashes</a>
+    </li>
+
+                    </ul>
+                </div>
+                <div class="row-fluid">
+                    <div class="span12">
+                        
+
+
+
+<div class="box">
+    <div class="box-title title">
+        <h2>
+            Using gdb to debug crashes
+        </h2>
+    </div>
+    <div class="box-content">
+
+        <div class="description">
+            <p>Javelin explains how to use gdb, the GNU Debugger, to debug a MUSH crash using a core file.</p>
+        </div>
+
+        <div class="author">
+            <strong>Author:</strong>
+                <span>
+                    <a href="../Author/Javelin@M-U-S-H.html">Javelin</a>@<a href="../Source/M-U-S-H.html">M*U*S*H</a>
+                </span>
+        </div>
+
+        <div class="author">
+            <strong>Category:</strong>
+            <a href="../Category/Hardcode.html">Hardcode</a>
+        </div>
+
+
+            <div class="functions">
+                <strong>Functions:</strong>
+                        <a href="../Function/accname.html" class="function">accname&#40;&#41;</a>,
+                        <a href="../Function/name.html" class="function">name&#40;&#41;</a>.
+            </div>
+
+
+            <div class="servers">
+                <strong>Compatibility:</strong>
+                        <a href="../Server/CobraMUSH.html" class="server">CobraMUSH</a>,
+                        <a href="../Server/PennMUSH.html" class="server">PennMUSH</a>.
+            </div>
+
+    </div>
+</div>
+
+
+<div class="box box-bordered box-condensed">
+    <div class="box-title">
+        <h3>
+	        <i class="icon-reorder"></i>
+	        MUSHCode for Using gdb to debug crashes
+        </h3>
+        <div class="actions">
+	        <a class="btn btn-mini select-all" href="Using-gdb-to-debug-crashes.html#">
+                    <i class="icon-resize-full"></i> Select Content
+            </a>
+        </div>
+    </div>
+    <div id="code" class="box-content content">
+        Topic: Using gdb to debug crashes<br/>Author: Javelin<br/>Summary: Javelin explains how to use gdb, the GNU Debugger, to debug a MUSH<br/>crash using a core file.<br/><br/><br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "I'm about to help blaze debug a mush<br/>crash using a core file. Does anyone else have interest in this topic? If so,<br/>I'll do it here (And someone could log it as a class, even). If not, I'll do<br/>it privately."<br/>&lt;Hardcode&gt; Knife() 'n' Fork() BlaZe logs.<br/>&lt;Hardcode&gt; 0xfeeddeadbeebeef Zebranky says, "I'm interested."<br/>&lt;Hardcode&gt; 0xfeeddeadbeebeef Zebranky gets out his GDB reference cards :)<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "Yeah, Blaze, if you want that,<br/>http://www.refcards.com/download/gdb-refcard-letter.pdf"<br/>&lt;Hardcode&gt; Knife() 'n' Fork() BlaZe says, "Nifty."<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "Okee, go to your game dir, and: gdb<br/>netmush mycore"<br/>&lt;Hardcode&gt; Goldberg says, "what is gdb?"<br/>&lt;Hardcode&gt; @dump 'n' @wipe Time wonders..<br/>&lt;Hardcode&gt; Knife() 'n' Fork() BlaZe says, "GCC debugger."<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "gdb is the GNU debugger"<br/>&lt;Hardcode&gt; Knife() 'n' Fork() BlaZe says, "Really? Thought it was just GCC"<br/>&lt;Hardcode&gt; @dump 'n' @wipe Time says, "What's the difference in that and what<br/>I use: gdb core netmush"<br/>&lt;Hardcode&gt; @dump 'n' @wipe Time says, "?"<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "No, gdb debugs more than just gcc"<br/>&lt;Hardcode&gt; Hopful Romantic Javelin doesn't think gdb core netmush would work,<br/>but I've never tried, Time.<br/>&lt;Hardcode&gt; @dump 'n' @wipe Time uses it all the time, jav :)<br/>&lt;Hardcode&gt; 0xfeeddeadbeebeef Zebranky says, "Time, I think that uses netmush<br/>as the core file and core as the executable (though I might be wrong)"<br/>&lt;Hardcode&gt; @dump 'n' @wipe Time says, "It may work both ways..."<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "gdb may be smart enough to figure it<br/>out."<br/>&lt;Hardcode&gt; @dump 'n' @wipe Time says, "Anyway, go on.."<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "Ok, got it up, Blaze?"<br/>&lt;Hardcode&gt; Knife() 'n' Fork() BlaZe says, "Aye."<br/>&lt;Hardcode&gt; @dump 'n' @wipe Time pulls up a core to test it.<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "Type 'where'"<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "That will produce a stack trace"<br/>&lt;Hardcode&gt; Knife() 'n' Fork() BlaZe says, "Spammy. Yep."<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "It's a set of lines showing you<br/>where the program was when it crashed."<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "The first line is where the crash<br/>happened, the second line is where the function that called the first line's<br/>function was, etc."<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "So what's the first couple lines?"<br/>&lt;Hardcode&gt; Knife() 'n' Fork() BlaZe says, "#0  0x400c1548 in strcasecmp ()<br/>from /lib/libc.so."<br/>&lt;Hardcode&gt; @dump 'n' @wipe Time says, "Ah..that's why...I use gdb -c core<br/>netmush"<br/>&lt;Hardcode&gt; Knife() 'n' Fork() BlaZe says, "#2  0x080ace7b in simple_matches<br/>(who=146, name=0x0, flags=17843184) at match.c:312"<br/>&lt;Hardcode&gt; @dump 'n' @wipe Time says, "The -c is the corefile name"<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "Ok, so it crashed when calling<br/>strcasecmp during simple_matches(), which is a function in match.c"<br/>&lt;Hardcode&gt; @dump 'n' @wipe Time shuts up as to not confuse anyone.<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "What was #1?"<br/>&lt;Hardcode&gt; Knife() 'n' Fork() BlaZe says, "Not due to that though?"<br/>&lt;Hardcode&gt; Hopful Romantic Javelin is assuming #1 was match_me?<br/>&lt;Hardcode&gt; Knife() 'n' Fork() BlaZe says, "#1  0x080ad453 in match_me<br/>(who=146, name=0x0) at match.c:462"<br/>&lt;Hardcode&gt; Knife() 'n' Fork() BlaZe nods<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "Ok. You start out in the lowest (#0)<br/>stack frame. Let's go up to #1. Type: up"<br/>&lt;Hardcode&gt; Knife() 'n' Fork() BlaZe is still there.<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "If you type 'l' now, you'll see the<br/>source code around match_me"<br/>&lt;Hardcode&gt; Knife() 'n' Fork() BlaZe thinks he just went down (scrolled)<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "You can type 'frame 1' to go there<br/>directly"<br/>&lt;Hardcode&gt; Knife() 'n' Fork() BlaZe says, "Ah, back at prompt. I see."<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "Clearly, the problem here is that<br/>match_me is getting called with a null pointer for name (name=0x0), and<br/>passing that to strcasecmp(), which is puking."<br/>&lt;Hardcode&gt; Knife() 'n' Fork() BlaZe says, "Okay."<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "We want to figure out what's passing<br/>NULLs into the matcher. In #2, you can see that simple_matches was given a<br/>NULL name parameter. SO let's look at who called simple_matches"<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "Type: frame 3"<br/>&lt;Hardcode&gt; Knife() 'n' Fork() BlaZe says, "who"<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "When you're in frame 3, 'info args'<br/>will probably be useful. What's the output of that?"<br/>&lt;Hardcode&gt; Knife() 'n' Fork() BlaZe says, "who = 146 name = 0x0 type = 65535<br/>flags = 17843184"<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "Do: info frame 3"<br/>&lt;Hardcode&gt; Hopful Romantic Javelin thinks that'll show us the name of the<br/>function we're in, too.<br/>&lt;Hardcode&gt; Goldberg has now made a fresh release of ASpace+Penn using a new<br/>Penn177p13 tarball and manually inserting the relevant code<br/>&lt;Hardcode&gt; Knife() 'n' Fork() BlaZe says, "Okay."<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "So, what function are we in, Blaze?"<br/>&lt;Hardcode&gt; Knife() 'n' Fork() BlaZe says, "match_result_internal I think"<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "Makes sense. Go 'up'"<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "Now what function?"<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "(Probably match_result or one of the<br/>variants...)"<br/>&lt;Hardcode&gt; Knife() 'n' Fork() BlaZe says, "noisy_match_result"<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "Great. Ok, now 'up' again and we<br/>find out how we got a NULL into the matcher."<br/>&lt;Hardcode&gt; Knife() 'n' Fork() BlaZe says, "We do?"<br/>&lt;Hardcode&gt; Hopful Romantic Javelin hopes so. What called noisy_match_result?<br/>&lt;Hardcode&gt; Knife() 'n' Fork() BlaZe is currently at #5? There's no<br/>noisy_match_result.<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "But what's the function at #5?"<br/>&lt;Hardcode&gt; Knife() 'n' Fork() BlaZe says, "fun_accname"<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "Ok, so that's where the problem<br/>lies. What line number?"<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "funstr.c 1431ish?"<br/>&lt;Hardcode&gt; Knife() 'n' Fork() BlaZe says, "fundb.c:1430"<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "Right, that's what I meant. :)"<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "Ok, type 'l'"<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "You'll see the code there. The line<br/>that went bad was: dbref it = match_thing(executor, args[0]);"<br/>&lt;Hardcode&gt; Knife() 'n' Fork() BlaZe notes he made a small hack so name() is<br/>just an alias for accname. Would that make much of a difference?<br/>&lt;Hardcode&gt; Hopful Romantic Javelin isn't sure yet.<br/>&lt;Hardcode&gt; Knife() 'n' Fork() BlaZe says, "Okay. Yes it does."<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "Let's see what args[0] was. Type: p<br/>args[0]"<br/>&lt;Hardcode&gt; Knife() 'n' Fork() BlaZe says, "NULL."<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "When you made that hack..."<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "You just changed fun_name to<br/>fun_accname in the function table entry for "NAME"?"<br/>&lt;Hardcode&gt; Knife() 'n' Fork() BlaZe says, "Yup."<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "Yep, your fault. You broke it."<br/>&lt;Hardcode&gt; 0xfeeddeadbeebeef Zebranky grins.<br/>&lt;Hardcode&gt; Knife() 'n' Fork() BlaZe grins. "How and why?"<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "The function table entry for NAME<br/>reads: {"NAME", fun_name, 0, 2, FN_REG},"<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "fun_name knows how to deal with 0<br/>and 2 arguments."<br/>&lt;Hardcode&gt; Knife() 'n' Fork() BlaZe aaaahs.<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "fun_accname expects and only can<br/>deal with 1 argument, exactly."<br/>&lt;Hardcode&gt; Knife() 'n' Fork() BlaZe says, "Aye, just spotted that"<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "When someone passes in 0 args to<br/>accname() (via name()), it'll die."<br/>&lt;Hardcode&gt; Knife() 'n' Fork() BlaZe takes a look at the call.<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "The proper way to make that hack, if<br/>you want it..."<br/>&lt;Hardcode&gt; Knife() 'n' Fork() BlaZe says, "name(%0). Right. if %0 is null."<br/>&lt;Hardcode&gt; Knife() 'n' Fork() BlaZe is to change 0, 2, to 1, 1?<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "Is to leave "NAME" pointing at<br/>fun_name, and edit fun_name, replacing the shortname() call at line 1413 with<br/>accented_name() instead."<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "You can change 0,2 to 1,1, and<br/>that's safe."<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "But then people won't be able to use<br/>the side effect version of name()"<br/>&lt;Hardcode&gt; Knife() 'n' Fork() BlaZe says, "How do you mean?"<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "And code that expects that name()<br/>returns nothing (which it historically has) will suddenly get an error."<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "Well, name(myobj,newname) will stop<br/>working if you don't allow 2 args."<br/>&lt;Hardcode&gt; Knife() 'n' Fork() BlaZe says, "Ah, okay."<br/>&lt;Hardcode&gt; Hopful Romantic Javelin recommends against any hacking of name() at<br/>all, but if you must force accented output, do it the way I suggested above.<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "In any case, we've found the problem<br/>and you can 'quit' gdb :)"<br/>&lt;Hardcode&gt; Knife() 'n' Fork() BlaZe will do. "And the lecture was very<br/>helpful."<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "The stack trace showed us that the<br/>crash was due to strcascmp() getting a null arg."<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "Looking back, we found that the null<br/>arg was a null name that was passed to the matcher."<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "We then found that it was<br/>fun_accname() that was running the matcher with a null argument, and we could<br/>wonder how fun_accname was called with no arguments."<br/>&lt;Hardcode&gt; Hopful Romantic Javelin says, "Which led to the conclusion that the<br/>tweak in function.c was at fault. Successful debug. Whee."
+    </div>
+</div>
+<script type="text/javascript">
+    var selectText = function(element) {
+        var doc = document;
+        var text = doc.getElementById(element);
+
+        if (doc.body.createTextRange) { // ms
+            var range = doc.body.createTextRange();
+            range.moveToElementText(text);
+            range.select();
+        } else if (window.getSelection) { // moz, opera, webkit
+            var selection = window.getSelection();
+            var range = doc.createRange();
+            range.selectNodeContents(text);
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
+    }
+
+    $('a.select-all').click(function () {
+        selectText('code');
+    });
+</script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</body>
+
+</html>
+<script src="../Scripts/Google.js" type="text/javascript"></script>

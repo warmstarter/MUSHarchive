@@ -1,0 +1,81 @@
+@@ Object: Zilch Game
+@@ Version: 1.0
+@@ Author: Jonathan A. Booth
+@@ E-mail: kamikaze@N0$PAMimsa.edu
+@@ Web: http://www.N0$PAMimsa.edu/~kamikaze/
+@@ (remove N0$PAM from hostnames to use them)
+@@ Date: Sept 14, 1998
+@@ Written for: PennMUSH 1.7.2 pl15
+@@ Author is willing to support: Yes
+@@
+@@ This script creates a object that knows how to play the dice game
+@@ zilch. It includes a basic description of the rules of the game, and
+@@ a list of counters.
+@@
+
+think CREATING ZILCH GAME
+@create Zilch Game
+&copyright zilch=Zilch Game copyleft under the current GPL by Jonathan Booth/Rhysem@M*U*S*H, Sept 14, 1998. Changes and bug reports should go to kamikaze@N0$PAMimsa.edu. (remove N0$PAM to mail)
+@set zilch game=!no_command
+@lock/Basic Zilch Game==me
+&GAME-LEVEL Zilch Game=
+@set Zilch Game/GAME-LEVEL=no_command
+&GAME-PLAYERS Zilch Game=
+@set Zilch Game/GAME-PLAYERS=no_command
+&GAME Zilch Game=not running
+@set Zilch Game/GAME=no_command
+&USAGE_OPTION Zilch Game=$option:@pemit %#=Available options to toggle: [iter(lattr(me/option*),after(##,-))].
+&CMD_OPTION Zilch Game=$option *:@select [hasattr(me,option-[edit(secure(%0),%b,-)])]=1,{&option-[edit(secure(%0),%b,-)] me=[not(v(option-[edit(secure(%0),%b,-)]))];@pemit %#=Option %0 toggled to [switch(v(option-[edit(secure(%0),%b,-)]),1,on,0,off,unknown)].},{@pemit %#=No such option, %0.};@@ allows you to toggle options @@
+&OPTION-GRAPHIC-DICE Zilch Game=1
+&TCL_DISPLAY_DICE Zilch Game=set dice(1) "   | * |   "; set dice(2) "   |* *|   "; set dice(3) "*  | * |  *"; set dice(4) "* *|   |* *"; set dice(5) "* *| * |* *"; set dice(6) "* *|* *|* *"; set ret ""; for {set line 0} {$line < 3} {incr line} { for {set i 0} {$i < [llength $in(0)]} {incr i} { append ret "[ansi hi][lindex [split $dice([lindex $in(0) $i]) |] $line][ansi n] "; }; append ret "\n"; }; return [string trim $ret "\n"];
+&USAGE_START Zilch Game=$start:@pemit %#=You must specify what level of a game to start. Levels are: [v(levels)].
+&USAGE_SAVE Zilch Game=$save:@pemit %#=You must specify what to save. 'zcounters' lists valid combos to save.
+&FUNC_ZCOUNTER_DISP Zilch Game=[rjust(%0,6)] [ljust(%1,20)] %2
+&CMD_ZCOUNTERS Zilch Game=$zcounters:@pemit %#=- Counters for Zilch by Jonathan A. Booth/Rhysem@M*U*S*H -%r[repeat(-,78)]%r[u(func_zcounter_disp,Value,Name,Example)][iter(50 5 5|100 1 1|1000 111 1 1 1|200 222 2 2 2|300 333 3 3 3|400 444 4 4 4|500 555 5 5 5|600 666 6 6 6|1500 straight 1 2 3 4 5 6,%r[u(func_zcounter_disp,first(##),first(rest(##)),rest(rest(##)))],|)]%r- The followin counters apply additionally to the 10000 point game -[iter(2000 three_pair 1 1 2 2 3 3|3000 two_triples 4 4 4 5 5 5,%r[u(func_zcounter_disp,first(##),first(rest(##)),rest(rest(##)))],|)]%r- The following counters apply additionally to the 15000 point game -[iter(4000 four_kind 3 3 3 3|5000 five_kind 2 2 2 2 2|6000 six_kind 4 4 4 4 4 4,%r[u(func_zcounter_disp,first(##),first(rest(##)),rest(rest(##)))],|)]%r[repeat(-,78)];@@ list the counters in a game of zilch @@
+&CMD_ZRULES Zilch Game=$zrules:@@ display the rules of the game @@;@pemit %#=- Rules for Zilch by Jonathan A. Booth/Rhysem@M*U*S*H -%r[repeat(-,78)]%rZilch is a very simple game. When it's your turn, you roll the dice, and put any counters you have aside. As long as you don't zilch (roll no counters) you can continue rolling if you want and getting a higher score. You may also stop and take your add your hand's score to your total score.%r%rIf you zilch, your current score for that round is a 0, so you add nothing to your total score.%r%rThe only exception ot being able to stop anytime is if you "turn the corner" -- use all 6 dice as counters. In that case you must roll again.%r%rTo get a list of the counters, type 'zcounters'. 'zhelp' for general help.%r[repeat(-,78)]
+&FUNC_SCORE_ABOVEMIN Zilch Game=gte(first(v(score-%0)),max(350,mul(500,lte(rest(v(score-%0)),0))))
+&TODO Zilch Game=Detect zilch and force turn change. Didn't detect turning corner.
+&FUNC_SCORE Zilch Game=[set(me,score-%0:[add(first(v(score-%0)),extract(v(valid_%1),3,1,&))] [rest(v(score-%0))])][set(me,roll-%0:[setq(0,before(v(roll-%0),|))][setq(9,regmatch(before(v(roll-%0),|),before(v(valid_%1),&),1))][iter(%q1,setq(0,remove(%q0,##)))][squish(%q0)])]
+&FUNC_PRETTY_NAME Zilch Game=last(v(valid_%0),&)
+&CMD_SAVE Zilch Game=$save *:@select setr(5,u(func_save_guess,secure(%0))):[u(func_is_turn,%#)]=#-*:*,{@pemit %#=I don't think %0 is a valid combination of dice to score.},*:0,{@pemit %#=It is not your turn.},{@select u(func_valid_save,%#,%q5)=1,{think [setq(6,first(v(score-%#)))][u(func_score,%#,%q5)];@emit %N sets [u(func_pretty_name,%q5)] aside. %P hand score is now [first(v(score-%#))][switch(%q6,0,%b(total: [rest(v(score-%#))]))].;@emit u(func_turn_corner,%#)},{@pemit %#=You don't have [u(func_pretty_name,%q5)] in your roll, or that counter is not valid in a [v(game-level)] point gave.}};@@  put dice to the side to save their values @@
+@DESCRIBE Zilch Game=A [switch(v(game),in progress,{[v(game-level)] point%b})]game of Zilch. Use the command 'zhelp' for help on it.[switch(gt(words(v(game-players)),0),1,%r%r[u(func_display)])][switch(v(game),final round,%r%rResults of last game:%r[v(results)])]
+@set Zilch Game/DESCRIBE=no_command visual
+&CMD_ROLL Zilch Game=$roll:@select u(func_cannot_roll,%#):[u(func_is_turn,%#)]=*:0,{@pemit %#=It is not your turn.},0:1,{think u(func_roll,%#);@emit [switch(v(option-graphic-dice):[tcl()],1:,{[tcleval(me/tcl_display_dice,before(v(roll-%#),|))]is %N's roll.},{[before(v(roll-%#),|)] is %N's roll.})]},{@pemit %#=You can't roll again yet -- you must choose what dice you wish to count.};@@  roll your dice @@
+&FUNC_TURN_CORNER Zilch Game=switch(eq(words(before(v(roll-%0),|)),0),1,[set(me,roll-%0:0 0 0 0 0 0)][name(%0)] turns the corner with that save%, and must roll again.)
+&FUNC_ROLL Zilch Game=set(me,roll-%0:[sort(iter(lnum(words(before(v(roll-%0),|))),add(1,rand(6))))]|)
+&FUNC_IS_TURN Zilch Game=strmatch(%0,first(v(game-players)))
+&FUNC_CANNOT_ROLL Zilch Game=and(u(func_is_turn,%0),eq(strlen(last(v(roll-%0),|)),0),hasattr(me,roll-%0))
+&FUNC_DISPLAY Zilch Game=[switch(gt(words(v(game-players)),0),1,{[u(func_display_fmt,Player Name (in turn order),Current Roll,Total Score,Hand Score)][iter(v(game-players),%r[u(func_display_fmt,name(##),before(v(roll-##),|),rest(v(score-##)),first(v(score-##)))])]})][switch(v(game),final round,{%r%r[u(func_display_fmt,Player Name (game over),Current Roll,Total Score)][iter(lattr(me/score-*),[switch(match(v(game-players),after(##,-)),0,%r[u(func_display_fmt,name(after(##,-)),before(v(roll-[after(##,-)]),|),rest(v(score-[after(##,-)])))])])]})]
+&FUNC_DISPLAY_FMT Zilch Game=[ljust(%0,30)][ljust(%1,15)][rjust(%2,12)][rjust(%3,12)]
+&VALID_1 Zilch Game=(1)&5000 10000 15000&100&a one
+&VALID_5 Zilch Game=(5)&5000 10000 15000&50&a five
+&VALID_111 Zilch Game=(1 1 1)&5000 10000 15000&1000&triple ones
+&VALID_222 Zilch Game=(2 2 2)&5000 10000 15000&200&triple twos
+&VALID_333 Zilch Game=(3 3 3)&5000 10000 15000&300&triple threes
+&VALID_444 Zilch Game=(4 4 4)&5000 10000 15000&400&triple fours
+&VALID_555 Zilch Game=(5 5 5)&5000 10000 15000&500&triple fives
+&VALID_666 Zilch Game=(6 6 6)&5000 10000 15000&600&triple sixes
+&VALID_THREE_PAIR Zilch Game=(1 1|2 2|3 3|4 4|5 5|6 6) (1 1|2 2|3 3|4 4|5 5|6 6) (1 1|2 2|3 3|4 4|5 5|6 6)&10000 15000&2000&three pairs
+&VALID_TWO_TRIPLES Zilch Game=(1 1 1|2 2 2|3 3 3|4 4 4|5 5 5|6 6 6) (1 1 1|2 2 2|3 3 3|4 4 4|5 5 5|6 6 6)&10000 15000&3000&two triplets
+&VALID_FOUR_KIND Zilch Game=(1 1 1 1|2 2 2 2|3 3 3 3|4 4 4 4|5 5 5 5|6 6 6 6)&15000&4000&four of a kind
+&VALID_FIVE_KIND Zilch Game=(1 1 1 1 1|2 2 2 2 2|3 3 3 3 3|4 4 4 4 4|5 5 5 5 5|6 6 6 6 6)&15000&5000&five of a kind
+&VALID_SIX_KIND Zilch Game=(1 1 1 1 1 1|2 2 2 2 2 2|3 3 3 3 3 3|4 4 4 4 4 4|5 5 5 5 5 5|6 6 6 6 6 6)&15000&6000&six of a kind
+&FUNC_VALID_SAVE Zilch Game=and(regmatch(before(v(roll-%0),|),before(v(valid_%1),&),1),match(extract(v(valid_%1),2,1,&),v(game-level)))
+&FUNC_SAVE_GUESS Zilch Game=switch(hasattr(me,valid_[edit(%0,%b,_)]),1,edit(%0,%b,_),0,switch(lattr(me/valid_[edit(%0,%b,_)]*),* *,#-2 MULTIPLE MATCHES,,#-1 NO MATCH,after(lattr(me/valid_[edit(%0,%b,_)]*),_)))
+&VALID_STRAIGHT Zilch Game=(1 2 3 4 5 6)&5000 10000 15000&1500&a straight
+&CMD_ZILCH Zilch Game=$zilch:@select u(func_is_turn,%#)=0,{@pemit %#=It is not your turn.},{think u(func_next_player);&score-%# me=0 [rest(v(score-%#))];&roll-%# me=0 0 0 0 0 0;@emit %N looks at %p dice and sees nothing in them. It is now [name(first(v(game-players)))]'s turn.};@@  pass to the next player because you zliched @@
+&CMD_STAY Zilch Game=$stay:@select u(func_is_turn,%#):[u(func_score_abovemin,%#)]:[u(func_cannot_roll,%#)]=0:*:*,{@pemit %#=It is not your turn.},*:0:*,{@pemit %#=You don't have enough points to stay. You'll need 500 to meld, or 350 min.},*:*:1,{@pemit %#=You can not stay without saving at least one counter after your last roll.},{@emit %N looks at %p dice, and stops at [first(v(score-%#))] points.;&score-%# me=0 [add(first(v(score-%#)),rest(v(score-%#)))];&roll-%# me=0 0 0 0 0 0;@select and(gt(rest(v(score-%#)),v(game-level)),not(strmatch(v(game),final round)))=1,{@emit %N has scored enough points to win the game. Everyone left will have one round to try to top %N's score.;&game me=final round;think u(func_next_player)},{think u(func_next_player)}};@@ allows you keep the score you have so far & pass the turn @@
+&FUNC_NEXT_PLAYER Zilch Game=set(me,game-players:[rest(v(game-players))][switch(v(game),in progress,%b[first(v(game-players))])])[switch(words(v(game-players)),0,u(func_game_over))]
+&FUNC_GAME_OVER Zilch Game=[set(me,results:[u(func_display)])][emit(The game is over, look at [name(me)] to see the winner.)][set(me,game:not running)][set(me,game-players:)][set(me,game-level:)][wipe(me/game-*)][wipe(me/score-*)]
+&CMD_RESET Zilch Game=$reset:@select strmatch(owner(me),%#)=0,{@pemit %#=You can't do that.},{@pemit %#=Resetting game...;@wipe me/roll-*;@wipe me/score-*;@wipe me/game*;&game me=not running;&game-players me=;&game-level me=;&results me};@@ allows the owner of the game to reset it, clearing any running game @@
+&CMD_JOIN Zilch Game=$join:@select v(game)=not running,{@emit %N joins the zilch game.;&game-players me=[setunion(v(game-players),%#)];&score-%# me=0 0;&roll-%# me=0 0 0 0 0 0},{@pemit %#=You may not join a game that is [v(game)].};@@ join a zilch game not yet started @@
+&CMD_QUIT Zilch Game=$quit:@select v(game)=not running,{@pemit %#=You leave the zilch game.;&game-players me=[setdiff(v(game-players),%#)];&roll-%# me;&score-%# me},{@pemit %#=You may not leave a game in progress.};@@ leave a zilch game not yet started @@
+&CMD_START Zilch Game=$start *:@select v(game):[gt(match(v(game-players),%#),0)]:[gt(match(v(levels),secure(%0)),0)]=not running:1:1,{@emit %N starts a %0 zilch game with [squish(iter(setdiff(v(game-players),%#),name(##)))].;&results me;&game me=in progress;&game-level me=[secure(%0)];&game-players me=[shuffle(v(game-players))];@emit The playing order in the game will be: [iter(v(game-players),name(##))].},*:0:*,{@pemit %#=You must be in a zilch game to start it.},*:*:0,{@pemit %#=Invalid level, %0 to start a game. Valid levels are [v(levels)].},{@pemit %#=You can only play one game per zilch object at a time.};@@  begin a game if you are in it @@
+&LEVELS Zilch Game=5000 10000 15000
+&CMD_ZHELP Zilch Game=$zhelp:@pemit %#=- Help for Zilch by Jonathan A. Booth/Rhysem@M*U*S*H -%r[repeat(-,78)][iter(sort(lattr(me/cmd_*)),%r[ljust(after(##,_),10)][squish(edit(u(func_regexp_extract_all,v(##),v(regexp-help)),&at;,@))])]%r%rNote that to use the GRAPHIC-DICE option, you must have the Tcl patch by Trivian@M*U*S*H installed!%r[repeat(-,78)];@@ displays this help file @@
+&REGEXP-HELP Zilch Game=@@([^@]*)@@(.*)
+&FUNC_REGEXP_EXTRACT_ALL Zilch Game=setq(9,regmatch(%0,%1,0 1 2))%q1[switch(%q9,1,u(func_regexp_extract_all,%q2,%1))]
+@FAILURE Zilch Game=I don't think you should take that.
+@set Zilch Game/FAILURE=no_command
+
+think ZILCH GAME CREATION SUCCESSFUL!

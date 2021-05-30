@@ -1,0 +1,29 @@
+@create PARENT: Sanitation Robot
+@lock PARENT: Sanitation Robot=PARENT: Sanitation Robot
+@Desc PARENT: Sanitation Robot=There are two current models of Sanitation Units. One that uses transparent exits and one that uses exits with the VA attribute. Eventually I may convert totally to the latter model but that will require time. :) I have set them up as parent objects to #516 is the transparent type and this is the VA type. When setting up new units, it MAY be desirable to reset some of the MESS* actions to fir the local environment.
+&ROAM PARENT: Sanitation Robot=@swi [hasattr(%0,VA)]=1, move %0
+&MESS0 PARENT: Sanitation Robot=picks up a discarded cup
+&MESS1 PARENT: Sanitation Robot=sucks up a sticky puddle of goo
+&MESS2 PARENT: Sanitation Robot=scrapes up some gum
+&MESS3 PARENT: Sanitation Robot=cleans a spot off of a nearby wall
+&MESS4 PARENT: Sanitation Robot=collects some leaves that are blowing down the street
+&MESS5 PARENT: Sanitation Robot=says, "Please help keep Lito clean"
+&MESS6 PARENT: Sanitation Robot=empties a garbage can
+&MESS7 PARENT: Sanitation Robot=accepts a donation from a passerby
+&MESS8 PARENT: Sanitation Robot=chases a small animal
+&MESS9 PARENT: Sanitation Robot=sprays down an area with disinfectant
+&NOTE PARENT: Sanitation Robot=This is an indoor model.
+@Ahear PARENT: Sanitation Robot=@swi [type(first(%0))]=THING,get first(%0),{@swi rand(10)=0,{@tr me/roam={[extract(lexits(here),add(1,rand(words(lexits(here)))),1)]}}}
+@Omove PARENT: Sanitation Robot=beeps a warning as it works.
+@Ofail PARENT: Sanitation Robot=attacks the [name(me)].
+@Oenter PARENT: Sanitation Robot=is collected by [name(me)].
+@Oxenter PARENT: Sanitation Robot=is collected by [name(me)].
+@Sex PARENT: Sanitation Robot=neuter
+@set PARENT: Sanitation Robot=DARK
+@set PARENT: Sanitation Robot=MONITOR
+@set PARENT: Sanitation Robot=OPAQUE
+@set PARENT: Sanitation Robot=VISUAL
+@set PARENT: Sanitation Robot=PARENT_OK
+@set PARENT: Sanitation Robot=ENTER_OK
+@set PARENT: Sanitation Robot=HALT
+@set PARENT: Sanitation Robot=SAFE

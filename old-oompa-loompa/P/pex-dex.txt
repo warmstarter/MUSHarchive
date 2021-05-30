@@ -1,0 +1,32 @@
+@create Pex/Dex
+@lock Pex/Dex=me
+&CMD_PEX Pex/Dex=$+pex *:@trigger +Pex (Subroutine)/SUB_PEX=%#,locate(%#,switch(%0,*/*,before(%0,/),*=*,before(%0,=),%0),*),switch(%0,*/*=*,before(after(%0,/),=),*/*,after(%0,/)),switch(%0,*=*,after(%0,=)),-E
+&CMD_DEX Pex/Dex=$+dex *:@trigger +Pex (Subroutine)/SUB_PEX=%#,locate(%#,switch(%0,*/*,before(%0,/),*=*,before(%0,=),%0),*),switch(%0,*/*=*,before(after(%0,/),=),*/*,after(%0,/)),switch(%0,*=*,after(%0,=)),-D
+@Desc Pex/Dex=+pex, +dex
+@lock/UseLock Pex/Dex=me
+@set Pex/Dex=INHERIT
+@set Pex/Dex=COMMANDS
+@create +Pex (Subroutine)
+&LIST_FLAGS +Pex (Subroutine)=ABODE AUDIBLE BUILDER CHOWN_OK CONTROL_OK DARK DESTROY_OK ENTER_OK FLOATING GOING HALTED HAVEN IMMORTAL INHERIT JUMP_OK KEY LIGHT LINK_OK MONITOR MYOPIC NOSPOOF OPAQUE PUPPET QUIET ROBOT ROYALTY SAFE PARENT_OK SLAVE STICKY TEMPLE TERSE TRACE TRANSPARENT UNFINDABLE VERBOSE VISUAL WIZARD ZONE
+&LIST_LOCKS +Pex (Subroutine)=DefaultLock EnterLock GiveLock LeaveLock LinkLock PageLock ReceiveLock TeloutLock TportLock UseLock
+&LIST_BADATTRIBS +Pex (Subroutine)=Comment
+&SUB_PEX +Pex (Subroutine)=@switch/first 1=strmatch(%1,#-1),{@pemit %0=I don't see that here.},strmatch(%1,#-2),{@pemit %0=I don't know which one you mean!},not(or(controls(%0,%1),hasflag(%1,VISUAL))),{@pemit %0=You can't examine that!},{@switch %2=,{@pemit %0=u(FN_PEX_HEADER%4,%1,u(FN_PEX_NAME,%3,%1))};@dolist lattr(%1/[switch(%2,,*,%2)])={@pemit %0=u(FN_PEX_FMTATR%4,get(%1/##),##,u(FN_PEX_NAME,%3,%1))};@switch %2=,{@pemit %0=u(FN_PEX_FOOTER%4,%1,u(FN_PEX_NAME,%3,%1))}}
+&FN_PEX_NAME +Pex (Subroutine)=switch(%0,,switch(type(%1),ROOM,here,PLAYER,me,name(%1)),%0)
+&FN_UNPARSE +Pex (Subroutine)=[name(%0)](%0[flags(%0)])
+&FN_PEX_HEADER-E +Pex (Subroutine)=[u(FN_UNPARSE,%0)]%rType: [type(%0)] %bFlags: [u(FN_PEX_FLAGS,%0)]%rOwner: [name(owner(%0))] %b Money: [money(%0)][u(FN_PEX_LOCKS-E,%0,%1)]
+&FN_PEX_HEADER-D +Pex (Subroutine)=[switch(type(%0),PLAYER,@pcreate [switch(%1,me,name(%0),%1)] <password>,THING,@create %1,ROOM,@dig/tel [switch(%1,here,name(%0),%1)],EDIT,@open %1)][iter(u(FN_PEX_FLAGS,%0),%r@set %1=##)][u(FN_PEX_LOCKS-D,%0,%1)]
+&FN_PEX_LOCKS-E +Pex (Subroutine)=iter(v(LIST_LOCKS),switch(lock(%0/##),,,%r##: [lock(%0/##)]))
+&FN_PEX_LOCKS-D +Pex (Subroutine)=iter(v(LIST_LOCKS),switch(lock(%0/##),,,%r@lock/## %1=[lock(%0/##)]))
+&FN_PEX_FLAGS +Pex (Subroutine)=iter(iter(v(LIST_FLAGS),switch(hasflag(%0,##),1,##)),##)
+&FN_PEX_FOOTER-E +Pex (Subroutine)=switch(type(%0),ROOM,[switch(loc(%0),#-1,,Dropped objects go to: [u(FN_UNPARSE,loc(%0))]%r)],EXIT,Source: [u(FN_UNPARSE,home(%0))]%r[switch(loc(%0),#-1,,Destination: [u(FN_UNPARSE,loc(%0))])],Home: [u(FN_UNPARSE,home(%0))]%rLocation: [u(FN_UNPARSE,loc(%0))])
+&FN_PEX_FOOTER-D +Pex (Subroutine)=switch(type(%0),EXIT,switch(loc(%0),#-1,,@link %1=[loc(%0)]), ROOM,switch(loc(%0),#-1,,@link %1=[loc(%0)]),switch(home(%0),#-1,,@link %1=[home(%0)]))
+&FN_PEX_FMTATR-E +Pex (Subroutine)=switch(%0,$*,%1:[before(%0,:)]:[u(FN_PEX_PLIST,after(%0,:))],^*,%1:[before(%0,:)]:[u(FN_PEX_PLIST,after(%0,:))],@*,%1:[u(FN_PEX_PLIST,%0)],&*,%1:[u(FN_PEX_PLIST,%0)],#*,switch(rest(%0),#*,%1:%0,,%1:%0,%1:[u(FN_PEX_PLIST,%0)]),%1:%0)
+&FN_PEX_FMTATR-D +Pex (Subroutine)=switch(%0,$*,[u(FN_PEX_APFX,%1)] %2=[before(%0,:)]:[u(FN_PEX_PLIST,after(%0,:))],^*,[u(FN_PEX_APFX,%1)] %2=[before(%0,:)]:[u(FN_PEX_PLIST,after(%0,:))],@*,[u(FN_PEX_APFX,%1)] %2=[u(FN_PEX_PLIST,%0)],&*,[u(FN_PEX_APFX,%1)] %2=[u(FN_PEX_PLIST,%0)],#*,switch(rest(%0),#*,[u(FN_PEX_APFX,%1)] %2=%0,,[u(FN_PEX_APFX,%1)] %2=%0,[u(FN_PEX_APFX,%1)] %2=[u(FN_PEX_PLIST,%0)]),[u(FN_PEX_APFX,%1)] %2=%0)
+&FN_PEX_APFX +Pex (Subroutine)=switch(member(%0,ucstr(%0)),1,&%0,@%0)
+&FN_PEX_PLIST +Pex (Subroutine)=u(FN_PEX_INDENT,u(FN_PEX_SPCFX,u(FN_PEX_CROUT,u(FN_PEX_CRIN,%0))))
+&FN_PEX_CRIN +Pex (Subroutine)=edit(edit(edit(%0,\},%r\}%r),\{,%r\{%r),;,;%r)
+&FN_PEX_CROUT +Pex (Subroutine)=edit(edit(edit(edit(%0,\\%r\}%r,\\\}),\\%r\{%r,\\\{),\\;%r,\\;),\}%r;,\};)
+&FN_PEX_SPCFX +Pex (Subroutine)=edit(edit(edit(edit(%0,;%r%b,;%r),\{%r%b,\{%r),\{%r%b,\{%r),%b;%r,;%r)
+&FN_PEX_INDENT +Pex (Subroutine)=[setq(0,1)][u(FN_PEX_RECIN,%0)]
+&FN_PEX_RECIN +Pex (Subroutine)=[setq(1,before(%0,%r))][switch(r(1),,,\{*,%r[setq(0,add(r(0),1))][repeat(%t,r(0))][r(1)],\}*,%r[repeat(%t,r(0))][setq(0,sub(r(0),1))][r(1)],%r[repeat(%t,r(0))][r(1)])][switch(after(%0,%r),,,u(FN_PEX_RECIN,after(%0,%r)))]
+@set +Pex (Subroutine)=INHERIT

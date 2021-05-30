@@ -1,0 +1,26 @@
+@dig/teleport GDT Complex Parent Room
+@chzone here = #10462
+@lock/Enter here=#12129
+@set here = DARK
+@set here = JUMP_OK
+@set here = MONITOR
+@SUCCESS here=[ansi(y, stripansi(eval(me, rdesc)))]%r[ansi(y, The alert status panel on the wall reads: )] [eval(#10503, alert)]%r[switch(lcon(me),%#,[ansi(g, The room is empty.)]%r,[ansi(g,Contents:)][iter(remove(lcon(me),%#), [switch(type(##),PLAYER,%r[ansi(y, [class(##)] [name(##)] [get_eval(##/[switch(idle(##),-1,ddesc,sdesc)])])],THING,[switch(flags(##),*D*, ,%r[ansi(y, [name(##)] [get(##/sdesc)])])])])]%r)][ansi(g, Obvious Exits:)]%r[switch(get(me/extdesc),none,[iter([lexits(me)],  [ansi(y, [name(##)])], ,%r)], [eval(me, extdesc)])]
+&RDESC here=This room is so very special and technologically advanced, it has no features, because it doesn't need them!  And the fact that we haven't gotten to describing it yet...
+&EXTDESC here=[ansi(y, table([iter(lexits(me), center(name(##), 39), ,|)],39,78,|, ))]
+@ACONNECT here=@pemit %#=[ansi(g, center(Grim Determination MOTD, 79, -))]%r[ansi(y, stripansi(eval(#10503, gdzmotd)))]%r[ansi(g, center(-, 79, -))]%r[ansi(y, Type)] [ansi(g, touch help)] [ansi(y, for help.)]; @@ To display the GDT ZMOTD on connection within the zone.  &gdzmotd is the attribute in which the zmotd is stored.
+&GDZMOTD here=Sencus has left, so I, Sovek, am now in charge of GDT.  Thankfully, Roberts is connecting here more and more.  A few notes: One, you've probably noticed a big difference in how GDT looks.  I'm trying to clean up some of the mess that has been made around here.  Two, Quite a few changes are going to be made around here, some small and some big.  I do hope that GDT can be an active company, just like it was in the old days.  So, try to keep your connection time up, and, soon, hopefully, everything will be business as usual again.
+&ALERT here=[eval(me, curdefalert)]
+@VA here=$touch zmotd:@pemit %#=[ansi(g, center(Grim Determination MOTD, 79, -))]%r[ansi(y, stripansi(eval(#10503, gdzmotd)))]%r[ansi(g, center(-, 79, -))]; @@ To display the GDT ZMOTD.  &gdzmotd is the attribute in which the zmotd is stored.
+@VB here=$touch * alert:@switch %0=red, {&alert #10503=\[ansi(rh, <<<RED ALERT>>>)]; @zemit #10462=[ansi(g, Computer:)] [ansi(rh, RED ALERT! RED ALERT!)]}, yellow, {&alert #10503=\[ansi(yh, <<<YELLOW ALERT>>>)]; @zemit #10462=[ansi(g, Computer:)] [ansi(yh, YELLOW ALERT! YELLOW ALERT!)]}, intruder, {&alert #10503=\[ansi(mh, <<<INTRUDER ALERT>>>)]; @zemit #10462=[ansi(g, Computer:)] [ansi(mh, INTRUDER ALERT! INTRUDER ALERT!)]}, {&alert #10503=\[eval(me, curdefalert)]; @zemit #10462=[ansi(g, Computer:)] [ansi(y, Alert cancelled.)]}; @@ This is for the purposes of setting alerts.  &curdefalert is the currently defined default alert.  &alert is the current alert status of the GDT building. #10624 is the zone object.
+&CURDEFALERT here=[ansi(yh, ///UNDER CONSTRUCTION///)]
+@VC here=$touch ann *:@switch [match(get(#10503/adminlist), %#)]=0, {@pemit %#=[ansi(g, Permission denied.)]}, {@zemit #10462=[ansi(g, GDT Announcment from %n:)] [ansi(y, stripansi(%0))]}; @@ This is for announcing something to all connected players in the GDT complex.  #10462 is the zone object for GDT. #10503 is the parent room.  &adminlist holds a list of GDT administrators.
+&ADMINLIST here=#12129 #4726 #3787 #2899 #4797
+@VD here=$touch zwho:@pemit %#=[ansi(g, center([name(zone(me))] - ZWHO, 79, -))]%r[ansi(y, [ljust(Rank, 16)][ljust(Name, 20)]Location)]%r[ansi(g, center(-, 79, -))]%r[iter(inzone(zone(me)), [ansi(y, [switch([idle(##)], -1, [ljust(left(class(##), 16), 16)][ljust(left([name(##)], 11) <Asleep>, 20)][ljust(left(index(name(loc(##)),-,2,2), 43), 43)], [ljust(left(class(##), 16), 16)][ljust(left([name(##)], 20), 20)][ljust(left(name(loc(##)), 43), 43)])])], ,%r)]%r[ansi(g, center(-, 79, -))]
+&CREWLIST here= #10428 #2899 #4726 #3455 #4797 #11111
+&GUESTLIST here= #3455
+@VE here=$touch guestlist:@pemit %#=[ansi(g, center(GDT Guest List, 79, -))]%r[ansi(y, table([iter(squish(get(#10503/guestlist)), [center([class(##)] [name(##)], 39)], ,|)],39,78,|, ))]%r[ansi(g, center(-, 79, -))]%r[ansi(y, These people are guests of GDT and should be treated as such.)]
+@VF here=$touch crewlist:@pemit %#=[ansi(g, center(GDT Crew List, 79, -))]%r[ansi(y, table([iter(squish(get(#10503/crewlist)), [center([class(##)] [name(##)], 39)], ,|)],39,78,|, ))]%r[ansi(g, center(-, 79, -))]
+@VG here=$touch adminlist:@pemit %#=[ansi(g, center(GDT Administration List, 79, -))]%r[ansi(y, table([iter(squish(get(#10503/adminlist)), [center([class(##)] [name(##)], 39)], ,|)],39,78,|, ))]%r[ansi(g, center(-, 79, -))]
+@XA here=$touch help:@pemit %#=[ansi(g, Not fully completed.  Current command list:)]%r[iter(get(me/cmdlist), ansi(y, center(##, 79)),|,%r)]
+&CMDLIST here=touch zmotd|touch * alert|touch zwho|touch crewlist|touch guestlist|touch adminlist|touch ann *|touch help
+@XB here=$add cmd *:&cmdlist me=[get(me/cmdlist)]|%0

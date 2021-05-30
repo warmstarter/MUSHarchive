@@ -1,0 +1,28 @@
+@@ File   : glob
+@@ Author : Andrew Turner aka
+@@          Daerr Thacru of Spacial Wastes and Apex
+@@ MUSH   : Spacial Wastes (chestnut.enmu.edu 2001)
+@@
+@@ Purpose: This command shows a list of all objects in the master room,
+@@        : The number of attributes on them, and the percent of the total
+@@        : (number of attributes).  It also displays the description of the
+@@        : object (which should have a list of the commands on that object)
+@@
+@@ Command: +glob
+
+@create GlobalChecker=10
+@desc GlobalChecker=+glob
+
+@@ VA is set to the number of the master room, change as appropriate to your
+@@ MUSH.
+@va GlobalChecker=#4
+
+@@ This is the actual command...
+&GLOB GlobalChecker=$+glob:@switch [hasflag(%#,wizard)]=0,@pemit %#=Permission denied.,{@pemit %#=%b[ljust(Global Name,24)]|Num(Per)|Description%r[repeat(-,25)]+[repeat(-,8)]+[repeat(-,40)]%r[setq(0,words(iter(lcon(%va) %va,switch(owner(##),##,,lattr(##)))))]%b[iter(sort(%va [lcon(%va)]),switch(owner(##),##,[ljust(name(##),24)]|*PLAYER*|Working on the globals no doubt%r,{[ljust([name(##)],24)]|[rjust([words(lattr(##))],3)]%([rjust(div(mul(100,words(lattr(##))),[r(0)]),2,0)]%%%)|[u(wrap,get(##/desc),[space(25)]|[space(8)]|,40)]%r}))][repeat(-,25)]+[repeat(-,8)]+[repeat(-,40)]%r[ljust(Total,25)]|[rjust(r(0),3)](---)|}
+
+@@ This function will wrap lines (%0 is the string to wrap, %1 goes at the
+@@ beginning of new lines, and %2 is the line length)
+&WRAP GlobalChecker=[switch(lte(strlen(%0),%2),1,%0,{[extract(%0,1,[sub([wordpos(%0,%2)],1)])]%r%1[u(wrap,[extract(%0,[wordpos(%0,%2)],9999)],%1,%2)]})]
+
+@@ The following is a +help entry for it (formatted for my +help).
++addtopic glob=-+glob-This command lists all of the objects currently in the Master Room. It also lists the number of attributes on each object, the percent of the total, and its description. NOTE TO GLOBALS AUTHORS: Put a desc on your objects that lists the commands contained within, that way they will be listed properly with +glob.

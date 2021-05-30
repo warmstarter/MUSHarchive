@@ -1,0 +1,40 @@
+@create Holographic Projector
+@link Holographic Projector=#0
+@lock/Basic Holographic Projector==[owner(me)]
+@set Holographic Projector=LINK_OK
+@set Holographic Projector=NO_COMMAND
+@DESCRIBE Holographic Projector=ansi(r,Holographic Projector Parent%r%t%tInstructions:%r%t%t@create Holographic Projector%r%t%t@parent holo=#169%r%t%t@set holo=!no_command%rThe Holographic Projector is a data storage device, that can store sound, holographic videos, and data.%rREMEMBER TO CHANGE THE @DESC OF THIS%rFor commands, type HCHELP.%rThe Password for this parent is test. You need the password in order to activate anything.
+&MODE Holographic Projector=on
+&PASSWORD Holographic Projector=test
+&TEMP Holographic Projector=4
+&IM-DEL Holographic Projector=$im-del *:&image-%0 me=;&image-dir me=[edit([get(me/image-dir)],[%B%0%B],[];@pemit %#=You delete the image titled [ansi(h,%0)]
+&MESS-DIR Holographic Projector=$dir:@pemit %#=[repeat([ansi(h,=-)],39)]%R%T%T%T[ansi(hb,Message Directory)]%R[repeat([ansi(h,=-)],39)]%R[ansi(ac,[get(me/directory)])]%R[repeat([ansi(h,=-)],39)]
+&MINIHELP Holographic Projector=$hchelp:@pemit %N=[repeat([ansi(h,=-)], 39)]%R%T%T%T[ansi(hb,MiniComp Menu)]%R[repeat([ansi(h,=-)], 39)]%R%Ttype [ansi(h,DHELP)] for Data Storage Commands%R%Ttype [ansi(h,HOLOHELP)] for Holo-Viewer Commands%R[repeat([ansi(h,=-)], 39)]
+&IMAGE-D-VIEW Holographic Projector=$im-dir:@pemit %N=[repeat([ansi(h,-=)], 39)]%R%T%T%T[ansi(hb,Image Directory)]%R[repeat([ansi(h,-=)], 39)]%R[ansi(hc,[v(IMAGE-DIR)])]%R[repeat([ansi(h,-=)], 39)]
+&IMAGE-DIR Holographic Projector=--
+&IMAGE-DEL Holographic Projector=$im-del *:&image-%0 me=;&image-dir me=[edit([get(me/image-dir)],[%B%0%B],[];@pemit %#=You delete the image titled [ansi(h,%0)]
+&IMAGE-VIEW Holographic Projector=$im-vi *:@lemit %N presses a button and after a few seconds, an image springs forth;@wait 4=@lemit [repeat([ansi(h,=-)], 39)]%R%T%T%T%T[ansi(hb,Holo-Image)]%R[repeat([ansi(h,-=)], 39)]%R[ansi(ac,[v(image-%0)])]%R[repeat([ansi(h,-=)], 39)]
+&IMAGE-SAVE Holographic Projector=$image *=*:&image-%0 me=%1;@pemit %N=You save the image titled: [ansi(h,%0)]%R[ansi(h,Image)]: %1;&image-dir me=[get(me/image-dir)]%B%0%B
+&HOLO_HELP Holographic Projector=$holohelp:@pemit %N=[repeat([ansi(h,-=)], 39)]%R%T%T%T[ansi(hb,Holo-Viewer Commands)]%R[repeat([ansi(h,-=)], 39)]%Rtype [ansi(h,mess <title>=<message body>)] to record a message%Rtype [ansi(h,dir)] to get a listing of messages%Rtype [ansi(h,view <title>)] to view a message%Rtype [ansi(h,del <title>)] to delete a message%R[repeat([ansi(h,-=)], 39)]%R%T%T%T[ansi(hb,Image-Viewer)]%R[repeat([ansi(h,-=)], 39)]%Rtype [ansi(h,image <title>=<image>)] to save an image%Rtype [ansi(h,im-vi <title>)] to view an image%Rtype [ansi(h,im-dir)] to view a list of images%Rtype [ansi(h,im-del <title>)] to delete image%R[repeat([ansi(h,-=)], 39)]
+&DELETE Holographic Projector=$del *:&holo-%0 me=;@pemit %N=You delete the entry titled [ansi(h,%0)];&directory me=[edit([get(me/directory)],[%B%0%B],[])]
+&FILE_VIEW Holographic Projector=$view *:@lemit %N presses a button on the Holo-Viewer and after a few seconds, an image springs forth;@wait 4=@lemit [repeat([ansi(h,-=)], 39)]%R%T%T%T%T[ansi(hb,Holo Title:)] [ansi(h,%0)]%R[repeat([ansi(h,-=)], 39)]%R[v(holo-%0)]%R[repeat([ansi(h,-=)], 39)]
+&DIRECTORY Holographic Projector=--
+&MESSAGE Holographic Projector=$mess *=*:&holo-%0 me=%N says %1;&directory me=[get_eval(me/directory)]%B%0%B;@pemit %N=You record a message titled: [ansi(h,%0)]%R[ansi(h,Message Body)]: %1
+&CONNECTION Holographic Projector=0
+&CURRENT Holographic Projector=-1
+&MAX Holographic Projector=4
+&VIEW Holographic Projector=$-vi:@switch v(mode)={on},{@switch v(current)={-1},{@pemit %#=You must select a file first.},{@pemit %#=[get_eval(me/file_display)]}},{@pemit %#=You must enter the password first.}
+&LOGO Holographic Projector=This small data-pad is currently turned off.%rA small keypad allows data-entry while te vid screen displays the current file.%r
+&HELP Holographic Projector=$dhelp:@pemit %#=[repeat([ansi(hb,=-)], 39)]%rDatapad -- Commands%rCOMMANDS:%r[ljust(-pw <PASSWORD>,20)]%tActivates the datapad, if the password is correct%r[ljust(-sp <OLD>=<NEW>,20)]%tChanges the password from <OLD> to <NEW>%r[ljust(-off,20)]%tDeactivates the datapad%r[ljust(-dir,20)]%tLists the files saved on the datapad%r[ljust(-op <FILENAME>,20)]%tOpens the current file for editting,creating%r[space(20)]%ta new file if necessary%r[ljust(-del=<FILENAME>,20)]%tDeletes the specified file%r[ljust(-wr <TEXT>,20)]%tAdds texts to the currently opened file%r[ljust(-ed <TEXT>=<REPLACE>,20)]%tReplaces matching text with specified text%r[ljust(-cl,20)]%tErases all the text from the currently opened file%r[ljust(-vi,20)]%tViews the text from the currently opened file%rBy Chance%r[repeat([ansi(hb,=-)], 39)]
+&FILE_DISPLAY Holographic Projector=[repeat(=-,39)]=%rFile:%b[v(file_[v(current)]_name)]%r%r[v(file_[v(current)]_text)]%r[repeat(=-,39)]=
+&CLEAR Holographic Projector=$-cl:@switch v(mode)={on},{@switch v(current)={-1},{@pemit %#=You must select a file first.},{&file_[v(current)]_text me; @pemit %#=Cleared.}},{@pemit %#=You must enter the password first.}
+&EDIT Holographic Projector=$-ed *=*:@switch v(mode)={on},{@switch v(current)={-1},{@pemit %#=You must select a file first.},{&file_[v(current)]_text me=[edit(v(file_[v(current)]_text),%0,%1)];@pemit %#=Editted.}},{@pemit %#=You must enter the password first.}
+&WRITE Holographic Projector=$-wr *:@switch v(mode)={on},{@switch v(current)={-1},{@pemit %#=You must select a file first.},{&file_[v(current)]_text me=[v(file_[v(current)]_text)]%b%0;@pemit %#=Written.}},{@pemit %#=You must enter the password first.}
+&ERASE Holographic Projector=$-del=*:@switch v(mode)={on},{@switch [u(find_file_id,%0)]={-1},{@pemit %#=File `%0' not found.},{@pemit %#=Erasing `%0'.;&temp me=[u(find_file_id,%0)];&file_[v(temp)]_name me;&file_[v(temp)]_text me;&file_[v(temp)]_name me=[v(file_[sub(v(max),1)]_name)];&file_[v(temp)]_text me=[v(file_[sub(v(max),1)]_text)];&file_[sub(v(max),1)]_name me;&file_[sub(v(max),1)]_text me;&max me=[sub(v(max),1)];@switch eq(v(temp),v(current))={1},{&current me=-1}}},{@pemit %#=You must enter the password first.}
+&OPEN Holographic Projector=-op *:@switch v(mode)={on},{@switch [u(find_file_id,%0)]={-1},{@pemit %#=Creating file '%0'.;&file_[v(max)]_name me=[secure(%0)];&file_[v(max)]_text me;&current me=[v(max)];&max me=[add(1,v(max))];},{@pemit %#=Opening file `%0'.;&current me=[u(find_file_id,%0)];}},{@pemit %#=You must enter the password first.}
+&FIND_FILE_ID Holographic Projector=[sub(member(iter(lnum(v(max)),strmatch(v(file_##_name),%0)%b),1),1)]
+&STOP Holographic Projector=$-off:@pemit %#=You turn the datapad off.;&mode me=off
+&SETPASS Holographic Projector=$-sp *=*:@switch strmatch(v(password),%0)={0},{@pemit %#=That password is not correct.},{@pemit %#=New password set.;&password me=[secure(%1)]}
+&START Holographic Projector=$-pw *:@switch strmatch(v(password),%0)={0},{@pemit %#=That password is not correct.},{@pemit %#=Thank you. You may now use the datapad.;&mode me=on;&current me=-1;&connection me=0}
+&DIR Holographic Projector=$-dir:@switch v(mode)={on},{@pemit %#=[setq(0,[add(div(v(max),3),1)])][repeat(=-,39)]=%rDatapad -- Directory%r[iter(lnum(add(r(0),0)),%r[u(display,##)]%b[u(display,[add(r(0),##)])]%b[u(display,[add(r(0),r(0),##)])])]%r%r[repeat(=-,39)]=},{@pemit %#=You must enter the password first.}
+&DISPLAY Holographic Projector=[ljust(v(file_%0_name),25)]

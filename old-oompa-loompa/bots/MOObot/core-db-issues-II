@@ -1,0 +1,2292 @@
+Message 1 on *Core-DB-Issues(#350):
+Date:     Fri May 14 07:55:11 1993 EDT
+From:     BabyBriar (#2)
+To:       Anne_Merkel (#114), Porcupine (#807), *Core-DB-Issues (#350), and Dagard (#636)
+Subject:  Re: @ps instead on @forked
+
+Porcupine:
+> How about adding the alias `@ps' to @forked?  It's faster to type,
+> and makes logical sense.
+
+Anne Merkel:
+> @ps?  I don't understand.  Is it an acronym for something?  The
+> only thing I can think of offhand is `post script' like at the end
+> of a letter.
+
+I like it -- not that I'll remember to use it instead of @forked. But.
+
++ Added @ps as an alias to $prog:@forked
++ Added a mention of @ps to $prog_help.@forked
++ Added a help entry for @ps in $prog_help, pointing to @forward
+
+Briar
+
+--------------------------
+
+
+Message 2 on *Core-DB-Issues(#350):
+Date:     Fri May 14 14:39:03 1993 EDT
+From:     Hemlock (#1989)
+To:       *Core-DB-Issues (#350)
+
+Sheez.  Why not just make it @f*orked?
+
+--------------------------
+
+
+Message 3 on *Core-DB-Issues(#350):
+Date:     Sat May 15 04:42:47 1993 EDT
+From:     Xiombarg (#360)
+To:       *Core-DB-Issues (#350)
+Subject:  @ps/@forked
+
+How about @jobs? That's a less ambigious UNIXism.
+         -Xi
+
+--------------------------
+
+
+Message 4 on *Core-DB-Issues(#350):
+Date:     Sat May 15 07:00:23 1993 EDT
+From:     Anne_Merkel (#114)
+To:       Xiombarg (#360) and *Core-DB-Issues (#350)
+Subject:  Re: @ps/@forked
+
+>  From:     Xiombarg (#360)
+>  How about @jobs? That's a less ambigious UNIXism.
+
+Well... @ps is cryptic enough that you won't assume it means something else
+while `@jobs' might be a reference to the projects board or OpalMOO employment
+agency.
+
+--------------------------
+
+
+Message 5 on *Core-DB-Issues(#350):
+Date:     Sat May 15 17:39:32 1993 EDT
+From:     Hemlock (#1989)
+To:       *Core-DB-Issues (#350)
+
+I never thought @forked was very difficult to type.  Now if we were talking
+about @queued, then I'd rally for an easier alias.  But we aren't.
+
+--------------------------
+
+
+Message 6 on *Core-DB-Issues(#350):
+Date:     Sun May 16 16:47:02 1993 EDT
+From:     Porcupine (#807)
+To:       *Core-DB-Issues (#350)
+Subject:  User Interfaces
+
+Re: Hemlock
+
+It may not be "easier to type" for you, but for me it is easier to remember.
+I am used to doing all my work on my Unix system at home here, and typing "ps"
+to list the processes I have running.  On Monohaze I also added "@ls" as an
+alias for @contents, and created an "@ll" which is like ls -l on Unix.  This
+has very little to do with being easy to type, and more to do with a general
+consistency in user interface.
+
+--------------------------
+
+
+Message 7 on *Core-DB-Issues(#350):
+Date:     Mon May 17 06:27:45 1993 EDT
+From:     Edison (#200)
+To:       *Wizard-List (#141) and *Core-DB-Issues (#350)
+Subject:  $command_utils:player_name_available()
+
+I have installed a new verb called $command_utils:player_name_available()
+which takes two arguments and is documented.
+Basically, it works like the object_match_failed stuff and the like.  It
+checks to see if a name is available and valid and, if it isn't explains why
+and even offers alternate spellings, otherwise, it returns 1.
+I've got some ideas on things to use this for but haven't implemented them
+yet.
+
+--------------------------
+
+
+Message 8 on *Core-DB-Issues(#350):
+Date:     Mon May 17 20:03:30 1993 EDT
+From:     Jordan (#830)
+To:       Edison (#200) and *Core-DB-Issues (#350)
+Subject:  Re: $command_utils:player_name_available()
+
+Is this really the best place for it?  Maybe $player_db:available_failed might
+be a better choice...
+
+--------------------------
+
+
+Message 9 on *Core-DB-Issues(#350):
+Date:     Tue May 25 00:21:20 1993 EDT
+From:     Edison (#200)
+To:       *Core-DB-Issues (#350) and *Wizard-List (#141)
+Subject:  $player:ownership_quota() replaced by $ownership_utils:ownership_quota()
+
+The verb $player:ownership_quota() would return the player's quota value if
+caller_perms() was allowed to control the player according to
+$perm_utils:controls().  For some purposes this was innocent enough but since
+a player could easily hack their own version to always return a large number,
+it would become a major security hole if used in any form of creation.
+The only current core usage was in $player:inventory(), used to simply tell
+you the value.
+
+Since a player should still be able to find out their own quota but not hack
+their own, I moved the verb to $ownership_utils:ownership_quota() which is
+passed a player-objnum and returns the .ownership_quota value of the object if
+caller_perms() still meets the same permission requirements.
+Luckily there were only 8 verbs on OpalMOO that used $player:ownership_quota()
+and I've hacked them to work appropriately.
+
+--------------------------
+
+
+Message 10 on *Core-DB-Issues(#350):
+Date:     Tue May 25 14:13:29 1993 EDT
+From:     Wilson (#738)
+To:       *Core-DB-Issues (#350) and *Wizard-List (#141)
+Subject:  creation problem.
+
+Do an @audit on me.  You will see I have made 8 objects.  Look at my
+inventory.  I create all the way up to 21 objects.  @count returns 8.  I own
+the newly created objects, yet they are not in my .owned_objects list.  I use
+@create $thing named "Objectxx" for each one.
+This is more of an annoyance than anything.
+
+--------------------------
+
+
+Message 11 on *Core-DB-Issues(#350):
+Date:     Tue May 25 20:31:48 1993 EDT
+From:     Edison (#200)
+To:       *Core-DB-Issues (#350)
+Subject:  Quota Contest
+
+The Quota Contest described in the OpalMOO News is still on.  The
+$player:ownership_quota() problem wasn't the hole.  Actually, it wasn't even a
+hole yet, just a potential hole.
+So keep looking for the quota hole and let us know when you find it.
+(Exploiting the hole is a no-no.)  Find it and the prize of ONE HUNDRED QUOTA
+will be yours!
+--- Edison
+
+--------------------------
+
+
+Message 12 on *Core-DB-Issues(#350):
+Date:     Tue May 25 22:08:00 1993 EDT
+From:     Edison (#200)
+To:       Wilson (#738), *Core-DB-Issues (#350), and *Wizard-List (#141)
+Subject:  Re: creation problem.
+
+With Silly's help, I found the problem.  As it turns out, the
+$perm_utils:controls() check in #1:initialize() was failing because
+$perm_utils:controls() always failed when the .owners property on an object
+was clear and since that property gets set AFTER the perms check, it would
+always fail on new objects (not made by $recycler:_recreate().)
+I changed $perm_utils to simply fix clear .owners props and continue without
+stopping so that it should work okay, I think.
+
+Oh, and I also scanned through the DB and fixed all .owned_objects lists so
+everything should be hunky-dorey now.
+
+--- Edison
+
+PS - This error had no effect on quota so it is not the quota hole in the
+contest.
+
+--------------------------
+
+
+Message 13 on *Core-DB-Issues(#350):
+Date:     Thu May 27 09:58:11 1993 EDT
+From:     Dreamy (#1038)
+To:       *Core-DB-Issues (#350)
+Subject:  $ownership_utils:delete_owner
+
+
+Ok, I know there was a problem once with :delete_owner, and I had a chat
+with BlackBriar about it once.  Upon sharing objects with another
+character, it would delete that object from the .owned_objects property
+but when you do an inventory, it will say that you are broke (can't
+make anything else).
+So someone may think that they can make more things, while that's not
+possible.
+That was one small hole that was there, and no one noticed it.
+Bb fixed it tho.  :)
+
+Dreamer
+
+
+--------------------------
+
+
+Message 14 on *Core-DB-Issues(#350):
+Date:     Sat May 29 22:51:12 1993 EDT
+From:     BabyBriar (#2)
+To:       *Core-DB-Issues (#350)
+Subject:  New Command: @oops / @undo
+
+I'd like to invite people to check out the new @oops/@undo command for
+programmers. (There is a help screen for it as well.) I've tried to test it,
+but I'd like feedback -- anyone got any suggestions or bug reports?
+
+Briar
+
+--------------------------
+
+
+Message 15 on *Core-DB-Issues(#350):
+Date:     Mon May 31 19:18:26 1993 EDT
+From:     Edison (#200)
+To:       *Wizard-List (#141) and *Core-DB-Issues (#350)
+Subject:  $old_names_db
+
+I have created and installed an $old_names_db.  This database is linked
+through  the $player_db.  Whenever a name is removed from the $player_db by
+:delete(), the $old_names_db:insert() verb is called and stores the name and
+previous player object on the $old_names_db.
+The purpose of this database is to help track down people who cause trouble
+and then change their name.  Previously, it was almost impossible to find out
+who was causing the trouble but the $old_names_db now makes it possible to
+find out who a name _used_ to belong to.
+
+--------------------------
+
+
+Message 16 on *Core-DB-Issues(#350):
+Date:     Mon May 31 20:38:59 1993 EDT
+From:     BabyBriar (#2)
+To:       *Core-DB-Issues (#350)
+Subject:  MINOR $room chance
+
+I killed $room:room_announce*_all_but and added the relevant aliases to the
+real verbs on $room (i.e. $room:announce, :announce_all, :announce_all_but).
+
+--------------------------
+
+
+Message 17 on *Core-DB-Issues(#350):
+Date:     Tue Jun  1 15:20:13 1993 EDT
+From:     Edison (#200)
+To:       *Wizard-List (#141) and *Core-DB-Issues (#350)
+Subject:  New Networking Stuff Added!
+
+I have just finished installing several new verbs.
+
+$player:@netforward [<message-sequence>] [on *<recipient>]
+     This documented command allows you to forward messages from yourself or a
+readable-by-you mailing list to your registered email address.  This is a good
+thing because you can use this command to easily archive your old mail and
+mailing list stuff and delete it from storage on OpalMOO.  Trimming your mail
+is very important because mail takes up a LOT of DB space and if get too big,
+we may get switched off.
+
+$network:valid_email_address(string)
+       Since only a wizard can see a player's .email_address, this probably
+won't be of much use to most players but its purpose is to return true or
+false as to whether or not an email address seems viable.  It several
+different checks to make its guess but we can't really know for sure until the
+address bombs on a netmail-send.  I added this because it was getting tiresome
+duplicating the same checks over and over and centralizing a multiply-used
+check is always a good thing.
+
+-----
+
+Now that you can easily archive your lists, I'm going to get working on having
+the mailing lists age out old messages.  Don't worry, I'll give list owners
+plenty of warning before activating this.
+
+--- Edison, Slayer of DB Bloat
+
+--------------------------
+
+
+Message 18 on *Core-DB-Issues(#350):
+Date:     Tue Jun  1 16:37:58 1993 EDT
+From:     BabyBriar (#2)
+To:       Edison (#200), *Wizard-List (#141), and *Core-DB-Issues (#350)
+Subject:  Re: New Networking Stuff Added!
+
+Ande Edison didn't mention it, I figured I might as well mention the last
+@mail-option: netmail.
+
+If you @mail-option +netmail, your MOOMail will not be delivered to you here
+on the MOO, but rather will be delivered to your RL Internet EMail mailbox
+(the mailbox your character is registered to).  Thanks to Edison for provoking
+this change.
+
+Briar
+
+--------------------------
+
+
+Message 19 on *Core-DB-Issues(#350):
+Date:     Wed Jun  2 19:09:57 1993 EDT
+From:     Praecox (#711)
+To:       *Core-DB-Issues (#350)
+Subject:  @options and all
+
+I like the command that Jordan has done on monohaze.  It's just an @options
+command which lists all the various @%(.*%)-options packages which the player
+has at eir disposal.  Whaddya think?
+
+prae ("empowering eirself")
+p.s. *phew*  Thank god I don't have to write a petition to ask for this stuff!
+
+--------------------------
+
+
+Message 20 on *Core-DB-Issues(#350):
+Date:     Wed Jun  2 19:14:17 1993 EDT
+From:     Jordan (#830)
+To:       Praecox (#711) and *Core-DB-Issues (#350)
+Subject:  Re: @options and all
+
+ACtually, I didn't write it.  I ported it from JH. :)
+
+--------------------------
+
+
+Message 21 on *Core-DB-Issues(#350):
+Date:     Thu Jun  3 00:05:03 1993 EDT
+From:     Edison (#200)
+To:       *Wizard-List (#141) and *Core-DB-Issues (#350)
+Subject:  $registration_db:email_address() installed
+
+The verb $registration_db:email_address() takes a player-objnum as its arg and
+returns the address of that player ONLY IF the caller_perms() match the objnum
+or a wizard.  This is the same protection as on
+$ownership_utils:ownership_quota() and is pretty much secure unless someone
+hacks themself wiz-perms, in which case they'd be able to look at the property
+anyway.
+Players can use this verb to find out if their email_address is set correctly.
+--- Edison
+
+--------------------------
+
+
+Message 22 on *Core-DB-Issues(#350):
+Date:     Thu Jun  3 14:23:56 1993 EDT
+From:     BabyBriar (#2)
+To:       Edison (#200), *Wizard-List (#141), and *Core-DB-Issues (#350)
+Subject:  Re: $registration_db:email_address() installed
+
+Edison:
+
+>  The verb $registration_db:email_address() takes a player-objnum as
+>  its arg and returns the address of that player ONLY IF the
+>  caller_perms() match the objnum or a wizard.  [...]
+
+With this in mind, I've just blown away $player:email_address, which does
+essentially the same thing.
+
+Briar
+
+--------------------------
+
+
+Message 23 on *Core-DB-Issues(#350):
+Date:     Fri Jun  4 02:21:17 1993 EDT
+From:     Ranma (#200)
+To:       *Core-DB-Issues (#350) and *Wizard-List (#141)
+Subject:  Description Integration Implementation Altered
+
+I have just finished making some changes to the way object-integration is done
+on $player, $room, and $container.
+
+The change is quite simple.  The way it was before we ran into the same
+problem we had on LambdaMOO with object-integration: If you wanted to change
+the way the description-base looked before integration, you had to duplicate
+and override the entire integration system.
+
+What I did was rename the :description() verb to :integrate_description() and
+changes its args so that the first arg is the text for a description and the
+second arg is the list of objects to be integrated.  Then I stored the old
+version as :description(old) and changed :look_self() to call
+this:integrate_description(this:description(), integrators) instead of
+this:description(integrators).
+
+Now it's much easier to do tricky stuff with description verbs and not have to
+muck around with duplicating all the integration stuff.
+
+If you already have dupliacted the integration stuff, there shouldn't be much
+trouble since the :look_self() will be calling the :description() verb with no
+args.  It would still be a good idea if you altered your verb to make
+allowance for the change, however.
+
+--- Ranma (previously Edison)
+
+--------------------------
+
+
+Message 24 on *Core-DB-Issues(#350):
+Date:     Mon Jun  7 16:54:53 1993 EDT
+From:     Ranma (#200)
+To:       *Core-DB-Issues (#350), *Wizard-List (#141), and *RPG (#1523)
+Subject:  $Life (#2051)
+
+For construction of the RPG system, I have installed a new parent of $player
+called $life.  This object is a child of the Generic Gendered Object(#71).
+Currently, it's non-fertile because it really isn't completely finished yet.
+However, I needed to put it in the heirarchy to prevent property conflicts in
+the future.  Once it's finished, it will also be the main parent for any NPC
+RPG stuff.  (That's Non-Player Character Role-Playing Guff, to the
+acronymistically-impaired.)
+
+For the time being, the only noticable difference you should see is that when
+you look at yourself, a message about your current health is also displayed.
+That is, unless you have a weird :look_self() that doesn't pass(@args).
+
+Yes, I'm finally gonna try to get this thing done now.  Hopefully by July, it
+will be up and active.
+
+--------------------------
+
+
+Message 25 on *Core-DB-Issues(#350):
+Date:     Tue Jun  8 00:56:18 1993 EDT
+From:     BabyBriar (#2)
+To:       *Core-DB-Issues (#350)
+Subject:  @builder / @programmer change
+
+I've just modified
+  $wiz_utils:set_builder
+  $wiz_utils:set_programmer
+so that, in addition to all the old stuff they used to do, they also add the
+Builder's Feature Object and/or the Programmer's Feature Object (respectively)
+to the lucky player in question.  The features to add are taken from
+$builder.features and $prog.features and, thus, more features could be added
+to this list, in theory.
+
+Briar
+
+--------------------------
+
+
+Message 26 on *Core-DB-Issues(#350):
+Date:     Tue Jun  8 01:54:59 1993 EDT
+From:     BabyBriar (#2)
+To:       *Core-DB-Issues (#350)
+Subject:  More minor changes.
+
+$root_class:eject
+  -- hopefully, the change I made here will take into account the kill_task()
+hack Quinn made on LambdaMOO.  I trust someone will inform me if I'm wrong. :)
+
+$room:accept
+  -- although I'm going to rewrite this entirely, I slightly modified the
+mechanism for moving from one room to another when connected by exits. no
+biggie; closed a hole i accidentally left open.
+
+Briar
+
+--------------------------
+
+
+Message 27 on *Core-DB-Issues(#350):
+Date:     Tue Jun  8 10:08:22 1993 EDT
+From:     BabyBriar (#2)
+To:       *Core-DB-Issues (#350)
+Subject:  more minor changes
+
+I've just modified
+  $login:welcome_msg
+  $wiz:"newpassword_msg welcome_netmail_msg"
+  $wiz:welcome_mail_msg
+  $wiz_utils:make_player
+to do more substitutions, and modified
+  $login.welcome_msg
+  $wiz.newpassword_msg
+  $wiz.welcome_netmail_msg
+  $wiz.welcome_mail_msg
+  $core_help.$login
+to take them into account.  These changes are documented; try
+  help $login:welcome_msg
+  help $wiz:welcome_netmail_msg
+to see the new substitutions.
+
+To go along with these changes; I've added and/or modified the following
+verbs:
+  $network:init_for_core
+  $wiz:init_for_core
+
+As a small change, I moved the faulty $network.help_msg to
+$core_help.$network; anyone wanna document this?
+
+--------------------------
+
+
+Message 28 on *Core-DB-Issues(#350):
+Date:     Tue Jun  8 11:06:05 1993 EDT
+From:     BabyBriar (#2)
+To:       *Core-DB-Issues (#350)
+Subject:  Login Watcher Information
+
+I've just ported the Login Watcher from LambdaMOO.  I've ported this, with
+waffle's permission, because I believe I made a bad judgment call when I put
+the login-watcher notification in $player:confunc and $player:disfunc.
+
+As part of this, I have made the following changes:
++ All players who had previously been listening to the login watcher are
+listening to the new login watcher.
++ All players who had previously had @interesting lists had those lists
+inserted into the login watcher listings.
++ Removal of login-watcher stuff from $player:confunc and $player:disfunc
++ Removal of $player:login_watcher and $player:logout_watcher
++ Removal of $player:@login and $player:set_login_watcher and
+$player:@interesting
++ Removal of $player.login_watcher and $player.interesting
+
+I also made a few small changes; these should hopefully not be a big deal.
+
+Briar
+
+--------------------------
+
+
+Message 29 on *Core-DB-Issues(#350):
+Date:     Tue Jun  8 11:18:09 1993 EDT
+From:     BabyBriar (#2)
+To:       *Core-DB-Issues (#350)
+Subject:  Mail User's Feature Object
+
+Added: @unread
+
+--------------------------
+
+
+Message 30 on *Core-DB-Issues(#350):
+Date:     Tue Jun  8 19:15:37 1993 EDT
+From:     Praecox (#711)
+To:       *Core-DB-Issues (#350)
+Subject:  core release?
+
+Any plans for releasing the OpalCore?  I think it's a great core and should be
+on the market....
+
+Another question:  Could we build a cross-post killer option on the
+$mail_agent system?
+
+Just wondering...
+   prae
+
+--------------------------
+
+
+Message 31 on *Core-DB-Issues(#350):
+Date:     Tue Jun  8 21:40:34 1993 EDT
+From:     Blackbriar (#110)
+To:       Praecox (#711) and *Core-DB-Issues (#350)
+Subject:  Re: core release?
+
+Praecox:
+
+>  Any plans for releasing the OpalCore?  I think it's a great core
+>  and should be on the market....
+
+Yes.  If I'm lucky, a debugging version will come out in the next few days.
+
+>  Another question:  Could we build a cross-post killer option on
+>  the $mail_agent system?
+
+I suppose so.  Someone wanna write it?  (Port it from LambdaMOO and I'll make
+it fit.)
+
+Blackbriar
+
+--------------------------
+
+
+Message 32 on *Core-DB-Issues(#350):
+Date:     Tue Jun  8 23:50:53 1993 EDT
+From:     Praecox (#711)
+To:       *Advertisements (#1438) and *Core-DB-Issues (#350)
+Subject:  Eww!  1st core verb for praecox!  Immortality!
+
+I hassled Bb to add two verbs to $list_utils.  They are just :occurances(targ,
+list), and :ioccurances(targ, list[, index]), for lists and alists, resp.
+They both return a list containing the indices for the given targ in the list.
+So, if you w3ant to know how many 1's are in the list list = {1, 2, 3, 2, 1},
+just do:
+;  length($list_utils:occurances(1, list))
+=> 2
+There ya go!  Yrs,
+--prae
+
+--------------------------
+
+
+Message 33 on *Core-DB-Issues(#350):
+Date:     Wed Jun  9 01:04:08 1993 EDT
+From:     Ranma (#200)
+To:       *Core-DB-Issues (#350) and *Wizard-List (#141)
+Subject:  @subscribe
+
+I just made a small change to @subscribe to make it more similar to
+@unsubscribe.  Since @unsubscribe will let you give multiple lists in one
+command, I set up @subscribe to do the same and changed the documentation
+accordingly.
+--- Ranma
+
+--------------------------
+
+
+Message 34 on *Core-DB-Issues(#350):
+Date:     Wed Jun  9 06:34:37 1993 EDT
+From:     JoeFeedback (#390)
+To:       Praecox (#711), *Advertisements (#1438), and *Core-DB-Issues (#350)
+Subject:  Re: Eww!  1st core verb for praecox!  Immortality!
+
+>  :occurances(targ, list), and :ioccurances(targ, list[, index]),
+
+Any reason for making up the word "occurances" rather than using the English
+word that means what you want?
+
+--------------------------
+
+
+Message 35 on *Core-DB-Issues(#350):
+Date:     Thu Jun 10 00:13:25 1993 EDT
+From:     Ranma (#200)
+To:       *Core-DB-Issues (#350) and *Theme-Issues (#120)
+Subject:  Trimming Back the DB
+
+One very good way that you can help decrease the DB is to delete your old
+messages.  Some players have over 50k of old mail and one player even has 156k
+of stored mail.
+Please delete this old mail with the @rmmail command, followed by the @rmmail
+expunge command (which kills the phantom mail stored for @unrmm).  If you want
+to save your messages, save them on your own system by using @netforward to
+have the mail sent to you; that's why I wrote it.
+Please please please don't save old mail that you don't need.  I don't want to
+have to delete other people's mail but I'll have to if the existence of this
+MOO depends on it.
+This goes triple for you mailing-list owners.  Archive, archive, archive!
+
+--- Ranma
+
+--------------------------
+
+
+Message 36 on *Core-DB-Issues(#350):
+Date:     Thu Jun 10 01:41:04 1993 EDT
+From:     Praecox (#711)
+To:       JoeFeedback (#390) and *Core-DB-Issues (#350)
+Subject:  Re: Eww!  1st core verb for praecox!  Immortality!
+
+>
+>  >  :occurances(targ, list), and :ioccurances(targ, list[, index]),
+>
+>  Any reason for making up the word "occurances" rather than using
+>  the English word that means what you want?
+
+Nope.  What's the english word I want?
+
+--------------------------
+
+
+Message 37 on *Core-DB-Issues(#350):
+Date:     Thu Jun 10 01:44:00 1993 EDT
+From:     Ranma (#200)
+To:       *Core-DB-Issues (#350)
+Subject:  Petty squabbling over spelling and other such nonsense
+
+Look, if you have a bug or typo or something to report, just say so and don't
+try to be cute and take up 5 or 6 messages for one report.  The DB is
+overbloated as it is without people filling up the mailing lists with
+repititious posturings.  Sheesh!  What we gotta do?  Keep MOO-Mail to
+Wizperms?
+
+--------------------------
+
+
+Message 38 on *Core-DB-Issues(#350):
+Date:     Thu Jun 10 04:28:28 1993 EDT
+From:     JoeFeedback (#390)
+To:       Praecox (#711) and *Core-DB-Issues (#350)
+Subject:  Re: Eww!  1st core verb for praecox!  Immortality!
+
+occurrences
+
+--------------------------
+
+
+Message 39 on *Core-DB-Issues(#350):
+Date:     Thu Jun 10 05:19:21 1993 EDT
+From:     JoeFeedback (#390)
+To:       *Core-DB-Issues (#350)
+Subject:  $string_utils documentation
+
+(I've just erased a bunch of my mail, so I refuse to feel guilty about sending
+more.)
+
+`help $string_utils' contains a description of :_cap_property.
+
+Throughout most (yeah, yeah, unfortunately not all) of the core, a leading
+underscore in a verb name indicates that the verb is "private"--that is, it's
+an auxiliary verb for some of the "public" verbs on the object, and should
+_not_ be called from elsewhere.  Part of this is that they're not generally
+very useful; perhaps a more important part is that the authors of these verbs
+have designated them as private and hence will feel no qualms about changing
+their interfaces, or renaming or even deleting them.  They are there only to
+help with specific other verbs on the same object.
+
+I recognize that no one here is likely to hack on :_cap_property; however, it
+is still my opinion that the verb should not be documented as part of the
+public interface of $string_utils (which is what I take the help text to be).
+
+--------------------------
+
+
+Message 40 on *Core-DB-Issues(#350):
+Date:     Thu Jun 10 12:53:26 1993 EDT
+From:     Praecox (#711)
+To:       JoeFeedback (#390) and *Core-DB-Issues (#350)
+Subject:  Re: $string_utils documentation
+
+I agree.  Take it out.  You should probably change the names of the
+$list_utils verbs I added also.  Sorry about the spelling error--and me a
+typesetter no less.  Here's the one liner, which should be in '? $list_utils':
+  [...]
+sort              (list[,keys])  => sorted list
+occurrences       (targ, list)   => list of indices where targ occurs
+ [...]
+sort_alist        (alist[,i]) => alist sorted on i-th elements
+ioccurrences (targ,alist[,i]) => list of indices where targ occurs
+
+prae
+
+--------------------------
+
+
+Message 41 on *Core-DB-Issues(#350):
+Date:     Thu Jun 10 13:48:44 1993 EDT
+From:     Wilson (#738)
+To:       *Core-DB-Issues (#350)
+Subject:  my part.
+
+I have done what i can and recycled my unused objects that were wasting space.
+If everyone went thru their stuff, I'm sure they would find 1 or 2 useless
+objects to get rid of.
+
+--------------------------
+
+
+Message 42 on *Core-DB-Issues(#350):
+Date:     Fri Jun 11 20:01:34 1993 EDT
+From:     BabyBriar (#2)
+To:       *Core-DB-Issues (#350)
+Subject:  In an effort to conserve space...
+
+I've just made the following changes to the Core:
+  + Added $object_utils:object_bytes
+  + Added $object_utils:value_bytes
+    [yes, those are the two verbs from the MOO Pig]
+  + Recycled the previous MOO Pig (#264), after fixing references to it in the
+DB.
+  + Added a @sizeof verb to the Builder's Feature Object (#987).
+
+Briar
+
+--------------------------
+
+
+Message 43 on *Core-DB-Issues(#350):
+Date:     Sat Jun 12 13:45:38 1993 EDT
+From:     BabyBriar (#2)
+To:       *Core-DB-Issues (#350)
+Subject:  Minor Changes.
+
+I've done away with $player_start and changed references to $player.home.
+
+I've done away with $player_class and made it $wiz_utils.default_player_class.
+
+Briar
+
+--------------------------
+
+
+Message 44 on *Core-DB-Issues(#350):
+Date:     Sat Jun 12 15:25:25 1993 EDT
+From:     BabyBriar (#2)
+To:       *Core-DB-Issues (#350)
+Subject:  [BabyBriar (#2):  OpalCore.]
+
+Date:     Sat Jun 12 15:23:13 1993 EDT
+From:     BabyBriar (#2)
+To:       *Wizard-List (#141)
+Subject:  OpalCore.
+
+I'm generating OpalCore, and I have the following questions about what should
+be included in the Core:
+
+Should $cash be in the core?
+  My guess: NO
+
+Should $gopher be in the core?
+  My guess: NO
+
+Should $NOOMail be in the core?
+  My answer: A firm NO
+
+Should $rpg_utils be in the core?
+  My guess: NO (at least, not yet)
+
+Should $services be in the core?
+  My guess: NO
+
+--------------------------
+
+
+Message 45 on *Core-DB-Issues(#350):
+Date:     Mon Jun 14 01:58:51 1993 EDT
+From:     BabyBriar (#2)
+To:       *Core-DB-Issues (#350)
+Subject:  Minor bug fixed.
+
+I fixed an eensy bug in the generic large-capacity mail lists. No biggie.
+
+--------------------------
+
+
+Message 46 on *Core-DB-Issues(#350):
+Date:     Mon Jun 14 15:55:59 1993 EDT
+From:     BabyBriar (#2)
+To:       *Core-DB-Issues (#350)
+Subject:  $note:mailme
+
+There is a command on $note on MediaMOO (I suspect it was snagged from
+JaysHouseMOO) which allows you to mail the text of the note to yourself.  Do
+we want it?
+
+--------------------------
+
+
+Message 47 on *Core-DB-Issues(#350):
+Date:     Mon Jun 14 16:15:37 1993 EDT
+From:     BabyBriar (#2)
+To:       *Core-DB-Issues (#350)
+Subject:  Well, ok.
+
+I added two verbs to $note:
+  mailme
+  show
+
+Both are documented; comments?
+
+--------------------------
+
+
+Message 48 on *Core-DB-Issues(#350):
+Date:     Mon Jun 14 19:29:02 1993 EDT
+From:     Ranma (#200)
+To:       BabyBriar (#2) and *Core-DB-Issues (#350)
+Subject:  Re: $note:mailme
+
+>  From:     BabyBriar (#2)
+>  There is a command on $note on MediaMOO (I suspect it was snagged
+>  from JaysHouseMOO) which allows you to mail the text of the note
+>  to yourself.  Do we want it?
+
+That's a good idea.  At LambdaMOO, APHiD has the reverse, a mailing-list that
+creates a $note of the text mailed to it.  That might be nice to have.
+
+--------------------------
+
+
+Message 49 on *Core-DB-Issues(#350):
+Date:     Tue Jun 15 02:34:13 1993 EDT
+From:     Ranma-chan (#200)
+To:       *Wizard-List (#141) and *Core-DB-Issues (#350)
+Subject:  $login:_match_player()
+
+I hacked this to accept player aliases as well as name.  This should save a
+little stress.
+
+--------------------------
+
+
+Message 50 on *Core-DB-Issues(#350):
+Date:     Tue Jun 15 03:05:50 1993 EDT
+From:     Ranma-chan (#200)
+To:       *Core-DB-Issues (#350)
+Subject:  $code_utils:ctime_last_modified/time_last_modified(object, verb)
+
+I just added $code_utils:ctime_last_modified/time_last_modified(object, verb)
+which returns the ctime or time of a given verb respectively.
+The object must have the verb defined directly on it and be readable by the
+caller_perms().
+If the verb is from Pre-Time-Stamping days, it simply returns the zero time
+(i.e. ctime(0) or time()==0).
+I think it could be useful for something.  Maybe a new version of @display
+that shows the last modified time for verbs.
+
+--------------------------
+
+
+Message 51 on *Core-DB-Issues(#350):
+Date:     Thu Jun 17 14:41:00 1993 EDT
+From:     Porcupine (#807)
+To:       *Core-DB-Issues (#350)
+Subject:  Briar
+
+Why shouldn't $services be in the core?
+
+--------------------------
+
+
+Message 52 on *Core-DB-Issues(#350):
+Date:     Thu Jun 17 16:06:46 1993 EDT
+From:     Jordan (#830)
+To:       Porcupine (#807) and *Core-DB-Issues (#350)
+Subject:  Re: Briar
+
+Cause $services isn't really finished yet.
+When it is, I'm sure Briar will put it into the core.
+
+-Jo.
+
+--------------------------
+
+
+Message 53 on *Core-DB-Issues(#350):
+Date:     Tue Jun 22 03:40:45 1993 EDT
+From:     Praecox (#711)
+To:       *Core-DB-Issues (#350)
+Subject:  graveyard
+
+Wow, it sure got dead here real fast...
+
+--------------------------
+
+
+Message 54 on *Core-DB-Issues(#350):
+Date:     Wed Jun 23 23:18:41 1993 EDT
+From:     Dreamy (#1038)
+To:       *Core-DB-Issues (#350)
+Subject:  Dead?
+
+In what sense??
+I still consider myself alive.....
+
+--------------------------
+
+
+Message 55 on *Core-DB-Issues(#350):
+Date:     Thu Jun 24 12:36:00 1993 EDT
+From:     Wilson (#738)
+To:       *Core-DB-Issues (#350)
+Subject:  pocket fluff & black holes
+
+1)  I am alive.
+
+2)  How is the problem with no disk space coming?  I am curious.
+
+3)  Can we program once more?
+
+- wilson
+
+--------------------------
+
+
+Message 56 on *Core-DB-Issues(#350):
+Date:     Thu Jun 24 21:20:06 1993 EDT
+From:     Solipsist (#804)
+To:       *Core-DB-Issues (#350)
+Subject:  For my information
+
+Which is worse on the system:
+Using objects that are 15 levels of descent from the verbs I'm calling, or
+using @copy to add the verbs directly to the item I'm working on?
+I'd like to find out about the balance between ticks used and memory used.
+Thanks.
+Solipsist
+
+--------------------------
+
+
+Message 57 on *Core-DB-Issues(#350):
+Date:     Thu Jun 24 21:41:54 1993 EDT
+From:     Ranma-chan (#200)
+To:       Solipsist (#804) and *Core-DB-Issues (#350)
+Subject:  Re: For my information
+
+>  From:     Solipsist (#804)
+>  Which is worse on the system:
+>  Using objects that are 15 levels of descent from the verbs I'm
+>  calling, or using @copy to add the verbs directly to the item I'm
+>  working on?
+
+Well, I'm not realy sure on that.  I'll ask around and see.
+
+>  I'd like to find out about the balance between ticks used and
+>  memory used.
+
+There is no relation between ticks used and memory used.  Ticks are a
+time-measurement and memory is a size-measurement.  They can both cause lag
+but in their own ways.
+
+--------------------------
+
+
+Message 58 on *Core-DB-Issues(#350):
+Date:     Fri Jun 25 01:36:47 1993 EDT
+From:     Solipsist (#804)
+To:       *Core-DB-Issues (#350)
+Subject:  Information clarification.
+
+>There is no relation between ticks used and memory used.  Ticks are a
+> time-measurement and memory is a size-measurement.  They can both cause lag
+> but in their own ways.
+
+I was imprecise.  What I meant to say was, I'm trying to balance the ill
+effects of database bloat and the ill effects of hierarchical calls.
+Which is worse: bloating BrynMawr's disk space, or ticking Opal to death?
+Solipsist.
+
+--------------------------
+
+
+Message 59 on *Core-DB-Issues(#350):
+Date:     Fri Jun 25 22:30:41 1993 EDT
+From:     Porcupine (#807)
+To:       *Core-DB-Issues (#350)
+Subject:  Ill effects of hierarchical calls?
+
+as far as I know an inherited verb is lickity-split fast -- at least since we
+got ref-counting
+
+--------------------------
+
+
+Message 60 on *Core-DB-Issues(#350):
+Date:     Sat Jun 26 00:31:58 1993 EDT
+From:     Ranma-chan (#200)
+To:       *Wizard-List (#141) and *Core-DB-Issues (#350)
+Subject:  Changes to $player and #1
+
+I made some small changes to $player and #1.  I wanted to have
+$player:look_self() and $player:my_huh() pass back to stuff on eir parents but
+most $player stuff never pass()'s at all.
+What I've done is add #1:core_huh() and #1:look_self_append() which just
+return 0.  Then I had $player:my_huh() also call this:core_huh() and I moved
+the idleness portion of the description to $player:look_self_append() which
+also pass()'s.
+Mainly, this was to facilitate some stuff on the Generic Living Thing (#2051).
+You shouldn't see much difference.
+
+--------------------------
+
+
+Message 61 on *Core-DB-Issues(#350):
+Date:     Sat Jun 26 00:47:59 1993 EDT
+From:     Jordan (#830)
+To:       Porcupine (#807) and *Core-DB-Issues (#350)
+Subject:  Re: Ill effects of hierarchical calls?
+
+No, its actually very slow, due to the fact that it calls strlen() like a
+million times.
+Not that you'd notice it in most cases, but most of MOO processing time is
+apparently spent in the strlen() function now.
+
+--------------------------
+
+
+Message 62 on *Core-DB-Issues(#350):
+Date:     Sat Jun 26 11:41:26 1993 EDT
+From:     Blackbriar (#110)
+To:       Solipsist (#804) and *Core-DB-Issues (#350)
+Subject:  Re: For my information
+
+Solipsist asks:
+
+>  Which is worse on the system:
+>  Using objects that are 15 levels of descent from the verbs I'm
+>  calling, or using @copy to add the verbs directly to the item I'm
+>  working on?
+>  I'd like to find out about the balance between ticks used and
+>  memory used.
+
+Use the inherited verb.  Never @copy unless there's a very good reason to.
+Bb
+
+--------------------------
+
+
+Message 63 on *Core-DB-Issues(#350):
+Date:     Sat Jun 26 13:27:49 1993 EDT
+From:     Blackbriar (#110)
+To:       *Core-DB-Issues (#350)
+Subject:  Hm. I was just looking at $core_db
+
+.. and I was realizing that I can't recall why I wanted it to be a
+$generic_db at all.  Wouldn't it work just as well as a child of $root_class
+with a few properties stuck on it?  (I mean, we stick data into the DB part of
+$core_db, but those data are never accessed; we get all our information from a
+buncha properties.)
+
+Comments?
+
+Blackbriar
+
+--------------------------
+
+
+Message 64 on *Core-DB-Issues(#350):
+Date:     Mon Jun 28 01:11:05 1993 EDT
+From:     Blackbriar (#110)
+To:       *Core-DB-Issues (#350)
+Subject:  $prog.dump_task
+
+What is .dump_task supposed to do and how is it supposed to work? I'm
+confuzzeled.
+
+--------------------------
+
+
+Message 65 on *Core-DB-Issues(#350):
+Date:     Mon Jun 28 18:11:57 1993 EDT
+From:     Ranma-chan (#200)
+To:       Blackbriar (#110) and *Core-DB-Issues (#350)
+Subject:  Re: $prog.dump_task
+
+>  From:     Blackbriar (#110)
+>  What is .dump_task supposed to do and how is it supposed to work?
+>  I'm confuzzeled.
+
+I altered $prog:notify() a while back.  Now, when a programmer is performing a
+@dump, calls to :notify() that are not from the @dump are stalled until the
+@dump is finished.  This was, @dump's aren't interrupted by pages and stuff.
+Besides, if someone pages you in the middle of a dump, you usually don't even
+see it because most people just screen-capture @dump's without paying much
+attention.
+
+--------------------------
+
+
+Message 66 on *Core-DB-Issues(#350):
+Date:     Fri Jul  2 15:43:18 1993 EDT
+From:     BabyBriar (#2)
+To:       *Core-DB-Issues (#350)
+Subject:  @dump
+
+I just made a few more changes to @dump.  See 'help @dump'.  In summation:
+  + The @dump output may now be mailed directly to you
+  + The @dump output will no longer be interrupted by pages and the like (this
+was nearly solved before, with a minor glitch I -think- I resolved).
+
+I think.
+
+--------------------------
+
+
+Message 67 on *Core-DB-Issues(#350):
+Date:     Fri Jul  2 23:42:24 1993 EDT
+From:     BabyBriar (#2)
+To:       *Core-DB-Issues (#350)
+Subject:  Eensy change.
+
+I've just split the "General Help Topics" up into those for builders and those
+for non-builders.  Please let me know if I mucked anything up.
+Briar
+
+--------------------------
+
+
+Message 68 on *Core-DB-Issues(#350):
+Date:     Fri Jul  2 23:52:24 1993 EDT
+From:     BabyBriar (#2)
+To:       *Core-DB-Issues (#350)
+Subject:  Another small change.
+
+I just killed #0:core_objects and replaced it with $core_db:core_objects.
+I don't think this change should be meaningful because, for quite some time
+now, #0:core_objects called that verb.
+Bb
+
+--------------------------
+
+
+Message 69 on *Core-DB-Issues(#350):
+Date:     Sun Jul  4 13:58:22 1993 EDT
+From:     BabyBriar (#2)
+To:       *Core-DB-Issues (#350) and Ranma-chan (#200)
+Subject:  I don't know how $old_names_db works, but...
+
+Is there any way that we could hack $wiz_utils:unset_player() so that when a
+player object becomes no longer so (by virtue of toading, reaping, suicide,
+etc.) those names are added to the $old_names_db so that one can lookup a dead
+objnum and see who it used to be?
+
+Briar
+
+--------------------------
+
+
+Message 70 on *Core-DB-Issues(#350):
+Date:     Sun Jul  4 14:04:34 1993 EDT
+From:     Blackbriar (#110)
+To:       *Core-DB-Issues (#350)
+Subject:  Unless anyone objects...
+
+I'm going to take the @audit/@prospectus verbage from LambdaMOO, hack it
+somewhat to use :audit_msg, and slide it over to here because I think it's
+better done than my hacks.  Does anyone object?
+Blackbriar
+
+--------------------------
+
+
+Message 71 on *Core-DB-Issues(#350):
+Date:     Sun Jul  4 15:31:35 1993 EDT
+From:     Ranma-chan (#200)
+To:       BabyBriar (#2) and *Core-DB-Issues (#350)
+Subject:  Re: I don't know how $old_names_db works, but...
+
+>  From:     BabyBriar (#2)
+>  Is there any way that we could hack $wiz_utils:unset_player() so
+>  that when a player object becomes no longer so (by virtue of
+>  toading, reaping, suicide, etc.) those names are added to the
+>  $old_names_db so that one can lookup a dead objnum and see who it
+>  used to be?
+
+Hmmm.... the $old_names_db uses names as keys, not objnums, so I don't know if
+it would be possible.
+
+--------------------------
+
+
+Message 72 on *Core-DB-Issues(#350):
+Date:     Mon Jul  5 14:10:24 1993 EDT
+From:     Blackbriar (#110)
+To:       Ranma-chan (#200), BabyBriar (#2), and *Core-DB-Issues (#350)
+Subject:  Re: I don't know how $old_names_db works, but...
+
+Baby Briar:
+
+>  From:     BabyBriar (#2)
+>  Is there any way that we could hack $wiz_utils:unset_player() so
+>  that when a player object becomes no longer so (by virtue of
+>  toading, reaping, suicide, etc.) those names are added to the
+>  $old_names_db so that one can lookup a dead objnum and see who it
+>  used to be?
+
+Ranma-chan:
+
+>  Hmmm.... the $old_names_db uses names as keys, not objnums, so I
+>  don't know if it would be possible.
+
+However, it -could- be possible to have an admittedly tick-intensive search to
+find the names for a given objnum.  Does anyone think this is a -bad- idea?
+
+Bb
+
+--------------------------
+
+
+Message 73 on *Core-DB-Issues(#350):
+Date:     Mon Jul  5 18:44:28 1993 EDT
+From:     Ranma-chan (#200)
+To:       Blackbriar (#110), BabyBriar (#2), and *Core-DB-Issues (#350)
+Subject:  Re: I don't know how $old_names_db works, but...
+
+>  From:     Blackbriar (#110)
+>  However, it -could- be possible to have an admittedly
+>  tick-intensive search to find the names for a given objnum.  Does
+>  anyone think this is a -bad- idea?
+
+Bad idea.  It would be much much simpler to have $wiz_utils store a list
+objects and names.
+In any case, the way that a DB stores information would make it extremely
+difficult to sort out the partial names from complete names and so on.
+On the other hand, it would also be fairly simple to alter
+$wiz_utils:unset_player() to get $old_names_db to store names of dead players.
+See the $old_names_db stores names as keys with objnum and times as datum.
+There really isn't any simple way to search for a specific piece of datum,
+especially only part of a datum.
+
+--------------------------
+
+
+Message 74 on *Core-DB-Issues(#350):
+Date:     Mon Jul  5 21:28:34 1993 EDT
+From:     BabyBriar (#2)
+To:       *Core-DB-Issues (#350), LaTraviata (#473), and Mr.Z (#1297)
+Subject:  No more teleportation?
+
+Perhaps this will finally eliminate teleportation?  Who knows.
+
+I've just modified (rewritten, really) $room:accept and removed
+$room.free_entry.
+
+I've modified all the verbs in the DB which referred to .free_entry (if you've
+received this mail and you don't know why, that's why).
+
+Blah.  The code's readable; lemme know if there are any bugs.
+
+Briar
+
+--------------------------
+
+
+Message 75 on *Core-DB-Issues(#350):
+Date:     Mon Jul  5 21:45:37 1993 EDT
+From:     BabyBriar (#2)
+To:       *Core-DB-Issues (#350)
+Subject:  Modifications...
+
+I modified $wiz_utils:unset_player to stick the deceased's names/aliases into
+$old_names_db.  I also added $old_names_db:from_obj which is very
+tick-intensive, but which will take an objnum and return any past names that
+objnum used which are stored in the db.
+
+--------------------------
+
+
+Message 76 on *Core-DB-Issues(#350):
+Date:     Mon Jul  5 22:31:20 1993 EDT
+From:     Ranma-chan (#200)
+To:       *Core-DB-Issues (#350)
+Subject:  $player:@whowas
+
+Incidentally, I forgot to announce the verb $player:@whowas which allows you
+to find out who used a given name.  I just modified it so that it wouldn't
+screw up on recycled players.
+
+--------------------------
+
+
+Message 77 on *Core-DB-Issues(#350):
+Date:     Tue Jul  6 00:26:51 1993 EDT
+From:     BabyBriar (#2)
+To:       *Core-DB-Issues (#350)
+Subject:  $player:@sweep
+
+I've just written a more detailed @sweep which checks for everyone who may
+possibly be listening.  Let me know if there are any bugs you see.
+Briar
+
+--------------------------
+
+
+Message 78 on *Core-DB-Issues(#350):
+Date:     Tue Jul  6 01:37:33 1993 EDT
+From:     BabyBriar (#2)
+To:       *Core-DB-Issues (#350) and Paris (#1444)
+Subject:  $player:@lastlog
+
+I've finally taken the #974:@when verb and rolled it into core as
+$player:@lastlog.  This was, in my opinion, a damned good bit of coding.
+Congrats, Paris.
+
+--------------------------
+
+
+Message 79 on *Core-DB-Issues(#350):
+Date:     Fri Jul  9 02:48:41 1993 EDT
+From:     Ranma-chan (#200)
+To:       *Core-DB-Issues (#350)
+Subject:  $match_utils:match_verb()
+
+I just fixed up $match_utils:match_verb() to make it a little smarter, i.e. to
+take into account "any" as a preposition arg and "this" as dobj and iobj args.
+
+I also documented it while I was at it.
+
+--- Ranma
+
+--------------------------
+
+
+Message 80 on *Core-DB-Issues(#350):
+Date:     Fri Jul  9 14:21:08 1993 EDT
+From:     Wilson (#738)
+To:       *Core-DB-Issues (#350)
+Subject:  okay, it's not forwarding yet.
+
+I enabled my net-forward, and have yet to receive any mail from any newsgroup
+or from myself.
+- Wilson
+
+--------------------------
+
+
+Message 81 on *Core-DB-Issues(#350):
+Date:     Sat Jul 24 23:12:20 1993 EDT
+From:     BabyBriar (#2)
+To:       *Core-DB-Issues (#350)
+Subject:  Modifications.
+
+I've just fixed a nasty bug in @sweep.  I hope nobody abused it while it was
+broken.
+
+I've also just installed a fixed version of $object_utils:has_callable_verb
+which isn't fooled by !x verbs.
+
+Briar
+
+--------------------------
+
+
+Message 82 on *Core-DB-Issues(#350):
+Date:     Sun Jul 25 01:23:22 1993 EDT
+From:     Panda (#685)
+To:       *Core-DB-Issues (#350)
+Subject:  dataspace on CC
+
+I heard from Yas that CC wsa 98% full. If LambdaMoo is at 80 MB of disk
+space, (a number that sounds off to me...) that would mean that CC only
+has what... 81 MB?  sounds wrong to me....
+
+-Panda
+
+--------------------------
+
+
+Message 83 on *Core-DB-Issues(#350):
+Date:     Sun Jul 25 15:57:01 1993 EDT
+From:     Blackbriar (#110)
+To:       Panda (#685) and *Core-DB-Issues (#350)
+Subject:  Re: dataspace on CC
+
+Panda:
+
+>  I heard from Yas that CC wsa 98% full. If LambdaMoo is at 80 MB
+>  of disk space, (a number that sounds off to me...) that would
+>  mean that CC only has what... 81 MB? sounds wrong to me....
+
+ Filesystem   Total    kbytes   kbytes   %
+ node         kbytes   used     free     used  Mounted on
+ /dev/rz1b     386747  324863   23210    93%   /home
+
+Of that, our usage is limited to 17M.  We're a relatively small chunk of the
+available space.
+
+Blackbriar
+
+--------------------------
+
+
+Message 84 on *Core-DB-Issues(#350):
+Date:     Wed Jul 28 02:56:27 1993 EDT
+From:     Panda (#685)
+To:       *Core-DB-Issues (#350)
+Subject:  dataspace
+
+386 MB? thats ALL?  Damn. I almost have that on my computer at home....
+I would tell them to by a damn drive. $1000 or so will get them a GB.
+Grumblingly,
+Panda
+
+--------------------------
+
+
+Message 85 on *Core-DB-Issues(#350):
+Date:     Sat Jul 31 00:53:30 1993 EDT
+From:     BabyBriar (#2)
+To:       *Core-DB-Issues (#350) and *Event-Issues (#1490)
+Subject:  :event_say
+
+Finally installed.  See $room:say.
+Briar
+
+--------------------------
+
+
+Message 86 on *Core-DB-Issues(#350):
+Date:     Sun Aug  1 22:55:25 1993 EDT
+From:     BabyBriar (#2)
+To:       *Core-DB-Issues (#350), Mickey (#2587), and *Wizard-List (#141)
+Subject:  $string_utils changes:
+
+I've just rolled the following verbs all into one:
+  $string_utils:"nn name_and_number name_and_number_list names_of"
+I think this is neater and I've always hated :names_of.
+
+I've also installed some Mickey code:
+  $string_utils:a_or_an
+
+Documentation to follow, I suppose.
+
+Briar
+
+--------------------------
+
+
+Message 87 on *Core-DB-Issues(#350):
+Date:     Sun Aug  1 23:05:44 1993 EDT
+From:     Mickey (#2587)
+To:       *Core-DB-Issues (#350)
+Subject:  What is an exit
+
+I'd like things to be able to be exits without inheriting from $exit.  That's
+why I'm working on the $exit_utils thing.  It has proved very useful in my
+Moo.
+
+One piece of glue that's needed, though, is to change the way in which things
+check for exitness.  In my moo, we have:
+
+    >@list $root_class:is_an_exit
+    #1:"is_an_exit"   this none this
+     1:  return 0;
+    >@list $exit:is_an_exit
+    #7:"is_an_exit"   this none this
+     1:  return 1;
+
+Could I get someone to establish a similar thing here?
+
+To make it work, you also have to @grep for $exit (or--shudder--#7) and make
+sure no one is using it in the context of something like
+$object_utils:isa(...,$exit).  There should be almost no one doing this.  In
+my Moo, which is based on the lambda core, there are only two such incidences
+($room:@add-exit and $room:$player:do_follow), so the mods to be made are
+completely trivial.  I'd do this search myself here, but without wizard perms
+I can't @grep the full space of things that need to be checked.
+
+Idiot alert:  Install the verbs on $root_class and $exit BEFORE modifying the
+callers.
+
+This change can be done independently of the other stuff I'm doing on
+$exit_utils, and I think is a worthwhile change to make.  On the other hand, I
+can't proceed usefully with my testing of the $exit_utils until it's done,
+since otherwise @add-exit won't like my surrogate exits.
+ --Mickey
+
+--------------------------
+
+
+Message 88 on *Core-DB-Issues(#350):
+Date:     Wed Aug  4 05:14:52 1993 EDT
+From:     Blade (#1108)
+To:       *Core-DB-Issues (#350)
+Subject:  A little question...
+
+When will OpalCore be available?
+
+Eagerly and Greedily,
+Blade
+
+--------------------------
+
+
+Message 89 on *Core-DB-Issues(#350):
+Date:     Sat Aug 14 17:59:19 1993 EDT
+From:     Blackbriar (#110)
+To:       Blade (#1108) and *Core-DB-Issues (#350)
+Subject:  Re: A little question...
+
+Blade asks:
+
+>  When will OpalCore be available?
+
+Not for a little while.
+
+Blackbriar
+
+--------------------------
+
+
+Message 90 on *Core-DB-Issues(#350):
+Date:     Sun Aug 15 00:26:00 1993 EDT
+From:     BabyBriar (#2)
+To:       *Core-DB-Issues (#350), Networker (#138), CyberFox (#1878), Blade (#1108), Blackbriar (#110), Alea (#756), Hacker (#37), BeeKay (#167), Rohan (#117), Xyphus (#123), Heather (#205), Hagbard (#361), Profane (#603), Anne (#114), LaTraviata (#473), Xythian (#125), Tobin (#336), RPG (#2343), NightWatcher (#670), natasha (#605), Trystan (#805), Praecox (#711), Paris (#1444), Dreamy (#1038), Miloslav (#1186), Cpt.Vader (#1228), Ogwul (#2078), Banker (#1889), Pomegranate (#2061), Jander (#2093), Kira (#2426), Barleymow (#2482), Pluto (#1212), yduJ (#112), Mickey (#2587), Ranma-chan (#200), Greene (#485), Panda (#685), Black_Francis (#708), and Euphistopheles (#1205)
+Subject:  LARGE LOOK CHANGE
+
+Essentially: If you are going to put a :look_self or a :tell_contents verb on
+an object, have it return a string or a list of strings.  Have your rooms'
+:look verbs return the string/list-of-strings/$failed_match/$ambiguous_match.
+:description already should follow this protocol.  Player class creators can
+feel free to put :l*ook verbs on their creations.
+
+If you are receiving this letter personally, it's because I have had to make a
+modification to one of your objects.  See below for itemized changes.
+
+I am changing the :look system so that the major controls are on the :look
+verb on $player.  The :look verb on $player will call the :look verb on the
+player's location, and handle whatever's returned.  The results of the :look
+verb on the room will be one of the following:
+  + A list of strings, indicating the text to be returned (the description,
+usually), or
+  + $failed_match, in the case of not having found anything to look at, or
+  + $ambiguous_match, in the case of being confused.
+
+In order to support this, I have had to make all :look verbs on rooms be +x.
+The applicable verbs are:
+  $room:look (already +x)
+  #786:look (already +x)
+  #1025:look (not originally +x; I made it +x after checking it for security)
+  #1032:look (not originally +x; I made it +x after checking it for security)
+  #1273:look (already +x)
+  #1704:look (already +x)
+  #1779:look (already +x)
+  #1999:look (not +x; made it +x because it's not programmed)
+
+Next comes the modifications of those verbs; they were all modified to return
+values instead of doing any raw tell-ing to the player who is looking around.
+  $room:look
+  #786:look
+  #786:examine_details
+  #1025:look
+  #1032:look
+  #1273:look
+  #1704:look
+  #1704:look_outside
+  #1779:look
+  #1779:look_details
+  #1779:look_radio
+
+Ok, so by this time, I've got traceback everywhere on the entire MOO, so it's
+time to start modifying the :look_* support verbs (:look_self, :look_through,
+:look_in and so forth) so as to support these thingies.
+  #1:look_self
+  #3:look_self
+  #6:look_self
+  #8:look_self
+  #45:look_self
+  #46:look_self
+  #62:look_self
+  #70:look_self
+  #106:look_self
+  #117:look_self
+  #123:look_self
+  #205:look_self
+  #261:look_self
+  #275:list
+  #276:look_self
+  #331:look_self
+  #342:look_self
+  #361:look_self
+  #363:look_self
+  #380:look_self
+  #384:look_self
+  #400:look_self
+  #404:look_self
+  #473:look_self
+  #477:look_self
+  #540:look_self (but Tobin should work on some this 'cause it's ugly)
+  #561:look_self
+  #570:look_self
+  #603:look_self
+  #670:look_self
+  #688:look_self
+  #689:look_self
+  #762:look_self
+  #778:look_self
+  #843:look_self
+  #865:look_self
+  #872:look_self
+  #958:look_self
+  #1038:look_self
+  #1042:look_self
+  #1058:look_self
+  #1061:look_self WAS NOT TOUCHED AT ALL BUT SHOULD BE
+  #1186:look_self
+  #1228:look_self
+  #1333:look_self
+  #1334:look_self
+  #1381:look_self
+  #1481:look_self
+  #1582:look_self
+  #1631:look_self
+  #1771:look_self
+  #1771:tell_drawer_contents
+  #1775:look_self
+  #1813:look_self
+  #1823:look_self WAS NOT TOUCHED.  Ogwul should look into this.
+  #1869:look_self
+  #2051:look_self
+  #2061:look_self
+  #2084:look_self
+  #2204:look_self
+  #2238:look_self
+  #2426:look_self
+  #2510:look_self
+
+WHEW. And not a moment too soon. Opal's getting restless. But we're NOT DONE
+YET! The :tell_contents verb needs to be modified as well, because that was
+another bad design decision. So we modify the following :tell_contents verbs:
+  #3:tell_contents
+  #6:tell_contents
+  #50:tell_contents
+  #331:tell_contents
+  #361:tell_contents
+  #384:tell_contents
+  #413:tell_contents
+  #457:tell_contents
+  #570:tell_contents
+  #1025:tell_contents WAS NOT TOUCHED.
+  #1222:tell_contents
+  #1243:tell_contents
+  #1483:tell_contents
+  #1778:tell_contents
+  #2051:tell_contents
+
+Ok.  Now that's taken care of.  But there are still the other support verbs,
+so I'm hitting all of them I can find:
+  #1:look_in
+  #1:look_through (and friends)
+  #1:look_in_front_of
+  #7:look_through
+  #8:look_in
+  #115:look_through and friends WERE NOT TOUCHED.  Mickey should look at this.
+  #382:look_through
+  #1381:look_through
+  #1771:look_in (and friends)
+
+Ok.  Now we need to look at some of the verbs which -call- these verbs.  The
+following verbs call :look_self or :tell_contents or something related:
+  #3:confunc
+  #3:enterfunc
+  #3:@zones
+  #6:@subscribe
+  #9:read
+  #47:showlists
+  #359:moveto
+  #489:confunc
+  #540:read
+  #694:see
+  #723:spy
+  #746:enterfunc
+  #752:set_pointer
+  #753:read
+  #762:open
+  #762:close
+  #790:showlists
+  #1055:read
+  #1081:@peruse
+  #2459:remote_look
+  #2459:remote_go
+
+And some last-minute cleanups of the :tell_contents stuff...
+  #1:examine_contents
+  #3:examine_contents
+  #6:look_self
+  #6:look_self_append
+  #8:look_self
+  #8:examine_contents
+  #331:look_self
+  #331:tell_contents
+  #384:look_self
+  #570:look_self
+  #843:look_self
+  #1483:look_self
+  #1823:look_self WAS NOT TOUCHED
+  #2051:look_self
+
+Report all bugs to me.  I think we've got it down now.
+
+Briar
+
+--------------------------
+
+
+Message 91 on *Core-DB-Issues(#350):
+Date:     Sun Aug 15 11:36:33 1993 EDT
+From:     Networker (#138)
+To:       *Core-DB-Issues (#350)
+Subject:  look changes.
+
+Groovy, I've modified the vroom stuff so it 'look's fine now.  How are you
+gonna sell this to LambdaMOO?!? ;)
+
+--------------------------
+
+
+Message 92 on *Core-DB-Issues(#350):
+Date:     Sun Aug 15 14:39:47 1993 EDT
+From:     Mickey (#2587)
+To:       BabyBriar (#2) and *Core-DB-Issues (#350)
+Subject:  Re: LARGE LOOK CHANGE
+
+Thank you for the notification of the changes.
+
+#115:look_through did not, in fact, need changes to accomodate the new
+protocol, although the new $exit_utils which it calls out to did need a
+corresponding change, so you were right to point me at #115:look_through
+anyway or I might not have noticed this.  (Note to anyone reading this:
+neither #115 nor $exit_utils is ready for use yet, so don't bother playing
+with them.  I'll send mail when they are ready for experimentation.)
+
+Is there a utility anywhere that does the operation merge_strings such that
+  merge_strings("foo","bar") => "foobar"
+  merge_strings("foo",{"bar","baz"}) => "foobarbaz"
+  merge_strings({"foo","bar"},"baz") => "foobarbaz"
+  merge_strings({"foo"},{"bar"}) => "foobar"
+so that these weird return values that are either lists or strings can be
+played with in some straightforward way?  It's really aggravating having to
+check for the return type in order to know if you can do {@old,new} or if you
+have to do old+new or {@old,@new} or whatever.  Maybe I'm just not up on the
+full space of available tools, though.
+Absent such a utility, I'd almost wish these things would just always return
+lists of strings.
+
+--------------------------
+
+
+Message 93 on *Core-DB-Issues(#350):
+Date:     Sun Aug 15 20:36:08 1993 EDT
+From:     BabyBriar (#2)
+To:       Mickey (#2587) and *Core-DB-Issues (#350)
+Subject:  Re: LARGE LOOK CHANGE
+
+Mickey:
+
+>  Is there a utility anywhere that does the operation merge_strings
+>  such that
+>    merge_strings("foo","bar") => "foobar"
+>    merge_strings("foo",{"bar","baz"}) => "foobarbaz"
+>    merge_strings({"foo","bar"},"baz") => "foobarbaz"
+>    merge_strings({"foo"},{"bar"}) => "foobar"
+>  so that these weird return values that are either lists or strings
+>  can be played with in some straightforward way?
+
+I've just added $string_utils:merge_strings as you detailed above.  This won't
+help in the problem we were working with before, though; what we need, really,
+is a :merge_lists which will take a bunch of stuff and merge them together
+with the assumption that anything which isn't a list should be.
+
+For this reason, I've also added $list_utils:merge_lists, which -will- be
+helpful in things like :look_self generations.
+
+Briar
+
+--------------------------
+
+
+Message 94 on *Core-DB-Issues(#350):
+Date:     Tue Aug 24 16:48:59 1993 EDT
+From:     BabyBriar (#2)
+To:       *Core-DB-Issues (#350)
+Subject:  [BabyBriar (#2):  Server Release 1.7.5]
+
+Date:     Mon Aug 16 00:04:40 1993 EDT
+From:     BabyBriar (#2)
+To:       *Q&A (#1111) and *Wizard-List (#141)
+Subject:  Server Release 1.7.5
+
+Anyone think going to 1.7.5 is a good idea?  Anyone know what the good it is?
+
+Briar
+
+--------------------------
+
+
+Message 95 on *Core-DB-Issues(#350):
+Date:     Sat Aug 28 12:33:25 1993 EDT
+From:     Ranma-chan (#200)
+To:       *Wizard-List (#141) and *Core-DB-Issues (#350)
+Subject:  $player:lookup_room()
+
+I just altered $player:lookup_room() so that, if the string sent is not either
+"here", an object number, or a room as listed in the player's @rooms list, it
+will try to match it against all existing rooms.
+Actually, it doesn't re-scan for all rooms when called.  What it does is get a
+list of rooms from the new, under-construction $path_utils:all_rooms() which
+re-scans for all descendants of $room each time it is called more than 24
+hours since the last scan.  Actually, at our current size, it only takes
+12,500 ticks to re-scan anyway but this will help keep the scanning down when
+used on larger MOOs.
+I'm keeping the @rooms list in there because you may not be able to access all
+rooms based on the :all_rooms() system because rooms may have similar names.
+For example, if you were to try and match on the string "strychnine", you'd
+get $ambiguous_match because Strychnine Avenue is made up of several locations
+starting with "Strychnine".  And what if you want to refer to your home as
+"home"?  Lots of people may have "home" as the name or alias of their home so
+that would be a problem.
+
+So it only uses the :all_rooms() system when checking the @rooms list results
+in $failed_match.
+
+--- Ranma
+
+--------------------------
+
+
+Message 96 on *Core-DB-Issues(#350):
+Date:     Sat Aug 28 13:40:27 1993 EDT
+From:     Ranma-chan (#200)
+To:       *Wizard-List (#141) and *Core-DB-Issues (#350)
+Subject:  $player:walk to <person || place>
+
+I just moved `walk' to $player with some modifications to prevent error.
+
+walk to <person || place>
+This command will cause you to walk to either the current location of the
+person you specify or the room you specify.  There will be a short pause as
+the system tries to find a path between you and your destination.  If a path
+is found, you will enter `brief' @mode, causing you to see only the room names
+and contents as you automatically walk through each exit in the path.  You are
+automatically returned to your previous @mode upon completion.
+
+--- Ranma
+
+--------------------------
+
+
+Message 97 on *Core-DB-Issues(#350):
+Date:     Sat Aug 28 19:09:33 1993 EDT
+From:     BabyBriar (#2)
+To:       *Core-DB-Issues (#350)
+Subject:  New @edit-option
+
+I've just added a new @edit-option:
+  @edit-option +minimal_parens
+.. will import your code into the Verb Editor with minimal parentheses.  So,
+for example, you won't see things like:
+  x = (("Hi there, " + player.name) + ".  How are you today?");
+.. you will, instead, see:
+  x = "Hi there, " + player.name + ".  How are you today?";
+
+As a default, the old (fully parenthesized) code will be used.
+
+Briar
+
+--------------------------
+
+
+Message 98 on *Core-DB-Issues(#350):
+Date:     Fri Sep  3 16:39:35 1993 EDT
+From:     Satanas (#2670)
+To:       *Core-DB-Issues (#350)
+Subject:  Bug in Generic Detailed Room (#786)
+
+There seems to be a bug in the Generic Detailed Room.  If a player
+attempts a "look <target>", and <target> is invalid (meaning it's not
+an object or a detail or anything, "look" dies with a traceback.
+
+The problem is that #786:look() is returning $nothing to #6:look,
+which doesn't know about this error condition.  Thus, #6:look() tries
+to to call "player:notify_lines($nothing)", with predictable results.
+
+This can be patched up by having "#786:examine_details()" return
+$failed_match instead of $nothing if it fails to match an argument
+string with a detail.
+
+--------------------------
+
+
+Message 99 on *Core-DB-Issues(#350):
+Date:     Sat Sep  4 02:05:04 1993 EDT
+From:     BabyBriar (#2)
+To:       *Bug-Report (#544) and *Core-DB-Issues (#350)
+Subject:  'look at spaz'
+
+I've just fixed $player:look so that it will correctly handle the case that
+you
+  look at spaz
+.. and there is no spaz there.
+
+--------------------------
+
+
+Message 100 on *Core-DB-Issues(#350):
+Date:     Sat Sep  4 14:15:40 1993 EDT
+From:     BabyBriar (#2)
+To:       *Core-DB-Issues (#350)
+Subject:  Minor change.
+
+I've made $player:home a hacker-owned !c property and modified
+$player:@sethome to set the home appropriately.  Send bug reports to me.
+
+--------------------------
+
+
+Message 101 on *Core-DB-Issues(#350):
+Date:     Sat Sep  4 14:16:04 1993 EDT
+From:     BabyBriar (#2)
+To:       *Core-DB-Issues (#350)
+Subject:  Re: Minor change.
+
+>  I've made $player:home a hacker-owned !c property and modified
+
+.. of course, I meant $player.home
+
+--------------------------
+
+
+Message 102 on *Core-DB-Issues(#350):
+Date:     Sun Sep  5 21:36:02 1993 EDT
+From:     Whazzat (#200)
+To:       *Core-DB-Issues (#350)
+Subject:  $Player_DB:Available() Changed
+
+We've made a change to allowable player names.
+Now, when checking the $player_db for existing name uses, we first strip all
+non alphanumeric characters before running the match.  This means that if the
+name "Fred" is in use, the names "Fred!", "Fred.", "Fr  ed", or other such
+differencs, will count as unavailable.
+The main advantage of this is in preventing spoofing by players changing to
+names that are subtly different, like spoofing "Fred" by named yourself to
+"Fred." which small difference may be overlooked when reporting harassment.
+Of course, if you are "Fred", you may still add the aliases, "Fred.", "Fred!",
+etc.
+Incidentally, while it used to be that a player alias containing a space would
+not count as a secure alias, it is now secured with the space stripped.  Also,
+there were a few aliases (not names) which contained no alphanumeric
+characters at all and these aliases are no longer allowed.  We apologize for
+any inconvenience.
+
+--------------------------
+
+
+Message 103 on *Core-DB-Issues(#350):
+Date:     Tue Sep  7 12:32:01 1993 EDT
+From:     BabyBriar (#2)
+To:       *Core-DB-Issues (#350)
+Subject:  eval replaced
+
+I've just replaced $prog:eval with eval*d, the version ported from LambdaMOO.
+
+--------------------------
+
+
+Message 104 on *Core-DB-Issues(#350):
+Date:     Tue Sep  7 17:49:44 1993 EDT
+From:     Blackbriar (#110)
+To:       *Core-DB-Issues (#350), *Wizard-List (#141), and Whazzat (#200)
+Subject:  New $player_db changes.
+
+If I want to @add-alias, for example, Lust! to myself, I see the message:
+  Lust(#96) is already using the alias Lust!.
+.. which I do not believe is correct.  This, though, is a stylistic change.
+What surprises me is the following:
+
+> ;#96.aliases
+  => {"Lust", "Guest", "Guest1"}
+> ;$player_db:find_exact("Lust!")
+  => #96  (Lust)
+
+This, to my way of thinking, is actually WRONG. I don't think that the
+$player_db:find* verbs should be modified to use the 'stripped' player names.
+I believe this because, simply, Lust does not have the name Lust!; e merely
+makes it unavailable. I do not have the name B!l!a!c!k!b!@riar, but by virtue
+of having Blackbriar as my name, nobody else can use that monstrosity. I don't
+think I should come up in a search, however, when someone looks for
+B!l!a!c!k!b!@riar. I'd expect that to come up as a $failed_match in a
+$player_db:find.
+
+Similarly, in the @add-alias above, I'd have expected to see something like:
+  The name Lust! is unavailable for use because it is too similar to Lust
+(#96).
+.. or something like that.
+
+While I'm at it, let me add another, more minor, gripe about @add-alias. The
+name 'Rogue' is in $player_db.stupid_names for entirely personal reasons.
+Let's say that I want to annoy the hell out of Opal and take that name as an
+alias.
+> @addalias Rogue to me
+  Aliases for Blackbriar(#110) are now {"Blackbriar", "Bb", "Seth", "Santa",
+"yduJ2", "Blacky", "Lou_Grant", "Sethaleen", "SIR", "Blbrar", "Seff", "Elvis",
+"BAH", "Heathcliff", "Batman", "yiu", "Phoenix", "Ren", "Blachbriar", "rogue"}
+.. but Rogue is not actually added to my .aliases list because it's not a
+permitted name. (This is a 'bug' in the LambdaCore release as well.)
+
+But I'm going away for another week.  So.
+
+Blackbriar
+
+--------------------------
+
+
+Message 106 on *Core-DB-Issues(#350):
+Date:     Tue Sep  7 18:26:06 1993 EDT
+From:     BabyBriar (#2)
+To:       *Core-DB-Issues (#350)
+Subject:  Modification.
+
+I've just modified
+  $builder:@create
+  $string_utils:literal_object
+to take into account core things like $gopher.note and the like.  So you can
+@create $gopher.note named etc.  This is a JaysHouseMOO port.
+
+--------------------------
+
+
+Message 107 on *Core-DB-Issues(#350):
+Date:     Wed Sep  8 01:52:34 1993 EDT
+From:     Hemlock (#1989)
+To:       *Core-DB-Issues (#350) and *Bug-Report (#544)
+Subject:  login
+
+I've got a gripe.  I can no longer connect with one of my .aliases, but must
+use my .name.
+
+--------------------------
+
+
+Message 108 on *Core-DB-Issues(#350):
+Date:     Wed Sep  8 15:51:08 1993 EDT
+From:     Whazzat (#200)
+To:       Hemlock (#1989), *Core-DB-Issues (#350), and *Bug-Report (#544)
+Subject:  Re: login
+
+>  From:     Hemlock (#1989)
+>  I've got a gripe.  I can no longer connect with one of my
+>  .aliases, but must use my .name.
+
+BabyBriar is going to doing some work on how $player_db stores names and since
+this may cause $player_db:find_exact() to act strangely, sometimes not
+matching at all, we've temporarily gone back to the name-matching system.  We
+figure it's better that you be able to log in with your name only than not at
+all.
+Once this change is finished, we'll go back to alias matching.
+
+--------------------------
+
+
+Message 109 on *Core-DB-Issues(#350):
+Date:     Fri Sep 10 13:22:42 1993 EDT
+From:     CyberFox (#1878)
+To:       *Core-DB-Issues (#350)
+Subject:  Post-summer mail-list EEK!
+
+You know, I would REALLY  like  it if the generic mail  header would say
+something like  this:
+
+Message 47 (of 6000012) on *Stoopid_Mail_Posts
+
+I know  it  would be really easy to look  before  I  leap, but when I
+start @nn'ing, it would be  nice  to  know if I need to flush  some
+messages to avoid spending  my  old age catching  up on mail...
+
+====CF, rattling on about trivial things...
+
+--------------------------
+
+
+Message 110 on *Core-DB-Issues(#350):
+Date:     Sun Sep 12 19:32:31 1993 EDT
+From:     Opal (#72)
+To:       *Core-DB-Issues (#350) and *Bug-Report (#544)
+Subject:  Re: Names and aliases and stuff
+
+My apologies, you cannot change your name, or your aliases or do anything with
+said things.  Just be patient, and allow us to finish fixing it.  I sent
+Blackbriar off to do some minor shopping and errand running in RL and so it'll
+be a little while.
+Soon, I promise. :)
+Opal
+
+--------------------------
+
+
+Message 111 on *Core-DB-Issues(#350):
+Date:     Mon Sep 13 10:12:06 1993 EDT
+From:     BabyBriar (#2)
+To:       *Core-DB-Issues (#350)
+Subject:  New $player_db modifications.
+
+I've just made some modifications to $player_db which should have the
+following effect: If you have, for example, the name Blackbriar, you have
+'reserved' all identifiable variants of that name, such as B!lackbriar,
+Blackbriar!, Black@briar?, and so forth. You have -not- reserved any prefixes
+or suffixes, however, so Black, Briar, BlackbriarJr, MrBlackbriar... all of
+these are fair game for other players to use.
+
+I do not, however, believe that I have fixed all the problems with the system.
+Please report bugs to *Bug-Reports.
+
+Briar
+
+--------------------------
+
+
+Message 112 on *Core-DB-Issues(#350):
+Date:     Tue Sep 14 00:57:53 1993 EDT
+From:     CyberFox (#1878)
+To:       *Core-DB-Issues (#350) and *Bug-Report (#544)
+Subject:  Re: New message?
+
+Hey, I *liked* the new messages.  So did the limited cross-section of
+OpalMOO residents I happen to be coexisting with at the moment.  As a
+little compromise, I (and a few other people -- or maybe a lot, I dunno)
+would kinda like a .connect_msg and a .disconnect_msg so that we can
+broadcast unique messages to those interested in our comings and goings.
+Presumably this would eliminate the redundancy that bores poor Mickey so
+(and let me tell you, going back to "connected"/"disconnected" has really
+brought back all the fun I always associated with login watching). As
+long as it's not too spammy to call somebody's property when he/she connects,
+I think  it  would  be neat...
+
+
+Just suggesting...
+====CF.
+
+--------------------------
+
+
+Message 113 on *Core-DB-Issues(#350):
+Date:     Tue Sep 14 13:13:18 1993 EDT
+From:     Opal (#72)
+To:       *Core-DB-Issues (#350), *Theme-Issues (#120), and *Wizard-List (#141)
+Subject:  RE: OpalMOO size
+
+I've just finished speaking with academic computing here at BMC, and they've
+told us, out of the generosity of their hearts, that we may have 30M of space,
+and that's it.
+Problem is we're already up to 27M.
+In other words, folks, we're gonna be doing some serious scrunching for a
+little while until we kill some things and clean up a little bit.
+Please bear with us if we now turn down prog bits and increased quota for a
+while.
+Thanks.
+
+Opal
+
+--------------------------
+
+
+Message 114 on *Core-DB-Issues(#350):
+Date:     Tue Sep 14 13:17:52 1993 EDT
+From:     Mickey (#2587)
+To:       CyberFox (#1878) and *Core-DB-Issues (#350)
+Subject:  Re: New message?
+
+My message was objecting mainly to the grammatical form, not the content.
+I mostly just want it to read well in a sentence!
+
+I have small secondary objection to the fact that unlike LambdaMOO, this MOO
+isn't all under one roof so mentioning "leaving the building" is misleading.
+
+But within the limits of good grammar and themeliness, I have no objection to
+something more interesting than "connected" and "disconnected".
+Here are some things that would be fine for me:
+ -----Connected--------------  -----Disconnected--------------
+ is back in town               has left town
+ is nosing around nearby       has moved on for other parts
+ showed up in town             left town
+
+Note that the first of the two above need to be made to be "are" or "have" in
+the case that more than one name will be inserted in the string.  The login
+watcher could trivially arrange for this.
+
+But I agree with you that the simplest solution is to let there be a verb
+me:login_watcher which if present is called with a list of the players who
+connected, and a list of those who disconnected, and gets to print out a
+message about them.  This would presumably override the .login_watcher option.
+ --Mickey
+
+--------------------------
+
+
+Message 115 on *Core-DB-Issues(#350):
+Date:     Sat Sep 18 16:09:58 1993 EDT
+From:     Wilson (#738)
+To:       *Core-DB-Issues (#350)
+Subject:  only 30Mb?
+
+I guess it's time to removed ALL mail again?
+
+And come to think of it, any redundant object that exist.  I have got myself
+down to my minimum of ownership.
+- wilson
+
+--------------------------
+
+
+

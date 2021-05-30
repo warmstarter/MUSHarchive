@@ -1,0 +1,25 @@
+@create Courtroom
+@link Courtroom=#7414
+@lock Courtroom==*[owner(me)]
+@set Courtroom=HAVEN
+@set Courtroom=OPAQUE
+@set Courtroom=STICKY
+@set Courtroom=WIZARD
+&DISMISS-1 Courtroom=$dism:@remit [num(me)]=Judge %N says, "This court is adjourned."
+&ORDER-1 Courtroom=$or1:@remit [num(me)]=Judge %N says "ORDER! ORDER!"
+&FINE1 Courtroom=$fine *:@remit [num(me)]=Judge %N says, "I find %0 in contempt of court!"
+&BEGIN1 Courtroom=$be1:@remit [num(me)]=The Judge, %N, bangs his gavel twice and says, "This courtroom will now come to order."
+@IDESCRIBE Courtroom=[ansi(cr,----)] [edit(name(zone(me)),Zone,)][ansi(cr,[repeat(-,[sub(73,[sub([strlen(name(zone(me)))],5)])])])]%r[ansi(hg,[eval(me,desc_store)])]%r%r[ansi(g,-)] [ansi(cr,People)] [ansi(g,-)] [squish([iter(lcon(me),switch(type(##),PLAYER,switch(idle(##),-1,,switch(hasflag(##,Dark),0,edit(name(##),Console,) [switch(hasflag(##,IC),1,(IC))] [switch(hasattr(##,CAPTION),1,{Brandishing: [get(##/CAPTION)]})] [ansi(g,-)]))))])]%r[ansi(g,-)] [ansi(cr,Objects)] [ansi(g,-)] [squish([iter(lcon(me),switch(type(##),THING,switch(hasflag(##,Dark),0,edit(name(##),Console,) [switch(hasflag(##,IC),1,(IC))] [switch(hasattr(##,CAPTION),1,{Brandishing: [get(##/CAPTION)]})] [ansi(g,-)])))])][iter(v(Installed),[s(%r)][ansi(cr,There is a)] [ansi(g,edit(##,_,space(1)))] [ansi(cr,here.)])]
+@DESCRIBE Courtroom=This is a court room.
+&DESC_STORE Courtroom=This is a courtroom for judging accused players of something. You see a judge's bench at the center of the back wall, jury seats at the judge's left, and a transcript recorder to the judge's right. In front of the judge's bench is the plantiff's and the defendant's seats. Behind them are about 200 other chairs so relatives and friends can watch the trial. You also see a couple of clear boxes, obviously meant for Sub-space TV broadcasts.
+@EALIAS Courtroom=enter courtroom;judge;jury
+@LALIAS Courtroom=o;ou;out;leave;exit;dismiss
+@LISTEN Courtroom=*
+@PREFIX Courtroom=From the Courtroom,
+&AUDIO-1 Courtroom=$au on:@force [owner(me)]=@set [num(me)]=audible
+&AUDIO-2 Courtroom=$au off:@force [owner(me)]=@set [num(me)]=!audible
+&CLOAK-1 Courtroom=$rcloak:@force [owner(me)]=@set [num(me)]=dark
+&CLOAK-2 Courtroom=$dcloak:@force [owner(me)]=@set [num(me)]=!dark
+&LOOKING Courtroom=$+lo:@force [num(me)]=look
+&DO-1 Courtroom=$do *:@force [num(me)]=%0
+@INFILTER Courtroom={* has arrived.},{* has left.}

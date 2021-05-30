@@ -1,0 +1,331 @@
+##########################################################################
+# 
+# Deity commands
+# By Dan
+#
+##########################################################################
+
+&CMD-MANA-TRANSFER #58=$@mana/transfer * to *:
+
+# A command to transfer mana from one god to another.
+# %q9 is checks
+
+	think setq(9,
+		[hastag(*%1,deity)]
+		[isnum(%0)]
+		[gt(%0,0)]
+		[gte(getaccount(%#,mana),%0)]);
+
+# The switch gives out error messages
+
+	@switch %q9=
+		0???,@pemit %#=%1 is not a god. They have no need for mana.,
+		?0??,@pemit %#=%0 is not a valid number.,
+		??0?,@pemit %#=You can't transfer negitive mana!,
+		???0,@pemit %#=You don't have that much mana!,
+
+# If it works, use @account/transfer and @pemit messages
+
+		1111,{@pemit %#=Transfering %0 mana to %1...;
+		@pemit *%1=%0 transfered %0 mana to you.;
+		@account/transfer %0 mana from %# to *%1;
+		@pemit %#=Done.}
+
+-
+
+&CMD-MANA-DRAIN #58=$@mana/drain *=*:
+
+# A command for a god to drain their own mana for any reason.
+# Intended use: a series of poses that would cost mana, but doesn't
+
+	@switch 
+		[gte(getaccount(%#,mana),%0)]
+		[gte(%0,0)]
+		[isnum(%0)]=
+
+# Error messages
+
+		0??, @pemit %#=You don't have that much mana.,
+		?0?, @pemit %#=You can't give yourself mana this way!,
+		??0, @pemit %#=That isn't a number.,
+
+# If it works, Drain the mana form the account and tell the god.
+
+		111,{@account/adjust *%#/mana=-%0;
+			@pemit %#=%0 mana drained.;
+			@bb/post Staff/Mana Spent=%cX%cw%ch[name(%#)] 
+                        spent%b%0%b
+			mana for the following reason:%cn%r%1}
+
+-
+
+&CMD-@MANA #58=$@mana:
+
+# A command to show the mana you have.
+
+	@pemit %#=You have [getaccount(%#,mana)] mana.
+
+-
+#-----------------------------------------#
+#  The old @worshippers * command broke   #
+#  buffer limits for Zutiv.  This one     #
+#  can list the players that worship *,   #
+#  but the symbols for various facts      #
+#  about each player such as if they're a #
+#  priest(ess) or not won't fit because   #
+#  of buffer limits.                      #
+#                                         #
+# Carrie                              2000#
+#-----------------------------------------#
+
+
+
+&cmd-worshippers #58 = $@worshippers *:
+        think setq(0, name(*%0));
+        think setq(1, search(eplayer=
+                        and(not(hasflag(##, wizard)),
+                        match(get(##/PATRON-DEITY),
+                                %q0))));
+        think setq(2, sort(iter(%q1, [name(##)]
+		[get(##/worshipper-symbols)], %b, |),a,|));
+        @switch hastag(*%0, deity)=
+                1,
+                {@pemit %# = {%cX%cc%ch%q0's Worshippers:%cn%r
+                 [repeat(%cX%cc-, 78)]%r
+                 [columns(%q2, 19, |)]%r
+                 [repeat(%cX%cc-, 78)]%r
+                    P = priest(ess)%b%b%b%b%b%b
+                    * = not chargened yet%b%b%b%b%b%b
+                    R = on the roster%b%b%b%b%b%b}}
+-
+
+
+&CMD-MANA-IMBUE #58=$@mana/imbue * into *:
+
+# A command to transfer mana from a god to an object.
+# %q1 is the dbref of the object
+
+	think setq(1,locate(%#,%1,inhTV));
+
+# %q9 is checks
+
+        think setq(9,
+                [match(type(%q1),THING)]
+                [isnum(%0)]
+                [gt(%0,0)]
+                [gte(getaccount(%#,mana),%0)]);
+
+# The switch gives out error messages
+
+        @switch %q9=
+                0???,@pemit %#=%1 is not an object.  You can not imbue any
+		mana into it.,
+                ?0??,@pemit %#=%0 is not a valid number.,
+                ??0?,@pemit %#=You can't imbue negitive mana!,
+                ???0,@pemit %#=You don't have that much mana!,
+
+# If it works, use @account/transfer and @pemit messages  
+
+                1111,{@pemit %#=Transfering %0 mana to %1...;
+	                @account/transfer %0 mana from %# to %q1;
+        	        @pemit %#=Done.;
+			@bb/post Staff/Mana Imbue=[name(%#)] imbued 
+			%0 mana into [name(%q1)](%q1).}
+
+-
+
+&CMD-MANA-OFFERINGS #58=$@mana/offerings:
+
+# A command to list all objects that were offered to %# and not claimed.
+
+		@pemit %#=Offerings to you:%r
+
+# Run through the list...
+
+		[iter(lcon(#4702),
+
+# Check who it was offered to.
+
+		[switch(match(get(##/OFFERED-TO),[name(%#)]),
+
+# It it was %#, return the name of the object.
+
+			1,[name(##)]%b)])]%r
+			%rUse @mana/claim <object> to bring one of these 
+			objects to you.
+
+-
+
+&CMD-MANA-OFFERED #58=$@mana/offered:
+
+	@force %#=@mana/offerings
+
+-
+
+&CMD-MANA-OFFERINGS-GOD #58=$@mana/offerings *:
+
+# A command to list all objects that were offered to %0 and not claimed.
+
+		@pemit %#=Offerings to %0:%r
+
+# Run through the list...
+
+		[iter(lcon(#4702),
+
+# Check who it was offered to.  There is no error checking because if you
+# specify a player or object, there willbe nothiing offered to them.
+
+		[switch(match(get(##/OFFERED-TO),[name(*%0)]),
+
+# If it was %0, return the name of the object.
+
+		1,[name(##)]%b)])]%r
+		%rIf you want to steal an item from %0, use @mana/steal 
+		<object> from %0.
+
+-
+
+&CMD-MANA-RETRIEVE #58=$@mana/retrieve *:
+
+# A command for a god to retrieve an object offered to them.
+
+	think setq(0, filter(filter-offered,lcon(#4702),|));
+	think setq(1, locate(#4702,%0,i));
+	think setq(2,elements(%q0,match(%q0,%q1,|),|));
+	@switch isdbref(%q2)=
+		1,{@tel %q2=%#;
+			@tag %q2=!offering;
+			@pemit %#=You retrieve %0.},
+		0,{@pemit %#=I don't see a %0 offered to you.}
+
+-
+
+&CMD-MANA-CLAIM #58=$@mana/claim *:
+
+	@force %#=@mana/retrieve %0
+
+-
+
+&FILTER-OFFERED #58=
+
+# A filter to check if %0 was offered to %#
+
+	[and(
+		hastag(%0,offering),
+		match(get(%0/OFFERED-TO),[name(%#)])
+	)]
+
+
+-
+
+# Not used yet
+
+###&CMD-MANA-TELEPORT #58=$@mana/tel *:
+
+# A command for a god to teleport around.  Mana cost is affected by where
+# the destination is.  Basically this is the @go command with a mana cost
+
+# If <location> is a #dbref, it teleports you into the object.
+# If <location> is a player name, it teleports you into the same room as
+# the specified player.
+# In all other cases, @go searches the names of all the rooms in the db
+# and if it finds a unique match, it teleports you there.
+#
+
+  think setq(0, pmatch(%0)); 
+
+  @switch 1 = 
+    isdbref(%0), {
+      @switch or(hastype(%0, thing), hastype(%0, room)) = 1, {
+        @switch hasflag(%0, unfindable) = 0, {
+          @trig me/trig-mana-teleport=%#, %0
+        }, {
+          @pemit %# = That object is unfindable.
+        }
+      }, {
+        @pemit %# = That isn't a room or thing.
+      }
+    },
+    isdbref(%q0), {
+      @switch 1 = 
+        hasflag(%q0, unfindable), {
+          @pemit %# = That person is unfindable.
+        },
+        hasflag(loc(%q0), unfindable), {
+          @pemit %# = That person is somewhere unfindable.
+        }, {
+          @trig me/trig-mana-teleport= %#, loc(%q0)
+        }
+    }, {
+      @switch %q0 = 
+        #-2*, {
+          @pemit %# = '%0' matches more than one player name.
+        }, 
+        #-1 *, {
+          think setq(0, search(eroom=strmatch(name(##), *%0*)) ); 
+
+          @switch words(%q0) = 
+            0, {
+              @pemit %# = No room matches '%0'.
+            }, 
+            1, {
+              @switch hasflag(%q0, unfindable) = 1, {
+                @pemit %# = The only matching room is unfindable.
+              }, {
+                @trig me/trig-mana-teleport=%#, %q0
+              }
+            }, {
+              @pemit %# = More than one room matches '%0'.
+            }
+        }, {
+          @pemit %# = Hmmm. %%q0 = %q0
+        }
+    }
+
+-
+
+# Not used yet
+
+###&TRIG-MANA-TELEPORT #58=
+
+# A trig to check for the right amount of mana, then if the god has enough,
+# tel them there.
+# %0 is the player
+# %1 is the destination
+
+	think setq(0,
+		[hastag(%1,ooc)]
+		[hastag(%1,public)]
+		[hastag(%1,city)]
+		[hastag(%1,temple)]
+		[match(default(%1/temple-for,Noone),[name(%0)])]
+		[hastag(%1,heaven)]
+	);
+	think setq(1,0);
+	@switch/all %q0=
+		0?????,{@pemit %#=Gods can't teleport to an OOC area.},
+		11????,{think setq(1,add([u(mana-tel-public)],%q1))},
+		1?1???,{think setq(1,add([u(mana-tel-city)],%q1))},
+		1?0???,{think setq(1,add([u(mana-tel-noncity)],%q1))},
+		1??11?,{think setq(1,add([u(mana-tel-owntemple)],%q1))},
+		1??10?,{think setq(1,add([u(mana-tel-othertemple)],%q1))},
+		1????1,{think setq(1,add([u(mana-tel-heaven)],%q1))};
+	@switch [hastag(%0,check-mana)]=
+		0,{@pemit %0=%q1 mana drained.;
+			@account/adjust %0/mana=-%q1;
+			@tel %0=%1},
+		1,{think setq(3,%0);
+			@program %0= me/prog-mana-tel:It will take %q1 mana 
+		to teleport to [name(%1)].  Are you sure you want to do this?}
+
+-
+
+# Not used yet
+
+###&PROG-MANA-TEL #58=
+
+	@switch %0=
+		y*,{@pemit %q3=%q1 mana drained.;
+			@account/adjust %q3/mana=-%q1;
+			@tel %q3=%1},
+		{@pemit %q3=Teleport canceled.}

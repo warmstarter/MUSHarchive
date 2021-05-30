@@ -1,0 +1,2183 @@
+#############################################################################
+#  C O M B A T - L I T E . M U X 
+#############################################################################
+#12 is the Combat code object
+#13 is the Combat database -- stores information about combats
+
+@@  Combat Lite: Melee and Functions -- a combat system for FiranMUX
+    Copyright (C) 1998 Adam Dray <adam@legendary.org>
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+-
+
+
+
+&RCS-Combat-Lite #12 = 
+    @@ $Id: combat.mux,v 1.8 2000/09/14 14:50:13 theo Exp $
+-
+
+
+
+#----------------------------------------
+# DEPENDENCIES:
+#----------------------------------------
+# 
+#   * skill() and attribute() -- Soul systems
+#   * goodname()
+#   * Tag system, including settag()
+#   * Proper setup of weapon objects
+#   * @error
+#   * Damage system
+#   * Immobile flag
+#   * take_energy() and account system functions -- ac_*()
+#   * successes() function and modified Storyteller dice system
+#   * Resource request and return functions res_*()
+# 
+
+#----------------------------------------
+# DIAGNOSTICS:
+#----------------------------------------
+# 
+#   * combatstatus tag allows you to see your current damage/energy status
+#   * combatstats tag allows you to see dice rolls and successes
+#   * puppet flag lets you see what was triggered on you
+#   
+
+#----------------------------------------
+# TAGS USED:
+#----------------------------------------
+#   * combatstatus
+#   * combatstats
+#   * free_energy
+#   * invulnerable
+#   * combat
+#   * engaged
+#   * harmless
+#   * testing
+#   * unconscious
+#   * dead
+#   * ooc
+#   * broken
+#
+
+
+
+#----------------------------------------
+# The Combat code object serves as its own semaphore object.
+# Semaphores are used to ensure that every combat commands happens in 
+# order, and none run concurrently.
+# 
+@startup #12 = 
+  @drain me; 
+  @notify me
+-
+
+
+
+#----------------------------------------
+# A good uselock keeps people from fighting in Uf's dream world, 
+# in OOC rooms, and when they're dead.
+#
+&is-testing #12 = 
+  [hastag(%#, testing)]
+-
+&is-conscious #12 = 
+  [not(hastag(%#, shock))]
+-
+&is-alive #12 = 
+  [not(hastag(%#, dead))]
+-
+&is-ic #12 = 
+  [not(hastag(%L/ooc))]
+-
+@lock/use #12 = 
+  is-testing/1 | (is-conscious/1 & is-alive/1 & is-ic/1)
+-
+
+
+#----------------------------------------
+# @COMBAT
+# 
+# Show the player a report telling him all about his combat status.
+# 
+#----------------------------------------
+&cmd-combat-me #12 = $@combat: 
+#----------------------------------------
+  @pemit %# = ulocal(ul-combat-report, %#)
+-
+
+#----------------------------------------
+# @COMBAT player
+# 
+# Show the staff member a report telling her all about a player's combat status.
+# 
+#----------------------------------------
+&cmd-combat #12 = $@combat *: 
+#----------------------------------------
+  think setq(0, locate(%#, %0, *P)); 
+  think setq(0, ifelse(isdbref(%q0), %q0, pmatch(%0))); 
+
+  @switch or(orflags(%#, WwZ), strmatch(%#, %q0)) = 1, {
+    @pemit %# = ulocal(ul-combat-report, %q0); 
+  }, {
+    @pemit %# = Only staff members can see the combat stats of other players.
+  }
+-
+&ul-combat-report #12 = 
+  %cb%ch[center(COMBAT REPORT FOR [ucstr(goodname(%0))], 75, -)]%cn
+  [combatdesc(%0)]%r
+  %r
+  %ch%cyENERGY%Cn [getaccount(%0,energy)] %b 
+  %ch%cyRESERVES%Cn [getaccount(%0,energy reserves)]%r
+  %r
+  [u(u-damage-report, %0)]%r
+  %r
+  [ulocal(ul-delay-report, %0)]%r
+  %cb%ch[repeat(-, 75)]%cn
+-
+
+
+
+
+#----------------------------------------
+# @COMBAT/ERROR enactor = obj/attribute, command entered, diagnostic info
+# 
+# Gives the enactor an error message and notifies the code's author about
+# the error.
+# 
+#----------------------------------------
+&cmd-combat/error #12 = $@combat/error *=*,*,*: 
+#----------------------------------------
+  @pemit %0 = 
+    COMBAT: An unexpected error occurred when you entered: [trim(%2)]%r
+    The staff has been notified of the error.; 
+
+  @switch hasflag(owner(me), connected) = 1, {
+    @pemit owner(me) = %ch%cr
+      COMBAT ERROR in [trim(%1)]%r
+      %b [trim(%0)] typed '[trim(%2)]'%r
+      %b Diagnostic information: [trim(%3)]
+      %cn
+  }, {
+    @mail/quick [owner(me)]/BUG: [trim(%1)] = 
+      %b [trim(%0)] typed '[trim(%2)]'%r
+      %b Diagnostic information: [trim(%3)]
+  }
+-
+
+#----------------------------------------
+# WIELD weapon
+# 
+# Make a weapon (or any object, really) your currently wielded weapon.
+# Objects must be wielded before they can be used in combat.
+# 
+#----------------------------------------
+&cmd-wield #12 = $wield *: 
+#----------------------------------------
+  @wait me = {
+
+    think setq(0, locate(%#, %0, inT)); 
+
+    think setq(9, 
+      [isdbref(%q0)]
+      [not(u(u-is-engaged-to-someone, %#))]
+      [not(u(u-is-engaged-by-someone, %#))]
+      [not(ulocal(ul-is-wielding-a-weapon, %#))]
+      [not(hastag(%q0, worn))]
+      [strmatch(loc(%q0), %#)]
+      [not(hastag(%q0, broken))]
+      [not(hastag(%#,captured))]
+    ); 
+
+    @select %q9 = 
+
+#   NOMINAL CASE: the player can wield the weapon
+
+    11111111, {
+      &combat-wielded %# = %q0; 
+      @remit %L = 
+        [capstr(goodname(%#))] [udefault(%q0/owield, wields %p [goodname(%q0)].)]; 
+
+#     lock the weapon so they can't drop it or give it
+      @lock/drop %q0 = =#0; 
+      @lock/give %q0 = =#0; 
+      @dfail %q0 = You can't drop that until you 'unwield' your weapon.; 
+      @gfail %q0 = You can't give that to someone else until you 'unwield' it.; 
+    }, 
+
+
+#   can't find that object
+
+    0???????, {
+      @error %# = locate %q0
+    }, 
+
+#   is engaged to someone in combat 
+
+    ?0??????, {
+      @pemit %# = You can't wield a weapon until you disengage from combat!; 
+    }, 
+
+#   is engaged by someone in combat 
+
+    ??0?????, {
+      @pemit %# = You can't wield a weapon until you disengage from combat!; 
+    }, 
+
+#   already wielding something else
+
+    ???0????, {
+      think setq(1, goodname(u(u-weapon-wielded, %#))); 
+      @pemit %# = You're already wielding [art(%q1)] %q1.  
+                  You'll have to unwield that first.
+    }, 
+
+#   it's worn
+
+    ????0???, {
+      @pemit %# = You can't wield something that you're wearing.
+    }, 
+
+#   not holding that, but it's in the room
+
+    ?????0??, {
+      @pemit %# = You'll have to pick that up first.
+    }, 
+
+    ??????0?, {
+      @pemit %# = Your [goodname(%q0)] is broken.
+    }, 
+
+    ???????0, {
+      @pemit %# = You've been captured.
+    },
+
+#   ERROR -- unexpected @switch condition
+
+    *, {
+      @combat/error %# = #12/cmd-wield, wield %0, Q9=%q9
+    }; 
+
+    @wait 0=@notify me
+  }
+-
+
+# Wield stub
+# 
+&cmd-wield-stub #12 = $wield: 
+  @pemit %# = 
+    Type 'wield' followed by the name of the weapon you want to hold. 
+    If you want to use your fists, don't wield anything (unwield everything).
+-
+
+
+
+#----------------------------------------
+# UNWIELD
+# 
+# Unwield the currently wielded weapon.
+# 
+#----------------------------------------
+&cmd-unwield #12 = $unwield: 
+#----------------------------------------
+  @wait me = {
+    think setq(0, u(u-weapon-wielded, %#)); 
+
+    think setq(9, 
+      [not(strmatch(%q0, v(fists)))]
+    );
+
+    @select %q9 = 
+  
+
+#   NOMINAL CASE: player unwields weapon currently wielded
+
+    1, {
+#     unlock it so they can drop it or give it again, if they desire
+#     A mod here to unaim a weapon that is wielded.
+      @fo %#=unaim;
+      @unlock/drop [u(u-weapon-wielded, %#)]; 
+      @unlock/give [u(u-weapon-wielded, %#)]; 
+      @dfail [u(u-weapon-wielded, %#)]; 
+      @gfail [u(u-weapon-wielded, %#)]; 
+
+      &combat-wielded %# = u(fists); 
+      @remit %L = 
+        [capstr(goodname(%#))] [udefault(%q0/ounwield, unwields %p [goodname(%q0)].)]; 
+    }, 
+
+
+#   not wielding a weapon
+
+    0, {
+      @pemit %# = You're not wielding anything but your fists!
+    }, 
+
+
+#   ERROR -- unexpected @switch condition
+
+    *, {
+      @combat/error %# = #12/cmd-unwield, unwield, Q9=%q9 / Q0=%q0
+    }; 
+
+
+    @wait 0=@notify me
+  }; 
+-
+&cmd-unwield-weapon #12 = $unwield *: 
+  @force %# = unwield
+-
+
+
+#----------------------------------------
+# ENGAGE target
+# 
+# Attempt to engage a target in combat.
+# 
+#----------------------------------------
+&cmd-engage #12 = $engage *: 
+#----------------------------------------
+  @wait me = {
+    think setq(0, locate(%#, %0, nmP)); 
+
+    think setq(9, 
+      [isdbref(%q0)]
+      [u(u-can-mount-engage, %#, %q0)]
+      [not(u(u-is-engaged-to-someone, %#))]
+      [not(u(u-is-engaged-by-someone, %#))]
+      [u(u-is-valid-combatant, %q0)]
+      [u(u-can-engage-now, %#)]
+      [u(u-has-engage-energy, %#)]
+      [not(hasflag(%#, DARK))]
+      [not(hasflag(%q0, DARK))]
+      [not(hastag(%#, captured))]
+    ); 
+
+    @select %q9 = 
+
+#   NOMINAL CASE: try to engage
+    1111111111, {
+
+#     timestamp the engager
+      &last-combat %# = secs(); 
+
+#     clear any aims
+      think ulocal(ul-clear-aims, %#); 
+
+#     roll some dice (automatic engagement if victim is unaware)
+      think setq(6, u(u-engage-success, %#, %q0)); 
+      think setq(1, switch(aware(%q0), 0, BONUS, u(u-engage-score, %q6))); 
+
+      @pemit %# = switch(hastag(%#, combatstats), 1, 
+                         COMBAT: %q1 (%q6 successes) for engagement); 
+      @pemit %# = switch(hastag(%#, combatstatus), 1, combatstatus(%#)); 
+
+      @remit %L = u(u-msg-engage-%q1, %#, %q0); 
+      think ac_adjust(%#, energy, -[u(u-energy-cost-engage-%q1)]); 
+
+
+#     Trigger the victim's AEngage routine, and pass it useful information
+
+      @pemit %q0 = switch(hasflag(%q0, puppet), 1, 
+        {Triggered your AEngage with %r
+                 %%0 = %# -- attacker's dbref %r
+                 %%1 = [u(u-weapon-wielded, %#)] -- dbref of attacker's weapon %r
+                 %%2 = %q1 -- BONUS, SUCCESS, FAILURE, or BOTCH}); 
+      @trigger %q0/AEngage = %#, u(u-weapon-wielded, %#), %q1; 
+
+
+#     set %q2 to %# (engager) if a bonus or success (otherwise, set it to #-1)
+#     set %q0 to %q0 (engagee) if a bonus or success (otherwise, set it to #-1)
+#     ...using this "no-op" style with #-1 prevents a @switch
+
+      think setq(2, switch(%q1, BONUS, %#, SUCCESS, %#, #-1)); 
+      think setq(0, switch(%q1, BONUS, %q0, SUCCESS, %q0, #-1)); 
+
+#     timestamp the engagee if the engagement was successful
+      &last-combat %q0 = secs(); 
+
+      &combat-check %q2 = [time()] -- engaged [name(%q0)] (%q0); 
+      &combat-check %q0 = [time()] -- engaged by %n (%#); 
+
+      &combat-engaged-to %q2= trim(setunion(get(%q2/combat-engaged-to), %q0)); 
+      &combat-engaged-by %q0= trim(setunion(get(%q0/combat-engaged-by), %q2)); 
+
+#     clear the engager's and engagee's immobile flag and engaged tag
+      think res_request(engagedby-%q2, immobile, %q0); 
+      think res_request(engagedto-%q0, immobile, %q2); 
+      think res_request(engagedby-%q2, engaged, %q0); 
+      think res_request(engagedto-%q0, engaged, %q2); 
+    }, 
+
+
+#   can't find the victim
+    0?????????, {
+      @error %# = locate %q0
+    }, 
+
+#   enactor cannot engage because of flying mount rules
+    ?0????????, {@@ %q0 and %# are subject to flying mount rules @@},
+
+#   enactor is already engaged TO someone
+    ??0???????, {
+#     timestamp them
+      &last-combat %# = secs(); 
+
+#     clear any aims
+      think ulocal(ul-clear-aims, %#); 
+
+      @pemit %# = You must disengage [goodname(u(u-engaged-to, %#))] before 
+                  you engage someone else.
+    }, 
+
+#   enactor is already engaged BY someone
+    ???0??????, {
+#     timestamp them
+      &last-combat %# = secs(); 
+
+#     clear any aims
+      think ulocal(ul-clear-aims, %#); 
+
+      @pemit %# = You must disengage [goodname(u(u-engaged-by, %#))] before 
+                  you engage someone.
+    }, 
+
+#   not allowed to engage that target
+    ????0?????, {
+      @pemit %# = You're not allowed to engage [goodname(%q0)].
+    }, 
+
+#   not enough time has passed to engage yet
+    ?????0????, {
+      @pemit %# = 
+        You must wait another [sub(u(u-time-till-engage, %#), secs())] seconds 
+        before you are allowed to try to engage someone.
+    }, 
+
+#   not enough energy
+    ??????0???, {
+      @pemit %# = You don't have enough energy to engage [goodname(%q0)].
+    }, 
+
+#   enactor is dark
+    ???????0??, {
+#     timestamp them
+      &last-combat %# = secs(); 
+
+#     clear any aims
+      think ulocal(ul-clear-aims, %#); 
+
+      @pemit %# = You can't engage someone in combat when you're hiding!; 
+      @force %# = unhide; 
+      @remit %L = %n tries to ambush [name(%q0)] but fumbles the attempt!; 
+    }, 
+
+#   victim is dark -- pretend they don't see them
+    ????????0?, {
+      @error %# = locate #-1
+    }, 
+
+#   enaco.. enactor s.. is captured..
+    ?????????0, {
+      @pemit %#=You're captured.  You can't engage.
+    }, 
+
+#   ERROR
+    *, {
+      @combat/error %# = #12/cmd-engage, engage %0, Q9=%q9
+    }; 
+
+    @wait 0=@notify me
+  }
+-
+
+# Engage stub
+#
+&cmd-engage-stub #12 = $engage: 
+  @pemit %# = 
+    Type 'engage' followed by the name of the person or creature you want to 
+    get into combat with.
+-
+
+
+#----------------------------------------
+# DISENGAGE player
+# 
+# Attempt to disengage a currently-engaged target.
+# You might either be engaging the player, or be engaged by the player.
+# 
+#----------------------------------------
+&cmd-disengage #12 = $disengage *: 
+#----------------------------------------
+  @wait me = {
+
+    think setq(0, ulocal(ul-match-engaged, %#, %0)); 
+    think ## 1 disengage %0 Q0=%q0 Q9=%q9 ##; 
+
+    think setq(0, ifelse(isdbref(%q0), %q0, locate(%#, %0, *P))); 
+    think setq(9, 
+      [isdbref(%q0)]
+      [strmatch(%L, loc(%q0))]
+      [u(u-has-disengage-energy, %#)]
+      [u(u-is-engaged-to, %#, %q0)]
+      [u(u-is-engaged-by, %#, %q0)]
+      [u(u-can-disengage-now, %#)]
+    ); 
+    think ## 2 disengage %0 Q0=%q0 Q9=%q9 ##; 
+
+    @select %q9 = 
+
+#   NOMINAL CASE #1: engaged TO the player (passive disengage)
+
+    11?10?, {
+#     timestamp them
+####      &last-combat %# = secs(); 
+#### not necessary. Passive actions should not timestamp!
+
+#     clear any aims
+      think ulocal(ul-clear-aims, %#); 
+
+      &combat-engaged-to %#  = trim(setdiff(get(%#/combat-engaged-to), %q0)); 
+      &combat-engaged-by %q0 = trim(setdiff(get(%q0/combat-engaged-by), %#)); 
+
+      @remit %L = %ch%cy
+        COMBAT: [capstr(goodname(%#))] disengages [goodname(%q0)], 
+                  halting %p attack.%cn; 
+
+
+#     Trigger the victim's ADisengage routine, and pass it useful information
+
+      @pemit %q0 = switch(hasflag(%q0, puppet), 1, 
+        {Triggered your ADisengage with %r
+                 %%0 = %# -- attacker's dbref %r
+                 %%1 = [u(u-weapon-wielded, %#)] -- dbref of attacker's weapon %r
+                 %%2 = PASSIVE -- BONUS, SUCCESS, FAILURE, BOTCH, or PASSIVE %r}); 
+      @trigger %q0/ADisengage = %#, u(u-weapon-wielded, %#), PASSIVE; 
+
+      &combat-check %#  = [time()] -- passively disengaged [name(%q0)] (%q0).; 
+      &combat-check %q0 = [time()] -- passively disengaged by %n (%#); 
+
+#     Clear the disengager's and disengagee's immobile flag and engaged tag
+      think res_return(engagedto-%q0, immobile, %#); 
+      think res_return(engagedto-%q0, engaged,  %#); 
+      think res_return(engagedby-%#, immobile, %q0); 
+      think res_return(engagedby-%#, engaged,  %q0); 
+    }, 
+
+
+#   NOMINAL CASE #2: engaged BY the player (active disengage) [111011]
+#   NOMINAL CASE #3: engaged TO & BY the player (active disengage) [111111]
+#     (both cases assume that the enforced waiting period has expired)
+
+    111?11, {
+#     timestamp them
+      &last-combat %# = secs(); 
+
+#     clear any aims
+      think ulocal(ul-clear-aims, %#); 
+
+#     roll some dice
+      think setq(6, u(u-disengage-success, %#, %q0)); 
+      think setq(1, u(u-disengage-score, %q6)); 
+
+      @pemit %# = switch(hastag(%#, combatstats), 1, 
+                         COMBAT: %q1 (%q6 successes) for disengagement); 
+      @pemit %# = switch(hastag(%#, combatstatus), 1, combatstatus(%#)); 
+
+      @remit %L = u(u-msg-disengage-%q1, %#, %q0); 
+      think take_energy(%#, u(u-energy-cost-disengage-%q1), both, e);
+
+#     Trigger the victim's ADisengage routine, and pass it useful information
+      @pemit %q0 = switch(hasflag(%q0, puppet), 1, 
+        {Triggered your ADisengage with %r
+                 %%0 = %# -- attacker's dbref %r
+                 %%1 = [u(u-weapon-wielded, %#)] -- dbref of attacker's weapon %r
+                 %%2 = %q1 -- BONUS, SUCCESS, FAILURE, BOTCH, or PASSIVE %r}); 
+      @trigger %q0/ADisengage = %#, u(u-weapon-wielded, %#), %q1; 
+
+
+#     set %q0 to %q0 (engagee) if a bonus or success (otherwise, set it to #-1)
+#     set %q2 to %# (engager) if a bonus or success (otherwise, set it to #-1)
+#     ...using this "no-op" style with #-1 prevents a @switch
+
+#     %q2 actively disengaged %q0
+
+
+      think setq(0, switch(%q1, BONUS, %q0, SUCCESS, %q0, #-1)); 
+      think setq(2, switch(%q1, BONUS, %#,  SUCCESS, %#,  #-1)); 
+
+#     time stamp the person disengaged if successful
+      &last-combat %q0 = secs(); 
+
+      &combat-check %q0  = [time()] -- actively disengaged by [name(%q2)] (%q2).; 
+      &combat-check %q2 = [time()] -- actively disengaged [name(%q0)] (%q0).; 
+
+      &combat-engaged-by %q0 = trim(setdiff(get(%q0/combat-engaged-by), %q2)); 
+      &combat-engaged-to %q0 = trim(setdiff(get(%q0/combat-engaged-to), %q2)); 
+      &combat-engaged-by %q2 = trim(setdiff(get(%q2/combat-engaged-by), %q0)); 
+      &combat-engaged-to %q2 = trim(setdiff(get(%q2/combat-engaged-to), %q0)); 
+
+#     clear the disengager's and disengagee's immobile flag and engaged tag
+      think res_return(engagedby-%q0, immobile, %q2); 
+      think res_return(engagedby-%q0, engaged,  %q2); 
+      think res_return(engagedto-%q2, immobile, %q0); 
+      think res_return(engagedto-%q2, engaged,  %q0); 
+    }, 
+
+
+#   could otherwise attempt to disengage, but not enough time has passed
+    111?10, {
+      @pemit %# = 
+        You must wait another [sub(u(u-time-till-disengage, %#), secs())] 
+        seconds before you can try to disengage.
+    }, 
+
+#   can't find the target
+
+    0?????, {
+      @pemit %# = switch(%q0, 
+        #-1, You're not engaged to '%0'., 
+        #-2, I'm not sure which '%0' you mean., 
+             Sorry.
+        )
+    }, 
+
+#   somehow, engager and engagee are in different rooms
+
+    ?0????, {
+#     timestamp them
+      &last-combat %# = secs(); 
+      &last-combat %q0 = secs(); 
+
+#     clear any aims
+      think ulocal(ul-clear-aims, %#); 
+
+      &combat-engaged-to %#  = setdiff(get(%#/combat-engaged-to), %q0); 
+      &combat-engaged-by %q0 = setdiff(get(%q0/combat-engaged-by), %#); 
+      @remit %L = %ch%cy
+        COMBAT: [capstr(goodname(%#))] disengages [goodname(%q0)], 
+                 halting %p attack.%cn; 
+      @remit loc(%q0) = %ch%cy
+        COMBAT: [capstr(goodname(%#))] disengages [goodname(%q0)], 
+                 halting %p attack.%cn; 
+
+
+      &combat-check %#  = [time()] -- successfully disengaged [name(%q0)] (%q0) --
+                          (different rooms!); 
+      &combat-check %q0 = [time()] -- successfully disengaged by %n (%#) -- (different rooms!); 
+
+#     clear the disengager's and disengagee's immobile flag and engaged tag
+      think res_return(engagedto-%q0, immobile, %#); 
+      think res_return(engagedto-%q0, engaged,  %#); 
+      think res_return(engagedby-%#,  immobile, %q0); 
+      think res_return(engagedby-%#,  engaged,  %q0); 
+
+    }, 
+
+#   not enough energy (and trying to actively disengage)
+
+    ??0???, {
+      @pemit %# = You don't have enough energy to disengage!
+    }, 
+
+#   not engaged to anyone
+
+    ???00?, {
+      @pemit %# = You're not engaged to anyone at the present time.
+    }, 
+
+
+#   ERROR
+    *, {
+      @combat/error %# = #12/cmd-disengage, engage %0, Q9=%q9
+    }; 
+
+
+    @wait 0=@notify me
+  }
+-
+
+
+
+# Disengage "stub"
+#
+&cmd-disengage-stub #12 = $disengage: 
+  think setq(0, u(u-engaged-to, %#)); 
+  think setq(1, u(u-engaged-by, %#)); 
+
+  @switch/all 1 = 
+  isdbref(%q0), {
+    @force %# = disengage %q0
+  }, 
+  isdbref(%q1), {
+    @force %# = disengage %q1
+  }, {
+    @pemit %# = 
+      Type 'disengage' followed by the person or creature you 
+      want to get away from.
+  }
+-
+
+
+#----------------------------------------
+# ATTACK player
+# 
+# Try to hit the player with your currently wielded weapon.
+# 
+#----------------------------------------
+&cmd-attack #12 = $attack *: 
+#----------------------------------------
+  @wait me = {
+    think setq(0, locate(%#, %0, anmP)); 
+
+    think setq(9, 
+      [isdbref(%q0)]
+      [or(u(u-is-engaged-to, %#, %q0), 
+          and(u(u-is-engaged-by, %#, %q0), u(u-weapons-are-same-length, %#, %q0)))]
+      [u(u-is-valid-combatant, %q0)]
+      [u(u-can-attack-now, %#)]
+      [u(u-has-attack-energy, %#)]
+      [not(hastag(%#, captured))]
+    ); 
+
+    @select %q9 = 
+
+#   NOMINAL CASE: attack the player
+
+    111111, {
+#     Timestamp the player
+      &last-combat %# = secs(); 
+      &combat-check %# = [time()] -- attack; 
+
+#     clear any aims
+      think ulocal(ul-clear-aims, %#); 
+
+#     Get wielded weapon and mode for attacker and defender
+
+      think setq(1, u(u-weapon-wielded, %#)); 
+      think setq(2, u(u-weapon-mode, %#, %q1)); 
+
+      think setq(3, u(u-weapon-wielded, %q0)); 
+      think setq(4, u(u-weapon-mode, %q0, %q3)); 
+
+#     Get damage class verb for attacker
+
+      think setq(8, u(u-verb-damage-class, %q1, 
+                            default(%q1/damage-class, bashing)));
+
+#     Roll some dice now
+
+      think setq(5, ulocal(ul-attack-success, %#, %q1, %q0, %q3)); 
+      think setq(6, u(u-attack-level-of-success, %q5)); 
+
+#     Subtract energy
+
+      think take_energy(%#, u(u-energy-cost-attack-%q6), energy); 
+
+#     Print out combat stats, if activated
+
+      @pemit %# = switch(hastag(%#, combatstats), 1, 
+                         COMBAT: %q6 (%q5 successes) for attack); 
+      @pemit %# = switch(hastag(%#, combatstatus), 1, combatstatus(%#)); 
+
+#     Trigger the victim's AAttack routine, and pass it useful information
+      @pemit %q0 = switch(hasflag(%q0, puppet), 1, 
+        {Triggered your AAttack with %r
+                 %%0 = %# -- attacker's dbref %r
+                 %%1 = %q1 -- dbref of attacker's weapon %r
+                 %%2 = %q6 -- BONUS, SUCCESS, FAILURE, or BOTCH}); 
+      @trigger %q0/AAttack = %#, %q1, %q6;
+
+#     Trigger the attacker's AAttacker routine, and pass it useful info
+      @pemit %#=switch(hasflag(%#, puppet), 1,
+        {Triggered your AAttacker attribute with %r
+             %%0 = %q0 -- victim's dbref %r
+             %%1 = %q1 -- dbref of your weapon %r
+             %%2 = %q6 -- BONUS, SUCCESS, FAILURE, or BOTCH});
+      @trigger %#/AAttacker = %q0, %q1, %q6;
+
+#     Processing specific to success level ...
+
+      @select %q6 = 
+
+      SUCCESS, {
+        &combat-check %#  = attacked and hit [name(%q0)] (%q0) -- success; 
+        &combat-check %q0 = attacked and hit by %n (%#) -- success; 
+
+        @remit %L = 
+          [capstr(goodname(%#))] aims and %q8 [goodname(%q0)] with 
+          [switch(%q1,
+            v(fists), %p fists.,
+            v(feet),  a kick.,
+                      %p [u(u-weapon-name, %q1)]. 
+          )]; 
+
+#       pick a hit location: victim, attacker, weapon, successes, success level
+        think setq(7, ulocal(ul-hit-location, %q0, %#, %q1, %q5, %q6)); 
+        @remit %L = 
+          [goodname(%q0)] takes a hit to the 
+             [u(#15/u-bodyloc-description, %q7)]! ;
+
+#       damage!!
+        think setq(8, u(u-damage-amount, %#, %q1, %q5)); 
+        think setq(9, default(%q1/damage-class, bashing)); 
+        @damage %q0/%q7 = %q8 x %q9 by %#; 
+        
+#       'use' the item once
+        @trigger %q1/Ause; 
+      }, 
+
+      BONUS, {
+        &combat-check %#  = attacked and hit [name(%q0)] (%q0) -- bonus; 
+        &combat-check %q0 = attacked and hit by %n (%#) -- bonus; 
+
+        @remit %L = 
+          [capstr(goodname(%#))] %q8 [goodname(%q0)] hard with 
+          [switch(%q1,
+            v(fists), %p fists!,
+            v(feet),  a kick!,
+                      %p [u(u-weapon-name, %q1)]!
+          )]; 
+
+#       pick a hit location: victim, attacker, weapon, successes, success level
+        think setq(7, ulocal(ul-hit-location, %q0, %#, %q1, %q5, %q6)); 
+        @remit %L = 
+          [goodname(%q0)] takes a hit to the 
+             [u(#15/u-bodyloc-description, %q7)]! ;
+
+#       damage!!
+        think setq(8, u(u-damage-amount, %#, %q1, %q5)); 
+        think setq(9, default(%q1/damage-class, bashing)); 
+        @damage %q0/%q7 = %q8 x %q9 by %#; 
+        
+#       'use' the item once
+        @trigger %q1/Ause; 
+      }, 
+
+      FAILURE, {
+        &combat-check %#  = attacked and missed [name(%q0)] (%q0) -- failure; 
+        &combat-check %q0 = attacked and missed by %n (%#) -- failure; 
+
+        @remit %L = 
+          [capstr(goodname(%#))] misses [goodname(%q0)] 
+             with %p [u(u-weapon-name, %q1)].; 
+
+#       don't use the item for a bonus
+      }, 
+
+      BOTCH, {
+        &combat-check %#  = attacked and missed [name(%q0)] (%q0) -- botch; 
+        &combat-check %q0 = attacked and missed by %n (%#) -- botch; 
+
+        @remit %L = 
+          [capstr(goodname(%#))] tries to hit [goodname(%q0)] 
+               with %p [u(u-weapon-name, %q1)], but %s misses terribly!; 
+
+#       'use' the item 5 times
+        @trigger %q1/Ause; 
+        @trigger %q1/Ause; 
+        @trigger %q1/Ause; 
+        @trigger %q1/Ause; 
+        @trigger %q1/Ause; 
+      }, 
+
+#     ERROR: unexpected success level
+
+      *, {
+        @remit %L = 
+          COMBAT: [capstr(goodname(%#))] has found a bug in the combat system. 
+                  The staff is being notified.; 
+        @combat/error #12/cmd-attack, attack %0, 
+                        Inner @select: %q6(%q5 successes); 
+      }
+    }, 
+
+
+#   can't find the target
+
+    0?????, {
+      @error %# = locate %q0
+    }, 
+
+#   not engaged with the target
+
+    ?0????, {
+      @pemit %# = You must engage [goodname(%q0)] before you can 
+                  attack [obj(%q0)].
+    }, 
+
+#   not allowed to attack that target
+    ??0???, {
+#     Timestamp the player
+      &last-combat %# = secs(); 
+      &combat-check %# = attacked invalid target -- [name(%q0)] (%q0); 
+
+#     clear any aims
+      think ulocal(ul-clear-aims, %#); 
+
+      @pemit %# = You're not allowed to attack [goodname(%q0)].
+    }, 
+
+#   the waiting period hasn't expired
+    ???0??, {
+      @pemit %# = 
+        You must wait [sub(u(u-time-till-attack, %#), secs())] seconds 
+        before you can attack anyone.
+    }, 
+
+#   not enough energy
+
+    ????0?, {
+      @pemit %# = You don't have enough energy to attack [goodname(%q0)].
+    }, 
+
+
+#     captured
+    ?????0, {
+      @pemit %#= You've been captured.  You can't attack.
+    },
+
+
+#   ERROR
+    *, {
+      @combat/error %# = #12/cmd-attack, attack %0, Q9=%q9
+    }; 
+
+    @wait 0=@wait 0=@notify me
+  }
+-
+
+# Attack stub
+#
+&cmd-attack-stub #12 = $attack: 
+  think setq(0, u(u-engaged-to, %#)); 
+  think setq(1, u(u-engaged-by, %#)); 
+
+  @switch/first 1 = 
+  gt(words(%q0), 1), {
+    @pemit %# = 
+      Type 'attack' followed by the name of the 
+      person or creature you want to hit.
+  }, 
+  isdbref(%q0), {
+    @force %# = attack %q0
+  }, 
+  gt(words(%q1), 1), {
+    @pemit %# = 
+      Type 'attack' followed by the name of the 
+      person or creature you want to hit.
+  }, 
+  and(isdbref(%q1), u(u-weapons-are-same-length, %#, %q1)), {
+    @force %# = attack %q1
+  }, {
+    @pemit %# = I'm not clear on who you want to attack.
+  }
+-
+
+
+
+
+#=============================================================================
+# UFUNCTIONS
+#=============================================================================
+
+#---------------------------------------
+# U(U-CAN-MOUNT-ENGAGE, <ENACTOR>, <TARGET>)
+#
+# Returns a 1 if the player can engage the target
+# Returns a 0 and an error message if the player cannot engage
+#----------------------------------------
+
+&u-can-mount-engage #12=
+  [switch(1, 
+
+# Neither party is flying, so engagement is not a problem.
+
+     [and(not(hastag(%0, fly)), not(hastag(%1, fly)))], 1,
+
+# Attacker is not flying but target is
+
+     [and(not(hastag(%0, fly)), hastag(%1, fly))],
+     [pemit(%0, You can't engage [name(%1)] because [name(%1)] is 
+                        flying and you're on the ground.)]0,
+
+# Attacker is flying, but not a mount
+
+     [and(hastag(%0, fly), not(hastag(%0, mount)))],
+     [pemit(%0, You're flying!  You can't engage anything from up here.)]0,
+
+# Target is flying but not a mount
+
+     [and(hastag(%1, fly), not(hastag(%1, mount)))],
+     [pemit(%0, [name(%1)] is flying.  Engage [name(%1)]'s mount instead.)]0,
+
+# Default 
+      1)]
+
+-
+
+#----------------------------------------
+# U(U-WEAPONS-ARE-SAME-LENGTH, player, foe)
+# 
+# Returns 1 if the player's weapon is the same length class as her foe's.
+# 
+#----------------------------------------
+&u-weapons-are-same-length #12 = 
+#----------------------------------------
+  strmatch(
+    default([u(u-weapon-wielded, %0)]/length-class, medium), 
+    default([u(u-weapon-wielded, %1)]/length-class, medium)
+  )
+-
+
+
+
+#----------------------------------------
+# U(U-CAN-ENGAGE-NOW, player)
+# 
+# Returns 1 if the player is allowed to engage now; else, 0.
+# Condition is based on the amount of time since he last engaged and 
+# includes factors such as the player's Reflex and Intuition.
+# 
+#----------------------------------------
+&u-can-engage-now #12 = 
+#----------------------------------------
+  gte(secs(), u(u-time-till-engage, %0))
+-
+
+
+#----------------------------------------
+# U(U-TIME-TILL-ENGAGE, player)
+# 
+# Returns the 'secs()' format time at which the player is allowed to try
+# to engage.
+# 
+#----------------------------------------
+&u-time-till-engage #12 = 
+#----------------------------------------
+  add(default(%0/last-combat, 0), u(u-seconds-till-engage, %0))
+-
+# This is the multiplier for the combat code. Commented out so it 
+#   doesn't need to be changed except online.
+
+@@ &Combat-Multiplier #12=1.5
+
+-
+
+
+#----------------------------------------
+# U(U-SECONDS-TILL-ENGAGE, player)
+# 
+# Returns the number of seconds a player must wait to try to engage after he 
+# has just used another combat command.
+#
+# Waiting period is 5 * (11 - (Reflex + Intuition)) seconds.
+# That's 25 seconds for an average character, +/- 5 seconds per point of 
+# Reflex or Intuition above or below 3.  Weapon speed is ADDED to the time.
+# 
+#----------------------------------------
+&u-seconds-till-engage #12 = 
+#----------------------------------------
+  round(mul(v(Combat-Multiplier),
+    add(
+      max(5, 
+        mul(5, 
+          sub(sub(11, 
+                  add(attribute(%0, Reflex), 
+                      attribute(%0, Intuition))), 
+              default(%0/modifier-engage-speed, 0)))
+      ), 
+      default([u(u-weapon-wielded, %0)]/speed, 5)
+    )
+  ),0)
+-
+
+
+#----------------------------------------
+# ULOCAL(UL-MATCH-ENGAGED, %#, string)
+# 
+# Searches the list of people the player is engaged to, and returns the dbref
+# of the player who matches the string.  If no match is found, it returns #-1.
+# If more than one match is found, returns #-2.
+# 
+#----------------------------------------
+&ul-match-engaged #12 = 
+#----------------------------------------
+  [setq(1, %1)]
+  [setq(0, filter(filter-match-engaged, default(%0/combat-engaged-to, #-1)))]
+  [switch(words(%q0), 1, %q0, 0, #-1, #-2)]
+-
+&filter-match-engaged #12 = 
+  strmatch(name(%0), %q1*)
+-
+
+
+#----------------------------------------
+# U(U-IS-ENGAGED-TO-SOMEONE, player)
+# 
+# Returns 1 if the player is engaged to someone, or 0 if not.
+# 
+#----------------------------------------
+&u-is-engaged-to-someone #12 = 
+#----------------------------------------
+  not(strmatch(u(u-engaged-to, %0), #-1))
+-
+
+
+#----------------------------------------
+# U(U-IS-ENGAGED-BY-SOMEONE, player)
+# 
+# Returns 1 if the player is engaged by someone, or 0 if not.
+# 
+#----------------------------------------
+&u-is-engaged-by-someone #12 = 
+#----------------------------------------
+  not(strmatch(u(u-engaged-by, %0), #-1))
+-
+
+
+#----------------------------------------
+# U(U-IS-ENGAGED-TO, player1, player2)
+#
+# Returns 1 if player1 is engaged TO player2.
+# 
+#----------------------------------------
+&u-is-engaged-to #12 = 
+#----------------------------------------
+  neq(0, member(u(u-engaged-to, %0), %1))
+-
+
+
+#----------------------------------------
+# U(U-IS-ENGAGED-BY, player1, player2)
+#
+# Returns 1 if player1 is engaged BY player2.
+# 
+#----------------------------------------
+&u-is-engaged-by #12 = 
+#----------------------------------------
+  neq(0, member(u(u-engaged-by, %0), %1))
+-
+
+
+#----------------------------------------
+# U(U-ENGAGED-TO, player)
+# 
+# Returns the dbref(s) of whomever the player has engaged.
+# 
+#----------------------------------------
+&u-engaged-to #12 = 
+#----------------------------------------
+  trim(default(%0/combat-engaged-to, #-1))
+-
+
+
+#----------------------------------------
+# U(U-ENGAGED-BY, player)
+# 
+# Returns the dbref(s) of whomever the player has engaged.
+# 
+#----------------------------------------
+&u-engaged-by #12 = 
+#----------------------------------------
+  trim(default(%0/combat-engaged-by, #-1))
+-
+
+
+# U(U-MAY-ATTACK, attacker, target)
+#
+# Returns 1 if the attacker may attack the target. 0 otherwise.
+# Generally, he may attack if he is engaged TO the target, or if
+# he is engaged BY the target AND their weapons are the same length.
+#
+#----------------------------------------
+&u-may-attack #12 =
+#----------------------------------------
+  or(
+    u(u-is-engaged-to, %0, %1), 
+    and(
+      u(u-is-engaged-by, %0, %1), 
+      u(u-weapons-are-same-length, %0, %1)
+    )
+  )
+-
+
+
+#----------------------------------------
+# U(U-IS-VALID-COMBATANT, player)
+# 
+# Returns 1 if the player is someone who can be engaged, attacked, etc.
+# If not, returns a 0.
+# 
+#----------------------------------------
+&u-is-valid-combatant #12 = 
+#----------------------------------------
+  and(hastag(%0, combat), 
+      not(hastag(%0, invulnerable)),
+      not(strmatch(%#,%0)),
+      switch(hasflag(%#,wizard),
+        0,not(hasflag(%0,dark)),
+        1,1)
+  )
+-
+
+
+#----------------------------------------
+# U(U-ENGAGE-SUCCESS, player, target)
+# 
+# Returns an integer representing the overall success of an opposed
+# success roll (difference-of-successes).  Rolls successes for the
+# engager and engagee, and returns the difference.
+# 
+# To account for weapon speed, the player's weapon speed is added to his 
+# Opponent's dice pool, and vice versa.
+# 
+#----------------------------------------
+&u-engage-success #12 = 
+#----------------------------------------
+  sub(
+    successes(
+      max(1, 
+        add(u(u-engage-dice-engager, %0), 
+            default([u(u-weapon-wielded, %0)]/modifier-engager, 0))), 
+      v(difficulty-engage)
+    ), 
+    successes(
+      max(1, 
+        add(u(u-engage-dice-engagee, %1), 
+            default([u(u-weapon-wielded, %1)]/modifier-engagee, 0))), 
+      v(difficulty-engage)
+    )
+  )
+-
+
+
+#----------------------------------------
+# U(U-ENGAGE-DICE-ENGAGER, player)
+# 
+# Returns the number of dice the player gets to roll for his 
+# engage attempt.
+# 
+#----------------------------------------
+&u-engage-dice-engager #12 = 
+#----------------------------------------
+  add(max(attribute(%0, Reflex), attribute(%0, Agility)), 
+      attribute(%0, Size), 
+      skill(%0, u(u-combat-skill, %0)), 
+      default(%0/modifier-engager, 0)
+  )
+-
+
+
+#----------------------------------------
+# U(U-ENGAGE-DICE-ENGAGEE, player)
+# 
+# Returns the number of dice the player gets to roll to avoid
+# an engage attempt.
+# 
+#----------------------------------------
+&u-engage-dice-engagee #12 = 
+#----------------------------------------
+  add(min(attribute(%0, Agility), attribute(%0, Reflex)), 
+      attribute(%0, Size), 
+      max(skill(%0, Dodge), skill(%0, u(u-combat-skill, %0))), 
+      default(%0/modifier-engagee, 0)
+  )
+-
+
+
+#----------------------------------------
+# U(U-ENGAGE-SCORE, number)
+# 
+# Returns a word description that relates to the integer score of a 
+# difference-of-successes roll.
+# 
+#----------------------------------------
+&u-engage-score #12 = 
+#----------------------------------------
+  switch(1, 
+    gte(%0,  4), BONUS, 
+    gte(%0,  1), SUCCESS, 
+    gte(%0, -2), FAILURE, 
+                 BOTCH
+  )
+-
+
+
+#----------------------------------------
+# U(U-CAN-DISENGAGE-NOW, player)
+# 
+# Returns 1 if the player is allowed to engage now; else, 0.
+# Condition is based on the amount of time since he last engaged and 
+# includes factors such as the player's Reflex and Attention.
+# 
+#----------------------------------------
+&u-can-disengage-now #12 = 
+#----------------------------------------
+  gte(secs(), u(u-time-till-disengage, %0))
+-
+
+
+#----------------------------------------
+# U(U-TIME-TILL-DISENGAGE, player)
+# 
+# Returns the 'secs()' format time at which the player is allowed to try
+# to disengage.
+# 
+#----------------------------------------
+&u-time-till-disengage #12 = 
+#----------------------------------------
+  add(default(%0/last-combat, 0), u(u-seconds-till-disengage, %0))
+-
+
+
+#----------------------------------------
+# U(U-SECONDS-TILL-DISENGAGE, player)
+# 
+# Returns the number of seconds a player must wait before trying to engage 
+# after using some combat command.
+#
+# Waiting period is 5 * (11 - (Reflex + Attention)) seconds.
+# That's 10 seconds for an average character, +/- 2 seconds per point of 
+# Reflex or Attention above or below 3.
+# 
+#----------------------------------------
+&u-seconds-till-disengage #12 = 
+#----------------------------------------
+  round(mul(v(Combat-Multiplier),
+    add(
+      max(5, 
+        mul(5, 
+          sub(sub(11, 
+                  add(attribute(%0, Reflex), 
+                  attribute(%0, Attention))), 
+              default(%0/modifier-disengage-speed, 0)))
+      ), 
+      default([u(u-weapon-wielded, %0)]/speed, 5)
+    )
+  ),0)
+-
+
+
+#----------------------------------------
+# U(U-DISENGAGE-SUCCESS, player, target)
+# 
+# Returns an integer representing the overall success of an opposed
+# success roll (difference-of-successes).  Rolls successes for the
+# engager and engagee, and returns the difference.
+# 
+#----------------------------------------
+&u-disengage-success #12 = 
+#----------------------------------------
+  sub(
+    successes(
+      max(1, 
+        add(u(u-disengage-dice-engager, %0), 
+            default([u(u-weapon-wielded, %0)]/modifier-disengager, 0))), 
+      v(difficulty-disengage)
+    ), 
+    successes(
+      max(1, 
+        add(u(u-disengage-dice-engagee, %1), 
+            default([u(u-weapon-wielded, %1)]/modifier-disengagee, 0))), 
+      v(difficulty-disengage)
+    )
+  )
+-
+
+
+#----------------------------------------
+# U(U-DISENGAGE-DICE-ENGAGER, player)
+# 
+# Returns the number of dice the player gets to roll for his 
+# disengage attempt.
+# 
+#----------------------------------------
+&u-disengage-dice-engager #12 = 
+#----------------------------------------
+  add(max(attribute(%0, Agility), attribute(%0, Reflex)),
+      max(skill(%0, Escape), skill(%0, u(u-combat-skill, %0))), 
+      default(%0/modifier-disengager, 0)
+  )
+-
+
+
+#----------------------------------------
+# U(U-DISENGAGE-DICE-ENGAGEE, player)
+# 
+# Returns the number of dice the player gets to roll to avoid
+# a disengage attempt.
+# 
+#----------------------------------------
+&u-disengage-dice-engagee #12 = 
+#----------------------------------------
+  add(min(attribute(%0, Reflex), attribute(%0, Agility)), 
+      skill(%0, u(u-combat-skill, %0)), 
+      default(%0/modifier-disengagee, 0)
+  )
+-
+
+
+#----------------------------------------
+# U(U-DISENGAGE-SCORE, number)
+# 
+# Returns a word description that relates to the integer score of a 
+# difference-of-successes roll.
+# 
+#----------------------------------------
+&u-disengage-score #12 = 
+#----------------------------------------
+  switch(1, 
+    gte(%0,  4), BONUS, 
+    gte(%0,  1), SUCCESS, 
+    gte(%0, -2), FAILURE, 
+                 BOTCH
+  )
+-
+
+
+#----------------------------------------
+# U(U-HAS-ENGAGE-ENERGY, player)
+#
+# Returns a 1 if the player has enough energy to attempt to engage.
+# If not, returns a 0.
+# 
+#----------------------------------------
+&u-has-engage-energy #12 = 
+#----------------------------------------
+  or(hastag(%0, free_energy), 
+    gte(getaccount(%0, energy), 
+        u(u-energy-cost-engage-success)
+    )
+  )
+-
+
+
+#----------------------------------------
+# U(U-HAS-DISENGAGE-ENERGY, player)
+#
+# Returns a 1 if the player has enough energy in energy or energy-reserves
+# to attempt to actively disengage. If not, returns a 0.
+# 
+#----------------------------------------
+&u-has-disengage-energy #12 = 
+#----------------------------------------
+  or(hastag(%0, free_energy), 
+    gte(add(getaccount(%0, energy), getaccount(%0, energy reserves)), 
+        u(u-energy-cost-disengage-success)
+    )
+  )
+-
+
+
+#----------------------------------------
+# U(U-CAN-ATTACK-NOW, player)
+# 
+# Returns 1 if the player is allowed to attack now; else, 0.
+# Condition is based on the amount of time since he last engaged and 
+# includes factors such as the player's Reflex and Luck.
+# 
+#----------------------------------------
+&u-can-attack-now #12 = 
+#----------------------------------------
+  gte(secs(), u(u-time-till-attack, %0))
+-
+
+
+#----------------------------------------
+# U(U-TIME-TILL-ATTACK, player)
+# 
+# Returns the 'secs()' format time at which the player is allowed to try
+# to attack.
+#
+# Waiting period is 5 * (15 - (Reflex + Luck)) seconds.
+# That's 45 seconds for an average character, +/- 5 seconds per point of 
+# Reflex or Luck above or below 3.
+# 
+#----------------------------------------
+&u-time-till-attack #12 = 
+#----------------------------------------
+  add(default(%0/last-combat, 0), u(u-seconds-till-attack, %0))
+-
+
+
+#----------------------------------------
+# U(U-SECONDS-TILL-ATTACK, player)
+# 
+# Returns the number of seconds a player must wait before he attacks, after
+# he has just used a combat command.
+#
+# Waiting period is 5 * (15 - (Reflex + Luck)) seconds.
+# That's 45 seconds for an average character, +/- 5 seconds per point of 
+# Reflex or Luck above or below 3.
+# 
+#----------------------------------------
+&u-seconds-till-attack #12 = 
+#----------------------------------------
+  round(mul(v(Combat-Multiplier),
+    add(
+      max(10, 
+        mul(5, 
+          sub(sub(15, 
+                  add(attribute(%0, Reflex), 
+                      attribute(%0, Luck))), 
+          default(%0/modifier-attack-speed, 0)))
+      ),
+      default([u(u-weapon-wielded, %0)]/speed, 5)
+   )
+  ),0)
+-
+
+
+
+#----------------------------------------
+# U(U-HAS-ATTACK-ENERGY, player)
+#
+# Returns a 1 if the player has enough energy to attempt to attack.
+# If not, returns a 0.
+# 
+#----------------------------------------
+&u-has-attack-energy #12 = 
+#----------------------------------------
+  or(hastag(%0, free_energy), 
+    gte(getaccount(%0, energy), 
+        u(u-energy-cost-attack-success)
+    )
+  )
+-
+
+
+#----------------------------------------
+# U(U-WEAPON-WIELDED, player, foe)
+# 
+# Returns the dbref of the object wielded by the player.
+# 
+#----------------------------------------
+&u-weapon-wielded #12 = 
+#----------------------------------------
+  default(%0/combat-wielded, 
+    ifelse(hasattr(%0, combat-base-weapon), 
+      u(%0/combat-base-weapon, %1), 
+#   else
+      u(fists)
+    )
+  )
+-
+
+#----------------------------------------
+# U(U-WEAPON-NAME, weapon dbref)
+# 
+# Returns a reasonable name for the weapon.
+# 
+#----------------------------------------
+&u-weapon-name #12 = 
+#----------------------------------------
+  default(%0/wielded-name, goodname(%0))
+-
+
+
+#----------------------------------------
+# ULOCAL(UL-IS-WIELDING-A-WEAPON, player)
+# 
+# Returns a 1 if the player is wielding a weapon (object tagged 'weapon')
+# 
+#----------------------------------------
+&ul-is-wielding-a-weapon #12 = 
+#----------------------------------------
+  hastag(u(u-weapon-wielded, %0), weapon)
+-
+
+
+#----------------------------------------
+# U(U-COMBAT-SKILL, player)
+# 
+# Returns the name of the skill required for the weapon wielded by the 
+# player.
+# 
+#----------------------------------------
+&u-combat-skill #12 = 
+#----------------------------------------
+  get([u(u-weapon-wielded, %0)]/combat-skill)
+-
+
+
+#----------------------------------------
+# U(U-VERB-DAMAGE-CLASS, weapon, damage class)
+# 
+# Returns a single-person present-tense verb describing the damage class.
+# For example 'slices', 'bashes', etc.
+#
+#----------------------------------------
+&u-verb-damage-class #12 = 
+#----------------------------------------
+  first(
+    shuffle(
+      default(%0/verbs-%1, 
+        default(%0/verbs, 
+          default(me/verbs-%1, v(verbs-default))
+        )
+      ), |
+    ), |
+  )
+-
+
+
+#----------------------------------------
+# ULOCAL(UL-ATTACK-SUCCESS, attacker, attacker's weapon, 
+#                           defender, defender's weapon)
+# 
+# Returns a numeric representation of quality of success, based on a 
+# difference of two successes rolls (one for the attacker, and one for 
+# the defender).  Higher numbers mean the attacker was more successful.
+# 
+#----------------------------------------
+&ul-attack-success #12 = 
+#----------------------------------------
+  sub(u(u-attack-success-attacker, %0, %1), 
+      u(u-attack-success-defender, %2, %3))
+-
+
+
+#----------------------------------------
+# U(U-ATTACK-SUCCESS-DEFENDER, defender, weapon)
+# 
+# Returns the integer value of a successes roll for the attacker.
+# 
+#----------------------------------------
+&u-attack-success-attacker #12 = 
+#----------------------------------------
+  successes(
+    max(1, 
+      add(attribute(%0, default(%1/combat-attribute, Coordination)), 
+          skill(%0, default(%1/combat-skill, Combat/Brawling)), 
+          default(%0/modifier-attack, 0))), 
+    default(%1/attack-difficulty, 6))
+-
+
+
+#----------------------------------------
+# U(U-ATTACK-SUCCESS-DEFENDER, defender, weapon)
+# 
+# Returns the integer value of a successes roll for the defender.
+# 
+#----------------------------------------
+&u-attack-success-defender #12 = 
+#----------------------------------------
+  successes(
+    max(1, 
+      add(attribute(%0, u(u-defender-attribute, %1)), 
+          skill(%0, default(%1/combat-skill, Combat/Brawling)),
+          default(%0/modifier-defend, 0))), 
+    default(%1/defense-difficulty, 6))
+-
+
+
+#----------------------------------------
+# U(U-DEFENDER-ATTRIBUTE, weapon dbref)
+# 
+# Returns the name of appropriate attribute to roll against for the defender.
+# If the weapon object has a combat-attribute-defense attribute, it'll use 
+# its value.  If not, it'll check for a combat-attribute attribute on the 
+# weapon object.  If that doesn't exist either, it defaults to Coordination.
+# 
+#----------------------------------------
+&u-defender-attribute #12 = 
+#----------------------------------------
+  default(%0/combat-attribute-defense, 
+    default(%0/combat-attribute, Coordination))
+-
+
+
+#----------------------------------------
+# U(U-ATTACK-LEVEL-OF-SUCCESS, <difference of successes>)
+# 
+# Returns an abstract level of success based on the integer difference
+# of successes rolls passed in.
+# 
+#----------------------------------------
+&u-attack-level-of-success #12 = 
+#----------------------------------------
+  switch(1, 
+    gte(%0,  4),  BONUS, 
+    gte(%0,  1),  SUCCESS, 
+    gte(%0, -2),  FAILURE, 
+                  BOTCH
+  )
+-
+
+
+#----------------------------------------
+# ULOCAL(UL-HIT-LOCATION, victim, attacker, weapon, successes, success level)
+#
+# Returns a bodyloc on the victim hit by the attacker with the given weapon 
+# by an attack with the given number of successes.
+#
+#----------------------------------------
+&ul-hit-location #12 = 
+#----------------------------------------
+  [setq(0, udefault(%0/u-hit-locations, u(#14/u-hit-locations,%0,%1,%2,%3,%4), 
+                    %0, %1, %2, %3, %4))]
+  [choose(u(#14/u-lefthalf, %q0, :), u(#14/u-righthalf, %q0, :))]
+-
+
+
+#----------------------------------------
+# U(U-DAMAGE-AMOUNT, attacker, weapon, #successes)
+# 
+# Returns the amount of damage caused by the attacker with a given 
+# weapon and a certain number of successes.
+# 
+# Damage formula:
+#   die(succ, damage) + bonus ...
+#   where  ... succ is #successes
+#          ... damage is the damage rating of the weapon, or a number 
+#                        based on the object's weight if not a weapon
+#          ... bonus is the best of the character's score in Muscle or 
+#                        the weapon's skill or the weapon's attribute
+#                        plus any style modifiers
+#----------------------------------------
+&u-damage-amount #12 = 
+#----------------------------------------
+  ulocal(ul-damage-amount, %0, %1, %2)
+-
+&ul-damage-amount #12 = 
+
+# determine the base damage
+
+  [setq(1, 
+    add(die(%2, default(%1/damage, u(u-damage-by-weight, %1))), 
+        max(attribute(%0, Muscle), 
+            attribute(%0, get(%1/combat-attribute)), 
+            skill(%0, get(%1/combat-skill))
+        ), 
+        default(%0/modifier-damage, 0)
+    )
+  )]
+
+  [setq(0, 
+    div(mul(attribute(%0,muscle), %q1), 4)
+  )]
+
+
+#   if the attacker's weapon or the attacker is tagged 'harmless'
+#   do no damage at all!
+
+  [ifelse(or(not(t(type(%1))), 
+         hastag(%1, harmless), hastag(%0, harmless)), 
+      0, 
+
+#   else do no more than max-damage
+
+      min(default(%1/max-damage, 1000), %q0)
+  )]
+-
+
+#----------------------------------------
+# U(U-DAMAGE-BY-WEIGHT, object)
+# 
+# Returns the damage rating for an object that isn't a weapon 
+# (that is, doesn't have a &damage rating).  The damage rating
+# will be determined by weight.
+# 
+#----------------------------------------
+&u-damage-by-weight #12 = 
+#----------------------------------------
+  round(fdiv(default(%0/weight, 0), 10), 0)
+-
+
+
+#----------------------------------------
+# U(U-DAMAGE-REPORT, player)
+# 
+# Returns a report of damage on a player: a total, subtotals by location,
+# then individual damage types.
+# 
+#----------------------------------------
+&u-damage-report #12 = 
+#----------------------------------------
+  %cr%chDAMAGE%cn 
+  [switch(lte(default(%0/damage, 0), 0), 1, 
+    \(none\), 
+# else
+    \([default(%0/damage, 0)] total\)
+    [iter(setdiff(lattr(%0/damage-*), lattr(%0/damage-*-*)), 
+      %r%b[rjust(get(%0/##), 3)] 
+          [ljust(u(#15/u-bodyloc-description,lcstr(after(##, -))), 15)] 
+             \([u(u-iter-damage-specific, %0, ##)]\)
+    )]
+  )]
+-
+&u-iter-damage-specific #12 = 
+  iter(lattr(%0/%1-*), [get(%0/##)] [lcstr(extract(##,3,20,-))], %b, %,%b)
+-
+
+#----------------------------------------
+# ULOCAL(UL-DELAY-REPORT, player)
+# 
+# Returns a report of a player's combat delays.
+# 
+#----------------------------------------
+&ul-delay-report #12 = 
+#----------------------------------------
+  %cc%chDELAYS%cn (seconds)%r
+  [ulocal(ul-delay-line, engage,    %0)] %r
+  [ulocal(ul-delay-line, disengage, %0)] %r
+  [ulocal(ul-delay-line, attack,    %0)] %r
+  [ulocal(ul-delay-line, capture,   %0)] %r
+  [ulocal(ul-delay-line, aim,       %0)] %r
+  [ulocal(ul-delay-line, shoot,     %0)] %r
+  [ulocal(ul-delay-line, throw,     %0)] %r
+-
+&ul-delay-line #12 = 
+  [setq(0, sub(u(u-time-till-%0, %1), secs()))]
+  %b[ljust(%0:, 10)] [rjust(u(u-seconds-till-%0, %1), 2)] 
+            %(%chnext%cn [ifelse(lte(%q0, 0), -- now, in %q0 seconds)]%)
+-
+
+
+#----------------------------------------
+# U(U-REFLEXIVE, object)
+# 
+# Returns a the reflexive form of the pronoun for the object, based
+# on gender.
+# 
+#----------------------------------------
+&u-reflexive #12 = 
+#----------------------------------------
+  switch(obj(%0), 
+    him,  himself, 
+    her,  herself, 
+    it,   itself, 
+    them, themselves, 
+          [obj(%0)]self
+  )
+-
+
+
+     
+
+#=============================================================================
+# FUNCTIONS
+#=============================================================================
+
+
+&function-combatdesc #50 = 
+  [switch(u(#12/u-is-engaged-by-someone, %0), 1, 
+    %r[capstr(subj(%0))] is engaged in combat by 
+      [u(#52/u-commafy-goodname, u(#12/u-engaged-by, %0))]., 
+    %r
+  )]
+
+  [switch(u(#12/u-is-engaged-to-someone, %0), 1, 
+    %r[capstr(subj(%0))] is engaged in combat to 
+      [u(#52/u-commafy-goodname, u(#12/u-engaged-to, %0))].
+  )]
+    
+  [switch(u(#12/u-is-aimed-at-someone, %0), 1, 
+    %r[capstr(subj(%0))] is aiming at  
+      [u(#52/u-commafy-goodname, u(#12/u-aimed-at, %0))].
+  )]
+    
+  [switch(u(#12/u-is-aimed-at-by-someone, %0), 1, 
+    %r[capstr(subj(%0))] is being aimed at by 
+      [u(#52/u-commafy-goodname, u(#12/u-aimed-at-by, %0))].
+  )]
+    
+  [switch(ulocal(#12/ul-is-wielding-a-weapon, %0), 1, 
+    [setq(0, u(#52/u-commafy-goodname, u(#12/u-weapon-wielded, %0)))]
+    %r[capstr(subj(%0))] is wielding [art(%q0)] %q0.
+
+    [switch(default(%0/combat-style, none), 
+      none, %b[capstr(subj(%0))] is not using a style., 
+      zero, %b[capstr(subj(%0))] is not using a style., 
+            %b[capstr(subj(%0))] is using the '[get(%0/combat-style)]' style.
+    )]
+  )]
+
+-
+
+
+&function-combatstatus #50 = 
+  [ulocal(#12/ul-combatstatus-energy, %0)]%r
+  [u(#12/u-combatstatus-damage, %0)]
+####  [u(#12/u-combatstatus-fatigue, %0)]
+-
+&ul-combatstatus-energy #12 = 
+  [setq(0, ulocal(ul-energy-percentage, %0))]
+
+  [ansi(bh, ENERGY:)]
+  [ansi(yh, rjust(round(getaccount(%0, energy), 0), 3))] 
+  [ansi(yY, repeat(##, div(%q0, 10)))]
+  [ansi(bB, repeat(--, sub(10, div(%q0, 10))))]
+-
+&ul-energy-percentage #12 = 
+  [setq(0, getaccount(%0, energy))]
+  [setq(1, u(u-max-energy, %0))]
+  [max(min(div(mul(%q0, 100), %q1), 100), 0)]
+-
+&u-max-energy #12 = 
+  mul(5, attribute(%0, Size))
+-
+&ul-combatstatus-fatigue #12 = 
+  [setq(0, ulocal(ul-fatigue-percentage, %0))]
+
+  [ansi(bh, FATIGUE:)]
+  [ansi(rh, rjust(round(getaccount(%0, fatigue), 0), 3))] 
+  [ansi(rR, repeat(##, div(%q0, 10)))]
+  [ansi(bB, repeat(--, sub(10, div(%q0, 10))))]
+-
+&ul-fatigue-percentage #12 = 
+  [setq(0, getaccount(%0, fatigue))]
+  [setq(1, u(u-max-fatigue, %0))]
+  [max(min(div(mul(%q0, 100), %q1), 100), 0)]
+-
+&u-max-fatigue #12 = 
+  mul(5, attribute(%0, Endurance))
+-
+&u-combatstatus-damage #12 = 
+  [ansi(rh, DAMAGE:)]
+  [ansi(rh, rjust(round(default(%0/damage, 0), 0), 3))] 
+  [ansi(rR, repeat(#, default(%0/damage, 0)))]
+-
+
+
+
+# Energy costs for the engage command, at different levels of success...
+
+&u-energy-cost-engage-bonus #12 = 
+  mul(not(hastag(%0, free_energy)), v(energy-cost-engage-bonus))
+-
+&u-energy-cost-engage-success #12 = 
+  mul(not(hastag(%0, free_energy)), v(energy-cost-engage-success))
+-
+&u-energy-cost-engage-failure #12 = 
+  mul(not(hastag(%0, free_energy)), v(energy-cost-engage-failure))
+-
+&u-energy-cost-engage-botch #12 = 
+  mul(not(hastag(%0, free_energy)), v(energy-cost-engage-botch))
+-
+
+
+# Energy costs for the disengage command, at different levels of success...
+
+&u-energy-cost-disengage-bonus #12 = 
+  mul(not(hastag(%0, free_energy)), v(energy-cost-disengage-bonus))
+-
+&u-energy-cost-disengage-success #12 = 
+  mul(not(hastag(%0, free_energy)), v(energy-cost-disengage-success))
+-
+&u-energy-cost-disengage-failure #12 = 
+  mul(not(hastag(%0, free_energy)), v(energy-cost-disengage-failure))
+-
+&u-energy-cost-disengage-botch #12 = 
+  mul(not(hastag(%0, free_energy)), v(energy-cost-disengage-botch))
+-
+
+
+# Energy costs for the attack command, at different levels of success...
+
+&u-energy-cost-attack-bonus #12 = 
+  mul(not(hastag(%0, free_energy)), v(energy-cost-attack-bonus))
+-
+&u-energy-cost-attack-success #12 = 
+  mul(not(hastag(%0, free_energy)), v(energy-cost-attack-success))
+-
+&u-energy-cost-attack-failure #12 = 
+  mul(not(hastag(%0, free_energy)), v(energy-cost-attack-failure))
+-
+&u-energy-cost-attack-botch #12 = 
+  mul(not(hastag(%0, free_energy)), v(energy-cost-attack-botch))
+-
+
+
+
+
+#=============================================================================
+# MESSAGES
+#=============================================================================
+
+#----------------------------------------
+# Engage messages at different levels of success
+#----------------------------------------
+@@ &u-msg-engage-bonus #12 = 
+  [capstr(goodname(%0))] easily traps [goodname(%1)], pinning [obj(%1)] 
+  in a bad position with [poss(%0)] [goodname(u(u-weapon-wielded, %0))].
+-
+&u-msg-engage-bonus #12 = 
+  %cy%ch
+  COMBAT: 
+  [capstr(goodname(%0))] gets into a good position to attack [goodname(%1)]. 
+  [switch(u(u-weapons-are-same-length, %1, %0), 1, 
+    [goodname(%1)] may attack also.)]
+  %cn
+-
+@@ &u-msg-engage-success #12 = 
+  [capstr(goodname(%0))] circles [goodname(%1)] and moves in to attack 
+  with [poss(%0)] [goodname(u(u-weapon-wielded, %0))].
+-
+&u-msg-engage-success #12 = 
+  %cy%ch
+  COMBAT: 
+  [capstr(goodname(%0))] gets into a position to attack [goodname(%1)]. 
+  [switch(u(u-weapons-are-same-length, %1, %0), 1, 
+    [goodname(%1)] may attack also.)]
+  %cn
+-
+@@ &u-msg-engage-failure #12 = 
+  [capstr(goodname(%0))] tries to move in to attack [goodname(%1)] 
+  with [poss(%0)] [goodname(u(u-weapon-wielded, %0))], but fails.
+-
+&u-msg-engage-failure #12 = 
+  %cy%ch
+  COMBAT: 
+  [capstr(goodname(%0))] tries to get into a position to attack 
+  [goodname(%1)], but fails.
+  %cn
+-
+@@ &u-msg-engage-botch #12 = 
+  [capstr(goodname(%0))] circles [goodname(%1)], looking for a position. 
+  [capstr(subj(%0))] attempts to engage with [poss(%0)] 
+  [goodname(u(u-weapon-wielded, %0))], but fails miserably.
+-
+&u-msg-engage-botch #12 = 
+  %cy%ch
+  COMBAT: 
+  [capstr(goodname(%0))] tries to get into a position to attack 
+  [goodname(%1)], but fails.
+  %cn
+-
+
+#----------------------------------------
+# Disengage messages at different levels of success
+#----------------------------------------
+&u-msg-disengage-bonus #12 = 
+  %cy%ch
+  COMBAT: 
+  [capstr(goodname(%0))] rolls away from [goodname(%1)], 
+       breaking off the attack!
+  %cn
+-
+&u-msg-disengage-success #12 = 
+  %cy%ch
+  COMBAT: 
+  [capstr(goodname(%0))] gets away from [goodname(%1)].
+  %cn
+-
+&u-msg-disengage-failure #12 = 
+  %cy%ch
+  COMBAT: 
+  [capstr(goodname(%0))] tries to escape [goodname(%1)], but fails.
+  %cn
+-
+&u-msg-disengage-botch #12 = 
+  %cy%ch
+  COMBAT: 
+  [capstr(goodname(%0))] tries to get away from [goodname(%1)], 
+       but fails terribly, exhausting [u(u-reflexive, %0)].
+  %cn
+-
+
+
+#=============================================================================
+# CONSTANTS
+#=============================================================================
+
+
+# How hard is it to engage and disengage?
+
+&difficulty-engage #12 = 4
+-
+&difficulty-disengage #12 = 7
+-
+
+
+# Energy costs for the engage command, at different levels of success...
+
+&energy-cost-engage-bonus #12 = 0
+-
+&energy-cost-engage-success #12 = 0.5
+-
+&energy-cost-engage-failure #12 = 0.5
+-
+&energy-cost-engage-botch #12 = 1.0
+-
+
+
+# Energy costs for the disengage command, at different levels of success...
+
+&energy-cost-disengage-bonus #12 = 0
+-
+&energy-cost-disengage-success #12 = 0.1
+-
+&energy-cost-disengage-failure #12 = 0.1
+-
+&energy-cost-disengage-botch #12 = 0.75
+-
+
+
+# Energy costs for the attack command, at different levels of success...
+
+&energy-cost-attack-bonus #12 = 0
+-
+&energy-cost-attack-success #12 = 0.25
+-
+&energy-cost-attack-failure #12 = 1
+-
+&energy-cost-attack-botch #12 = 2
+-
+
+
+# Generic Fist
+
+&fists #12 = #1789
+-
+
+
+# Generic Foot
+
+&feet #12 = #1733
+-
+
+
+# Verbs for the attack command
+
+&verbs-default #12 = attacks|hits|punishes
+-
+&verbs-bashing #12 = 
+  bashes|pounds|whomps|thumps|slams|smashes|nails|crushes|belts
+-
+&verbs-chopping #12 = chops|hacks|hits|cleaves|wails on
+-
+&verbs-slashing #12 = slashes|slices|cuts|gashes
+-
+&verbs-piercing #12 = pierces|penetrates|stabs|thrusts|pokes|sticks
+-
+&verbs-ranged #12 = shoots|fires|looses
+-
+&verbs-fluid #12 = sprays|douses
+-
+&verbs-energy #12 = zaps
+-
+
+
+#=============================================================================
+
+@drain #12
+-
+@notify #12
+-
+
+think Done.
+-

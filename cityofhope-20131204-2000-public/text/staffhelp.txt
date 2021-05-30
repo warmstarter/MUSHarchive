@@ -1,0 +1,1122 @@
+& help
+[header()]
+Index 
+
+  This is the index of staff helpfiles, V1.0b(17JUL00)
+
+[columns(sort(+accept|+vote|+commands|+contents|+duty|+join|+motd|+register|+rjoin|+rsummon|+learnq|+summon|+timestamp|+version|BACKGROUNDS|CONFIGURE|DEFAULTS|FUNCTIONS|PROJECT|+roles|+stattypes|+liststats|jobs|CGEN|+approve|+unapprove|+xp|dir|+db|+setstat|+sitebans|+abilitypoints|+qset|sheetop|+squery|+notes|+xpspend|+renown|+shift|+equip|+qset|+cg|+build|Dead|+carbonite|+lock|+pack|+fridgify|+boons|+alts|+book|+nightzones|+dayzones|bb,a,|,|),19,|,2)]
+
+  To get help on any of the listed topics, type '+shelp <topic>'
+[footer()]
+
+& +accept
+[header()]
++accept
+
+  SYNTAX: +accept
+
+  This command sets an acceptance attribute on the player to show that they 
+  have read and accepted the terms of your game's AUP.  It sets a simple 
+  timestamp on the character object and sends the player an emit that the 
+  command has worked.  
+
+  This command is adaptable to other applications where you may need players 
+  to acknowledge that they have read and accepted rules associated with the 
+  game.  Imbedding the command in the text of the material you want to be read 
+  is the best way to document it for players.
+[footer()]
+
+& +bg
+& +back
+& backgrounds
+[header()]
+Staff Background Commands:                                
+
+  +bgview <name>       - Shows the number of sections for <name>.
+  +bgcheck <name>/<#>  - Shows the text of section <#> for <name>.
+[footer()]
+
+& CONFIGURE
+[header()]
+Configuring SGP:
+
+  There will be several things that you need to configure in this package in 
+  order to make use of all the features therein.  One of the first will be to 
+  edit the parameters that define who passes isstaff() and ostaff().  Both 
+  functions are found on the Global Functions object.  
+
+  isstaff() is defined specifically by flag.  ostaff() checks against the list 
+  stored in &STAFF-LIST on the Global Parent Object.  Truthfully, most 
+  functions in the game will use isstaff(), where ostaff() is used for code 
+  where you want the regular game staff to show, such as +who.
+
+  &STAFF-LIST is a space seperated list of dbrefs.  It displays on +staff and 
+  +staff/all in the same order that they are entered on the list.
+
+  See Also: CONFIGURE2
+[footer()]
+
+& CONFIGURE2
+[header()]
+Configuring SGP:
+
+  Headers and Footers maybe changed through the code by editting the code.  
+  This code is specifically set up to use &HEADER and &FOOTER attributes on 
+  the Global Parent Object.  You can edit the existing default headers and 
+  simply add them in the place of the old.  The footers can be substituted by 
+  editting them to match.  Examine the global parent object for a pregenerated 
+  set of footers.
+  
+  ANSI color is optional not used in this code, since different servers enable 
+  and handle color differently.  ASCII character art used as header and footer     
+  attributes on the main code will not require a major hacking effort.  
+  Complex ASCII art has been incorporated into at least one game and simply 
+  requires someone with the patience to hack it in.  
+
+  All globals are coded to 78 spaces wide.  78 is divisable by 78, 39, 26, 13, 
+  6, 3, 2, and 1.  When you design your own ASCII for this package, you can 
+  use repeat() to generate certain unique elements.  There is nothing to 
+  prevent ascii headers and other elements from being several lines high, 
+  though it is adviseable to keep an eye to how many extra lines the code 
+  generates.
+
+  See Also: CONFIGURE3
+[footer()]
+
+& CONFIGURE3
+[header()]
+Configuring SGP +finger:
+
+  +finger can be customized in the by changing appropriate references in the 
+  softcode to headers and footers to attributes that you desire.  
+
+  Adjusting the types of attributes that the code will read by default 
+  requires making changes to &FINGER_LIST and &FINGER_LIST_LONG on the parent 
+  object.  These two attributes control the finger attributes that the code 
+  looks for, and the actual output to the display itself.  These two 
+  attributes are in a specific order and are directly related to each other.  
+  If you add, remove, or modify items in the list, you must make sure that the 
+  order is preserved in both lists.  You have been warned. 
+  
+  As with all such undertakings, make sure you have a backup of anything you 
+  had prior to making modifications.  You'll hate yourself if you've made 
+  extensive modifications and then mess up.
+[footer()]
+
+& +cnotes
+[header()]
++cnotes
+
+  CNOTES have been deprecated in favor of +notes
+
+See Also: +notes
+[footer()] 
+
+& +commands
+[header()]
++commands
+
+  SYNTAX: +commands <thing>
+
+  This command shows the $-commands for a given object, room, or player.  This 
+  is useful for many reasons, including looking for conflicting commands.
+[footer()]
+
+& +contents
+[header()]
++contents
+
+  SYNTAX: +contents <thing>
+
+  This commands shows the contents of a given object, room, or player.  It 
+  shows DARK objects.
+[footer()] 
+
+& DEFAULTS 
+[header()]
+Default SGP 
+
+  SGP comes with a given list of commands and helpfiles.  The default 
+  configuration of the code is found in the SGP Installer.  This configuration 
+  accounts for base globals and doesn't include those commands that would be 
+  only useful in a roleplaying environment.  To add the RP specific code, 
+  quote the RPPack file in the same that you did the installer.  It will write 
+  them directly to the required objects.
+  
+  This code does not include a bulletin board system.  If you choose to use 
+  Myrrdin's BBS system, you may simply add the text version of +help to the 
+  file and add the specific topics to the listing in the index at the top of 
+  this file.  Other BBS systems may or may not have helpfiles that are 
+  MUX-ready. 
+
+  Helpfiles for MUX are set up as .txt files and are placed in the game/text/ 
+  directory of your master account as 'staffhelp.txt' and 'plushelp.txt'.  
+  Use mkindx and then @readcache within the MUX to bring changes into the 
+  files read by the game.  These files may be used by Penn and TinyMUSH 2.2 
+  games with hardcoded +help commands, though there will be additions required 
+  for Tiny that are not needed for Penn.
+[footer()]
+
+& +duty 
+[header()]
++duty
+
+  SYNTAX: +duty
+
+  This sets a staff member as being either On or Off duty.  
+[footer()]
+
+& FUNCTIONS
+[header()]
+Softcoded Functions:
+
+  Functions: isstaff(<dbref>)   
+
+    Returns 1 or 0 when player matches the flags defined as 'staff'
+    
+             ostaff(<dbref>)    
+    
+    Softcoded function that checks to see if <dbref> against the official 
+    staff list as listed on the Global Parent.
+    
+             andlist(<string>,<delimiter>) 
+
+    Returns a string as a comma separated list with 'and' between second to 
+    last and last elements.
+    
+             mmm-dd-yyyy()
+    
+    Returns time() output in terms of MMM DD YYYY.
+    
+[footer()]
+
+& +motd
+[header()]
++motd
+
+  SYNTAX: +motd/list
+          +motd/set <type>=<message>
+          +motd/del <type>=<MOTD #>
+          +motd/clear <type>
+          +motd/reset   
+
+  This code allows for easier manipulation of the @motd command and the use of 
+  softcoded MOTD to create semi-permanent MOTD.  
+  
+  The first command lists the stored MOTD messages in order from oldest to 
+  newest, by MOTD type.  The types listed are: general, wizard, down, and 
+  full.  
+  
+  The second command sets an MOTD attribute to the global parent.  You select 
+  the type from the above list and set the message of your choosing.  
+        
+  > +motd/set general=This is an MOTD.
+
+  The third command removes a selected MOTD # from a given MOTD listing.  In 
+  the above example, the message number is 1 in the general list. 
+
+  > +motd/del general=1 
+
+  The fourth command clears all the MOTD of a given type.
+
+  > +motd/clear general 
+  
+  The last command resets the +motd system so that the game will read the 
+  MOTDs appropriately.  This code is called as part of the @startup for the 
+  object.
+[footer()]
+
+& +join
+[header()]
++join
+
+  SYNTAX: +join <name>
+
+  Allows a staff member to join a player where they are on the game.
+  Please note that it is considered polite to page the player in advance to 
+  inform them of the pending visit.
+
+  See Also: +summon
+[footer()]  
+
+& PROJECT 
+[header()]
+Project Status Tracker Help                             
+        
+  SYNTAX:  +setproject <project name>/<coder name>/<status>
+           +viewprojects
+           +editproject <project name>/who=<coder name>
+           +editproject <project name>/status=<status>
+           +deleteproject <project name>
+           +trackerhelp -- Gets this screen.
+
+  This code assists in the management of game-related projects.  The project 
+  name, and the other fields, can have spaces in them.
+[footer()]
+
+& +register
+[header()]
++register
+
+  SYNTAX: +register <character>=<RL name>=<email>=<alts>
+
+  The RL name must be their FULL name, first and last. Alts can be none.
+[footer()]
+
+& +rjoin
+[header()]
++rjoin
+
+  SYNTAX: +rjoin
+
+  Sends a staff member back to where they had been previously.  Use this 
+  command when you want to go somewhere other than your home.
+  
+  See Also: +join
+[footer()]
+
+& +rsummon
+[header()]
++rsummon
+
+  SYNTAX: +rsummon <player> 
+
+  Allows a staff member to send a player back to the location they were when 
+  they were originally summoned.
+  
+  See Also: +summon
+[footer()]
+
+& +staff
+[header()]
+Notes on +staff:
+ 
+  SYNTAX: +staff/add <player>
+          +staff/remove <player>
+ 
+  These two commands modify the contents of &STAFF-LIST on the global parent 
+  and affect whether or not a given person appears on the +staff and 
+  +staff/all listings.  Where isstaff() checks against flags, STAFF-LIST and 
+  ostaff() are explicitly set and checked by code.
+   
+[footer()]
+
+& +stnotes
+[header()]
+STNOTES
+
+	STNOTES have been deprecated in favor of +notes
+
+See Also: +notes
+[footer()]
+
+& +summon
+[header()]
++summon
+
+  SYNTAX: +summon <player>
+
+  Allows a staff member to summon a player object to their current location.  
+  Please note that it is considered polite to page the player in advance to 
+  inform them of the pending summons.
+  
+  See Also: +rsummon, +join
+[footer()]
+
+& +timestamp
+[header()]
++timestamp
+
+  SYNTAX:  +timestamp <name>/<topic>=<note>  - Sets a timestamp on a given 
+                                               player for a given topic and 
+                                               reason.
+           +timestamp/read <name>            - Lets staff read all timestamps 
+                                               on a given player.
+           +timestamp/rem <name>/<topic>     - Removes a given timestamp 
+                                               attribute from a player.
+           +timestamp/showall                - Shows all currently set 
+                                               timestamps.  Can be spammy.
+[footer()]
+
+& +version
+[header()]
++version
+
+  SYNTAX:  +version   
+           +version <dbref>
+
+  This code is in place to aid the user in the tracking of version history of
+  SGP objects.  The first form of this command returns a list of all SGP and 
+  additional tracked objects, their version numbers, dbrefs, most recent 
+  applied patches, and the date the last upgrade was done.  SGP installers 
+  update this information automatically.
+  
+  The second form of this command looks up a specific tracked object and 
+  returns information on what was applied to the object when.
+  
+  See Also: +version2  
+[footer()]
+&
+
+& +version2
+[header()]
++version (continued)
+
+  SYNTAX:  +version/add <dbref>   
+           +version/remove <dbref>
+           +version/update <dbref>/<field>=<data>
+           
+  The first form of this command adds new objects to the +version listing.  
+  The second form removes an object from +version. The third form edits 
+  various parts of the +version display. Fields include 'version', 
+  'patchlevel' and 'history'.  The 'Last Update' field is updated by the first 
+  two uses of this command.
+  
+  Updating the 'history' field adds detailed information to the object's 
+  UPDATE-HISTORY attribute and includes a date with every entry. 
+[footer()]
+& +authorities
+[header(Authorities)]
+Authorities provide staff a way to carry out various tasks related to
+managing the MU without needing Wizbit or Royalty powers. These authorities
+are managed with the +authorities commands.
+
+  SYNTAX:  +authorities
+  	   +authorities/give <player>=<authority>
+  	   +authorities/remove <player>=<authority>
+
+  The first form list the existing authorities, what they mean, and who has
+  them. This is available only to staff. The second form bestows <authority>
+  on <player>. The third form removes <authority> from <player>. These forms
+  are only available to wizards.
+
+  In +chelp: [ljust(hasauthority,12)]
+[footer()]
+
+& +stattypes
+[header(+stattypes)]
+  +stattypes
+
+Lists the categories of stats. This is a temporary command.
+
+See Also: [ljust(+authorities,12)]  [ljust(+addstat,12)]  [ljust(+liststats,12)]
+[footer()]
+
+& +setstat
+[header(+setstat/unsafe <player>/<stat>=<value>)]
+
+Sets the stat on a player, with minimal sanity checking. <value> can be anything.
+
+See Also: +abilitypoints
+[footer()]
+
+& +liststats
+[header(+liststats <type>)]
+  +liststats <type>
+
+Lists the stats available of a certain type, such as 'merits'. See +stattypes for a list of types.
+
+This is a temporary command.
+See Also: [ljust(+authorities,12)]  [ljust(+addstat,12)]  [ljust(+stattypes,12)]
+[footer()]
+
+& +jobs
+& jobs
+[header(Jobs)]
+  See: +jhelp
+[footer()]
+
+& CGEN
+[header(Chargen)]
+  Statting commands:
+  
+  +setstat     +settemp     +removestat  +stattype    +setstring   +setlist 
+------------------------------------------------------------------------------
+  DB commands:
+  
+  +create-db   +stathide	+statlist    +match       +matchfirst
++matches
+------------------------------------------------------------------------------
+  Cgen and Database functions:
+
+  STAT()       SGPSQUISH()  SGPTRIM()    TEMPSTAT()   STRING()     STATLIST()   
+  STATTYPE()                             
+------------------------------------------------------------------------------
+  General Sheet Functions:
+  
+  FN-DISPLAY-LIST     FN-DISPLAY-LISTS    FN-DISPLAY-STRINGS  FN_FORMAT
+  FN-HASLIST          FN_3LISTSCOL        FN_3VCOL            
+
+  World of Darkness Specific:
+    
+  FN_ABILITIES        FN_ARCANOI          FN_ARTS             FN_ATTRIBUTES 
+  FN_COMMON-LISTS     FN_DISCIPLINES      FN_FORMAT           FN_HEALTH 
+  FN_NUMINA           FN_SPHERES-REALMS
+[footer()]  
+& DB Commands
+[header(DB Commands)]
+  The DB Commands object contains commands that are used to maintain the stat 
+  data objects. The default lock on this object is set so that only Wizards 
+  can use the commands.  If you want to limit the group of people who can alter 
+  your stats database, then you need to change the &CAN_USE attribute accord
+  -ingly. The lock can be changed by altering the condition in the CAN_USE 
+  attribute to either a space seperated list of authorized users, or by 
+  creating a softcoded function similar to OSTAFF().
+  
+  Related Topics: 
+[footer()]
+& +create-db
+[header(+create-db)]
+  COMMAND: +create-db
+
+  Updates the stat database stored on the Stat DB object using the stat lists 
+  stored on the List Object.  This command needs to be run anytime the stat 
+  lists on the List Object are modified, either manually, or by using one of 
+  the following +statlist commands.
+  
+  Related Topics: 
+[footer()]
+& +stathide
+[header(+stathide)]
+  COMMAND: +stathide
+
+  This is an administrative command that calls @attribute/access to set all 
+  the STATLIST-, STRING-, and LIST- attributes to be wizard hidden, so that 
+  the players cannot directly see or modify their stats.  For this command to 
+  work properly @attribute/access needs to be runnable by a Wizard.  By 
+  default, @attribute/access is usually set so that only God can use it.
+  
+  Related Topics: 
+[footer()]
+& +statlist
+[header(+statlist)]
+  COMMAND: +statlist/<switch> [[<statlist>]/[<stat>]]
+
+    /showlists                   - This command lists out all the stat lists 
+                                  on the List Object. These are the stat lists 
+                                  that will be incorporated into the stat 
+                                  database when +create-db is run.
+    /addlist <statlist>          - This command adds <statlist> to the list 
+                                  of stat lists used by the database.  
+                                  <statlist> should be a single word with no 
+                                  spaces in it.   
+    /showstats <statlist>        - This command lists out the stats 
+                                  belonging to the stat list <statlist>.
+    /addstat <statlist>/<stat>   - This command adds the stat <stat> to the 
+                                  stat list <statlist>.  <stat> may include 
+                                  any characters (including blanks) except 
+                                  for ":" and "|".  
+    /deletestat <statlist>/<stat>- This command deletes the stat <stat> from 
+                                   the stat list <statlist>.  <stat> must, of 
+                                   course, be a stat on the named stat list.  
+
+  IMPORTANT NOTES: 
+    The stat lists can be manually edited by altering the LIST-<statlist> 
+    attribute on the List Object.
+    All alterations to the List Object, whether manually done, or done by 
+    code, MUST be followed by use of the +create-db command for the changes to 
+    take effect.  +stathide has to be used following the use of the /addlist 
+    switch.
+  
+  Related Topics:  +create-db, DB COMMANDS, LIST OBJECT, +stathide 
+[footer()] 
+& STAT()
+[header(STAT\(\)]
+  GLOBAL FUNCTION: stat(<player>,<stat>)
+  
+  Returns the numeric value of the stat for a given player.  Returns 0 if the 
+  stat doesn't exist on the character or that stat is set to 0.  
+[footer()]       
+& SGPSQUISH()
+header(SGPSQUISH\(\))]
+  GLOBAL FUNCTION: sgpsquish(<string>[,<character>])
+  
+  This function will trim multiple occurrences of <character> (or a space, if 
+  <character> is not specified) down to a single occurrence of <character>.
+  This is useful for getting rid of big internal spaces, and the like.
+  
+  Using ~ as part of the second argument will cause an error.
+  
+  Provides a second argument for squish on MUX.  This is a compatibility 
+  function that is only installed on MUXen where a 1 argument squish() is 
+  present.  Upgrade your server to the most current version of MUX as soon as 
+  possible. 
+[footer()]    
+& SGPTRIM()
+[header(SGPTRIM\(\))]
+  GLOBAL FUNCTION: sgptrim(<string> [,<trim style> [,<trim character>]])
+  
+  Checks for a Penn-style trim() and reverses the last 2 arguments.  This is a
+  compatibility function. 
+[footer()]    
+& TEMPSTAT()
+[header(TEMPSTAT\(\))]
+  GLOBAL FUNCTION: tempstat(<player>,<statname>)
+  
+  Returns the numeric value of the stat for a given player.  Returns 0 if the 
+  stat doesn't exist on the character or that stat is set to 0.
+[footer()]   
+& STRING()
+[header(STRING\(\))]
+  GLOBAL FUNCTION: string(*<player>,<stringname>)
+  
+  Returns the value of &STRING-<stringname> on a player object.    
+[footer()]
+& STATLIST()
+[header(STATLIST\(\))]
+  GLOBAL FUNCTION: statlist(<statlist>) 
+  
+  Returns the contents of a given &LIST and nothing if the LIST does not exist 
+  on the list object.  
+[footer()]
+& STATTYPE()
+[header(STATTYPE\(\))]
+  GLOBAL FUNCTION: stattype(<stat>)
+  
+  Returns the type of a given stat.  If the string is not a stat, then it 
+  returns "NOT A STAT".
+[footer()]
+& FN-DISPLAY-LIST
+[header(FN-DISPLAY-LIST)]
+  SHEET FUNCTION: FN-DISPLAY-LIST
+  
+  Given &LIST-FOO, creates a 78 column wide heading with 'Foo' centered and 
+  displays the appropriate list per FN-DISPLAY-LISTS.      
+[footer()]
+& FN-DISPLAY-LISTS
+[header(FN-DISPLAY-LISTS)]
+  SHEET FUNCTION: FN-DISPLAY-LISTS
+  
+  Given a '|' seperated &LIST from the character object, displays the 
+  elements of the &LIST in a 2 column format.  To change the number of 
+  columns, vary the 2nd argument of table(). 
+[footer()]
+& FN-DISPLAY-STRINGS
+[header(FN-DISPLAY-STRINGS)]
+  SHEET FUNCTION: FN-DISPLAY-STRINGS 
+  
+Given [u(fn-display-strings,%0,<name>:STRING-<name>|<name 2>:STRING-<name2>)], 
+  creates a 2 column display of $STRING from the character object.   Vary the 
+  number of columns displayed by changing the value of the second argument in 
+  table().
+[footer()]
+& FN_FORMAT
+[header(FN_FORMAT)]
+  SHEET FUNCTION: FN_FORMAT
+  
+  This function takes an individual stat:#:# in a &STATLIST and displays it in 
+  a 24 character wide field, stat on the left and the temporary and permanent 
+  values for that stat.  Temporary values for a stat are in ().  This is an 
+  internal function to all numerical stat displays.  To change the width in 
+  order to vary the number of columns, you change the value inside the 
+  strlen().  
+  
+  Example:
+    Willpower          (6) 7
+[footer()] 
+& FN-HASLIST
+[header(FN-HASLIST)]
+  SHEET FUNCTION: FN-HASLIST
+  
+  This function checks for the presence of a given &LIST on a player and 
+  feeds the result back to FN-DISPLAY-LISTS.          
+[footer()]
+& FN_3LISTSCOL
+[header(FN_3LISTSCOL)]
+  SHEET FUNCTION: [u(<dbref>/fn_3listscol,get(%0/<statlist>))]
+  
+  <dbref> is the dbref of the object where fn_3vcol is stored.  <statlist> is 
+  the STATLIST-<stattype> to be displayed.  This function displays a '|' 
+  seperated list of stats in 3, roughly equal vertical columns, divided into 
+  a 78 column display.  It displays the stats in the order that the stats 
+  appear in the attribute.
+  
+  Example:
+    >&STATLIST-FOO Bar=apple|orange|mango|pear
+    >&STATLIST-BAR Bar=cat|dog|canary
+    >&STATLIST-FOOBAR Bar=tree|flower|shrub
+    >say [u(<dbref>/FN_3LISTSCOL,get(*%0/STATLIST-FOO), get(*%0/STATLIST-BAR),
+    >get(*%0/STATLIST-FOOBAR))]
+    >apple        cat          tree 
+     orange       dog          flower
+     mango        canary       shrub
+     pear             
+[footer()]
+& FN_3VCOL 
+[header(FN_3VCOL)]
+  SHEET FUNCTION: [u(<dbref>/fn_3vcol,get(%0/<statlist>))]
+  
+  <dbref> is the dbref of the object where fn_3vcol is stored.  <statlist> is 
+  the STATLIST-<stattype> to be displayed.  This function displays a '|' 
+  seperated list of stats in 3, roughly equal columns, divided into a 78 
+  column display.  It displays the stats in the order that the stats appear in 
+  the attribute.
+  
+  Example:
+    >&STATLIST-FOO Bar=1|2|3|4|5|6|7|8|9
+    >say [u(<dbref>/fn_3vcol,get(%0/STATLIST-FOO))]
+    >1           4            7
+     2           5            8
+     3           6            9            
+[footer()]
+& +approve
+[header(+approve <char>)]
+This commands approves a character for RP, allowing them to go on the grid and other fun stuff. It requires the Approvechars authority.
+
+See Also: +unapprove    +authorities
+[footer()]
+& +unapprove
+[header(+unapprove <char>)]
+This commands unapproves a character for RP, keeping them from going on the grid and other fun stuff. It requires the Approvechars authority.
+
+See Also: +approve    +authorities
+[footer()]
+& +learnq
+[header(Learning Queue)]
+  +learnq <player>
+
+Allows anyone with the VIEWSTATS authority to view a player's learning queue.
+
+  +learnq/approve <player>=<stat>/<xp>
+  +learnq/approve <player>=<stat>/<xp>/<learning time>
+
+The +learnq/approve command allows a staffer with the SETSTATS authority to preapprove a <stat> for a <player> at a given <xp> cost. If the type of stat (attribute, talent, etc) has an established learning time per XP spent, then the first form is sufficient. If there's no per-XP learning time or the staffer would like to override the default learning time, the second form is used. NOTE: The <learning time> is in [ansi(h,seconds)], which may suck but I will write a calculator for it in due time.
+
+  +learnq/unapprove <player>=<stat>
+
+The +learnq/unapprove command allows a staffer with the SETSTATS authority to unapprove <stat> for <player>. If XP has already been deducted for the stat it will be refunded.
+
+  +learnq/finalize <player>=<stat>
+
+The +learnq/finalize command allows a staffer with the SETSTATS authority to finalize <stat> for <player>. This applies the stat to the character sheet and removes it from <player>'s learning queue. It does not affect XP because the XP was deducted when the player first slotted the stat.
+[footer()]
+& +xp
+[header(+xp)]
+
+Staff with the VIEWSTATS authority can:
+
+  +xp <player>                  View statistics about a player's XP.
+
+Staff with the SETSTATS authority can:
+
+  +xp/set <player>=<amount>     Set an exact amount of XP.
+  +xp/add <player>=<amount>     Add XP to current total.
+  +xp/sub <player>=<amount>     Take away XP from current total.
+  +xp/spent <player>            View a player's XP spend history.
+
+  <amount> can be fractional (or negative, but why would you want to?)
+[footer()]
+& +vote/history
+[header(+vote/history <player>)]
+The +vote/history command allows staff with the VIEWSTATS authority to see what votes <player> has cast recently. Each time the player casts a vote, votes older than six hours are removed from the history and the new vote is added. This cleanup is only done when a vote is cast so you may see votes much older than six hours on the history.
+[footer()]
+& +roles
+[header(Role Management)]
+  +roles
+  +roles/authorities
+
+  +roles/give   <player>=<role>
+  +roles/remove <player>=<role>
+  +roles/strip  <player>
+
+[mudname()] uses a system of Role-Based Access Control to grant bits, powers and authorities to staff. The first command lists what roles are on the system, what they do, who has them, and what the role gives them. The second command describes the authorities on the system.
+
+Authorities can be thought of as soft-coded powers. Some commands check to see that the user has a certain authority before doing anything. This allows for more fine-grained control over soft-coded aspects of the system.
+
+The third command grants a <role> to a given <player>. The fourth removes <role> from <player>. The fifth removes [ansi(h,all)] roles from <player>. All three of these commands reset bits and powers when invoked. All three of these commands require the ROLEMGR authority.
+[footer()]
+& +notes
+[header(Unified Notes System)]
+  +notes/all <target>
+  +note/read <target>/<note>
+
+  +note/approve <target>/<note>
+  +note/reject  <target>/<note>
+  +note/lock    <target>/<note>
+
+  The /all and /read commands allow staff to list and read all notes notes on players.
+  The /approve, /reject, and /lock commands allow staff with the SETSTATS authority to set the status of a note to APPROVED, REJECTED, or LOCKED. LOCKED notes are considered APPROVED but cannot be edited by the player.
+
+See Also: +roles
+See in +help: +notes
+[footer()]
+
+& dir
+[header(Sphere Location Directory)]
+Cam - Belvedere Hotel #345
+Fae - Rhapsody #317
+Gar - Cave #1186
+Ratkin - The Rat Nest #1781
+Sabbat - Argent Institute #1355
+Technocracy - Black Ridge Building #292
+[footer()]
+
+& +db
+[header(+db <player>)]
+The +db command allows staff to inspect the (mostly) raw data on a character sheet. The attributes are sorted to make it slighly easier to find what you're looking for. In the header is the dbref of the sheet object, and the player.
+[footer()]
+
+& +sitebans
+[header(Site Banninator)]
+  [pcol(+sitebans/list)]                      - List current sitebans
+  [pcol(+sitebans/delete)] [argcol(<IP>)]               - Delete a siteban entry
+  [pcol(+sitebans/add)] [argcol(<IP>)]=[argcol(<reason>)]         - Add a siteban for a specific IP
+  [pcol(+sitebans/player)] [argcol(<player>)]=[argcol(<reason>)]  - Add a siteban for the current IP of <player>
+
+These commands cause an IP address to become sitebanned: No one from that IP can connect to the MU. They should be used with great care and only as a last resort.
+[footer()]
+
+& +abilitypoints
+[header(+abilitypoints)]
+  [pcol(+abilitypoints)] [argcol(<player>)]
+
+Tally up ability points for <player>.
+[footer()]
+
+& sheetop
+[header(Sheet Operations)]
+The Sheet Operation ([pcol(sheetop)]) system is code for matching Character Sheets with specific properties. sheetop allows you to form fairly simple expressions to match character sheets.
+
+All sheet operations take the following form:
+
+  [argcol(<Stat>)]@[pcol(<operator)]@[argcol(<value>)]
+
+Stat names and values are [pcol(not)] case-sensitive although when use in code, capitalization makes it easier to read.
+For example:
+
+  [argcol(Faction@is@Independent)] - Match character sheets with [argcol(Faction)] [pcol(exactly matching)] [argcol(Independent)]
+
+Available operators:
+
+  [pcol(is)] - Exact text match
+  [pcol(isnt)] - Text doesn't match
+  [pcol(matches)] - Part of the text is in the stat (amari matches camarilla)
+  [pcol(in)] - Stat matches an item in|a|list|like|this
+  [pcol(BEQ)] - Base stat is equal to value
+  [pcol(BNEQ)] - Base stat does is not equal to value
+  [pcol(EEQ)] - Effective stat is equal to value
+  [pcol(ENEQ)] - Effective stat is not equal to value
+  [pcol(BLT)] - Base stat is less than value
+  [pcol(BGT)] - Base stat is greater than value
+  [pcol(ELT)] - Effective stat is less than value
+  [pcol(EGT)] - Effective stat is greater than value
+  [pcol(BLTE)] - Base stat is less than or equal to value
+  [pcol(BGTE)] - Base stat is greater than or equal to value
+  [pcol(ELTE)] - Effective stat is less than or equal to value
+  [pcol(EGTE)] - Effective stat is greater than or equal to value
+
+See Also: +squery
+[footer()]
+
+& +qset
+[header(+qset)]
+  [pcol(+qset)] [argcol(<player>)]=[argcol(Stat1:value)]
+  [pcol(+qset)] [argcol(<player>)]=[argcol(Stat1:value|Stat2:value|Stat3:value)]
+
+Set stats on a player in bulk.
+[footer()]
+
+& +squery
+[header(+squery)]
+  [pcol(+squery/app)] [argcol(<sheetop>)]  - Search approved characters
+  [pcol(+squery/all)] [argcol(<sheetop>)]  - Search all characters
+
+Search through approved characters or all characters for sheets that match specific criteria (Sheet Operations: [pcol(+shelp sheetop)]).
+
+Sample searches:
+
+  [pcol(+squery/app)] [argcol(Faction@is@Independent)] - Find independents
+  [pcol(+squery/app)] [argcol(Strength@BGTE@3)] - Find chars with base strength >= 3
+  [pcol(+squery/app)] [argcol(Nature@is@)] - Find chars with no nature set
+
+See Also: [argcol(sheetop)]
+[footer()]
+
+& Cheatsheet
+[header(Staff Commands Cheat Sheet)]
+  +jobs/mine
+  +job/assign #=spo  - Assign a job to sponge
+  +job/trans #=CODE  - Move a job to the code bucket
+  +job/mail #=Yo dawg...  - Update and send mail for a job
+  +job/complete #=Yo dawg..  - Complete a job, with message (no mail)
+
+  +setstat/unsafe <player>/<stat>=<value>  - Set stat on a player with almost no safety checking
+  +xp/spend <player>=<amount>  - Deduct XP from player and mark it as spent.
+[footer()]
+
+& +xpspend
+[header(+xpspend)]
+  +xpspend/st <player>/<stat>=<value>/<cost>
+
+Spend a player's XP to set a stat to a given value. It's only sanity checking is to:
+  * Ensure it knows what player you're talking about
+  * Ensure the stat exists
+  * Ensure the player has enough XP.
+
+It doesn't verify that the cost is appropriate. It deducts the XP from the player, sets the stat, and logs the XP spend.
+
+See Also: +xp
+[footer()]
+
+& +effects
+[header()]
+  [pcol(+effects)] [argcol(<player>)]
+
+  [pcol(+effect/remove)] [argcol(<player>)]/[argcol(<effect ID>)]
+  [pcol(+effect/perm)] [argcol(<player>)]/[argcol(<stat>)]=[argcol(<adjustment>)]/[argcol(<reason>)]
+  [pcol(+effect/temp)] [argcol(<player>)]/[argcol(<stat>)]=[argcol(<adjustment>)]/[argcol(<days>)]/[argcol(<reason>)]
+
+Staff with SETSTATS authority can set effects on players: adjustments to stats that don't represent permanent (forever) adjustments to the character sheet. The effects set with /perm are set to expire in 2022 so while technically temporary, they should outlive the game.
+
+Effect IDs are six-digit numbers shown in [pcol(+effects)]. The /remove command will remove effects set by any means.
+[footer()]
+
+& +renown
+[header(+renown)]
+  [pcol(+renown)] [argcol(<player>)]
+  [pcol(+renown/log)] [argcol(<player>)]
+  [pcol(+renown/log)] [argcol(<player>)]/[argcol(<days>)]
+  [pcol(+renown/award)] [argcol(<player>)]/[argcol(<type>)]=[argcol(<amount>)]/[argcol(<reason>)]
+
+The first command will display a player's current renown.
+
+The second commmand will show a player's renown history.
+
+The third command will award a player [pcol(temporary)] renown of the given type. If the new value for temporary renown exceeds 10, permanent and temporary will be adjusted accordingly. [argcol(<amount>)] can be a negative value and if the new value is below 0, permanent and temporary will be adjusted accordingly. Every time renown is awarded, the type, amount, reason, time, and who awarded it are recorded, just like with [pcol(+xpspend)].
+[footer()]
+
+& +shift
+[header(+shift)]
+  [pcol(+shift/custom)] [argcol(<player>)]/[argcol(<form>)]=[argcol(<stat>:<value>|<stat>:<value>|...)]
+
+This command sets a custom [pcol(+shift)] form on a player. To clear the form, leave everying blank after the [argcol(=)] sign.
+
+[argcol(Common Demon Forms)]
+  APOC-BEL: Strength:1|Dexterity:2|Stamina:1
+  APOC-NUSKU: Strength:2|Dexterity:1|Stamina:1
+  APOC-QINGU: Charisma:2|Manipulation:1|Appearance:1
+  APOC-DAGAN: Strength:1|Dexterity:1|Stamina:1
+  APOC-NINSUN: Intelligence:1|Wits:1|Perception:2
+  APOC-SHAMASH: Intelligence:2|Wits:1|Perception:1
+  APOC-NERGAL: Charisma:2|Manipulation:1|Appearance:1
+  APOC-KISHAR: Strength:2|Dexterity:1|Stamina:1
+  APOC-MUMMU: Strength:2|Dexterity:1|Stamina:1
+  APOC-ZALTU: Strength:2|Dexterity:2|Stamina:1
+  APOC-NINURTU: Strength:1|Dexterity:2|Stamina:1
+  APOC-ARURU: Charisma:1|Manipulation:1|Appearance:2
+  APOC-MAMMETUM: Dexterity:2
+  APOC-ISHARA: Charisma:2|Manipulation:1|Appearance:2
+[footer()]
+
+& +equip
+[header(+equip)]
+  +equip/new <item type number>
+  +equip/unowned
+  +equip/chown <item ID>=<player>
+  +equip/who <player>
+  +equip/set <item ID>=<property>:<value>|<property>:<value>|<property>:<value>
+
+[pcol(+equip/new)] will create a new item of the specified type. For example, [pcol(+equip/new)] [argcol(3)] will create a new Heavy Revolver. Newly-created items have no owner.
+
+[pcol(+equip/unowned)] will list items with no owner. This helps find items you've created but haven't yet given to a player.
+
+[pcol(+equip/chown)] will give an item to a player so it shows up in their equipment list.
+
+[pcol(+equip/who)] will show all the items owned by a specified player.
+
+[pcol(+equip/set)] will update properties of an item. This allows you to provide custom Damange, Range, Soak, or other properties to an item. This command does no sanity checking whatsoever on the properties you specify. It will allow you to set non-sensical properties and values. Use it with caution. Providing no [argcol(<value>)] for a property will remove that property from the item.
+  [pcol(+equip/set)] [argcol(123456)]=[argcol(Range:40|Damage:3|Conceal)] will provide a custom [argcol(Range)] and [argcol(Damage)] for item [argcol(123456)] and remove its custom [argcol(Conceal)] if it has a custom [argcol(Conceal)].
+
+Item Type [argcol(0)] is special. It is an [argcol(Anything)] and has no default properties. If you need to give a player an item that has no close match in the system, this can be used to create a completely custom item.
+[footer()]
+
+& +qset
+[header(+qset)]
+  [pcol(+qset)] [argcol(<player>)]=[argcol(Strength:2|Dexterity:3|Firearms:2|Faction:Cool Dudes|Path Rating:2)]
+
+See Also: +cg
+[footer()]
+
+& +cg
+[header(+cg)]
+  [pcol(+cg/despace)] [argcol(<player>)]   - Remove all leading and trailing spaces from stats on a player's sheet.
+  [pcol(+cg/clearbsd)] [argcol(<player>)]  - Remove Wyrm renown from a sheet.
+  [pcol(+cg/cleargai)] [argcol(<player>)]  - Remove Gaian Garou renown from a sheet.
+
+  [pcol(+cg/check)] [argcol(<player>)]  - Check a player's +sheet for common problems.
+  [pcol(+cg/addstat)] [argcol(<type>)]=[argcol(<stat name>)]   - Add a stat to the system. Use [pcol(+statsearch)] to check first. The system will fix capitalization.
+  [pcol(+cg/delstat)] [argcol(<stat name>)]  - Remove a stat from the system. Capitalization does not matter.
+
+  [pcol(+cg/vchecks)]     - List value checks in the system
+  [pcol(+cg/vcheck)] [argcol(<statname>)]=[argcol(<acceptable values>)]  - Add a value check to the system.
+
+[pcol(Value Checks)] mean "If you have this stat, it should have this value." This is intended to ensure that players select appropriate values for merits, flaws, and similar stats. [argcol(<acceptable values>)] can be one of the following:
+  * [argcol(3)] - This stat may only be [argcol(3)].
+  * [argcol(2-4)] - Stat may be 2, 3, or 4.
+  * [argcol(2/4/6)] - Stat may be 2, 4, or 6 (but not 3 or 5).
+
+See Also: +qset
+[footer()]
+
+& +build
+[header(+build)]
+  +build/who <player>
+  +build/list
+  +build/create <project name>/<# rooms>=<owner>   (multi-room projects only)
+  +build/select <parent>
+  +build/exam here|<exit>|<room>|<parent>
+  +build/link <proj dbref>   - Link the project to the grid, after inspecting its location with [pcol(+build/jump)]
+  [pcol(+build/single)] [argcol(<projct name>)]=[argcol(<player>)]   - Create a single room build project for player. It won't have a project parent and will require using [pcol(+build/m*)] commands to get on the grid.
+
+[argcol(Manual fixy stuff commands)]
+  [pcol(+build/mparent)] [argcol(<exit>|<room>)]=[argcol(<parent>)]  - Manually set the parent for a room or exit. For exits it ignores the specified parent.
+  [pcol(+build/mset)] [argcol(<exit>|<room>|<parent>)]/[argcol(<attribute>)]=[argcol(<value>)]
+  [pcol(+build/medit)] [argcol(<exit>|<room>|<parent>)]/[argcol(<attribute>)]=[argcol(<from>)],[argcol(<to>)]
+  [pcol(+build/mname)] [argcol(<exit>|<room>|<parent>)]=[argcol(<name>)]  - Rename a room exit, or parent. For rooms, if no color is specified it uses the default IC room color.
+  [pcol(+build/mlink)] [argcol(<exit>)]=[argcol(<room>)]  - Manually link an exit to a room.
+  [pcol(+build/mchown)] [argcol(<exit>|<room>|<parent>)]=[argcol(<player>)]  - Manually @chown a room, exit, or project parent to a player.
+  [pcol(+build/mhangout)] [argcol(<hangout name>)]/[argcol(<hangout description>)]=[argcol(<jump-to dbref>)]/[argcol(<space-separated list of dbrefs for hangout>)]
+  [pcol(+build/munhangout)] [argcol(<hangout name>)]
+
+[argcol(Build Request Handling Gibberish)]
+\[Staff\] Sponge says, "Basically, some players will ask for 25 room build projects, which is of course silly. My rule of thumb is that ever room of a project should see at least    an hour of RP every 2-4 weeks. Chances are that won't apply to a dog house, third guest bedroom, etc"
+\[Staff\] Sponge says, "So I want to hear in the build job which rooms they intend to make"
+\[Staff\] Sponge says, "More rules of thumb: no more than 1 personal build project and no more than one business project, and each depends on it making sense"
+\[Staff\] Sponge says, "If someone wants to have a club, at this point they need to explain how it's going to be different from the clubs we already have."
+\[Staff\] Sponge says, "I usually try to keep it to 2-3 rooms per project but I try not to be a tight ass going up to 5 if I think those 5 really are going to get RP."
+\[Staff\] Sponge says, "Resources don't stack: My resources 4 and her resources 4 don't make resources 5: they make resources 4"
+\[Staff\] Sponge says, "I usually allow an extra room or two for a combined business-residence"
+\[Staff\] Sponge says, "I think a good rule of thumb is to not even start the build project until the character has had some minimum amount of IC time. I've been terribly inconsistent about enforcing it."
+
+See Also: +lock
+[footer()]
+
+& dead
+[header(Dead)]
+May be incomplete. Some dates are approximate.
+
+unknown  - Sebastian Holmes - By Cory. Seems like OOC suicide.
+unknown  - Tiadra           - Spawn-camped by Ranger.
+10/02/12 - Scott            - Per Sponge for Cam -> Sabbat defection.
+10/16/12 - Sister Magdalena - By Carl for trying to infiltrate Sabbat.
+12/30/12 - LaVey            - By Faqirah and Damion.
+02/07/13 - Damion           - Challenged NPC leader to monomacy, pwned.
+02/21/13 - Dmitrius         - Random Risk 3 fight.
+04/16/13 - Nicolette        - Diablerized by Cyn.
+05/14/13 - Varges           - By Faqirah.
+05/26/13 - Carl             - Retired, agreed to die off camera per Acis.
+05/28/13 - Brice, Dwayne,   - Retired, agreed to die off camera.
+             Steven, Drake,
+             Vidar
+06/04/13 - Ravaun           - Club burned down for animal abuse.
+06/20/13 - Nana             - Heart attack.
+06/30/13 - Casper           - Stumbled upon Umbral spirit, eaten.
+06/30/13 - Harstone         - By NPCs for attempted mutiny.
+07/26/13 - Beckett          - By Katie, voluntarily after repenting.
+07/28/13 - Garan            - By Cross for aiming to drive Arec to murder.
+07/31/13 - Azoun            - Saving NPC girl from NPC BSDs.
+08/04/13 - Willow           - Retired, agreed to die off camera per Rowan.
+08/25/13 - Pythagoras       - By Kirk for stealing Lihi's phylactery.
+09/20/13 - Tayze            - By Typhanie et al for serial rape and Wyrminess.
+11/05/13 - Ignacio          - By Gwydion/Aiden for murder of NPCs with Draven.
+11/17/13 - Ghost, Aeric,    - By Draven after driving him to hunger frenzy.
+             Deirdre
+11/28/13 - Never            - Retired, killed off-camera by Whiskey/November.
+[footer()]
+
+& +carbonite
+& +fridgify
+[header(+carbonite/+fridgify)]
+  [pcol(+carbonite)] [argcol(<player>)]
+
+The [pcol(+carbonite)] command will [pcol(+unapprove)] a character, @link them to the Freezer, then send them to the Freezer where they are effectively trapped.
+
+The exit going out of the freezer is locked and the room itself is locked to prevent teleporting or @home'ing out. The character cannot be extracted via [pcol(+meet)], etc. Think very carefully before using this command as it requires a Wizard to undo.
+
+  [pcol(+fridgify)] [argcol(<player>)]
+
+The [pcol(+fridgify)] command will set a character's home to the [ansi(m,OOC Nexus)] and teleport them to [ansi(m,The Fridge)]. The character is *not* unapproved and they can escape the fridge any time they want by using [pcol(home)]. This command opens a job for the character's stuff to be cleaned up. [moniker(#4)] should probably handle that job. This command only works on characters that are approved and haven't logged in in over 90 days.
+[footer()]
+
+& +lock
+[header(+lock)]
+  [pcol(+lock/setup)] [argcol(<exit>)]=[argcol(<player>)]
+
+A macro that runs [pcol(+lock/init)], [pcol(+lock/givecontrol)], and [pcol(+lock/givekey)].
+
+[pcol(+lock/init)] can fail for a number of reasons. For it to work on an exit all of the following must be true:
+  * The exit must have exactly one corresponding exit (going in the opposite direction)
+  * Both exits must have an appropriate exit parent.
+
+The other [pcol(+lock)] commands can fail for a number of reasons:
+  * Any of the reasons that would cause [pcol(+lock/init)] to fail
+  * The exit key has changed (via @lock or @unlock)
+
+When the other [pcol(+lock)] commands fail, [pcol(+lock/setup)] should be able to fix it but it will reset the control and key lists.
+[footer()]
+
+& +pack
+[header(+pack)]
+  [pcol(+pack/chan)] [argcol(<pack name>)]=[argcol(<Chan name>)]
+
+Example:
+  [pcol(+pack/chan)] [argcol(Gaia's Merciless Pimpslap)]=[argcol(PimpSlap)]
+
+This adds a channel for a pack that meets the criteria. This should be the appropriate points in totem or some kind of fetish or something.
+
+In the above example, all members of the pack [argcol(Gaia's Merciless Pimpslap)] would be able to communicat with each other:
+  [pcol(+pack)] [argcol(Sup nagas?)]
+  [scol(<)][pcol(PimpSlap)][scol(>)] [moniker(#4)] says, "Sup nagas?"
+[footer()]
+
+& +boons
+[header(+boons)]
+  [pcol(+boons)] [argcol(<player>)]  - view a players boons.
+[footer()]
+
+& +alts
+[header(+alts)]
+  [pcol(+alts)] [argcol(<player>)]   - View a player's alts.
+
+Get the list of a player's registered and unregistered alts.
+
+Registered alts are those alts a player has claimed using the [pcol(+alts)] system.
+
+Unregistered alts are presumed to be alts based on matching SEMAIL or matching IP networks.
+
+There's nothing preventing a player from using a different SEMAIL on each character so the email method will fail to find characters that are alts.
+
+The IP-based matching is more reliable but may incorrectly match two players who have logged in from the same network. It will match characters as alts that are not. Note that this methods only uses the IP address of the character you choose. It may give different results for different characters owned by the same player.
+[footer()]
+
+& +book
+[header(+book)]
+  [pcol(+book/approve)] [argcol(WW1234)] - Approve book WW1234
+  [pcol(+book/reject)] [argcol(WW1234)]  - Reject book WW1234
+
+These two commands mark a book as approved or rejected for use on the game. When a book is approved, all stats and materials are approved. When a book is rejected, all stats and materials in the book are rejected. If only some materials in the book are approved and others rejected, the book should be left unspecified.
+[footer()]
+
+& +nightzones
+& +dayzones
+[header(Nightzones and Dayzones)]
+  [pcol(+nightzones)]     List all nightzones.
+  [pcol(+dayzones)]       List all dayzones.
+[footer()]
+
+& bb
+[header(Staff bboard commands)]
++bbnewgroup <name>
++bbcleargroup <name>     Renumbers stuff! Use only if you botch the above.
+
+Attributes to set on the new bb's object:
+
+CANREAD = u(UFUN_PASSES_LOCK,%%0)
+CANWRITE = u(UFUN_PASSES_LOCK,%%0)
+UFUN_PASSES_LOCK = or(and(u(#14/UFUN_SHEET_EXPR,%%0,<expression>),isapproved(%%0)),isstaff(%%0))
+  where <expression> is something like Tribe@is@Bone Gnawer
+
+Code is located on #52. Some commands are obsolete, thus omitted here.
+[footer()]
+
+&

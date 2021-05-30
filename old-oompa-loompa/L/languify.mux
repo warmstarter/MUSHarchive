@@ -1,0 +1,71 @@
+# For the second argument, feed either the word 'all' for normal use in
+#  commands like say and pose, or give it the list of listeners for use in
+#  things like whisper and directed mutter.
+
+# languify(<speaker>, <listeners/all>, <language>, <message> 
+#  [, <prefix for listeners>, <prefix for speaker>, 
+#  <message for uninvolveds>])
+
+&LANGUIFY #2541=
+
+# Set the following q-registers:
+#  %q0 -- The real name of the language, if any
+#  %q1 -- The speaker's skill in the language
+#  %q2 -- The message, evaluated with the speaker's permissions
+#  %q3 -- The speaker's location
+#  %q4 -- The speaker's name
+
+   [setq(0, default(#1771/LANGUAGE-%2-NAME, #-1))]
+   [setq(1, skill(%0, Language/%q0))]
+   [setq(2, objeval(%0, s(%3)))]
+   [setq(3, loc(%0))]
+   [setq(4, name(%0))]
+
+# See if this is OOC, so the checks don't have to be performed.
+
+   [ifelse(u(U-IS-OOC, %0),
+# 1,
+
+	u(me/U-SPEAK-OOCLY, %0, %1, %q2, %q4, %5, %4),
+
+# 0,
+
+# IC SPEECH STARTS HERE
+
+# Run the tests to make sure the speaker can continue...
+
+	switch(u(me/U-LANGUAGE-CHECKS, %0, %q3, %q0, %q1),
+		1???, 
+		  pemit(%0, You can't do that in your condition.),
+		?1??,
+		  pemit(%0, You can't speak in that room.),
+		??1?,
+		  pemit(%0, That language doesn't exist.),
+		???1,
+		  pemit(%0, You don't know that language.),
+
+		0000, {
+
+# Roll the dice and get those successes! Put them into %q5.
+
+			[setq(5, u(me/U-SUCCESS-STATUS,
+			 ulocal(me/UL-LANG-SUCCESSES, %0, %q0)))]
+
+# Broadcast to the speaker.
+
+			[u(me/U-SPEAKER-HEARS, %0, %1, %q2, %q0, %q1, %q5, %5)]
+
+# Broadcast the message to the listeners (and in some cases, uninvolveds).
+
+			[ulocal(me/UL-BROADCAST-MESSAGE, %0, %1, %q2, %q0,
+			 %q5, %q4, speaker, %4, %6)]
+
+# And finally, broadcast to the audible rooms.
+
+			[u(me/U-BROADCAST-AUDIBLE-ROOMS,%0, %1, %q2, %q0,
+			 %q5, %q4, %4, %6)]
+
+		})
+	)]
+
+-

@@ -1,0 +1,17 @@
+@create Jesse's memory
+@lock Jesse's memory==*me
+@lock/Use Jesse's memory==*me
+@VA Jesse's memory=$rem *:@set me=[first(v(0))]:[rest(v(0))];@remit here=Done.
+@VB Jesse's memory=$rec *:@switch [get(me/%0)]=,@remit here=I don't recall that one.,@pemit %n=%0 is [get(me/%0)].
+@VC Jesse's memory=$tel *:@switch [get(me/%0)]=,@remit here=I don't recall that one.,@force [loc(me)]=@tel [get(me/%0)]
+@VD Jesse's memory=$mex *:@switch [get(me/%0)]=,@remit here=I don't recall that one.,@force [loc(me)]=ex [get(me/%0)]
+@VE Jesse's memory=$bring *:@switch [get(me/%0)]=,@remit here=I don't recall that one.,@force [loc(me)]=@tel [get(me/%0)]=here
+@VF Jesse's memory=$listmem:@dolist [lattr(me)]=@switch ##=v?,,{@switch ##=Succ,,{@switch ##=Desc,,{@Switch ##=Aclone,,{@switch ##=OWNER,,@emit ##: [v(##)]}}}}
+@Succ Jesse's memory=Before using this object, you must first type the following commands:%r@chown [num(me)]=me%r@set [num(me)]=!halted%r@set [num(me)]=inherit%r@lock/use [num(me)]=me
+@Desc Jesse's memory=To store the number of n object in memory type `rem <name> <number>' (make sure to put a # in front of the number). The name does not need to be the actual object name, just whatever you want to remember it as. It may NOT contain any spaces.%rTo forget (remove from memory) an object name, type `rem <name>'.%rTo recall the number of an object type `rec <name>'.%rTo examine an object from afar by name type `mex <name>'.%rTo teleport to a room by name type `tel <name>'.%rTo teleport an object to your current location, type `bring <name>'.%rNew feature: To get a list of all memory contents type `listmem'.
+@Aclone Jesse's memory=&owner me=%n;@lock me=*%n;@name me=%n's memory;@link me=%n;@set me=chown_ok;@set me=sticky;@pemit %n=Your memory has arrived. Please type `get [num(me)]'.
+&OWNER Jesse's memory=[owner(me)]
+@Adesc Jesse's memory=@pemit %n=To set up, type: @chown (this object)=you, then @lock (object)=you, then @link (object)=you, then @set (object)=sticky, then @set (object)=inherit, then @lock/use (object)=you.
+@set Jesse's memory=INHERIT
+@set Jesse's memory=STICKY
+@set Jesse's memory=SAFE

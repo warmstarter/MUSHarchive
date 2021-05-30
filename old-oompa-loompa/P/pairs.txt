@@ -1,0 +1,37 @@
+#   Author:  Unknown
+#   Format:  Mark Hassman (12/6/96)
+#
+###############################################################################
+#+pairs <object>
+#+pairs <object/attr>
+#        +pairs returns the counts of the various types of brackets in an 
+#   object or a specific attribute. The attribute call can use wild cards. 
+#   Eg, +pairs me/a*. Counts are returned on: [] {} ().
+###############################################################################
+#         Configuration Notes -
+#   This code currently resides on one object. It should be broken into
+#   two parts with the functions on an object which is not in the master
+#   room and the actual command on a global command object.  If this is
+#   done, change the u() calls to u(dbref/attribute) where the dbref is
+#   the new function/data object.
+#
+@create Pairs
+-
+&DO_PAIRS =$+pairs *: @pemit 
+%#=[setq(0,locate(%#,first(%0,/),*))][switch(controls(%#,r(0)),#-1*,I don't see 
+that here.,0,Permission 
+denied.,[setq(1,u(SECURE_ATTR_FN,%#,lattr(r(0)/[switch(%0,*/*,rest(%0,/),*)
+])))]Pairs Check for 
+[name(r(0))]\([r(0)][flags(r(0))]\)[map(PAIRS_FN,sort(r(1)))])]
+-
+&PAIRS_FN Pairs=%r%b%b[ljust(%0:,28)] [setq(2,get(r(0)/%0))]%b [ljust(\{ \}: 
+[u(COUNT_CHAR_FN,r(2),\{)]/[u(COUNT_CHAR_FN,r(2),\})],12)] %b 
+[ljust(\[ \]: 
+[u(COUNT_CHAR_FN,r(2),\[)]/[u(COUNT_CHAR_FN,r(2),\])],12)] %b 
+[ljust(\( \): 
+[u(COUNT_CHAR_FN,r(2),\()]/[u(COUNT_CHAR_FN,r(2),\))],12)]
+-
+&COUNT_CHAR_FN Pairs=[sub(words(escape(%0),%1),1)]
+-
+&SECURE_ATTR_FN Pairs=[switch(hasflag(%0,wizard),1,%1,setdiff(%1,COMMENT))]
+-

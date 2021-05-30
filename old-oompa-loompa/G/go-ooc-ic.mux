@@ -1,0 +1,44 @@
+# Commands to go IC and OOC.
+
+
+&CMD-OOC #7 = $ooc: 
+  @switch hastag(%L, OOC) = 1, {
+    @pemit %# = Ha! You're already in an OOC area. What a kidder.
+  }, {
+
+#  if the current room is a dynamic room (unfixed dspace room), fix the room!
+    think setq(0, ifelse(and(isdspace(%L), not(hasattr(%L, Aleave))), %L, #-1)); 
+    think switch(strmatch(%q0, #-1), 0, res_request(ic-ooc-%#, fixed-dspace, %L)); 
+
+    &ic %# = %L; 
+    @remit %L = %n goes to the OOC rooms.; 
+    @tel %# = #446; 
+    @remit %L = %n arrives from the game, now out of character.
+  }
+-
+
+&CMD-IC #7 = $ic: 
+  think setq(0, default(%#/ic, default(%#/ic-home, #100))); 
+
+  @switch hastag(%L, ooc) = 
+  
+  1, {
+    @remit %L = %n goes back in character.; 
+    @tel/quiet %# = %q0; 
+    @remit %q0 = %n comes back into character from an OOC room.; 
+
+    think switch(hastag(%q0, ooc-dspace), 1, res_return(ic-ooc-%#, fixed-dspace, %L)); 
+  }, {
+    @pemit %# = I'm sorry, but you're not in an Out of Character (OOC) Area. 
+                To go to an OOC area, please type: 'ooc'.
+  } 
+-
+
+
+
+# Resource Request stuff ...
+#
+&request-fixed-dspace #28 = set(%0, Aleave:#)
+-
+&return-fixed-dspace #28 = set(%0, Aleave:)
+-

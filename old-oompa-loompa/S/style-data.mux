@@ -1,0 +1,512 @@
+#=============================================================================
+# STYLE-DATA.MUX -- information on the actual combat styles
+#=============================================================================
+
+#### see softcode/combat/modifiers.txt for more information
+
+
+&modifiers #38 = 
+  ES:engage-speed 
+  ER:engager 
+  EE:engagee 
+  DS:disengage-speed 
+  DR:disengager 
+  DE:disengagee 
+  AS:attack-speed 
+  AT:attack 
+  DF:defend 
+  DM:damage 
+  TS:throw-speed 
+  TR:thrower 
+  TD:throwee 
+  SS:shoot-speed 
+  SR:shooter 
+  SD:shootee 
+-
+
+@@ @@ @@ @@ @@ @@ @@ @@ @@ @@ @@ @@ @@ @@ @@ @@ @@ @@
+
+#              ES  ER  EE  DS  DR  DE  AS  AT  DF  DM TS TR TD SS SR SD
+# Berserk:     +2  +2  -2  -5  -2  +2  +3  -1  -6  +5 +3 -1 -6 +3 -1 -6
+# Turtle:      -2  -2  +2  +2  +3  -2  -9  -9  +6  -2 -9 -9 +6 -9 -9 +6
+# Aggressive:  +1  +1  -1  -2  -2  +1  +1  +2  -2  +1 +1 +2 -2 +1 +2 -2
+# Defensive:   -1  -1  +1  +1  +2  -1  -1  -2  +2  +0 -1 -2 +2 -1 -2 +2
+# Accurate:    -2  +1  +0  -2  +1  -1  -4  +3  +2  +2 -4 +3 +2 -4 +3 +2
+# Lightning:   +2  -2  +0  +1  -2  +2  +4  -1  -1  -2 +4 -1 -1 +4 -1 -1
+# Zero/none:   +0  +0  +0  +0  +0  +0  +0  +0  +0  +0 +0 +0 +0 +0 +0 +0
+# Passive:    -20 -20 -20 -20 -20 -20 -20 -20 -20 -20 -20 -20 -20 -20 -20
+# Gattack:     +1  +1  +0  +0  -1  +1  +1  +1  -3  +1 +0 +0 +0 +0 +0 +0
+# Gberserk:    +2  +2  -2  -5  -8  +4  +2  +2  -6  +3 +0 +0 +0 +0 +0 +0
+# Agarn:       -1  -1  -1  -1  -1  -1  +1  +2  +2  +0 +0 +0 +0 +0 +0 +0
+# Judano:      +0  +0  +1  +0  +0  +1  +1  +2  +1  +1 +0 +0 +0 +0 +0 +0
+# Absurd:     +20 +20 +20 +20 +20 +20 +20 +20 +20 +20 +20 +20 +20 +20 +20
+# Cursed:     -40 -40 -40 -40 -40 -40 -40 -40 -40 -40 -40 -40 -40 -40 -40
+- 
+
+
+#             AS ES ER DS DR DM DF EE DE AT TS TR TD SS SR SD
+# None:       +0 +0 +0 +0 +0 +0 +0 +0 +0 +0 +0 +0 +0 +0 +0 +0
+
+&desc-none #38 = 
+  No style at all (no modifiers).
+-
+&style-none #38 = 
+ nothing
+-
+
+#             AS ES ER DS DR DM DF EE DE AT TS TR TD SS SR SD
+# Zero:       +0 +0 +0 +0 +0 +0 +0 +0 +0 +0 +0 +0 +0 +0 +0 +0
+
+&desc-zero #38 = 
+  This is equivalent to 'none', but spells out the modifiers.
+-
+&style-zero #38 = 
+#   all of the things you can set are here
+  engage-speed:+0 
+  engager:+0 
+  engagee:+0 
+  disengage-speed:+0 
+  disengager:+0 
+  disengagee:+0 
+  attack-speed:+0 
+  attack:+0 
+  defend:+0 
+  damage:+0 
+  throw-speed:+0 
+  thrower:+0 
+  throwee:+0 
+  shoot-speed:+0 
+  shooter:+0 
+  shootee:+0 
+-
+
+
+#             AS ES ER DS DR DM DF EE DE AT TS TR TD SS SR SD 
+# Berserk:    +3 +2 +2 -5 -2 +5 -6 -2 +2 -1 +3 -1 -6 +3 -1 -6
+
+&desc-berserk #38 = 
+  All out attacks with no concern for your own safety.
+-
+&style-berserk #38 = 
+  attack-speed:+3 
+  engage-speed:+2 
+  engager:+2 
+  disengage-speed:-5 
+  disengager:-2 
+  damage:+5 
+  defend:-6 
+  engagee:-2 
+  disengagee:+2 
+  attack:-1 
+  throw-speed:+3 
+  thrower:-1 
+  throwee:-6 
+  shoot-speed:+3 
+  shooter:-1 
+  shootee:-6 
+-
+
+#             AS ES ER DS DR DM DF EE DE AT TS TR TD SS SR SD
+# Turtle:     -9 -2 -2 +2 +3 -2 +6 +2 -2 -9 -9 -9 +6 -9 -9 +6
+
+&desc-turtle #38 = 
+  Shelling up and concentrating solely on defense.
+-
+&style-turtle #38 = 
+  attack-speed:-9 
+  engage-speed:-2 
+  engager:-2 
+  disengage-speed:+2 
+  disengager:+3 
+  damage:-2 
+  defend:+6 
+  engagee:+2 
+  disengagee:-2 
+  attack:-9 
+  shoot-speed:-9 
+  shooter:-9 
+  shootee:+6 
+  throw-speed:-9 
+  thrower:-9 
+  throwee:+6  
+-
+
+#             AS ES ER DS DR DM DF EE DE AT TS TR TD SS SR SD
+# Aggressive: +1 +1 +1 -2 -2 +1 -2 -1 +1 +2 +1 +2 -3 +1 +2 -3
+
+&desc-aggressive #38 = 
+  Gain offense and lose defense capability
+-
+&style-aggressive #38 = 
+  attack-speed:+1 
+  engage-speed:+1 
+  engager:+1 
+  disengage-speed:-2 
+  disengager:-2 
+  damage:+1 
+  defend:-2 
+  engagee:-1 
+  disengagee:+1 
+  attack:+2 
+  throw-speed:+1 
+  thrower:+2 
+  throwee:-3 
+  shoot-speed:+1 
+  shooter:+2 
+  shootee:-3   
+-
+
+#             AS ES ER DS DR DM DF EE DE AT TS TR TD SS SR SD
+# Defensive:  -1 -1 -1 +1 +2 +0 +2 +1 -1 -2 -1 -2 +2 -1 -2 +2
+
+&desc-defensive #38 = 
+  Gain defense and lose offense capability.
+-
+&style-defensive #38 = 
+  attack-speed:-1 
+  engage-speed:-1 
+  engager:-1 
+  disengage-speed:+1 
+  disengager:+2 
+  damage:+0 	
+  defend:+2 
+  engagee:+1 
+  disengagee:-1 
+  attack:-2 
+  throw-speed:-1 
+  thrower:-2 
+  throwee:+2 
+  shoot-speed:-1 
+  shooter:-2 
+  shootee:+2 
+-
+
+
+#              AS  ES  ER  DS  DR  DM  DF  EE  DE  AT TS TR TD SS SR SD
+# Passive:    -20 -20 -20 -20 -20 -20 -20 -20 -20 -20 -20 -20 -20 -20 -20
+
+&desc-passive #38 = 
+  No resistance. Hit me. Kill me. I don't care.
+-
+&style-passive #38 = 
+  attack-speed:-20 
+  engage-speed:-20 
+  engager:-20 
+  disengage-speed:-20 
+  disengager:-20 
+  damage:-20 
+  defend:-20 
+  engagee:-20 
+  disengagee:-20 
+  attack:-20 
+  throw-speed:-20 
+  thrower:-20 
+  throwee:-20 
+  shoot-speed:-20 
+  shooter:-20 
+  shootee:-20 
+-
+
+#             AS ES ER DS DR DM DF EE DE AT TS TR TD SS SR SD
+# Accurate:   -4 -2 +1 -2 +1 +2 +2 +0 -1 +3 -4 +2 +2 -4 +2 +2
+
+&desc-accurate #38 = 
+  Gains great accuracy but is very slow.
+-
+&style-accurate #38 = 
+  attack-speed:-4 
+  engage-speed:-2 
+  engager:+1 
+  disengage-speed:-2 
+  disengager:+1 
+  damage:+2 
+  defend:+2 
+  engagee:+0 
+  disengagee:-1 
+  attack:+3 
+  throw-speed:-4 
+  thrower:+2 
+  throwee:+2 
+  shoot-speed:-4 
+  shooter:+2 
+  shootee:+2 
+-
+
+#             AS ES ER DS DR DM DF EE DE AT TS TR TD SS SR SD
+# Lightning:  +4 +2 -2 +1 -2 -2 -1 +0 +2 -1 +4 -2 -2 +4 -2 -2
+
+&desc-lightning #38 = 
+  Gains great speed but loses accuracy.
+-
+&style-lightning #38 = 
+  attack-speed:+4 
+  engage-speed:+2 
+  engager:-2 
+  disengage-speed:+1 
+  disengager:-2 
+  damage:-2 
+  defend:-1 
+  engagee:+0 
+  disengagee:+2 
+  attack:-1 
+  throw-speed:+4 
+  thrower:-2 
+  throwee:-2 
+  shoot-speed:+4 
+  shooter:-2 
+  shootee:-2 
+-
+
+#            AS ES ER DS DR DM DF EE DE AT  TS TR TD SS SR SD
+# Gberserk:  +2 +2 +2 -5 -8 +3 -6 -2 +4 +2  +0 +0 -6 +0 +0 -6
+
+&desc-gberserk #38 =
+  Griffon berserk style.
+
+-
+&style-gberserk #38 = 
+  attack-speed:+2 
+  engage-speed:+2 
+  engager:+2 
+  disengage-speed:-5 
+  disengager:-8 
+  damage:+3 
+  defend:-6 
+  engagee:-2 
+  disengagee:+4 
+  attack:+2 
+  throw-speed:+0 
+  thrower:+0 
+  throwee:-6 
+  shoot-speed:+0  
+  shooter:+0  
+  shootee:-6 
+-
+
+#            AS ES ER DS DR DM DF EE DE AT TS TR TD SS SR SD
+# Gattack    +1 +1 +1 -1 -1 +1 -3 -1 +1 +1 +0 +0 -3 +0 +0 -3
+
+&desc-gattack #38 = 
+  Aggressive griffon attack style.
+
+-
+&style-gattack #38 = 
+  attack-speed:+1 
+  engage-speed:+1 
+  engager:+1 
+  disengage-speed:-1 
+  disengager:-1 
+  damage:+1 
+  defend:-3 
+  engagee:-1 
+  disengagee:+1 
+  attack:+1 
+  throw-speed:+0 
+  thrower:+0 
+  throwee:-3 
+  shoot-speed:+0 
+  shooter:+0 
+  shootee:-3
+-
+#	     AS ES ER DS DR DM DF EE DE AT TS TR TD SS SR SD
+# Gdefend:   -2 -2 -2 +2 +2 -2 +2 -2 +2 -2 +0 +0 +2 +0 +0 +2
+
+&desc-gdefend #38 = 
+  Griffon defensive style.
+-
+&style-gdefend #38 =
+  attack-speed:-2 
+  engage-speed:-2 
+  engager:-2 
+  disengage-speed:+2  
+  disengager:+2  
+  damage:-2 
+  defend:+2 
+  engagee:-2 
+  disengagee:+2 
+  attack:-2 
+  throw-speed:+0 
+  thrower:+0 
+  throwee:+2 
+  shoot-speed:+0 
+  shooter:+0 
+  shootee:+2 
+- 
+ 
+
+#            AS ES ER DS DR DM DF EE DE AT
+# Agarn:     +1 -1 -1 -1 -1 +0 +2 -1 -1 +2
+
+&desc-agarn #38 = 
+  Agarn's 'signature' style.
+
+-
+&style-agarn #38 = 
+  attack-speed:+1 
+  engage-speed:-1 
+  engager:-1 
+  disengage-speed:-1 
+  disengager:-1 
+  damage:+0 
+  defend:+2 
+  engagee:-1 
+  disengagee:-1 
+  attack:+2 
+  throw-speed:-1  
+  thrower:-1 
+  throwee:+2 
+  shoot-speed:-1  
+  shooter:-1 
+  shootee:+2 
+-
+
+#            AS ES ER DS DR DM DF EE DE AT
+# Judano     +1 +0 +0 +0 +0 +1 +1 +1 +1 +2
+
+&desc-judano #38 = 
+  Judano's 'signature' style.
+
+-
+&style-judano #38 = 
+  attack-speed:+1 
+  engage-speed:+0 
+  engager:+0 
+  disengage-speed:+0 
+  disengager:+0 
+  damage:+1 
+  defend:+1 
+  engagee:+1 
+  disengagee:+1 
+  attack:+2 
+-
+
+#            AS  ES  ER  DS  DR  DM  DF  EE  DE  AT TS TR TD SS SR SD
+# Cursed:   -40 -40 -40 -40 -40 -40 -40 -40 -40 -40 -40 -40 -40 -40 -40
+
+&desc-cursed #38 = 
+  Gain massive negative modifiers in everything.
+
+-
+&style-cursed #38 = 
+  attack-speed:-40 
+  engage-speed:-40 
+  engager:-40 
+  disengage-speed:-40 
+  disengager:-40 
+  damage:-40 
+  defend:-40 
+  engagee:-40 
+  disengagee:-40 
+  attack:-40 
+  throw-speed:-40 
+  thrower:-40 
+  throwee:-40 
+  shoot-speed:-40 
+  shooter:-40 
+  shootee:-40 
+-
+
+#            AS  ES  ER  DS  DR  DM  DF  EE  DE  AT TS TR TD SS SR SD
+#Garen:      +0  +0  +0  +1  +2  +0  +0  +0  +0  +0 +0 +0 +0 +1 +2 +1
+
+&desc-garen #38 =
+  Garen's "signature" style.
+-
+
+&style-garen #38=
+  attack-speed:+0 
+  engage-speed:+0 
+  engager:+0 
+  disengage-speed:+1 
+  disengager:+2 
+  damage:+0 
+  engagee:+0 
+  disengagee:+0 
+  defend:+0 
+  attack:+0 
+  throw-speed:+0  
+  thrower:+0 
+  throwee:+0 
+  shoot-speed:+1 
+  shooter:+2 
+  shootee:+1 
+-
+#
+#            AS  ES  ER  DS  DR  DM  DF  EE  DE  AT TS TR TD SS SR SD
+#ArchAimed:  +0  +0  +0  -2  +2  +0  +0  +0  +0  +0 -2 +2 +0 -2 +2 +0
+
+&desc-archaimed #38 = 
+  Aimed accurate archery style, sacrificing speed for accuracy.
+-
+&style-archaimed #38 = 
+  attack-speed:+0 
+  engage-speed:+0 
+  engager:+0 
+  damage:+0 
+  defend:+0 
+  engagee:+0 
+  disengagee:+0  
+  attack:+0 
+  disengage-speed:-2 
+  disengager:+2 
+  throw-speed:-2  
+  thrower:+2 
+  throwee:+0 
+  shoot-speed:-2 
+  shooter:+2 
+  shootee:+0 
+-
+
+#            AS  ES  ER  DS  DR  DM  DF  EE  DE  AT TS TR TD SS SR SD
+# Absurd:   +20 +20 +20 +20 +20 +20 +20 +20 +20 +20 +20 +20 +20 +20 +20
+
+&desc-absurd #38 = 
+  Gain massive positive modifiers in everything.
+
+-
+&style-absurd #38 = 
+  attack-speed:+20 
+  engage-speed:+20 
+  engager:+20 
+  disengage-speed:+20 
+  disengager:+20 
+  damage:+20 
+  defend:+20 
+  engagee:+20 
+  disengagee:+20 
+  attack:+20 
+  throw-speed:+20 
+  thrower:+20 
+  throwee:+20 
+  shoot-speed:+20 
+  shooter:+20 
+  shootee:+20 
+-
+
+#
+#            AS  ES  ER  DS  DR  DM  DF  EE  DE  AT TS TR TD SS SR SD
+#Archfast:   +0  +0  +0  +1  +1  +0  -2  +0  +0  +0 +2 -2 +0 +2 -2 +0
+
+&desc-archfast #38 = 
+  Fast archery style, sacrificing accuracy for speed.
+
+-
+&style-archfast #38 = 
+  attack-speed:+0 
+  engage-speed:+0 
+  engager:+0 
+  damage:+0 
+  defend:-2 
+  engagee:+0 
+  disengagee:+0  
+  attack:+0 
+  disengage-speed:+1  
+  disengager:+1 
+  throw-speed:+2  
+  thrower:-2 
+  throwee:-2 
+  shoot-speed:+2  
+  shooter:-2 
+  shootee:-2 
+- 
+

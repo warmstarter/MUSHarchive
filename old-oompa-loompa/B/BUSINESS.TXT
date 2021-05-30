@@ -1,0 +1,24 @@
+@create Business Kiosk Parent
+@lock/Basic Business Kiosk Parent==me
+@set Business Kiosk Parent = WIZARD
+@set Business Kiosk Parent = NO_COMMAND
+&CMD_CANCEL Business Kiosk Parent=$cancel:[pemit(%#,Registration aborted.)][wipe(me/step)][wipe(me/affil_name)]
+&CMD_DIV Business Kiosk Parent=$div *:th [switch(v(step),3,[set(%#,div:[secure(%0)])][pemit(%#,Div set.)],[pemit(%#,Huh? (Type "help" for help.)])]
+&CMD_DONE Business Kiosk Parent=$done:th [switch(v(step),3,[u(fun_step4)],[pemit(%#,Huh? (Type "help" for help.)])]
+&CMD_NAME Business Kiosk Parent=$name *:th [switch(v(step),1,[switch(strlen(%0),>25,[pemit(%#,Name too long.)],[if(u(fun_nametaken,[secure(%0)]),[pemit(%#,That name is already taken. Please choose another.)],[set(me,affil_name:[secure(%0)])][pemit(%#,Your new affiliation name will be [ansi(hg,[secure(%0)])].)][u(fun_step2)])])],[pemit(%#,Huh? %(Type "help" For help.%))])]
+&CMD_ORG Business Kiosk Parent=$org *:th [switch(v(step),3,[set(%#,org:[secure(%0)])][pemit(%#,Org set.)],[pemit(%#,Huh? (Type "help" for help.)])]
+&CMD_POS Business Kiosk Parent=$position *:th [switch(v(step),3,[set(%#,pos:[secure(%0)])][pemit(%#,Pos set.)],[pemit(%#,Huh? (Type "help" for help.)])]
+&CMD_RANK Business Kiosk Parent=$rank *:th [switch(v(step),3,[set(%#,class:[secure(%0)])][set(%#,rank:20)][pemit(%#,Rank set.)],[pemit(%#,Huh? (Type "help" for help.)])]
+&CMD_START_AFFILIATION Business Kiosk Parent=$start aff*:th [switch(get(%#/empire),None Chosen,[if(hasattr(me,step),[pemit(%#,Please wait. In progress.)],[u(fun_step1)])],[pemit(%#,You are already part of an affiliation. Contact your affiliation head to be removed if you wish.)])]
+&CMD_VEND_PORTFOLIO Business Kiosk Parent=$vend portfolio:th [switch(v(step),2,[u(fun_vend_portfolio,v(affil_name))],[pemit(%#,Huh? (Type "help" for help.)])]
+&CREDITS Business Kiosk Parent=Dave@GalacticMUSH [EMAIL: davemilford@home.com] [ICQ: 8516328]
+@DESCRIBE Business Kiosk Parent=The kiosk is filled with booklets of information with a computer terminal standing in the middle.%r%r[ansi(nc,<)][ansi(nw,OOC)][ansi(nc,>)] Type START AFFILIATION to begin the process of making your own affiliation.
+@set Business Kiosk Parent/DESCRIBE=no_command visual
+&FUN_GIVE Business Kiosk Parent=give %0=business portfolio
+&FUN_NAMETAKEN Business Kiosk Parent=[iter(lsearch(all,type,player),[switch(get(##/empire),%0,[set(me,name_was_taken:1)])])][if(hasattr(me,name_was_taken),1,0)][wipe(me/name_was_taken)]
+&FUN_STEP1 Business Kiosk Parent=[set(me,step:1)][pemit(%#,[ansi(h,STEP 1:)]%b%bAnyone can start an affiliation...but you must be ready for one. You should have a ship to start off with, and if you are starting a business, you should have enough money to buy the commodities needed for Factories and other economy structures (see NEWS ECON STRUCTURES).%r%rIf you are ready, type in [ansi(hg,NAME <affiliation name>)]. This name should not be offensive to anyone and be fairly short.%rIf you wish to cancel this process, type [ansi(hg,CANCEL)].%r%r)]
+&FUN_STEP2 Business Kiosk Parent=[set(me,step:2)][pemit(%#,[ansi(h,STEP 2:)]%b%bYou will now be given a Business Portfolio. This portfolio is essential to your company, you can use it to manage assets, list members, add/remove members, pay salaries, and other things. (see HELP ECON BUSINESS PORTFOLIO)%r%rType [ansi(hg,VEND PORTFOLIO)] to receive yours.)]
+&FUN_STEP3 Business Kiosk Parent=[set(me,step:3)][pemit(%#,[ansi(h,STEP 3:)]%b%bNow we're going to set your information. It is not terribly important, but this is the stuff that shows up on DET's and +FINGERs. Please type the following commands:%r%r[ansi(hg,rank <rank name>%rorg <your organization in the company>%rdiv <your division in the company>%rposition <your position in the company>)]%r%rWhen you are finished, please type [ansi(hg,DONE)].
+&FUN_STEP4 Business Kiosk Parent=[set(me,step:4)][set(%#,EMPHEAD:YES)][pemit(%#,[ansi(h,STEP 4:)]%b%bYou're all set! It is now a good idea to contact the local administrator of a planet that you'd like to build your facilities on. %([ansi(hg,+ROYALTY)] lists them, find the appropriate one%) They will most likely negotiate a rent with you that you will have to pay, but they may insist on you buying the land.%r%rIf for some reason you ever wish to disband your corporation, please contact an onduty wizard.%r%rType HELP ADMIN for commands you can now administer to your own corporation%r%rCongratulations!)][wipe(me/step)][wipe(me/affil_name)][set(%#,emphead:yes)]
+&FUN_VEND_PORTFOLIO Business Kiosk Parent=[setq(0,[create(%0 Business Portfolio)])][set(%q0,!no_command)][set(%q0,wiz)][set(%q0,business:%0)][parent(%q0,[v(business_portfolio)])][set(v(server),[edit(%0,%b,_)]-CEO:%#)][set(v(server),[edit(%0,%b,_)]-MEMBERS:)][set(%#,empire:%0)][trigger(me/fun_give,%n)][u(fun_step3)]
+&VERSION Business Kiosk Parent=3.0

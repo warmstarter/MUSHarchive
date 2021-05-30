@@ -1,0 +1,21 @@
+@create Virtual Comlink
+@link Virtual Comlink = #2
+@chzone Virtual Comlink = #16
+@set Virtual Comlink = !NO_COMMAND
+@set Virtual Comlink = INHERIT
+@set Virtual Comlink = OPAQUE
+@set Virtual Comlink = WIZARD
+@set Virtual Comlink = SAFE
+@VA Virtual Comlink=$addcom *=*:@switch [grab(get(%#/Comlink_Alias),%0 *,|)]=, {&Comlink_Alias %#=[u(Insert,get(%#/Comlink_Alias),%0 %1)];@pemit %#=Comlink alias `%0' added for channel `%1'.}, {@pemit %#=Comlink alias `%0' already exists for channel `[rest(#$)]'.}
+@VB Virtual Comlink=$delcom *:@switch [grab(get(%#/Comlink_Alias),%0 *,|)]=, {@pemit %#=Comlink alias `%0' does not exist.}, {&Comlink_Alias %#=[remove(get(%#/Comlink_Alias),#$,|)];&Comlink_Title %#=[remove(get(%#/Comlink_Title),grab(get(%#/Comlink_Title),%0 *,|),|)];@pemit %#=Comlink alias `%0' for channel `[rest(%1)]' deleted.}
+@VC Virtual Comlink=$.* *:@switch [grab(get(%#/Comlink_Alias),%0 *,|)]=, {@pemit %#=Comlink alias '%0' does not exist.}, {@fo %#=[setq(0,rest(#$))][setq(1,[rest(grab(get(%#/Comlink_Title),%0 *,|))])][switch(%1,on,@chan/on %q0,off,@chan/off %q0,who,@chan/who %q0,@chat %q0={[switch(left(%1,1),:,[escape(%1)],;,[escape(%1)],[escape(switch(%q1,,\;: %1,\;: %q1 %1))])]})]}
+@VD Virtual Comlink=$listcom:@pemit %#={[ljust(Alias,10)] [ljust(Channel Name,20)] Prefix%r[repeat(=,75)][iter(get(%#/Comlink_Alias),%r[ljust(lcstr(first(##)),10)] [ljust(rest(##),20)] [ljust(rest(grab(get(%#/Comlink_Title),[first(##)] *,|)),45)],|)]%r[repeat(=,75)]}
+@VE Virtual Comlink=$prefix *=*:@switch [grab(get(%#/Comlink_Alias),%0 *,|)]=, {@pemit %#=Comlink alias `%0' does not exist.}, {&Comlink_Title %#=[insert(remove(get(%#/Comlink_Title),grab(get(%#/Comlink_Title),%0 *,|),|),1,%0 %1,|)];@pemit %#=Prefix for alias `%0' ([rest(#$)]) set to '%1'.}
+@VF Virtual Comlink=$send *=*:@switch [num(*%0)]|[elock(*%0/Page,owner(%#))]=#-1|*, {@pemit %#=No such player.}, *|0, {@pemit %#=[name(*%0)]'s comlink is turned off.}, {@pemit %#=You tap your comlink and say `%1' to [name(*%0)].;@oemit %#=%n taps %p comlink and says `%1'.;@pemit *%0=Your comlink crackles with %n's voice: `%1';@oemit *%0=[name(*%0)]'s comlink crackles with %n's voice: `%1'}
+@VG Virtual Comlink=$addtel *=*:@switch [grab(get(%#/Tel_Dests),%0 *,|)]=, {@switch [setq(0,locate(%#,%1,PRT*))]%q0=#-1, {@pemit %#=I don't see %1 here.}, #-2, {@pemit %#=I don't know which %1 you mean.}, {&Tel_Dests %#=[insert(get(%#/Tel_Dests),1,%0 %q0,|)];@pemit %#=Teleport destination `%0' set to: [name(%1)]([num(%1)][flags(%1)]).}}, {@pemit %#=Teleport destination `[first(#$)]' already exists for `[name(rest(#$))]([rest(#$)][flags(rest(#$))])'.}
+@VH Virtual Comlink=$deltel *:@switch [grab(get(%#/Tel_Dests),%0 *,|)]=, {@pemit %#=Teleport destination `%0' does not exist.}, {@pemit %#=Teleport destination `[first(#$)]' to `[name(rest(#$))]([rest(#$)][flags(rest(#$))])' removed.;&Tel_Dests %#=[remove(get(%#/Tel_Dests),#$,|)]}
+@VI Virtual Comlink=$listtel:@pemit %#=[ljust(Destination Name,20)] Destination%r[repeat(-,79)][iter(trim(get(%#/Tel_Dests),|),%r[ljust(first(##),20)] [ljust([name(rest(##))]([rest(##)][flags(rest(##))]),55)],|)]%r--- End ---
+@VJ Virtual Comlink=$tel *:@switch [grab(get(%#/Tel_Dests),%0 *,|)]=, {@pemit %#=Teleport destination `%0' does not exist.}, {@tel %#=[rest(#$)]}
+&INSERT Virtual Comlink=[trim(%0|%1,|)]
+@DESCRIBE Virtual Comlink=This useful gadget allows people to use comlink commands without even carrying a comlink. Even objects can use this. Type `help comlink' for help.
+@set Virtual Comlink/DESCRIBE=no_command visual

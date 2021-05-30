@@ -1,0 +1,174 @@
+@@
+@@ This is the new version (v1.1) of the NiftyHelp system, a global +help
+@@ system. 
+
+@@ Changes (mostly minor):
+@@
+@@ - 	help storage attributes are now named with submenu name as well as topic
+@@	name (avoids annoying problem of inadvertently overwriting a topic in 
+@@	another menu).
+@@
+@@ -	submenu listings and topics can now be accessed using +help <submenu>
+@@	and +help <submenu> <topic> as well as +help/<submenu> <topic>. Just
+@@	personally found it easier to type. 
+@@
+
+@@ Date v1.0 Released: 10/26/95
+@@ Object: The Nifty +Help System v.1.1
+@@ Server: PennMUSH 1.6
+@@ Notes:
+@@ 1) This object will create hard newlines under some versions of 
+@@ PennMUSH (later than p10, I believe), so beware if you're running 
+@@ a version of the server that can't handle them! It runs fine under p15. 
+@@ 2) The object should ideally be given pemit_all power, assuming you want 
+@@ it to be able to pemit to HAVEN/pagelocked players and that pemit_all 
+@@ is available as a power on your MUSH. No other powers are necessary. 
+@@ 3) The system is composed of two parts, in order to avoid cluttering 
+@@ the Master Room with non-trigger attributes. The +Help System object 
+@@ should be in the master room; the +Help Storage object should NOT. 
+@@ In order for the system to work properly, both objects must be owned 
+@@ by the same person. 
+
+@@ Date v1.1 Released: 3/23/97
+@@ Coder: Nightbird@Transformers2005 // DV@SWISH // Shalott@lots.of.places
+@@ Email: shalott@netspace.org
+
+@@ Description: +help is nearly universal on every MUSH I've seen, but 
+@@ there's no publically available system that I know of, so I thought 
+@@ I'd share mine. The system makes it extremely easy for any admin to 
+@@ add or remove help on a topic with a minumum of fuss, keeping the 
+@@ +help files up to date nicely. The system also supports submenus, to 
+@@ keep your index from becoming cluttered. Feel free to use this and 
+@@ modify it as you like, but please drop me a note to let me know if 
+@@ you like it, and especially if you find some nifty modification to it 
+@@ so I can upgrade it. 
+
+@@ Installation: Pretty simple. Just cut&paste or /quote in the code 
+@@ below. 
+
+@@ Sample Output:
+@@ +help
+@@ =^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=
+@@ +HELP TOPICS                   ->>*<<-                    TRANSFORMERS 2005
+@@ =v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=
+@@         
+@@         '               +admin          +alias          +allow          
+@@         +aside          +bbhelp         +define         +email          
+@@ ---------------------------------SUBMENUS---------------------------------- 
+@@         advancement     combat          energon         transform       
+@@ =-------------------------------------------------------------------------=
+@@ To see the help on any of these topics, type '+help <topic>'
+@@ =-------------------------------------------------------------------------=
+
+@@ DISCLAIMER: I didn't put anything nasty in this code, but someone 
+@@ else might have handled this before you got it, so don't blame me if 
+@@ you pop it in without reading it and something unpleasant happens. 
+
+@@ ----------------------- CUT HERE ---------------------------------
+
+@@
+@@ Create the Global Object
+@@
+
+@create NiftyHelp System
+@lock/Basic NiftyHelp System==me
+@set NiftyHelp System = SAFE
+@power NiftyHelp System = pemit_all
+
+@@
+@@ Create the Storage Object and set it up
+@@
+
+@create +Help Storage
+@lock +Help Storage==me
+@set +Help Storage = SAFE
+
+@@
+@@ CHANGE THIS NAME!!!!
+@@
+
+&MUSH_NAME +Help Storage=MUSH
+
+
+@@
+@@ Set up commands
+@@
+
+@set NiftyHelp System=HELPDB:[num(+Help Storage)]
+
+&ADMINHELPTAIL +Help Storage==[repeat(-,73)]=%rTo see the help on any of these topics, type '+adminhelp <topic>'
+
+&ADMINHELPHEADER +Help Storage=[repeat(=^,37)]=%r[ljust(+ADMINHELP TOPICS,31)]->>*<<-[rjust(ucstr(v(mush_name)),37)]%r=[repeat(-,73)]=%r
+
+&ADMINHELPSUBJHEADER +Help Storage=[repeat(=^,37)]=%r[ljust(+ADMINHELP ON [ucstr(%0)],31)]->>*<<-[rjust(ucstr(v(mush_name)),37)]%r[repeat(=v,37)]=%r
+
+&HELPTAIL +Help Storage==[repeat(-,73)]=%rTo see the help on any of these topics, type '+help <topic>'
+
+&HELPHEADER +Help Storage=[repeat(=^,37)]=%r[ljust(+HELP TOPICS,31)]->>*<<-[rjust(ucstr(v(mush_name)),37)]%r=[repeat(-,73)]=%r
+
+&HELPSUBJHEADER +Help Storage=[repeat(=^,37)]=%r[ljust(+HELP ON [ucstr(%0)],31)]->>*<<-[rjust(ucstr(v(mush_name)),37)]%r[repeat(=v,37)]=%r
+
+&HELP_NUM_ROWS +Help Storage=[add([div([words([v([%0]_list)] )],4)],1)]
+
+&HELP_ROW_COUNTER +Help Storage=[iter([lnum([u(help_num_rows,%0)])],[add([mul(##,4)],1)])]
+
+&HELP_PRINT_ROWS +Help Storage=[iter([u(help_row_counter,%0)],%R[space(8)][u(helprow,[extract([v([%0]_list)],##,4)])])]
+
+@DESCRIBE +Help Storage=%R[space(5)]This object stores the +help entries. Please do not do anything bad to it.%R
+
+
+&MENUTAIL +Help Storage==[repeat(-,73)]=%RTo see help on these topics, type +help/[%0] <topic>
+
+&HELPROW +Help Storage=[iter(%0,[ljust(##,15)])]
+
+
+@@
+@@ Add some initial +help topics
+@@
+
+&ADMINHELP_LIST +Help Storage=+adminhelp addhelp delhelp submenus
+
+&HELP_LIST +Help Storage=+help credits
+
+&HELP_+HELP +Help Storage=Syntax: +help OR +help <topic>%r%rThe first command gets you the index of +help files available on global commands and topics, while the second gets you the help file on that topic.
+
+&HELP_CREDITS #42=[center(NiftyHelp v1.1,78)]%R%R[center(v1.1 released 3/22/97,78)]%R%R[center(Coded by Nightbird@2k5/DV@SWISH,78)]%R[center(Contact shalott@netspace.org if you have questions.,78)]
+
+&HELP_ADMIN_DELHELP +Help Storage=Syntax: delhelp <COMMAND>%R%RThis command removes a +help entry on COMMAND. Please do not remove commands unless you know what you are doing. To change the help on a command, you can simply reset it by doing 'addhelp' again. To remove a +adminhelp topic, type 'deladminhelp <COMMAND>'.
+
+&HELP_ADMIN_SUBMENUS +Help Storage=Commands: addmenu <MENU>%R[space(10)]delmenu <MENU>%R[space(10)]addhelp/<MENU> <COMMAND>=<HELP TEXT>%R[space(10)]delhelp/<MENU> <COMMAND>=<HELP TEXT>%R%RThese commands allow you to create submenus within the +help system and a dd/remove entries on those submenus. Please be very careful using the delmenu command, as it removes an entire submenu and erases all its entries.
+
+&HELP_ADMIN_+ADMINHELP +Help Storage=Syntax: +adminhelp OR +adminhelp <topic>%r%rThe first command gets you the index of +help files available on admin-only commands and topics, while the second gets you the adminhelp file on that topic.
+
+&HELP_ADMIN_DELHELP +Help Storage=Syntax: delhelp <COMMAND>%R%RThis command removes a +help entry on COMMAND. Please do not remove commands unless you know what you are doing. To change the help on a command, you can simply reset it by doing 'addhelp' again. To remove a +adminhelp topic, type 'deladminhelp <COMMAND>'.
+
+&HELP_ADMIN_ADDHELP +Help Storage=Syntax: addhelp <COMMAND>=<HELP TEXT>%R%RThis command allows you to add a +help entry on a command. To add a +adminhelp entry, you must type: addadminhelp <COMMAND>=<HELP TEXT>. Please look at other +help entries and follow their standard syntax.
+
+@@
+@@ Put away the storage item
+@@
+
+@tel +Help Storage = NiftyHelp System
+
+@@ 
+@@ Set up the NiftyHelp system
+@@
+
+&DO_HELP_SUBMENU2 NiftyHelp System=$+help * *:@pemit %#=[switch(and(member(get(v(HELPDB)/submenu_list),%0),member(get(v(HELPDB)/[%0]_list),%1)),0,That is either an invalid submenu or an invalid topic.,[u(v(HELPDB)/helpsubjheader,%1)][eval(v(HELPDB),help_[%0]_%1)]%r=[repeat(-,73)]=)]
+&DO_HELP_MENU NiftyHelp System=$+help/*:@select %0=* *,{},{@pemit %#=[switch([member(get(v(HELPDB)/submenu_list),%0)],0,{There is no +help on %0.},{[u(v(HELPDB)/helpheader)][space(8)][u(v(HELPDB)/help_print_rows,%0)]%R[u(v(HELPDB)/menutail,%0)]})]}
+&DO_DELADMINHELP NiftyHelp System=$deladminhelp *:@select orflags(%#,Wr)=1,{&help_admin_[%0] v(HELPDB) ;&adminhelp_list v(HELPDB)=[setdiff(get(v(HELPDB)/adminhelp_list),%0)];@pemit %#=+adminhelp removed on %0.}
+&DO_ADDADMINHELP NiftyHelp System=$addadminhelp *=*:@select orflags(%#,Wr)=1,{&help_admin_[%0] v(HELPDB)={%1};&adminhelp_list v(HELPDB)=[setunion(get(v(HELPDB)/adminhelp_list),%0)];@pemit %#=+adminhelp added on %0.}
+&DO_MENU_DELHELP NiftyHelp System=$delhelp/* *:@select and(orflags(%#,Wr),member(get(v(HELPDB)/submenu_list),%0))=1,{&help_[%0]_[%1] v(HELPDB) ;&[%0]_list v(HELPDB)= [setdiff(get(v(HELPDB)/[%0]_list),%1)];@pemit %#=+help/[%0] on %1 removed.}
+&DO_MENU_ADDHELP NiftyHelp System=$addhelp/* *=*:@select and(orflags(%#,Wr),member(get(v(HELPDB)/submenu_list),%0))=1,{&help_[%1] v(HELPDB)={%2};&[%0]_list v(HELPDB)=[setunion(get(v(HELPDB)/[%0]_list),%1)];@pemit %#=+help/[%0] added on %1}
+&CONFIRM_DELMENU NiftyHelp System=$confirm delmenu *:@select hasflag(%#,Wizard)=1,{@dol [get(v(HELPDB)/[%0]_list)]=&help_[##] v(HELPDB) ; @wait 1=&[%0]_list v(HELPDB) ; &submenu_list v(HELPDB)=[setdiff(get(v(HELPDB)/submenu_list),%0)] ; @pemit %#=Submenu %0 removed from +help system.}
+&DO_DELMENU NiftyHelp System=$delmenu *:@select hasflag(%#,Wizard)=1,@pemit %#={This command will completely delete submenu [%0] from the +help system and wipe all entries for the [words(get(v(HELPDB)/[%0]_list))] topics under it. If you are sure you wish to proceed, please type 'confirm delmenu %0' now.}
+&DO_ADDMENU NiftyHelp System=$addmenu *:@select and(orflags(%#,Wr),eq(member(adminhelp admin submenu,%0),0))=1,{&submenu_list v(HELPDB)=[setunion(get(v(HELPDB)/submenu_list),%0)];@pemit %#=Submenu %0 added. To add help topics to it, please type 'addhelp/%0 <topic>=<help message>'.
+&DO_DELHELP NiftyHelp System=$delhelp *:@select orflags(%#,Wr)=1,{&help_[%0] v(HELPDB) ;&help_list v(HELPDB)=[setdiff(get(v(HELPDB)/help_list),%0)];@pemit %#=+help removed on %0.}
+&DO_ADDHELP NiftyHelp System=$addhelp *=*:@select orflags(%#,Wr)=1,{&help_[%0] v(HELPDB)={%1};&help_list v(HELPDB)=[setunion(get(v(HELPDB)/help_list),%0)];@pemit %#=+help added on %0.}
+&DO_ADMINHELP_SUBJ NiftyHelp System=$+adminhelp *:@pemit %#=[switch(orflags(%#,Wr),1,[switch(member(get(v(HELPDB)/adminhelp_list),%0),0,There is no +adminhelp on %0.,[u(v(HELPDB)/adminhelpsubjheader,%0)][eval(v(HELPDB),help_admin_%0)]%r=[repeat(-,73)]=)],Type 'help' or '+help' for help.)]
+&DO_ADMINHELP NiftyHelp System=$+adminhelp:@pemit %#=[switch(orflags(%#,Wr),1,[u(v(HELPDB)/adminhelpheader)][space(8)][u(v(HELPDB)/help_print_rows,adminhelp)]%r[u(v(HELPDB)/adminhelptail)],Type 'help' or '+help' for help.)]
+&DO_HELP NiftyHelp System=$+help:@pemit %#=[u(v(HELPDB)/helpheader)][space(8)][u(v(HELPDB)/help_print_rows,help)]%R[center(SUBMENUS,75,-)][u(v(HELPDB)/help_print_rows,submenu)]%R[u(v(HELPDB)/helptail)]
+&DO_HELP_SUBMENU NiftyHelp System=$+help/* *:@pemit %#=[switch(and(member(get(v(HELPDB)/submenu_list),%0),member(get(v(HELPDB)/[%0]_list),%1)),0,That is either an invalid submenu or an invalid topic.,[u(v(HELPDB)/helpsubjheader,%1)][eval(v(HELPDB),help_[%0]_%1)]%r=[repeat(-,73)]=)]
+&DO_HELP_SUBJ NiftyHelp System=$+help *:@sel %0=* *,,{@pemit %#=[switch([member(get(v(HELPDB)/help_list),%0)]_[member(get(v(HELPDB)/submenu_list),%0)],0_0,{There is no +help on %0.},*_0,{[u(v(HELPDB)/helpsubjheader,%0)][eval(v(HELPDB),help_%0)]%r=[repeat(-,73)]=},{[u(v(HELPDB)/helpheader)][space(8)][u(v(HELPDB)/help_print_rows,%0)]%R[u(v(HELPDB)/menutail,%0)]})]}
+@DESCRIBE NiftyHelp System=%R[space(5)]This object contains the global +help and +adminhelp for the MUSH. Please do not add help topics or touch this item unless you know what you are doing. This object must remain in the Master Room of the MUSH. For help on using the +help system, type +help. For help on adding help topics, see +adminhelp.%R
+

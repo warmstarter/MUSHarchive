@@ -1,0 +1,30 @@
+@create Global: Commands
+@link Global: Commands
+@parent Global: Commands=#4
+@lock/Basic Global: Commands
+@set Global: Commands = VISUAL
+@set Global: Commands = WIZARD
+@set Global: Commands = SAFE
+&CMD_AT_SHOUTWHO Global: Commands=$@shoutwho:@pemit %#=Players with their shout option%R[repeat(-=,15)]-[setq(0,u(FUNC_MWHO))][iter(r(0),[switch(mod(match(r(0),##),3),1,%R)][ljust(name(##),17)])]
+&FUNC_NOTDARKSHOUTER Global: Commands=and(not(hasflag(%0,DARK)),switch(get(%0/OPTIONS),S,1,0))
+&FUNC_MWHO Global: Commands=filter(FUNC_NOTDARKSHOUTER,lwho())
+&FUNC_NOTDARK Global: Commands=not(hasflag(%0,DARK))
+&CREDITS Global: Commands=Coded with Simon on Absolute MU*. All code is expressly the property of Simon for use on Invid Invasion and may not be copied with out his permission.
+&CMD_MINUS_SHOUT Global: Commands=$-shout:@switch match(get(%#/OPTIONS),S)=0,{@pemit %#=You already have your shout option turned off.},{@unlock %#/OPTIONS;&OPTIONS %#=-;@lock %#/OPTIONS;@pemit %#=Shout option turned off.}
+&CMD_PLUS_SHOUT Global: Commands=$+shout:@switch match(get(%#/OPTIONS),S)=0,{@unlock %#/OPTIONS;&OPTIONS %#=S;@lock %#/OPTIONS;@pemit %#=Shout option turned on.},{@pemit %#=You already have your shout option turned on.}
+&COMMAND_SHOUTCOST Global: Commands=$shoutcost *:@swi hasflag(%#,wizard)=1,{@pemit %#=Shout cost set to [secure(%0)];&SHOUT_COST me=%0},@pemit %#=Huh?%B%B(Type "help" for help.)
+&COMMAND_SHOUTDELAY Global: Commands=$shoutdelay *:@swi hasflag(%#,wizard)=1,{@pemit %#=Shout delay per person set to [secure(%0)];&SHOUT_DELAY me=%0},@pemit %#=Huh?%B%B(Type "help" for help.)
+&SHOUT_DELAY Global: Commands=30
+&SHOUT_COST Global: Commands=100
+&COMMAND_SHOUT Global: Commands=$@shout ?*:@switch [lte(money(%#),v(SHOUT_COST))][u(shout_toosoon,%#)][u(shout_toomuch,%0%1)][u(shouts_on,me)][hasflag(%#,slave)][u(shout_ok,%#)][switch(type(%#),PLAYER,1,0)]=1*,{@pemit %#=Sorry, you need at least [v(SHOUT_COST)] pennies to shout},01*,{@pemit %#=Sorry, you have to wait between shouts.},00?1???,{@pemit %#=Sorry, due to abuse, shouts are currently not active.},00?01??,{@pemit %#=You have been set SLAVE. This means you are NOT allowed to shout.},00???0?,{@pemit %#=You must have your shout option turned on to use the shouter.},001*,{@pemit %#=Sorry, you are not allowed to shout spam like that.},0000011,{give %#=-[v(SHOUT_COST)];@unlock %#/LAST_SHOUT;&LAST_SHOUT %#=[add(convtime(time()),v(SHOUT_DELAY))][setq(0,[switch(%0,:,{In a shout-pose%, %n %1},%;,{In a shout-pose%, %n%1},{%n shouts%, "%0%1"})])];@lock %#/LAST_SHOUT;@dolist filter(me/shout_ok,lwho())=@pemit ##=r(0)},{@pemit %#=Shout failed ! Tell a member of staff.}
+&SHOUT_TOOSOON Global: Commands=[and(gt(get(%0/LAST_SHOUT),convtime(time())),not(hasflag(%0,WIZARD)))]
+&SHOUT_TOOMUCH Global: Commands=[gt(match(%0,*%r*),0)]
+&SHOUT_SPAM Global: Commands=[gt(match(%0,*%r*),0)]
+&OPTION Global: Commands=Y
+&COMMAND_SHOUTS_OFF Global: Commands=$shoutsoff:@swi hasflag(%#,wizard)=1,{@pemit %#=Shouts are now off.;&option me=N},@pemit %#=Huh?%B%B(Type "help" for help.)
+&COMMAND_SHOUTS_ON Global: Commands=$shoutson:@swi hasflag(%#,wizard)=1,{@pemit %#=Shouts are now on.;&option me=Y},@pemit %#=Huh?%B%B(Type "help" for help.)
+&SHOUTS_ON Global: Commands=[switch(get(%0/option),*Y*,0,1)]
+&SHOUTLOCK Global: Commands=switch(get(%#/options),*s*,1,0)
+&SHOUT_OK Global: Commands=[switch(get(%0/options),*S*,1,0)]
+@DESCRIBE Global: Commands=@shoutwho -shout +shout shoutcost shoutdelay @shout shoutsoff shoutson ooc
+&OOC_TALK Global: Commands=$ooc *:@sel [mid(%0, 0, 1)]=:,{@remit %l=[ansi(hn, <)][ansi(hb, OOC)][ansi(hn, >)] %N [mid(%0, 1, [dec([strlen(%0)])])]},{;},{@remit %l=[ansi(hw, <)][ansi(hb, OOC)][ansi(hw, > )] [ansi(hm, %n[mid(%0, 1, [dec([strlen(%0)])])])]},{@remit %l=[ansi(hw, <)][ansi(hb, OOC)][ansi(hw, > %n says{,} )] "%0"

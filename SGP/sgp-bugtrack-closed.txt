@@ -1,0 +1,392 @@
+SGP Bug Tracking - Closed Issues
+
+Code issues which are have been closed and patches posted. Open bugs can be
+found here.
+
+#1
+Bug: +3who Broken
+Reported by: Audumla
+Description: +3who doesn't return anything but the headers. Likely a
+problem of missing code.
+The fix:
+Rewrote the code from scratch.
+
+&CMD-PLUS-3WHO SGP - Main Globals=$+3who:@pemit %#=setq(0,v(db))[setq(7,0)][u(v(db)/header)][repeat(|NAME[space(9)]On for Idle,3)]%r|----------- ------- ----|----------- ------- ----|----------- ------- ----[setq(1,0)][setq(8,iter(lwho(),switch(hasflag(##,dark),1,,setq(9,%q9[setq(1,add(%q1,1))][switch(mod(%q1,3),1,|%r)]|[ljust(mid(name(##),0,12),12)][u(%q0/twodigconn,conn(##))][rjust(mid(u(%q0/idletime,idle(##)),0,5),5)]))[setq(7,add(%q7,1))]))]%q9%r|[repeat(-,74)]|%r%b%q7 players connected.%R[u(v(db)/footer)]
+
+&TWODIGCONN SGP - Global Parent Object=switch(1,lt(%0,60),rjust(7,%0s),lt(%0,3600),rjust(div(%0,60)m,3)[rjust(mod(%0s,60),4)],lt(%0,86400),rjust(div(%0,3600)h,3)[rjust(div(mod(%0,3600),60)m,4)],rjust(div(%0,86400)d,3)[rjust(div(mod(%0,3600),3600)h,4)])
+
+&IDLETIME SGP - Global Parent Object=switch(1,lt(%0,60),%0s,lt(%0,3600),div(%0,60)m,lt(%0,86400),div(%0,3600)h,div(%0,86400)d)
+
+Platforms: ALL
+Opened: 27 Jun 00
+Closed: 20 Jul 00 by BEM and Ian@BrazilMUX
+  ------------------------------------------------------------------------
+
+#2
+Bug: +where broken
+Reported by: Audumla
+Description: +where not working in RhostMUSH. Reason is because RhostMUSH
+doesn't support sortby(), which the code depends on to determine the list
+of players displayed.
+The fix:
+Implement a softcoded sortby() and set the parent object INHERIT.
+Platforms: RhostMUSH
+Opened: 27 Jun 00
+Closed: 28 Jun 00 by Ashen-Shugar
+  ------------------------------------------------------------------------
+
+#3 Bug: Failed Install on RhostMUSH
+Reported by: Audumla
+Description: Broken Installer. Mostly needed to add switches for RhostMUSH
+functionality. Installed cleanly after fixes, startups fire properly, flags
+now set properly.
+The fix:
+Reinstall SGP from scratch. WARNING: Not all of SGP is interoperable with
+the myriad differences in server design in RhostMUSH. Some hacks will be
+needed to get things in the package to run cleanly, or at all.
+Platforms: RhostMUSH
+Opened: 27 Jun 00
+Closed: 27 Jun 00 by Audumla
+  ------------------------------------------------------------------------
+
+#4 Bug: @register broken
+Reported by: Audumla
+Description: Conflicts with internal server commands.
+The fix:
+Either disable the internal command or select a different token than @ or
++. Consult documentation.
+Platforms: RhostMUSH
+Opened: 27 Jun 00
+Closed: 20 Jul 00 by Audumla
+  ------------------------------------------------------------------------
+
+#5 Bug: +uptime
+Reported by: Audumla
+Description: Conflicts with internal commands in the server.
+The fix: Disable the internal command. Consult documentation. Platforms:
+RhostMUSH
+Opened: 27 Jun 00
+Closed: 20 Jul 00 by Audumla
+  ------------------------------------------------------------------------
+
+#6 Bug: +timestop
+Reported by: Audumla
+Description: Depends in vtime(). Likely fixable with a switch to time() or
+addition of virtual time code that supports vtime()
+The fix:
+Changed the single reference of vtime() to time()
+Platforms: ALL
+Opened: 27 Jun 00
+Closed: 1 Aug 00 by Audumla
+  ------------------------------------------------------------------------
+
+#7 Bug: +resume
+Reported by: Audumla
+Description: Fails to remove timestop object.
+The fix:
+
+&CMD-RESUME SGP - Main Globals=$+resume:@dolist lcon(loc(%#))=@switch/first and(strmatch(first(name(##)),TIMESTOP:*),controls(%#,##))=1,{@nuke ##;@nuke ##}
+
+This only corrects the Penn bug and will probably cause a 'No Sense in
+beating a dead object.' message in MUX and Tiny. Platforms: RhostMUSH,
+PennMUSH
+Opened: 27 Jun 00
+Closed: 28 Jun 00 by Trispis@M*U*S*H
+  ------------------------------------------------------------------------
+
+#8 Bug: +help and +wizhelp
+Reported by: Michael@Fading S
+Description: +help and +wizhelp return the following:
+
+  #-1 ARGUMENTS MUST BE INTEGERS #-1 ARGUMENTS MUST BE INTEGERS #-1 ARGUMENTS MUST BE INTEGERS #-1 ARGUMENTS MUST BE INTEGERS #-1 ARGUMENTS MUST BE INTEGERS #-1 ARGUMENTS MUST BE INTEGERS
+  #-1 ARGUMENTS MUST BE INTEGERS #-1 ARGUMENTS MUST BE INTEGERS #-1 ARGUMENTS MUST BE INTEGERS #-1 ARGUMENTS MUST BE INTEGERS #-1 ARGUMENTS MUST BE INTEGERS #-1 ARGUMENTS MUST BE INTEGERS
+  #-1 ARGUMENTS MUST BE INTEGERS #-1 ARGUMENTS MUST BE INTEGERS #-1 ARGUMENTS MUST BE INTEGERS #-1 ARGUMENTS MUST BE INTEGERS #-1 ARGUMENTS MUST BE INTEGERS #-1 ARGUMENTS MUST BE INTEGERS
+
+The fix:
+
+&DO_COL SGP - Help Data=[setq(0,fold(max_length,%0,0,%1))][setq(1,div(76,add(%q0,1)))][setq(2,sub(div(76,%q1),1))][setq(3,add(1,div(sub(words(%0,%1),1),%q1)))][setq(4,0)][iter(lnum(%q3),%r%b%b[iter(lnum(%q1),ljust(index(%0,%1,setq(4,add(1,%q4))%q4,1),%q2))])]
+
+PennMUSH doesn't treat null strings as 0. Added a setq() to DO_COL. Changes
+ported back to Tiny cleanly.
+Platforms: PennMUSH
+Opened: 27 Jun 00
+Closed: 28 Jun 00 by Raevnos@M*U*S*H
+  ------------------------------------------------------------------------
+
+#9 Bug: +timestamp
+Reported by: Michael@Fading S
+Description: +timestamp player/topic=note and am told I can only set
+timestamps on players.
+PLAYER isn't a flag in Penn, so code using orflags() had to be reworked.
+The fix:
+
+&CMD-TIMESTAMP-SET SGP - Wizard Globals=$+timestamp */*=*:;@switch hasflag(%#,wizard)[isdbref(num(*%0))]=0*,{@pemit %#=Huh?%B%B(Type "help" for help.)},10,{@pemit %#=You can only set timestamps on players.},{&timestamp-%1 *%0=Set by [name(%#)] on [time()]. %2;@lock *%0/timestamp-%1;@pemit %#=You have set the following timestamp on [name(*%0)]:%B%B[get(*%0/timestamp-%1)]}
+
+&CMD-TIMESTAMP-READ-STAFF SGP - Wizard Globals=$+timestamp/read *:@switch isstaff(%#)[isdbref(num(*%0))][words(lattr(*%0/timestamp*))]=0*,{@pemit %#=Huh?%B%B(Type "help" for help.)},10*,{@pemit %#=That is not a player.},110,{@pemit %#=[name(*%0)] has no timestamps.},{@pemit %#=center(name(*%0),78,=)[iter(lattr(*%0/timestamp-*),%R##%B-%B[get(*%0/##)])]}
+
+&CMD-TIMESTAMP-REMOVE SGP - Wizard Globals=$+timestamp/rem */*:;@switch hasflag(%#,wizard)[isdbref(num(*%0))]=0*,{@pemit %#=Huh?%B%B(Type "help" for help.)},10,{@pemit %#=You can only set timestamps on players.},{@unlock *%0/timestamp-%1;@pemit %#=You have removed the following timestamp on [name(*%0)]:%B%B[get(*%0/timestamp-%1)];&timestamp-%1 *%0=}
+
+All changes ported cleanly back to MUX and Tiny.
+Platforms: PennMUSH
+Opened: 27 Jun 00
+Closed: 28 Jun 00 by Raevnos@M*U*S*H
+  ------------------------------------------------------------------------
+
+#10 Bug: Failure to remove attributes in Penn
+Reported by: Audumla
+Description: Unsetting an attribute using Tiny and MUX method doesn't work
+in Penn.
+The fix:
+Made changes to the installer and removed the = signs from the code that
+unsets attributes.
+All changes ported cleanly back to MUX and Tiny.
+Platforms: PennMUSH
+Opened: 29 Jun 00
+Closed: 30 Jun 00 by Audumla
+  ------------------------------------------------------------------------
+
+#11 Bug: +spy in PLACES
+Reported by: Ashen-Shugar
+Description: spy code implementation uses explicit flagging, which breaks
+in TinyMUSH and Penn.
+The fix:
+Set changed +spy/who to isstaff() and +spy/add and +spy/rem to check only
+for WIZARD.
+
+Platforms: TinyMUSH 2.2, PennMUSH
+Opened: 30 Jun 00
+Closed: 3 Jul 00 by Audumla
+  ------------------------------------------------------------------------
+
+#12 Bug: mutter in PLACES
+Reported by: Ashen-Shugar
+Description: spy code implementation uses explicit flagging, which breaks
+in TinyMUSH and Penn.
+The fix:
+Changed (Overheard) [r(8)]@pemit %#= to (Overheard) [r(8)];@pemit %#=
+
+Platforms: All
+Opened: 30 Jun 00
+Closed: 3 Jul 00 by Ashen-Shugar
+  ------------------------------------------------------------------------
+
+#13 Bug: +who, +lwho
+Reported by: Ashen-Shugar
+Description: Several commands coded to check explicitly for WIZARD and
+IMMORTAL. This is a leftover from the original implementation of the code
+that we missed.
+The fix:
+Where appropriate, changed explicit flags references to isstaff().
+
+Platforms: All
+Opened: 30 Jun 00
+Closed: 3 Jul 00 by BEM@Granite
+  ------------------------------------------------------------------------
+
+#14 Bug: join command in PLACES
+Reported by: Vexon@M*U*S*H
+Description: 'join' command produces JOIN and OJOIN message to actor and
+displays nothing to the rest of the room. The culprit was the @verb in
+PLACEFUNCTION, which had a syntax error that only affected Penn.
+The fix:
+
+&PLACEFUNCTION Places_global_object=@switch/first 0=[lte(%2, get(%0/PLACESMAX))], @pemit %1=Invalid Place Number '%2'.,[setq(1, extract(get(%0/PLACENUMS), %2, 1, |))][gt(ulocal(GETINFO, %0, %2, CURPLACES), words(r(1)))], {@pemit %1=There aren't any free spaces there.},{@verb %1=[setq(0,ulocal(getinfo,%0,%2,NAME))]%1,eval_msg,[edit([U(GETINFO, %0, %2, JOIN)] [r(0)].,%,,%%%,)],oeval_mesg,[edit([U(GETINFO, %0, %2, OJOIN)] [r(0)].,%,,%%%,)]};@pemit/list [r(1)]= [name(%1)] joins you. ;&PLACENUMS %0=[replace(get(%0/PLACENUMS), %2, [r(1)]%1%b, |)]
+
+Platforms: PennMUSH
+Opened: 10 Jul 00
+Closed: 11 Jul 00 by Corum
+  ------------------------------------------------------------------------
+
+#15 Bug: Extraneous } in &PLACENUMS
+Reported by: Corum
+Description: Code sets an unneeded }. This was found while we were fixing
+Bug #14. This was a simple typo in PLACEFUNCTION
+The fix:
+Removed unneeded } from PLACEFUNCTION. Bug #14 fix corrects the flaw in the
+code. Remove the } from existing PLACENUM attributes.
+
+Platforms: All
+Opened: 11 Jun 00
+Closed: 11 Jul 00 by Audumla
+  ------------------------------------------------------------------------
+
+#16 Bug: tt and ttooc don't work in Penn
+Reported by: Vexon@M*U*S*H
+Description: The commands don't work at all. Problems with escape
+sequences.
+The fix:
+
+&DO_TT Places_global_object=$tt *:@pemit/list [setq(0,ulocal(WHICHPLACE,%l,%#))][switch(r(0),0,%#[setq(1,You'll need to join a place first.)],[extract(get(%l/PLACENUMS),r(0),1,|)][setq(1,[ulocal(GETINFO,%l,r(0),PREFIX)]%, [switch(%0,:*,%N [delete(%0,0,1)],;*,%N[delete(%0,0,1)],"*,%N says "[delete(%0,0,1)]",|*,delete(%0,0,1),%N says "%0")])])]=[r(1)];@pemit/list [iter(lcon(%l),switch(strmatch([get(##/SPYING)],%l [r(0)]),1,##))]=(Overheard) [r(1)]
+&DO_TTOOC Places_global_object=$ttooc *:@pemit/list [setq(0,ulocal(WHICHPLACE,%l,%#))][switch(r(0),0,%#[setq(1,You'll need to join a place first.)],[extract(get(%l/PLACENUMS),r(0),1,|)][setq(1, [ulocal(GETINFO,%l,r(0),PREFIX)]%, [switch(%0,:*,%N [delete(%0,0,1)],;*,%N[delete(%0,0,1)],"*,%N says "[delete(%0,0,1)]",|*,delete(%0,0,1),%N says "%0")])])]=r(1);@pemit/list [iter(lcon(%l),switch(strmatch([get(##/SPYING)],%l [r(0)]),1,##))]=(Overheard) [r(1)]
+
+Platforms: PennMUSH 1.7.2p32
+Opened: 11 Jun 00
+Closed: 11 Jul 00 by Corum
+  ------------------------------------------------------------------------
+
+#18 Bug: +finger doesn't obey DARK flag
+Reported by: Cheetara@Granite
+Description: DARK wizards triggered the AFINGER. This was judged to be
+incorrect behavior.
+The fix:
+See the fix for bug #21
+Platforms: All
+Opened: 6 Nov 00
+Closed: 7 Nov 00 by Audumla
+  ------------------------------------------------------------------------
+
+#19 Bug: TinyMUSH 3.0 compatibily
+Reported by: Luthe@GonturanMUSH
+Description: Luthe claims it works OoB on 3.0, but this is inconsistent
+with previous reports of required hacks.
+The fix:
+Essentially, the code works fine, with the flags set properly. This still
+doesn't answer the long term questions regarding compatibility. Our attempt
+to test the SGP code was fraught with problems with the server crashing, so
+extensive testing simply wasn't possible, nor will it be attempted again in
+the forseeable future.
+Platforms: TinyMUSH 3.0
+Opened: 6 Nov 00
+Closed: 20 Dec 00
+  ------------------------------------------------------------------------
+
+#20 Bug: +info * missing
+Reported by: Luthe@GonturanMUSH
+Description: Forgot to add this to the installer. Patch file added to the
+website.
+The fix:
+
+&CMD-INFO-SEE SGP - Main Globals=$+info *:@pemit %#=[switch(num(*%0),#-1,That is not a player.,{[center(%b[capstr(%0)]'s Info%b,78,=)]%rGeneral: [switch(hasattr(*%0,info-general),0,Unset.,get(*%0/info-general))][iter(edit(lattr(*%0/info-*),INFO-GENERAL,),[switch(or(match(squish(edit([string(%#,race)] [string(%#,tradition)] [string(%#,tribe)] [string(%#,clan)] [string(%#,faction)],NOT SET,)),after(##,INFO-)),isstaff(%#)),0,,%r[capstr(lcstr(edit(##,INFO-,)))]: [get(*%0/##)])])]%r[repeat(=,78)]})]
+
+Platforms: All
+Opened: 6 Nov 00
+Closed: 6 Nov 00 by Audumla
+  ------------------------------------------------------------------------
+
+#21 Bug: +finger display problem
+Reported by: Audumla
+Description: +finger display was showing the bottom portion of the display,
+even when the player was invalid. This applied only to staff. A faulty
+@switch was the culprit.
+The fix:
+
+&CMD-FINGER SGP - Main Globals=$+finger *:[setq(0,switch([type(num(%0))],PLAYER,[num(*%0)],[switch([type(num(*%0))],PLAYER,[Num(*%0)],[locate(%#,%0,mp)])]))][setq(9,and(not(and(hasflag(%q0,Dark),not(IsStaff(%#)))),switch(member(lwho(),%q0),0,0,1)))][setq(8,idle(%q0))]; @switch %q0= #-1,@pemit %#=That is not a player.,#-2,@pemit %#=There is more than one %0.,{@pemit %#=[center(---<@%B%B[name(%q0)[switch(isstaff(%#),0,,(%q0) [flags(%q0)])]]%B%B@>---,78,=)]%r[ljust(Alias:%B%B[switch(hasattr(%q0,alias),1,[u(%q0/Alias)],)]%B[switch(hasflag(%q0,Wizard),0,switch(hasflag(%q0,Immortal),0,switch(hasflag(%q0,Builder),0,,(Builder)),(Immortal)),(Wizard))],39)]|[ljust([switch(%q9,0,Last on: [get(%q0/last)],1,On for: [u(v(db)/secs2hrs,conn(%q0))][space(10)]Idle: [u(v(db)/secs2hrs,%q8)])],38)]%R[ljust(Sex: %B%B%B[switch(strlen(get(%q0/sex)),0,None Set,get(%q0/sex))],39)]|[ljust(Mail:%B%B[extract(mail(%q0),2,1)] unread / [extract(mail(%q0),1,1)] total.,38)]%R[ljust([switch(hasattr(%q0,email),1,E-Mail:%B[get(%q0/email)],E-Mail:%B(unlisted))],39)]|[ljust(,38)]%R[u(v(db)/footer)]%R[switch(findable(%#,%q0),1,Location:[space(7)][name(loc(%q0))],[switch(isstaff(%#),1,Location:[space(7)][name(loc(%q0))] (unfindable),Location:[space(7)](unfindable))])][setq(7,[u(v(db)/finger_list)])][iter(%q7,{[switch(1,hasattr(%q0,##),{%r[ljust([index([u(v(db)/finger_list_long)],|,[member(%q7,##,|)],1)]:,16)][u(%q0/##)]})]},|)][iter(lattr(%q0/finger*),%r[ljust(capstr(lcstr(edit(edit(##,FINGER_,),FINGER-,))):,15)]%t[u(%q0/##)])]; @pemit %#=[switch(hasflag(%#,wizard),0,,[repeat(-,78)]%RRegistration:%t%t[get(%q0/registration)]%rLast online from:%t[get(%q0/lastsite)]%r[switch(%q9,0,,Currently online from:%t[get(%q0/lastsite)]%r)])][u(v(db)/footer)];@switch hasflag(%#,DARK)=1,{},{@verb %q0=%#,,,,,afinger,}}
+
+Platforms: All
+Opened: 6 Nov 00
+Closed: 7 Nov 00 by BEM
+  ------------------------------------------------------------------------
+
+#22 Bug: +finger omission
+Reported by: Luthe@GonturanMUSH
+Description: 1. Missing entry in the &FINGER_LIST/&FINGER_LIST_LONG
+attributes on the Global Parent Object for 'position'.
+The fix:
+
+&FINGER_LIST_LONG SGP - Global Parent Object=Full Name|Age|Fame|Position|Apparent Age|Plan|RP-Prefs|Alts|Theme Song|Quote|Office-hours|Temperment|Vacation|Homepage
+
+&FINGER_LIST SGP - Global Parent Object=fullname|age|fame|position|app-age|plan|rp-prefs|alts|themesong|quote|off-hours|temperment|vacation|url
+
+Platforms: All
+Opened: 10 Nov 00
+Closed: 10 Nov 00 by Audumla
+  ------------------------------------------------------------------------
+
+#23 Bug: Typo in &CMD-PLUS-WHO-SORTED
+Reported by: Luthe@GonturanMUSH
+Description: Absolute dbref prevented installation to the master room
+objects.
+The fix:
+
+&CMD-PLUS-WHO-SORTED #59=
+
+&CMD-PLUS-WHO-SORTED SGP - Main Globals=$+who *: @pemit %#=[u(v(db)/header)][ljust(Player,15,)] [ljust(Sex,3)] [ljust(Alias,5)][rjust(Idle,6)] [ljust(mid(Location,0,28),28,)] [ljust(dbref,6)]%R[u(v(db)/footer)][setq(1, iter(lwho(),switch(strmatch(name(##),%0*),0,,##)))][iter(sortby(v(db)/namesort,%q1),switch(and(hasflag(##,dark),not(isstaff(%#))),1,,%R[ljust(name(##),15,.)] [ljust(mid(u(##/sex),0,1),3)] [ljust(mid(u(##/alias),0,5),5)][rjust(mid(u(v(db)/secs2hrs,idle(##)),0,6),6)] [ljust(switch(and(or(hasflag(##,unfindable),hasflag(loc(##),unfindable)),not(or(hasflag(%#,wizard),hasflag(%#,immortal)))),1,,mid(name(room(##)),0,28)),28,.)] [ljust(switch(or(isstaff(%#),and(hasflag(loc(##),JUMP_OK),not(hasflag(##,UNFINDABLE)),not(hasflag(loc(##),UNFINDABLE)))),0,,mid(room(##),0,5)),6,.)][ljust(switch(1,ostaff(##),Staff),6)]))]%r[u(v(db)/footer)]%RThere are [words(sortby(v(db)/cansee,lwho()))] players connected%R[u(v(db)/footer)]
+
+Platforms: All
+Opened: 10 Nov 00
+Closed: 10 Nov 00 by Audumla
+  ------------------------------------------------------------------------
+
+#24 Bug: Version monitoring needed
+Reported by: Audumla
+Description: SGP objects need to track install date, version date and add
++version to recall all the info for later checks.
+The fix:
+
+Platforms: All
+Opened: 29 Nov 00
+Closed: 4 Jan 01
+  ------------------------------------------------------------------------
+
+#26 Bug: +staff/add and +staff/remove
+Reported by: Taladan@JAGMush
+Description: These commands have 2 problems.
+The first is that neither take player names as arguments, which was a
+documented design feature/flaw, which makes an unholy mess of the display
+when you do use a name.
+The second is that the Penn parser requires that evaluations outside of
+@commands be in []. The other servers aren't as picky about this issue, but
+bracketing is better than not.
+The fix:
+
+&CMD-STAFF-ADD SGP - Wizard Globals=$+staff/add *:[setq(0,switch(isdbref(%0),1,%0,num(*%0)))];@switch/first 1=not(strmatch(type(%q0),PLAYER)),{@pemit %#=%0 is not a player!},match(get(v(db)/STAFF-LIST),%q0),{@pemit %#=That player is already listed in +staff.},{@wait 0=&STAFF-LIST [v(db)]=[get(v(db)/STAFF-LIST)]%B%q0;@pemit %#=You have added [name(%q0)] to the +staff listing.}
+
+&CMD-STAFF-REMOVE SGP - Wizard Globals=$+staff/remove *:[setq(0,switch(isdbref(%0),1,%0,num(*%0)))];@switch/first 1=not(strmatch(type(%q0),PLAYER)),{@pemit %#=%0 is not a player!},not(match(get(v(db)/STAFF-LIST),%q0)),{@pemit %#=That player is not listed in +staff.},{&STAFF-LIST [v(db)]=remove(get(v(db)/STAFF-LIST),%q0);@pemit %#=You have removed [name(%q0)] from the +staff listing.}
+
+Platforms: All/Penn
+Opened: 07 Jan 01
+Closed: 08 Jan 01 by Audumla
+  ------------------------------------------------------------------------
+
+#27 Bug: The Installers are failing.
+Reported by: Audumla
+Description: The installers for the main code and the +version patch failed
+big time. The problem was that @edit doesn't evaluate code in Penn and it
+blew sky high as a result. Building installers is a pain in the butt, BTW.
+The fix:
+Fixed the installers themselves on 08 Jan and will issue a patch to correct
+the other problems in games that may have used the files between 04 Jan and
+09 Jan.
+
+Platforms: All
+Opened: 07 Jan 01
+Closed: 10 Jan 01 by Audumla
+  ------------------------------------------------------------------------
+
+#28 Bug: @crontab isn't running crontabs
+Reported by: Audumla
+Description: There are 4 different of the function foreach(), depending on
+the server you use.
+The fix:
+Jeff Hulsey fixed this. If you have code dated before April 01, then reload
+the objects and trandfer your crontabs.
+
+Platforms: All
+Opened: 08 Jan 01
+Closed: 15 April 01 by Audumla and Jeff Hulsey
+  ------------------------------------------------------------------------
+
+#30 Bug: 'mp' listing in +help on Penn.
+Reported by: Taladan@JAGMush
+Description: +help shows 'mp' as a help topic when the command doesn't
+exist.
+The fix:
+Edit &LIST_COMMANDS on the SGP - Help Data object to remove the 'mp'
+listing.
+
+Platforms: All
+Opened: 08 Jan 01
+Closed: 08 Jan 01 by Audumla
+  ------------------------------------------------------------------------
+
+#33 Bug: +warn
+Reported by: Raevnos
+Description: +warn doesn't notify staff when it has been used.
+The fix:
+
+&CMD-WARN SGP - Main Globals=$+warn *:@switch [loc(*%0)]=#-1,{@pemit %#=[capstr(%0)] is not a valid player name or alias.},[loc(%#)],{@pemit %#=You issue an OOC warning to [name(*%0)].;@pemit *%0=[u(line)]OOC WARNING : You are in a potentially dangerous situation. Willfully initiating or entering combat or continuing with this RP could result in either injury, some other harm, or death for your character. By continuing this situation you accept the consequences of your IC actions.%r[u(line)]; @pemit/list get(v(db)/staff-list)=ALERT: %N has just used +warn on [name(*%0)] to alert [obj(*%0)] about a potentially dangerous IC situation.},{@pemit %#=That person is not in the same location as you are.}
+
+Platforms: All
+Opened: 9 Jun 01
+Closed: 11 Jun 01 by Raevnos
+  ------------------------------------------------------------------------

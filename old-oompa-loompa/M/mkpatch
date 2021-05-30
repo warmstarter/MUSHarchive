@@ -1,0 +1,199 @@
+#!/bin/bash
+#  Program: mkpatch version 1.1
+#  Author: David Cheatham / david@mush.cx / David@M*U*S*H / David@ChaoticMUX
+#  Description: Make patches of PennMUSH easily
+#  Date: August 17, 1999
+#  Tested with: diff 2.7, PennMUSH 1.7.2, bash 1.14.7
+#  Runs under: bash 1.14.7
+#
+#   This program has no warranty, and is free for anyone to use in any 
+#   way, provided you add your name and clear notice if you change it,
+#   and remove mine at request.
+#
+#   Template is from 
+#   ftp://ftp.pennmush.org/pub/PennMUSH/Source/contrib/README-FOR-CONTRIBUTORS
+#
+###  README  #############################################################
+#
+#    So, you're a source hack, huh? You've made a hacked copy of PennMUSH
+#      and want the world to see it. You're even thinking of submitting
+#      it for inclusion in the distribution. But how?
+#    Simple. Make a patch.
+#
+#    General rule of thumb about what to include in a patch:
+#    Patch as little as possible. If you've changed @uptime to show
+#      the time until the next floating room check and database
+#      consistency, just make of patch of that. Make sure you don't
+#      accidently put your lowercase WHO in there.
+#    Also, it's considered best to #ifdef everything, so people can turn
+#      things on and off.
+#
+#    There's a couple of things you need:
+#        1.  A hacked version of PennMUSH (duh)
+#        2.  An unhacked version of PennMUSH
+#            (1 and 2 *must* be the same version.)
+#        3.  A GNU utility named 'diff' ('patch' is nice too, for
+#            checking that everything was made right. Most, if not all,
+#            unix-based computers come with both of these.)
+#
+#    Now that that's done, cd to the root of your hacked pennmush, 
+#     and run this script, using a command like:
+#
+#  sh ~/mkpatch 
+#
+#   (if you didn't save this in your home directory, change
+#     ~/mkpatch to the full path to the file.)
+#
+#                 ############ IMPORTANT ############
+#   Be sure to open the patch in an editor and make sure you don't
+#    have anything in there you shouldn't. Also, put the version number
+#    of the patch in there.
+#
+
+############# RISK OF SHOCK ############
+#    No user-servicable parts below    #
+#   Opening cover can void warranty.   #
+########################################
+#
+#
+#
+#
+
+
+if [ -f ./mkpatch.save ]; then
+
+  . ./mkpatch.save
+  OUTPUT=$1
+  OUTPUT=${OUTPUT:=$FILENAME}
+  echo Output is: $OUTPUT
+
+  echo "# Patch name:" $PATCH_NAME >$OUTPUT
+  echo "# Patch version:" $PATCH_VERSION >>$OUTPUT
+  echo "# Author's name:" $NAME >>$OUTPUT
+  echo "# Author's email:" $EMAIL >>$OUTPUT
+  echo \# Version of PennMUSH: `grep -v 'Do not' Patchlevel | cut -d" " -f4` >>$OUTPUT
+  echo \# Date patch made: `date` >>$OUTPUT
+  echo \# Author is willing to support \(yes/no\): $SUPPORT >>$OUTPUT
+
+  cat <<STOP >> $OUTPUT
+# Patch format: Context
+#
+#
+# This is a contributed PennMUSH patch. Its use is subject to the
+# same restrictions found in PennMUSH's hdrs/copyrite.h file.
+#
+# No warranty is given for this patch. It is not necessarily going
+# to work on your system, with any version of PennMUSH other than
+# the one above, etc.
+#
+# If the author given above was willing to support the patch, you
+# should write to the author if you have any questions or problems. Do
+# *NOT* send email messages to Javelin or any PennMUSH mailing list about
+# this patch!
+#
+# Below this line is the author's description of the patch,
+# followed by the patch itself. If the patch is in context diff
+# format, you'll probably apply it by typing: patch < patchfile
+# in your top-level MUSH directory, unless instructed otherwise
+# below.
+#
+STOP
+################################
+
+
+  sed s/^/'# '/ <mkpatch.desc >>$OUTPUT
+
+# Now for the real patch...
+# check all the .c files, ignoring funcrypt.c, as we don't want to
+#accidently include the export version in a patch
+  echo : :src/:>>/dev/stderr
+  for i in `grep src/ MANIFEST|grep -v funcrypt.c`
+   {
+    echo $i>>/dev/stderr
+    diff -cN $CLEAN/src/ $i >>$OUTPUT
+   }
+
+# check the headers
+  echo : :hdrs/:>>/dev/stderr
+  for i in `grep hdrs/ MANIFEST|grep -v version.h` 
+   {
+    echo $i>>/dev/stderr
+    diff -cNH $CLEAN/hdrs $i >>$OUTPUT
+   }
+
+# And finally, other stuff you may have changed...
+  echo : :Other files:>>/dev/stderr
+  echo game/mushcnf.dst>>/dev/stderr
+  diff -cd $CLEAN/game/mushcnf.dst  game/mushcnf.dst >>$OUTPUT
+  echo Configure>>/dev/stderr
+  diff -cH $CLEAN/Configure Configure >>$OUTPUT
+  echo Makefile>>/dev/stderr
+  diff -cH $CLEAN/Makefile Makefile >>$OUTPUT
+  echo options.h.dist>>/dev/stderr
+  diff -cd $CLEAN/options.h.dist options.h.dist >>$OUTPUT
+  echo MANIFEST>>/dev/stderr
+  diff -c $CLEAN/MANIFEST MANIFEST>>$OUTPUT
+
+else
+  read -ep 'Where is a unhacked PennMUSH?: ' CLEAN
+
+  if [ ! -d $CLEAN ]; then
+    echo ERROR: Invalid path. >>/dev/stderr
+    exit
+  fi
+
+  if [ ! -f $CLEAN/options.h.dist ]; then
+    echo ERROR: No copy of PennMUSH in that location. >>/dev/stderr
+    exit
+  fi
+  echo export CLEAN=$CLEAN >./mkpatch.save
+  echo
+
+  read -ep "Patch name: " PATCH_NAME
+  echo "export PATCH_NAME=${PATCH_NAME:='No name given'}">>./mkpatch.save
+  echo
+
+  read -ep "Author's name (In single quotes.): " NAME
+  echo Using ${NAME:="J. Random Hacker"} as your name.
+  echo "export NAME=$NAME" >>./mkpatch.save
+  echo
+
+  read -ep "Author's email: " EMAIL
+  echo Using ${EMAIL:="*none*"} as your email address.
+  echo "export EMAIL=$EMAIL" >>./mkpatch.save
+  echo
+
+  echo What filename do you want patches saved as? You can use
+  echo /dev/stdout to send to stdout. If you list a file on the command
+  echo line, that will be used instead.
+  read -ep "Filename:" FILENAME
+
+  echo Using ${FILENAME:=/dev/stdout} as default filename.
+  echo "export FILENAME=$FILENAME" >>./mkpatch.save
+  echo
+
+  read -ep 'Author is willing to support (yes/no):' SUPPORT
+  echo Author is willing to support set to ${SUPPORT:="no"}.
+  echo "export SUPPORT=$SUPPORT" >>./mkpatch.save
+
+########
+  cat <<STOP
+
+-----------------------------------------------------
+
+Now type a short description of this patch. You can use enter and
+tab, although it may look weird. Don't worry, you can easily  
+edit this later. Hit Control-D to stop.
+
+-----------------------------------------------------
+STOP
+##########
+  cat >>./mkpatch.desc
+  echo To edit any of this information later, edit mkpatch.save in the
+  echo current directory.
+  echo To edit the description, edit mkpatch.desc, also in the current
+  echo directory.
+
+fi
+
+

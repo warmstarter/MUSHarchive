@@ -1,0 +1,96 @@
+@create DOOM Mech Parent
+@link DOOM Mech Parent=#1044
+@chzone DOOM Mech Parent=#1046
+@lock/Listen DOOM Mech Parent=Mech/1
+@lock DOOM Mech Parent==#1044
+@set DOOM Mech Parent=!NO_COMMAND
+@set DOOM Mech Parent=WIZARD
+@set DOOM Mech Parent=HALT
+@set DOOM Mech Parent=MONITOR
+@VO DOOM Mech Parent=$shutdown:@halt me={home;&Active me=0;@remit me=-*- Mech has been shutdown! -*-}
+@VN DOOM Mech Parent=$startup:@halt me={@tr me/Initialize;&Active me=1;@remit me=-*- All systems operational! -*-}
+@STARTUP DOOM Mech Parent=@tr me/Initialize
+&MISS_TORP DOOM Mech Parent=&torp_%0 me=Reloading;@remit me=Firing [u(specs,torp_name)] %0 at [name(v(lock))].;@remit me=[u(specs,torp_name)] missed.;@remit [v(lock)]=Incoming [u(specs,torp_name)] from [name(me)];@remit [v(lock)]=[u(specs,torp_name)] missed.;think iter(u(observers),remit(##,[name(me)] misses [name(v(lock))] with a [u(specs,torp_name)]!))};@wait [u(specs,torp_reload)]=@tr me/Reload_Torp=%0
+&ERROR_UNLOADED_TORP DOOM Mech Parent=[pemit(%#,[u(specs,torp_name)] %0 is not loaded.)]
+&ERROR_INVALID_TORP DOOM Mech Parent=[pemit(%#,Invalid [u(specs,torp_name)] number.)]
+&LOADED_TORP DOOM Mech Parent=[switch(v(torp_%0),Loaded,1,0)]
+&VALID_TORP DOOM Mech Parent=[lt(%0,u(specs,num_torps))]
+@VF DOOM Mech Parent=$fp *:@tr me/[switch([u(valid_lock)][u(valid_torp,%0)][u(loaded_torp,%0)],0??,u(error_invalid_lock),?0?,u(error_invalid_torp,%0),??0,u(error_unloaded_torp,%0),switch(u(torp_roll),1,fire_torp,miss_torp))]=%0
+&OBSERVERS DOOM Mech Parent=[remove(u(mech_sensors),v(lock))]
+&MISS_GUN DOOM Mech Parent=&gun_%0 me=Recharging;@remit me=Firing [u(specs,gun_name)] %0 at [name(v(lock))].;@remit me=[u(specs,gun_name)] missed.;@remit [v(lock)]=Enemy [u(specs,gun_name)] fired by [name(me)];@remit [v(lock)]=[u(specs,gun_name)] missed.;think iter(u(observers),remit(##,[name(me)] misses [name(v(lock))] with a [u(specs,gun_name)]!));@wait [u(specs,gun_recharge)]=@tr me/Recharge_Gun=%0
+&SPECS_HITPOINTS DOOM Mech Parent=Hitpoints: [u(specs,max_hitpoints)]
+&TORP_ROLL DOOM Mech Parent=[lte(rand(1000),mul(mul(u(specs,torp_accuracy),u(v(lock)/specs,size)),1000))]
+&GUN_ROLL DOOM Mech Parent=[lte(rand(1000),mul(mul(u(specs,gun_accuracy),u(v(lock)/specs,size)),1000))]
+&ERROR_UNCHARGED_GUN DOOM Mech Parent=[pemit(%#,[u(specs,gun_name)] %0 is not charged.)]
+&ERROR_INVALID_GUN DOOM Mech Parent=[pemit(%#,Invalid [u(specs,gun_name)] number.)]
+&ERROR_INVALID_LOCK DOOM Mech Parent=[pemit(%#,Invalid weapons lock.)]
+&CHARGED_GUN DOOM Mech Parent=[switch(v(gun_%0),Charged,1,0)]
+&VALID_GUN DOOM Mech Parent=[lt(%0,u(specs,num_guns))]
+&VALID_LOCK DOOM Mech Parent=[switch(loc(v(lock)),loc(me),1,0)]
+&MECH DOOM Mech Parent=[t(get(%#/DOOM_Mech))]
+&STATUS_LOCK DOOM Mech Parent=[switch(v(lock),,Weapon directors free.,Weapon directors locked on [name(v(lock))] -- [get(get(v(lock)/filespec)/name)].)]
+&CONTACT_LOST DOOM Mech Parent=^* has left.:@remit me=CONTACT LOST: [name(%#)] -- [get(get(%#/filespec)/name)];think [switch(get(me/lock),%#,[set(me,Lock:)][remit(%#,Weapons lock from [name(me)] -- [u(specs,name)] has been broken.)][remit(me,Weapons lock on [name(%#)] lost.)]
+&NEW_CONTACT DOOM Mech Parent=^* has arrived.:@remit me=NEW CONTACT: [name(%0)] -- [u(%0/specs,name)]
+@VE DOOM Mech Parent=$fg *:@tr me/[switch([u(valid_lock)][u(valid_gun,%0)][u(charged_gun,%0)],0??,u(error_invalid_lock),?0?,u(error_invalid_gun,%0),??0,u(error_uncharged_gun,%0),switch(u(gun_roll),1,fire_gun,miss_gun))]=%0
+@VD DOOM Mech Parent=$lock *:@switch [t(get(%0/DOOM_Mech))]=0, {@pemit %#=Invalid target.}, {&lock me=[num(%0)];@remit me=Weapons locked on [name(%0)] -- [u(%0/specs,name)].;@remit %0=Warning!%b%b[name(me)] -- [u(specs,name)] has locked weapons.}
+&FILESPEC DOOM Mech Parent=#1232
+&DOOM_MECH DOOM Mech Parent=1
+&MECH_SENSORS DOOM Mech Parent=[squish(iter(remove(lcon(here),%!),switch(t(get(##/DOOM_Mech)),1,##)))]
+&MECH_SPECS DOOM Mech Parent=[u(line)]%r[ansi(h,center([u(specs,name)] Specs,79))]%r[u(line)]%r%r[u(specs_guns)]%r[u(specs_torps)]%r%r[u(specs_shields)]%r[u(specs_hull)]%r[u(specs_hitpoints)]%r%r[u(line)]
+&MECH_STATUS DOOM Mech Parent=[u(line)]%r[ansi(h,center([name(me)] Status,79))]%r[u(line)]%r%r[u(specs,gun_name)] status:%r[u(status_guns)]%r%r[u(specs,torp_name)] status:%r[u(status_torps)]%r%r[u(status_lock)]%r%r[u(status_shields)]%r[u(status_hull)]%r%r[u(line)]
+@VC DOOM Mech Parent=$sensors:@pemit %#=[u(sensor_report)]%r[u(exit_report)]
+&SPECS_HULL DOOM Mech Parent=Hull: [u(specs,hull_points)]
+&SPECS_SHIELDS DOOM Mech Parent=Shields: [u(specs,shield_power)], recharge rate [u(specs,shield_recharge_up)]/TT UP, [u(specs,shield_recharge_down)]/TT DOWN
+&SPECS_TORPS DOOM Mech Parent=[u(specs,torp_name)]s: [u(specs,num_torps)]*[u(specs,torp_power)], reload time [u(specs,torp_reload)]s, accuracy [u(specs,torp_accuracy)]
+&SPECS_GUNS DOOM Mech Parent=[u(specs,gun_name)]s: [u(specs,num_guns)]*[u(specs,gun_power)], recharge time [u(specs,gun_recharge)]s, accuracy [u(specs,gun_accuracy)]
+@VB DOOM Mech Parent=$specs:@pemit %#=[u(mech_specs)]
+&GUN_2 DOOM Mech Parent=Charged
+&STATUS_TORPS DOOM Mech Parent=[iter(lnum(u(specs,num_torps)),%r[u(specs,torp_name)] ##: [v(torp_##)])]
+&STATUS_GUNS DOOM Mech Parent=[iter(lnum(u(specs,num_guns)),%r[u(specs,gun_name)] ##: [v(gun_##)])]
+&SPECS DOOM Mech Parent=[switch(hasattrp(me,filespec),0,#-1 NO SUCH SPEC VALUE (%0),get(v(filespec)/%0))]
+&SHIELDS_RAISED DOOM Mech Parent=0
+&STATUS_HULL DOOM Mech Parent=Hull integrity:%t[v(hull_integrity)]/[u(specs,hull_points)] - [mul(fdiv(v(hull_integrity),u(specs,hull_points)),100)]%%
+&STATUS_SHIELDS DOOM Mech Parent=Shield status:%t[v(shield_level)]/[u(specs,shield_power)] - [mul(fdiv(v(shield_level),u(specs,shield_power)),100)]%% [switch(t(v(shields_raised)),1,(UP),(DOWN))]
+&LINE DOOM Mech Parent=[repeat(=,79)]
+@VA DOOM Mech Parent=$status:@pemit %#=[u(mech_status)]
+&FIRE_GUN DOOM Mech Parent=&gun_%0 me=Recharging;@remit me=Firing [u(specs,gun_name)] %0 at [name(v(lock))].;@remit me=[u(specs,gun_name)] hit!;@remit [v(lock)]=Enemy [u(specs,gun_name)] fired by [name(me)];@remit [v(lock)]=[u(specs,gun_name)] hit!;think iter(u(observers),remit(##,[name(me)] hits [name(v(lock))] with a [u(specs,gun_name)]!));@wait [u(specs,gun_recharge)]=@tr me/Recharge_Gun=%0;think u(battle_damage,u(specs,gun_power));@tr v(lock)/[switch(lte(get(v(lock)/hull_integrity),0),1,Destroyed,Null)]
+&NULL DOOM Mech Parent=@@
+&BATTLE_DAMAGE DOOM Mech Parent=[switch(and(get(v(lock)/Shields_Raised),get(v(lock)/Shield_Level)),1,[set(v(lock),Shield_Level:[sub(get(v(lock)/Shield_Level),%0)])][switch(lt(get(v(lock)/Shield_Level),0),1,[remit(v(lock),Shields failed!)][u(hull_damage,mul(get(v(lock)/Shield_Level),-1))][set(v(lock),Shield_Level:0)],[remit(v(lock),Shields reduced to [mul(fdiv(get(v(lock)/Shield_Level),u(v(lock)/specs,Shield_Power)),100)]%%!)])],u(hull_damage,%0))]
+&HULL_DAMAGE DOOM Mech Parent=[set(v(lock),Hull_Integrity:[sub(get(v(lock)/Hull_Integrity),%0)])][remit(v(lock),Hull damaged %0 - integrity down to [mul(fdiv(get(v(lock)/Hull_Integrity),u(v(lock)/specs,hull_points)),100)]%%)]
+&FIRE_TORP DOOM Mech Parent=&torp_%0 me=Reloading;@remit me=Firing [u(specs,torp_name)] %0 at [name(v(lock))].;@remit me=[u(specs,torp_name)] hit!;@remit [v(lock)]=Incoming [u(specs,torp_name)] from [name(me)];@remit [v(lock)]=[u(specs,torp_name)] hit!;think iter(u(observers),remit(##,[name(me)] hits [name(v(lock))] with a [u(specs,torp_name)]!));@wait [u(specs,torp_reload)]=@tr me/Reload_Torp=%0;think u(battle_damage,u(specs,torp_power));@tr v(lock)/[switch(lte(get(v(lock)/hull_integrity),0),1,Destroyed,Null)]
+&RECHARGE_GUN DOOM Mech Parent=@remit me=[u(specs,gun_name)] %0 fully charged.;&gun_%0 me=Charged
+&RELOAD_TORP DOOM Mech Parent=@remit me=[u(specs,torp_name)] %0 reloaded.;&torp_%0 me=Loaded
+&REPAIR_HULL DOOM Mech Parent=&Hull_Integrity me=[add(v(Hull_Integrity),u(specs,hull_repair_rate))];think switch(gt(v(Hull_Integrity),u(specs,hull_points)),1,set(me,Hull_Integrity:[u(specs,hull_points)]));@wait 12=@tr me/repair_hull
+&CHARGE_SHIELDS DOOM Mech Parent=&Shield_Level me=[switch(t(v(shields_raised)),1,add(v(shield_level),u(specs,shield_recharge_up)),add(v(shield_level),u(specs,shield_recharge_down)))];think switch(gt(v(Shield_Level),u(specs,shield_power)),1,set(me,Shield_Level:[u(specs,shield_power)]));@wait 6=@tr me/charge_shields
+&INITIALIZE DOOM Mech Parent=home;&hull_integrity me=[u(specs,hull_points)];&shield_level me=[u(specs,shield_power)];@dolist lnum(u(specs,num_guns))=&gun_## me=Charged;@dolist lnum(u(specs,num_torps))=&torp_## me=Loaded;@tr me/repair_hull;@tr me/charge_shields
+&LOCK DOOM Mech Parent=#534
+&DESTROYED DOOM Mech Parent=@remit me=Hull has failed.%b%bShip destroyed.;think [iter(u(mech_sensors),remit(##,***** [name(me)] - [u(specs,name)] DESTROYED. *****))];@tr me/Initialize;&active me=0
+@VG DOOM Mech Parent=$fga:@dolist lnum(u(specs,num_guns))=@tr me/[switch([u(valid_lock)][u(charged_gun,##)],0?,u(error_invalid_lock),?0,u(error_uncharged_gun,##),switch(u(gun_roll),1,fire_gun,miss_gun))]=##
+@VH DOOM Mech Parent=$fpa:@dolist lnum(u(specs,num_torps))=@tr me/[switch([u(valid_lock)][u(loaded_torp,##)],0?,u(error_invalid_lock),?0,u(error_unloaded_torp,##),switch(u(torp_roll),1,fire_torp,miss_torp))]=##
+&INSIDE DOOM Mech Parent=[switch(loc(%#),%!,1,0)]
+@VI DOOM Mech Parent=$drive *:@switch member(lexits(here),num(%0))=0, {@pemit %#=You attempt to climb too steep a hill.;@pemit %#=You make a piloting skill roll!;@pemit %#=You manage to stop before crashing.}, {@remit me=Driving to [name(%0)].;@remit [v(lock)]=Weapons lock from [name(me)] has been broken.;@remit me=[switch(v(lock),,Weapons lock on [name(v(lock))] lost.)];&lock me;go %0;@remit me=[u(sensor_report)];@remit me=[u(exit_report)]}
+&SENSOR_REPORT DOOM Mech Parent=Sensor report:[iter(u(mech_sensors),%r[switch(get(##/lock),%!,*%b)][name(##)] -- [u(##/specs,name)])]%r--- end ---
+&EXIT_REPORT DOOM Mech Parent=Exits:[iter(lexits(here),%b%b[name(##)])]
+@VJ DOOM Mech Parent=$scan *:@pemit %#=[switch(member(u(mech_sensors),num(%0)),0,Invalid scanner target.,[u(mech_scan,num(%0))][u(scan_notify,num(%0))])]
+&MECH_SCAN DOOM Mech Parent=[u(line)]%r[ansi(h,center({Scan of [name(%0)] -- [u(%0/specs,name)]},79))]%r[u(line)]%r%r[u(scan_guns,%0)]%r[u(scan_torps,%0)]%r%r[u(scan_shields,%0)]%r[u(scan_hull,%0)]%r%r[u(line)]
+&SCAN_GUNS DOOM Mech Parent=[setq(0,0)][u(%0/specs,gun_name)]s: [iter(lnum(u(%0/specs,num_guns)),switch(get(%0/Gun_##),Charged,setq(0,add(%q0,1))))]%q0 out of [u(%0/specs,num_guns)] charged.
+&SCAN_TORPS DOOM Mech Parent=[setq(0,0)][u(%0/specs,torp_name)]s:  [iter(lnum(u(%0/specs,num_torps)),switch(get(%0/Torp_##),Loaded,setq(0,add(%q0,1))))]%q0 out of [u(%0/specs,num_torps)] loaded.
+&SCAN_HULL DOOM Mech Parent=Hull integrity:%t[mul(fdiv(get(%0/hull_integrity),u(%0/specs,hull_points)),100)]%%
+&SCAN_SHIELDS DOOM Mech Parent=Shield status:%t[mul(fdiv(get(%0/shield_level),u(%0/specs,shield_power)),100)]%% - [switch(t(get(%0/shields_raised)),1,UP,DOWN)]
+@VK DOOM Mech Parent=$rs:&shields_raised me=1;@remit me=Shields raised.
+@VL DOOM Mech Parent=$ls:&shields_raised me=0;@remit me=Shields lowered.
+&SETUP DOOM Mech Parent=@set me=enter_ok;@set me=monitor;@dolist v(listen_attrs)={&## me;&## me=[v(##)]};@tr me/Initialize;@tr me/charge_shields;@tr me/repair_hull;@lock me=me;@lock/listen me=Mech/1
+&LISTEN_ATTRS DOOM Mech Parent=leaves new_contact contact_lost
+@IDESCRIBE DOOM Mech Parent=Commands are: STATUS, SENSORS, DRIVE <exit>, SPECS, SCAN <mech>, LOCK <mech>, UNLOCK WEAPONS, FPA, FGA, RS, LS, STARTUP, SHUTDOWN, MTRANS <message>, MSEND <mech>=<message>, SETFREQ <frequency #>
+@VM DOOM Mech Parent=$unlock weapons:@switch [loc(v(lock))]=[loc(me)], {@remit me=Unlocking weapons from [name(v(lock))].;@remit v(lock)=Weapons lock from [name(me)] has been broken.;&lock me}, {@pemit %#=Weapons are not locked.}
+&SCAN_NOTIFY DOOM Mech Parent=[remit(%0,We are being scanned by [name(me)].)]
+&LEAVES DOOM Mech Parent=^* leaves *:@remit me=<Tracking> %0 leaves %1
+&DOOM_CHEAT DOOM Mech Parent=1
+&HULL_INTEGRITY DOOM Mech Parent=20
+&SHIELD_LEVEL DOOM Mech Parent=10
+&GUN_0 DOOM Mech Parent=Charged
+&TORP_0 DOOM Mech Parent=Loaded
+&TORP_1 DOOM Mech Parent=Loaded
+&MTRANS DOOM Mech Parent=$mtrans *:@dol [squish(iter(remove(lcon(here),%!),switch(t(get(##/DOOM_Mech)),1,##)))]=@swi [get(##/freq)]=[v(freq)],@remit ##=[ansi(hb,<)][ansi(hw,Transmission:)] [ansi(hr,Frequency)] [ansi(hy,[v(freq)] gHz)][ansi(hb,>)]%b[switch(mid(%0,0,1),:,[ansi(hg,[name(me)])]%b[ansi(hr,mid(%0,1,strlen(%0)))],;,[ansi(hg,[name(me)])][ansi(hr,mid(%0,1,strlen(%0))])],{[ansi(hg,[name(me)])] [ansi(r,says ")][ansi(hr,%0)][ansi(r,")]})];@remit me=You transmit: [switch(mid(%0,0,1),:,[ansi(hg,[name(me)])]%b[ansi(hr,mid(%0,1,strlen(%0)))],;,[ansi(hg,[name(me)])][ansi(hr,mid(%0,1,strlen(%0))])],{[ansi(hg,[name(me)])] [ansi(r,says ")][ansi(hr,%0)][ansi(r,")]})]
+&MSEND DOOM Mech Parent=$msend *=*:@switch [t(get(%0/DOOM_Mech))]=0,{@pemit %#=Invalid Communications Channel.},{@remit me=You send [ansi(hg,`)][ansi(hw,[switch(mid(%1,0,1),:,[ansi(hr,[mid(%1,1,strlen(%1))])],;,[ansi(hr,[mid(%1,1,strlen(%1))])],{[ansi(hw,%1)]})])][ansi(hg,')] over the Comm Panel.;@remit %0=Your Comm Panel Reads: Personal Transmission from [name(me)] -- [u(specs,name)]: [switch(mid(%1,0,1),:,[ansi(hr,[mid(%1,1,strlen(%1))])],;,[ansi(hr,[mid(%1,1,strlen(%1))])],{[ansi(hw,%1)]})]}
+&MSETFREQ DOOM Mech Parent=$setfreq *:&freq me=%0;@pemit %#=Comm Freq: %0

@@ -1,0 +1,89 @@
+@create Doom Master Phaser
+@link Doom Master Phaser=#940
+@set Doom Master Phaser=!NO_COMMAND
+@set Doom Master Phaser=HAVEN
+@set Doom Master Phaser=OPAQUE
+@set Doom Master Phaser=WIZARD
+@set Doom Master Phaser=SAFE
+&BODYPARTS Doom Master Phaser=butt left_leg right_leg pelvis waist chest left_shoulder right_shoulder left_arm right_arm neck face head left_ear right_ear
+&RANDOM_BODYPART Doom Master Phaser=[first(shuffle(v(Bodyparts)))]
+&TAG_PLAYER Doom Master Phaser=@pemit %1=The words "IT" are painted on your [u(Random_Bodypart)].;@oemit %1=The words "IT" are painted on [name(%1)]'s [u(Random_Bodypart)].
+&SINFO_SETTING Doom Master Phaser=3
+&CHARGE Doom Master Phaser=1000000000
+&MAXCHARGE Doom Master Phaser=1000000000
+&MAXSETTING Doom Master Phaser=1
+&TRASH_ROOM Doom Master Phaser=#940
+&PAIN_PLAYER Doom Master Phaser=@pemit %1=You wince in pain from the hit.;@oemit %1=[name(%1)] winces in pain from the hit.
+&NONE_PLAYER Doom Master Phaser=@pemit %1=You withstand the hit without even wincing.;@oemit %1=[name(%1)] withstands the hit without even wincing.
+&SINFO_13 Doom Master Phaser=Explosive/Disruption Effects; discharge energy 720,000 for 0.82 seconds, SEM:NDF ratio 1:18. The damage index is 1,100; shielded matter exhibits minor vibrational heating effects. Medium geologic displacement; <=90 m^3 rock/ore of 6.0 g/cm^3 explosively uncoupled per discharge.
+&SINFO_12 Doom Master Phaser=Explosive/Disruption Effects; discharge energy 540,000 for 0.82 seconds, SEM:NDF ratio 1:14. The damage index is 940; ultradense alloy structural materials absorb/rebound energy, 0.1 sec delayed reaction before material vaporizes. Medium geologic displacement; <=50 m^3 rock/ore of 6.0 g/cm^3 explosively uncoupled per discharge.
+&SINFO_11 Doom Master Phaser=Explosive/Disruption Effects; discharge energy 300,000 for 0.78 seconds, SEM:NDF ratio 1:11. The damage index is 670; ultradense alloy structural materials absorb/rebound energy, 0.20 sec delayed reaction before material vaporizes. Light geologic displacement; <=10 m^3 rock/ore of 6.0 g/cm^3 explosively uncoupled per discharge.
+&SINFO_10 Doom Master Phaser=Disruption Effects; discharge energy 125,000 for 1.3 seconds, SEM:NDF ratio 1:9. The damage index is 450; heavy alloy structural materials absorb or rebound energy, 0.55 sec delay before material vaporizes.
+&SINFO_9 Doom Master Phaser=Disruption Effects; discharge energy 65,000 for 1.5 seconds, SEM:NDF ratio 1:7. The damage index is 300; medium alloy or ceramic structural materials over 100 cm thickness begin exhibiting energy rebound prior to vaporization.
+&RECHARGE Doom Master Phaser=&Charge me=[v(MaxCharges)]
+&EXIT_DAMAGE_THRESHOLD Doom Master Phaser=-20
+&THING_DAMAGE_THRESHOLD Doom Master Phaser=-20
+&DEVFLAGS Doom Master Phaser=Weapon
+&SINFO_8 Doom Master Phaser=Disruption Effects; discharge energy 15,000 for 1.75 seconds, SEM:NDF ratio 1:3. Cascadian disruption forces cause humanoid organisms to vaporize, as 50%% of affected matter transistions out of the continuum. The damage index is 120; all unprotected matter is affected and penetrated according to depth/time.
+&SINFO_7 Doom Master Phaser=Disruption Effects; discharge energy 4900 for 1.75 secnds, SEM:NDF ratio 1:1. Organic tissue damage causes immediate cessation of life processes, since disruption effects become widespread. The damage index is 50.
+&SINFO_6 Doom Master Phaser=Disruption Effects; discharge energy 2,700 for 1.75 seconds, SEM:NDF ratio 90:1. Organic tissues and structural materials exhibit comparable penetration and molecular damage effects as higher energies cause matter to dissociate rapidly. Familiar thermal effects begin decreasing at this level. The damage index is 15.
+&SINFO_5 Doom Master Phaser=Thermal Effects; discharge energy 857.5 for 1.5 seconds, SEM:NDF ratio 250:1. Humanoid tissue experiences severe burn effects but, due to water content, deep layers will not char. Simple personnel forcefields are penetrated after five seconds. Large Away Team fields will not be affected. The damage index is 7.
+&SINFO_4 Doom Master Phaser=Thermal Effects; discharge energy 515.75 for 1.5 seconds, SEM:NDF ratio not applicable. base humanoids experience extensive CNS damage and epidermal EM trauma. Structural materials exhibit visible thermal shock. Discharges of longer than five seconds produce deep heat storage effects within metal alloys. The damage index is 3.5.
+&SINFO_3 Doom Master Phaser=Heavy Stun; discharge energy 160.65 for 1.025 seconds, SEM:NDF ratio not applicable. Base humanoids remain in a sleep state for approximately one hour, resistant bioforms for fifteen minutes. Single discharges raise 1cc of liquid water by 100 deg C. Structural samples experience significant levels of thermal radiation. The damage index is 1.
+&SINFO_2 Doom Master Phaser=Medium Stun; discharge energy 45.30 for 0.75 seconds, SEM:NDF ratio not applicable. Base-type humanoids are rendered unconscious for up to fifteen minutes, resistant humanoids up to five minutes. L ong exposures produce low levels of irreversible CNS and epithelial damage. Structural materials are not affected, though higher levels of vibrational warming are evident. The damage index is zero.
+&SINFO_1 Doom Master Phaser=Light Stun; discharge energy index 15.75 for 0.25 seconds, SEM:NDF ratio not applicable. This setting is calibrated for base humanoid physiology, and causes temporary central nervous system (CNS) impairment. Subjects remain unconscious for up to five minutes. Higher levels of reversible CNS damage result from repeated long exposures. The discharge energy index if related to RNE protonic charge levels. Standard median-density composite structural material samples are not permanently affected, although small vibrational warming will be detected. A standard composite sample consists of multiple layers of tritanium, duranium, cortenite, lignin, and lithium-silicon-carbon 372. A standardized damage index is derived for setting comparisons; each whole number represents the number of cm of material penetrated or molecularly damaged. The damage index for this setting is zero.
+@VG Doom Master Phaser=$sinfo *:&sinfo_setting me=[setq(0,switch(add(%0,0),#-1 ARGUMENTS MUST BE NUMBERS,0,%0))][switch(lt(%q0,v(minsetting)),1,v(minsetting),switch(gt(%q0,v(maxsetting)),1,v(maxsetting),%q0))];@pemit %#=[u(line)]%r[center(Information for Weapon Setting [v(sinfo_setting)],79)]%r[u(line)]%r[u(sinfo_[v(sinfo_setting)])]%r[u(line)]
+&TRIG_DESTROY_EXIT Doom Master Phaser=@lock/user:oldlock %1=[lock(%1)];@unlock %1;@tr %1/a_destroy=%0
+&MSG_DESTROY_EXIT Doom Master Phaser=[remit(loc(%#),The blast blows [name(%0)] wide open!)][remit(loc(%0),[name(%0)] from [name(home(%0))] is blown wide open by a blast from outside!)]
+&MSG_DAMAGE_EXIT Doom Master Phaser=[remit(loc(%#),[name(%0)] withstands the hit.)][remit(loc(%0),[name(%0)] from [name(home(%0))] shakes as it withstands a hit from outside.)]
+&DAMAGE_EXIT_EFFECT Doom Master Phaser=[setq(1,rest(grab(v(damage_index),[v(setting)] *,|)))][set(%0,hitpoints:[sub(get(%0/hitpoints),%q1)])][switch(gt(get(%0/hitpoints),v(exit_damage_threshold)),1,u(msg_damage_exit,%0),[u(msg_destroy_exit,%0)]trig_destroy_exit)]
+&SHOOT_EXIT_ROLL Doom Master Phaser=1
+&SHOOT_LOCKED_EXIT Doom Master Phaser=[switch(hasdevflag(%0,invincible),1,pemit(%#,[name(%0)] is set invincible.),switch(u(shoot_exit_roll),1,[u(msg_shoot_player,%0)][switch(lt(v(Charge),0),1,,u(damage_exit_effect,%0))],u(msg_miss_player,%0)))]
+&SHOOT_THING_ROLL Doom Master Phaser=1
+&TRIG_DESTROY_THING Doom Master Phaser=@tel %1=[v(trash_room)];@halt %1=@tr me/a_destroy=%0
+&MSG_DESTROY_THING Doom Master Phaser=[remit(loc(%#),The hit causes [name(%0)] to explode!)]
+&MSG_DAMAGE_THING Doom Master Phaser=[remit(loc(%#),[name(%0)] withstands the hit.)]
+&DAMAGE_EFFECT Doom Master Phaser=[setq(1,rest(grab(v(damage_index),[v(setting)] *,|)))][set(%0,hitpoints:[sub(get(%0/hitpoints),%q1)])][switch(gt(get(%0/hitpoints),v(thing_damage_threshold)),1,u(msg_damage_thing,%0),[u(msg_destroy_thing,%0)]trig_destroy_thing)]
+&SHOOT_THING Doom Master Phaser=[switch(hasdevflag(%0,invincible),1,pemit(%#,[name(%0)] is set invincible.),switch(u(shoot_thing_roll),1,[u(msg_shoot_player,%0)][switch(lt(v(Charge),0),1,,u(damage_effect,%0))],u(msg_miss_player,%0)))]
+&TEMP_RECHARGER_PRESENT Doom Master Phaser=1
+&DRAIN_CHARGES Doom Master Phaser=[set(me,Charge:[sub(v(Charge),u(Chargesused))])][switch(lt(v(Charge),0),1,[pemit(%#,Your [name(me)] fizzles as it runs out of charges.)][oemit(%#,%n's [name(me)] fizzles at it runs out of charges.)][set(me,Charge:-1)]DONT_TRIGGER)]
+&BODY_NUM Doom Master Phaser=#211
+&STUN_TIME Doom Master Phaser=300
+@CHARGES Doom Master Phaser=-3465647
+&EXPLODE_PLAYER Doom Master Phaser=@pemit %1=You instantly explode, sending your blood and guts spraying everywhere!;@oemit %1=[name(%1)] instantly explodes, sending [poss(%1)] blood and guts spraying everywhere!;@tel %1=[v(dead_room)]
+&VAPORIZE_PLAYER Doom Master Phaser=@pemit %1=You have been vaporized!;@oemit %1=[name(%1)] has been vaporized!;@dolist lcon(%1)=@switch [hasdevflag(##,nosteal)]=0, @tel ##=[loc(%0)];@tel %1=[v(dead_room)]
+&STUNNED_PARENT Doom Master Phaser=#1018
+&CORPSE_PARENT Doom Master Phaser=#1013
+&KILL_PLAYER Doom Master Phaser=&body_num me=[create(corpse body)];@set [v(body_num)]=royalty;@parent [v(body_num)]=[v(corpse_parent)];@tr [v(body_num)]/kill_person=%1;&weapon_string [v(body_num)]=[v(weapon_string)]
+&STUN_PLAYER Doom Master Phaser=&body_num me=[create(stunned body)];@set [v(body_num)]=royalty;@parent [v(body_num)]=[v(stunned_parent)];@tr [v(body_num)]/stun_person=%1,[v(stun_time)];&weapon_string [v(body_num)]=[v(weapon_string)]
+&COMMENT_EFFECTS Doom Master Phaser=STUN stuns the player, use Stun Parent. KILL kills the player, use Corpse Parent. VAPORIZE vaporizes the player, and drops posessions. EXPLODE blows up the player, does not drop posessions. Gut-splattering.
+&SETTING_EFFECTS Doom Master Phaser=1 TAG|2 STUN 10|3 STUN 15|4 STUN 20|5 STUN 30|6 STUN 40|7 STUN 60|8 STUN 120|9 STUN 240
+&SETTING_EFFECT Doom Master Phaser=[setq(1,rest(grab(v(setting_effects),[v(setting)] *,|)))][switch(first(%q1),NONE,none_player,TAG,tag_player,PAIN,pain_player,STUN,[set(me,STUN_TIME:[rest(%q1)])]stun_player,KILL,kill_player,VAPORIZE,vaporize_player,EXPLODE,explode_player)]
+&PEMIT_EXCEPT Doom Master Phaser=[remove(remove(%0,%1),%2)]
+&MSG_MISS_PLAYER Doom Master Phaser=[pemit(%#,You fire your [name(me)] at [name(%0)] but miss.)][pemit(%0,[name(%#)] fires [poss(%#)] [name(me)] at you but misses.)][pemit(u(pemit_except,lcon(loc(%#)),%#,%0),[name(%#)] fires [poss(%#)] [name(me)] at [name(%0)] but misses.)][set(me,Charges:[sub(v(Charges),u(Chargesused))])]
+&MSG_SHOOT_PLAYER Doom Master Phaser=[pemit(%#,You fire your [name(me)] at [name(%0)] and hit!)][pemit(%0,%n fires [poss(%#)] [name(me)] at you and hits!)][pemit(u(pemit_except,lcon(loc(%#)),%#,%0),%n fires [poss(%#)] [name(me)] at [name(%0)] and hits!)][u(drain_charges)]
+&CHARGESUSED Doom Master Phaser=[rest(grab(v(energy_used),[v(setting)] *,|))]
+&SHOOT_PLAYER_ROLL Doom Master Phaser=[gt(rand(100),30)]
+&SHOOT_PLAYER Doom Master Phaser=[switch(hasdevflag(%0,invincible),1,pemit(%#,[name(%0)] is set invincible.), switch(u(shoot_player_roll),1,[u(msg_shoot_player,%0)][u(setting_effect,%0)],u(msg_miss_player,%0)))]
+&SHOOT_EXIT Doom Master Phaser=[switch(lock(%q0),*UNLOCKED*,u(shoot_unlocked_exit,%0),u(shoot_locked_exit,%0))]
+&ERROR_HOLSTERED Doom Master Phaser=[pemit(%#,You must DRAW your weapon first.)]
+&SHOOT_UNLOCKED_EXIT Doom Master Phaser=[pemit(%#,The exit '[name(%0)]' is not locked.)]
+@VF Doom Master Phaser=$FIRE *:@tr me/[switch(hasflag(me,dark),1,u(error_holstered),[switch([setq(0,locate(%#,%0,PTEne))]%q0,#-1,u(error_dontsee),#-2,u(error_whichone,%0),switch(type(%q0),EXIT,u(shoot_exit,%q0),THING,u(shoot_thing,%q0),u(shoot_player,%q0)))])]=%#,[locate(%#,%0,PTEne)]
+&ERROR_WHICHONE Doom Master Phaser=[pemit(%#,I don't know which %0 you mean.)]
+&ERROR_DONTSEE Doom Master Phaser=[pemit(%#,I don't see that here.)]
+@VE Doom Master Phaser=$HOLSTER:@set me=[switch(hasflag(me,DARK),0,DARK[pemit(%#,You holster your [name(me)].)][oemit(%#,%n holsters %p [name(me)].)],[pemit(%#,Your [name(me)] is already holstered.)])]
+@VD Doom Master Phaser=$DRAW:@set me=[switch(hasflag(me,DARK),1,!DARK[pemit(%#,You draw your [name(me)].)][oemit(%#,%n draws a [name(me)].)],[pemit(%#,Your [name(me)] is already drawn.)])]
+&WEAPON_STRING Doom Master Phaser=phaser blast
+&ENERGY_USED Doom Master Phaser=1 15.75|2 45.30|3 160.65|4 515.75|5 857.5|6 2700|7 4900|8 15000|9 65000|10 125000|11 300000|12 540000|13 720000|14 930000|15 1170000|16 1550000
+&DAMAGE_INDEX Doom Master Phaser=1 0|2 0|3 1|4 3.5|5 7|6 15|7 50|8 120|9 300|10 450|11 670|12 940|13 1100|14 1430|15 1850|16 2450
+&RECHARGER_PRESENT Doom Master Phaser=[trim([set(me,temp_recharger_present:0)][iter(lcon(loc(%#)),switch(hasdevflag(##,recharger),1,set(me,temp_recharger_present:1)))][v(temp_recharger_present)])]
+@VC Doom Master Phaser=$recharge:@switch [u(recharger_present)]=0, {@pemit %#=There is no weapon recharger in this room.}, {@pemit %#=You connect [name(me)] to the weapon recharger.;@oemit %#=%n connects a [name(me)] to the weapon recharger.;&charge me=[v(maxcharge)];@pemit %#=Weapon recharged.}
+@VB Doom Master Phaser=$set *:&setting me=[setq(0,switch(add(%0,0),#-1 ARGUMENTS MUST BE NUMBERS,0,%0))][switch(lt(%q0,v(minsetting)),1,v(minsetting),switch(gt(%q0,v(maxsetting)),1,v(maxsetting),%q0))];@pemit %#=[name(me)] set to [v(setting)].;@oemit %#=%n presses a few buttons on %p [name(me)].
+&LINE Doom Master Phaser=[repeat(=,79)]
+&WHELP Doom Master Phaser=[ljust(%0,20)] - [indent(23,65,%1)]
+@VA Doom Master Phaser=$whelp:@pemit %#=[u(line)]%r[center(Help for [name(me)],79)]%r[u(line)]%r%r[u(whelp,SET <setting>,{Sets the weapon to <setting>.})]%r[u(whelp,SINFO <setting>,{Obtains information about <setting>.})]%r[u(whelp,RECHARGE,{Recharges the weapon, if a weapon recharger is present.})]%r[u(whelp,DRAW,{Draws the weapon.})]%r[u(whelp,HOLSTER,{Holsters the weapon.})]%r[u(whelp,FIRE <target>,{Fires the weapon at <target>.})]%r[u(line)]
+&SETTING Doom Master Phaser=1
+@DESCRIBE Doom Master Phaser=A [name(me)]. Type `whelp' for help.%rCurrent setting: [v(setting)]/[v(maxsetting)].%rCurrent charge: [v(charge)]/[v(maxcharge)].
+&HOLDING Doom Master Phaser=[switch(%#,loc(me),1,0)]
+&DEAD_ROOM Doom Master Phaser=#1023
+&STUN_ROOM Doom Master Phaser=#1022

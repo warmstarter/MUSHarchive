@@ -1,0 +1,40 @@
+@create TrekWho Command
+@link TrekWho Command=#2
+@set TrekWho Command=INHERIT
+@set TrekWho Command=WIZARD
+@set TrekWho Command=SAFE
+&MOTD TrekWho Command=Welcome to [mudname()].
+&CURTYPE TrekWho Command=OBJECT
+&WHOCOLOR TrekWho Command=white
+&HEADER TrekWho Command=%r[ansi(c,|)]%b[ansi(b,Stat)]%b[ansi(c,|)]%b[ansi(b,%bName[space(21)]Alias%b%b%bOnfor[space(2)]Idle[space(2)]Affiliation)]%r[ansi(c,|%b----%b|%b%b[ljust(----,25)]-----%b%b%b-----%b%b----%b%b-----------)]
+&SEE_ALL TrekWho Command=[or(or(hasflag(%0,wizard),hasflag(%0,builder)),haspower(%0,see_all))]
+&RDISPLAY TrekWho Command=[setq(0, switch(grab(v(lengths),%0 *,|),,1,rest(#$)))][switch(gt(strlen(%1),r(0)),1,right(%1,r(0)),rjust(%1,r(0)))]
+@VA TrekWho Command=$who:@pemit %#=%r%b[ansi(c,_____)]%r[ansi(c,|%b%b%b%b%b|)]%b%b[ansi(hc,Connected Players%t%t%t)][ansi(hw,S t a r%b%bT r e k)] %r[ansi(c,|%b%b%b%b%b|[repeat(_,70)])]%r[ansi(c,%\[repeat(_,76)]%))]%r%r%r[u(motd)]%r%r[ansi(c,%b[repeat(_,76)]%r%/%b%b%b%b%b%b%b[repeat(_,69)]%))]%r[ansi(c,|%b%b%b%b%b%b|)][u(header)][iter(lwho(),switch(u(Can_See,%#,##),1,%r[switch([v(whocolor)],cyan,[set(me,whocolor:white)],white,[set(me,whocolor:cyan)])][u(entry,##)]))]%r[ansi(c,|%b%b%b%b%b%b|)]%r[ansi(c,|%b%b%b%b%b%b|)][center(Hidden Players: [sub([words([lwho()])],[words([mwho()])])]%tConnected Players: [words(mwho())],65)]%r[ansi(c,|%b%b%b%b%b%b|[repeat(_,69)])]%r[ansi(c,%\[repeat(_,76)]%))]%r
+&MAIN TrekWho Command=[ansi(hc,repeat(-,77))]%r[ansi(hb,[center(Star Wars MUSH,79)])]%r[center(------------,79)]%r[ansi(hb,[center(Connected Players,79)])][center(-----------------,79)]
+&DISPLAY TrekWho Command=[setq(0, switch(grab(v(lengths),%0 *,|),,1,rest(#$)))][switch(gt(strlen(%1),r(0)),1,left(%1,r(0)),space(60, %1)r(0)))]
+&LENGTHS TrekWho Command=sex 3|name 15| alias 7| onfor 9|idle 4|class 15|empire 11|org 19
+&CAN_SEE TrekWho Command=[or(u(see_all,%0),not(hidden(%1)))]
+&ENTRY TrekWho Command=[ansi(c,|)]%b[switch(u(flag,%0),WIZARD,[switch([get(%0/duty)],ON,[ansi(hr,DUTY%b)],[ansi(r,WIZ%b%b)])],GOD,[ansi(hr,GOD)],ROYALTY,[switch([get(%0/duty)],ON,[ansi(hy,DUTY%b)],[ansi(hy,ROY%b%b)])],BUILDER,[ansi(b,BLD%b%b)],[switch([hasflag(%0,fixed)],1,[ansi(hg,IC%b%b%b)],[ansi(hc,OOC%b%b)])])][ansi(c,|)]%b[switch([v(whocolor)],white,{[ansi(w,%b[ljust([mid([class(%0)] [name(%0)],0,25)],25)][ljust(mid(get(%0/alias),0,5),6)][rjust([u(onfor, %0)],7)][rjust([u(idle,%0)],6)]%b%b[ljust(empire(%0),12)])]},cyan,{[ansi(c,%b[ljust([mid([class(%0)] [name(%0)],0,25)],25)][ljust(mid(get(%0/alias),0,5),6)][rjust([u(onfor, %0)],7)][rjust([u(idle,%0)],6)]%b%b[ljust(empire(%0),12)])]})]
+@IDLE TrekWho Command=[switch([setq(0,idle(name(%0)))][u(idlescale,r(0))],seconds,[r(0)]s,minutes,[div(r(0),60)]m,hours,[div(r(0),3600)]h,days,[div(r(0),86400)]d)]
+&HOURS TrekWho Command=[switch(lt(div(mod(%0,86400),3600),10),1,0[div(mod(%0,86400),3600)],div(mod(%0,86400),3600))]
+&MINUTES TrekWho Command=[switch(lt(div(mod(%0,3600),60),10),1,0[div(mod(%0,3600),60)],[div(mod(%0,3600),60)]
+&DAYS TrekWho Command=[div(%0,86400)]
+&IDLESCALE TrekWho Command=[switch(lt(%0,60),1,seconds,switch(lt(%0,3600),1,minutes,switch(lt(%0,86400),1,hours,days)))]
+&NOTE TrekWho Command=[ansi(hc,[center([get(me/motd)],77)])]
+&FLAG TrekWho Command=[switch(class(%0),Builder,BUILDER,switch([get(%0/icstatus)],GOD,GOD,switch(hasflag(%0,WIZARD),1,WIZARD,switch(hasflag(%0,Royalty),1,ROYALTY,OTHER))))]
+&ONFOR TrekWho Command=[switch(gt(conn(name(%0)),86400),1,[u(days,conn(name(%0)))]d)][u(hours,conn(name(%0)))]:[u(minutes,conn(name(%0)))]
+@DESCRIBE TrekWho Command=The who command.
+&EENTRY TrekWho Command=[ansi(switch(u(Flag,%0),WIZARD,r,ROYALTY,y,BUILDER,b,DIRECTOR,g,c),ljust(Name(%0),14))][ljust(get(%0/alias),6)][ljust([u(idle,%0)],6)][ljust([u(Onfor,%0)],7)][ljust(get(%0/class),15)][ljust([get(%0/organization)],12)]
+&EMPIRE_FILTER TrekWho Command=[switch(get(%0/Empire),get(%#/Empire),1,0)]
+&EHEADER TrekWho Command=[ansi(c,[repeat(-,77)])]%r[ansi(hy,%b%b%bName[space(10)]Alias Idle[space(2)]Onfor[space(2)]Class[space(10)]Organization)]%r[ansi(c,repeat(-,77))]
+&EALL_HEADER TrekWho Command=%r%b[ansi(c,_____)]%r[ansi(c,|%b%b%b%b%b|)]%b%b[ansi(hc,[ljust([switch(%0,Federation,United Federation of Planets,%0)],50)])][ansi(hw,S t a r%b%bT r e k)] %r[ansi(c,|%b%b%b%b%b|[repeat(_,70)])]%r[ansi(c,%\[repeat(_,76)]%))]%r%r%b[ansi(c,repeat(_,77))]%r[ansi(c,%/%b%b[repeat(_,75)]%))]%r[ansi(c,|%b|)]%r[ansi(c,|%b|%bName%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%bOrganization%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%bConnected)]%r[ansi(c,|%b|)]%b[ansi(hr,~~~~%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b~~~~~~~~~~~~%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b~~~~~~~~~)]
+&EALL_ENTRY TrekWho Command=[ansi(c,|%b|)]%b[ansi(switch(u(Flag,%0),WIZARD,r,ROYALTY,y,BUILDER,b,c),ljust([class(%0)] [Name(%0)],25))][ansi(hr,ljust([org(%0)] <[get(%0/Division)]>,29))][switch(conn(%0),-1,{[ansi(hc,[ljust(mid([get(%0/last)],3,7),5)])]},{[ansi(c,[ljust(Connected,5)])]})]
+&EWHO TrekWho Command=$ewho:@pemit %#=%r%b[ansi(c,_____)]%r[ansi(c,|%b%b%b%b%b|)]%b%b[ansi(hc,[ljust([switch([empire(%#)],Federation,United Federation of Planets,[empire(%#)])],50)])][ansi(hw,S t a r%b%bT r e k)] %r[ansi(c,|%b%b%b%b%b|[repeat(_,70)])]%r[ansi(c,%\[repeat(_,76)]%))]%r%r%r%b[u(#2566/[edit([empire(%#)],%b,_)]_motd)]%r%b- [u(#2566/[edit([empire(%#)],%b,_)]_poster)]%r%r[ansi(c,%b%b[repeat(_,75)]%r%b%/%b%b[repeat(_,73)]%))]%r%b[ansi(c,|%b|)]%r%b[ansi(c,|%b|)]%b[ansi(b,[ljust(Name,22)] [ljust(Race,11)] [ljust(Idle,6)] [ljust(Onfor,7)] [ljust(Organization,18)])]%r[ansi(c,%b|%b|%b~~~~[space(19)]~~~~[space(8)]~~~~[space(3)]~~~~~[space(3)]~~~~~~~~~~~~)][setq(0,[iter([lwho()],[switch([empire(%#)],[empire(##)],##)])])][iter([r(0)],%r [ansi(c,|%b|)]%b[ansi(switch(u(Flag,%0),WIZARD,r,ROYALTY,y,BUILDER,b,DIRECTOR,g,c),[ljust([class(##)] [name(##)],22)])] [ansi(y,[ljust([mid([race(##)],0,11)],11)])] [ljust([u(idle,##)],6)] [ljust([u(onfor, ##)],7)] [ansi(r,[ljust([mid([org(##)] <[get(##/division)]>,0,20)],20)])])]%r%b[ansi(c,|%b|[repeat(_,73)])]%r%b[ansi(c,%\[repeat(_,75)]%))]%r
+&ENOTE TrekWho Command=[ansi(hc,The current time is:)] [extract([time()],4,1)]
+&ADMIN TrekWho Command=[ansi(c,Onduty Admin:)] [squish([iter([lwho()],[switch([get(##/onduty)],Yes,[ansi([switch([hasflag(##,wizard)],1,r,switch(hasflag(##,royalty),1,y,switch([get(##/adminstatus)],Yes,hc)))],[name(##)])],,%b[ansi(hc,-)]%b)])])]
+&FEDERATIONEMOTD TrekWho Command=Testing Federation EMOTD
+@VD TrekWho Command=$eall *:@pemit %#=[u(EALL_HEADER,%0)][iter(pempire(%0),%r[u(EALL_ENTRY,##)])]%r[ansi(c,|%b|)] [ansi(r,Wizard)] - [ansi(y,Royalty)] - [ansi(b,Builder)] - [ansi(c,Player)]%r[ansi(c,|%b|[repeat(_,75)])]%r[ansi(c,%\[repeat(_,77)]%))]%r
+@VC TrekWho Command=$eall:@pemit %#=[u(EALL_HEADER,[eval(%#,empire)])][iter(filter(Empire_Filter,lsearch(all, type, player)),switch(u(Can_See,%#,##),1,%r[u(EALL_ENTRY,##)]))]%r[ansi(c,|%b|)]%b[ansi(hm,There are [words([filter(Empire_Filter,lsearch(all, type, player)])])] players.)]%r[ansi(c,|%b|)] [ansi(r,Wizard)] - [ansi(y,Royalty)] - [ansi(b,Builder)] - [ansi(c,Player)]%r[ansi(c,|%b|[repeat(_,75)])]%r[ansi(c,%\[repeat(_,77)]%))]%r
+&DO_ONDUTY TrekWho Command=$+onduty:@swi [orflags(%#,Wr)]=1,{@select [get(%#/duty)]=OFF,{@dolist lwho()=@pe ##=[ansi(r,Star Trek:)] [ansi(hc,[class(%#)] %n is now onduty!)];&ison me=[cat([get(me/ison)],%#)];&duty %#=ON},{@pe %#=You are already onduty!}},0,{@pe %#=Permission Denied.}
+&DO_OFFDUTY TrekWho Command=$+offduty:@swi [orflags(%#,Wr)]=1,{@select [get(%#/duty)]=ON,{@dolist lwho()=@pe ##=[ansi(r,Star Trek:)] [ansi(hc,[class(%#)] %n is now offduty!)];&ison me=[squish([remove([get(me/ison)],%#)])];&duty %#=OFF},{@pe %#=You are not onduty!}},0,{@pe %#=Permission Denied.}
+&ISON TrekWho Command=

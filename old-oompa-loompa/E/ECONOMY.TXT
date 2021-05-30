@@ -1,0 +1,53 @@
+@create Economy Parent
+@lock/Basic Economy Parent==me
+@lock/Use Economy Parent=canuse/1
+@set Economy Parent = WIZARD
+@set Economy Parent = SAFE
+@set Economy Parent = NO_COMMAND
+&BANKER Economy Parent=#38
+&BANK_SERVER Economy Parent=#36
+&BORDER_COLOR Economy Parent=hb
+&BUFF Economy Parent=3700
+&BUSINESS_PORTFOLIO Economy Parent=#26
+&CANUSE Economy Parent=[or([and([hastype(%#,player)],[strmatch(get(%#/playstatus),IC)])],[hasflag(%#,wiz)])]
+&CARGO_TRANSPORT Economy Parent=#27
+&CMD_ADD_COMMOD Economy Parent=$add commod *=*,*,*,*,*,*:th [if(hasflag(%#,Wiz),[set(me,%0.production:%1)][set(me,%0.energy:%2)][set(me,%0.req:%3)][set(me,%0.desc:%4)][set(me,buying_price_%0:%5)][set(me,selling_price_%0:%5)][set(me,%0.weight:%6)][set(me,commodlist:[v(commodlist)]%0|)][pemit(%#,New Commod '%0' added.%rProduction: %1%rEnergy: %2%rReq: %3%rDesc: %4%rPrice: %5%rWeight: %6)],[pemit(%#,Permission denied.)])]
+&CMD_ADD_MATERIAL Economy Parent=$add material *=*,*,*,*:th [if(hasflag(%#,Wiz),[set(me,%0.production:%1)][set(me,%0.energy:%2)][set(me,%0.desc:%3)][set(me,buying_price_%0:%4)][set(me,selling_price_%0:%4)][set(me,%0.weight:%5)][pemit(%#,New Material '%0' added.%rProduction: %1%rEnergy: %2%rDesc: %3%rPrice: %4%rWeight: %5)],[pemit(%#,Permission denied.)])]
+&CMD_CALC_PRICE Economy Parent=$calc price *:th [switch([hasattr(me,production_%0)],1,[switch([strmatch([v(commodlist)],*|%0|*)],1,[pemit(%#,[round([mul([mul([add([v(production_%0)],100000)],[fdiv([v(energy_%0)],3)])],1)],0)])],0,[pemit(%#,[round([mul([mul([add([v(production_%0)],1)],[v(energy_%0)])],30)],0)])],0,[pemit(%#,No such material.)])]
+&CMD_FULL_LIST Economy Parent=$full list:th [pemit(%#,[ansi(v(border_color),[repeat(=,76)])]%r[ansi(v(title_color),[center(Full List,76)])]%r[ansi(v(border_color),[repeat(=,76)])]%r%b[ansi(v(subtitle_color),[ljust(Material,30)][ljust(Prod.,8)]Energy[space(4)]Price[space(5)]Weight)]%r%b[iter([lattr(me/*.PRODUCTION)],[ansi([switch([strmatch([v(commodlist)],*|[edit(##,.PRODUCTION,)]|*)],1,ng,0,n)],[ljust([edit(##,.PRODUCTION,)],30)][ljust([v(##)],10)][ljust([v([edit(##,.PRODUCTION,)].ENERGY)],8)][ljust([v(selling_price_[edit(##,.PRODUCTION,)])],10)][v([edit(##,.PRODUCTION,)].weight)]%r)])][ansi(v(border_color),[repeat(=,76)])]
+&CMD_REMOVE_COMMOD Economy Parent=$remove commod *:th [if(hasflag(%#,Wiz),[wipe(me/%0.production)][wipe(me/%0.req)][wipe(me/%0.energy)][wipe(me/%0.desc)][set(me,commodlist:[edit(v(commodlist),%0|,)])][pemit(%#,Removed.)],[pemit(%#,Permission denied.)])]
+&CMD_WEIGHT Economy Parent=$set weight *=*:th [if(hasflag(%#,wiz),[set(me,%0.weight:%1)][pemit(%#,%0 weight set to %1/unit.)],[pemit(%#,Permission denied.)])]
+&COMMODLIST Economy Parent=|hardened_steel|durasteel|fusion_reactor|glass|pump_station_building|market_building|house_building|farm_building|warehouse_building|cargo_transport|power_plant_building|fuel|fiber-optic_cable|factory_building|mine_building|Missile_Launcher|
+&CORPSERVER Economy Parent=[u(server)]
+&COURIER Economy Parent=#41
+&CREDITS Economy Parent=Dave@GalacticMUSH EMAIL: davemilford@home.com ICQ: 8516328
+&DAT_JOBNUM Economy Parent=1
+@DESCRIBE Economy Parent=This is THE MASTER ECONOMY OBJECT.  Every Economy Object ends up being parented to this one some way or another.  This stores DB#s for all econ parents, commodity information, and more.%r%r[ansi(hr,DO NOT NUKE)]
+&DESIGNDB Economy Parent=#51
+&ECONO Economy Parent=#29
+&ECONPARENT Economy Parent=#29
+&ECV Economy Parent=#28
+&FACTORY Economy Parent=#54
+&FARM Economy Parent=#31
+&FUN_PRICE_FORMULA Economy Parent=[setq(0,[round([mul([add([mul([mul([sub(15,[v(%0.production)])],0.5)],[mul([v(%0.energy)],0.3)])],[u(fun_price_formula_L1,%0)])],4)],0)])][set(me,buying_price_%0:%q0)][set(me,selling_price_%0:%q0)]%q0
+&FUN_PRICE_FORMULA_L1 Economy Parent=[set(me,buff:0)][iter(v(%0.req),[if(hasattr(me,[before(##,|)].req),[u(fun_price_formula_l2,[before(##,|)])])][set(me,buff:[add(v(buff),[mul([u(fun_price_formula,[before(##,|)])],[after(##,|)])])])])][v(buff)]
+&FUN_PRICE_FORMULA_L2 Economy Parent=[set(me,buff:0)][iter(v(%0.req),[set(me,buff:[add(v(buff),[mul([u(fun_price_formula,[before(##,|)])],[after(##,|)])])])])]
+&HOUSING_UNIT Economy Parent=#30
+&HSPACECOMMODS Economy Parent=|Generic_Reactor|Generic_Engines|Generic_Thrusters|Generic_Jump_Drive|Generic_Fuel_System|Generic_Sensors|Generic_Shield|Test Engines|Generic_Laser|
+&JOBDB Economy Parent=#43
+&MARKET Economy Parent=#33
+&MERCHANT Economy Parent=#34
+&MINE Economy Parent=#32
+&MSYNTAX Economy Parent=add material <name>=<production>,<energy>,<desc>,<price>
+&NAME_COLOR Economy Parent=hg
+&NONE Economy Parent=#56
+&NPCDB Economy Parent=#42
+&POWER_PLANT Economy Parent=#37
+&SERVER Economy Parent=#45
+&SUBTITLE_COLOR Economy Parent=ny
+&SUPPLIER Economy Parent=#35
+&SYNTAX Economy Parent=add commod <name>=<production>,<energy>,<req>,<desc>,<price>,<weight>
+&TITLE_COLOR Economy Parent=h
+&VERSION Economy Parent=3.0
+&WAREHOUSE Economy Parent=#25
+&WATER_PUMP Economy Parent=#39

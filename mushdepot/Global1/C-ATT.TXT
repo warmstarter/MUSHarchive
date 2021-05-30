@@ -1,0 +1,15 @@
+@create Reclass-Attach Object
+@link Reclass-Attach Object=#2
+@lock Reclass-Attach Object==#2
+@set Reclass-Attach Object = INHERIT
+@set Reclass-Attach Object = OPAQUE
+@set Reclass-Attach Object = QUIET
+@set Reclass-Attach Object = WIZARD
+@set Reclass-Attach Object = SAFE
+@set Reclass-Attach Object = !NO_COMMAND
+@DESCRIBE Reclass-Attach Object=Reclass-Attach commands for Admin.
+&BCREATE Reclass-Attach Object=$@bcreate *=*/*:@switch [orflags(%#,Wr)]=1,{@pcreate %0=%1;@chz *%0=[zone(%#)];&empire *%0=%2;@lock *%0/empire=#1;@dol builder hide login idle unkillable no_pay no_quota=@power *%0=##;@force *%0=@mail *%0=This is the builder character you have requested. Don't abuse the powers or else you will suffer the consequences.%r%r[center(**New DeltaMUSH Admin [name(%#)]**,79)];&class *%0=Builder;&playstatus *%0=BLD;@lock *%0/playstatus=#1;@lock *%0/builder=#1;&rank *%0=0;@lock *%0/rank=#4;@lock *%0/class=#4;@pemit %#=BCREATE: Builder `%0' created with pword `%1' for Empire: `%2'.},0,{@pemit %#=BCREATE: Permission Denied. Ask a Wizard or Royalty.}
+&ATTACH Reclass-Attach Object=$@attach *=*/*:@swi [num(*%0)]=#-1,@pemit %#=That player does not exist.,{@swi [get(%#/rank)]=>10,{@swi [get(%#/rank)]=>[get(*%0/rank)],{&organization [num(*%0)]=%1;&division [num(*%0)]=%2;@pemit %#=[name(*%0)] has been attached to <%1 - %2>;@pe [num(*%0)]=You have been attached to <%1 - %2>.;&lasttrans *%0=[extract(time(),2,2)] [extract(time(),5,1)]},@pe %#=You do not have the authority to do that.},@pe %#=You do not have the authority to do that.
+&RECLASS Reclass-Attach Object=$@reclass *=*/*:@swi [and(hastype(%#,player),hastype([num(*%0)],player))]=1,{@swi [num(*%0)]=#-1,@pemit %#=There is no such player.,{@swi [get(%#/rank)]=>10,{@swi [get(%#/rank)]=>[get(num(*%0)/rank)],{&class [num(*%0)]=%1;&rank [num(*%0)]=%2;@dolist class rank={@lock *%0/##=Rank:>10;@set *%0/##=visual};@pemit %#=[name(*%0)] has been reclassed: %1 - <%2>;@pemit [num(*%0)]=You have been reclassed: %1 - <%2>.;&lastpro *%0=[extract(time(),2,2)] [extract(time(),5,1)]},@pemit %#=You have no authority to do that.},@pemit %#=You have no authority to do that.}},@pemit %#=I don't know who you mean.
+&SETEMP Reclass-Attach Object=$@setemp *=*:@switch [hasflag(%#,Wizard)]=0, {@pemit %#=Permission denied.%b%bWizard bit required.}, {@switch [setq(0,locate(%#,%0,Ppn))]%q0=#-1, {@pemit %#=I don't see %0 here.}, #-2, {@pemit %#=I don't know which %0 you mean.}, {&Empire %q0=%1;@pemit %#=[name(%q0)] is now part of the %1 Empire.;@pemit %q0=%n joins you to the %1 Empire.;@lock %q0/empire=#4}}
+&PCREATE Reclass-Attach Object=$+pcreate *=*/*:@switch [hasflag(%#,WIZARD)]=1,{@pcreate %0=%1;&empire *%0=None;@dol Public Newbie Recruit=@force *%0=@chan/on ##;@lock *%0/empire=#1;&class *%0=Visitor;&rank *%0=3;@lock *%0/class=#1;@lock *%0/rank=#1;&email *%0=%2;&playstatus *%0=OOC;@lock *%0/playstatus=#1;@lock *%0/email=#1;@pemit %#=PCREATE: Player `%0' created with password `%1' and Email Address `%2'.},0,{@pemit %#=PCREATE: Permission Denied! You are not a Wizard.}

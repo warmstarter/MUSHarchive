@@ -1,0 +1,15 @@
+@create PARENT: Notepad
+@lock PARENT: Notepad=*Jesse
+@Desc PARENT: Notepad=A small notepad with a black vinyl cover to protect it's pages.
+@Adesc PARENT: Notepad=@pemit %#=%R<Type '.nhelp' for help.>%R
+&NOTE PARENT: Notepad=$.note *=*:&NOTE_%0 me=%1;@edit me/LIST=$,{%%R-%0-};@pemit %#=You find a blank page and scribble your note.;@oemit %#=%N scribbles a note in %p notebook.
+&EDIT PARENT: Notepad=$.edit *=*/*:@edit me/NOTE_%0={%1},{%2}
+&ADD PARENT: Notepad=$.add *=*:@edit me/NOTE_%0=$,{%1};@pemit %#=You find the note and add to it.;@oemit %#=%N scribbles something in %p pad.
+&REMOVE PARENT: Notepad=$.remove *:&NOTE_%0 me=;@edit me/LIST={%R-%0-},;@pemit %#=You rip a page from you notebook.;@oemit %#=%N tears a note from %p pad and throws it away.
+&LISTNOTES PARENT: Notepad=$.list:@pemit %#=[get_eval(me/LIST)]
+&READ PARENT: Notepad=$.read *:@pemit %#=You squint your eyes and read the scribbles...%R%R[get_eval(me/NOTE_%0)]%R;@oemit %#=%N squints his eyes hard and reads something in %p notepad.
+&LIST PARENT: Notepad=The following notes are available:%R
+&NOTEHELP PARENT: Notepad=$.nhelp:@pemit %#=%R----Notepad Commands----%R%R.note <name>=<text>[space(7)]Adds a note%R.edit <name>=<old>/<new>[space(2)]Edits anote%R.add <name>=<added text>[space(2)]Tacks info onto the end of anote%R.remove <name>[space(12)]Tears out a note%R.list[space(21)]Lists availablenotes%R.read <name>[space(14)]Reads a note%R%R
+@set PARENT: Notepad=VISUAL
+@set PARENT: Notepad=PARENT_OK
+@set PARENT: Notepad=HALTED

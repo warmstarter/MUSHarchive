@@ -1,0 +1,103 @@
+Step 1: Starting Off (#3871RFJnt)
+Ok to get to this point with a builder you need to first @dig <the name of a
+starting area on your planet>, once you do this it should tell you that <the
+name you gave it> created with room number <a db#>. You then @tel <the db#>
+that will bring you to this point.  For here follow the rooms and they will
+give you step by step instructions on how to build and zone the planet's so
+every thing will work with the space and combat codes :).
+
+Ship Zoning Tutorial 
+  There are four main types of useful ship objects: Ship Object, ZMO Parent,
+Main Ship Zone, and Deck Zones.
+
+Ship Object: An object that carries all the critical RP information, etc.
+ZMO Parent: Handles all softcoded functions, contains crew, etc.
+Main Ship Zones: Mainly a nameholder for rooms.
+Deck Zones: Another nameholder for rooms.
+
+Ship Zoning Tutorial: Part Two
+  Here are all the things you should put on/in the objects:
+
+Ship Object    --> &ZONES (List of all deck zones and main ship zone)
+ZMO Parent     --> &ZONES (List of all deck zones and main ship zone)
+Main Ship Zone --> Set this object AREA.
+                   Place all the deck zones within this object.
+                   &ZONES (List of all deck zones and main ship zone)
+Deck Zones     --> &ROOM_LIST (List all of the rooms that are @chzone'ed to                       the deck zone)
+                   &SHIP_OBJECT (DBREF of ship object)
+                   &ZONES (List of all deck zones and main ship zone)
+
+  In the example rooms, fictious names and databse numbers are used.
+
+  This is the object that contains all the IC stuff (space, etc.). Builders
+need not worry about placing info on this object, as it will be handled when
+consoles are placed, etc.
+
+ ISS Buckwheat SO(#1000n)
+ Type: THING Flags: NO_COMMAND
+ Owner: Me Key: *UNLOCKED* Credits: 1
+ Zone: *NOTHING*
+ Parent: ship object template (#24SYns)
+ Powers:
+ SHIP_OBJECT [#229]: #1000
+ No exits.
+ Location: Here(#0)
+
+Deck Zone Example Room 
+  This object's parent is the ZMO Parent, has the area flag, and contains a
+list of all rooms to which are zoned to it in ROOM_LIST:
+
+ Deck 1(#1333i)
+ Type: THING Flags: AREA
+ Owner: Me Key: *UNLOCKED* Credits: 1
+ Zone: ISS Buckwheat(#1222i)
+ Parent: ISS Buckwheat ZMO Parent(#1111)
+ Powers:
+ ZONES [#229]: #1222 #1333 #1444
+ ROOM_LIST [#229]: #441 #443 #448
+ SHIP_OBJECT [#229]: #1000
+ No exits.
+ Location: ISS Buckwheat(#1222i)
+
+Main Ship Zone Example Room 
+  This object has the area flag and holds the decks. Its parent is the ZMO
+Parent:
+
+ ISS Buckwheat(#1222i)
+ Type: THING Flags: AREA
+ Owner: Me Key: *UNLOCKED* Credits:1
+ Zone: *NOTHING*
+ Parent: ISS Buckwheat ZMO Parent(#1111)
+ Powers:
+ ZONES [#229]: #1222 #1333 #1444
+ Contents:
+ Deck 1(#1333i)
+ Deck 2(#1444i)
+ No Exits.
+ Location: Here (#0)
+
+  Any room that does not have any particular zone, like the turbolifts, place
+the room(s) in the &ROOM_LIST attribute on this object.
+
+ZMO Parent Example Room 
+  This is the place for the computer core (contact Radnor for info), and has
+all the objects listed in ZONES as children (@parent each object to this one).
+It also contains the attribute SHIP_OBJECT:
+
+ ISS Buckwheat ZMO Parent(#1111)
+ Type: THING Flags:
+ Owner: Me Key: *UNLOCKED* Credits: 1
+ Zone: *NOTHING*
+ Powers:
+ ZONES [#229]: #1222 #1333 #1444
+ SHIP_OBJECT [#229]: #1000
+ No exits.
+ Location: Here (#0)
+
+Ship Zoning Tutorial: Part Three 
+  That about wraps up the ship zoning tutorial. If you have any specific
+questions, feel free to ask Radnor. If you have completed your ship zones and
+rooms, @mail a note to Radnor telling him that you are ready to install the
+computer core.
+_______________________________________________________________________________
+

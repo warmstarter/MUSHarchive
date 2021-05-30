@@ -1,0 +1,121 @@
+@@ This is the first version of my ocean system. It works best in conjuction
+@@ with my room parent but that's not required. If you dont use the my room
+@@ parent simply @parent your own room parent to the Room to Dock Parent and
+@@ then parent that to the room you wish to make into a docking area.
+@@ The following attributes need to be set with the revelant information:
+@@ 
+@@ "inf_lead_2_dock" on the room leading to a dock needs to be set with the db#
+@@ of that areas dock object.
+@@
+@@ "inf_dock_for" on the dock object needs to be set to the room that it should
+@@ lead to.
+@@
+@@ "inf_name" on dock and ship objects should be set to what you want their
+@@ name to appear to other objects in the ocean.
+@@
+@@ "inf_ocean" on the ship object should be set to the db# of the ocean.
+@@
+@@ That being all the attributes with variables that the system depends on that
+@@ arent inherited as a constant from the parents that I can think of off hand.
+
+
+@@ This is the Ocean Room.
+
+@dig/teleport The Ocean
+@set here = DARK
+@set here = INHERIT
+@set here = WIZARD
+@set here = NO_COMMAND
+@set here = FLOATING
+@DESCRIBE here=[iter([lcon(me)],[center([ansi(b,[eval(##,inf_name)])] [ansi(hr,-)][space(3)][ansi(hc,x)][ansi(hy,[eval(##,inf_x)])][space(3)][ansi(hc,y)][ansi(hy,[eval(##,inf_y)])],74)]%r,,)]
+@set here/DESCRIBE=no_command visual
+&FUN_CHECKXY here=th [iter([lcon(here)],[switch([or([hasattr(##,inf_isship)],[hasattr(##,inf_isdock)])],1,{[squish(## [xget(##,inf_x)] [xget(##,inf_y)]|)]},0,{})])]
+&credits here=Coded by Jamie. For permission to use contact jamie@dj-tech.org via email. Note: As long as these credits remain in place permission is granted for general use.
+
+@@ This is the master ship object. Because listen events arent inherited you'll have to clone
+@@ and edit it for each ship that's to be used. Currently there are no help files...so if
+@@ you feel like contributing some send em to jamie@dj-tech.org
+
+@create DJ-Tech Ship Parent v.01
+@set DJ-Tech Ship Parent v.01 = INHERIT
+@set DJ-Tech Ship Parent v.01 = WIZARD
+@set DJ-Tech Ship Parent v.01 = ENTER_OK
+@set DJ-Tech Ship Parent v.01 = !NO_COMMAND
+@set DJ-Tech Ship Parent v.01 = MONITOR
+&AUTHOR DJ-Tech Ship Parent v.01=Coded by DJ-Tech, 1999 All Rights Reserved.
+&CMD_DOCK DJ-Tech Ship Parent v.01=^* says, "helm dock us with *":@swi [eval(#%1,inf_isdock)]=0,{@remit [loc(%#)]=The helmsman says, "That is not a dock."},1,{enter #%1;@remit [loc(%#)]=The helmsman says, "We're docking now.";@wait me/5=@remit [loc(%#)]=The ship shudders slightly as it docks with [ansi(hy,[eval(#%1,inf_name)])].;&inf_isdocked me=1;@set me=!no_leave},{@remit [loc(%#)]=The helmsman says, "I dont see what you want me to dock with."}
+&CMD_LAYIN DJ-Tech Ship Parent v.01=^* says, "helm layin a course for *-*":@swi [eval(me,inf_isdocked)]=0,{@swi [eval(me,inf_moving)]=1,{@remit [loc(%#)]=The helmsman says, "We're already underway."},0,{@switch [isnum(%1%2)]=1,{@remit [loc(%#)]=The helmsman says, "Laying in course for coordinates %1 %2.;&inf_moving me=1;th [tel(me,[xget(me,inf_ocean)])];@wait me/[mul([dist2d([xget(me,inf_X)],[xget(me,inf_Y)],%1,%2)],20)]={@remit [loc(%#)]=The helmsman says, "We have arrived at %1 %2.";&inf_x me=%1;&inf_y me=%2;&inf_moving me=0}},0,{@remit [loc(%#)]=The helmsman says, "We cant go that way."}}},1,{@remit [loc(%#)]=The helmsman says, "We have to undock first."
+&CMD_REPORT DJ-Tech Ship Parent v.01=^* says, "lookout report":th [setq(0,[lcon(me)])];@swi [eval(me,inf_isdocked)]=0,{@pe/list [remove(%q0,%#)]=The lookout reports to [name(%#)].;@pemit %#=The lookout calls to you, "The only ships and docks I see are:%r[setq(0,v(inf_x))][setq(1,v(inf_y))][iter(remove(lcon(here),%!),if(eq(0,dist2d(%q0,%q1,get(##/inf_x),get(##/inf_y))),[ansi(b,[edit(##,#,)])] [ansi(hc,-)] [ansi(b,[eval(##,inf_name)])]%r),,)]},1,{@remit [loc(%#)]=The lookout calls to you, "All I see is the dock."}
+&CMD_UNDOCK DJ-Tech Ship Parent v.01=^* says, "helm undock us":@swi [eval(me,inf_isdocked)]=0,{@remit [loc(%#)]=The helmsman says, "We're already undocked."},1,{leave;@remit [loc(%#)]=The helmsman says, "undocking now.";@set me=no_leave;@wait me/5={@remit [loc(%#)]=The ship shudders slightly as it undocks and the helmsman says, "We are free and clear to navigate.";&inf_isdocked me=0}
+@IDESCRIBE DJ-Tech Ship Parent v.01=[eval(me,idesc_[eval(me,inf_isdocked)])]
+@set DJ-Tech Ship Parent v.01/IDESCRIBE=no_command
+&IDESC_0 DJ-Tech Ship Parent v.01=%tStanding on the deck of the [ansi(hy,[eval(me,inf_name)])], you see ocean all around you. Seperating you from the massive expanse of salty blue liquid is an eclectic mix of persons in various positions of controlling the ship. To the fore, a helmsman standing sentry over his wheel ready to guide the ship. High above, perched in his roost, sits the lookout diligently scanning the surface of the sea.
+&IDESC_1 DJ-Tech Ship Parent v.01=%tStanding atop the deck of the [ansi(hy,[eval(me,inf_name)])], you see the helmsman's wheel to the fore, the lookout's roost high above you, and--below and around you--the bulk of wood and metal that comprise the ship itself.  Looking out you see the dock, where the ship currently rests.
+&INF_ISDOCKED DJ-Tech Ship Parent v.01=1
+&INF_ISSHIP DJ-Tech Ship Parent v.01=1
+&INF_MOVING DJ-Tech Ship Parent v.01=0
+&INF_NAME DJ-Tech Ship Parent v.01=USS DJ-Tech
+@fo me=&INF_OCEAN DJ-Tech Ship Parent v.01=[num(here)]
+&INF_X DJ-Tech Ship Parent v.01=1
+&INF_Y DJ-Tech Ship Parent v.01=1
+@LFAIL DJ-Tech Ship Parent v.01=Just as you are about to step off you realize there is no where to go.
+@set DJ-Tech Ship Parent v.01/LFAIL=no_command
+@OENTER DJ-Tech Ship Parent v.01=climbs aboard the [ansi(hy,[eval(me,inf_name)])].
+@set DJ-Tech Ship Parent v.01/OENTER=no_command
+@OLEAVE DJ-Tech Ship Parent v.01=walks down the plank of [ansi(hy,[eval(me,inf_name)])]
+@set DJ-Tech Ship Parent v.01/OLEAVE=no_command
+@OXENTER DJ-Tech Ship Parent v.01=climbs aboard the [ansi(hy,[eval(me,inf_name)])].
+@set DJ-Tech Ship Parent v.01/OXENTER=no_command
+@OXLEAVE DJ-Tech Ship Parent v.01=walks down the plank of [ansi(hy,[eval(me,inf_name)])]
+@set DJ-Tech Ship Parent v.01/OXLEAVE=no_command
+@SEMAPHORE DJ-Tech Ship Parent v.01=1
+@set DJ-Tech Ship Parent v.01/SEMAPHORE=no_inherit locked
+&credits DJ-Tech Ship Parent v.01=Coded by Jamie. For permission to use contact jamie@dj-tech.org via email. Note: As long as these credits remain in place permission is granted for general use.
+
+@@ This is the the object for the dock object parent.
+
+@create DJ-Tech Dock Parent v.01
+@set DJ-Tech Dock Parent v.01 = !NO_COMMAND
+@set DJ-Tech Dock Parent v.01 = INHERIT
+@set DJ-Tech Dock Parent v.01 = WIZARD
+@set DJ-Tech Dock Parent v.01 = ENTER_OK
+&CMD_LAND DJ-Tech Dock Parent v.01=$land:th [pemit(%#,You leave the dock for [ansi(hy,[name([u(inf_dock_for)])])][tel(%#,[u(inf_dock_for)])]
+@IDESCRIBE DJ-Tech Dock Parent v.01=%tYou stand on the dock, [ansi(hy,[eval(me,inf_name)])].  Looking out around you reveals the ocean, stretching out in a vast expanse of blue.  Various ships and water-craft have assembled themselves at the dock, a vast expanse of wood reaching slender fingers out into the water. You see the way back to [ansi(hy,[name([u(inf_dock_for)])])].%r[ansi(hr,OOC Note: Type)] [ansi(hy,land)] [ansi(hr,to go back to land)]
+@set DJ-Tech Dock Parent v.01/IDESCRIBE=no_command
+&INF_ISDOCK DJ-Tech Dock Parent v.01=1
+&INF_NAME DJ-Tech Dock Parent v.01=DJ-Dock
+&INF_X DJ-Tech Dock Parent v.01=1
+&INF_Y DJ-Tech Dock Parent v.01=1
+&credits DJ-Tech Dock Parent v.01=Coded by Jamie. For permission to use contact jamie@dj-tech.org via email. Note: As long as these credits remain in place permission is granted for general use.
+
+
+@@ This is the object for the Room to Dock parent.
+
+@create DJ-Tech Room to Dock Parent v.01
+@set DJ-Tech Room to Dock Parent v.01 = INHERIT
+@set DJ-Tech Room to Dock Parent v.01 = LINK_OK
+@set DJ-Tech Room to Dock Parent v.01 = WIZARD
+@set DJ-Tech Room to Dock Parent v.01 = SAFE
+@set DJ-Tech Room to Dock Parent v.01 = !NO_COMMAND
+&CMD_DOCK DJ-Tech Room to Dock Parent v.01=$dock:th [tel(%#,[u(inf_lead_2_dock)])]
+@SUCCESS DJ-Tech Room to Dock Parent v.01=You see the way to the [ansi(hy,[name([u(inf_lead_2_dock)])])].%r[ansi(hr,OOC Note: To go to the dock type)] [ansi(hy,dock)].
+@set DJ-Tech Room to Dock Parent v.01/SUCCESS=no_command
+&credits DJ-Tech Room to Dock Parent v.01=Coded by Jamie. For permission to use contact jamie@dj-tech.org via email. Note: As long as these credits remain in place permission is granted for general use.
+
+
+@@ This is a demo/default room for the dock *ROOM* not the dock object.
+
+@dig/teleport Docks
+@parent here=DJ-Tech Room To Dock Parent v.01
+@set here = !NO_COMMAND
+@set here = DARK
+@set here = WIZARD
+&INF_DESC here=A path to the dock for boats
+&credits here=Coded by Jamie. For permission to use contact jamie@dj-tech.org via email. Note: As long as these credits remain in place permission is granted for general use.
+
+
+@@ And finally we finish up any attributes that are needed to setup your default/demo rooms and
+@@ objects.
+
+@fo me=&inf_lead_2_dock DJ-Tech Room to Dock Parent v.01=[num(DJ-Tech Dock Parent v.01)]
+@fo me=&INF_DOCK_FOR DJ-Tech Dock Parent v.01=[num(here)]

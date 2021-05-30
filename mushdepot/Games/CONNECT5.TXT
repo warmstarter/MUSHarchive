@@ -1,0 +1,116 @@
+@@ So you've solved Chess, and Connect Four.  Now you think you know it all.
+@@ But wait!  Don't be too hasty!  There's another game ready to crush you with
+@@ new dilemmas.  Your friends will say that games are all the same.  Boy will
+@@ they be surprised.  You, you're different.  You have a curious mind and are
+@@ open-minded enough to know that if you practice enough with cold, hard
+@@ cunning you'll be on top in the end.  Connect Five is not for amateurs!
+
+@@ BE OPEN-MINDED.  BE A PRO.  DOWNLOAD CONNECT FIVE.
+
+@@ ----------------------------------------------------------------------------
+
+@@ Admittedly, I stole the basic scheme for above text.  Here's a new game for
+@@ simple-minded people to enjoy.  Connect Five is pretty much like Connect
+@@ Four with a few major exceptions.  1)  You can place anywhere on the board,
+@@ rather than just at the bottom.  2)  After 12 moves, you may not place any
+@@ new pieces on the board but instead, you must move them to horizontally or
+@@ vertically adjacent squares.  3)  The board is bigger!  Feeeeeel the power.
+
+@@ To set up the game you must follow the next few steps, which are very like
+@@ setting up Connect Four, BTW.  And as some have pointed out... Connect Four
+@@ has a `bug'.  It does not display high scores for any person until that
+@@ person has won at least 5 games.  This is because I found great displeasure
+@@ at the thought of a person winning 1 game and remaining at the top of the
+@@ high scores list for eternity.  It's still possible that a person might win
+@@ exactly 5 games and remain at the top forever, but it is much less likely.
+@@ So I'm not perfect.  On the bright side, you got this game for free.
+
+@@ Steps to set up Connect Five:
+
+@@ 1) Create an object called Connect Five Parent.
+@@ 2) Download the MUSHcode following the line.
+@@ 3) Create an object called Connect Five DB.
+@@ 4) Type `@force me=&pdb Connect Five Parent=[num(Connect Five DB)]'.
+@@ 5) Type `@notify Connect Five DB'.
+@@ 6) Create an object called Connect Five Game.
+@@ 7) Type `@parent Connect Five Game=Connect Five Parent'.
+@@ 8) Type `@notify Connect Five Game'.
+
+@@ After that... you're set.
+
+@@ You're also open-minded and professional.
+
+@@ --------------- CUT HERE, MUSHCODE BELOW ------------------
+@create Connect Five Parent
+@Desc Connect Five Parent=[repeat(=,78)]%rThe object of Connect Five is to get 5 of your counters in a row, vertically, horizontally, or diagonally.%b%bYou and your opponent alternate taking turns.%b%bOn your turn, you place a counter at any position on the 8x8 grid.%b%bYou have 12 counters each to place.%b%bIf the counters become used up and noone has won, you then alternate moving one counter of your color to one of the four adjacent squares next to it.%b%bTo make this move, the position must be open.%b%bThe time when you no longer add counters to the board is called extended mode.%b%bUse this game for a command list.%r[repeat(=,78)]
+@Ouse Connect Five Parent=uses the connect five game.
+@Use Connect Five Parent=%r[center(!Connect Five!,78)]%r%r%tBEGIN5 <player>%t%tWill begin a game with <player>.%r%tRESET5%t%t%tWill reset the game.%r%tMOVE5 <move>%t%tWill make a move.%b%bSee below.%r%tDISP5%t%t%tWill show the display.%r%tHI5%t%t%tWill show hiscores.%r%tSEE5 <player>%t%tWill show score of <player>.%r%tWATCH5%t%t%tWill watch the 5 game.%r%r%tMoves are in the form 'MOVE5 A1' for normal mode.%r%tMoves are in the form 'MOVE5 A1-A2' for extended mode.%r
+&REM0 Connect Five Parent=========== Commands ==========
+&BEGIN5 Connect Five Parent=$begin5 *:@wait me={@select [num(%0)]=#-1*,{@pemit %#=No such person present.;@notify me},{@select [v(playing)]=,{@tr me/BEGIN5_0=%#,%0},{@pemit %#=It seems that [name(v(player1))] and [name(v(player2))] are playing.%b%bIf not, type RESET5.;@notify me}}}
+&RESET5 Connect Five Parent=$reset5:@wait me={&lastmove me;&moves me=0;&state me;&column1 me=[v(null)];&column2 me=[v(null)];&column3 me=[v(null)];&column4 me=[v(null)];&column5 me=[v(null)];&column6 me=[v(null)];&column7 me=[v(null)];&column8 me=[v(null)];&playing me;&player1 me;&playing me;@emit [name(me)] reset by %n.;@notify me}
+&WATCH5 Connect Five Parent=$watch5:&watchers me=[setunion(v(watchers),%#)];@emit %N is now watching [name(me)]
+&MOVE5 Connect Five Parent=$move5 *:@wait me={@select %#=[v(player[v(playing)])],{@select [v(state)]=START,{@tr me/movestart=%#,%0},EXTENDED,{@tr me/moveextended=%#,%0}},{@pemit %#=Noone is playing.;@notify me}}
+&DISP5 Connect Five Parent=$disp5:@pemit %#=[u(fulldisplay)]
+&HI5 Connect Five Parent=$hi5:@pemit %#=[u(hiscores,[u(topscores)],Connect Five High Scores)]
+&SEE5 Connect Five Parent=$see5 *:@select [num(*%0)]=#-1*,{@pemit %#=No such player.},{@pemit %#=[u(hiscores,[num(*%0)],Go Score)]}
+&REM1 Connect Five Parent=========== Subroutines ==========
+&BEGIN5_0 Connect Five Parent=@emit [name(%0)] starts [name(me)] with [name(%1)]. Type WATCH5 to watch.;&lastmove me;&moves me=0;&state me=START;&column1 me=[v(null)];&column2 me=[v(null)];&column3 me=[v(null)];&column4 me=[v(null)];&column5 me=[v(null)];&column6 me=[v(null)];&column7 me=[v(null)];&column8 me=[v(null)];&playing me=1;&player1 me=[num(%1)];&player2 me=%0;&watchers me=[setunion(%0,num(%1))];@tr me/status
+&MOVESTART Connect Five Parent=@select [u(validpos,%1)]=0,{@pemit %0='[ucstr(%1)]' is not a valid position.;@notify me},{&xx me=[u(getx,%1)];&yy me=[u(gety,%1)];@select [switch(u(coor,v(xx),v(yy)),X,0,O,0,1)]=1,{&lastmove me=[ucstr(%1)];&column[v(xx)] me=[u(editline,v(column[v(xx)]),u(token,v(playing)),v(yy))];&moves me=[add(v(moves),1)];@select [v(moves)]=>23,{&state me=EXTENDED};@tr me/swapcheck=%0},{@pemit %0=That position is occupied.;@notify me}}
+&MOVEEXTENDED Connect Five Parent=@select [u(validmove,%1)]=0,{@pemit %0='[ucstr(%1)]' is not a valid move.%b%bRemember, it's extended mode now.;@notify me},{&x1 me=[u(getx,u(getpos1,%1))];&x2 me=[u(getx,u(getpos2,%1))];&y1 me=[u(gety,u(getpos1,%1))];&y2 me=[u(gety,u(getpos2,%1))];@select [switch(u(coor,v(x2),v(y2)),X,0,O,0,1)]=1,{@select [switch(u(coor,v(x1),v(y1)),u(token,v(playing)),1,0)]=1,{&column[v(x1)] me=[u(editline,v(column[v(x1)]),%%b,v(y1))];&column[v(x2)] me=[u(editline,v(column[v(x2)]),u(token,v(playing)),v(y2))];&xx me=[v(x2)];&yy me=[v(y2)];&lastmove me=[ucstr(%1)];@tr me/swapcheck},{@pemit %0=That isn't a token of yours.;@notify me}},{@pemit %0=The position moving to is occupied.;@notify me}}}
+&SWAPCHECK Connect Five Parent=@select [u(win,v(xx),v(yy))]=1,{@tr me/adjscores=[v(player[v(playing)])],[v(player[u(toggle,v(playing))])];@tr me/finish=[v(player[v(playing)])]},{&playing me=[u(toggle,v(playing))];@tr me/status}
+&STATUS Connect Five Parent=@dolist [v(watchers)]=@pemit ##=[u(fulldisplay)];@notify me
+&FINISH Connect Five Parent=@dolist [v(watchers)]=@pemit ##=--- Final Move ---%r[u(disp)]%r--- Winner: [name(%0)] ---;&state me;&playing me;@notify me
+&ADJSCORES Connect Five Parent=@wait me={@wait [v(pdb)]={&wins_%0 [v(pdb)]=[switch(isnum(get([v(pdb)]/wins_%0)),1,add(get([v(pdb)]/wins_%0),1),1)];&losses_%1 [v(pdb)]=[switch(isnum(get([v(pdb)]/losses_%1)),1,add(get([v(pdb)]/losses_%1),1),1)];&hiscores [v(pdb)]=[remove(remove(get([v(pdb)]/hiscores),%0),%1)];&tempfilter me=%0;&hiscores [v(pdb)]=[u(insscore,get([v(pdb)]/hiscores))];&hiscores [v(pdb)]=[remove(get([v(pdb)]/hiscores),%1)];&tempfilter me=%1;&hiscores [v(pdb)]=[u(insscore,get([v(pdb)]/hiscores))];@dolist v(watchers)=@pemit ##=u(hiscores,%0 %1,[name(me)] Scores);@notify [v(pdb)]};@notify me}
+&REM2 Connect Five Parent=========== Display Functions ==========
+&FULLDISPLAY Connect Five Parent=--- Last Move: [v(lastmove)] ---%r[u(disp)]%r--- Next Player: [switch(v(playing),1,X's\,,2,O's\,,None)] [name(v(player[v(playing)]))] ---
+&DISP Connect Five Parent=[u(top)]%r[u(line,8)]%r[u(mid)]%r[u(line,7)]%r[u(mid)]%r[u(line,6)]%r[u(mid)]%r[u(line,5)]%r[u(mid)]%r[u(line,4)]%r[u(mid)]%r[u(line,3)]%r[u(mid)]%r[u(line,2)]%r[u(mid)]%r[u(line,1)]%r[u(bottom)]
+&TOP Connect Five Parent=[space(23)]+---+---+---+---+---+---+---+---+
+&MID Connect Five Parent=[space(23)]+---+---+---+---+---+---+---+---+
+&BOTTOM Connect Five Parent=[space(23)]+---+---+---+---+---+---+---+---+%r[space(23)]%b%b1%b%b%b2%b%b%b3%b%b%b4%b%b%b5%b%b%b6%b%b%b7%b%b%b8
+&LINE Connect Five Parent=[space(21)][extract(v(rows),%0,1)]%b|%b[s(u(coor,1,%0))]%b|%b[s(u(coor,2,%0))]%b|%b[s(u(coor,3,%0))]%b|%b[s(u(coor,4,%0))]%b|%b[s(u(coor,5,%0))]%b|%b[s(u(coor,6,%0))]%b|%b[s(u(coor,7,%0))]%b|%b[s(u(coor,8,%0))]%b|
+&REM3 Connect Five Parent=========== High Scores Functions ==========
+&HISCORES Connect Five Parent=+[repeat(=,60)]+%r|[center(%1,60)]|%r+================= Name =================%% WINS==WIN===LOSS==+[u(hiscores0,%0)]%r+[repeat(=,60)]+
+&HISCORES0 Connect Five Parent=[iter(%0,%r| [center(name(##),38)] [ljust(u(pernum,##),8)][ljust(u(wins,##),6)][ljust(u(losses,##),6)]|)]
+&INSSCORE Connect Five Parent=[cat(filter(above,%0),switch(gt(u(wins,v(tempfilter)),4),1,v(tempfilter)),filter(belowe,%0))]
+&ABOVE Connect Five Parent=[and(gt(u(pernum,%0),u(pernum,v(tempfilter))),gt(u(wins,%0),4))]
+&BELOWE Connect Five Parent=[and(lte(u(pernum,%0),u(pernum,v(tempfilter))),gt(u(wins,%0),4))]
+&TOPSCORES Connect Five Parent=[switch(gt(words(get([v(pdb)]/hiscores)),10),1,extract(get([v(pdb)]/hiscores),1,10),get([v(pdb)]/hiscores))]
+&PERNUM Connect Five Parent=[switch(add(u(wins,%0),u(losses,%0)),0,0,div(mul(u(wins,%0),100),add(u(wins,%0),u(losses,%0))))]
+&WINS Connect Five Parent=[switch(get([v(pdb)]/wins_%0),,0,get([v(pdb)]/wins_%0))]
+&LOSSES Connect Five Parent=[switch(get([v(pdb)]/losses_%0),,0,get([v(pdb)]/losses_%0))]
+&REM4 Connect Five Parent=========== Data Retrieval Functions ==========
+&EDITLINE Connect Five Parent=[cat(extract(%0,1,sub(%2,1)),%1,extract(%0,add(%2,1),sub(words(%0),%2)))]
+&COOR Connect Five Parent=[extract(v(column%0),%1,1)]
+&TOGGLE Connect Five Parent=[switch(%0,1,2,2,1)]
+&GETPOS1 Connect Five Parent=[mid(%0,0,2)]
+&GETPOS2 Connect Five Parent=[mid(%0,3,2)]
+&GETX Connect Five Parent=[match(v(columns),mid(%0,1,1))]
+&GETY Connect Five Parent=[match(v(rows),mid(%0,0,1))]
+&TOKEN Connect Five Parent=[switch(%0,1,X,2,O)]
+&REM5 Connect Five Parent=========== Checking Functions ==========
+&VALIDMOVE Connect Five Parent=[and(eq(add(abs(sub(u(getx,mid(%0,0,2)),u(getx,mid(%0,3,2)))),abs(sub(u(gety,mid(%0,0,2)),u(gety,mid(%0,3,2))))),1),eq(strlen(%0),5),strmatch(mid(%0,2,1),-),u(validpos,mid(%0,0,2)),u(validpos,mid(%0,3,2)))]
+&VALIDPOS Connect Five Parent=[and(eq(strlen(%0),2),gt(match(v(rows),mid(%0,0,1)),0),gt(match(v(columns),mid(%0,1,1)),0))]
+&WIN Connect Five Parent=[or(u(vert,%0,%1),u(horz,%0,%1),u(diagf,%0,%1),u(diagb,%0,%1))]
+&VERT Connect Five Parent=[u(win-pattern,u(win-line,%0,1,0,1))]
+&HORZ Connect Five Parent=[u(win-pattern,u(win-line,1,%1,1,0))]
+&DIAGF Connect Five Parent=[u(win-pattern,u(win-line,add(sub(%0,%1),1),1,1,1))]
+&DIAGB Connect Five Parent=[u(win-pattern,u(win-line,sub(add(%1,%0),1),1,-1,1))]
+&WIN-PATTERN Connect Five Parent=[or(strmatch(%0,*X X X X X*),strmatch(%0,*O O O O O*))]
+&WIN-LINE Connect Five Parent=[iter(lnum(8),u(coor,add(%0,mul(%2,##)),add(%1,mul(%3,##))))]
+&REM6 Connect Five Parent=========== Data ==========
+&ROWS Connect Five Parent=A B C D E F G H
+&COLUMNS Connect Five Parent=1 2 3 4 5 6 7 8
+&COLUMN1 Connect Five Parent=%b %b %b %b %b %b %b %b
+&COLUMN2 Connect Five Parent=%b %b %b %b %b %b %b %b
+&COLUMN3 Connect Five Parent=%b %b %b %b %b %b %b %b
+&COLUMN4 Connect Five Parent=%b %b %b %b %b %b %b %b
+&COLUMN5 Connect Five Parent=%b %b %b %b %b %b %b %b
+&COLUMN6 Connect Five Parent=%b %b %b %b %b %b %b %b
+&COLUMN7 Connect Five Parent=%b %b %b %b %b %b %b %b
+&COLUMN8 Connect Five Parent=%b %b %b %b %b %b %b %b
+&NULL Connect Five Parent=%b %b %b %b %b %b %b %b
+&MOVES Connect Five Parent=0
+@set Connect Five Parent=OPAQUE
+@set Connect Five Parent=HALT
+@set Connect Five Parent=SAFE
+

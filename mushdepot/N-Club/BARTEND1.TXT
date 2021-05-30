@@ -1,0 +1,33 @@
+Deactivated Bartender Droid(#827VYh)
+Type: THING Flags: VISUAL PARENT_OK HALTED
+Owner: Brandy  Key: Brandy Building credits: 1
+Zone: LITO ZMO
+Powers:
+ORDER: $order *:@pemit/con here=%N orders %0.; @swi [or(strmatch([u(me/menu)],*
+[edit(%0,%b,_)]*),strmatch([u(me/drinks)],*[edit(%0,%b,_)]*))] = 1, @tr me/do1=
+[u(me/[edit(%0,%b,_)])], 0, "Sorry but that choice is outside of my design
+parameters.
+DO1: @pemit/con here= [extract(%0,1,1,|)]; @swi [gt(words(%0,|),1)]= 1, {@tr
+me/do2=[extract(%0,2,words(%0,|),|)]}
+DO2: @pemit/con here= [extract(%0,1,1,|)]; @swi [gt(words(%0,|),1)]= 1, {@tr
+me/do1=[extract(%0,2,words(%0,|),|)]}
+DRINKS: this_is_the_drink_list
+MENU: nuts
+NUTS: [name(me)] moves to a dispenser at the end of the bar.|[name(me)] returns
+to %N with a bowl of nuts.||[name(me)] moves to a dispenser at the end of the
+bar.|[name(me)] returns to %N with a bowl of nuts.||[name(me)] moves to a
+dispenser at the end of the bar.|[name(me)] returns to %N with a bowl of nuts.
+DROIDHELP: To program this droid you populate the MENU and DRINKS lists with
+the items that can be ordered. Multi-word items can be inserted like
+white_wine. Then for each thing in your list you add an attribute like NUTS.
+Note that percent-subs will work in this attribute. each | in the starts a new
+action, multiple |||| will cause a delay between actions.
+ORDERLIST: $drinks:@pemit %#=The beverage offerings are: [edit([get
+(me/drinks)],_,%b)]
+Adesc: @pemit %#=%r%RType MENU or DRINKS to see the proper lists. Then ORDER
+whatever you'd like.
+ORDERLIST1: $menu:@pemit %#=The food offerings are: [edit([get(me/menu)],_,%b)]
+No exits.
+Home: Parent Room
+Location: Parent Room
+_______________________________________________________________________________

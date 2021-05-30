@@ -1,0 +1,94 @@
+@@ Faraday's +help System
+@@ Coded by Linda Naughton (http://www.wordsmyth.org)
+@@
+@@ DISCLAIMERS:
+@@ - Permission is given to use and distribute this code, providing the 
+@@   credits entry in the help file remains intact.
+@@ - Although every effort has been made to test and debug this code, no warranty 
+@@   is provided for its use.
+@@   By using this code, you agree that the author is not responsible for any ill 
+@@   effects on your MUSH.
+@@ - I will support the code as far as I can, but I make no guarantees that I will 
+@@   have time to do everything.  RL comes first.  Please report any bugs or 
+@@   suggestions through http://www.wordsmyth.org
+@@
+@@ FEATURES:
+@@ - A complete family of +help commands, including the basic index (+help), the 
+@@   detailed help file view (+help <topic>), and the search facility (+help/search). 
+@@ - A staff help family of commands (+shelp) for your wizard/staff/admin-only commands.
+@@ - Help files can be stored so they aren't displayed in the basic index.  That way files 
+@@   like "+help +foo2" don't clutter up your main page.
+@@
+@@ REQUIREMENTS:
+@@ This code is designed for PennMUSH only.  As long as PennMUSH stays backwards compatible,
+@@ it will work on version 1.7.2 patchlevel 19 or higher.  You're welcome to try it on older
+@@ versions of Penn, or on TinyMUX, but I make no guarantees that it will work.
+@@
+@@ INSTALLATION:
+@@ This install script will handle everything for you. Simply save it as a TEXT file and
+@@ /quote it (or equivalent) to your MUSH as your Wizard character.
+@@
+@@ There is no need to create objects ahead of time.  You do not even have to edit this 
+@@ file by hand unless your globals room is not #2 (in which case replace #2 with the 
+@@ appropriate DB# throughout this file)
+@@
+@@ If you do not have /quote in your MUSH client, you can copy and paste, but beware of 
+@@ linebreaks inserted when copying!!
+@@
+@@ USAGE:
+@@ The +help system comes complete with help files for +help itself.
+@@
+@@ SETUP:
+@@ Look at the +help database for instructions on adding new help files.
+@@
+@@ UPDATES:
+@@ A mailing list is available if you wish to be notified of bugfixes or other updates to this code.  
+@@ Visit my webpage: http://www.wordsmyth.org/faraday to find out more.
+@@
+@@ --------------------------------------------------------------------------------
+
+
+@set me=quiet
+
+@pemit/silent %#=[ansi(hr,Beginning +help Installation.   Please wait until the Installation Complete message appears...)]%R
+
+@pemit/silent %#=[ansi(hr,Creating Objects...)]%R
+
+
+@create +help Commands
+@set +help Commands = !NO_COMMAND
+@set +help Commands = WIZARD
+@set +help Commands = SAFE
+
+&CMD-+HELP +help Commands=$+help:think pemit(%#,[u(#17/top_line)]%R[center(ansi(h,+help Topics),78)]%R[iter(lattr(#17/help_*),[switch(mod(#@,3),1,%R)][ljust(after(##,_),25)])]%R%RSee [ansi(h,+help <topic>)] for more information about a topic.%R[u(#17/bottom_line)]
+&CMD-+HELP-SEARCH +help Commands=$+help/search *:think pemit(%#,[u(#17/top_line)]%R[center(ansi(h,+help files containing %0),78)]%R[iter([grepi(#17,help_*,%0)]%B[grepi(#17,more_help_*,%0)],[switch(mod(#@,3),1,%R)][ljust(last(##,_),25)])]%R[u(#17/bottom_line)])
+&CMD-+HELP-TOPIC +help Commands=$+help *:think pemit(%#,switch(1,hasattr(#17,help_[trim(%0)]),[u(#17/top_line)]%R[center(ansi(h,+help [trim(%0)]),78)]%R[u(#17/help_[trim(%0)])]%R[u(#17/bottom_line)],hasattr(#17,more_help_[trim(%0)]),[u(#17/top_line)]%R[center(ansi(h,+help [trim(%0)]),78)]%R[u(#17/more_help_[trim(%0)])]%R[u(#17/bottom_line)],ansi(hr,There is no such help file.)))
+&CMD-+SHELP +help Commands=$+shelp:think switch(orflags(%#,WrJ),0,pemit(%#,ansi(hr,This command is for staff only.)),pemit(%#,[u(#17/top_line)]%R[center(ansi(h,+shelp Topics),78)]%R[iter(lattr(#17/staff_help_*),[switch(mod(#@,3),1,%R)][ljust(after(after(##,_),_),25)])]%R%RSee [ansi(h,+shelp <topic>)] for more information about a topic.%R[u(#17/bottom_line)])
+&CMD-+SHELP-SEARCH +help Commands=$+shelp/search *:think pemit(%#,switch(0,orflags(%#,WrJ),ansi(hr,This command is for staff only.),[u(#17/top_line)]%R[center(ansi(h,+shelp files containing %0),78)]%R[iter([grepi(#17,staff_help_*,%0)]%B[grepi(#17,more_staff_help_*,%0)],[switch(mod(#@,3),1,%R)][ljust(last(##,_),25)])]%R[u(#17/bottom_line)]))
+&CMD-+SHELP-TOPIC +help Commands=$+shelp *:think pemit(%#,switch(1,not(orflags(%#,WrJ)),ansi(hr,This command is for staff only.),hasattr(#17,staff_help_[trim(%0)]),[u(#17/top_line)]%R[center(ansi(h,+shelp [trim(%0)]),78)]%R[u(#17/staff_help_[trim(%0)])]%R[u(#17/bottom_line)],hasattr(#17,more_staff_help_[trim(%0)]),[u(#619/top_line)]%R[center(ansi(h,+shelp [trim(%0)]),78)]%R[u(#17/more_staff_help_[trim(%0)])]%R[u(#17/bottom_line)],ansi(hr,There is no such help file.)))
+@DESCRIBE +help Commands=This object contains the commands related to the +help Commands.  It must reside in the Globals room (usually #2).
+@STARTUP +help Commands=@set me=!no_command
+
+@create +help Database
+@set +help Database=SAFE
+&BOTTOM_LINE +help Database=repeat(-,78)
+@DESCRIBE +help Database=This object contains all the help files for the +help system.  Simply add an attribute to this object for each help file.  The attribute names determine how the help file will be displayed:%R%RHELP_XYZ - Shows up in the main +help index.%RSTAFF_HELP_XYZ - Shows up in the main +shelp index (for staff only)%RMORE_HELP_XYZ - Does not show up in the main +help index, but you can still view it.  Perfect for multi-part help files, so only the first part appears in the index.%RMORE_STAFF_HELP_XYZ - Same as MORE_HELP_XYZ but for +shelp (for staff only)%R%RNote that the top and bottom lines are automatically included by the +help/+shelp commands.  If you want to change the appearance of the line, edit the TOP_LINE and BOTTOM_LINE attributes on this object.
+&HELP_+HELP +help Database=The +help system supplements the 'help' command by providing help files on MUSH softcode and systems.%R%RUsage:%R[ansi(h,+help)] - Displays main help index%R[ansi(h,+help <topic>)] - Views a help file topic%R[ansi(h,+help/search <keyword>)] - Searches the help files%R%R+help system coded by Faraday (http://www.wordsmyth.org)
+&STAFF_HELP_+SHELP +help Database=The +shelp system supplements the 'help' command by providing help files on MUSH softcode and systems.  It is only available to staff members.%R%RUsage:%R[ansi(h,+shelp)] - Displays main staff help index%R[ansi(h,+shelp <topic>)] - Views a staff help file topic%R[ansi(h,+shelp/search <keyword>)] - Searches the staff help files%R%R+help system coded by Faraday (http://www.wordsmyth.org)
+&TOP_LINE +help Database=repeat(-,78)
+
+
+@pemit/silent %#=[ansi(hr,Setting up database numbers...)]%R
+
+@fo me=@edit +help Commands/*=#17,[num(+help Database)]
+@fo me=@edit +help Database/*=#17,[num(+help Database)]
+
+@wait 5=@pemit/silent %#=[ansi(hr,Moving objects to their appropriate places...)]%R
+
+@wait 5=@tel +help Database=+help Commands
+@wait 5=@tel +help Commands=#2
+
+@wait 5=@pemit/silent %#=%R%R[ansi(hr,Installation Complete!!)]%R
+
+@wait 5=@set me=!quiet
+

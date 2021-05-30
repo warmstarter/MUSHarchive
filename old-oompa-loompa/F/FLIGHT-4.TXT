@@ -1,0 +1,50 @@
+@create Borg Cube
+@set Borg Cube=!NO_COMMAND
+@set Borg Cube=HAVEN
+@set Borg Cube=INHERIT
+@set Borg Cube=OPAQUE
+@set Borg Cube=QUIET
+@set Borg Cube=WIZARD
+@set Borg Cube=SAFE
+@set Borg Cube=ROYALTY
+@IDESC Borg Cube=This room is quite larger that you had imagined. It is an amazing place. Glancing at the walls, you notice that they are made of a rich grain of wood; expensive and look down at the floor you see that it is made out of marble, also expensive. To one end of the room, where the entrance is are steps which lead down to the floor. To either side of you, you notice pedestals which seem to be arranged in an equal distance which encircles the walls. On these pedestals you notice display cases that house precious artifacts. In one case you see a statue which was brought from the Gamma Quadrant, in another, you notice a piece of gold from a century in Earth before the use of latinum was implemented and the others house artifacts, but other pedestals house items of power and destruction and that is why they are housed in containers protected by force fields. As you glance around the room looking at the wall, you notice several famous paintings which gives the room a sort of fancy look. Against one of the far walls you notice a desk with a comfy black leather chair resting behind it. In the center of the room there is a part of the floor which is raised and in the center sits a chair. The room is lit in various areas by a hidden light source, which is mainly for giving the display cases a sort of ascent. The raised part of the floor is lit by a red type of lighting which only seems to light the center part of the room where the chair and platform is. There is a latinum plated panel on the wall.
+@DESC Borg Cube=The most terrifying thing next to the Death Star, a Borg Cube!
+@LALIAS Borg Cube=o;ou;out;leave;exit;exit cube
+@EALIAS Borg Cube=cube;borg cube;enter cube;enter borg
+@LISTEN Borg Cube=*
+@ODROP Borg Cube=drops something.
+&CLOAK Borg Cube=$cloak:@remit here=[name(me)] cloaks, and shimmers from view.;@set [num(me)]=dark
+&DECLOAK Borg Cube=$decloak:@set me=!dark;@remit here=[name(me)] decloaks, and shimmers into existence.
+&CUBE Borg Cube=1
+&REMEMBER-1 Borg Cube=$rem *:@set [num(me)]=[first(v(0))]:[rest(v(0))];@pemit %n=[v(sname)] Destination remembered.
+&BRING-1 Borg Cube=$bring *:@switch [get(me/%0)]=,@pemit %n=I don't recall that one.,@force [num(me)]=@tel [get(me/%0)]=here
+&TIME-1 Borg Cube=$time:@remit [num(me)]=The Current MUSH Time is: [time()]
+&OOC Borg Cube=#0
+&RECALL-1 Borg Cube=$rec *:@switch [get(me/%0)]=,@pemit %n=I don't recall that one.,@pemit %n=%0 is [get(me/%0)].
+&SECURITY1 Borg Cube=#12
+&HOME Borg Cube=#76
+&MTRANS Borg Cube=$mtrans *:@dol [squish(iter(remove(loc(me),%!),switch(t(get(##/[v(sname)])),1,##)))]=@swi [get(##/freq)]=[v(freq)],@remit ##=[ansi(hb,<)][ansi(hw,Transmission:)] [ansi(hr,Frequency)] [ansi(hy,[v(freq)] gHz)][ansi(hb,>)]%b[switch(mid(%0,0,1),:,[ansi(hg,[name(me)])]%b[ansi(hr,mid(%0,1,strlen(%0)))],;,[ansi(hg,[name(me)])][ansi(hr,mid(%0,1,strlen(%0)))],{[ansi(hg,[name(me)])] [ansi(r,says ")][ansi(hr,%0)][ansi(r,")]})];@remit me=You transmit: [switch(mid(%0,0,1),:,[ansi(hg,[name(me)])]%b[ansi(hr,mid(%0,1,strlen(%0)))],;,[ansi(hg,[name(me)])][ansi(hr,mid(%0,1,strlen(%0)))],{[ansi(hg,[name(me)])] [ansi(r,says ")][ansi(hr,%0)][ansi(r,")]})]
+&MSEND Borg Cube=$msend *=*:@switch [t(get(%0/[v(sname)]))]=0,{@pemit %#=Invalid Communications Channel.},{@remit me=You send [ansi(hg,`)][ansi(hw,[switch(mid(%1,0,1),:,[ansi(hr,[mid(%1,1,strlen(%1))])],;,[ansi(hr,[mid(%1,1,strlen(%1))])],{[ansi(hw,%1)]})])][ansi(hg,')] over the Comm Panel.;@remit %0=Your Comm Panel Reads: Personal Transmission from [name(me)] -- [num(me)]: [switch(mid(%1,0,1),:,[ansi(hr,[mid(%1,1,strlen(%1))])],;,[ansi(hr,[mid(%1,1,strlen(%1))])],{[ansi(hw,%1)]})]}
+&MSETFREQ Borg Cube=$setfreq *:&freq me=%0;@pemit %#=Comm Freq: %0
+&FREQ Borg Cube=10
+&LEAVES Borg Cube=^* has left.:@remit me=<Tracking> %0 leaves %1
+&NEW_CONTACT Borg Cube=^* has arrived.:@remit me=NEW CONTACT: [name(%0)] -- [u(%0/specs,name)]
+&CONTACT_LOST Borg Cube=^* has left.:@remit me=CONTACT LOST: [name(%#)] -- [num(%#)];think [switch(get(me/lock),%#,[set(me,Lock:)][remit(%#,Weapons lock from [name(me)] -- [u(specs,name)] has been broken.)][remit(me,Weapons lock on [name(%#)] lost.)]
+&SENSOR_REPORT Borg Cube=Sensor report:[iter(u(mech_sensors),%r[switch(get(##/lock),%!,*%b)][name(##)])]%r--- end ---
+&SENSORS-1 Borg Cube=$sensors:@pemit me=[u(sensor_report)]%r[u(exit_report)]
+&MECH_SENSORS Borg Cube=[squish(iter(remove(lcon(here),%!),switch(t(get(##/sname)),1,##)))]
+@VK Borg Cube=$rs:&shields_raised me=1;@remit me=Shields raised.
+@VL Borg Cube=$ls:&shields_raised me=0;@remit me=Shields lowered.
+&SCAN_NOTIFY Borg Cube=[remit(%0,We are being scanned by [name(me)].)]
+&SCAN_TORPS Borg Cube=[setq(0,0)][u(%0/specs,torp_name)]s:  [iter(lnum(u(%0/specs,num_torps)),switch(get(%0/Torp_##),Loaded,setq(0,add(%q0,1))))]%q0 out of [u(%0/specs,num_torps)] loaded.
+&EXIT_REPORT Borg Cube=Exits:[iter(lexits(here),%b%b[name(##)])]
+&RHOMBUS Borg Cube=1
+&OUTSPEAKER Borg Cube=$spk *:@emit [ansi(r,%[)][ansi(hw,[name(me)])][ansi(r,%])] [switch(mid(%0,0,1),:,[ansi(hg,%N)]%b[ansi(hr,[mid(%0,1,strlen(%0))])],;,[ansi(hg,%N)][ansi(hr,[mid(%0,1,strlen(%0))])],{[ansi(hg,%N)] [ansi(r,says ")][ansi(hr,%0)][ansi(r,")]})]
+&DEVFLAGS Borg Cube=invincible recharger nosteal
+&PEEP-1 Borg Cube=$peep:look
+&DESTS-1 Borg Cube=$dest *:@switch [get(me/%0)]=,@pemit %N=I don't recall that one.,@force [num(me)]=@remit [loc(me)]=[name(me)] emits a portal from a hidden point.;@wait 2=@remit [loc(me)]=Suddenly you feel wind all around you and a low tone atmospheric noise.;@wait 3=@remit [loc(me)]=A red portal opens up where [name(me)] aimed the "weapon.";@wait 5=@remit [get(me/%0)]=A huge red portal opens up in the air.;@wait 9=@remit [loc(me)]=The hard wind continues to mess up your hair.;@wait 17=@remit [loc(me)]=The wind calms down and the portal closes in on itself.;@wait 17=@tel [num(me)]=[get(me/%0)];@wait 18=@remit [get(me/%0)]=The huge red portal, which opened in the air, closes in on itself.
+&BOOT-1 Borg Cube=$boot *:@force [num(me)]=drop %0
+&KICK-1 Borg Cube=$kick:@dol [lcon(me)]=drop ##
+&SNAME Borg Cube=Cube
+&HELP-1 Borg Cube=$+help:@pemit %N=Help File for [name(me)]:%rKick -- Kicks person Out%rBoot <person> -- Boots <person> out.%rdest <destination>=Takes you to <destination>. NOTE: Destination must be REMembered first.%rpeep -- Looks outside (if you got @listen <object>=* on.)%rspk <whatever> -- Speaks to the outside world through hidden speakers <listen must have * too>%rsensors -- searches for kindred [v(sname)], or similar others.%rsetfreq <frequency> -- Sets the frequency you transmit on%rmsend <object>=<message>=Send to other [v(sname)]s or kindred objects in the same room.%rmtrans * -- Transmits to all kindred objects in the same room.%rrec <dest> -- Recalls what DB# the name tels ya to%rtime -- Tells the MUSH time.%rbring <person> -- Summons a person to your [v(sname)]'s location.%rrem <name> <dest> -- Records <dest> as name <name>.%rrem <name> -- Deletes destination.%rCloak and Decloak -- Cloaks and decloaks your [v(sname)].%r
+&SHIELDS_RAISED Borg Cube=1

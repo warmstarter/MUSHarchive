@@ -1,0 +1,272 @@
+@create PARENT: Ship Cargo Console Parent
+@link PARENT: Ship Cargo Console Parent = #0
+@chzone PARENT: Ship Cargo Console Parent = #1245
+@parent PARENT: Ship Cargo Console Parent=#31
+@set PARENT: Ship Cargo Console Parent = INHERIT
+@set PARENT: Ship Cargo Console Parent = WIZARD
+@set PARENT: Ship Cargo Console Parent = NO_COMMAND
+&PFOOD PARENT: Ship Cargo Console Parent=10000
+&PORE PARENT: Ship Cargo Console Parent=10000
+&PDILITHIUM PARENT: Ship Cargo Console Parent=10000
+&VMANIFEST PARENT: Ship Cargo Console Parent=$view manifest:@pemit %#=[repeat([ansi(r,=)][ansi(b,-)],4)][ansi(r,%[)][ansi(g,Cargo Manifest)][ansi(r,%])][repeat([ansi(r,=)][ansi(b,=)],27)]%r[ansi(r,|)][space(7)][ansi(r,%[)][ansi(b,Cargo Type)][ansi(r,%])][space(10)][ansi(r,%[)][ansi(b,Amount of Cargo)][ansi(r,%])][space(10)][ansi(r,%[)][ansi(b,Price Per Unit)][ansi(r,%])][space(4)][ansi(r,|)][iter(v(MANIFEST),{%r[ansi(r,|)][space(8)][ansi(r,##)][space(add(12,sub(10,strlen(##))))][ansi(r,v(##))][space(add(12,sub(15,strlen(v(##)))))][ansi(r,v(P##))][space(add(5,sub(14,strlen(v(P##)))))][ansi(r,|)]})]%r[repeat([ansi(r,=)][ansi(b,-)],39)]
+&CLIST PARENT: Ship Cargo Console Parent=Dilithium Ore Food
+&VHOLD PARENT: Ship Cargo Console Parent=$view hold:@pem %#=[repeat([ansi(r,=)][ansi(b,-)],4)][ansi(r,%[)][ansi(g,Cargo Hold)][ansi(r,%])][ansi(r,%])][repeat([ansi(r,=)][ansi(b,-)],29)]%r[ansi(r,|)][space(8)][ansi(r,%[)][ansi(b,Cargo Type)][ansi(r,%])][space(20)][ansi(r,%[)][ansi(b,Amount of Cargo)][ansi(r,%])][space(19)][ansi(r,|)][iter(v(CLIST),{%r[ansi(r,|)][space(9)][ansi(r,##)][space(add(22,sub(10,strlen(##))))][ansi(r,v(##))][space(add(20,sub(15,strlen(v(##)))))][ansi(r,|)]})]%r[repeat([ansi(r,=)][ansi(b,-)],39)]
+&VRMANIFEST PARENT: Ship Cargo Console Parent=$vm *:@swi[squish(iter(trans(coords),{[switch(strmatch(%0,get(##/NAME)),1,[setq (1,1)][setq(2,##)])]}))][switch(%q1,1,1,0)]=0,{@pem %#=[ansi(r,Invalid Ship Contact.)]},1,{@pem %#=[switch(hasattr(%q2,CARGO),0,{[ansi(r,That ship is not interested in trading.)]},{[repeat([ansi(r,=)][ansi(b,-)],4)][ansi(r,%[)][ansi(g,[get(%q2/NAME)])][ansi(r,%])][repeat([ansi(r,=)][ansi(b,=)],[div([add(29,sub(40,strlen(get(%q2/NAME))))],2)])]%r[ansi(r,|)][space(7)][ansi(r,%[)][ansi(b,Cargo Type)][ansi(r,%])][space(10)][ansi(r,%[)][ansi(b,Amount of Cargo)][ansi(r,%])][space(10)][ansi(r,%[)][ansi(b,Price Per Unit)][ansi(r,%])][space(4)][ansi(r,|)][setq(3,[get(%q2/CARGO)])][iter(get(%q3/MANIFEST),{%r[ansi(r,|)][space(8)][ansi(r,##)][space(add(12,sub(10,strlen(##))))][ansi(r,get(%q3/##))][space(add(12,sub(15,strlen(get(%q3/##)))))][ansi(r,get(%q3/P##))][space(add(5,sub(14,strlen(get(%q3/P##)))))][ansi(r,|)]})]%r[repeat([ansi(r,=)][ansi(b,-)],39)]})]}
+&ALIASV PARENT: Ship Cargo Console Parent=$vm:@force %#=view manifest
+&FOOD PARENT: Ship Cargo Console Parent=10
+&ORE PARENT: Ship Cargo Console Parent=10
+&DILITHIUM PARENT: Ship Cargo Console Parent=5
+&MANIFEST PARENT: Ship Cargo Console Parent=Dilithium Food
+&TEST PARENT: Ship Cargo Console Parent=$test *:@pem %#=[iter(trans(coords),{[switch(strmatch(%0,get(##/NAME)),1,[setq(1,1)][set q(2,##)])]})][switch(%q1,1,[ansi(g,Valid Contact.)],[ansi(r,Invalid Contact.)])]
+&LC PARENT: Ship Cargo Console Parent=$lc:@pem %#=[switch(trans(coords),OK-DOCKED,{[setq(1,get(v(ship_object)/DOCKED_AT))][repeat([ansi(r,=)][ansi(b,-)],4)][ansi(r,%[)][ansi(g,get(v(ship_object)/NAME))][ansi(r,%])][repeat([ansi(r,=)][ansi(b,-)],[div([add(29,sub(40,strlen(get(v(ship_object)/NAME))))],2)])]%r[ansi(r,|)][space(7)][ansi(r,%[)][ansi(b,Docked At)][ansi(r,%])][space(58)][ansi(r,|)]%r[ansi(r,|)][space(8)][ansi(r,[get(%q1/NAME)])][space([add(28,sub(40,strlen(get(%q1/NAME))))])][ansi(r,|)]},{[repeat([ansi(r,=)][ansi(b,-)],4)][ansi(r,%[)][ansi(g,get(v(ship_object)/NAME))][ansi(r,%])][repeat([ansi(r,=)][ansi(b,-)],[div([add(29,sub(40,strlen(get(v(ship_object)/NAME))))],2)])]%r[ansi(r,|)][space(7)][ansi(r,%[)][ansi(b,Contact List)][ansi(r,%])][space(55)][ansi(r,|)][iter(trans(coords),{%r[ansi(r,|)][space(9)][ansi(r,get(##/NAME))][space([add(27,sub(40,strlen(get(##/NAME))))])][ansi(r,|)]})]%r[repeat([ansi(r,=)][ansi(b,-)],39)])]})]%r[repeat([ansi(r,=)][ansi(b,-)],39)]})]
+&SHIP_OBJECT PARENT: Ship Cargo Console Parent=#265
+&SECLIST PARENT: Ship Cargo Console Parent=#3111
+&WITHDRAW PARENT: Ship Cargo Console Parent=$withdraw * *:@swi[switch(match(v(SECLIST),%#),0,0,1)][isnum(%0)][switch(match(get(#1085/CLIST),%1),0,0,1)][setq(1,div(v(ECO),get(#3614/%1)))][switch(%q1,<%0,0,1)]=0***
+&ECO PARENT: Ship Cargo Console Parent=3000
+&DEPOSIT PARENT: Ship Cargo Console Parent=$deposit * *:@swi[isnum(%0)][switch(match(get(#1085/CLIST),%1),0,0,1)][switch(get(%#/%1),<%0,0,1)]=0**,{@pem %#=[ansi(r,Invalid Amount.)]},10*,{@pem %#=[ansi(r,Invalid Currency.)]},110,{@pem %#=[ansi(r,You do not have that much.)]},111,{@pem %#=[ansi(g,Initiating Transaction.)][set(%#,%1:[sub(get(%#/%1),%0)])][set(me,ECO:[add(v(ECO),mul(get(#3614/%1),%0))])]%r[ansi(g,Transaction Complete.)]}
+&ADDM PARENT: Ship Cargo Console Parent=$am *:@switch [switch(match(v(CLIST),%0),0,0,1)][switch(match(v(MAFEST),%0),0,0,1)][switch(v(%0),0,0,1)]=0**,{@pem %#=[ansi(r,Invalid Cargo.)]},11*,{@pem %#=[ansi(r,Cargo already on sales manifest.)]},100,{@pem %#=[ansi(r,None of[capstr(%0)] to selalready on sales manifest.)]},100,{@pem %#=[ansi(r,None of [capstr(%0)] to sell.)]},101,{@pem %#=[ansi(g,Adding[capstr(%0)] to sales manifest.)][set(me,MANIFEST:[v(MANIFEST)]
+
+@create PARENT: Empire Budge / Pay System
+@link PARENT: Empire Budge / Pay System = #12255
+@set PARENT: Empire Budge / Pay System = OPAQUE
+@set PARENT: Empire Budge / Pay System = WIZARD
+@set PARENT: Empire Budge / Pay System = HALT
+@DESCRIBE PARENT: Empire Budge / Pay System=You see a [name(%!)]%r%rFor help type 'Budget Help'
+&INVALID_NUM PARENT: Empire Budge / Pay System=Invalid Payroll Amount.
+&DO_CHANGE PARENT: Empire Budge / Pay System=[ansi(hy,name(%0))]'s pay changed from [ansi(c,u(pay,%0))] to [ansi(ch,%1)].[set(me,Pay_List:[replace(v(Pay_List),member(v(Budget_List),%0),%1)])]
+&CHANGE_PAY PARENT: Empire Budge / Pay System=$change *'s pay to *:[pemit(%#,[switch([u(Has_Access,%#)][t(member(v(Budget_List),num(*%0)))][isplayer(*%0)][and(isnum(%1),gte(%1,0))],0???,u(Command_0),1?0?,u(Player_0),101?,u(List_0,%0),1110,u(Invalid_Num),1111,u(Do_Change,num(*%0),val(%1)))])]
+&SHOW_BUD PARENT: Empire Budge / Pay System=Currently their are [ansi(c,u(Budget))] [ansi(hc,Econs)].
+&COM_BUDGET PARENT: Empire Budge / Pay System=$budget:[pemit(%#,[switch([u(Has_Access,%#)],0,u(Command_0),1,u(Show_Bud))])]
+&PAY_COLOR PARENT: Empire Budge / Pay System=y
+&NAME_COLOR PARENT: Empire Budge / Pay System=r
+&#8 PARENT: Empire Budge / Pay System=10
+&DO_REM PARENT: Empire Budge / Pay System=You remove [name(%0)] from the Budget.[set(me,Pay_list:[killword(v(Pay_List),member(v(Budget_List),%0))])][set(me,budget_list:[remove(v(Budget_List),%0)])][set(me,%0:-----)]
+&EMPTY_LIST PARENT: Empire Budge / Pay System=No one is listed in the budget.
+&DO_LIST PARENT: Empire Budge / Pay System=[ansi(hc,ljust(Name,20))][ansi(hc,Payment)]%r[ansi(b,repeat(~,32))]%r[iter(v(Budget_List),[ansi(v(Name_Color),ljust(name(##),20))][ansi(v(Pay_Color),[u(pay,##)])], ,%r)]%r[ansi(b,repeat(~,32))]
+&LIST PARENT: Empire Budge / Pay System=$budget list:[pemit(%#,[switch([u(Has_Access,%#)][gte(words(u(Budget_List)),1)],0?,u(Command_0),10,u(Empty_List),11,u(Do_List))])]
+&LIST_0 PARENT: Empire Budge / Pay System=[name(%0)] is not on the Budget.
+&REM_LIST PARENT: Empire Budge / Pay System=$remove * from budget:[pemit(%#,[switch([u(Has_Access,%#)][t(member(v(Budget_List),num(*%0)))],0?,u(Command_0),10,u(List_0,num(*%0)),11,u(Do_Rem,num(*%0)))])]
+&#5541 PARENT: Empire Budge / Pay System=-----
+&COMMAND PARENT: Empire Budge / Pay System=#979 #8
+&DO_ADD PARENT: Empire Budge / Pay System=You add [name(%0)] to the Budget.[set(me,Budget_List:[switch(words(v(Budget_List)),0,%0,[v(Budget_List)] %0)])][set(me,Pay_List:[switch(words(v(Pay_List)),0,10,[v(Pay_List)] 10)])]
+&LIST_1 PARENT: Empire Budge / Pay System=[name(*%0)] is already on the Budget List.
+&PLAYER_0 PARENT: Empire Budge / Pay System=Player does not exist.
+&COMMAND_0 PARENT: Empire Budge / Pay System=You can't access that.
+&ADD_LIST PARENT: Empire Budge / Pay System=$add * to budget:[pemit(%#,[switch([u(Has_Access,%#)][t(member(v(Budget_List),num(*%0)))][isplayer(*%0)],0??,u(Command_0),1?0,u(Player_0),111,u(List_1,%0),101,u(Do_Add,num(*%0)))])]
+&BUDGET PARENT: Empire Budge / Pay System=97703
+&HAS_ACCESS PARENT: Empire Budge / Pay System=[t(member(v(COMMAND),%0))]
+&PAY PARENT: Empire Budge / Pay System=[extract(v(Pay_List),member(v(Budget_List),%0),1)]
+&PAY_TO_LIST PARENT: Empire Budge / Pay System=$paylist:@pemit %#=[switch(u(Has_Access,%#),1,u(Do_Pay_All),u(Command_0))]
+&DO_PAY_ALL PARENT: Empire Budge / Pay System=[switch(gt(u(Total_Cost),v(budget)),1,u(Not_Enough_Money),iter(v(Budget_List),[set(me,BUDGET:[sub(v(BUDGET),u(pay,##))])][set(##,ECONS:[add(get(##/ECONS),u(pay,##))])][pemit(##,You are paid your salary of [u(pay,##)] Econs.)]))]
+&TOTAL_COST PARENT: Empire Budge / Pay System=[setq(0,0)][iter(v(Pay_List),setq(0,add(%q0,##)))]%q0
+&NOT_ENOUGH_MONEY PARENT: Empire Budge / Pay System=There is not enough money in the budget to cover those costs.
+&HELP PARENT: Empire Budge / Pay System=$budget help:@pemit %#=Commands are:%r%t[fitto(BUDGET,35)]-Show Budget Size%r%t[fitto(BUDGET LIST,35)]-List people on budget.%r%t[fitto(ADD/REMOVE <Person> TO/FROM BUDGET,35)]-Guess%r%t[fitto(CHANGE <Player>'s PAY TO <Amt>,35)]-Change Budgetted Pay for <Player>%r%t[fitto(PAYLIST,35)]-Pay Salary for all Players on Budget%r%t[fitto(MANIFEST <AMOUNT>,35)]-Adds <Amount> to budget.%r%t[fitto(REM MANIFEST <AMOUNT>,35)]-Removes <Amount> from budget.%r%t[fitto(ADD <PLAYER> TO COMMAND,35)]-Adds <Player> to Command access.%r%t[fitto(Remove <Player> from Command,35)]-Removes <Player> from command list.
+&DAMAGE_DESC PARENT: Empire Budge / Pay System=You see a [name(%!)]%r%rFor help type 'Budget Help'
+&MANIFEST PARENT: Empire Budge / Pay System=$manifest *:[pemit(%#,[switch([t(member(v(Command),%#))][gte(u(%#/Econs),%0)],0?,u(Command0),10,u(Amt0),11,u(Do_Man,%0))])]
+&AMT0 PARENT: Empire Budge / Pay System=No such amount of econs.
+&DO_MAN PARENT: Empire Budge / Pay System=You add [switch(%0,1,1 econ,%0 econs)] to the budget.[set(me,budget:[add(v(Budget),%0)])]
+&RMAN PARENT: Empire Budge / Pay System=$rem manifest *:[pemit(%#,[switch([t(member(v(Command),%#))][gte(u(Budget),%0)],0?,u(Command0),10,u(Amt0),11,u(Do_Rman,%0))])]
+&DO_RMAN PARENT: Empire Budge / Pay System=You remove [switch(%0,1,1 econ,%0 econs)] from the budget.[set(me,budget:[sub(u(Budget),%0)])][set(%#,econs:[add(u(%#/Econs),%0)])]
+&ADD_COM PARENT: Empire Budge / Pay System=$add * to command:[pemit(%#,[switch([u(Has_Access,%#)][isplayer(*%0)],0?,u(Command_0),10,u(Play0),11,u(Do_Com,num(*%0)))])]
+&PLAY0 PARENT: Empire Budge / Pay System=No such player
+&DO_COM PARENT: Empire Budge / Pay System=You add [name(%0)] to Command of the budget.[set(me,command:[v(command)] %0)]
+&REM_COM PARENT: Empire Budge / Pay System=$remove * from command:[pemit(%#,[switch([u(Has_Access,%#)][t(member(v(Command),num(%0)))],0?,u(Command_0),10,u(List0),11,u(Rem_Bud,num(*%0)))])]
+&LIST0 PARENT: Empire Budge / Pay System=That person is not on the command list.
+&REM_BUD PARENT: Empire Budge / Pay System=You remove [name(%0)] from the command list.[set(me,command:[remove(v(command),%0)])]
+
+@create PARENT: Cargo Translift
+@link PARENT: Cargo Translift = #0
+@set PARENT: Cargo Translift = VISUAL
+@set PARENT: Cargo Translift = WIZARD
+@set PARENT: Cargo Translift = SAFE
+&MOVE_SHIP PARENT: Cargo Translift=$shipmove *:[pemit(%#,[switch([hasattr(num(%0),airlock)],0,No such ship to board.,1,You push the [name(me)] into [name(num(%0))].[tel(me,u(num(%0)/airlock))],#-1,Invalid ship available)])]
+&TRANS PARENT: Cargo Translift=You move %0 tons of %1.[set(me,%1:[sub(v(%1),%0)])][set([num(%2)],%1_var:[add(get(%2/%1),%0)])]
+&NO_SEE PARENT: Cargo Translift=No such object.
+&TYPES PARENT: Cargo Translift=Mine Agri Industrial
+&NO_TYPE PARENT: Cargo Translift=No such type stored
+&NO_AMT PARENT: Cargo Translift=No amount stored.
+&NO_VEH PARENT: Cargo Translift=That's not a registered Cargo Translift.
+&CPUT PARENT: Cargo Translift=$ctput *=* to *:@pemit %#=[switch([gte(v(%1),%0)][t(member(v(TYPES),%1))][switch([get([num(#%2)]/IS_PRIVATE)],1,1,#-1,2,0)],0??,v(NO_AMT),10??,v(NO_TYPE),112,v(NO_SEE),110,v(NO_VEH),111,u(TRANS,%0,%1,%2))]
+&HEAD PARENT: Cargo Translift=$head *:@swi [t(member(lexits(here),num(%0)))]=0,{@pe %#=No such direction.},1,{@pe %#=You move the Cargo Lift into [name([loc(%0)])].;go %0}
+&AGRI PARENT: Cargo Translift=0
+&IND PARENT: Cargo Translift=0
+@DESCRIBE PARENT: Cargo Translift=You see a Cargo Translift.  For help type, '[ansi(y,CTHELP)]'%rCurrent  supplies:%r[ljust(- Mine,16)]: [v(MINE)]%r[ljust(- Agri,16)]: [v(AGRI)]%r[ljust(- Industrial,16)]: [v(INDUSTRIAL)]
+&MINE PARENT: Cargo Translift=1
+&IS_VEH PARENT: Cargo Translift=1
+&HELP PARENT: Cargo Translift=$CTHELP:@pe %#=[u(show_help)]
+&SHOW_HELP PARENT: Cargo Translift=[ansi(y,Command)]%r[ansi(b,repeat(~,32))]%rHead <Exit>%rCtput <amount>=<Type> to <CON>%r%rType '[ansi(yh,CTHELP <Command>)]' for further information
+&HELP_HEAD PARENT: Cargo Translift=$cthelp head:@pe %#=Head <Exit>%r%rMoves the Cargo Translift into or out of a new exit.
+&HELP_CTPUT PARENT: Cargo Translift=$cthelp ctput:@pe %#=Ctput <Amount>=<Type> to <CON>%r%rRemoves  <Amount> of <Type> and places it back on the Company Econ Console.
+
+@create PARENT: Market Buyer Parent
+@link PARENT: Market Buyer Parent = #0
+@set PARENT: Market Buyer Parent = MONITOR
+&NOT_ENOUGH PARENT: Market Buyer Parent=Not enough in the Cargo Translift
+&SELL PARENT: Market Buyer Parent=Good doing business with ya.
+&CHEAT PARENT: Market Buyer Parent=Think I'm stupid?
+&NOT_REG PARENT: Market Buyer Parent=That's not a Cargo Translift.
+&NO_VEH PARENT: Market Buyer Parent=No such object visible!
+&NO_NUM PARENT: Market Buyer Parent=Numbers only.
+&NO_TYPE PARENT: Market Buyer Parent=You have no type to sell!
+&OLD PARENT: Market Buyer Parent=$sell * * from *:say [switch([match(v(types),%1)],0,Well %N\, I only would like these types: [u(show_types)].,[switch([isnum(%0)],0,That is not a valid number.,[switch([num(#%2)],#-1,Where is that vehicle your talking about?,[switch([lt(%0,1)],1,Trying to steal from me?,[switch([hasattr(#%2,is_veh)],0,I've never seen a vehicle like that!,[switch([gte([get(#%2/%1)],%0)],0,You don't have the amount you want to be selling.,1,[set(#%2,%1:[sub([get(#%2/%1)],%0)])][set(me,%1:[add([v(%1)],%0)])][set(%#,traded_%1[num(me)]:[secs()])]Okay\, %N we've unloaded %0 [switch(%0,1,ton,tons)] of %1 for [u(price,%0,%#)][set(me,total:[add([v(total)],%0)])])])])])])])]
+&TOTAL PARENT: Market Buyer Parent=3
+&INDUSTRIAL PARENT: Market Buyer Parent=0
+&TYPES PARENT: Market Buyer Parent=Agri Mine Industrial
+@DESCRIBE PARENT: Market Buyer Parent=You see a Commerce buyer.%rFor help and commands type, '[ansi(hb,CMHELP)]'
+&SHOW_TYPES PARENT: Market Buyer Parent=Agri\, Mine\, and Industrial
+&MINE PARENT: Market Buyer Parent=2
+&AGRI PARENT: Market Buyer Parent=1
+&PRICE PARENT: Market Buyer Parent=[mul([add(100,[mul([skill(%1,trading)],3)])],%0)][set(%1,econs:[add(econs(%#),[mul([add(100,[mul([skill(%1,trading)],3)])],%0)])])]
+&HELP PARENT: Market Buyer Parent=$CMHELP:@PE %#=[u(show_help)]
+&SHOW_HELP PARENT: Market Buyer Parent=[ansi(y,Command)]%r[ansi(b,repeat(~,40))]%r[ansi(g,Price <Amount>)]%r[ansi(g,Sell <Amount>%b<Type> from <Translift #>%r%rTo get more info type, CMHELP <First Word>
+&HELP_PRICE PARENT: Market Buyer Parent=$cmhelp price:@pe %#=Price <Amount>%r%rWill give you the amount the buyer will give for the <Amount> of <Type>
+&HELP_SELL PARENT: Market Buyer Parent=$cmhelp sell:@pe %#=Sell <Amount>=<Type> from <Translift #>%r%rRemoves <Amount> of <Type> from <Translift> and give the buyer the goods.  In exchanged he will give you econs back.
+&SHOW_PRICE PARENT: Market Buyer Parent=$price *:[pemit(%#,Price for %0 [switch(%0,1,ton,tons)] = [mul([add(100,[mul([skill(%#,trading)],3)])],%0)])]
+
+@create PARENT: Planetary Economy Console
+@link PARENT: Planetary Economy Console = #12255
+@parent PARENT: Planetary Economy Console=#31
+@lock/Use PARENT: Planetary Economy Console=manlock/1
+@lock/Basic PARENT: Planetary Economy Console=#5656
+@set PARENT: Planetary Economy Console = MONITOR
+@XB PARENT: Planetary Economy Console=
+&CARGO_LEFT PARENT: Planetary Economy Console=[squish([iter(u(%0/Cargo),[setq(0,add(%q0,first(##)))],|)][sub(get(%0/Cargo_Capacity),%q0)])]
+&COMMAND PARENT: Planetary Economy Console=#8
+&DENIED PARENT: Planetary Economy Console=You can't do that!
+&DO_LIST PARENT: Planetary Economy Console=[ansi(hc,ljust(<Number>,13))] [ansi(hc,Name)]%r[ansi(b,repeat(~,38))]%r%b[iter(u(command),[ljust(#@,13)][name(##)], ,%r%b)]%r[ansi(b,repeat(~,38))]
+@VJ PARENT: Planetary Economy Console=$econlist:[pemit(%#,[switch([strmatch(v(XB),%#)],0,Your not manning [name(me)].,1,u(do_list))])]
+&ENOUGH_CARGO PARENT: Planetary Economy Console=[set(me,commodity:[grab(get(%2/cargo),* %1,|)])][gte(first(v(Commodity)),%0)][set(me,OneCargo:[grab(get(v(ship_object)/Commodities),%1 *,|)])]
+&ONEBOUGHT PARENT: Planetary Economy Console=Food 42
+&ENOUGH_MONEY PARENT: Planetary Economy Console=[set(me,cost:[mul([third([u(OneCargo)])],%0)])][lte([u(cost)],[get([v(ship_object)]/econs)])]
+&DO_ECON_BUY PARENT: Planetary Economy Console=[emit(abs(%0) units of %1 purchased from [get(%2/name)] for [abs(v(cost))] Econs.)][set(v(ship_object),econs:[sub(Get(v(ship_object)/econs),v(cost))])][set(v(ship_object),Commodities:[remove(get(v(ship_object)/commodities),v(onecargo),|)]|[first(v(OneCargo))] [add(second(v(OneCargo)),abs(%0))] [third(v(OneCargo))])][set(%2,cargo:[remove(get(%2/cargo),v(Commodity),|)]|[sub(first(v(Commodity)),abs(%0))] [second(v(Commodity))])][set(%2,credits:[add([get(%2/credits)],[v(cost)])]
+&ECON_BUY PARENT: Planetary Economy Console=[switch(u(has_commodity,%0,%1,%2),0,pemit(%#,{[get(%2/name)] does not trade %1.}),switch(u(enough_cargo,%0,%1,%2),0,pemit(%#,{[get(%2/name)] does not have %0 units of %1.}),switch(u(enough_money,%0,%1,%2),0,pemit(%#,{[v(Cost)] Credits are required to purchase %0 units of %1 from [get(%2/name)].}),switch(u(enough_cargo_space,%0,%1,%2),0,pemit(%#,{Insufficient cargo space to store %0 units of cargo.}),switch(trans(permission,%2),NOT FOUND,pemit(%#,{Invalid ship.}),OUT OF RANGE,pemit(%#,{[get(%2/name)] is out of transporter range.}),SOURCE SHIELD,pemit(%#,{The shield facing [get(%2/name)] must be lowered before transport.}),OKAY,u(do_econ_buy,%0,%1,%2),pemit(%#,{Weird transporter error. Report this to Kevin: [trans(permission,%2)] - %0, %1, %2.}))))))]
+@VF PARENT: Planetary Economy Console=$econ buy * of * from *:[pemit(%#,[switch([t(member(v(Command),%#))],0,u(denied),1,[switch([strmatch(v(Xb),%#)][u(find_target,%2)],0*,u(no_man),1#-1,u(invalid),1#-2,u(ambiguous),u(econ_buy,%0,%1,u(find_target,%2)))])])]
+&OWN_PRICE PARENT: Planetary Economy Console=[grab(get(u(ship_object)/commodities),%1 *,|)]
+&ONECARGO PARENT: Planetary Economy Console=Warp_Core 4 1000100
+&COMMODITY PARENT: Planetary Economy Console=0 Warp_Core
+&LIS_DISCONNECT PARENT: Planetary Economy Console=^* has disconnected.:think [switch([num(*%0)],[v(xb)],[u(unman,[num(*%0)])])]
+&LIS_LEAVE PARENT: Planetary Economy Console=^* has left.:think [switch([num(*%0)],[v(xb)],[u(unman,[num(*%0)])])]
+&DO_ECON_SELL PARENT: Planetary Economy Console=[switch([lte(%0,[cargo_left(%2)])],0,[get(%2/name)] doesn't have enough cargo space.,1,[set(me,Cost:[mul(third(u(own_price,%0,%1,%2)),abs(%0))])][emit(abs(%0) units of %1 sold to [get(%2/name)] for [abs(v(cost))] Econs.)][set(v(ship_object),Econs:[add(get(V(ship_object)/econs),v(cost))])][set(u(ship_object),Commodities:[remove(get(v(ship_object)/Commodities),v(oneCargo),|)]|[first(v(OneCargo))] [sub(second(v(OneCargo)),abs(%0))] [third(v(oneCargo))])][set(%2,cargo:[remove(get(%2/cargo),v(Commodity),|)]|[add(first(v(Commodity)),%0)] [second(v(Commodity))])])]
+&ECON_SELL PARENT: Planetary Economy Console=[switch(u(has_commodity,%0,%1,%2),0,pemit(%#,{[get(%2/name)] does not trade %1.}),switch(u(enough_ship_cargo,%0,%1,%2),0,pemit(%#,{Planet does not have %0 units of %1.}),switch(trans(permission,%2),NOT FOUND,pemit(%#,{Invalid ship.}),OUT OF RANGE,pemit(%#,{[get(%2/name)] is out of transporter range.}),SOURCE SHIELD,pemit(%#,{The shield facing [get(%2/name)] must be lowered before transport.}),OKAY,u(do_econ_sell,%0,%1,%2),pemit(%#,{Weird transporter error. Report this to Kevin: [trans(permission,%2)] - %0, %1, %2.}))))]
+@VG PARENT: Planetary Economy Console=$econ sell * of * to *:[pemit(%#,[switch([t(member(v(COMMAND),%#))],0,u(denied),1,[switch([strmatch(v(XB),%#)][u(find_target,%2)],0*,u(no_man),1#-1,u(invalid),1#-2,u(ambiguous),u(econ_sell,%0,%1,u(find_target,%2)))])])]
+&AMBIGUOUS PARENT: Planetary Economy Console=Ambiguous ship\, type 'econ targets' for valid targets.
+@COST PARENT: Planetary Economy Console=2200
+&NO_MAN PARENT: Planetary Economy Console=Your not manning the [name(me)].
+&STATUS PARENT: Planetary Economy Console=[ansi(hr,([get(v(ship_object)/empire)] Planet) [name(v(ship_object))] Information:)]%r[space(5)][ansi(yh,Econs:)] [ansi(hc,[add([get(v(ship_object)/econs)],[gross(v(ship_object))])])]%r[ansi(m,Population:)] [ansi(hb,[population(name(v(Ship_object)))]%r%r[ansi(c,Available Commodities:)]%r%r%b%b%b%b[ansi(hy,ljust(Commodity Name,20))]%b%b%b[ansi(hg,rjust(Amount,10))]%b%b%b[ansi(hr,rjust(Cost per Unit,20))][iter(get(v(ship_object)/commodities),%r%b%b%b%b[ansi(y,ljust(first(##),20))]%b%b%b[ansi(g,rjust(second(##),10))]%b%b%b[ansi(r,rjust(third(##),20))],|)]%r
+@VA PARENT: Planetary Economy Console=$econ status:[pemit(%#,[switch([strmatch(v(xb),%#)],0,u(NO_MAN),1,u(STATUS))])]
+&INVALID PARENT: Planetary Economy Console=Invalid ship\, type 'econ targets' for valid targets.
+&ECON_INFO PARENT: Planetary Economy Console=[u(title1,%0)]%r%r[u(title2)][u(cargo_header)][iter(u(%0/cargo),%r%b%B[ansi(y,ljust(rest(##),20))]%b%B%B[ansi(g,rjust(first(##),10))][setq(0,add(%q0,first(##)))],|)]%r%r[u(cargo_space_display,%q0,%0)]%r%r[u(money_display,%0)]
+&DISP2 PARENT: Planetary Economy Console=[ansi(hm,ljust(%0,22))]
+&FIND_DBREF PARENT: Planetary Economy Console=[iter(trans(coords),[switch([strmatch(name(##),%0*)],1,##)])]
+&INVALID_TARGET PARENT: Planetary Economy Console=Invalid contact, type 'Econ Targets' for valid contacts.
+&FIND_TARGET PARENT: Planetary Economy Console=[squish([setq(0,0)][iter(trans(coords),[switch(name(##),%0*,[setq(0,[add(%q0,1)])][setq(1,##)])])][switch(%q0,1,%q1,0,#-1,#-2)])]
+@VB PARENT: Planetary Economy Console=$econ info *:[pemit(%#,[switch([strmatch(v(XB),%#)][u(find_target,%0)],0*,u(NO_MAN),1#-1,u(invalid),1#-2,u(ambiguous),u(econ_info,u(find_target,%0)))])]
+&DISP1 PARENT: Planetary Economy Console=[ansi(hm,ljust(%0,20))]%b%b%b[ansi(c,rjust(%1,10))]
+&MONEY_DISPLAY PARENT: Planetary Economy Console=[ansi(hg,ljust(Remaining Econs:,20))]%b%b%b[ansi(g,rjust(get(%0/credits),10))]
+&CARGO_CAPACITY PARENT: Planetary Economy Console=[get(%1/cargo_capacity)]
+&CARGO_SPACE_DISPLAY PARENT: Planetary Economy Console=[u(disp1,Total Cargo:,%q0)]%r[u(disp1,Remaining Capacity:,sub(get(%1/cargo_capacity),%q0))]%r[u(disp1,Cargo Capacity:,get(%1/cargo_capacity))]
+&TITLE2 PARENT: Planetary Economy Console=[ansi(hc,Cargo Left:)]
+&TITLE1 PARENT: Planetary Economy Console=[ansi(hr,[get(%0/name)] Econ Status:)]
+&COORDS PARENT: Planetary Economy Console=[squish([switch(trans(coords),OK-DOCKED,[get(v(ship_object)/docked_at)] [iter(remove(lcon(get(get(v(ship_object)/docked_at)/dock)),get(v(ship_object)/marker)),switch(num(get(##/ship_object)),#-1,,##))],#$)])]
+@VC PARENT: Planetary Economy Console=$econ targets:[pemit(%#,[switch([strmatch(v(xb),%#)],0,Your not manning [name(me)],1,[ansi(c,Contacts in transporter range:)][iter(u(coords),%r[switch([t(get(##/econ_planet))][get(##/flags)],1*,,01*,[ansi(hm,[ljust([edit([name(##)],Ship Object,)],20)])],[ansi(hm,[ljust([edit([name(##)],Ship Object,)],20)])])][switch([t(get(##/econ_planet))][get(##/flags)],1*,,01*,ansi(hy,Starbase),ansi(hr,Ship))],,)]%r[ansi(y,--- End of contact list ---)])])]
+@VH PARENT: Planetary Economy Console=$econ dump * to *:[pemit(%#,[switch([t(member(v(Command),%#))],0,u(denied),1,[switch([strmatch(v(XB),%#)][u(find_target,%1)],0*,u(no_man),1#-1,u(invalid),1#-2,u(ambiguous),u(econ_dump,%0,u(find_target,%1)))])])]
+&ECON_DUMP PARENT: Planetary Economy Console=[switch(u(dump_money,%0),0,pemit(%#,{You do not have enough credits in order to dump %0 econs.}),switch(trans(permission,%1),NOT FOUND,pemit(%#,{Invalid Ship.}),OUT OF RANGE,pemit(%#,{[name(%1)] is out of range.}),SOURCE SHIELD,pemit(%#,{The shield facing [name(%1)] must be lowered.}),OKAY,u(do_econ_dump,%0,%1),pemit(%#,Weird Error.  Report this to Kevin: [trans(permission,%1)] - %0, %1})))]
+&DO_ECON_DUMP PARENT: Planetary Economy Console=[emit(abs(%0) credits dumped to [get(%1/name)].)][set(me,cost:[abs(%0)])][set(v(ship_object),econs:[sub(get(v(ship_object)/Econs),v(cost))])][set(%1,credits:[add(get(%1/credits),v(cost))])]
+&DUMP_MONEY PARENT: Planetary Economy Console=[set(me,Cost:%0)][lte(v(cost),get(v(ship_object)/econs))]
+&SHIP_OBJECT PARENT: Planetary Economy Console=#2218
+&TP PARENT: Planetary Economy Console=$tp:[pemit(%#,[trans(permission,#1520)])]
+&ENOUGH_SHIP_CARGO PARENT: Planetary Economy Console=[set(me,OneCargo:[grab(get(v(Ship_Object)/Commodities),%1 *,|)])][gte(second(v(OneCargo)),%0)]
+&HAS_COMMODITY PARENT: Planetary Economy Console=[set(me,Commodity:{[grab(get(%2/cargo),* %1,|)]})][switch(v(Commodity),,0,1)]
+&FIRST_REM PARENT: Planetary Economy Console=$econ remove *:[pemit(%#,[switch([t(member(v(COMMAND),%#))],0,u(denied),1,[switch([strmatch(v(xb),%#)][gte([add([get(v(Ship_Object)/Econs)],[gross(v(Ship_Object))])],%0)],0*,Your not manning the [name(me)].,10,[name(v(ship_object))] does not have [switch(%0,1,1 econ,%0 econs)].,11,You remove [switch(%0,1,1 econ,%0 econs)] from [name(v(ship_object))][set(v(Ship_object),econs:[sub([get(v(ship_object)/econs)],%0)])][set(%#,econs:[add([econs(%#)],%0)])])])])]
+&FIRST_ADD PARENT: Planetary Economy Console=$econ add *:[pemit(%#,[switch([t(member(v(COMMAND),%#))],0,u(denied),1,[switch([strmatch(v(XB),%#)][gte(econs(%#),%0)],0*,Your not manning the [name(me)],10,You don't have [switch(%0,1,1 econ,%0 econs)]!,11,You add [switch(%0,1,1 econ,%0 econs)] to the planet's database.[set(v(ship_object),econs:[add([get(v(ship_object)/econs)],%0)])][set(%#,econs:[sub([econs(%#)],%0)])])])])]
+@VI PARENT: Planetary Economy Console=$econ transfer * of * to *:[pemit(%#,[switch([t(member(v(Command),%#))],0,u(denied),1,[switch([strmatch(v(XB),%#)][u(find_target,%2)],0*,u(No_Man),1#-1,u(invalid),1#-2,u(ambiguous),u(econ_transfer,%0,%1,u(find_target,%2)))])])]
+&ECON_TRANSFER PARENT: Planetary Economy Console=[switch(u(enough_ship_cargo,%0,%1,%2),0,pemit(%#,{Planet does not have %0 units of %1}),switch(trans(permission,%2),NOT FOUND,pemit(%#,{Invalid Ship.}),OUT OF RANGE,pemit(%#,{[name(%2)] is out of range.}),SOURCE SHIELD,pemit(%#,{The shield facing [name(%2)] must be lowered.}),OKAY,u(do_econ_transfer,%0,%1,%2),pemit(%#,Weird Error.  Report this to Kevin: [trans(permission,%2)] -- %0, %1, %2})))]
+&DO_ECON_TRANSFER PARENT: Planetary Economy Console=[switch([lte(%0,[u(Cargo_Left,%2)])],0,[get(%2/name)] doesn't have enough cargo space.,1,[emit([abs(%0)] units of %1 transferred to [get(%2/name)])][set(me,commodity:[grab(get(%2/cargo),* %1,|)])][set(v(ship_object),Commodities:[remove(get(v(ship_object)/commodities),v(OneCargo),|)]|[first(v(OneCargo))] [sub(second(v(onecargo)),[abs(%0)])] [third(v(OneCargo))])][set(%2,cargo:[remove(get(%2/cargo),v(commodity),|)]|[add(first(v(Commodity)),[abs(%0)])] [first(v(OneCargo))])])]
+&COMMANDS PARENT: Planetary Economy Console=[ljust(Econ Targets,30)]Contacts in transporter range.%r[ljust(Econ Status,30)]Econs, Population and commodities list.%r[ljust(Econ Info <Ship>,30)]Cargo, econscity of <Ship>%r[ljust(Econ Dump <Amt> to <ship>,30)]Dumps <Amount> to <Ship>%r[ljust(Econ Sell <AMT> of <Commodity> to <ship>,30)]--%rSell <Commodity> to <Ship>%r[ljust(Econ buy <Amt> of <commodity> from <Ship>,30)]%rBuys <Commodity> from <Ship>%r[ljust(Econ Transfer <Amt> of <Commodity> to <ship>,30)]--%rTransfers <Commodity> <amount> to <Ship>%r[ljust(Econ Add <Amount>,30)]Adds <Amount> from pocket to planet.%r[ljust(Econ remove <Amount>,30)]Removes <Amount> from planet and adds to pocket.%r[ljust(Add Econlist <Player>,30)]Adds <Player> to Access List.%r[ljust(Remove Econlist <Player>,30)]Removes <Player> from Access List.%r[ljust(Econlist,30)]People on the access list
+@VE PARENT: Planetary Economy Console=$add econlist *:[pemit(%#,[switch([strmatch(v(XB),%#)][t(member(v(COMMAND),%#))][t(member(v(COMMAND),num(*%0)))][isplayer(*%0)],0???,Your not manning [name(me)].,10??,You can't do that!,1100,Invalid player!,1110,Report this to Kyle,1111,[name(*%0)] is already on the access list.,1101,u(add_list,%0))])]
+&ADD_LIST PARENT: Planetary Economy Console=[name(*%0)] added to access list.[set(me,command:[v(command)] [num(*%0)])]
+@VD PARENT: Planetary Economy Console=$remove econlist *:[pemit(%#,[switch([strmatch(v(XB),%#)][t(member(v(COMMAND),%#))][t(member(v(COMMAND),num(*%0)))],0??,Your not manning [name(me)].,10?,You can't do that!,110,[capstr(%0)] is not on the command list.,111,u(rem_list,%0))])]
+
+@create PARENT: Private Company Console
+@link PARENT: Private Company Console = #12255
+@lock/Basic PARENT: Private Company Console=#5279
+@set PARENT: Private Company Console = VISUAL
+@set PARENT: Private Company Console = WIZARD
+&AYD_COST PARENT: Private Company Console=1150
+&DO_NUM PARENT: Private Company Console=[edit(num(me),#,)]
+&AGRI_VAR PARENT: Private Company Console=-47
+&INDUSTRIAL_VAR PARENT: Private Company Console=-47
+&MINE_VAR PARENT: Private Company Console=-47
+&DAILY_NUM PARENT: Private Company Console=[div(sub(secs(),860130000),86400)]
+&LIST_TYPES PARENT: Private Company Console=$types list:@pe %#=[ljust(- Mine,12)]%r[ljust(- Agri,12)]%r[ljust(- Industrial,12)]
+&SHOW_COST PARENT: Private Company Console=$upgrade cost:@pe %#=Upgrade cost for [v(planet)]%r[ansi(b,repeat(~,29))]%r[ljust(v(planet),11)] [v([left(v(planet),3)]_cost)]
+&HELP_UPGRADE PARENT: Private Company Console=Upgrade <Type>=<Code>%r%rUpgrades <Type>, from Types list.  The price of upgrading a Type by one varies.  For the Upgrade cost for your planet type, 'Upgrade Cost.' If you have the amount of the upgrade cost you can then upgrade the <Type> by one.
+&HELP_REMOVE PARENT: Private Company Console=Remove <Person> from Command%r%rWhen a person is removed they cannot do any commands the console functions on.  Only the person who bought the company console can remove people.
+&HELP_ADD PARENT: Private Company Console=Adds <Person> to Command List%r%r  When a person is added they can do all of the commands list in ecohelp.  Only the person who bought the Company Console can add people.
+&TOPICS PARENT: Private Company Console=Command Upgrade Cput Add Remove Types Cost
+&HELP_COMMAND PARENT: Private Company Console=List Command:%r%rSimply gives a list of people who have access to the Econ Console.
+&NO_TOP PARENT: Private Company Console=No such topic. Or may have mispelled or not typed it exactly
+&HELP2 PARENT: Private Company Console=$ecohelp *:@pemit %#=[switch([t(member(v(TOPICS),%0))],0,v(NO_TOP),1,u(help_%0))]
+&HELP PARENT: Private Company Console=[ansi(y,Command)]%r[ansi(b,repeat(~,78))]%r[ljust(Add <Person> to Command,20)]%r[ljust(Remove <Person> from Command,20)]%r[ljust(List Command,20)]%r[ljust(Upgrade <Type>=<Code>,20)]%r[ljust(Cput <Amount>=<Type> to <CT>=<Code>,20)]%r[ljust(Upgrade Cost,20)]%r[ljust(Types List,20)]%r[ljust(Change code to <New Code>,20)]%r%rFor help on the topic type '[ansi(g,ECOHELP <Command>)]'%rEx. ecohelp Command, I will get info on command List Command
+&DO_HELP PARENT: Private Company Console=$ecohelp:@pe %#=[u(help)]
+&NO_VEH PARENT: Private Company Console=No such Private Econ Console
+&IS_PRIVATE PARENT: Private Company Console=1
+&TRANS PARENT: Private Company Console=You move %0 tons of %1.[set(me,%1_var:[sub(v(%1_var),%0)])][set([num(%2)],%1:[add(get(%2/%1),%0)])]
+&STORE PARENT: Private Company Console=$cput *=* to *=*:@pemit %#=[switch([gte(u(%1),%0)][t(member(v(TYPES),%1))][switch([get([num(%2)]/IS_VEH)],1,1,#-1,2,0)][t(member(v(CODE),%3))],0???,v(NO_AMT),10??,v(NO_TYPE),112?,v(WEIRD),110?,v(NOT_HERE),1110,v(WC),1111,u(TRANS,%0,%1,%2))]
+&NOT_HERE PARENT: Private Company Console=That is not a registered Cargo Translift
+&WEIRD PARENT: Private Company Console=No such object visible
+&NO_AMT PARENT: Private Company Console=No such amount produced
+&KRE_COST PARENT: Private Company Console=905
+&DOM_COST PARENT: Private Company Console=912
+&RIG_COST PARENT: Private Company Console=1050
+&GHD_COST PARENT: Private Company Console=866
+&MOL_COST PARENT: Private Company Console=622
+&BAJ_COST PARENT: Private Company Console=690
+&CAR_COST PARENT: Private Company Console=1200
+&EIS_COST PARENT: Private Company Console=745
+&REM_COST PARENT: Private Company Console=1011
+&ROM_COST PARENT: Private Company Console=799
+&QI'_COST PARENT: Private Company Console=881
+&RUR_COST PARENT: Private Company Console=630
+&ALP_COST PARENT: Private Company Console=620
+&EAR_COST PARENT: Private Company Console=1090
+&MAR_COST PARENT: Private Company Console=833
+&QO'_COST PARENT: Private Company Console=940
+&HAS_PRICE PARENT: Private Company Console=[switch([gte([econs(%#)],[v([left(v(planet),3)]_cost)])],0,0,1,1)]
+&TYPES PARENT: Private Company Console=Mine Agri Industrial
+&PRICE PARENT: Private Company Console=[v(area_pop,[v(planet)])]
+&DO_UPGRADE PARENT: Private Company Console=You upgrade %0 to [set(me,%0_var:[inc(v(%0_var))])][u(%0)][set(%#,econs:[sub(econs(%#),[v([left(v(planet),3)]_cost)])]
+&NO_TYPE PARENT: Private Company Console=No such type.
+&NOT_ENOUGH PARENT: Private Company Console=Not enough econs to upgrade that type.
+@WC PARENT: Private Company Console=Incorrect code.
+&UPGRADE PARENT: Private Company Console=$upgrade *=*:@pemit %#=[switch([t(member(v(CODE),%1))][t(member(v(TYPES),%0))][u(has_price)],0??,v(WC),110,v(NOT_ENOUGH),10?,v(NO_TYPE),111,u(DO_UPGRADE,%0))]
+&CHANGE PARENT: Private Company Console=You change the code on the Console.[set(me,code: %0)]
+&LIST PARENT: Private Company Console=$list command:@pemit %#=[ansi(hc,center(Command List,30))]%r[ansi(b,repeat(~,32))]%r[iter(v(COMMAND),[name(##)], ,%r)]%r[ansi(b,repeat(~,32))]
+&NOT PARENT: Private Company Console=That person is not on the command list.
+&REM PARENT: Private Company Console=$remove * from command:@pemit %#=[switch([t(member(v(UOWNER),%#))][isplayer(*%0)][t(member(v(COMMAND),num(*%0)))],0??,v(DEN),10?,v(NO_SUCH),110,v(NOT),111,u(DO_REM))]
+&DO_ADD PARENT: Private Company Console=You add [name(*%0)] to the Command/Trusted List.[pemit(*%0,You've been added to the Trusted list, of [v(FNAME)])][set(me,COMMAND:[v(command)] [num(*%0)])]
+&READY PARENT: Private Company Console=That person seems to be on the list already.
+&NO_SUCH PARENT: Private Company Console=No such player
+&DEN PARENT: Private Company Console=Only the owner who purchase me can do that!
+&ADD PARENT: Private Company Console=$add * to command:@pemit %#=[switch([t(member(v(UOWNER),%#))][isplayer(*%0)][t(member(v(COMMAND),num(*%0)))],0??,v(DEN),10?,v(NO_SUCH),111,v(READY),110,u(DO_ADD,%0))]
+&STATUS PARENT: Private Company Console=[switch([lt([u(agri)],2)],1,Agri products are at of deficit of [abs(u(agri))],Agri products are at a surplus of [u(AGRI)])]%r[switch([lt([u(mine)],2)],1,Mine products are at a deficit of [abs(u(mine))],Mine products are at a surplus of [u(mine)])]%r[switch([lt([u(industrial)],2)],1,Industrial products are at a deficit of [abs(u(industrial))],Industrial products are at a surplus of [u(industrial)])]
+&MINE PARENT: Private Company Console=[add(v(mine_var),u(daily_num))]
+&POP_MI PARENT: Private Company Console=[mul([ln([pop(v(PLANET))])],16)]
+&AREA_POP PARENT: Private Company Console=[population(u(Planet))]
+&EMPIRE PARENT: Private Company Console=Dominion
+&DEVICE PARENT: Private Company Console=#4520
+&LABEL PARENT: Private Company Console=[rjust(%0,28)]
+&HALF PARENT: Private Company Console=[ansi(b,repeat(~,[sub(41,[strlen(v(PLANET))])]))]
+&PLANET PARENT: Private Company Console=Earth
+@DESCRIBE PARENT: Private Company Console=You see a Facility Console.%r[name(me)] dbref is: [u(DO_NUM)]%r%rArea Population: [u(AREA_POP,u(PLANET))]%rSupplies Information:%r%r[u(status)]%r%rType '[ansi(hc,ECOHELP)]' for commands and information about this console.
+&KEY PARENT: Private Company Console=Agri~Food Supplies|Mine~Minerals|Industrial~Goods
+&HELP_TYPES PARENT: Private Company Console=Types List:%r%rList of things to be sold and upgraded on.
+&HELP_COST PARENT: Private Company Console=Upgrade Cost:%r%RCurrent cost to upgrade a product by 1.
+&HELP_CPUT PARENT: Private Company Console=Cput <Amount>=<Type> <CT>=<Code>%r%rRemoves <Amount> of <Type> and places amount on <Cargo Translift>.
+&AI'_COST PARENT: Private Company Console=875
+&CHGCODE PARENT: Private Company Console=$change code to *:@swi [t(member(v(COMMAND),%#))]=0,{@pe %#=You can't do that!.},1,{@pe %#=Code changed to "[v(0)]";&code me=%0}
+&AGRI PARENT: Private Company Console=[add(v(agri_var),u(daily_num))]
+&INDUSTRIAL PARENT: Private Company Console=[add(v(industrial_var),u(daily_num))]
+&HELP_CHANGE PARENT: Private Company Console=Change code to <New Code>:%r%rChanges the old code to <New Code>.  Only people with command access can change it.
+&GDH_COST PARENT: Private Company Console=720
+&KRI_COST PARENT: Private Company Console=1203

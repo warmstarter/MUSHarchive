@@ -1,0 +1,17 @@
+@create PARENT: Shapeshifter Descer
+@lock PARENT: Shapeshifter Descer=[owner(me)]
+@lock/Use PARENT: Shapeshifter Descer=[owner(me)]
+@lock/Enter PARENT: Shapeshifter Descer=[owner(me)]
+&MULTI_HELP PARENT: Shapeshifter Descer=$desc help:@pemit %n=====Shapeshifter Descer Help====%rWear <desc> - Puts on a saved desc%rClear <desc> - erases a description %rSave <desc> - saves a description%rList descs - lists saved descriptions%rsteal <person>/<saved name> - grabs the <person>'s desc and saves it under the %r%tgiven <saved name>. use only one word for the <saved name>%rmorph <saved name>/<sex>/<person's name> - morphs you into a saved stolen desc, %r%tchanges your sex, and re-names you under the given name.%r
+&MULTI_CLEAR PARENT: Shapeshifter Descer=$clear *:&[v(0)]_DESC me=;@pemit %#=Desc cleared.
+&MULTI_LIST PARENT: Shapeshifter Descer=$list descs:@pemit %#=Descs available: [edit(lattr(me/*_DESC),_DESC,)]
+&MULTI_SAVE PARENT: Shapeshifter Descer=$save *:&[v(0)]_DESC me=[get([owner(me)]/desc)]; @pemit *%n=Saving!
+&MULTI_WEAR PARENT: Shapeshifter Descer=$wear *:@desc [owner(me)]=[get(me/[v(0)]_DESC)];@pemit *%n=Worn!
+&MULTI_CHANGE PARENT: Shapeshifter Descer=$morph */*/*:@fo [owner(me)]=:starts to change shape and takes the form of %2.;@desc [owner(me)] = [get(me/[v(0)]_DESC)];@wait 1=@name [owner(me)]=%2.;@sex [owner(me)]=%1;@pemit *%n=Morphed!;&name1 [owner(me)]=%2
+&MULTI_SETUP PARENT: Shapeshifter Descer=$setup:&steal [owner(me)]=$taker *:&take me=%[get(%[num(%%0)]/desc)];@pemit %n=Done.
+&MULTI_MORPH PARENT: Shapeshifter Descer=$steal */*:@fo [owner(me)]=taker %0;@wait 1=&%1_desc me=[get([owner(me)]/take)];@pemit *%n=Stealing!
+@Desc PARENT: Shapeshifter Descer=%crIMPORTANT:%cn This is %cr/not/%cn a toy. Only use this object if you are a shapeshifter ICly. To get your own, do the following:%r1) @set me=inherit%r2) @create descer%r3) @set descer=inherit%r4) @parent descer=#6233%r5) type: setup (This is an extremely important step)%r6) type: desc help (to get a list of commands)%r
+@set PARENT: Shapeshifter Descer=INHERIT
+@set PARENT: Shapeshifter Descer=VISUAL
+@set PARENT: Shapeshifter Descer=PARENT_OK
+@set PARENT: Shapeshifter Descer=HALTED

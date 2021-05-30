@@ -1,0 +1,1145 @@
+& help
+------------------------------------------------------------------------------
+Index
+
+  Index of helpfiles, V1.0 (1 AUG 00)
+
+  +beginner      +cnotes        +finger        +finger-setup  +glance  
+  +ic            +info          +info-setup    +knock         +3who*
+  +lwho          +shout         +staff         +staff/all     +timestamp
+  +timestop      +uptime        +view          +view-setup    +warn
+  +where         +who           @register      BACKGROUNDS    CREDITS        
+  mutter         OOC            PLACES         places-config  places-options 
+  plook          CGEN
+  
+  To get help on any of the listed topics, type '+help <topic>'
+-----------------------------------------------------------------------------
+
+& backgrounds
+------------------------------------------------------------------------------
+Commands for Setting your Background:                     
+
+  SYNTAX:  +bg <#>                 - Read a background section.
+           +bglist                 - List out sections that have been created
+           +bgadd <#>=<text>       - Add to a background section.
+           +bgrem <#>=<text>       - Removes text from a background section.
+           +bgrep <#>=<old>/<new>  - Replaces text in a background section.
+           +bgclear <#>            - Clears a background section.
+           +bglock <#>             - Locks a background section when finished.
+
+  The '<#>' sign in the BG help stands for the number of the section you are
+  working on. The BG commands allows for multiple sections so that your 
+  background can be broken up into reasonably sized pieces of text.
+-----------------------------------------------------------------------------
+
+& +beginner
+------------------------------------------------------------------------------
++beginner
+
+  MUSH is new to some of you and probably a little daunting. To ease your 
+  feelings of panic, we offer a very basic list of commands that will get you 
+  looking around and using the various features of the game.
+
+    "<message>                You say <message>.
+    Say <message>             See above.
+    ooc <message>             Makes an OOC statement or pose.
+    page <person>=<message>   Pages <person> with <message>.
+    look                      Shows you the room you are standing in.
+    look <object or person>   Shows the desc for that object or person.
+    pose <message>            You pose <message> EX: pose grins.->John Doe 
+                              grins.
+    :<message>                See 'pose" above
+    WHO                       Shows a list of who is connected to the MUSH.
+    +staff                    Shows connected Staff.
+    +staff/all                Shows the staff roster.
+
+  NOTE: MUSH commands may be case sensitive. You can always page a staffer 
+  for help.
+
+  '+beginner' also recalls this file
+-----------------------------------------------------------------------------
+
+& +cnotes
+------------------------------------------------------------------------------
++cnotes
+
+  SYNTAX: +cnotelist             - Gives you a list of all cnotes on your 
+                                   character object.
+          +cnoteview <notename>  - Shows you the contents of the named cnote.
+          +cnote <notename>=text - Sets &cnote<notename> on the player to the 
+                                   value of the text with person and time 
+                                   added.
+                        
+  To set notes on rooms, exits, and other objects that you own, set an 
+  attribute: &CNOTE_<notename> <object>=<text>
+
+  Please note that some cnotes require staff approval before they can go into 
+  effect ICly.  Consult a member of staff for assistance.  
+-----------------------------------------------------------------------------
+
+& CREDITS
+------------------------------------------------------------------------------
+Credits
+
+  SGP is a broad, cross platform coding effort with numerous contributors.  
+  Current contributors of code and assistance in testing, writing helpfiles, 
+  and pithy comments are as follows:
+
+    Audumla@Everywhere   --A little bit of everything, +staff and +staff/all, 
+                           +beginner, +version, and installer files.
+    BEM@Granite          --Much of the base code including +who, joining 
+                           and summon commands, debugging. 
+    Miateila@Granite     --+finger and LOTS of pithy commentary
+    Hilikiradi@Sandbox   --Debugging, Penn platform tests, +cnotes, 
+                           +lwho, PLACES upgrades, and installer files. 
+    Brazil@Everywhere    --MUX 2.0 issues
+    Talek, Javelin, Raevnos, David,
+    Vexon@M*U*S*H        --Penn Issues
+    Ashen-Shugar         --RhostMUSH Issues, +motd
+    Lilith@Sandbox       --Debugging, @register 
+    Hunger@Pacifica      --Debugging, Aesthetics
+    Jeff@TSC             --+version, @crontab 
+------------------------------------------------------------------------------
+
+& +finger 
+------------------------------------------------------------------------------
++finger 
+
+  SYNTAX: +finger <name>
+           
+
+  This command shows you various bits of information about and will also 
+  accept "me" as an argument.  +finger is generally a command that notes OOC 
+  information and should not be considered IC unless game policy 
+  specifically says otherwise.
+
+  See Also '+finger-setup' for configuration options.  
+-----------------------------------------------------------------------------
+
+& +finger-setup
+------------------------------------------------------------------------------
+Finger Setup
+  
+  Attributes read by this command:
+        
+  E-MAIL:              Your email address (optional)   
+  POSITION:            Your Position
+  SHORT-DESC:          A short description of yourself  
+  FULLNAME:            Your character's full name.
+  AGE:                 Your real age
+  FAME:                What you are known for.
+  APP_AGE:             Your apparent age
+  PLAN:                Any plans your character may have
+  RP-PREFS:            Any RP Prefs that you may have as a person
+  ALTS:                Alternate characters you may be known as
+  THEMESONG:           Your Theme Song
+  QUOTE:               A typical quote from your character
+  OFF-HOURS:           When you are usually online.
+  TEMPERMENT:          Should explain itself, really.
+  VACATION:            The dates you expect to be gone.
+  URL:                 Your homepage, if any.
+  &FINGER-<whatever>:  Let's you add other fields.
+
+  AFINGER:     Similar to @adesc, gets triggered when someone +fingers 
+               you.%%0 is the name of the person who +fingered you, 
+               %%1 is their dbref.
+-----------------------------------------------------------------------------
+
+& +glance 
+------------------------------------------------------------------------------
++glance
+
+  SYNTAX: +glance 
+
+  Displays displays the &SHORT-DESC attributes of objects and connected 
+  players in your present location.  Idle times of players are shown.  
+  &SHORT-DESC information is truncated to 50 characters. 
+-----------------------------------------------------------------------------
+
+& +ic
+------------------------------------------------------------------------------
++ic 
+
+  SYNTAX: +ic
+
+  Lets a player go to a set beginning IC location.
+-----------------------------------------------------------------------------
+
+& +info
+------------------------------------------------------------------------------
++info
+
+  SYNTAX: +info           Show you the info that you have set on yourself.
+          +info <player>  Shows you info set on other characters.
+
+  +info allows you to set information on yourself that would be useful to 
+  other players without them having them page you for it. This is an 
+  /excellent/ way to tell other players about pertinent merits, flaws, or 
+  other things that /would/ affect the way that they might interact with you, 
+  yet would not be appropriate to place in your @desc.
+
+  Players should make a brief mention like "+info set" at the end of their 
+  @desc, so that others may know to look.
+
+  See Also: +info-setup
+-----------------------------------------------------------------------------  
+
+& +info-setup
+------------------------------------------------------------------------------
++info setup
+
+  To set info on yourself, set it as an attribute &INFO-<category>.  General 
+  info can be seen by anyone. More specific info is set in the same way, 
+  except you use who should be able to see it instead of 'general'. Possible 
+  things to use are: race, factions, clans, tribes, and traditions.:
+
+  &info-general me=A wandering bum, usually seen in the dirtier parts of 
+the streets.
+  &info-camarilla me=This is the Gangrel Primogen, and as such, is a very 
+noted member of the Camarilla...
+  &info-garou me=This character has a Pure Breed 4.
+-----------------------------------------------------------------------------
+
+& +knock
+------------------------------------------------------------------------------
++knock
+
+  SYNTAX: +knock <exit name or alias>
+
+  This command will allow you to 'knock' on any door in the MUSH. The players 
+  on the other side of the door will get an emit telling them that someone is 
+  knocking on the door. 
+
+  NOTE: Using this command on the street grid on exits like South <S> is very 
+  silly and people will think that you are dumb if you do.
+-----------------------------------------------------------------------------
+
+& mp
+------------------------------------------------------------------------------
+mp - multipaging:
+
+  SYNTAX:  mp <names>=<message> - Allows multipaging to a list of players
+           mp <message>         - Allows multipaging to the last group of 
+                                  players multipaged.
+-----------------------------------------------------------------------------
+
+& mutter
+------------------------------------------------------------------------------
+mutter
+  
+  SYNTAX: mutter <target>=<string>
+          mutter/tt <target>=<string>
+          mutter/place <place number>=<string>
+
+  The first form of this command behaves identically to "whisper", except 
+  that the other players in the room will see that you have said something. 
+  A regular message, or part of a pose enclosed in "quotes", will have some 
+  of its words or groups of words replaced by "..." If you enclose a phrase 
+  with <angle brackets>, it will not be replaced. Poses without "quotes" 
+  will simply show that you have muttered something. <target> can be any 
+  player in the same room as you.
+
+  The second form of this command behaves like the first, except that instead 
+  of the entire room hearing the mutter, only people at a place will do so. 
+  If you are at a place, those at your place will hear the mutter;if you are 
+  not, and the target is, those at that place will hear the mutter. If 
+  neither of you are at a place, an error message will be generated.
+
+  The final version of this command allows everyone at a place to hear the 
+  message in full, while the rest of the room hears the mutter.
+
+  This code was written by Deirdre@AmberMUSH.
+
+  See Also: 'mutter2'
+-----------------------------------------------------------------------------
+
+& mutter2
+------------------------------------------------------------------------------
+mutter examples:
+
+     mutter Finndo=Can you loan me thirty Pence? I'm broke!
+     Meg mutters to Finndo, "Can... loan... thirty... broke!"
+
+     mutter Bleys=:frowns. "What a <cheapskate> he is!" She shrugs.
+     Meg frowns. She mutters to Bleys, "What... cheapskate..." She shrugs.
+
+     mutter/place 1=:chuckles. "Thank you very much."
+     Meg chuckles. She mutters to the long, mahogany bar, "Thank you..."
+
+     mutter/tt Deirdre=Where did you hide those Trumps?
+     At the bar, Meg mutters to Deirdre, "Where... Trumps?"
+-----------------------------------------------------------------------------
+
+& OOC
+------------------------------------------------------------------------------
+Out of Character speech:
+
+  SYNTAX:  ooc <message>
+           ' <message>
+  
+  Allows a player to speak or pose OOCly or out of character.
+         
+-----------------------------------------------------------------------------
+
+& places
+------------------------------------------------------------------------------
+PLACES
+
+  SYNTAX:  Mv from <#> to <#>          Moves a vacancy from one place to another.
+           Join <place name>           Puts you at <place name>
+           Join at #<num>              Puts you at place #<num>.
+           Join with <name>            Puts you at the place with <name>.
+           Depart                      Removes you from your place.
+           sit *                        Alias for Join.
+           Depart                      Removes you from your place.
+           Places                      Lists who's present at all places.
+           Place <num>                 Lists who's present at place <num>.
+           Plook                       Lists in column format everyone around the 
+                              room.
+           Plook <num>                 Lists name of <num> and virtual desc.
+           tt <message>                (Tete a tete) Relays a message to all those at
+                              your place. This command takes the usual 
+                              say/pose tokens, and TT |<message> will emit.
+           ttooc <message>             (Tete a tete) Relays an OOC message
+           Update <#>/<Option>=<text>  See '+help places-options'
+
+  PLACES are virtual places to sit, stand or occupy. You remain in the same
+  room, but join a group of people within that room who may or may not be
+  having a quiet conversation only with others placed with them.
+
+  For installation help, type '+help places-config'.
+
+  This code originally provided courtesy of Deirdre, Meg, and Osric of 
+  AmberMUSH. It has since been editted by Angel@Heaven
+-----------------------------------------------------------------------------
+
+& places-config
+------------------------------------------------------------------------------
+PLACES configuration:
+  
+  SYNTAX: Configure <num> places
+          Unconfigure places
+
+  Notes: A null fixed message means vacancies can be moved freely to and from 
+  the place.  This does not make sense for things like couches and rugs.  Set 
+  it to something like "That makes no sense." if you are using such a place.
+
+  (O)Join and (O)depart messages take like this: %%N. All Join and Depart 
+  messages are appended with the place name.
+
+  Functions:  WHICHPLACE(<loc num>,<dbnum>) gives the number of a place where 
+              <dbnum> is.
+              ATPLACE(<loc num>,<place num>) gives you a list of things at a 
+              place.
+              PLACEINFO(<loc num>,<place num>,<option>) gives the value of 
+              <option> at place.
+-----------------------------------------------------------------------------
+
+& places-options
+------------------------------------------------------------------------------
+PLACES configuration:
+
+  SYNTAX: Update <Place #>/<Option>=<Configuration Text>
+
+  Option Description    <Option>        Default Configuration Text
+  ------------------    --------        --------------------------
+  Place Name            NAME            Table x
+  Maximum # of places   MAXPLACES       Random
+  Current # of places   CURPLACES       Random (1 >= # >= MAXPLACES)
+  Fixed fail message    FIXED           <NULL>
+  Full fail message     FULL            That table has no more room.
+  Join message          JOIN            You sit down at <place>.
+  Ojoin message         OJOIN           sits down at <place>.
+  Depart message        DEPART          You stand and leave <place>.
+  Odepart message       ODEPART         stands and leaves <place>.
+  Say prefix            PREFIX          At your table
+  Description           DESCRIBE        A table with 4 legs and some chairs 
+-----------------------------------------------------------------------------
+
+& plook
+------------------------------------------------------------------------------
+plook
+
+  SYNTAX: plook
+          plook <target>
+
+  The first form gives you a list of places, in a three column format.
+
+  The second form takes the number of the place as an argument, and gives the 
+  name and description of the virtual place. Descriptions are in the final 
+  field of the PLACE# attribute on the room, after the | in the list of 
+  information.
+-----------------------------------------------------------------------------
+
+& @register
+------------------------------------------------------------------------------
+
+  SYNTAX: @register <RL Name>=<email>=<alts>
+
+  All players must be registered and read and accept the conditions found in 
+  'news AUP' before they are allowed out of the Registration room. 
+  Unregistered character objects become subject to nuking at any time.
+-----------------------------------------------------------------------------
+
+& +selfboot
+------------------------------------------------------------------------------
++selfboot
+
+  SYNTAX: +selfboot
+
+  This command allows you to boot 'ghost' connections that are usually caused 
+  by dropped connections to your ISP.  
+-----------------------------------------------------------------------------
+
+& +shout
+------------------------------------------------------------------------------
++shout
+  
+  SYNTAX: +shout <message>
+
+  This command will allow you to shout a message so that is is heard in 
+  adjacent rooms. Codewise, it propogates a given message through all non-
+  audible exits leading from the room of the enactor.
+
+  NOTE: People in adjacent rooms will not know who is shouting, but will be 
+  told that 'A man', 'A woman', or 'Someone" is shouting.
+
+  Overuse of this command can be very annoying to others.
+
+  If you want to 'sound proof' an exit, to prevent a shout from being heard 
+  through a particular exit, add &NO_SHOUT <exit name>=1.
+-----------------------------------------------------------------------------
+
+& +staff
+------------------------------------------------------------------------------
++staff
+
+  SYNTAX: +staff
+
+  This command shows all connected staff who are not set DARK, along with 
+  their alias, staff position, duty status, and how long they have been idle.
+-----------------------------------------------------------------------------
+
+& +staff/all
+------------------------------------------------------------------------------
++staff/all
+
+  SYNTAX: +staff/all
+
+  This command shows all staff along with their alias, staff position, and if 
+  they are connected or not.  For offline or DARK staff, it displays when they 
+  were last connected.
+-----------------------------------------------------------------------------
+
+& +timestamp
+------------------------------------------------------------------------------
++timestamp
+
+  SYNTAX: +timestamp      
+  
+  Allows a player to read their current timestamps.
+-----------------------------------------------------------------------------
+
+& +timestop
+------------------------------------------------------------------------------
++timestop
+
+  SYNTAX:  +timestop     
+           +resume
+           
+           
+  +timestop create a timestop object and drops it in the room where the 
+  timestop was requested.  Staff is notified.  The object itself will appear 
+  in the location as:  TIMESTOP: <player> <timestamp> <location>
+
+  +resume removes _all_ timestops from the room in which it is used.
+-----------------------------------------------------------------------------
+
+& +uptime 
+------------------------------------------------------------------------------
++uptime
+
+  SYNTAX: +uptime
+
+  This command displays basic runtime statistics for the game.
+-----------------------------------------------------------------------------
+
+& +view
+------------------------------------------------------------------------------
+  SYNTAX:  +view                  List all objects in the room with views set.
+           +view here             Lists all viewable items in the room.
+           +view <object>         Lists all views on a particular object.
+           +view <object>/<view>  Reads a view.
+
+  Setting viewable objects using this code allows for greater detail to be 
+  coded into a room without requiring huge, spammy descriptions. +view may 
+  also be set on characters.
+
+  Be sure to add "+view items" to your @descs so people know to look at them.
+
+  See Also: '+help +view-setup'
+----------------------------------------------------------------------------- 
+
+& +view-setup
+------------------------------------------------------------------------------
+Setting views:
+
+  Set an attribute on the object thus:
+
+               &view-<name of view> <object>=<text>
+
+  An example:  &view-painting here=You see a painting hanging on the walls, 
+  that seems to be done in an Impressionist tone...
+
+        To erase a view, simply leave the <text> area blank.
+
+  You may also set messages to be displayed to other players when a view is 
+  looked at. This is just like setting a view, but the attribute is called 
+  &oview.
+
+  An example.  &oview-painting here=takes a look at the painting hanging on 
+  the wall.
+
+  Mary and Fred are in a room and Mary does a "+view here/painting" 
+  Fred would see 'Mary takes a look at the painting hanging on the wall.'
+-----------------------------------------------------------------------------
+
+& +warn
+------------------------------------------------------------------------------
++warn
+
+  SYNTAX:   +warn <player>         
+  
+  Issues an anonymous OOC warning of impending danger to the named player.
+
+  This is only a generic warning -- players are encouraged to page or @pemit 
+  more specific messages, but this will suffice in a pinch. Do not use this 
+  command flippantly. Give players ample time to make up their minds. This is 
+  to be used BEFORE a timestop occurs. The command DOES display a message to 
+  staff when used.
+-----------------------------------------------------------------------------
+
+& +3who
+------------------------------------------------------------------------------
++3who
+
+  SYNTAX: +3who
+
+  Displays +who in a 3 column format.
+-----------------------------------------------------------------------------
+
+& +lwho
+------------------------------------------------------------------------------
++lwho
+
+  SYNTAX: +lwho 
+
+  This commands information as that displayed by +who, but only shows the 
+  players in the same room. 
+-----------------------------------------------------------------------------
+
+& +who
+------------------------------------------------------------------------------
++who
+
+  SYNTAX: +who
+          +who <string>
+
+  This command displays Player, Gender, Alias, Idletime, Location, dbref of 
+  location if findable and set JUMP_OK, and if the player is also staff.
+
+  The second version of this command accepts an argument and allow you to see
+  only connected players who match the argument given, such as looking for all
+  players whose names start with an 'm'.
+
+  The staff version of this code shows DARK staff, location, and dbref of 
+  locations.
+------------------------------------------------------------------------------
+
+& +where
+------------------------------------------------------------------------------
++where
+
+  SYNTAX: +where
+
+  Shows the location of all findable players on the mush.  It sorts the list 
+  by location and does not show DARK, UNFINDABLE, or those in UNFINDABLE 
+  locations.
+-----------------------------------------------------------------------------
+## SGP CGEN V0.? VERY BETA - 24 November 2001
+##
+## ----  SGP - Cgen helpfiles  ----
+##
+## This listing of helpfiles for SGP Cgen is woefully incomplete.  It also 
+## needs to be converted to softcode for non-MUX servers.  All of the current 
+## commands are listed.  These are all staff commands.
+##
+## TO DO:
+## 		- Document +setstring and +setlist.  (done 111001)
+## 		- Document global functions.  (done 111001)
+## 		- Document sheet display functions.  (done 111001)
+## 		- Document genre-specific sheet display functions.
+## 		- Document List Object creation and organization. 
+##        (done 111001 HOWTO-CHAR-SHEETS.txt)
+##      
+
+& CGEN 
+
+------------------------------------------------------------------------------
+  Statting commands:
+  
+  +setstat     +settemp     +removestat  +stattype    +setstring   +setlist 
+                                                                                                                                 
+------------------------------------------------------------------------------
+  DB commands:
+  
+  +create-db   +stathide	+statlist    +match       +matchfirst  +matches
+  
+------------------------------------------------------------------------------
+  Cgen and Database functions:
+
+  STAT()       SGPSQUISH()  SGPTRIM()    TEMPSTAT()   STRING()     STATLIST()   
+  STATTYPE()                             
+  
+------------------------------------------------------------------------------
+  General Sheet Functions:
+  
+  FN-DISPLAY-LIST     FN-DISPLAY-LISTS    FN-DISPLAY-STRINGS  FN_FORMAT
+  FN-HASLIST          FN_3LISTSCOL        FN_3VCOL            
+                                                                                                                          
+  World of Darkness Specific:
+  
+  FN_ABILITIES        FN_ARCANOI          FN_ARTS             FN_ATTRIBUTES 
+  FN_COMMON-LISTS     FN_DISCIPLINES      FN_FORMAT           FN_HEALTH 
+  FN_NUMINA           FN_SPHERES-REALMS
+
+------------------------------------------------------------------------------
+
+
+& +setstat
++setstat
+
+  COMMAND: +setstat <player>/<stat>=<value>
+
+  This command sets or modifies the permanent value of  <stat> on <player>. If 
+  <value> is a simple number, the permanent and temporary value of the stat is 
+  set to that value.  If <value> starts with a '+' or '-' character, the 
+  permanent value is incremented or decremented by <value>.  The temporary 
+  value is set to match the new permanent value.
+  
+  Related Topics: 
+
+& +settemp
++settemp
+
+  COMMAND: +settemp <player>/<stat>=<value>
+
+  This command sets or modifies the temporary value of  <stat> on <player>. If 
+  <value> is a simple number, the temporary value of the stat is set to that 
+  value.  If <value> starts with a '+' or '-' character, the temporary value 
+  is incremented or decremented by <value>.  The permanent value of the stat 
+  remains unchanged.
+  
+  Related Topics: 
+
+& +removestat
++removestat
+
+  COMMAND: +removestat <player>/<stat>
+  
+  This command completely removes the named <stat> from the <player>.
+  
+  Related Topics: 
+
+& +stattype
++stattype
+
+  COMMAND: +stattype <stat>
+
+  This command looks up the named <stat> in the stat database and tells you 
+  which stat list it belongs to.
+  
+  Related Topics: 
+
+& +match
++match
+
+  COMMAND: +match <stat>
+  
+  This command exercises the FN-MATCHSTAT function on the Stat Parent object.  
+  This accepts a partially typed <stat> name and returns the stat that matches.  
+  If no stat matches <stat> the command returns #NO MATCH#.  If there are 
+  multiple stats that match <stat> the command returns #MULTIPLE MATCH#.
+  
+  Related Topics: 
+
+& +matchfirst
++matchfirst
+
+  COMMAND: +matchfirst <stat>
+  
+  This command exercises the FN-MATCH-FIRST function on the Stat Parent 
+  object.  This accepts a partially typed <stat> name and returns the first 
+  stat in the database that matches.  The stats are ordered alphabetically, so 
+  'str' would match 'streetwise' in preference to 'strength'.
+  
+  Related Topics: 
+
+& +matches
++matches
+
+  COMMAND: +matches <stat>
+
+  This command finds all stats in the database that match <stat>.
+  
+  Related Topics: 
+
+& +setstring
++setstring
+
+  COMMAND: +setstring <player>/<string>=<value>
+  
+  Writes <value> to a given &STRING attribute on a character.  Checks 
+  against &LIST-STRINGS for the existence of a given string.
+  
+  Related Topics: 
+
+& +setlist
++setlist
+
+  COMMAND: +setlist <player>/<list>=<value>
+  COMMAND: +setlist <player>/<list>=+<value>
+  COMMAND: +setlist <player>/<list>=-<value>
+  
+  Writes <value> to a given &LIST attribute on a character, adding a '|' 
+  between entries.  Checks against &LIST-LISTS for the existence of a given 
+  list. The first command overwrites the entry for a given &LIST, while adding 
+  a + or - adds and removes items from a list, respectively.
+  
+  Related Topics: 
+
+& DB Commands
+DB Commands
+
+  The DB Commands object contains commands that are used to maintain the stat 
+  data objects. The default lock on this object is set so that only Wizards 
+  can use the commands.  If you want to limit the group of people who can alter 
+  your stats database, then you need to change the &CAN_USE attribute accord
+  -ingly. The lock can be changed by altering the condition in the CAN_USE 
+  attribute to either a space seperated list of authorized users, or by 
+  creating a softcoded function similar to OSTAFF().
+  
+  Related Topics: 
+
+& +create-db
++create-db
+
+COMMAND: +create-db
+  Updates the stat database stored on the Stat DB object using the stat lists 
+  stored on the List Object.  This command needs to be run anytime the stat 
+  lists on the List Object are modified, either manually, or by using one of 
+  the following +statlist commands.
+  
+  Related Topics: 
+
+& +stathide
++stathide
+
+  COMMAND: +stathide
+
+  This is an administrative command that calls @attribute/access to set all 
+  the STATLIST-, STRING-, and LIST- attributes to be wizard hidden, so that 
+  the players cannot directly see or modify their stats.  For this command to 
+  work properly @attribute/access needs to be runnable by a Wizard.  By 
+  default, @attribute/access is usually set so that only God can use it.
+  
+  Related Topics: 
+
+& +statlist
++statlist
+
+  COMMAND: +statlist/<switch> [[<statlist>]/[<stat>]]
+
+    /showlists                   - This command lists out all the stat lists 
+                                  on the List Object. These are the stat lists 
+                                  that will be incorporated into the stat 
+                                  database when +create-db is run.
+    /addlist <statlist>          - This command adds <statlist> to the list 
+                                  of stat lists used by the database.  
+                                  <statlist> should be a single word with no 
+                                  spaces in it.   
+    /showstats <statlist>        - This command lists out the stats 
+                                  belonging to the stat list <statlist>.
+    /addstat <statlist>/<stat>   - This command adds the stat <stat> to the 
+                                  stat list <statlist>.  <stat> may include 
+                                  any characters (including blanks) except 
+                                  for ":" and "|".  
+    /deletestat <statlist>/<stat>- This command deletes the stat <stat> from 
+                                   the stat list <statlist>.  <stat> must, of 
+                                   course, be a stat on the named stat list.  
+
+  IMPORTANT NOTES: 
+    The stat lists can be manually edited by altering the LIST-<statlist> 
+    attribute on the List Object.
+    All alterations to the List Object, whether manually done, or done by 
+    code, MUST be followed by use of the +create-db command for the changes to 
+    take effect.  +stathide has to be used following the use of the /addlist 
+    switch.
+  
+  Related Topics:  +create-db, DB COMMANDS, LIST OBJECT, +stathide 
+  
+  
+& STAT()
+STAT()
+
+  GLOBAL FUNCTION: stat(<player>,<stat>)
+  
+  Returns the numeric value of the stat for a given player.  Returns 0 if the 
+  stat doesn't exist on the character or that stat is set to 0.  
+       
+& SGPSQUISH()
+SGPSQUISH()
+
+  GLOBAL FUNCTION: sgpsquish(<string>[,<character>])
+  
+  This function will trim multiple occurrences of <character> (or a space, if 
+  <character> is not specified) down to a single occurrence of <character>.
+  This is useful for getting rid of big internal spaces, and the like.
+  
+  Using ~ as part of the second argument will cause an error.
+  
+  Provides a second argument for squish on MUX.  This is a compatibility 
+  function that is only installed on MUXen where a 1 argument squish() is 
+  present.  Upgrade your server to the most current version of MUX as soon as 
+  possible. 
+    
+& SGPTRIM()
+SGPTRIM()
+
+  GLOBAL FUNCTION: sgptrim(<string> [,<trim style> [,<trim character>]])
+  
+  Checks for a Penn-style trim() and reverses the last 2 arguments.  This is a
+  compatibility function. 
+    
+& TEMPSTAT()
+TEMPSTAT()
+
+  GLOBAL FUNCTION: tempstat(<player>,<statname>)
+  
+  Returns the numeric value of the stat for a given player.  Returns 0 if the 
+  stat doesn't exist on the character or that stat is set to 0.
+   
+& STRING()
+STRING()
+
+  GLOBAL FUNCTION: string(*<player>,<stringname>)
+  
+  Returns the value of &STRING-<stringname> on a player object.    
+
+& STATLIST()
+STATLIST()
+
+  GLOBAL FUNCTION: statlist(<statlist>) 
+  
+  Returns the contents of a given &LIST and nothing if the LIST does not exist 
+  on the list object.  
+
+& STATTYPE()
+STATTYPE()
+
+  GLOBAL FUNCTION: stattype(<stat>)
+  
+  Returns the type of a given stat.  If the string is not a stat, then it 
+  returns "NOT A STAT".
+
+& FN-DISPLAY-LIST
+FN-DISPLAY-LIST
+
+  SHEET FUNCTION: FN-DISPLAY-LIST
+  
+  Given &LIST-FOO, creates a 78 column wide heading with 'Foo' centered and 
+  displays the appropriate list per FN-DISPLAY-LISTS.      
+
+& FN-DISPLAY-LISTS
+FN-DISPLAY-LISTS
+
+  SHEET FUNCTION: FN-DISPLAY-LISTS
+  
+  Given a '|' seperated &LIST from the character object, displays the 
+  elements of the &LIST in a 2 column format.  To change the number of 
+  columns, vary the 2nd argument of table(). 
+    
+
+& FN-DISPLAY-STRINGS
+FN-DISPLAY-STRINGS
+
+  SHEET FUNCTION: FN-DISPLAY-STRINGS 
+  
+Given [u(fn-display-strings,%0,<name>:STRING-<name>|<name 2>:STRING-<name2>)], 
+  creates a 2 column display of $STRING from the character object.   Vary the 
+  number of columns displayed by changing the value of the second argument in 
+  table().
+
+& FN_FORMAT
+FN_FORMAT
+
+  SHEET FUNCTION: FN_FORMAT
+  
+  This function takes an individual stat:#:# in a &STATLIST and displays it in 
+  a 24 character wide field, stat on the left and the temporary and permanent 
+  values for that stat.  Temporary values for a stat are in ().  This is an 
+  internal function to all numerical stat displays.  To change the width in 
+  order to vary the number of columns, you change the value inside the 
+  strlen().  
+  
+  Example:
+    Willpower          (6) 7
+    
+  
+& FN-HASLIST
+FN-HASLIST
+
+  SHEET FUNCTION: FN-HASLIST
+  
+  This function checks for the presence of a given &LIST on a player and 
+  feeds the result back to FN-DISPLAY-LISTS.          
+
+& FN_3LISTSCOL
+FN_3LISTSCOL
+
+  SHEET FUNCTION: [u(<dbref>/fn_3listscol,get(%0/<statlist>))]
+  
+  <dbref> is the dbref of the object where fn_3vcol is stored.  <statlist> is 
+  the STATLIST-<stattype> to be displayed.  This function displays a '|' 
+  seperated list of stats in 3, roughly equal vertical columns, divided into 
+  a 78 column display.  It displays the stats in the order that the stats 
+  appear in the attribute.
+  
+  Example:
+    >&STATLIST-FOO Bar=apple|orange|mango|pear
+    >&STATLIST-BAR Bar=cat|dog|canary
+    >&STATLIST-FOOBAR Bar=tree|flower|shrub
+    >say [u(<dbref>/FN_3LISTSCOL,get(*%0/STATLIST-FOO), get(*%0/STATLIST-BAR), get(*%0/STATLIST-FOOBAR))]
+    >apple        cat          tree 
+     orange       dog          flower
+     mango        canary       shrub
+     pear             
+        
+
+& FN_3VCOL 
+FN_3VCOL 
+
+  SHEET FUNCTION: [u(<dbref>/fn_3vcol,get(%0/<statlist>))]
+  
+  <dbref> is the dbref of the object where fn_3vcol is stored.  <statlist> is 
+  the STATLIST-<stattype> to be displayed.  This function displays a '|' 
+  seperated list of stats in 3, roughly equal columns, divided into a 78 
+  column display.  It displays the stats in the order that the stats appear in 
+  the attribute.
+  
+  Example:
+    >&STATLIST-FOO Bar=1|2|3|4|5|6|7|8|9
+    >say [u(<dbref>/fn_3vcol,get(%0/STATLIST-FOO))]
+    >1           4            7
+     2           5            8
+     3           6            9           
+------------------------------------------------------------------------------
+
+& bboard
+==============================================================================
+                Commands for Myrddin's Bulletin Board 4.0.6
+------------------------------------------------------------------------------
+     Requiem's BBS is a global, multi-threaded board with a rich set of
+     features. To see help on a particular topic, type '+help <topic>'
+     (Example: +help bbread).
+  
+     TOPIC                 DESCRIPTION
+     ~~~~~                 ~~~~~~~~~~~
+     bbread                Reading bulletin board messages.
+     bbpost                Posting bulletin board messages.
+     bbmisc                Other commands (removing messages, unsubscribing
+                             groups, resubscribing to groups, etc)
+  
+     bbtimeout             Expanded help on the topic of message timeouts.
+==============================================================================
+
+& bbread
+==============================================================================
+                  Commands for Myrddin's Bulletin Board 4.0.6
+------------------------------------------------------------------------------
+     +bbread                         Scans joined bulletin board groups.
+     +bbread <#>                     Scans messages in group <#>.
+     +bbread <#>/<list>              Reads message(s). <list> can be a single
+                                        number, multiple numbers, or a range
+                                        of numbers (ie. 1-6), or any combo.
+     +bbread <#>/u                   Reads all unread messages in group <#>.
+     +bbcatchup <#>                  Marks all messages in group <#> as read.
+                                        You can use multiple group #'s/names
+                                        or may use the word 'all' to catchup
+                                        on all messages on all boards.
+  
+     +bbscan        Totals unread postings (if any) in each joined group. You
+                    can place this command in your @aconnect, and it's
+                    recommended you do so.
+  
+Note: You can use the boards name (or abbreviation) in place of it's number.
+------------------------------------------------------------------------------
+See also: +help bbpost, +help bbmisc
+==============================================================================
+
+& bbpost
+==============================================================================
+                  Commands for Myrddin's Bulletin Board 4.0.6
+------------------------------------------------------------------------------
+     +bbpost <#>/<title>             This starts a post to group <#>.
+     +bbwrite <text>                 This adds text to an already started post.
+     +bb <text>                      Same as +bbwrite.
+     +bbedit <area>=<old>/<new>      Edits your post in progress. Valid areas
+                                       are: text, title
+     +bbproof                        Displays your current post in progress.
+     +bbtoss                         Discards your current post in progress.
+     +bbpost                         This will post your current post in
+                                       progress.
+  
+     +bbpost <#>/<subject>=<body>    Posts a message to group <#>. This is a
+                                       quick way of posting a message with
+                                       one command.
+     +bbedit <#>/<#>=<old>/<new>     Edits one of your posted messages.
+  
+Note: You can use the boards name (or abbreviation) in place of it's number.
+------------------------------------------------------------------------------
+See also: +help bbread, +help bbmisc
+==============================================================================
+
+& bbmisc
+==============================================================================
+                  Commands for Myrddin's Bulletin Board 4.0.6
+------------------------------------------------------------------------------
+     +bbremove <#>/<list>            Removes a message by you. <list> can be a
+                                       single number, a group of numbers, or a
+                                       range (10-14).
+     +bbmove <#>/<#> to <#>          Moves one of your messages to a new group.
+     +bbleave <#>                    Unsubscribe from group <#>.
+     +bbjoin <#>                     Joins a group you've previously 'left'.
+     +bblist                         Listing of all groups available to you
+                                       along with their timeout values.
+     +bbsearch <#>/<name>            Shows you a list of <name>'s postings on
+                                       group <#>.
+     +bbtimeout <#>/<#>=<days>       Changes timeout for a message to <days>.
+     +bbnotify <#>=<on|off>          Turn post notification for group <#> on
+                                       or off.
+  
+  
+For a '.sig', set an attribute on you called BB_SIG, and place your
+signature in that.
+  
+Note: You can use the board's name (or abbreviation) in place of its number.
+------------------------------------------------------------------------------
+See also: +help bbread, +help bbpost, +help bbtimeout, +help bbchanges
+==============================================================================
+
+& bbtimeout
+==============================================================================
+   Expanded Help on Message Timeouts for Myrddin's Bulletin Board (1 of 2)
+------------------------------------------------------------------------------
+There's only a couple of things that need to be understood in order to take
+full advantage of message timeouts.
+  
+1: Once a day, the TR_TIMEOUT attribute on the bbpocket should be triggered.
+   Some games already have a way of accomplishing this. For games that do not,
+   simply have a wizard execute set the 'autotimeout' global parameter:
+      +bbconfig autotimeout=on
+   Turning that parameter on sets up the board to take care of its own daily
+   triggering.  Setting the paramenter to 'off' turns off the BBS's internal
+   triggering.
+  
+------------------------------------------------------------------------------
+Concluded in: +help bbtimeout2
+==============================================================================
+
+& bbtimeout2
+==============================================================================
+   Expanded Help on Message Timeouts for Myrddin's Bulletin Board (2 of 2)
+------------------------------------------------------------------------------
+  
+2: There are 3 different timeout values:
+  
+   The global parameter 'timeout' (set via the '+bbconfig timeout=<days>'
+   command) sets a default timeout that will be set on any new bb groups
+   created after the execution of this command.
+  
+   The group parameter 'timeout' (set via the '+bbconfig <#>/timeout=<days>'
+   command) sets a default timeout for the group <#>. Any new messages
+   posted to this group will inherit that timeout.
+  
+   The user command '+bbtimeout <group>/<message list>=<days>' will set the
+   specified timeout on individual messages. Players can only modify their
+   own messages, wizards can modify any messages. Players can only set
+   timeouts equal to or less than the default timeout for the board, wizards
+   can set any timeout.
+  
+   In all cases, a timeout of '0' indicates no timeout.
+==============================================================================
+
+& bbchanges
+==============================================================================
+                    Changes to Myrddin's Bulletin Board
+------------------------------------------------------------------------------
+The most recent version of this code, bug fixes, and patches can be found at:
+                    www.firstmagic.com/~merlin/mushcode
+  
+4.0.6:
+     BugFix: Patched a security hole (thanks to Alierak for pointing it out)
+     PennFix: Minor tweak to +bbremove that will keep Penn's cleaner and
+              prevent odd behavior
+     Feature: Message headers internal to the bbs now store dbref of the owner
+              of the poster.
+  
+4.0.5:
+     Improved +bbscan (Amberyl)
+     Improved number range error handling (Kareila@ChaoticMUX)
+     BugFix: +bbmove - better error handling, and replaced missing '}'
+     BugFix: FN_SETR behaves better for those that need it.
+ 
+4.0.4:
+     BugFix: +bbsearch now checks permissions properly
+     BugFix: base 36 to base 10 conversion tweaked to be friendlier to Penn
+             (added a base case of '0' to fold()).
+     BugFix: Posting to an anonymous board no longer appends your BB_SIG.
+     BugFix: BBS is now aware of the 8k MUX buffer limit. This affects the
+             'percentage' full meter.
+     PennFix: +bbmove tweaked to be friendlier to PennMUSH.
+     PennFix: Various other PennMUSH fixes, most involving flags. Should help
+              the BBS run correctly on PennMUSH's.
+     Feature: Post notification now includes [board]/[#]
+     Help: Help files have been expanded in the areas of message timeouts and
+           locking groups.
+   
+4.0.3:
+     BugFix: +bbcleargroup now checks permissions properly
+     BugFix: +bbcleargroup will no longer re-order remaining groups
+     BugFix: Automatic post notification for anonymous boards now uses
+             the anonymous 'title' instead of the poster's name.
+  
+4.0.2:
+     BugFix: +bbsearch will now work properly on all servers
+     Some attribute cleanup
+  
+4.0.1:
+     BugFix: Message ID's no longer improperly sorted by certain commands
+     BugFix: Update-Installer should no longer scramble message ID's
+  
+4.0.0:
+     Misc. security enhancements.
+     Up to 25% increase in storage capacity.
+     Support for message timeouts. Fully configurable.
+     Support for anonymous boards. Configurable 'From' field title. Obviously,
+       MUSH staff can determine original poster.
+     Post notification: online players are notified of new posts. Configurable
+     New Command: +bbsearch. Allows user to search a group for posts by a
+       specific author.
+     New Command: +bbnotify. Allows user to toggle post notification for
+       boards.
+     New Staff Command: +bbconfig. For setting global/group timeout values,
+       anonymous boards, built-in timeout monitor.
+==============================================================================

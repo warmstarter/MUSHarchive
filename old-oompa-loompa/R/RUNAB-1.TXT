@@ -1,0 +1,33 @@
+@create USV Patapsco
+@link USV Patapsco=me
+@lock USV Patapsco==[owner(me)]
+@lock/Use USV Patapsco==[owner(me)]
+@set USV Patapsco=INHERIT
+@set USV Patapsco=OPAQUE
+@set USV Patapsco=WIZARD
+@set USV Patapsco=ENTER_OK
+@set USV Patapsco=ROYALTY
+@set USV Patapsco=MONITOR
+@SUCCESS USV Patapsco=[switch([v(light_type)],alertlights,[eval(me,alert_lights)],torchlight,[eval(me,torchlight)],streetlights,[eval(me,street_lights)],buildinglights,[eval(me,Building_Lights)],lamplights,[eval(me,Lamp_Lights)],roomlights,[eval(me,Room_Lights)],daylight,[eval(me,Sun_Light)],windowlight,[eval(me,Windows)],hall-light,[eval(me,Hall_Light)],default,[eval(me,defaultlights)])]
+&LIGHT_TYPE USV Patapsco=lamplights
+&LANDING USV Patapsco=@remit #7326=[name(me)] is preparing to land, please brace yourselves.;@wait 2=@remit #7326=[name(me)] has landed. You may leave now.
+&PREFLIGHT USV Patapsco=@remit #7326=[name(me)] is preparing to launch. Please sit down and fasten seatbelts.
+&TAKEOFF USV Patapsco=@remit #7326=[name(me)] takes off!
+&LOOK-1A USV Patapsco=$peep:@force [owner(me)]=@listen #7326=*;@force #7326=l;@force [owner(me)]=@listen #7326=
+&CREDITS USV Patapsco=Coded by Jesse@DeltaMUSH
+&TIME-1 USV Patapsco=$time:@pemit %#=The Current MUSH Time is: [time()]
+&TALK-1B USV Patapsco=$sp off:@force [owner(me)]=@set here=!audible;@force [owner(me)]=@prefix #7326=
+&TALK-1A USV Patapsco=$sp on:@force [owner(me)]=@set here=audible;@force [owner(me)]=@prefix #7326=From USV Patapsco,
+&FLY-2 USV Patapsco=$mf *:@force #7326=The runabout takes off, and heads to a nearby destination.;@force #7326=go %0;@wait 1=@force #7326=@emit The runabout appears, and lands on the ground.
+&DECLOAK USV Patapsco=$dcloak:@force [owner(me)]=@set #7326=!dark;@force #7326=@emit You see the USV Patapsco appear, then shimmer into existence.
+&CLOAK USV Patapsco=$rcloak:@force #7326=@emit The USV Patapsco shimmers, and disappears from existence.;@force [owner(me)]=@set #7326=dark
+&WHEREIS-1 USV Patapsco=$where *:@pemit %N=[name(*%0)] is currently at: [name(loc(*%0))] - <[loc(*%0)]>
+&FLY-1 USV Patapsco=$fly *:@force #7326=@emit The USV Patapsco lifts off, to a destination unknown.;@trigger #7326/preflight;@wait 2=@trigger #7326/takeoff;@force [owner(me)]=@wait 3=@tel #7326=%0;@emit The USV Patapsco appears, and lands safely on the ground.;@wait 4=@trigger #7326/landing
+&BOOT-1 USV Patapsco=$boot:@dolist lcon(#7326)=drop ##
+&KICK-1 USV Patapsco=$kick *:@force #7326=drop %0;@remit #7326=%N has kicked [name(%0)] out of [name(me)]!
+&DESC_STORE USV Patapsco=This is the inside of Jesse's Runabout (USV Patapsco). You see 4 chairs in the front, 1 is the piloting, 2 is engineering, 3 is copilot, and 4 is scanners/sensors. In the next compartment has a conference table and some beds in it. You are in a compartment that contains recreational facilities. You see a chess board, a table with a lot of chairs on it, and rules to a unknown game on the wall.
+@IDESCRIBE USV Patapsco=[ansi(cr,----)] [edit(name(zone(me)),Zone,)][ansi(cr,[repeat(-,[sub(73,[sub([strlen(name(zone(me)))],5)])])])]%r[ansi(hg,[eval(me,desc_store)])]%r%r[ansi(g,-)] [ansi(cr,People)] [ansi(g,-)] [squish([iter(lcon(me),switch(type(##),PLAYER,switch(idle(##),-1,,switch(hasflag(##,Dark),0,edit(name(##),Console,) [switch(hasflag(##,IC),1,(IC))] [switch(hasattr(##,CAPTION),1,{Brandishing: [get(##/CAPTION)]})] [ansi(g,-)]))))])]%r[ansi(g,-)] [ansi(cr,Objects)] [ansi(g,-)] [squish([iter(lcon(me),switch(type(##),THING,switch(hasflag(##,Dark),0,edit(name(##),Console,) [switch(hasflag(##,IC),1,(IC))] [switch(hasattr(##,CAPTION),1,{Brandishing: [get(##/CAPTION)]})] [ansi(g,-)])))])][iter(v(Installed),[s(%r)][ansi(cr,There is a)] [ansi(g,edit(##,_,space(1)))] [ansi(cr,here.)])]
+&LISTEN-1 USV Patapsco=^*:@remit #7326=<Outside> %0
+@DESCRIBE USV Patapsco=This is Jesse's Personal Runabout, the USV Patapsco.
+@EALIAS USV Patapsco=embark;enter Patapsco;patapsco
+@LALIAS USV Patapsco=o;ou;out;leave;exit;disembark

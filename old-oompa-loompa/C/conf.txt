@@ -1,0 +1,460 @@
+#  Sample Configuration File
+#    by Mark A. Hassman on 8/7/97
+#  
+#  This file has been tested with MUISHY 1.15p8.  Changes may
+#  render document incompatible with other servers.
+#
+#  The document is divided into two sections:
+#     1.  Startup options [not settable via @admin while running]
+#     2.  Run-time options [changeable by @admin while running]
+#
+#  Comments, questions, suggestions, and bug reports should be sent
+#  to mark@lost.strange.com
+#
+#
+include alias.conf
+include compat.conf
+#######################################################################
+#                STARTUP CONFIGURATION OPTIONS                        #
+# The following configuration options can only be modified within     #
+# *.conf files read when the game starts. They cannot be changed      #
+# while the game is running using the @admin command.  All paramters  #
+# are listed with the defaults set up by the game.  If there is no    #
+# default, the config parameter is commented out.                     #
+#    For the second set of options search for 'RUN-TIME'              #
+#######################################################################
+#
+#######################################################################
+#                          PORT & DATABASE                            #
+#######################################################################
+# The default port where the game listens to connections              #
+#######################################################################
+port    		6250
+input_database  mushcore.db
+output_database mushcore.db.new
+crash_database  mushcore.db.CRASH
+gdbm_database   mushcore.gdbm
+#
+#
+#######################################################################
+#                      HELP FILES                                     #
+#######################################################################
+# Mortal, administrator, news and local help file definitions as well #
+# as indexes used by the game.  Indexes are generated at startup      #
+# as well as via mkindx.  If text files are modified while the game   #
+# is running, @readcache and mkindx should be utilized to bring the   #
+# information up to date.                                             #
+#######################################################################
+admin_help_file			wizhelp.txt
+admin_help_index		wizhelp.indx
+help_file  			help.txt
+help_index  			help.indx
+news_file  			news.txt
+news_index  			news.indx
+#
+######################################################################
+#                     MESSAGE OF THE DAY FILES                       #
+######################################################################
+# File displayed upon a successful connection to a player            #
+######################################################################
+admin_motd_file			wizmotd.txt
+motd_file  			motd.txt
+#
+######################################################################
+#                        TEXT FILES                                  #
+######################################################################
+# These text files are displayed to upon connection to the .game.    #
+# The file shown depends on the site and status of a variety of      #
+# options set by the administrator(s).  Help is available for each   #
+# of these files.                                                    #
+######################################################################
+#
+badsite_file			badsite.txt
+connect_file  			connect.txt
+connect_reg_file                connect_reg.txt
+down_file  			down.txt
+full_file  			full.txt
+guest_file  			guest.txt
+newuser_file  			newuser.txt
+quit_file  			quit.txt
+register_create_file            create_reg.txt
+#
+#############################################################################
+#                   MISCELLANEOUS STARTUP OPTIONS                           #
+#############################################################################
+#  Most of these will never need to be changed but they are listed anyway   #
+#############################################################################
+# Should we abort on a bug
+# abort_on_bug			no
+# Should object names utilize a separate cache
+# cache_names  			yes
+# Cache Size
+# cache_depth  			10
+# cache_width 			60
+# Action to take upon reciept of a fatal signal
+# signal_action			default
+# Status file used to write whatever argument @shutdown is given    
+# status_file  			shutdown.status
+# Used to include additional configuration files
+# include			<path to conf file> 
+# Set up of an initial database. This should not be changed.
+# initial_size
+# Do children inherit control locks when set Zone?
+# parentable_control_lock 	no
+#
+#
+##########################################################################
+#                       RUN-TIME CONFIGURATION OPTIONS                   #
+##########################################################################
+#  The following paramaters can be changed at any time during the game's #
+#  operation or modified during the start sequence of the game.          #
+##########################################################################
+#
+##########################################################################
+#                            QUOTAS                                      #
+##########################################################################
+#  Set up the game wide quota system including if quotas are on at all   #
+##########################################################################
+# Do we want quotas at all? If so which type. Both should be set yes for
+# the use of quota restrictions by type
+quotas 				yes
+typed_quotas 			yes
+# How much quota is required to create the following:
+exit_quota 			1
+player_quota 			1
+room_quota 			1
+thing_quota 			1
+# How much quota does a player get at startup
+starting_quota 			10
+starting_exit_quota 		2
+starting_player_quota 		1
+starting_room_quota 		1
+starting_thing_quota 		6
+# Setup the amount of quota cost for placing commands to be exectued
+command_quota_increment 	1
+command_quota_max 		100
+##########################################################################
+#
+#
+##########################################################################
+#                            MOTDs                                       #
+##########################################################################
+#  Arrays of motd messages which are run-time changeable rather than the #
+#  set file information. Typically, these are not changed from within    #
+#  configuartion files.                                                  #
+##########################################################################
+#    admin_motd_message 
+#    down_motd_message 
+#    full_motd_message 
+#    motd_message 
+##########################################################################
+#
+##########################################################################
+#                      ACCESS AND ALIAS INFORMATION                      #
+##########################################################################
+#  These configuration options control who can access specific commands, #
+#  attributes, and functions.  It also allows aliasing of commands,      #
+#  attributes and functions.  Most of these config paramters can be used #
+#  multiple times with in a configuration file.                          #
+##########################################################################
+# Control access and aliases of the in-server commands 
+# access
+# alias
+# Example:
+#access		@search		admin
+#alias		@srch		@search
+#alias		@wiz		@wall/admin
+alias		+help		lhelp
+alias		+finger		@finger
+logout_cmd_alias +where		WHERE
+# Control access and aliases of server-defined attributes
+# attr_access
+# attr_alias 
+# Examples:
+attr_access	sex		!hidden private !admin !internal
+attr_alias	gender		sex
+#
+# Changes the access rights of all attribute setting commands
+# attr_cmd_access
+#
+# Modifies who can change particular configuartion options.
+# config_access
+# Example
+#config_access	dump_message	!god admin
+#
+# Controls access and aliases of functions in the server
+# function_access 
+# function_alias 
+# Example:
+#function_access	lwho		admin
+#function_alias  whoseon		lwho
+#
+# Modifies the permissions needed for @list options
+# list_access 
+#
+# Controls the access rights and aliases of the Logout commands in
+# the server eg WHO, QUIT, etc.
+# logout_cmd_access 
+# logout_cmd_alias 
+# Example:
+logout_cmd_alias	who	WHO
+#
+# Changes the access flags of user attributes when they are created.
+# Use @attribute to set individual permissions on user-attribs.
+# user_attr_access 
+#
+# Aliases flags to different names. See 'alias.conf' in the 
+# source distribution for the current aliases before adding.
+# flag_alias 
+##########################################################################
+#
+#
+##########################################################################
+#                      PLAYER/ROBOT NAME CONTROL                         #
+##########################################################################
+#  The following can control which names a player may choose.  These can #
+#  be used for not allowing book character names in a themed game or     #
+#  merely for control of profanity in player names.  Good and bad names  #
+#  can contain wildcards.  player_name_spaces is a boolean variable that #
+#  controls if player names can contain spaces.                          #
+##########################################################################
+#  bad_name
+#  good_name 
+#  player_name_spaces 
+#  Examples:
+bad_name	    	Santa*
+bad_name		ToothFairy
+good_name	   	Rudolph
+good_name		Leprech*
+player_name_spaces	no
+##########################################################################
+#
+#
+##########################################################################
+#                      TIMERS, INTERVALS, ETC                            #
+##########################################################################
+#  The following configuration parameters control how often various      #
+#  checks and processes are done by the game.  All values are integers   #
+#  which designate seconds                                               #
+##########################################################################
+# Controls how often the database is checked for inconsistencies and 
+# the delay period after startup.
+check_interval 		600
+check_offset		300
+# How quickly does a connection timeout if not logged in
+conn_timeout 		60
+# How often are dumps processed
+dump_interval 		3600
+dump_offset 		0
+# How often are idle times checked for timeouts?
+idle_interval 		60
+# How long can a player idle before being disconnected?
+idle_timeout 		3600
+# How often do players gain additional command quotas?
+timeslice 		1000
+##########################################################################
+#
+##########################################################################
+#                         FLAG CONTROL                                   #
+##########################################################################
+#  These options set which flags particular objects get when they are    #
+#  created.  Also included are control options related to flags.         #
+##########################################################################
+# Do we show expanded flags during an examine?
+examine_flags  			yes 
+# Can any player get the flags of an object?
+public_flags 			yes
+# Is the commands flag required to execute $commands on an object?
+require_cmds_flag 		yes
+# What flags do we set on a particular object upon creation?
+# exit_flags
+# player_flags 
+# robot_flags 
+# room_flags 
+# thing_flags 
+# Examples:
+#robot_flags			
+player_flags			newborn
+##########################################################################
+#
+##########################################################################
+#                         MONEY STUFF                                    #
+##########################################################################
+#  This DOES NOT include costs. I've purged them from my server.         #
+##########################################################################
+# What's money called on the game? 
+money_name_plural 	Silvers
+money_name_singular 	silver
+# How much money does a player get to start with?
+starting_money 		10
+# How much money do I get per day I connect?
+paycheck 		10
+##########################################################################
+#
+##########################################################################
+#                         SITE CONTROL                                   #
+##########################################################################
+#  The following configuration options control sites which can access the#
+#  game including the ability to suspect sites, forbid them, enforce     #
+#  registration, etc.  See 'wizhelp SITE LISTS' for usage                #
+##########################################################################
+#    forbid_site 
+#    guest_site 
+#    permit_site 
+#    register_site 
+#    suspect_site 
+#    trust_site 
+# Example:
+#  To put the entire game on registration, uncomment the next line.
+#register_site 	0.0.0.0		0.0.0.0
+#  To register a Class A network, try this:
+#register_site  130.0.0.0	255.0.0.0
+#  A Class B...
+#register_site  130.253.0.0     255.255.0.0
+#  A Class C...
+#register_site  130.253.1.0	255.255.255.0
+#  An individual IP address:
+#register_site  130.253.1.1	255.255.255.255
+#
+# Any of the site configuration paramters work the same as the examples
+# above.
+##########################################################################
+#
+#
+##########################################################################
+#                  RECURSION, LIMITS, AND QUEUES                         #
+##########################################################################
+#  Interal control limits for the game. Most of these are not changed    #
+#  check wizhelp for proper usage.                                       #
+##########################################################################
+#    building_limit 
+#    earn_limit 
+#    function_invocation_limit 
+#    function_recursion_limit 
+#    lock_recursion_limit 
+#    notify_recursion_limit 
+#    output_limit 
+#    player_queue_limit 
+#    queue_active_chunk 
+#    queue_idle_chunk 
+#    retry_limit 
+#    trace_output_limit 
+##########################################################################
+#
+#
+##########################################################################
+#                  HOMES, LOCATION DEFAULTS                              #
+##########################################################################
+#  Player home and start location defaults                               #
+##########################################################################
+#  Where do non-player object homes default to <dbref>
+default_home	  		17
+#  Where do players start at and where is the default home for them
+player_starting_home		23 
+player_starting_room	 	23
+##########################################################################
+#
+##########################################################################
+#                  VIEWING, LOOKING, ETC                                 #
+##########################################################################
+#  Most of these control how something looks or what appears in various  #
+#  instances.  See wizhelp for more details.                             #
+##########################################################################
+# Do not show disconnected player objects.
+dark_sleepers 		yes
+# Are public attributes displayed to non-owners during examines?
+examine_public_attrs    yes
+# Do admins over idle_timeout show in the WHO?
+idle_wiz_dark 		yes
+# When looking, does it objey the terse_* configuration options?
+look_obey_terse 	yes
+# Do players see attributes on objects when looking at them?
+quiet_look		no
+# Are whispers completely invisible? 
+quiet_whisper		yes
+# Can you anyone read remote descriptions? 
+read_remote_desc	no
+# Can anyone see names of objects remotely by dbref? 
+read_remote_name 	yes
+# Do players see their objects even if they are dark?
+see_owned_dark 		yes
+# Do dark-connect players show in @sweep?
+sweep_dark 		yes
+# Do contents of an object show when the looker is set terse?
+terse_shows_contents    yes
+# Do exits show when the looker is set terse?
+terse_shows_exits       yes
+# Do the SUCC/DROP/ENTER/LEAVE messages show when the mover is terse?
+terse_shows_move_messages  yes
+# Do we show traces topdown? (vs bottom down)
+trace_topdown 		yes
+##########################################################################
+#
+##########################################################################
+#                  LOGGING AND LOG OPTIONS                               #
+##########################################################################
+# What types of things do we log? use !<option> to turn it off.
+log  accounting !all_commands bad_commands !buffer_alloc bugs checkpoints config_changes create logins network problems security !shouts startup admin
+# What options are printed in the log file? use !<option> to turn it off
+log_options 	flags location owner timestamp
+##########################################################################
+#
+##########################################################################
+#                     MASTER ROOMS                                       #
+##########################################################################
+# Are local master rooms allowed?
+local_master_rooms 		yes
+# Dbref of the master_room
+master_room 			2
+# Can we use the @parent/zone command?
+parent_zones 			yes
+# Is the master room checked for global @aconnect and @adisconnect's?
+use_global_aconn 		yes
+##########################################################################
+#
+##########################################################################
+#                        MISCELLANEOUS OPTIONS                           #
+##########################################################################
+#  These are listed here for lack of a better category to stick them 
+#  under :)
+#
+#  Do admins obey link locks?
+admin_obeys_linklock 		no
+#  Message sent to connected players prior to a dump
+dump_message     Game: Dumping.
+#  Can an object @tel out of an object that is not controlled & !jump_ok?
+fascist_teleport 		yes
+# How are dumps performed?    
+#fork_dump 
+#fork_vfork 
+# What are the dbrefs of the guests of the game?
+guests  	27 28 29 30 31
+# Do hostnames show as the sites in the wiz-who?
+hostnames 			yes
+# Do non-player  objects search themselves for $commands?
+match_own_commands 		yes
+# What's the max # of players allowed to connect?
+max_players 			128
+# What's this game called?
+mud_name 			TestMUSH
+# Do we check every buffer for consistencies during each allocation?
+paranoid_allocate 		no
+# Can we pemit to any object even far players?
+pemit_any_object 		yes
+pemit_far_players 		yes
+# Are players allowed to the listen series of attribs (ahear etc)    
+player_listen 			no
+# Do players search themselves for $commands?
+player_match_own_commands 	no
+# Display what message after a dump?
+postdump_message		Game: Dump Complete.
+# Recycle dbrefs?
+recycling 			yes
+# Can robots talk & pose?
+robot_speech 			yes
+# Are extra spaces compressed in player input?
+space_compress 			yes
+# is @switch/all the default?
+switch_default_all 		no
+# Are non-owned objects safe from admin destruction?
+unowned_safe 			yes

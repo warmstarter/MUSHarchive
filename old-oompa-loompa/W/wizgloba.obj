@@ -1,0 +1,27 @@
+@create Wizard Globals Object
+&LOCK-USE Wizard Globals Object=[hasflag(%#,wizard)]
+@lock/UseLock Wizard Globals Object=LOCK-USE/1
+&DO-WIZHELP-TOPIC Wizard Globals Object=$+wizhelp *:@pemit %#=[setq(0,v(OBJ-HELP))][setq(1,edit(switch(mid(%0,0,1),+,mid(%0,1,strlen(%0)),%0),%b,_))][setq(2,iter(lattr(%q0/*_WIZHELP),before(##,_WIZHELP)))][setq(3,match(%q2,%q1*))]switch(%q3,0,No such global wizhelp topic '%0'.,u(%q0/[extract(%q2,%q3,1)]_WIZHELP))
+&DO-WIZHELP Wizard Globals Object=$+wizhelp:@pemit %#=[repeat(=,78)]%rWizard Help Topics%r[repeat(-,78)]%r[ljust(Info,11)]|%b%b%b[u(FMT_HELP_COL,+finger +garbage +inv +size)]%r[ljust(Actions,11)]|%b%b%b[u(FMT_HELP_COL,+inspect +motd)]%r[ljust(Systems,11)]|%b%b%b[u(FMT_HELP_COL,Bboard)][repeat(=,78)]
+&DO-GARBAGE Wizard Globals Object=$+garbage:@pemit %#=[setq(0,iter(filter(FILT_GARBAGE,lnum(first(stats()))),{{#}}##))]Garbage objects \([words(%q0)]\): [switch(%q0,,None,%q0)]
+&DO-INSPECT-PRINT Wizard Globals Object=$+inspect/print *:@pemit %#=[setq(0,locate(%#,%0,*))]switch(%q0,#-1,I can't find the object to output to.,#-2,I don't know which output object you're referring to.,[setq(1,1)]Printing to [name(%q0)]/ROOMEVAL-%l);@swi %q1=1,{&ROOMEVAL-%l %q0=[ulocal(FN_INSPECT_EVAL)];&ROOMEVAL-%l-DATE %q0=[name(%l)]\(%l[flags(%l)]\) last +inspected: [time()];@pemit %#=Finished outputting.}
+&DO-MOTD-CLEAR Wizard Globals Object=$+motd/clear:@swi [setq(0,v(OBJ-MOTD))]%#=#1,{@dolist lattr(%q0)=&## %q0;@motd;@pemit %#=Motd Cleared.},@pemit %#=That's a God-only command.
+&DO-MOTD-CLEAR-SUBJ Wizard Globals Object=$+motd/clear *:@pemit %#=[setq(0,v(OBJ-MOTD))][setq(1,get(%q0/LIST-SUBJECTS))]switch([pos(/,%0)]:[match(%q1,%0)]:[match(#1 #2 #263,%#)],#-1:*:0,Permission denied.,#-1:0:*,No such motd subject '%0'.,#-1:*,Motd subject '%0' cleared.[setq(2,1)]);@swi %q2=1,{@dolist lattr(%q0/%0-*)=&## %q0;&NUM-%0 %q0;&LIST-SUBJECTS %q0=[remove(%q1,%0)];@motd [iter(sort(get(%q0/LIST-SUBJECTS)),%r[ucstr(##)]:[u(ITER_MOTD,##)]%r)]}
+&DO-MOTD-ADDTO Wizard Globals Object=$+motd *=*:@swi [setq(0,v(OBJ-MOTD))][setq(1,add(get(%q0/NUM-%0),1))]words(%0)=1,{&NUM-%0 %q0=%q1;&%0-%q1 %q0=%1;&LIST-SUBJECTS %q0=[setunion(get(%q0/LIST-SUBJECTS),lcstr(%0))];@motd [iter(sort(get(%q0/LIST-SUBJECTS)),%r[ucstr(##)]:[u(ITER_MOTD,##)]%r)];@pemit %#=MOTD item added to %0 subject.},@pemit %#='%0' can only be one word long.
+&DO-MOTD-CLEAR-SUBJ-# Wizard Globals Object=$+motd/clear */*:@pemit %#=[setq(0,v(OBJ-MOTD))][setq(1,get(%q0/NUM-%0))][setq(2,sub(%q1,1))][setq(3,get(%q0/LIST-SUBJECTS))]switch([match(%q3,%0)]:[lte(%1,%q1)],0:*,No such MOTD subject '%0'.,*:0,No such %0 item '%1'.,[setq(4,1)]Item %1 of MOTD subject %0 cleared.);@swi %q4=1,{&%0-%1 %q0;@dolist extract(rest(lnum(add(%q1,1))),add(1,%1),sub(%q1,%1))=@mvattr %q0=%0-##,%0-[sub(##,1)];&NUM-%0 %q0=%q2;&LIST-SUBJECTS %q0=[remove(%q3,switch(%q2,0,lcstr(%0)))];@wait 2=@motd [iter(sort(get(%q0/LIST-SUBJECTS)),%r[ucstr(##)]:[u(ITER_MOTD,##)]%r)]}
+&DO-WIZMOTD-CLEAR-SUBJ Wizard Globals Object=$+wizmotd/clear *:@pemit %#=[setq(0,v(OBJ-WIZMOTD))][setq(1,get(%q0/LIST-SUBJECTS))]switch([pos(/,%0)]:[match(%q1,%0)]:[match(#1 #2 #263,%#)],#-1:*:0,Permission denied.,#-1:0:*,No such wizard motd subject '%0'.,#-1:*,Wizard motd subject '%0' cleared.[setq(2,1)]);@swi %q2=1,{@dolist lattr(%q0/%0-*)=&## %q0;&NUM-%0 %q0;&LIST-SUBJECTS %q0=[remove(%q1,%0)];@motd/wizard [iter(sort(get(%q0/LIST-SUBJECTS)),%r[ucstr(##)]:[u(ITER_MOTD,##)]%r)]}
+&DO-WIZMOTD-ADDTO Wizard Globals Object=$+wizmotd *=*:@swi [setq(0,v(OBJ-WIZMOTD))][setq(1,add(get(%q0/NUM-%0),1))]words(%0)=1,{&NUM-%0 %q0=%q1;&%0-%q1 %q0=%1;&LIST-SUBJECTS %q0=[setunion(get(%q0/LIST-SUBJECTS),lcstr(%0))];@motd/wizard [iter(sort(get(%q0/LIST-SUBJECTS)),%r[ucstr(##)]:[u(ITER_MOTD,##)]%r)];@pemit %#=Wizard MOTD item added to %0 subject.},@pemit %#='%0' can only be one word long.
+&DO-WIZMOTD-CLEAR-SUBJ-# Wizard Globals Object=$+wizmotd/clear */*:@pemit %#=[setq(0,v(OBJ-WIZMOTD))][setq(1,get(%q0/NUM-%0))][setq(2,sub(%q1,1))][setq(3,get(%q0/LIST-SUBJECTS))]switch([match(%q3,%0)]:[lte(%1,%q1)],0:*,No such wizard MOTD subject '%0'.,*:0,No such %0 item '%1'.,[setq(4,1)]Item %1 of wizard MOTD subject %0 cleared.);@swi %q4=1,{&%0-%1 %q0;@dolist extract(rest(lnum(add(%q1,1))),add(1,%1),sub(%q1,%1))=@mvattr %q0=%0-##,%0-[sub(##,1)];&NUM-%0 %q0=%q2;&LIST-SUBJECTS %q0=[remove(%q3,switch(%q2,0,lcstr(%0)))];@wait 2=@motd/wizard [iter(sort(get(%q0/LIST-SUBJECTS)),%r[ucstr(##)]:[u(ITER_MOTD,##)]%r)]}
+&DO-MOTD Wizard Globals Object=$+motd:@motd [setq(0,v(OBJ-MOTD))][iter(sort(get(%q0/LIST-SUBJECTS)),%r[ucstr(##)]:[u(ITER_MOTD,##)]%r)];@pemit %#=MOTD reset to stored text.
+&DO-WIZMOTD Wizard Globals Object=$+wizmotd:@motd/wizard [setq(0,v(OBJ-WIZMOTD))][iter(sort(get(%q0/LIST-SUBJECTS)),%r[ucstr(##)]:[u(ITER_MOTD,##)]%r)];@pemit %#=Wizard MOTD reset to stored text.
+&DO-WIZMOTD-CLEAR Wizard Globals Object=$+wizmotd/clear:@swi [setq(0,v(OBJ-WIZMOTD))]%#=#1,{@dolist lattr(%q0)=&## %q0;@motd/wizard;@pemit %#=Wizard Motd Cleared.},@pemit %#=That's a God-only command.
+&CREDITS Wizard Globals Object=These globals were coded by Opa of PernMUSH.
+@set Wizard Globals Object=INHERIT
+@set Wizard Globals Object=SAFE
+ 
+@create Wizard Motd Text Object
+&NUM-TEST Wizard Motd Text Object=0
+@set Wizard Motd Text Object=SAFE
+ 
+@create Motd Text Object
+@set Motd Text Object=SAFE

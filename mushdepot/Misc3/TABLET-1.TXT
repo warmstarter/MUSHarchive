@@ -1,0 +1,70 @@
+@create PARENT: Monolith's Tablet
+@link PARENT: Monolith's Tablet=[owner(me)]
+@lock PARENT: Monolith's Tablet==*[owner(me)]
+@Succ PARENT: Monolith's Tablet=You pick up the [name(me)] and place it in a pocket.
+@Osucc PARENT: Monolith's Tablet=picks up the granite [name(me)] and places it in %p pocket.
+@Drop PARENT: Monolith's Tablet=You ease the [name(me)] out of your pocket and with a huff drop it onto the floor.
+@Odrop PARENT: Monolith's Tablet=eases a stone [name(me)], possibly granite, out of %p pocket and with a huff drops it onto the floor.
+@Fail PARENT: Monolith's Tablet=The [name(me)] is far too heavy for you to pick it up.
+@Ofail PARENT: Monolith's Tablet=tries in vain to pick the stone [name(me)], possibly granite, up.
+@Desc PARENT: Monolith's Tablet=A tablet of purest granite enscribed with runes and empowered with mystical abilities. You can't help but wonder if typing 'thelp page' would show you the help page.
+&SHOW_HELP PARENT: Monolith's Tablet=$thelp *:@pemit %#=[center(< Tablet help page. >,79,=)]%r[switch(comp(v(HELP_[edit(%0,%b,_)]),),0,center(There is no help on that topic. Type 'thelp page'.,79,),u(HELP_[edit(%0,%b,_)]))]%r[center(< Coded by Monolith@VenusMUSH >,79,=)]
+&HELP_PAGE PARENT: Monolith's Tablet=[center(< List of sub-menus page >,79,-)]%rtype 'THelp <subject>'%r%r%t[ljust(Subject,10)]- Description of subject%r%t[ljust(Startup,10)]: Important instructions that should be followed before use.%r%t[ljust(Descer,10)]: Multi descer functions.%r%t[ljust(Notepad,10)]: Useful note taking functions.%r%t[ljust(Friends,10)]: Lists of players that are friends and useful functions.%r%t[ljust(Locations,10)]: Useful private @teleporter.
+&HELP_STARTUP PARENT: Monolith's Tablet=IMPORTANT: Before you use the Tablet you should do the following.%r%tType: @lock [name(me)]=me%r%tType: @lock/use [name(me)]=me%r%tType: @set [name(me)]=inherit%r%tType: @set [name(me)]=dark
+&HELP_DESCER PARENT: Monolith's Tablet=%t[ljust(DAdd <title>,21)]: Save current description, name and omove.%r%t[ljust(DRem <title>,21)]: Remove a current saved description.%r%t[ljust(DSet <title>,21)]: Set you @desc, @name, @omove to the ones stored.%r%t[ljust(DEmit <title>=<emit>,21)]: Set @emit that is made when desc changed.%r%t[ljust(DView <title>,21)]: View a saved desc.%r%t[ljust(DList,21)]: List all current descriptions saved.
+&ADD_DESC PARENT: Monolith's Tablet=$DADD *:&DESC_[setq(0,edit(%0,%b,_))][r(0)] me=[get(%#/DESC)]; &DATA_[r(0)] me=[name(%#)]|[get(%#/SEX)]|[get(%#/OMOVE)]|; @pemit %#=Description saved.
+&REM_DESC PARENT: Monolith's Tablet=$DREM *:@switch comp(v(DESC_[setq(0,edit(%0,%b,_))][r(0)]),)=0, {@pemit %#=Desc is unknown.}, {&DESC_[r(0)] me=; &DATA_[r(0)] me=; @pemit %#=Description removed.}
+&VIEW_DESC PARENT: Monolith's Tablet=$DVIEW *:@pemit %#=[switch(comp(v(DESC_[setq(0,edit(%0,%b,_))][r(0)]),),0,Description unkown,{[center(< Desciption >,79,=)]%r[ljust(Name,15)]: [u(DATA,name)]%r[ljust(Sex,15)]: [u(DATA,sex)]%r[ljust(Omove,15)]: [u(DATA,name)] [u(DATA,omove)]%r[ljust(Description,15)]:%r[u(DESC_[r(0)])]%r[repeat(=,79)]})]
+&LIST_DESC PARENT: Monolith's Tablet=$DLIST:@pemit %#=[center(< Descriptions stored >,79,=)]%r[center(iter(lattr(me/DESC_*),[capstr(lcstr(edit(delete(##,0,5),_,%b)))]%,),79,)]%r[repeat(=,79)]
+&HELP_NOTEPAD PARENT: Monolith's Tablet=%tNQuick <title>=<text>%t: Write a quick note.%r%tNOpen <title>%t%t: Open a note.%r%tNAdd <text>%t%t: Add text to an opened note.%r%tNEdit <old>/<new>%t: Edit a note.%r%tNClose%t%t%t: Close current open note.%r%tNToss%t%t%t: Toss current note.%r%tNCR%t%t%t: Add carriage return to note.%r%tNLJust <text>/<number>%t: Add left adjusted text into <number> spaces.%r%tNRJust <text>/<number>%t: Add right adjusted text into <number> spaces.%r%tNCJust <text>/<number>%t: Add centre adjusted text into <number> spaces.%r%tNSpace <number>%t%t: Add <number> spaces.%r%tNList%t%t%t: List all notes.%r%tNView <title>%t%t: View a note.%r%tNView%t%t%t: View currently open note.%r%tNPrint <title>%t%t: Creates an object and desc as note text.%r%tNPrint%t%t%t: As above but with current note.%r%tNRem <title>%t%t: Remove a note.
+&QUICK_NOTE PARENT: Monolith's Tablet=$nquick *=*:@pemit %#=You write a quick note.; &NOTE_[edit(%0,%b,_)] me=%1; &CURRENT me=[edit(%0,%b,_)]
+&OPEN_NOTE PARENT: Monolith's Tablet=$nopen *:@pemit %#=You [switch(comp(v(NOTE_[edit(%0,%b,_)]),),0,start a new,open an old)] note.; &CURRENT me=[edit(%0,%b,_)]
+&ADD_NOTE PARENT: Monolith's Tablet=$nadd *:@switch comp(v(CURRENT),)=0, {@pemit %#=There is no note in progress.}, {@pemit %#=You append the note '[edit(v(CURRENT),_,%b)]'.; &NOTE_[v(CURRENT)] me=[v(NOTE_[v(CURRENT)])] %0}
+&EDIT_NOTE PARENT: Monolith's Tablet=$nedit */*:@switch comp(v(CURRENT),)=0, {@pemit %#=There is no note in progress.}, {@pemit %#=You replace '%0' with '%1' in the note '[edit(v(CURRENT),_,%b)]'.; &NOTE_[v(CURRENT)] me=[edit(v(NOTE_[v(CURRENT)]),%0,%1)]}
+&CLOSE_NOTE PARENT: Monolith's Tablet=$nclose:@switch comp(v(CURRENT),)=0, {@pemit %#=There is no note in progress.}, {@pemit %#=You close the note '[edit(v(CURRENT),_,%b)]'.; &CURRENT me=}
+&TOSS_NOTE PARENT: Monolith's Tablet=$ntoss:@switch comp(v(CURRENT),)=0, {@pemit %#=There is no note in progress.}, {@pemit %#=You toss the note '[edit(v(CURRENT),_,%b)]'.; &NOTE_[v(CURRENT)] me=; &CURRENT me=}
+&CR_NOTE PARENT: Monolith's Tablet=$ncr:@switch comp(v(CURRENT),)=0, {@pemit %#=There is no note in progress.}, {@pemit %#=Carriage return added.; &NOTE_[v(CURRENT)] me=[v(NOTE_[CURRENT])]%r}
+&LJUST_NOTE PARENT: Monolith's Tablet=$nljust */*:@switch comp(v(CURRENT),)=0, {@pemit %#=There is no note in progress.}, {@switch isnum(%1)=0, {@pemit %#=Invalid number for justify.}, {@pemit %#=Left justified test added.; &NOTE_[v(CURRENT)] me=[v(NOTE_[v(CURRENT)])] [ljust(%0,%1)]}}
+&RJUST_NOTE PARENT: Monolith's Tablet=$nrjust */*:@switch comp(v(CURRENT),)=0, {@pemit %#=There is no note in progress.}, {@switch isnum(%1)=0, {@pemit %#=Invalid number for justify.}, {@pemit %#=Right justified test added.; &NOTE_[v(CURRENT)] me=[v(NOTE_[v(CURRENT)])] [rjust(%0,%1)]}}
+&CJUST_NOTE PARENT: Monolith's Tablet=$nljust */*:@switch comp(v(CURRENT),)=0, {@pemit %#=There is no note in progress.}, {@switch isnum(%1)=0, {@pemit %#=Invalid number for justify.}, {@pemit %#=Centre justified test added.; &NOTE_[v(CURRENT)] me=[v(NOTE_[v(CURRENT)])] [center(%0,%1,)]}}
+&SPACE_NOTE PARENT: Monolith's Tablet=$nspace *:@switch comp(v(CURRENT),)=0, {@pemit %#=There is no note in progress.}, {@switch isnum(%0)=0, {@pemit %#=Invalid number.}, {@pemit %#=%0 spaces added.; &NOTE_[v(CURRENT)] me=[v(NOTE_[v(CURRENT)])][space(%0)]}}
+&LIST_NOTE PARENT: Monolith's Tablet=$nlist:@pemit %#=[center(< Notes stored >,79,=)]%r[center(Current Note: [edit(v(CURRENT),_,%b)],79,)]%r[center(iter(lattr(me/NOTE_*),[Capstr(lcstr(edit(delete(##,0,5),_,%b)))]%,),79,)]%r[repeat(=,79)]
+&SHOW_NOTE PARENT: Monolith's Tablet=$nview *:@switch comp(v(NOTE_[edit(%0,%b,_)]),)=0, {@pemit %#=That note does not exist.}, {@pemit %#=[u(DISP_NOTE,%0)]}
+&PROOF_NOTE PARENT: Monolith's Tablet=$nview:@switch comp(v(CURRENT),)=0, {@pemit %#=There is no note in progress.}, {@pemit %#=[u(DISP_NOTE,[edit(v(CURRENT),_,%b)])]}
+&PRINT_NOTE PARENT: Monolith's Tablet=$nprint *:@switch comp(v(NOTE_[edit(%0,%b,_)]),)=0, {@pemit %#=That note does not exist.}, {@pemit %#=Note is being printed.; @tr me/DO_PRINT=edit(%0,%b,_)}
+&PRINT_CNOTE PARENT: Monolith's Tablet=$nprint:$nprint:@switch comp(v(CURRENT),)=0, {@pemit %#=There is no note in progress.}, {@pemit %#=Note is being printed.; @tr me/DO_PRINT=v(CURRENT)}
+&REM_NOTE PARENT: Monolith's Tablet=$nrem *:@switch comp(v(NOTE_[edit(%0,%b,_)]),)=0, {@pemit %#=That note does not exit.}, {@pemit %#=Note removed from list.; &NOTE_[edit(%0,%b,_)] me=}
+&HELP_FRIENDS PARENT: Monolith's Tablet=%tFAdd <player>%t: Add a friend to list.%r%tFRem <number>%t: Remove a friend from list.%r%tFList%t%t: List all players.%r%tFPage <text>%t: Page all friends.%r%tFMail <subject>%t: Set +mail up for Mailing all friends.%r%r%t'THelp Friend Locks' has help on @locks using the friend list.
+&ADD_FRIEND PARENT: Monolith's Tablet=$fadd *:@switch num(*%0)=#-1, {@pemit %#=Unknown player.}, {@pemit %#=[name(*%0)] added to list of friends.; &FRIENDS me=[v(FRIENDS)] [num(*%0)]}
+&REM_FRIEND PARENT: Monolith's Tablet=$frem *:@switch and(isnum(%0),lte(%0,words(v(FRIENDS))))=0, {@pemit %#=Invalid number.}, {@pemit %#=[name(extract(v(FRIENDS),%0,1))] removed from friends list.; &FRIENDS me=[ldelete(v(FRIENDS),%0)]}
+&LIST_FRIENDS PARENT: Monolith's Tablet=$flist:@pemit %#==%[ # %]=%[ Name %]==============%[ Sex : Con : Location %]==========================[iter(v(FRIENDS),%r %b%b[setq(9,add(r(9),1))][ljust(r(9),6)][ljust(name(##),23)][switch(get(##/SEX),m*,M,f*,F,-)][space(5)][switch(hasflag(##,connected),1,Y,-)][space(4)][switch(loc(##),#-1,center(= Unfindable =,35,-),mid(name(loc(##)),0,35))])]%r[repeat(=,79)]
+&PAGE_FRIENDS PARENT: Monolith's Tablet=$fpage *:@pemit %#=Friends Page: [switch(pos(:,%0),1,{Long distance to Friends: %n [delete(%0,0,1)]},{You paged friends with '%0'})]; @dolist [v(FRIENDS)]=@pemit ##=Friends Page: [switch(pos(:,%0),1,{From Afar, %n [delete(%0,0,1)]},{%n pages: %0})]
+&DISP_NOTE PARENT: Monolith's Tablet=[center(< %0 >,79,=)]%r[u(NOTE_[edit(%0,%b,_)])]%r[repeat(=,79)]
+&SET_DESC PARENT: Monolith's Tablet=$DSET *:@switch comp(v(DESC_[setq(0,edit(%0,%b,_))][r(0)]),)=0, {@pemit %#=Desc is unknown.}, {@desc %#=[v(DESC_[r(0)])]; @femit %#=[u(DATA,emit)]; @sex %#=[u(DATA,sex)]; @omove %#=[u(DATA,omove)]; @name %#=[u(DATA,name)]; @pemit %#=Description updated.}
+&DATA PARENT: Monolith's Tablet=[extract(u(DATA_[r(0)]),switch(%0,name,1,sex,2,omove,3,emit,4),1,|)]
+&DATA_TEMP PARENT: Monolith's Tablet=Monolith|Granite|omove|emit
+&TEL_TO PARENT: Monolith's Tablet=$ttel *:@switch u(ISLOC,%0)=0, {@pemit %#=That is not a valid location.}, {@tel %#=[extract(v(LOCNUMS),%0,1)]; @pemit %#=You have been transported.}
+&SHOW_LOCS PARENT: Monolith's Tablet=$locs:@pemit %#==%[ # %]=%[%b db# %b%]===%[ Location Name %]=================================%[ Flags %]=[iter(v(LOCNUMS),%r[space(3)][setq(0,add(r(0),1))][r(0)][rjust(##,10)][space(3)]:[space(3)][ljust(mid(name(##),0,47),49)] [flags(##)])]%r[repeat(-,79)]%r[center(use 'ttel <num>' to @tel to a location.,79,)]%r[repeat(=,79)]
+&ADD_LOC PARENT: Monolith's Tablet=$ladd:&LOCNUMS me=[v(LOCNUMS)] [loc(%#)]
+&ISLOC PARENT: Monolith's Tablet=[and(isnum(%0),and(gte(%0,1),lte(%0,words(v(LOCNUMS)))))]
+&HELP_LOCATIONS PARENT: Monolith's Tablet=%tLocs%t%t: Display all locations stored.%r%tLAdd%t%t: Add your current location to the list.%r%tLRem <num>%t: Remove location from list.%r%TTTel <num>%t: @teleport to a location on list.
+&THELP PARENT: Monolith's Tablet=$thelp:@pemit %#=[center(< Tablet help page. >,79,=)]%r[center(Try 'thelp page' for the help page.,79,)]%r[center(< Coded by Monolith@VenusMUSH >,79,=)]
+&THELP_HELP PARENT: Monolith's Tablet=[iter(lattr(me/HELP_*),capstr(lcstr(edit(delete(##,0,5),_,%b)))%,)]
+&EMIT_DESC PARENT: Monolith's Tablet=$demit *=*:@switch comp(v(DESC_[edit(%0,%b,_)]),)=0, {@pemit %#=Description unknown.}, {@pemit %#=Emit messages stored.; &DATA_[edit(%0,%b,_)] me=[extract(v(DATA_[edit(%0,%b,_)]),1,3,|)]|%1}
+&MAIL_FRIENDS PARENT: Monolith's Tablet=$fmail *:@fo %#=+mail [u(FRIENDS)]=%0
+&X_WHO PARENT: Monolith's Tablet=$xwho:@va me=[lwho()]; @vb me=[sort(iter(%va,switch(not(loc(##)),0,##)))]; @pemit %#==%[ # %]=%[ Name %]============%[ Sex : Idle : Location %]===========================[iter(%va,%r[space(3)][u(S_RANK,##)][space(5)][ljust(name(##),21)][switch(get(##/SEX),m*,M,f*,F,-)][space(3)][center(u(IDLE_FOR,##),6,)][space(2)][mid(u(FIND_LOC,##),0,36)])]%r[repeat(=,79)]
+@VA PARENT: Monolith's Tablet=#3092 #11170 #3702 #8853 #8333 #9790 #10118 #6744 #9620 #6585 #4954 #1622 #10132 #4769 #10720 #7509 #1147 #5326 #4624 #6329 #2989 #7259 #9087 #5402 #2734
+&S_RANK PARENT: Monolith's Tablet=[switch(1,hasflag(%0,wiz),W,hasflag(%0,admin),A,hasflag(%0,staff),S,hasflag(%0,judge),J,-)]
+&IDLE_FOR PARENT: Monolith's Tablet=[setq(0,idle(%0))][switch(gte(r(0),60),0,[r(0)]s,[div(r(0),60)]m)]
+&FIND_LOC PARENT: Monolith's Tablet=[switch(loc(%0),#-1,X [mid(u(HIDDEN_LOC,%0,%vb),0,34)],- [mid(name(loc(%0)),0,34)])]
+&HIDDEN_LOC PARENT: Monolith's Tablet=[switch(words(%1),0,{[center(= Unindable =,34,-)]},{[switch(nearby(%0,first(%1)),1,name(loc(first(%1))),u(HIDDEN_LOC,%0,ldelete(%1,1)))]})]
+@VB PARENT: Monolith's Tablet=#3092 #5402 #7259 #9087 #9620 #10118
+&DO_PRINT PARENT: Monolith's Tablet=@create Note: [setq(0,edit(%0,_,%b))][r(0)]; @desc Note: [r(0)]=[center(< [r(0)] >,79,=)]%r[v(NOTE_%0)]%r[repeat(=,79)]; drop Note: [r(0)]
+&REM_LOC PARENT: Monolith's Tablet=$lrem *:@switch u(ISLOC,%0)=0, {@pemit %#=That is not a valid location.}, {&LOCNUMS me=[ldelete(v(LOCNUMS),%0)]; @pemit %#=Location removed from list.}
+@Sex PARENT: Monolith's Tablet=[v(FRIENDS)]
+&FRIEND_LOCK PARENT: Monolith's Tablet=[sign(match(v(FRIENDS),%#))]
+&HELP_FRIEND_LOCKS PARENT: Monolith's Tablet=The friends list can be used to @lock doors so that friends may pass. Allowing you to update door @locks easily and efficiently. To do so do the following to the doors in question.%r%r%t&CAN_PASS <door>=%[u(%!/FRIEND_LOCK)%]%r%t@set <door>=inherit%r%tThen use CAN_PASS/1 in the @lock.%r%te.g. @lock <door>=me|CAN_PASS/1%r%tThis will let you and anyone on the friend list pass.
+@set PARENT: Monolith's Tablet=VISUAL
+@set PARENT: Monolith's Tablet=PARENT_OK
+@set PARENT: Monolith's Tablet=NO_COMMAND
+@set PARENT: Monolith's Tablet=HALT

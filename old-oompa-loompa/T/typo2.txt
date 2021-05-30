@@ -1,0 +1,18 @@
+@@ This is my first attempt at a big coding project and there are bound to 
+@@ be problems with it. This command should be used as a global to assist
+@@ people in finding typos in descs and in code. 
+@@ Report bugs to mrob@fix.net
+
+@create +typo global=10
+@Desc +typo global=This is the +typo global.. obvouisly.. Use the +lhelp for local commands on it.
+&CMD_TYPO +typo global=$+typo *:&Typo[get(me/typonum)] me=secure(%0)%rIt was Submitted by %ch%cr[name(%#)]%cn from %ch%cy[fullname(loc(%#))]([loc(%#)])%cn;&typos me=[v(typos)] [v(typonum)];@swi [v(typos)]=0;{&typos me=1};&typonum me=inc(v(typonum));@pemit %#=%rYou have added a typo to the list. Thank you for your support, please continue to use this function to make your playing experience a little more fun.%r;&numtypos me =[add(v(numtypos),1)]
+&CMD_LIST +typo global=$+list typos:@switch [hasflag(%#,STAFF)]=0,@pemit %N=That is a restricted command;@switch [v(typonum)]=1,@pemit %#=There are no typos reported.,2,@pemit %#=These are the following unfixed typos:%r;@dolist v(typos)=@pemit %#=[match(v(typos),##)]. [v(typo##)]
+&CMD_READ +typo global=$+read typo *:@switch [hasflag(%#,STAFF)]=0;{@pemit %N=That is a restricted command};@pemit %N=The +typo reads:%r[get(me/typo%0)]
+&TYPONUM +typo global=6
+&CMD_CLEAR +typo global=$+clear typos:@switch [hasflag(%#,STAFF)]=0,@pemit %#=That is a restricted command.;@dolist v(typos)={&typo## me =;&numtypos me=};&typonum me =1;&typos me =;@pemit %# =You clear all the typos.
+&CMD_ERASE +typo global=$+del typo *:@switch [hasflag(%#,STAFF)]=0;{@pemit %#=That is a restricted command.};@swi gt(%0,v(numtypos))=1,{@pemit %#=That note doesn't exist.},{&typo[extract(v(numtypos),%0,1)] me=;&typo[extract(v(typos),%0,1)] me=;&typos me=remove(v(typos),extract(v(typos),%0,1));&numtypos me=add(v(numtypos),-1);@pemit %#=You have erased the typo from the list.;@swi [v(numtypos)]=0,&numtypos me=1}
+&NUMTYPOS +typo global=1
+&HELP2_TYPO +typo global=$+shelp typo:@pemit %#=[repeat(=-,38)]%r[center(Staff help for the +typo system,80,%b)]%rCOMMANDS:%r%t+list typos :Lists all typos.%r%t+clear typos: Clears the entire list%r%t+del typo *:Deletes a specific typo%r%t+read typo *:Reads a specific typo report.%r[repeat(=,78)]%r[center(Coded by SatBLDR. If you want a copy of this let me know and I'll give you,80)]%r[center(one for use.,80)]%r[repeat(-=,38)]
+&HELP_TYPO +typo global=$+staffhelp:@pemit %#=Help also for the +typo reporting system. Type +shelp typo for a list of commands.
+&credit +typo global=Coded by SatBLDR/Anubus of CCSMUX ccsmux.telmaron.com 7283
+

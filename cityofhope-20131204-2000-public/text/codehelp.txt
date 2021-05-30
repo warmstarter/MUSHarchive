@@ -1,0 +1,284 @@
+& help
+[header(Code Help)]
+The +chelp system exists to provide information related to code on [mudname()].
+
+General categories accessible via +chelp <category>:
+   Coding Standards   Functions   CGen
+
+See Also: Code Documentation
+[footer()]
+
+& Attribute Names
+[header(Attribute Names)]
+Attributes on non-personal coded objects are to have their names prefixed
+based on the purpose of the attribute. Prefixes are as follows:
+
+UFUN_ - Soft functions invoked via U()
+GFUN_ - Soft functions invoked as global functions (set with @function)
+CMND_ - Soft commands
+TEXT_ - Attributes used to store message text and templates
+LIST_ - Attributes used to store delimited lists
+DATA_ - Attributes storing other data
+META_ - Attributes storing information about the code but not used by the code
+[footer()]
+
+& Code Documentation
+[header(Code Documentation)]
+All non-personal coded objects are to have the following "META" attributes
+set:
+
+META_AUTHOR - Charname and DBRef of the author
+META_UPDATED_BY - Charname and DBRef of last updated
+META_PURPOSE - What the code is supposed to accomplish
+META_NEEDS_OBJS - Objects this object depends on
+META_NEEDS_FLAGS - Flags this object needs to function properly
+
+These attributes can easily be managed with the Code Manager. See
++chelp code manager
+
+Authors and maintainers are strongly encouraged to add any other "META"
+attributes that seem relevant or helpful. 
+
+See Also: [ljust(Code Manager,20)]
+[footer()]
+
+& Coding Standards
+[header(Coding Standards)]
+[mudname()] implements a body of coding standards to ensure easy collaboration and take the pain out of 'passing the torch' to codestaff to come. Although players are encouraged to follow these standards in their own personal code, the standards are only required for code intended to be publicly usable.
+
+Coding Standards Topics:
+   [ljust(Code Documentation,20)] [ljust(Attribute Names,17)] [ljust(Look and Feel,15)]
+[footer()]
+
+& Functions
+[header(Functions)]
+Numerous soft code functions have been created to aid code developers and
+prevent numerous people from reinventing the wheel. Functions invoked via the
+built-in U() function will be referred to as "soft functions". Functions
+invoked in the same way as built in functions, such as header() will be
+referred to as "soft global functions". More information on any of these can
+be obtained via '+chelp <name>'.
+
+  Soft u\(\) functions:
+   UFUN_PROGRESS_BAR
+  Soft Global Functions:
+   header    pcol    isstaff     mmm-dd-yyyy
+   footer    scol    ostaff      hasauthority
+   exitname  tcol    isapproved  
+             isic
+
+[footer()]
+
+& header
+[header(header\(\[text\]\))]
+header() is a soft global function which returns standard header that appears
+at the top of the output from most game commands. Usage of header() is
+strongly encouraged as hit helps present a uniform look and feel to the game.
+
+With no arguments, header() inserts the MUSH name into the middle of the
+header. If text is supplied, the given text is inserted into the middle of the
+header.
+
+There is also subheader() which is a slightly downplayed version of header(),
+useful for separating sections of the output from one command.
+
+See Also: [ljust(footer,10)] [ljust(Look and Feel,15)]
+[footer()]
+
+& footer
+[header(footer)]
+footer() is a soft global function which returns standard footer that appears
+at the bottom of the output from most game commands. Usage of footer() is
+strongly encouraged as hit helps present a uniform look and feel to the game.
+
+See Also: [ljust(header,10)] [ljust(Look and Feel,15)]
+[footer()]
+
+& Code Manager
+[header(Code Manager)]
+Coding documentation standards are wonderful for people trying to read code
+but generally a pain for those trying to write and maintain code. The Code
+Manager was created with this in mind. The Code Manager seeks to reduce the
+amount of tedious work involved in code creation and maintanence. The Code
+Manager offers the following commands which are accessible via +chelp
+<command>:
+
+  [ljust(+ccreate,12)] [ljust(+cupdate,12)] [ljust(+cview,12)] [ljust(+cneedsobjs,15)] [ljust(+cneedsflags,12)]
+
+See Also: [ljust(Code Documentation,20)]
+[footer()]
+
+& +cview
+[header(+cview <name/dbref>)]
++cview examines an object specified by either a name or a dbref and displays all code documentation available
+
+See Also: [ljust(+ccreate,12)] [ljust(+cupdate,12)] [ljust(+cneedsobjs,15)] [ljust(+cneedsflags,12)]
+[footer()]
+
+& +ccreate
+[header(+ccreate <name>=<purpose>)]
++ccreate creates a new object with the provided name, sets what documentation
+it can, ands sets some basic flags.
+
+See Also: [ljust(+cupdate,12)] [ljust(+cview,12)] [ljust(+cneedsobjs,15)] [ljust(+cneedsflags,12)]
+[footer()]
+
+& +cupdate
+[header(+cupdate <name/dbref>)]
+   +cupdate <name/dbref>
+
++cupdate annotates a modification to the object specified by name or dbref
+
+See Also: [ljust(+ccreate,12)] [ljust(+cview,12)] [ljust(+cneedsobjs,15)] [ljust(+cneedsflags,12)]
+[footer()]
+
+& +cneedsobjs
+[header(+cneedsobjs <name/dbref>=<dbref1> <dbref2> <dbrefn>)]
++cneedsobjs annotates that the object specified by name or dbref depends on
+the other objects, specified by dbref, to function properly. +cneedsobjs does
+%xhnot%xn add to the existing list: it replaces the existing list. It also automatically performs a +cupdate.
+
+
+See Also: [ljust(+ccreate,12)] [ljust(+cview,12)] [ljust(+cupdate,12)] [ljust(+cneedsflags,12)]
+[footer()]
+
+& +cneedsflags
+[header(+cneedsflags <name/dbref>=<flag1> <flag2> <flagn>)]
++cneedsflags annotates that the object specified by name or dbref requires the
+listed flags to function properly. +cneedsflags does %xhnot%xn add to the
+existing list: it replaces the existing list. It also automatically performs a
++cupdate
+
+See Also: [ljust(+ccreate,12)] [ljust(+cview,12)] [ljust(+cupdate,12)] [ljust(+cneedsobjs,12)]
+[footer()]
+
+& isstaff
+[header(isstaff\(<dbref>\))]
+isstaff() returns 1 or 0 when player matches the flags defined as 'staff'
+
+See Also: [ljust(ostaff,12)] [ljust(Functions,12)]
+[footer()]
+
+& ostaff
+[header(ostaff\(<dbref>\))]
+Softcoded function that checks to see if <dbref> against the official staff list as listed on the Global Parent.
+
+See Also: [ljust(isstaff,12)] [ljust(Functions,12)]
+[footer()]
+
+& andlist
+[header(andlist\(<string>\,<delimiter>\))]
+Returns a string as a comma separated list with 'and' between second to last and last elements.
+
+See Also: [ljust(Functions,12)]
+[footer()]
+
+& mmm-dd-yyyy
+[header(mmm-dd-yyyy\(\))]
+Returns time() output in terms of MMM DD YYYY.
+
+See Also: [ljust(Functions,12)]
+[footer()]
+
+& pcol
+[header(pcol\(<text>\))]
+Returns the supplied text colored with the MUSH's primary color.
+
+See Also: [ljust(scol,10)] [ljust(tcol,10)] [ljust(Look and Feel,15)]
+[footer()]
+
+& scol
+[header(scol\(<text>\))]
+Returns the supplied text colored with the MUSH's secondary color.
+
+See Also: [ljust(pcol,10)] [ljust(tcol,10)] [ljust(Look and Feel,15)]
+[footer()]
+
+& tcol
+[header(tcol\(<text>\))]
+Returns the supplied text colored with the MUSH's tertiary color.
+
+See Also: [ljust(pcol,10)] [ljust(scol,10)] [ljust(Look and Feel,15)]
+[footer()]
+
+& Look and Feel
+[header(Look and Feel)]
+[mudname()] tries to maintain a consistant appearance for all command output
+to make it easier for players and staff to adjust to unfamiliar commands.
+TODO: Finish writing this up
+
+To make it easy for code developers to write code that stays consistant with
+[mudname()]'s appearance, a slew of "Look and Feel" related functions are
+provided. Each one applies some aspect of the game's visual style to a piece
+of supplied text. These functions are:
+
+  [ljust(header,12)] [ljust(pcol,10)] [ljust(exitname,10)]
+  [ljust(footer,12)] [ljust(scol,10)]
+  [ljust(,12)] [ljust(tcol,10)]
+
+See Also: [ljust(Coding Standards,18)]
+[footer()]
+
+& exitname
+[header(exitname\(<abbreviation>\,<exit title>\))]
+TODO: Update this. It's out of date.
+exitname() takes an exit abbreviation and title and returns an exit name with
+the MUSH's look and feel. For example, the call exitname(101,Room 101) would
+return [exitname(101,Room 101)]. When using this to rename an exit, simply use
+the call to exitname as you would a regular exit name, like this:
+
+  @name 101=\[exitname\(101,Room 101\)\];101;...
+
+Unfortunately, when you do this to set an exit name, the function call
+executes %xhbefore%xn the assignment, not with every player look. If the MUSH
+Look and Feel standards change and break your exit's compliance, you have to
+re-@name your exit with the exitname() call, exactly as you did before.
+
+See Also: [ljust(Look and Feel,15)]
+[footer()]
+
+& hasauthority
+[header(hasauthority\(<player>\,<authority>\))]
+hasauthority() takes a player name or dbref and an authority and returns 1 or
+0 depending on whether or not that player has that authority. If the player
+supplied is not staff, it will return 0.
+
+See Also:  [ljust(isstaff,12)] [ljust(ostaff,10)]
+In +shelp: [ljust(+authorities,12)]
+[footer()]
+& +list
+[header(+list)]
+The +list system helps determine what stats players are eligible for. The +list commands reside on #448 while the functions that do the actual work, UFUN_CHECK_LIST, UFUN_BUILD_LIST, and UFUN_BUILD_LIST_ALL, reside on #465.
+
+The UFUN_BUILD_LIST function takes two arguments: <category> and <player dbref>. It grabs all the attributes on #465 that begin with UFUN_BLIST_<category>_ and individually supplies them to UFUN_CHECK_LIST. If UFUN_CHECK_LIST returns 1, the UFUN_BLIST_ attribute is assumed to apply to the player, gets executed, and the list that it returns is setunion'd with the building list of items \(\%qL\).
+
+UFUN_CHECK_LIST is just a helper function and shouldn't be called directly. It performs the tests to determine if a list building function applies to the player. It is supplied everything in the name of a UFUN_BLIST_ attribute name after UFUN_BLIST_<category>_, which is assumed to be a list of <vital>-<value> pairs, delimited by underscores. If there are spaces in the proper text of the vital name or value, they should have those spaces replaced with periods in the UFUN name. For each pair, the contents of that vital are grabbed off the player with the string\(\) function and compared to the <value> after the hyphen in the UFUN name. If they match, it spits out a 0, if they don't match, it spits out a 1. All of the 1s and 0s are tallied up and if the result is 0, then every pair matched and the UFUN_BLIST_ function applies to the player.
+
+By a not undesirable quirk in the UFUN_CHECK_LIST function, if you name a function UFUN_BLIST_<category>_COMMON, the COMMON is evaluated as the name of a vital. Because no race has a vital called 'common', the string\(\) call will always return nothing. Because there's no -<value> on the UFUN name, the nothing matches nothing and that UFUN always applies. This provides a way to make a list that will apply to everyone, regardless of race. It doesn't need to be COMMON, but that should be used as it makes it clear what it's purpose is.
+[footer()]
+& isapproved()
+[header(isapproved\(<dbref>\))]
+The isapproved\(<dbref>\) function checks to see if a player is approved for RP. It returns 1 or 0. It checks the _APPROVED_BY and _APPROVED_ON attributes on the supplied player.
+[footer()]
+& CGEN
+[header(Chargen Notes)]
+[mudname()] uses the SGP Character Sheet system with the WoD module with some
+improvements of our own. Topics related to our chargen improvements are:
+
+  +list
+
+See Also in +shelp: cgen
+[footer()]
+& UFUN_PROGRESS_BAR
+[header(#452/UFUN_PROGRESS_BAR)]
+The UFUN_PROGRESS_BAR u\(\) function creates a progress bar of <length>, full to <fraction>. As a rule, <length> shouldn't be longer than 78 as that's the standard accepted screen width. The length number includes 2 characters for the caps, so if you say 78, the progress bar will fit into 78 characters.  <fraction> should always be a number between 0 and 1. A value of 1 or larger will always result in a full bar that still fits within the desired <length>.  A <fraction> less than one will always leave at least one space open so the bar will not appear full unless <fraction> is 1 or greater.
+
+Example:
+  @pemit me=u\(#452/UFUN_PROGRESS_BAR,36,.47\)
+  > [u(#452/UFUN_PROGRESS_BAR,36,.47)]
+[footer()]
+& isic()
+[header(isic\(<dbref>\))]
+The isic() function takes a player's dbref and returns either 1 or 0 for in and out of character respectively. This is based on whether or not the room they are in has the Backstate Room Parent Object in its parent hierarchy. This function is used by many commands and system functions, including the decision of whether or not to award someone XP for being IC.
+[footer()]
+&

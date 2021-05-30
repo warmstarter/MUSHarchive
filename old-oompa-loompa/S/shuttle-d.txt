@@ -1,0 +1,174 @@
+@set me=quiet
+@switch [isdbref(num(Shuttle Main Parent))]=0,{think [ansi(hm,INSTALL:)] No "Shuttle Main Parent" object found -- creating...;@create Shuttle Main Parent},1,{think [ansi(hm,INSTALL:)] "Shuttle Main Parent" object already exists... skipping creation.}
+@switch [isdbref(num(Shuttle Landing-Area Parent))]=0,{think [ansi(hm,INSTALL:)] No "Shuttle Landing-Area Parent" object found -- creating...;@create Shuttle Landing-Area Parent},1,{think [ansi(hm,INSTALL:)] "Shuttle Landing-Area Parent" object already exists... skipping creation.}
+@switch [isdbref(num(Shuttle Ship Parent))]=0,{think [ansi(hm,INSTALL:)] No "Shuttle Ship Parent" object found -- creating...;@create Shuttle Ship Parent},1,{think [ansi(hm,INSTALL:)] "Shuttle Ship Parent" object already exists... skipping creation.}
+@switch [isdbref(num(Shuttle Entrance Parent))]=0,{think [ansi(hm,INSTALL:)] No "Shuttle Entrance Parent" object found -- creating...;@create Shuttle Entrance Parent},1,{think [ansi(hm,INSTALL:)] "Shuttle Entrance Parent" object already exists... skipping creation.}
+@switch [isdbref(num(Shuttle Exit Parent))]=0,{think [ansi(hm,INSTALL:)] No "Shuttle Exit Parent" object found -- creating...;@create Shuttle Exit Parent},1,{think [ansi(hm,INSTALL:)] "Shuttle Exit Parent" object already exists... skipping creation.}
+@switch [isdbref(num(Shuttle Terminal))]=0,{think [ansi(hm,INSTALL:)] No "Shuttle Terminal" object found -- creating...;@create Shuttle Terminal},1,{think [ansi(hm,INSTALL:)] "Shuttle Terminal" object already exists... skipping creation.}
+think [ansi(hm,INSTALL:)] Setting Shuttle Flags...
+@set Shuttle Main Parent=no_command
+@set Shuttle Main Parent=!halt
+@set Shuttle Landing-Area Parent=no_command
+@set Shuttle Landing-Area Parent=!halt
+@set Shuttle Terminal=!no_command
+@set Shuttle Terminal=!halt
+@set Shuttle Terminal=Wizard
+@set Shuttle Ship Parent=no_command
+@set Shuttle Ship Parent=!halt
+@set Shuttle Entrance Parent=no_command
+@set Shuttle Entrance Parent=!halt
+@set Shuttle Exit Parent=no_command
+@set Shuttle Exit Parent=!halt
+@parent Shuttle Terminal=Shuttle Landing-Area Parent
+@parent Shuttle Landing-Area Parent=Shuttle Main Parent
+@parent Shuttle Ship Parent=Shuttle Main Parent
+think [ansi(hm,INSTALL:)] Downloading Shuttle Commands...
+&CMD_SHUTTLE.Copyright Shuttle Main Parent=$shu*/copy*:[pemit(%#,Shuttle Parent v[v(DATA_VERSION)] -- Created by Demonic \(2000\)%rUpdated versions of this code can be found on:%r%b%bhttp://www.mindspring.com/~loparo)]
+&CMD_SHUTTLE.Help Shuttle Main Parent=$shu*/help:[pemit(%#,[ansi(v(FONT_HELP.Border),[repeat(-,78)]%r<<<<<)][ansi(v(FONT_HELP.Header),center(Shuttle Help Section,68))][ansi(v(FONT_HELP.Border),>>>>>%r[repeat(-,78)])]%r[u(DRAW_SHUTTLE.Help)]%r[ansi(v(FONT_HELP.Border),repeat(-,78))])]
+&CMD_SHUTTLE.Setup Shuttle Main Parent=$shu*/setup:[pemit(%#,[ansi(v(FONT_HELP.Border),[repeat(-,78)]%r<<<<<)][ansi(v(FONT_HELP.Header),center(SHUTTLE HELP SECTION,68))][ansi(v(FONT_HELP.Border),>>>>>%r[repeat(-,78)])]%rIf you are seeing this text\, it means you already have a terminal setup. Great\, but let's make sure you actually set this terminal up properly. Every Shuttle Terminal should have the following things done:%r%r%b%b[ansi(v(FONT_HELP.Cmds),[ifelse(hasflag(me,Wizard),%b,*)]%b@set Shuttle Terminal=WIZARD)]%r%b%b[ansi(v(FONT_HELP.Cmds),[ifelse(member(lock(me),%!),%b,*)]%b@lock Shuttle Terminal=Shuttle Terminal)]%r%b%b[ansi(v(FONT_HELP.Cmds),[ifelse(hasflag(me,ENTER_OK),*,%b)]%b@set Shuttle Terminal=!ENTER_OK)] \(make sure to type the ! too\)%r%b%b[ansi(v(FONT_HELP.Cmds),[ifelse(hastype(%l,ROOM),%b,*)]%bdrop Shuttle Terminal)] \(must be in a ROOM -- not an OBJECT\)%r%r%b%b[ansi(v(FONT_HELP.Cmds),[ifelse(member([v(PTR_SHUTTLE.Land)] [v(PTR_SHUTTLE.Ship)],parent(me)),%b,*)]%b@parent Shuttle Terminal=Shuttle Landing-Area Parent)] \(if in landing area\)%r[space(6)]- OR -%r%b%b[ansi(v(FONT_HELP.Cmds),[ifelse(member([v(PTR_SHUTTLE.Land)] [v(PTR_SHUTTLE.Ship)],parent(me)),%b,*)]%b@parent Shuttle Terminal=Shuttle Ship Parent)] \(if inside a shuttle\)%r%rIf you see a [ansi(v(FONT_HELP.Cmds),*)] it means you do not have that part of this terminal set properly\, and you should type the command exactly as it appears. Believe it or not\, this is the hardest part of setting up a shuttle. It only gets easier from here...%r%r\(Continued in '[ansi(v(FONT_HELP.Cmds),shuttle/setup2)]'\)%r[ansi(v(FONT_HELP.Border),repeat(-,78))])]
+&CMD_SHUTTLE.Setup2 Shuttle Main Parent=$shu*/setup2:[pemit(%#,[ansi(v(FONT_HELP.Border),[repeat(-,78)]%r<<<<<)][ansi(v(FONT_HELP.Header),center(SHUTTLE HELP SECTION 2,68))][ansi(v(FONT_HELP.Border),>>>>>%r[repeat(-,78)])]%rNow you will want to make your shuttle\(s\). You can make as many or as few as you want\, but these steps must be followed for each and every one you create:%r%r- First\, make sure the Landing Area has a ZONE. If necessary see '[ansi(v(FONT_HELP.Cmds),help zones)]'.%r- Set &ST_STARTPOS on the ZONE to the celestial body's XYZ coords.%r- Next @dig the room for your shuttle. Make sure it has an exit and entrance.%r- @parent the Entrance (to the Shuttle) to the Shuttle Entrance Parent.%r- Enter the Shuttle.%r- @parent the Exit (from the Shuttle) to the Shuttle Exit Parent.%r- @lock the Exit to LOCK_NORMAL/1 by typing '[ansi(v(FONT_HELP.CMDS),@lock <exit name>=LOCK_NORMAL/1)]'.%r- Create a new Shuttle Terminal and follow the steps in '[ansi(v(FONT_HELP.Cmds),shuttle/setup)]'.%r- Set &DATA_WARP on the Shuttle Terminal to the shuttle's warp speed.%r- Set &DATA_RANGE on the Shuttle Terminal to the shuttle's range.%r%rThat's it! Your shuttle should be ready to go now. If there are any problems\, make sure the parents are set correctly and that the proper flags are set on the terminals.%r[ansi(v(FONT_HELP.Border),repeat(-,78))])]
+&CMD_SHUTTLE.Plot Shuttle Ship Parent=$shu*/plot *:[switch([u(FUN_PLR.Auth-Plot,%#,%!)][isdbref(setr(1,u(FUN_CONVERT.Plot2Zone,secure(%1))))][eq(trunc(xget(last(lexits(%l)),FLAG_SPACED)),1)][member(%q1,zone(loc(last(lexits(%l)))))][u(FUN_SHUTTLE.CanMakeRange2,%!,u(FUN_CALC.Dist,u(FUN_BODY.Pos,zone(loc(last(lexits(here))))),u(FUN_BODY.Pos,%q1)))],0????,u(TRI_ERROR,%#,!AUTH_PLOT),10???,u(TRI_ERROR,%#,PLOT_!VALID,secure(%1)),111??,u(TRI_ERROR,%#,SHUTTLE_SPACED),1101?,u(TRI_ERROR,%#,SHUTTLE_ALREADY_HERE2,%q1),11000,u(TRI_ERROR,%#,SHUTTLE_CANT_MAKE_RANGE2,%q1),11001,u(TRI_SHUTTLE.Plot,%#,%q1,u(FUN_CONVERT.Plot2Room,secure(%1))),u(TRI_SYSERR,%#))]
+&CMD_SHUTTLE.Launch Shuttle Ship Parent=$shu*/launch:@switch [u(FUN_PLR.Auth-Launch,%#,%!)][isdbref(v(DATA_PLOT))][eq(trunc(xget(last(lexits(%l)),FLAG_SPACED)),1)][member(v(DATA_PLOT),loc(last(lexits(%l))))]=0???,{think [u(TRI_ERROR,%#,!AUTH_LAUNCH)]},10??,{think [u(TRI_ERROR,%#,COURSE_!VALID)]},111?,{think [u(TRI_ERROR,%#,SHUTTLE_LAUNCHED)]},1101,{think [u(TRI_ERROR,%#,SHUTTLE_ALREADY_HERE2,v(DATA_PLOT))]},1100,{@tr me/TRI_SHUTTLE.CmdLaunch=%#,[v(DATA_PLOT)]},{think [u(TRI_SYSERR,%#)]}
+&CMD_SHUTTLE.Dest Shuttle Ship Parent=$shu*/dest*:[pemit(%#,[ansi(v(FONT_DEST.Border),[repeat(-,78)]%r<<<<<)][ansi(v(FONT_DEST.Header),center(Shuttle Destinations - from [name(zone(v(DATA_LAST.Loc)))],68))][ansi(v(FONT_DEST.Border),>>>>>%r[repeat(-,78)])][iter(u(FUN_ROOM.List),%r[ljust(name(zone(##)),23,.)] \[Range\] [rjust(setr(4,trunc(u(FUN_CALC.Dist,u(FUN_BODY.Pos,zone(v(DATA_LAST.Loc))),u(FUN_BODY.Pos,zone(##))))),8)].... \[EFT\] [u(FUN_CONVERT.Secs2Time,u(FUN_CALC.ETA,%q4,v(DATA_WARP)))].... [left(masterorgname(owner(##)),14)])]%r[ansi(v(FONT_DEST.Border),repeat(-,78))]%r* Estimated flight times \(EFT\) are based on warp [v(DATA_WARP)])]
+&CMD_SHUTTLE.ETA Shuttle Ship Parent=$shu*/eta:[pemit(%#,ifelse(v(DATA_ETA),The current ETA to [name(zone(v(DATA_DESTINATION)))] is [u(FUN_CONVERT.Secs2Time,sub(v(DATA_ETA),secs()))].,The shuttle is not in flight.))]
+&CMD_SHUTTLE.Dest Shuttle Landing-Area Parent=$shu*/dest*:[pemit(%#,[ansi(v(FONT_DEST.Border),[repeat(-,78)]%r<<<<<)][ansi(v(FONT_DEST.Header),center(Shuttle Destinations - from [name(zone(here))],68))][ansi(v(FONT_DEST.Border),>>>>>%r[repeat(-,78)])][iter(u(FUN_ROOM.List),%r[ljust(name(zone(##)),23,.)] \[Range\] [rjust(setr(4,trunc(u(FUN_CALC.Dist,u(FUN_BODY.Pos,zone(here)),u(FUN_BODY.Pos,zone(##))))),8)].... \[EFT\] [u(FUN_CONVERT.Secs2Time,u(FUN_CALC.ETA,%q4,v(DATA_WARP.Default)))].... [left(masterorgname(owner(##)),14)])]%r[ansi(v(FONT_DEST.Border),repeat(-,78))]%r* Estimated flight times \(EFT\) are based on warp [v(DATA_WARP.Default)])]
+&CMD_SHUTTLE.List Shuttle Landing-Area Parent=$shu*/list:[pemit(%#,[ansi(v(FONT_LIST.Border),[repeat(-,78)]%r<<<<<)][ansi(v(FONT_LIST.Header),center(Shuttle Listing - from [name(zone(here))],68))][ansi(v(FONT_LIST.Border),>>>>>%r[repeat(-,78)])]%r%b[ansi(v(FONT_LIST.Title),ljust(Shuttle Name,23))][ansi(v(FONT_LIST.Border),|)] [ansi(v(FONT_LIST.Title),ljust(Shuttle Location,31))][ansi(v(FONT_LIST.Border),|)] [ansi(v(FONT_LIST.Title),Warp)] [ansi(v(FONT_LIST.Border),|)] [ansi(v(FONT_LIST.Title),Range)]%r[ansi(v(FONT_LIST.Border),------------------------|--------------------------------|------|-------------)][iter(u(FUN_SHUTTLE.LIST),%r%b[ljust(left(name(loc(##)),23),23)][ansi(v(FONT_LIST.Border),|)] [ljust(left(ifelse(u(FUN_SHUTTLE.InFlight,##),ifelse(member(%l,xget(##,DATA_DESTINATION)),* IN FLIGHT - ETA: [u(FUN_CONVERT.Secs2Time,sub(xget(##,DATA_ETA),secs()))],* In flight to [name(zone(xget(##,DATA_DESTINATION)))]),[name(zone(setr(0,loc(last(lexits(loc(##)))))))]: [name(%q0)]),31),31)][ansi(v(FONT_LIST.Border),|)] [rjust(ifelse(isnum(xget(##,DATA_WARP)),round(xget(##,DATA_WARP),1),0.0),4)] [ansi(v(FONT_LIST.Border),|)] [trunc(xget(##,DATA_RANGE))])]%r[ansi(v(FONT_LIST.Border),repeat(-,78))]%r* Use '[ansi(v(FONT_SHUTTLE.Cmds),shuttle/call <name>)]' to summon a shuttle.)]
+&CMD_SHUTTLE.Call Shuttle Landing-Area Parent=$shu*/call *:@switch [u(FUN_PLR.Auth-Call,%#)][u(FUN_SHUTTLE.Valid,setr(1,u(FUN_CONVERT.Input2Ship,%1)))][u(FUN_SHUTTLE.InFlight,%q1)][member(u(FUN_CONVERT.Ship2Loc,%q1),%l)][ifelse(v(CNF_CHECKRANGE.OnCall),u(FUN_SHUTTLE.CanMakeRange2,%q1,setr(2,u(FUN_CALC.Dist,u(FUN_BODY.Pos,zone(%l)),u(FUN_BODY.Pos,zone(u(FUN_CONVERT.Ship2Loc,%q1)))))),1)]=0????,{think [u(TRI_ERROR,%#,!AUTH_CALL)]},10???,{think [u(TRI_ERROR,%#,SHUTTLE_!VALID,secure(%1))]},111??,{think [u(TRI_ERROR,%#,SHUTTLE_INFLIGHT,%q1)]},1101?,{think [u(TRI_ERROR,%#,SHUTTLE_ALREADY_HERE,%q1)]},11000,think [u(TRI_ERROR,%#,SHUTTLE_CANT_MAKE_RANGE,%q1)]},11001,{@tr me/TRI_SHUTTLE.Call-[ifelse(v(CNF_CALL.Immediate),Immediate,Delayed)]=%#,%q1,%q2},{think [u(TRI_SYSERR,%#)]}
+think [ansi(hm,INSTALL:)] Downloading Shuttle Triggers...
+&TRI_SYSERR Shuttle Main Parent=[pemit(%0,ansi(fhr,SYSERR: There is a bug in the code. Please report this to an Administrator.))]
+&TRI_ERROR Shuttle Main Parent=[pemit(%0,[u(DATA_PREFIX.Error)][space(ifelse(words(u(DATA_PREFIX.Error)),1,0))][u(ERR_%1,%2,%3,%4,%5)])]
+&TRI_MESSAGE.PRIV Shuttle Main Parent=[pemit(%0,[u(DATA_PREFIX.Game)][space(not(not(words(u(DATA_PREFIX.Game)))))][u(MSG_%1,%2,%3,%4)])]
+&TRI_MESSAGE.OTHERS Shuttle Main Parent=[pemit(setdiff(lcon(loc(%0)),%0),[u(DATA_PREFIX.Game)][space(not(not(words(u(DATA_PREFIX.Game)))))][u(MSG_%1,%2,%3,%4)])]
+&TRI_MESSAGE.ROOM Shuttle Main Parent=[remit(%0,[u(DATA_PREFIX.Game)][space(not(not(words(u(DATA_PREFIX.Game)))))][u(MSG_%1,%2,%3,%4)])]
+&TRI_SHUTTLE.Land Shuttle Main Parent=[u(TRI_MESSAGE.Room,%2,LANDED_EXTERNAL,%3)][u(TRI_MESSAGE.Room,loc(%3),LANDED_INTERNAL,%3)][link(last(lexits(loc(%3))),%2)][set(%3,DATA_ETA:)][set(%3,DATA_DESTINATION:)][set(%3,DATA_LAST.Loc:%2)][tel(%1,%2)]
+&TRI_SHUTTLE.Launch Shuttle Main Parent=[u(TRI_MESSAGE.Room,loc(%3),LAUNCHED_INTERNAL,%3)][u(TRI_MESSAGE.Room,home(%1),LAUNCHED_EXTERNAL,%3[set(%3,DATA_DESTINATION:%2)][set(%3,DATA_ETA:[add(secs(),u(FUN_CALC.ETA,trunc(u(FUN_CALC.Dist,u(FUN_BODY.Pos,zone(%2)),u(FUN_BODY.Pos,zone(loc(last(lexits(loc(%1)))))))),xget(%3,DATA_WARP)))])][tel(%1,v(PTR_SHUTTLE.Space))])][link(last(lexits(loc(%3))),v(PTR_SHUTTLE.Space))]
+&TRI_SHUTTLE.Plot Shuttle Ship Parent=[setq(3,u(FUN_CALC.ETA,trunc(u(FUN_CALC.Dist,u(FUN_BODY.Pos,%1),u(FUN_BODY.Pos,zone(loc(last(lexits(%l))))))),v(DATA_WARP)))][set(me,DATA_PLOT:%2)][u(TRI_MESSAGE.Priv,%0,COURSE_PLOTTED,%1,%q3)][u(TRI_MESSAGE.Others,%0,COURSE_PLOTTED_BY,%0,%1,%q3)]
+&TRI_SHUTTLE.CmdLaunch Shuttle Ship Parent=think [setq(3,u(FUN_CALC.ETA,trunc(u(FUN_CALC.Dist,u(FUN_BODY.Pos,zone(%1)),u(FUN_BODY.Pos,zone(loc(last(lexits(%l))))))),v(DATA_WARP)))][u(TRI_MESSAGE.Priv,%0,SHIP_CMDLAUNCHED)][u(TRI_MESSAGE.Others,%0,SHIP_CMDLAUNCHED_BY,%0)][u(TRI_MESSAGE.Room,loc(%0),LAUNCH_ETA,%q3)][u(TRI_SHUTTLE.Launch,%0,setr(4,u(FUN_CONVERT.Ship2Entr,%!)),v(DATA_PLOT),%!)];@wait %q3=@tr me/TRI_SHUTTLE.Land=%0,%q4,%1,%!
+&TRI_SHUTTLE.Call-Immediate Shuttle Landing-Area Parent=think [iter(lcon(loc(%1)),if(not(member(lparent(##),v(PTR_SHUTTLE.Ship))),[u(TRI_MESSAGE.Priv,##,PURGE_CALL)][tel(##,last(lexits(loc(%1))))]))][u(TRI_MESSAGE.Priv,%0,SHUTTLE_CALLED,%1)][u(TRI_MESSAGE.Others,%0,SHUTTLE_CALLED_BY,%0,%1)][u(TRI_SHUTTLE.Launch,%0,u(FUN_CONVERT.Ship2Entr,%1),%l,%1)];@wait 5=@tr me/TRI_SHUTTLE.Land=%0,u(FUN_CONVERT.Ship2Entr,%1),%l,%1
+&TRI_SHUTTLE.Call-Delayed Shuttle Landing-Area Parent=think [iter(lcon(loc(%1)),if(not(member(lparent(##),v(PTR_SHUTTLE.Ship))),[u(TRI_MESSAGE.Priv,##,PURGE_CALL)][tel(##,last(lexits(loc(%1))))]))][u(TRI_MESSAGE.Priv,%0,SHUTTLE_CALLED,%1)][u(TRI_MESSAGE.Others,%0,SHUTTLE_CALLED_BY,%0,%1)][u(TRI_SHUTTLE.Launch,%0,u(FUN_CONVERT.Ship2Entr,%1),%l,%1)];@wait [u(FUN_CALC.ETA,trunc(%2),xget(%1,DATA_WARP))]=@tr me/TRI_SHUTTLE.Land=%0,u(FUN_CONVERT.Ship2Entr,%1),%l,%1
+think [ansi(hm,INSTALL:)] Downloading Shuttle Functions...
+&FUN_PLR.Auth-Launch Shuttle Main Parent=1
+&FUN_PLR.Auth-Plot Shuttle Main Parent=1
+&FUN_PLR.Auth-Call Shuttle Main Parent=1
+&FUN_BODY.Pos Shuttle Main Parent=[default(%0/ST_STARTPOS,Unknown)]
+&FUN_BODY.List Shuttle Main Parent=[default(DATA_BODY.Nums,iter(lsearch(all,parent,v(PTR_SHUTTLE.Land)),zone(loc(##))))]
+&FUN_ROOM.List Shuttle Main Parent=[default(DATA_ROOM.Nums,iter(lsearch(all,parent,v(PTR_SHUTTLE.Land)),loc(##)))]
+&FUN_CALC.Dist Shuttle Main Parent=[power(add(power(sub(trunc(extract(%0,1,1)),trunc(extract(%1,1,1))),2),power(sub(trunc(extract(%0,2,1)),trunc(extract(%1,2,1))),2),power(sub(trunc(extract(%0,3,1)),trunc(extract(%1,3,1))),2)),.5)]
+&FUN_CALC.ETA Shuttle Main Parent=[trunc(fdiv(%0,fdiv(power(%1,3),2)))]
+&FUN_SHUTTLE.List Shuttle Main Parent=[default(DATA_SHUTTLE.Terminals,lsearch(all,parent,v(PTR_SHUTTLE.Ship)))]
+&FUN_SHUTTLE.Valid Shuttle Main Parent=[and(isdbref(%0),member(lparent(%0),v(PTR_SHUTTLE.Ship)))]
+&FUN_SHUTTLE.InFlight Shuttle Main Parent=[member(loc(last(lexits(loc(%0)))),v(PTR_SHUTTLE.Space))]
+&FUN_SHUTTLE.CanMakeRange Shuttle Main Parent=[gte(xget(u(FUN_CONVERT.Entr2Ship,%0),DATA_RANGE),%1)]
+&FUN_SHUTTLE.CanMakeRange2 Shuttle Main Parent=[gte(trunc(xget(%0,DATA_RANGE)),%1)]
+&FUN_CONVERT.Ship2Entr Shuttle Main Parent=[last(iter(lexits(loc(last(lexits(loc(%0))))),if(and(member(loc(##),loc(%0)),member(lparent(##),v(PTR_SHUTTLE.Entr))),##)))]
+&FUN_CONVERT.Plot2Zone Shuttle Main Parent=[zone(u(FUN_CONVERT.Plot2Room,%0))]
+&FUN_CONVERT.Plot2Room Shuttle Main Parent=[extract(u(FUN_Room.List),match(iter(u(FUN_BODY.List),name(##)),%0*),1)]
+&FUN_CONVERT.Zone2Room Shuttle Main Parent=[home(last(iter(entrances(loc(%0)),if(and(member(lparent(##),v(PTR_SHUTTLE.Entr)),member(zone(home(##)),%1)),##))))]
+&FUN_CONVERT.Ship2Loc Shuttle Main Parent=[loc(last(lexits(loc(%0))))]
+&FUN_CONVERT.Entr2Ship Shuttle Main Parent=[last(iter(lcon(loc(%0)),if(member(lparent(##),v(PTR_SHUTTLE.Ship)),##)))]
+&FUN_CONVERT.Entr2Loc Shuttle Main Parent=[loc(last(lexits(loc(%0))))]
+&FUN_CONVERT.SECS2TIME Shuttle Main Parent=[if(gte(%0,86400),[div(%0,86400)]d%b)][ifelse(lt(setr(5,div(mod(%0,86400),3600)),10),0%q5,%q5)]:[ifelse(lt(setr(6,div(mod(mod(%0,86400),3600),60)),10),0%q6,%q6)]:[ifelse(lt(setr(7,mod(mod(mod(%0,86400),3600),60)),10),0%q7,%q7)]
+&FUN_CONVERT.Input2Ship Shuttle Main Parent=[extract(#-1 [setr(8,u(FUN_SHUTTLE.List))],inc(match(iter(%q8,[name(loc(##))]|),*%0*,|)),1)]
+think [ansi(hm,INSTALL:)] Downloading Shuttle Data...
+&DATA_WARP.Default Shuttle Main Parent=7.0
+&DATA_WARP Shuttle Ship Parent=7.0
+&DATA_RANGE Shuttle Ship Parent=750000
+&DATA_VERSION Shuttle Main Parent=2.0
+think [ansi(hm,INSTALL:)] Downloading Shuttle ASCII-Art...
+&DRAW_SHUTTLE.Help Shuttle Landing-Area Parent=This is the perfect system for those of you who are new to flying or who do not want to face the possible dangers in space. The shuttles are so small that they are extremely difficult to detect on sensors\, so you should not be prone to any unexpected visits. The commands are also very basic so that you do not need to learn the complexities of the larger armed vessels.%r%r%b%b[ansi(v(FONT_HELP.Cmds),ljust(shuttle/setup,20))]- Gives setup information for Admin%r%b%b[ansi(v(FONT_HELP.Cmds),ljust(shuttle/dests,20))]- Shows destinations and additional info%r%b%b[ansi(v(FONT_HELP.Cmds),ljust(shuttle/list,20))]- Gives a list of shuttles%r%b%b[ansi(v(FONT_HELP.Cmds),ljust(shuttle/call <name>,20))]- Summons a shuttle to your location
+&DRAW_SHUTTLE.Help Shuttle Ship Parent=When using this terminal you must first plot a course. Be CAUTIOUS when launching -- as you cannot stop or reverse the shuttle.%r%r%b%b[ansi(v(FONT_HELP.Cmds),ljust(shuttle/setup,20))]- Gives setup information for Admin%r%b%b[ansi(v(FONT_HELP.Cmds),ljust(shuttle/dests,20))]- Shows destinations and additional info%r%b%b[ansi(v(FONT_HELP.Cmds),ljust(shuttle/plot <name>,20))]- Plots a course for specified celestial body%r%b%b[ansi(v(FONT_HELP.Cmds),ljust(shuttle/launch,20))]- Launches the shuttle%r%b%b[ansi(v(FONT_HELP.Cmds),ljust(shuttle/eta,20))]- Shows the Estimated Time of Arrival to destination 
+think [ansi(hm,INSTALL:)] Downloading Shuttle Fonts...
+&FONT_HELP.Cmds Shuttle Main Parent=hc
+&FONT_HELP.Border Shuttle Main Parent=r
+&FONT_HELP.Header Shuttle Main Parent=hr
+&FONT_DEST.Border Shuttle Main Parent=r
+&FONT_DEST.Header Shuttle Main Parent=hr
+&FONT_LIST.Border Shuttle Main Parent=r
+&FONT_LIST.Header Shuttle Main Parent=hx
+&FONT_LIST.Title Shuttle Main Parent=hr
+&FONT_SHUTTLE.Cmds Shuttle Main Parent=hc
+&FONT_HELP.Border Shuttle Main Parent=r
+&FONT_HELP.Header Shuttle Main Parent=hr
+&FONT_HELP.Cmds Shuttle Main Parent=hc
+think [ansi(hm,INSTALL:)] Downloading Shuttle Messages...
+&MSG_PURGE_CALL Shuttle Main Parent=This shuttle has been called. You are being removed from this location.
+&MSG_SHUTTLE_CALLED Shuttle Main Parent=You have summoned the [name(loc(%0))].
+&MSG_SHUTTLE_CALLED_BY Shuttle Main Parent=[name(%0)]\(%0\) has summoned the [name(loc(%1))].
+&MSG_LANDED_INTERNAL Shuttle Main Parent=The shuttle has landed -- disembark immediately.
+&MSG_LANDED_EXTERNAL Shuttle Main Parent=The [name(loc(%0))] has landed. You may enter at any time.
+&MSG_LAUNCHED_INTERNAL Shuttle Main Parent=The shuttle begins to rock slightly as it launches into orbit.
+&MSG_LAUNCHED_EXTERNAL Shuttle Main Parent=The [name(loc(%0))] roars as it launches into orbit.
+&MSG_COURSE_PLOTTED Shuttle Main Parent=New course plotted: [name(%0)] - ETA would be: [u(FUN_CONVERT.Secs2Time,%1)]
+&MSG_COURSE_PLOTTED_BY Shuttle Main Parent=[name(%0)]\(%0\) plots in a new course: [name(%1)] - ETA would be: [u(FUN_CONVERT.Secs2Time,%2)]
+&MSG_SHIP_CMDLAUNCHED Shuttle Main Parent=You execute the launching sequence for the shuttle.
+&MSG_SHIP_CMDLAUNCHED_BY Shuttle Main Parent=[name(%0)]\(%0\) executes the launching sequence for the shuttle.
+&MSG_LAUNCH_ETA Shuttle Main Parent=The ETA is [u(FUN_CONVERT.Secs2Time,%0)] for your flight to [name(zone(v(DATA_PLOT)))].
+think [ansi(hm,INSTALL:)] Downloading Shuttle Error Messages...
+&ERR_!AUTH_CALL Shuttle Main Parent=You do not have authorization to call shuttles.
+&ERR_SHUTTLE_!VALID Shuttle Main Parent=That is not a valid shuttle. Use '[ansi(v(FONT_SHUTTLE.Cmds),shuttle/list)]' to see a list of shuttles.
+&ERR_SHUTTLE_INFLIGHT Shuttle Main Parent=The [name(loc(%0))] is currently in flight\, and thus cannot be summoned. Please try a different shuttle.
+&ERR_SHUTTLE_ALREADY_HERE Shuttle Main Parent=The [name(loc(%0))] is already at this location. If you still cannot enter the shuttle\, contact an Administrator.
+&ERR_SHUTTLE_CANT_MAKE_RANGE Shuttle Main Parent=The [name(loc(%0))] cannot travel that far.
+&ERR_!AUTH_PLOT Shuttle Main Parent=You do not have authorization to plot courses on this shuttle.
+&ERR_PLOT_!VALID Shuttle Main Parent='%0' is not a valid destination. Type '[ansi(v(FONT_SHUTTLE.Cmds),shuttle/dests)]' for a listing.
+&ERR_SHUTTLE_SPACED Shuttle Main Parent=This shuttle is already in flight -- you may not plot a new course.
+&ERR_SHUTTLE_ALREADY_HERE2 Shuttle Main Parent=The shuttle is already at [name(%0)]. Change the plotted course using [ansi(v(FONT_SHUTTLE.Cmds),shuttle/plot <name>)]'.
+&ERR_SHUTTLE_CANT_MAKE_RANGE2 Shuttle Main Parent=The shuttle does not have enough fuel to travel to [name(%0)].
+&ERR_!AUTH_LAUNCH Shuttle Main Parent=You are not authorized to launch this shuttle.
+&ERR_COURSE_!VALID Shuttle Main Parent=There is not a valid course plotted. Use '[ansi(v(FONT_SHUTTLE.Cmds),shuttle/plot <destination>)]' to plot a new course.
+&ERR_SHUTTLE_LAUNCHED Shuttle Main Parent=But the shuttle is already launched!
+think [ansi(hm,INSTALL:)] Downloading Shuttle Configurations...
+&CNF_CALL.Immediate Shuttle Main Parent=0
+&CNF_CHECKRANGE.OnCall Shuttle Main Parent=1
+think [ansi(hm,INSTALL:)] Attempting to set pointers...
+@fo me=&PTR_SHUTTLE.Main Shuttle Main Parent=[num(Shuttle Main Parent)]
+@fo me=&PTR_SHUTTLE.Land Shuttle Main Parent=[num(Shuttle Landing-Area Parent)]
+@fo me=&PTR_SHUTTLE.Ship Shuttle Main Parent=[num(Shuttle Ship Parent)]
+@fo me=&PTR_SHUTTLE.Entr Shuttle Main Parent=[num(Shuttle Entrance Parent)]
+@fo me=&PTR_SHUTTLE.Exit Shuttle Main Parent=[num(Shuttle Exit Parent)]
+@fo me=&PTR_SHUTTLE.Main Shuttle Entrance Parent=[num(Shuttle Main Parent)]
+@fo me=&PTR_SHUTTLE.Land Shuttle Entrance Parent=[num(Shuttle Landing-Area Parent)]
+@fo me=&PTR_SHUTTLE.Ship Shuttle Entrance Parent=[num(Shuttle Ship Parent)]
+@fo me=&PTR_SHUTTLE.Entr Shuttle Entrance Parent=[num(Shuttle Entrance Parent)]
+@fo me=&PTR_SHUTTLE.Exit Shuttle Entrance Parent=[num(Shuttle Exit Parent)]
+@fo me=&PTR_SHUTTLE.Main Shuttle Exit Parent=[num(Shuttle Main Parent)]
+@fo me=&PTR_SHUTTLE.Land Shuttle Exit Parent=[num(Shuttle Landing-Area Parent)]
+@fo me=&PTR_SHUTTLE.Ship Shuttle Exit Parent=[num(Shuttle Ship Parent)]
+@fo me=&PTR_SHUTTLE.Entr Shuttle Exit Parent=[num(Shuttle Entrance Parent)]
+@fo me=&PTR_SHUTTLE.Exit Shuttle Exit Parent=[num(Shuttle Exit Parent)]
+think [ansi(hm,INSTALL:)] Setting-up Space Room...
+@dig/tel Space
+@switch [t(match(name(here),*Space*))]=1,{@fo me={@set here=FLOATING;&PTR_SHUTTLE.Space Shuttle Main Parent=[num(here)];&PTR_SHUTTLE.Space Shuttle Entrance Parent=[num(here)];&PTR_SHUTTLE.Space Shuttle Exit Parent=[num(here)]}},{think [ansi(hm,INSTALL)] [ansi(hr,WOAH!)] Looks like you aren't in the right room. Be sure to run this part of the script again.}
+think [ansi(hm,INSTALL:)] Setting-up Shuttle Entrance Parent...
+&LOCK_NORMAL Shuttle Entrance Parent=1
+@fail Shuttle Entrance Parent=The [capstr(lcstr(trim(squish(edit(edit(edit(edit(ucstr(name(loc(me))),-,),>,),<,),SHUTTLE,)))))] Shuttle is not at this location. Type '[ansi(v(FONT_SHUTTLE.Cmds),shuttle/call <name>)]' to summon it.
+@succ Shuttle Entrance Parent=You board the shuttle.
+@odrop Shuttle Entrance Parent=climbs aboard from [name(home(me))].
+@osucc Shuttle Entrance Parent=boards the [capstr(lcstr(trim(squish(edit(edit(edit(edit(ucstr(name(loc(me))),-,),>,),<,),SHUTTLE,)))))] Shuttle.
+&FONT_SHUTTLE.Cmds Shuttle Entrance Parent=hc
+think [ansi(hm,INSTALL:)] Setting-up Shuttle Exit Parent...
+&LOCK_NORMAL Shuttle Exit Parent=[not(member(loc(me),v(PTR_SHUTTLE.Space)))]
+@fail Shuttle Exit Parent=You may not depart the shuttle while it is in flight.
+@succ Shuttle Exit Parent=You depart the shuttle.
+@osucc Shuttle Exit Parent=departs the shuttle.
+@odrop Shuttle Exit Parent=disembarks the [capstr(lcstr(trim(squish(edit(edit(edit(edit(ucstr(name(home(me))),-,),>,),<,),SHUTTLE,)))))] Shuttle.
+think [ansi(hm,INSTALL:)] Downloading Shuttle Descriptions...
+@desc Shuttle Landing-Area Parent=Type '[ansi(v(FONT_SHUTTLE.Cmds),shuttle/help)]' for more information.
+@desc Shuttle Ship Parent=Type '[ansi(v(FONT_SHUTTLE.Cmds),shuttle/help)]' for more information.
+@desc Shuttle Entrance Parent=An entranceway leading to [name(loc(me))].
+@desc Shuttle Exit Parent=An exitway leading to [name(loc(me))].
+think [ansi(hm,INSTALL:)] Downloading Shuttle Prefixes...
+&DATA_PREFIX.WARN Shuttle Main Parent=[ansi(hy,WARN:)]
+&DATA_PREFIX.GAME Shuttle Main Parent=[ansi(hg,GAME:)]
+&DATA_PREFIX.ERROR Shuttle Main Parent=[ansi(hr,ERROR:)]
+&DATA_PREFIX.SYSERR Shuttle Main Parent=[ansi(fhr,SYSERR:)]
+think [ansi(hm,INSTALL:)] [ansi(hr,Download is complete!  Now you must do the following:)]
+think [ansi(hm,INSTALL:)] %b%b%b- @create a Shuttle Terminal and drop it in a Landing Area
+think [ansi(hm,INSTALL:)] %b%b%b- @parent the created object to the Shuttle Landing-Area Parent
+think [ansi(hm,INSTALL:)] %b%b%b- @set the created object !NO_COMMAND\, !HALT\, and WIZARD
+think [ansi(hm,INSTALL:)] %b%b%b- Type '[ansi(hc,shuttle/setup)]' for further information.
+think [ansi(hm,INSTALL:)] 
+think [ansi(hm,INSTALL:)] The Copyright must stay with this code.  If you have any questions
+think [ansi(hm,INSTALL:)] or complaints \(bug reports\) concerning this code\, please contact
+think [ansi(hm,INSTALL:)] me at: [ansi(hc,worldwar@bb6.betterbox.net)].  Thank you.
+@set me=!quiet

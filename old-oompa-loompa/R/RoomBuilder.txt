@@ -1,0 +1,106 @@
+Self-sufficient Room Digger
+coded by Hangover
+Jun 1993
+Version 1.0
+
+On most MUSH's there is a hotel where new players can go along and get a
+room where they can build from. Unfortunately a lot of these hotels
+require you to mail a wiz to get a room or very often the rooms are
+not very well organised.
+
+I coded this simple little room digger that allows players to come
+along and type 'gimme a room' and they will be built a room straight
+away as long as they have'nt already got one.
+
+For the Room Digger to work you need to build a room which we call the
+Living Area. This room will hold all the exits that lead off to the rooms.
+Two objects are also needed. The first is the actual Room Digger itself
+which handles the building of the room. The second is a Notice which
+lists all the commands and also handles the room directory and locking
+of rooms.  Both of these objects should be placed in the Living area.
+Don't forget to lock and link the two objects.
+
+Once set up you will not need to bother with it again(I hope!).
+It would be very advisable for the person who is setting this up
+to either be a wiz or set inherit, or you may run out of cash quickly.
+
+Another problem is that I haven't bothered to code in something to
+stop two people using the machine at once. That could be a problem.
+Anyone out there want to have a go?
+
+Anyway heres what you need to do, to set up the Living Area.
+
+1. Dig a room called 'The Living Area'.
+2. Enter the code for the Room Digger.
+3. Place the Room Digger in the Living Area.
+4. Enter the code for the notice.
+5. Change all the #1111's in the notice code to the number
+   of the Room Digger
+
+   eg. @edit notice/*=#1111,#2563
+       where #2563 is the number of the Room Digger you created.
+
+6. Place the notice in the Living Area.
+7. Sit back and watch your Living Area fill up.
+
+You will notice that the Room Digger is set DARK. This is to make
+the output neater. Also all the entrances to the rooms area DARK
+so as not to overcrowd the room description.
+
+If I have left anything out or you have a problem or idea
+then mail me at:
+
+u9228616@athmail1.causeway.qub.ac.uk
+
+or if you have problems mailing to me at that address try:
+
+u9228616%athmail1.causeway.qub.ac.uk@uknet-relay.ac.uk
+
+
+
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+                                   Living Area
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+The following commands are available:
+
+        gimme a room            - get yourself a free room
+        where is <player>       - find out what room <player> is in
+        who is in #             - directory of rooms # to (#+9)
+        lock my room            - lock the entrance to your room
+        unlock my room          - unlock the entrance to your room
+
+To get into a room just type its room number.
+You can only have one room here.
+If you have any problems the mail Hangover
+
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+
+
+***********************
+* Code for the Notice *
+***********************
+
+@create Notice=10
+@lock Notice=me
+@link Notice=here
+&FIND_PERSON Notice=$where is *:@switch member(get(#1111/ROOMS),num(*%0))=>0,{@pemit %#=[name(num(*%0))] is in room number [get(#1111/E[num(*%0)])].},@pemit %#=Sorry that person does not have a room here.
+&ROOM_DIR Notice=$who is in *:@switch get(#1111/ROOM[%0])=>"",{@pemit %#==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-%r[centre(Room Directory,80)]=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-%r%r[iter([extract(lnum(add(10,%0)),add(1,%0),10)],[switch(get(#1111/ROOM[##]),,%t[##]:%t<Empty>,%t[##]:%t[name(get(#1111/ROOM[##]))])]%r)]%r=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-},@pemit %#=That room has not been occupied
+&LOCK_ROOM Notice=$lock my room:@switch member(get(#1111/ROOMS),%#)=>0,{@lock get(#1111/E[%#])=%# | #10002;@pemit %#=You have locked your room.},@pemit %#=You do not have a room here.
+&UNLOCK_ROOM Notice=$unlock my room:@switch member(get(#1111/ROOMS),%#)=>0,{@unlock get(#1111/E[%#]);@pemit %#=You have unlocked your room.},@pemit %#=You do not have a room here.
+@Desc Notice==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-%r[centre(Living Area,80)]=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-%r%rThe following commands are available:%r%r%tgimme a room%t%t- get yourself a free room%r%twhere is <player>%t- find out what room <player> is in%r%twho is in #%t%t- directory of rooms # to (#+9)%r%tlock my room%t%t- lock the entrance to your room%r%tunlock my room%t%t- unlock the entrance to your room%r%rTo get into a room just type its room number.%rYou can only have one room here.%rIf you have any problems the mail Hangover%r%r=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+
+****************************
+* Code for the Room Digger *
+****************************
+
+@create Room Digger<rd>=10
+@lock Room Digger<rd>=me
+@link Room Digger<rd>=here
+&DIG_ROOM Room Digger<rd>=$gimme a room:@switch member(v(rooms),%#)=>0,@pemit %#=Sorry but you already have a room here.,{@pemit %#=A room is being built.;@dig [%n]'s Room={[v(top_room)]},{Out;o};@set v(top_room)=dark;@osucc v(top_room)=goes into [%n's Room].;@odrop v(top_room)=comes into the room.;move/quiet [v(top_room)];@osucc out=leaves the room.;@odrop out=comes out of one of the rooms.;@set here=chown_ok;@desc here==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-%r%t%t%tComplementary Room from Hangover%r=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-%r%rTo make this room your own follow these steps:%r%r%to Type: @chown here=me%r%to Type: @set here=!halt%r%to Enter your room description using: @desc here=<description>%r%rIf you have any problems then feel free to mail Hangover.%r%r=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;move/quiet out;&ROOMS me=v(rooms) [%#];&ROOM[v(top_room)] me=%#;&E[%#] me=[v(top_room)];&TOP_ROOM me=add(1,v(top_room));@pemit %#=Your room has been built. Its is number [sub(v(top_room),1)].}
+&TOP_ROOM Room Digger<rd>=1
+@set Room Digger<rd>=DARK
+
+

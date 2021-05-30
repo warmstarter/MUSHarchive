@@ -1,0 +1,253 @@
+@create PARENT: Ship Room Parent
+@link PARENT: Ship Room Parent = #395
+@parent PARENT: Ship Room Parent=#24
+@set PARENT: Ship Room Parent = LINK_OK
+@set PARENT: Ship Room Parent = VISUAL
+@set PARENT: Ship Room Parent = NO_COMMAND
+@set PARENT: Ship Room Parent = ROYALTY
+&COM_+BIO PARENT: Ship Room Parent=$+bio:think [switch(t(match([u([v(zone)]/cmd_list)] [u([v(zone)]/crw_list)],%#)),0,[pemit(%#,ACCESS DENIED!!)],1,[remit(me,%n accesses the computer database.)][pemit(%#,u(bio_list))])]
+@set PARENT: Ship Room Parent/COM_+BIO=visual
+&BIO_LIST PARENT: Ship Room Parent=[ansi(u(ansi0),%b[repeat(_,48)]%r/)][ansi(u(ansi3),center([u(ship_name)] Bio List,48))][ansi(u(ansi0),%\%r|[repeat(-,48)]|%r|)][ansi(u(ansi4),[ljust(Rank,33)][ljust(Name,15)])][ansi(u(ansi0),|%r|[repeat(~,32)] [repeat(~,15)]|)]%r[iter(get([v(zone)]/bio_list),[ansi(u(ansi0),|)][ansi(u(ansi1),[ljust(class(##),32)])]%b[ansi(u(ansi2),[ljust(name(##),15)])][ansi(u(ansi0),|)], ,%r)]%r[ansi(u(ansi0),%\[repeat(_,48)]/)]
+@set PARENT: Ship Room Parent/BIO_LIST=visual
+&ABOARD_LIST PARENT: Ship Room Parent=[ansi(u(ansi0),%b[repeat(_,75)]%r/)][ansi(u(ansi3),[center([get(me/ship_name)] Occupancy Index,75)])][ansi(u(ansi0),%\)]%r[ansi(u(ansi0),|[repeat(-,75)]|)]%r[ansi(u(ansi0),|)]%b[ansi(u(ansi4),[ljust(Org,12)][ljust(Name,14)][ljust(Location,38)][ljust(Status,10)])][ansi(u(ansi0),|)]%r[ansi(u(ansi0),|%b[repeat(~,10)]%b%b[repeat(~,12)]%b%b[repeat(~,35)]%b%b%b[repeat(~,8)][space(2)]|)][iter(u([v(zone)]/aboard_list),%r[ansi(u(ansi0),|)]%b[switch([t(match(get([v(zone)]/bio_list),before(##,|)))],0,[ansi(u(ansi3),[mid([ljust(UNKNOWN,10)],0,10)])],1,[ansi(r,[mid([ljust([get([before(##,|)]/organization)],10)],0,10)])])]%b%b[switch([t(match(get([v(zone)]/bio_list),before(##,|)))],0,[ansi(hm,[mid([ljust(UNKNOWN,12)],0,12)])],1,[ansi(m,[mid([ljust([name([before(##,|)])],12)],0,12)])])]%b%b[ansi(g,[mid([ljust([before(name(after(##,|)),u([after(##,|)]/roombefore))],36)],0,36)])]%b%b%b[switch(gt([idle([before(##,|)])],-1),1,[ansi(hc,ACTIVE[space(2)])],0,[ansi(u(ansi0),asleep[space(2)])])]%b[ansi(u(ansi0),|)])]%r[ansi(u(ansi0),%\[repeat(_,75)]/)]
+@set PARENT: Ship Room Parent/ABOARD_LIST=visual
+&COM_+COMMAND PARENT: Ship Room Parent=$+command:think [switch(t(match([u([v(zone)]/cmd_list)] [u([v(zone)]/crw_list)],%#)),0,[pemit(%#,ACCESS DENIED!!)],1,[remit(me,%n accesses the computer database.)][pemit(%#,u(command_list))])]
+@set PARENT: Ship Room Parent/COM_+COMMAND=visual
+&COM_+CLEARLOG PARENT: Ship Room Parent=$+clearlog:think [switch(t(match([u([v(zone)]/cmd_list)],%#)),0,[pemit(%#,ACCESS DENIED!!)],1,[remit(me,%n accesses the computer database.)][set([v(zone)],sec_log1:)][set([v(zone)],sec_log2:)])]
+@set PARENT: Ship Room Parent/COM_+CLEARLOG=visual
+&COM_+ABOARD PARENT: Ship Room Parent=$+aboard:think [switch(t(match([u([v(zone)]/cmd_list)] [u([v(zone)]/crw_list)] [u([v(zone)]/brd_list)],%#)),0,[pemit(%#,ACCESS DENIED!!)],1,[remit(me,%n accesses the computer database.)][pemit(%#,u(aboard_list))])]
+@set PARENT: Ship Room Parent/COM_+ABOARD=visual
+&COMMAND_LIST PARENT: Ship Room Parent=[ansi(u(ansi0),%b[repeat(_,48)]%r/)][ansi(u(ansi3),center([u(ship_name)] Command Staff,48))][ansi(u(ansi0),%\%r|[repeat(-,48)]|%r|)][ansi(u(ansi4),[ljust(Rank,33)][ljust(Name,15)])][ansi(u(ansi0),|%r|[repeat(~,32)] [repeat(~,15)]|)]%r[iter(get([v(zone)]/cmd_list),[ansi(u(ansi0),|)][ansi(u(ansi1),[ljust(class(##),32)])]%b[ansi(u(ansi2),[ljust(name(##),15)])][ansi(u(ansi0),|)], ,%r)]%r[ansi(u(ansi0),%\[repeat(_,48)]/)]
+@set PARENT: Ship Room Parent/COMMAND_LIST=visual
+&COMMANDS PARENT: Ship Room Parent=[ansi(hr,Setup Commands:)]%r[ljust(Ship Setup Help,25)]-Help on setting up a ship.%r[ljust(Ship Extras,25)]-Help with extras for the ship.%r[ljust(Room Setup Help,25)]-Help on attributes to settable on rooms.%r[ljust(Feature Help,25)]-Help with the features list.%r%r[ansi(hr,Unrestricted Commands:)]%r[ljust(+Aboard,25)]-List who is onboard the ship.%r[ljust(+Int List,25)]-List rooms with intercoms in them.%r[ljust(+Int <#/PA/Off>,25)]-Set intercom status. (# is the numbet from +Int list)%r[ljust(+Int <Message>,25)]-Talk into the intercom. (Or just speak normal.)%r%r[ansi(hr,Crew Level Commands:)]%r[ljust(+<alert status>,25)]-Adjust alert level. (green/blue/yellow/red/intruder)%r[ljust("*<alert> alert<null/./!>,25)]-Set alert status vocally.%r[ljust(+Command,25)]-List command staff.%r[ljust(+Crew,25)]-List crew members.%r[ljust(+Board,25)]-See who has boarding clearance.%r[ljust(+Bio,25)]-See who is in the bio-log.%r[ljust(+Board<+/->,25)]-Add/remove someone to/from the boarding list.%r[ljust(+Bio<+/->,25)]-Add/remove someone to/from the bio-log.%r%r[ansi(hr,Command Level Commands:)]%r[ljust(+Seclog,25)]-See the security log.%r[ljust(+Clearlog,25)]-Clear the security log.%r[ljust(+Command<+/->,25)]-Add/remove someone to/from the command list.%r[ljust(+Crew<+/->,25)]-Add/remove someone to/from the crew list.
+@set PARENT: Ship Room Parent/COMMANDS=visual
+&COM_SHIP_SETUP_HELP PARENT: Ship Room Parent=$ship setup help:think [pemit(%#,[ansi([v(hcolor)],repeat([v(line)],[div(79,strlen(v(line)))]))]%r[ansi(hr,[center(SHIP SETUP HELP,79)])]%r[ansi([v(hcolor)],repeat([v(line)],[div(79,strlen(v(line)))]))]%r[u(shiphelp)]%r[ansi([v(hcolor)],repeat([v(line)],[div(79,strlen(v(line)))]))])]
+@set PARENT: Ship Room Parent/COM_SHIP_SETUP_HELP=visual
+&SETUPHELP PARENT: Ship Room Parent=Ship Attributes:%rType 'Ship Setup Help'%r%rNeccessary Items:%r&rdesc <Room>=<Description> %(Instead of @desc%)%r@set <Room>=dark%r@set <Room>=transparent%r@set <Each Exit>=!light%r%rPreset Items:%r&line <Room>=<What is repeated for the top line>%r&featurename <Room>=<Features Heading> %(Type 'Feature Help'%)%r&contentname <Room>=<Contents Heading>%r&oexitname <Room>=<Heading for Opaque Exits>%r&texitname <Room>=<Heading for Transparent Exits>%r%rColors:%r&dcolor <Room>=<Description Color>%r&fcolor <Room>=<Feature Color>%r&pcolor <Room>=<Player Color>%r&ocolor <Room>=<Object Color>%r&hcolor <Room>=<Heading Color>%r&ecolor <Room>=<Exit Color>%r&eecolor <Room>=<Exit Destination Color>%r%rNote:%rTo make your ship room parent, @create it and @parent it to #392.
+@set PARENT: Ship Room Parent/SETUPHELP=visual
+&SHIPHELP PARENT: Ship Room Parent=Parents:%r@parent <Room Parent>=#392%r@parent <Zone>=#401%r@parent <Exit Parent>=#403%r@parent <Security Console>=#1021%r%rNeccessary Attributes:%r&ship_name <Room Parent>=<Ship Name>%r%tExample: &ship_name room=USS Destroyer%r%r&room_parent <Zone>=<Room Parent Dbref>%r%tExample: &room_parent zone=#2455%r%r&exit_parent <Zone>=<Exit Parent Dbref>%r%tExample: &exit_parent zone=#3475%r%r&room_list <Zone>=<a dbref listing of all the rooms on your ship.>%r%tDefault: All rooms in the zone%r%tExample: &room_list zone=#5689 #2355 #5829 #2954 #2950 #2039 #2944%r%r&int_dbref <Room Parent>=<dbref list of rooms you want to have intercoms>%r%tDefault: Entire &room_list%r%tExample: &int_dbref room=#5689 #2355 #5829 #2954 #2950 #2039 #2944%r%r&int_name <Room>=<Name of room in +int list>%r%tDefault: Name before &roombefore%r%tExample: &int_name here=Bridge%r%rExtras:%rType 'Ship Extras'%r%rShip Setup:%rOnce the attributes are set, type 'setup ship'.%rYou must redo this command after altering the room_list attribute on the zone parent, altering the the int_dbref attribute on the room parent, and adding/deleting exits.
+@set PARENT: Ship Room Parent/SHIPHELP=visual
+&TEXITNAME PARENT: Ship Room Parent=Hatches:
+@set PARENT: Ship Room Parent/TEXITNAME=visual
+&OEXITNAME PARENT: Ship Room Parent=Hatches:
+@set PARENT: Ship Room Parent/OEXITNAME=visual
+&INT_NAME PARENT: Ship Room Parent=[before(name(me),u(roombefore))]
+@set PARENT: Ship Room Parent/INT_NAME=visual
+&FUN_INTEGER PARENT: Ship Room Parent=[round(sub(%0,.5),0)]
+@set PARENT: Ship Room Parent/FUN_INTEGER=visual
+&INT_LIST PARENT: Ship Room Parent=[ansi(u(ansi0),%b[repeat(_,48)]%r/)][ansi(u(ansi3),center([u(ship_name)] Intercom,48))][ansi(u(ansi0),%\%r|[repeat(-,48)]|%r|)][ansi(u(ansi4),[ljust(Num,4)][ljust(Location,44)])][ansi(u(ansi0),|%r|[repeat(~,3)] [repeat(~,44)]|)]%r[iter(u(int_dbref),[ansi(u(ansi0),|)][ansi(u(ansi1),[ljust([match(u(int_dbref),##)],3)])]%b[ansi(u(ansi2),[ljust([u(##/int_name)],44)])][ansi(u(ansi0),|)], ,%r)]%r[ansi(u(ansi0),%\[repeat(_,48)]/)]%rType 'Commands' for some commands.
+@set PARENT: Ship Room Parent/INT_LIST=visual
+&ANSI0 PARENT: Ship Room Parent=c
+@set PARENT: Ship Room Parent/ANSI0=visual
+&ANSI1 PARENT: Ship Room Parent=m
+@set PARENT: Ship Room Parent/ANSI1=visual
+&ANSI2 PARENT: Ship Room Parent=g
+@set PARENT: Ship Room Parent/ANSI2=visual
+&ANSI3 PARENT: Ship Room Parent=hr
+@set PARENT: Ship Room Parent/ANSI3=visual
+&ANSI4 PARENT: Ship Room Parent=hb
+@set PARENT: Ship Room Parent/ANSI4=visual
+&RSUCC PARENT: Ship Room Parent=[ljust(Alert Status:,15)][get(v(zone)/alert_status)]%r[ljust(Stardate:,15)][stardate()]
+@set PARENT: Ship Room Parent/RSUCC=visual
+&COM_+INT_LIST PARENT: Ship Room Parent=$+int list:think [switch([t(match(u(int_dbref),%l))],0,[pemit(%#,There is no intercom here.)],1,[pemit(%#,[u(int_list)])])]
+@set PARENT: Ship Room Parent/COM_+INT_LIST=visual
+&COM_+INT_PA PARENT: Ship Room Parent=$+int pa:think [switch([t(match(u(int_dbref),%l))],0,[pemit(%#,There is no pa here.)],1,[remit(me,%n activates the PA.)][set(me,int_loc:pa)])]
+@set PARENT: Ship Room Parent/COM_+INT_PA=visual
+&COM_+INT_OFF PARENT: Ship Room Parent=$+int off:think [switch([t(match(u(int_dbref),%l))][t(v(int_loc))],0*,[pemit(%#,There is no intercom here.)],10,[pemit(%#,The intercom is already off.)],11,[remit(me,%n [switch(v(int_loc),pa,deactivates,closes)] the [switch(v(int_loc),pa,PA,intercom)].)])];@swi [t(v(int_loc))]=1,&int_loc me
+@set PARENT: Ship Room Parent/COM_+INT_OFF=visual
+&COM_+INT PARENT: Ship Room Parent=$+int *:@select [switch(%0,list,0,pa,0,off,0,1)][t(match(u(int_dbref),%l))][t(v(int_loc))][switch(v(int_loc),pa,1,0)][setq(0,integer(%0))][and(isnum(%q0),and(lte(%q0,words(u(int_dbref))),gte(%q0,1)))]=0*,,10*,think [pemit(%#,There is no intercom here.)],11100,think [remit([v(int_loc)],[ansi(hr,<*<)][u(ship_name)] Intercom[ansi(hr,>*>)] From [u(int_name)]%, %n says%, "%0")][remit(me,Into the intercom%, %n says%, "%0")],11110,think [iter([u([v(zone)]/room_list)],[remit(##,[ansi(hr,<*<)][u(ship_name)] PA System[ansi(hr,>*>)] From [u(int_name)]%, %n says%, "%0")])],11??1,think [remit(me,%n opens the intercom to [u([extract(u(int_dbref),%q0,1)]/int_name)])][set(me,int_loc:[extract(u(int_dbref),%q0,1)])],11000,[pemit(%#,The intercom is currently off.)]
+@set PARENT: Ship Room Parent/COM_+INT=visual
+&CREW_LIST PARENT: Ship Room Parent=[ansi(u(ansi0),%b[repeat(_,48)]%r/)][ansi(u(ansi3),center([u(ship_name)] Crew Members,48))][ansi(u(ansi0),%\%r|[repeat(-,48)]|%r|)][ansi(u(ansi4),[ljust(Rank,33)][ljust(Name,15)])][ansi(u(ansi0),|%r|[repeat(~,32)] [repeat(~,15)]|)]%r[iter(get([v(zone)]/crw_list),[ansi(u(ansi0),|)][ansi(u(ansi1),[ljust(class(##),32)])]%b[ansi(u(ansi2),[ljust(name(##),15)])][ansi(u(ansi0),|)], ,%r)]%r[ansi(u(ansi0),%\[repeat(_,48)]/)]
+@set PARENT: Ship Room Parent/CREW_LIST=visual
+&FEATURE_INTERCOM PARENT: Ship Room Parent=[u(int_list)]
+@set PARENT: Ship Room Parent/FEATURE_INTERCOM=visual
+&COM_+CREW PARENT: Ship Room Parent=$+crew:think [switch(t(match([u([v(zone)]/cmd_list)] [u([v(zone)]/crw_list)],%#)),0,[pemit(%#,ACCESS DENIED!!)],1,[remit(me,%n accesses the computer database.)][pemit(%#,u(crew_list))])]
+@set PARENT: Ship Room Parent/COM_+CREW=visual
+&SEC_LOG PARENT: Ship Room Parent=%b[ansi(u(ansi0), [repeat(_,48)]%r/)][ansi(u(ansi3),center([u(ship_name)] Security Log,48))][ansi(u(ansi0),%\%r|[repeat(-,48)]|%r|)][ansi(u(ansi4),[ljust(Name,16)][ljust(Time,32)])][ansi(u(ansi0),|%r|[repeat(~,15)] [repeat(~,32)]|)]%r[iter(get([v(zone)]/sec_log1),[ansi(u(ansi0),|)][ansi(u(ansi1),[ljust(name(##),15)])] [ansi(u(ansi2),[ljust([index(get([v(zone)]/sec_log2),|,[match(get([v(zone)]/sec_log1),##)],1)],32)])][ansi(u(ansi0),|)], ,%r)]%r[ansi(u(ansi0),%\[repeat(_,48)]/)]
+@set PARENT: Ship Room Parent/SEC_LOG=visual
+&BOARD_LIST PARENT: Ship Room Parent=[ansi(u(ansi0),%b[repeat(_,48)]%r/)][ansi(u(ansi3),center([u(ship_name)] Boarding Clearance List,48))][ansi(u(ansi0),%\%r|[repeat(-,48)]|%r|)][ansi(u(ansi4),[ljust(Rank,33)][ljust(Name,15)])][ansi(u(ansi0),|%r|[repeat(~,32)] [repeat(~,15)]|)]%r[iter(get([v(zone)]/brd_list),[ansi(u(ansi0),|)][ansi(u(ansi1),[ljust(class(##),32)])]%b[ansi(u(ansi2),[ljust(name(##),15)])][ansi(u(ansi0),|)], ,%r)]%r[ansi(u(ansi0),%\[repeat(_,48)]/)]
+@set PARENT: Ship Room Parent/BOARD_LIST=visual
+&COM_+BOARD PARENT: Ship Room Parent=$+board:think [switch(t(match([u([v(zone)]/cmd_list)] [u([v(zone)]/crw_list)],%#)),0,[pemit(%#,ACCESS DENIED!!)],1,[remit(me,%n accesses the computer database.)][pemit(%#,u(board_list))])]
+@set PARENT: Ship Room Parent/COM_+BOARD=visual
+&COM_+SECLOG PARENT: Ship Room Parent=$+seclog:think [switch(t(match([u([v(zone)]/cmd_list)],%#)),0,[pemit(%#,ACCESS DENIED!!)],1,[remit(me,%n accesses the computer database.)][pemit(%#,u(sec_log))])]
+@set PARENT: Ship Room Parent/COM_+SECLOG=visual
+@SUCCESS PARENT: Ship Room Parent=[switch([and(u(brd_alert),hasflag(%#,FIXED))],1,[switch(t(match([u([v(zone)]/cmd_list)] [u([v(zone)]/crw_list)] [u([v(zone)]/brd_list)],%#)),0,[zemit(u(zone),u(intruder_msg,%#))][set(u(zone),sec_log1:[get([u(zone)]/sec_log1)] %#)][set(u(zone),sec_log2:[get([u(zone)]/sec_log2)][time()]|)])])]
+@set PARENT: Ship Room Parent/SUCCESS=no_command
+&INTRUDER_MSG PARENT: Ship Room Parent=[ansi(hr,INTRUDER SPOTTED: LOCATION [before(name(loc(%0)),u(roombefore))])]
+@set PARENT: Ship Room Parent/INTRUDER_MSG=visual
+&BRD_ALERT PARENT: Ship Room Parent=1
+@set PARENT: Ship Room Parent/BRD_ALERT=visual
+&SHIPEXTRAS PARENT: Ship Room Parent=&accesspad <Exit>=<'1' to make door have an accesspad '0' to not>%r%tDefault: 0%r%tExample: &accesspad port=1%r%r&code <Exit>=<Access Code>%r%tDefault: 0000%r%tExample: &code port=1234%r%r&level <Exit>=<Clearance level for palm access (board,crew,command)>%r%tDefault: crew%r%tExample: &level port=command%r%r&brd_alert <Room Parent>=<'1' to activate intruder warnings, '0' to deactivate>%r%tDefault: 1%r%tExample: &brd_alert room=0
+@set PARENT: Ship Room Parent/SHIPEXTRAS=visual
+&COM_SHIP_EXTRAS PARENT: Ship Room Parent=$ship extras:think [pemit(%#,[ansi([v(hcolor)],repeat([v(line)],[div(79,strlen(v(line)))]))]%r[ansi(hr,[center(SHIP EXTRAS,79)])]%r[ansi([v(hcolor)],repeat([v(line)],[div(79,strlen(v(line)))]))]%r[u(shipextras)]%r[ansi([v(hcolor)],repeat([v(line)],[div(79,strlen(v(line)))]))])]
+@set PARENT: Ship Room Parent/COM_SHIP_EXTRAS=visual
+&LIS_BLUE PARENT: Ship Room Parent=^* says, "*blue alert":@switch [t(match([u([v(zone)]/cmd_list)] [u([v(zone)]/crw_list)],%#))]=0,think [remit(loc(%#),The computer beeps%, "ACCESS DENIED!!")],1,{@zemit [v(zone)]=[ansi(hb,ALERT STATUS BLUE: Prepare to dock!)][set([v(zone)],lcolor:hb)];&alert_status [v(zone)]=[ansi(hb,Blue)]}
+@set PARENT: Ship Room Parent/LIS_BLUE=visual
+&LIS_GREEN PARENT: Ship Room Parent=^* says, "*green alert":@switch [t(match([u([v(zone)]/cmd_list)] [u([v(zone)]/crw_list)],%#))]=0,think [remit(loc(%#),The computer beeps%, "ACCESS DENIED!!")],1,{@zemit [v(zone)]=[ansi(hg,ALERT STATUS GREEN: All crew resume standard posts!)][set([v(zone)],lcolor:hg)];&alert_status [v(zone)]=[ansi(hg,Green)]}
+@set PARENT: Ship Room Parent/LIS_GREEN=visual
+&LIS_RED PARENT: Ship Room Parent=^* says, "*red alert":@switch [t(match([u([v(zone)]/cmd_list)] [u([v(zone)]/crw_list)],%#))]=0,think [remit(loc(%#),The computer beeps%, "ACCESS DENIED!!")],1,{@zemit [v(zone)]=[ansi(hr,ALERT STATUS RED: BATTLE STATIONS!)][set([v(zone)],lcolor:hr)];&alert_status [v(zone)]=[ansi(hr,Red)]}
+@set PARENT: Ship Room Parent/LIS_RED=visual
+&LIS_YELLOW PARENT: Ship Room Parent=^* says, "*yellow alert":@switch [t(match([u([v(zone)]/cmd_list)] [u([v(zone)]/crw_list)],%#))]=0,think [remit(loc(%#),The computer beeps%, "ACCESS DENIED!!")],1,{@zemit [v(zone)]=[ansi(hy,ALERT STATUS YELLOW: PREPARE FOR BATTLE STATIONS!)][set([v(zone)],lcolor:hy)];&alert_status [v(zone)]=[ansi(hy,Yellow)]}
+@set PARENT: Ship Room Parent/LIS_YELLOW=visual
+&LIS_INTRUDER PARENT: Ship Room Parent=^* says, "*intruder alert":@switch [t(match([u([v(zone)]/cmd_list)] [u([v(zone)]/crw_list)],%#))]=0,think [remit(loc(%#),The computer beeps%, "ACCESS DENIED!!")],1,{@zemit [v(zone)]=[ansi(hir,INTRUDER ALERT: ALL SECURITY PERSONEL REPORT TO DUTY!)][set([v(zone)],lcolor:hir)];&alert_status [v(zone)]=[ansi(hir,Intruder)]}
+@set PARENT: Ship Room Parent/LIS_INTRUDER=visual
+&LIS_BLUE2 PARENT: Ship Room Parent=^* says, "*blue alert.":@switch [t(match([u([v(zone)]/cmd_list)] [u([v(zone)]/crw_list)],%#))]=0,think [remit(loc(%#),The computer beeps%, "ACCESS DENIED!!")],1,{@zemit [v(zone)]=[ansi(hb,ALERT STATUS BLUE: Prepare to dock!)][set([v(zone)],lcolor:hb)];&alert_status [v(zone)]=[ansi(hb,Blue)]}
+@set PARENT: Ship Room Parent/LIS_BLUE2=visual
+&LIS_GREEN2 PARENT: Ship Room Parent=^* says, "*green alert.":@switch [t(match([u([v(zone)]/cmd_list)] [u([v(zone)]/crw_list)],%#))]=0,think [remit(loc(%#),The computer beeps%, "ACCESS DENIED!!")],1,{@zemit [v(zone)]=[ansi(hg,ALERT STATUS GREEN: All crew resume standard posts!)][set([v(zone)],lcolor:hg)];&alert_status [v(zone)]=[ansi(hg,Green)]}
+@set PARENT: Ship Room Parent/LIS_GREEN2=visual
+&LIS_RED2 PARENT: Ship Room Parent=^* says, "*red alert.":@switch [t(match([u([v(zone)]/cmd_list)] [u([v(zone)]/crw_list)],%#))]=0,think [remit(loc(%#),The computer beeps%, "ACCESS DENIED!!")],1,{@zemit [v(zone)]=[ansi(hr,ALERT STATUS RED: BATTLE STATIONS!)][set([v(zone)],lcolor:hr)];&alert_status [v(zone)]=[ansi(hr,Red)]}
+@set PARENT: Ship Room Parent/LIS_RED2=visual
+&LIS_YELLOW2 PARENT: Ship Room Parent=^* says, "*yellow alert.":@switch [t(match([u([v(zone)]/cmd_list)] [u([v(zone)]/crw_list)],%#))]=0,think [remit(loc(%#),The computer beeps%, "ACCESS DENIED!!")],1,{@zemit [v(zone)]=[ansi(hy,ALERT STATUS YELLOW: PREPARE FOR BATTLE STATIONS!)][set([v(zone)],lcolor:hy)];&alert_status [v(zone)]=[ansi(hy,Yellow)]}
+@set PARENT: Ship Room Parent/LIS_YELLOW2=visual
+&LIS_INTRUDER2 PARENT: Ship Room Parent=^* says, "*intruder alert.":@switch [t(match([u([v(zone)]/cmd_list)] [u([v(zone)]/crw_list)],%#))]=0,think [remit(loc(%#),The computer beeps%, "ACCESS DENIED!!")],1,{@zemit [v(zone)]=[ansi(hir,INTRUDER ALERT: ALL SECURITY PERSONEL REPORT TO DUTY!)][set([v(zone)],lcolor:hir)];&alert_status [v(zone)]=[ansi(hir,Intruder)]}
+@set PARENT: Ship Room Parent/LIS_INTRUDER2=visual
+&LIS_BLUE3 PARENT: Ship Room Parent=^* says, "*blue alert!":@switch [t(match([u([v(zone)]/cmd_list)] [u([v(zone)]/crw_list)],%#))]=0,think [remit(loc(%#),The computer beeps%, "ACCESS DENIED!!")],1,{@zemit [v(zone)]=[ansi(hb,ALERT STATUS BLUE: Prepare to dock!)][set([v(zone)],lcolor:hb)];&alert_status [v(zone)]=[ansi(hb,Blue)]}
+@set PARENT: Ship Room Parent/LIS_BLUE3=visual
+&LIS_GREEN3 PARENT: Ship Room Parent=^* says, "*green alert!":@switch [t(match([u([v(zone)]/cmd_list)] [u([v(zone)]/crw_list)],%#))]=0,think [remit(loc(%#),The computer beeps%, "ACCESS DENIED!!")],1,{@zemit [v(zone)]=[ansi(hg,ALERT STATUS GREEN: All crew resume standard posts!)][set([v(zone)],lcolor:hg)];&alert_status [v(zone)]=[ansi(hg,Green)]}
+@set PARENT: Ship Room Parent/LIS_GREEN3=visual
+&LIS_RED3 PARENT: Ship Room Parent=^* says, "*red alert!":@switch [t(match([u([v(zone)]/cmd_list)] [u([v(zone)]/crw_list)],%#))]=0,think [remit(loc(%#),The computer beeps%, "ACCESS DENIED!!")],1,{@zemit [v(zone)]=[ansi(hr,ALERT STATUS RED: BATTLE STATIONS!)][set([v(zone)],lcolor:hr)];&alert_status [v(zone)]=[ansi(hr,Red)]}
+@set PARENT: Ship Room Parent/LIS_RED3=visual
+&LIS_YELLOW3 PARENT: Ship Room Parent=^* says, "*yellow alert!":@switch [t(match([u([v(zone)]/cmd_list)] [u([v(zone)]/crw_list)],%#))]=0,think [remit(loc(%#),The computer beeps%, "ACCESS DENIED!!")],1,{@zemit [v(zone)]=[ansi(hy,ALERT STATUS YELLOW: PREPARE FOR BATTLE STATIONS!)][set([v(zone)],lcolor:hy)];&alert_status [v(zone)]=[ansi(hy,Yellow)]}
+@set PARENT: Ship Room Parent/LIS_YELLOW3=visual
+&LIS_INTRUDER3 PARENT: Ship Room Parent=^* says, "*intruder alert!":@switch [t(match([u([v(zone)]/cmd_list)] [u([v(zone)]/crw_list)],%#))]=0,think [remit(loc(%#),The computer beeps%, "ACCESS DENIED!!")],1,{@zemit [v(zone)]=[ansi(hir,INTRUDER ALERT: ALL SECURITY PERSONEL REPORT TO DUTY!)][set([v(zone)],lcolor:hir)];&alert_status [v(zone)]=[ansi(hir,Intruder)]}
+@set PARENT: Ship Room Parent/LIS_INTRUDER3=visual
+&LIS_INT PARENT: Ship Room Parent=^* says, "*":@select [t(v(int_loc))][switch(v(int_loc),pa,1,0)]=0*,,10,think [remit([v(int_loc)],[ansi(hr,<*<)][u(ship_name)] Intercom[ansi(hr,>*>)] From [u(int_name)]%, %0 says%, "%1")],11,think [iter([u([v(zone)]/room_list)],[remit(##,[ansi(hr,<*<)][u(ship_name)] PA System[ansi(hr,>*>)] From [u(int_name)]%, %0 says%, "%1")])]
+@set PARENT: Ship Room Parent/LIS_INT=visual
+@DESCRIBE PARENT: Ship Room Parent=[switch(u(line1),1,[ansi([u([v(zone)]/lcolor)],repeat([u(line)],[div(79,strlen(u(line)))]))]%r)][ansi([v(dcolor)],[eval(me,rdesc)])][switch(u(line2),1,%r[ansi([u([v(zone)]/lcolor)],repeat([u(line)],[div(79,strlen(u(line)))]))])][switch(v(rsucc),,,%r[u(rsucc)])][switch(words(lattr(me/feature_*)),0,,%r%r[ansi([v(hcolor)],[v(featurename)])]%r%b[iter([lattr(me/feature_*)],[ansi([v(fcolor)],[capstr(lcstr(edit(after(##,FEATURE_),_,%b)))])], ,%r%b)])]%r%r[ansi([v(hcolor)],[v(contentname)])][switch(t(u(plist)),1,%r%b[iter(u(plist),[ansi([v(pcolor)],[name(##)]%b)][ansi([v(pcolor)],<[status(##)]>)] [switch(status(##),IC,)], ,%r%b)])][switch(t(u(objlist)),1,%r%b[iter(u(objlist),[ansi(v(ocolor),name(##))][switch(caption(##),,,%b[caption(##)])], ,%r%b)])][switch([hasflag(me,transparent)],0,%r%r[ansi(v(hcolor),[u(oexitname)])]%r%b[iter([lexits(me)],[ansi([v(hcolor)],[ljust(<[ucstr([extract([fullname(##)],2,1,;)])]>,5)])][ansi([v(ecolor)],[name(##)])]%b%b%b)],[switch(words(u(oexitlist)),0,,%r%r[ansi(v(hcolor),[v(oexitname)])]%r%b[iter([u(oexitlist)],[ansi([v(hcolor)],[ljust(<[ucstr([extract([fullname(##)],2,1,;)])]>,5)])] [ansi([v(ecolor)],[name(##)])]%b%b%b)])])][switch([hasflag(me,transparent)],1,[switch(words(u(texitlist)),0,,%r%r[ansi([v(hcolor)],[v(texitname)])][iter([u(texitlist)],%r%b[ansi([v(hcolor)],[ljust(<[ucstr([extract([fullname(##)],2,1,;)])]>,5)])] [ansi([v(ecolor)],[ljust([name(##)],24)])] [ansi([v(eecolor)],u(nameotherside,##))])])]
+@set PARENT: Ship Room Parent/DESCRIBE=no_command visual
+&LINE2 PARENT: Ship Room Parent=1
+@set PARENT: Ship Room Parent/LINE2=visual
+&INT_DBREF PARENT: Ship Room Parent=[u([u(zone)]/room_list)]
+@set PARENT: Ship Room Parent/INT_DBREF=visual
+@create PARENT: Ship Zone Parent
+@link PARENT: Ship Zone Parent = #395
+@parent PARENT: Ship Zone Parent=#6034
+@set PARENT: Ship Zone Parent = LINK_OK
+@set PARENT: Ship Zone Parent = VISUAL
+@set PARENT: Ship Zone Parent = NO_COMMAND
+&COM_+CRWE- PARENT: Ship Zone Parent=$+crew- *:think [switch([t([num(*%0)])][t(match([u(cmd_list)],%#))],0*,[pemit(%#,I don't know who that is.)],10,[pemit(%#,ACCESS DENIED!!)],11,[remit(%l,%n accesses the computer database.)][set(me,crw_list:[squish(remove([u(crw_list)],num(*%0)))])])]
+@set PARENT: Ship Zone Parent/COM_+CRWE-=visual
+&COM_+BIO- PARENT: Ship Zone Parent=$+bio- *:think [switch([t([num(*%0)])][t(match([u(cmd_list)],%#))],0*,[pemit(%#,I don't know who that is.)],10,[pemit(%#,ACCESS DENIED!!)],11,[remit(%l,%n accesses the computer database.)][set(me,bio_list:[squish(remove([u(bio_list)],num(*%0)))])])]
+@set PARENT: Ship Zone Parent/COM_+BIO-=visual
+&COM_+BIO+ PARENT: Ship Zone Parent=$+bio+ *:think [switch([t([num(*%0)])][t(match([u(cmd_list)] [u(crw_list)],%#))],0*,[pemit(%#,I don't know who that is.)],10,[pemit(%#,ACCESS DENIED!!)],11,[remit(%l,%n accesses the computer database.)][set(me,bio_list:[u(bio_list)] [num(*%0)])])]
+@set PARENT: Ship Zone Parent/COM_+BIO+=visual
+&PLAYER_LIST PARENT: Ship Zone Parent=[iter(lcon(%0),[switch(isplayer(##),1,[##]|%0)])]
+@set PARENT: Ship Zone Parent/PLAYER_LIST=visual
+&COM_+INTRUDER PARENT: Ship Zone Parent=$+intruder:@switch [t(match([u(cmd_list)] [u(crw_list)],%#))]=0,think [pemit(%#,ACCESS DENIED!!)],1,{@zemit [num(me)]=[ansi(hir,INTRUDER ALERT: ALL SECURITY PERSONEL REPORT TO DUTY!)][set(me,lcolor:hir)];&alert_status me=[ansi(hir,Intruder)]}
+@set PARENT: Ship Zone Parent/COM_+INTRUDER=visual
+&ABOARD_LIST PARENT: Ship Zone Parent=[squish([iter(u(room_list),u(player_list,##))])]
+@set PARENT: Ship Zone Parent/ABOARD_LIST=visual
+&COM_+BOARD+ PARENT: Ship Zone Parent=$+board+ *:think [switch([t([num(*%0)])][t(match([u(cmd_list)] [u(crw_list)],%#))],0*,[pemit(%#,I don't know who that is.)],10,[pemit(%#,ACCESS DENIED!!)],11,[remit(%l,%n accesses the computer database.)][set(me,brd_list:[u(brd_list)] [num(*%0)])])]
+@set PARENT: Ship Zone Parent/COM_+BOARD+=visual
+&COM_+BOARD- PARENT: Ship Zone Parent=$+board- *:think [switch([t([num(*%0)])][t(match([u(cmd_list)] [u(crw_list)],%#))],0*,[pemit(%#,I don't know who that is.)],10,[pemit(%#,ACCESS DENIED!!)],11,[remit(%l,%n accesses the computer database.)][set(me,brd_list:[squish(remove([u(brd_list)],num(*%0)))])])]
+@set PARENT: Ship Zone Parent/COM_+BOARD-=visual
+&COM_+BLUE PARENT: Ship Zone Parent=$+blue:@switch [t(match([u(cmd_list)] [u(crw_list)],%#))]=0,think [pemit(%#,ACCESS DENIED!!)],1,{@zemit [num(me)]=[ansi(hb,ALERT STATUS BLUE: Prepare to dock!)][set(me,lcolor:hb)];&alert_status me=[ansi(hb,Blue)]}
+@set PARENT: Ship Zone Parent/COM_+BLUE=visual
+&COM_+GREEN PARENT: Ship Zone Parent=$+green:@switch [t(match([u(cmd_list)] [u(crw_list)],%#))]=0,think [pemit(%#,ACCESS DENIED!!)],1,{@zemit [num(me)]=[ansi(hg,ALERT STATUS GREEN: All crew resume standard posts!)][set(me,lcolor:hg)];&alert_status me=[ansi(hg,Green)]}
+@set PARENT: Ship Zone Parent/COM_+GREEN=visual
+&COM_+RED PARENT: Ship Zone Parent=$+red:@switch [t(match([u(cmd_list)] [u(crw_list)],%#))]=0,think [pemit(%#,ACCESS DENIED!!)],1,{@zemit [num(me)]=[ansi(hr,ALERT STATUS RED: BATTLE STATIONS!)][set(me,lcolor:hr)];&alert_status me=[ansi(hr,Red)]}
+@set PARENT: Ship Zone Parent/COM_+RED=visual
+&COM_+YELLOW PARENT: Ship Zone Parent=$+yellow:@switch [t(match([u(cmd_list)] [u(crw_list)],%#))]=0,think [pemit(%#,ACCESS DENIED!!)],1,{@zemit [num(me)]=[ansi(hy,ALERT STATUS YELLOW: PREPARE FOR BATTLE STATIONS!)][set(me,lcolor:hy)];&alert_status me=[ansi(hy,Yellow)]}
+@set PARENT: Ship Zone Parent/COM_+YELLOW=visual
+&COM_+COMMAND+ PARENT: Ship Zone Parent=$+command+ *:think [switch([t([num(*%0)])][t(match([u(cmd_list)],%#))],0*,[pemit(%#,I don't know who that is.)],10,[pemit(%#,ACCESS DENIED!!)],11,[remit(%l,%n accesses the computer database.)][set(me,cmd_list:[squish(setunion([u(cmd_list)],num(*%0)))])])]
+@set PARENT: Ship Zone Parent/COM_+COMMAND+=visual
+&COM_+COMMAND- PARENT: Ship Zone Parent=$+command- *:think [switch([t([num(*%0)])][t(match([u(cmd_list)],%#))],0*,[pemit(%#,I don't know who that is.)],10,[pemit(%#,ACCESS DENIED!!)],11,[remit(%l,%n accesses the computer database.)][set(me,cmd_list:[squish(remove([u(cmd_list)],num(*%0)))])])]
+@set PARENT: Ship Zone Parent/COM_+COMMAND-=visual
+&COM_+CREW+ PARENT: Ship Zone Parent=$+crew+ *:think [switch([t([num(*%0)])][t(match([u(cmd_list)],%#))],0*,[pemit(%#,I don't know who that is.)],10,[pemit(%#,ACCESS DENIED!!)],11,[remit(%l,%n accesses the computer database.)][set(me,crw_list:[v(crw_list)] [num(*%0)])]
+@set PARENT: Ship Zone Parent/COM_+CREW+=visual
+&COM_+CREW- PARENT: Ship Zone Parent=$+crew- *:think [switch([t([num(*%0)])][t(match([u(cmd_list)],%#))],0*,[pemit(%#,I don't know who that is.)],10,[pemit(%#,ACCESS DENIED!!)],11,[remit(%l,%n accesses the computer database.)][set(me,crw_list:[squish(remove([u(crw_list)],num(*%0)))])])]
+@set PARENT: Ship Zone Parent/COM_+CREW-=visual
+&SETUPEVAL PARENT: Ship Zone Parent=[switch(%0,owner(me),1,0)][t(u(room_list))][t(v(room_parent))][t(v(exit_parent))][t(get([v(room_parent)]/ship_name))]
+@set PARENT: Ship Zone Parent/SETUPEVAL=visual
+&COM_SETUP_SHIP PARENT: Ship Zone Parent=$setup ship:think [switch([u(setupeval,%#)],0*,[pemit(%#,You need to own the zone to do that.)],10*,[pemit(%#,You forgot to set the &room_list.)],110*,[pemit(%#,You forgot to set the &room_parent.)],1110*,[pemit(%#,You forgot to set the &exit_parent.)],11110*,[pemit(%#,You forgot to set the &ship_name.)],11111,[pemit(%#,Ship Setup Complete.)][parent(v(room_parent),#392)][parent(v(exit_parent),#403)][lock(me/enter,=%#)][lock(me/zone,=%#)])];@swi [u(setupeval,%#)]=11111,{@dol [u([v(room_parent)]/room_list)]=&feature_intercom ##=[get([u(room_parent)]/feature_intercom)]}
+@set PARENT: Ship Zone Parent/COM_SETUP_SHIP=visual
+&ROOM_LIST PARENT: Ship Zone Parent=[setinter(lsearch(owner(me),zone,num(me)),lsearch(owner(me),type,room))]
+@set PARENT: Ship Zone Parent/ROOM_LIST=visual
+&INT_DBREF PARENT: Ship Zone Parent=[u([u(zone)]/room_list)]
+@set PARENT: Ship Zone Parent/INT_DBREF=visual
+&ROOM_LISTEN_SET PARENT: Ship Zone Parent=[set(%0,monitor)][iter(v(listenattr),set(%0,##:[get(parent(%0)/##)]))]
+@set PARENT: Ship Zone Parent/ROOM_LISTEN_SET=visual
+&LISTENATTR PARENT: Ship Zone Parent=lis_blue lis_green lis_red lis_yellow lis_intruder lis_blue2 lis_green2 lis_red2 lis_yellow2 lis_intruder2 lis_blue3 lis_green3 lis_red3 lis_yellow3 lis_intruder3 lis_int
+@set PARENT: Ship Zone Parent/LISTENATTR=visual
+&LCOLOR PARENT: Ship Zone Parent=hg
+@set PARENT: Ship Zone Parent/LCOLOR=visual
+&SHIP_OBJECT PARENT: Ship Zone Parent=#12285
+@set PARENT: Ship Zone Parent/SHIP_OBJECT=no_command wizard mortal_dark
+&ALERT_STATUS PARENT: Ship Zone Parent=![1m![32mGreen![0m
+@set PARENT: Ship Zone Parent/ALERT_STATUS=visual
+@create PARENT: Ship Exit Parent
+@link PARENT: Ship Exit Parent = #395
+@parent PARENT: Ship Exit Parent=#4279
+@set PARENT: Ship Exit Parent = LINK_OK
+@set PARENT: Ship Exit Parent = VISUAL
+@set PARENT: Ship Exit Parent = NO_COMMAND
+&LEVEL PARENT: Ship Exit Parent=crew
+@set PARENT: Ship Exit Parent/LEVEL=visual
+&UNIT PARENT: Ship Exit Parent=hatch
+@set PARENT: Ship Exit Parent/UNIT=visual
+&SEC_LIST PARENT: Ship Exit Parent=[switch([u(level)],board,[get([v(zone)]/brd_list)] [get([v(zone)]/crw_list)])] [switch([u(level)],crew,[get([v(zone)]/crw_list)])] [get([v(zone)]/cmd_list)]
+@set PARENT: Ship Exit Parent/SEC_LIST=visual
+&CODE PARENT: Ship Exit Parent=0000
+@set PARENT: Ship Exit Parent/CODE=visual
+@create Bajoran Exit Parent
+@link Bajoran Exit Parent = #123
+@chzone Bajoran Exit Parent = #1245
+@parent Bajoran Exit Parent=#6233
+@set Bajoran Exit Parent = LINK_OK
+@set Bajoran Exit Parent = VISUAL
+@set Bajoran Exit Parent = NO_COMMAND
+&OTHERSIDE Bajoran Exit Parent=[squish(iter(lexits(loc(me)),switch(home(me),loc(##),##)))]
+@set Bajoran Exit Parent/OTHERSIDE=visual
+&DELAY Bajoran Exit Parent=10
+@set Bajoran Exit Parent/DELAY=visual
+&SEC_LIST Bajoran Exit Parent=#5541 #123
+@set Bajoran Exit Parent/SEC_LIST=visual
+&PASS_LOCK Bajoran Exit Parent=[or([hasflag(%#,wizard)],[haspower(%#,builder)])]
+@set Bajoran Exit Parent/PASS_LOCK=visual
+&EXITNAME Bajoran Exit Parent=[name(me)] [u(unit)]
+@set Bajoran Exit Parent/EXITNAME=visual
+&ANSI4 Bajoran Exit Parent=hr
+@set Bajoran Exit Parent/ANSI4=visual
+&ANSI3 Bajoran Exit Parent=hb
+@set Bajoran Exit Parent/ANSI3=visual
+&ANSI2 Bajoran Exit Parent=hm
+@set Bajoran Exit Parent/ANSI2=visual
+&ANSI1 Bajoran Exit Parent=hg
+@set Bajoran Exit Parent/ANSI1=visual
+&ANSI0 Bajoran Exit Parent=c
+@set Bajoran Exit Parent/ANSI0=visual
+&APDESC Bajoran Exit Parent=Next to the [eval(me,unit)]%, you see:%r[ansi([eval(me,ansi0)],%b[repeat(_,48)]%b%r/)][ansi([eval(me,ansi3)],Current Status:)] [ansi([switch([v(lock_status)],LOCKED,hr,hg)],[ljust([switch([v(lock_status)],,UNLOCKED,[v(lock_status)])],32)])][ansi([eval(me,ansi0)],%\%r|[repeat(-,48)]|%r|)][ansi([eval(me,ansi2)],[center(Commands,48)])][ansi([eval(me,ansi0)],|%r|)][ansi([eval(me,ansi3)],[ljust(Palm [eval(me,alias)],[add(16,strlen([eval(me,alias)]))])])][ansi([eval(me,ansi1)],-)][ansi([eval(me,ansi4)],[ljust(Gain access via palm scan.,[sub(31,strlen([eval(me,alias)]))])])][ansi([eval(me,ansi0)],|%r|)][ansi([eval(me,ansi3)],[ljust(Access [eval(me,alias)]=<Code>,[add(16,strlen([eval(me,alias)]))])])][ansi([eval(me,ansi1)],-)][ansi([eval(me,ansi4)],[ljust(Gain access via code.,[sub(31,strlen([eval(me,alias)]))])])][ansi([eval(me,ansi0)],|%r|)][ansi([eval(me,ansi3)],[ljust(Lock [eval(me,alias)]=<Code>,[add(16,strlen([eval(me,alias)]))])])][ansi([eval(me,ansi1)],-)][ansi([eval(me,ansi4)],[ljust(Lock passage.,[sub(31,strlen([eval(me,alias)]))])])][ansi([eval(me,ansi0)],|%r|)][ansi([eval(me,ansi3)],[ljust(Unlock [eval(me,alias)]=<Code>,[add(16,strlen([eval(me,alias)]))])])][ansi([eval(me,ansi1)],-)][ansi([eval(me,ansi4)],[ljust(Unlock passage.,[sub(31,strlen([eval(me,alias)]))])])][ansi([eval(me,ansi0)],|%r%\[repeat(_,48)]/)]
+@set Bajoran Exit Parent/APDESC=visual
+&UNIT Bajoran Exit Parent=door
+@set Bajoran Exit Parent/UNIT=visual
+@DESCRIBE Bajoran Exit Parent=[switch([words(u(rdesc))],0,,[u(rdesc)]%r%r)][switch(hasflag(me,opaque),0,On the other side%, you see:%r[ansi([u([loc(me)]/hcolor)],repeat([u([loc(me)]/line)],[div(79,strlen(u([loc(me)]/line)))]))]%r[ansi([u([loc(me)]/dcolor)],[u([loc(me)]/rdesc)])]%r[ansi([u([loc(me)]/hcolor)],repeat([u([loc(me)]/line)],[div(79,strlen(u([loc(me)]/line)))]))]%r%r)][switch(u(accesspad),1,[u(apdesc)])]
+@set Bajoran Exit Parent/DESCRIBE=no_command visual
+&NAMEOTHERSIDE Bajoran Exit Parent=[before([name([loc(me)])],[u(roombefore)])]
+@set Bajoran Exit Parent/NAMEOTHERSIDE=visual
+&ROOMBEFORE Bajoran Exit Parent=%b<
+@set Bajoran Exit Parent/ROOMBEFORE=visual
+@ALIAS Bajoran Exit Parent=[extract([fullname(me)],2,1,;)]
+@set Bajoran Exit Parent/ALIAS=no_command visual
+&CODE Bajoran Exit Parent=1357
+@set Bajoran Exit Parent/CODE=visual
+&ACCESSPAD Bajoran Exit Parent=0
+@set Bajoran Exit Parent/ACCESSPAD=visual
+@SUCCESS Bajoran Exit Parent=[switch(hasflag(me,opaque),1,You enter the [lcstr(u(exitname))].,0,You head [lcstr(name(me))] to [u(nameotherside)].)]
+@set Bajoran Exit Parent/SUCCESS=no_command
+@OSUCCESS Bajoran Exit Parent=[switch(hasflag(me,opaque),1,enters the [lcstr(u(exitname))].,0,heads [lcstr(name(me))] to [u(nameotherside)].)]
+@set Bajoran Exit Parent/OSUCCESS=no_command
+@ODROP Bajoran Exit Parent=[switch(hasflag(me,opaque),1,arives through the [lcstr(u([u(otherside)]/exitname))].,0,arrives from the [u([u(otherside)]/nameotherside)])]
+@set Bajoran Exit Parent/ODROP=no_command
+@FAILURE Bajoran Exit Parent=[switch(hasflag(me,opaque),1,You cannot seem to enter the [lcstr(u(exitname))].,0,You can't go [lcstr(name(me))].)]
+@set Bajoran Exit Parent/FAILURE=no_command
+@OFAILURE Bajoran Exit Parent=[switch(hasflag(me,opaque),1,tries unsuccessfully to enter the [lcstr(u(exitname))].,0,tries unsuccessfully to go [lcstr(name(me))].)]
+@set Bajoran Exit Parent/OFAILURE=no_command
+&UNLOCK Bajoran Exit Parent=think [setq(0,u(otherside))];@wait 2=think [lock(me,[v(old_lock)])][lock(%q0,[get(%q0/old_lock)])][remit(home(me),The [u(exitname)] unlocks with a click.)][remit(home(%q0),The [u(%q0/exitname)] unlocks with a click.)][set(me,lock_status:UNLOCKED)][set(%q0,lock_status:UNLOCKED)]
+@set Bajoran Exit Parent/UNLOCK=visual
+&LOCK Bajoran Exit Parent=think [setq(0,u(otherside))][set(me,old_lock:[switch([lock(me)],*UNLOCKED*,,[lock(me)])])][set(%q0,old_lock:[switch(lock(%q0),*UNLOCKED*,,lock(%q0))])];@wait 2=think [lock(me,pass_lock/1)][lock(%q0,pass_lock/1)][remit(home(me),The [u(%0/exitname)] locks with a click.)][remit(home(%q0),The [u(%q0/exitname)] locks with a click.)][set(me,lock_status:LOCKED)][set(%q0,lock_status:LOCKED)]
+@set Bajoran Exit Parent/LOCK=visual
+@open Out;o;out
+@link Out = #5314
+@lock/Basic Out=#13
+@FAILURE Out=[ansi(y,Lighting crashes upon your head!)] [ansi(r,YOU are *NOT* Swimmer..go away!)]
+@set Out/FAILURE=no_command

@@ -1,0 +1,40 @@
+@create PARENT: Harley '94
+@Desc PARENT: Harley '94=A classic '94 Harley Davidson. Jet black with blued chrome. This is one very hot-looking bike. If it had wings, it would fly... <bikehelp>%r%rNOTE: You must type @listen <bikename>=* to be able to hear what's going on outside.
+@Ealias PARENT: Harley '94=hop on
+@Lalias PARENT: Harley '94=hop off
+@Enter PARENT: Harley '94=You hop on the [name(me)]. The Bike growls between your legs.
+@Oenter PARENT: Harley '94=hops onto the bike behind you...
+@Oxenter PARENT: Harley '94=hops onto the [name(me)] and crouches down, you hear the motor growl...
+@Leave PARENT: Harley '94=You jump off the bike and see it go into idle mode... The motor purrs...
+@Oleave PARENT: Harley '94=jumps off of the bike...
+@Oxleave PARENT: Harley '94=jumps off of the [name(me)], the bike settles into idle mode, the motor winding down from a growl to a purr...
+@Listen PARENT: Harley '94=*
+@VA PARENT: Harley '94=$drive *:\\The [name(me)] growls and speeds out of sight!;move %0
+@Fail PARENT: Harley '94=Fergeddaboudit!
+@VB PARENT: Harley '94=$scan:look
+@VE PARENT: Harley '94=$drive home:home
+@VF PARENT: Harley '94=$rev*:: 's engine revs, "VROOOOOOOOOOOOOOOOOOOOOOOOM!
+@Omove PARENT: Harley '94=thunders into view, the exhaust rumbling.
+@VH PARENT: Harley '94=$tunes,*:\\A tape automatically is inserted and from two mega-bass speakers welded above the handlebars, the latest %0 tune starts slamming into yer ears!
+@VI PARENT: Harley '94=$scan *:look %0
+&SCORE PARENT: Harley '94=6
+&MOTOR PARENT: Harley '94=$motor *:&DCount me=0;@tr me/motor2=%0, %N
+&DCMAX PARENT: Harley '94=5
+&DCOUNT PARENT: Harley '94=0
+&MOTOR2 PARENT: Harley '94=@switch %0=*,{drive %0;@wait v(speed)=@tr me/motor2=%0},{@emit The [name(me)] screeches to a stop...}
+&BRAKE PARENT: Harley '94=$brake:@halt me;@emit The [name(me)] screeches to a stop...
+&SHIFT PARENT: Harley '94=$shift *:&speed me=%0
+&SPEED PARENT: Harley '94=0
+@Odesc PARENT: Harley '94=checks out the [name(me)].
+&BHELP PARENT: Harley '94=$bikehelp:@pemit %#= Commands for the Bike:%r%rhop on%rhop off%rdrive <direction>%rdrive home%t%t(teleports bike and contents home)%rscan%t%t%t(look)%rscan <object>%t%t(look at object)%rrev%t%t%t(revs the engine)%rtunes,<band name>%t(blasts the speaker!)%rhorn%t%t%t(honk the horn)
+&CREDITS PARENT: Harley '94=Coded by mjg@biosun.harvard.edu, updated and brought to you here by Jade@CitadelMUSH, brought to Dark Metal by yours truly, Fishbone
+@Filter PARENT: Harley '94=* has left.,* has arrived.
+@Infilter PARENT: Harley '94=* has left,* has arrived.
+&HORN PARENT: Harley '94=$horn:@switch [num(me)]=[loc([v(#)])],{@pemit me=[v(n)] honks the horn.;@emit The [name(me)]'s horn HONKS!}
+@Tfail PARENT: Harley '94=This object is set jump_OK so as to make it's muber clear. It is not set up to b teleported to.
+@set PARENT: Harley '94=MONITOR
+@set PARENT: Harley '94=VISUAL
+@set PARENT: Harley '94=PARENT_OK
+@set PARENT: Harley '94=AUDIBLE
+@set PARENT: Harley '94=HALTED
+@set PARENT: Harley '94=SAFE

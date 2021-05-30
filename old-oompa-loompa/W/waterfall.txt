@@ -1,0 +1,198 @@
+#  Authors: Ellan@LostTribes
+#    --> This emitter was adapted from a chime set crafted by 
+#        MasterMinerDanielle, September 1, 1992 for the Ice 
+#        Castle of PernMush.
+#
+#  Format: Mark Hassman (12/30/96)
+###########################################################################
+# CONFIGURATION NOTES:
+#    You will have to edit the dbref listed in this file (#622) to the 
+#    dbref of the location you are configuring.  Also, the old style
+#    @remit was updated to @pemit/contents during the formatting process.
+#    The attribute sets are based on 'here' so you can either stand in
+#    the room as you quote and/or edit the file and replace all occurences
+#    of 'here=' with '<dbref>='.
+#
+#  Here is a sample desc list for the room. These are in the format used
+#  with the climate-season driver.
+#
+#  To change this from a waterfall to windchimes (as the original) or
+#  another noise generator, you need to set the VA through VL attributes.
+#  Merely update the textuall noise to be whatever you wish it and put
+#  them in the order you wish them to emit based on the alphabetical
+#  order of the V* attrib.
+#  Eg, VA is first, VB is second, ... VL is the laster and then
+#  resets the sequence.
+#
+&PREDESC here=A tiny waterfall licks down over the rim of the mountainside for 
+a few yards and then, by a trick of the rock surface, explodes into a dancing 
+curtain of living water that reflects all the light available, seeming to glow 
+night or day. The spray is thick, like a fog, making this glade seem 
+mysterious and cool.
+-
+&POSTDESC here=Moss grows everywhere, in shades of forest and olive and in 
+between, every small white or purple flower glistening with water droplets. 
+The falls billows into a basin at the foot of the mountain, forming a pool 
+that is white with bubbles and always moving. The pool lets out into a much 
+more sedate flow, the little burn slipping downhill between fronds of fern and 
+under a blanket of peppery watercress.
+-
+&POSTSUCCESS here=The fern dips it's curled heads over the stream, moving in 
+the force of the spray.
+-
+# At startup we do some cleanup/initialization of the room
+@Startup here=@tr me/try_update
+-
+&TRY_UPDATE here=
+         &people me=none;
+         @dolist [lcon(loc(me))] = @switch [flags(##)] = P*c*,&people me=some;
+         @wait 5=
+         {
+           @switch [get(me/people)] = some,
+           {
+             @wait [v(interval)]=@trigger me/va;&STATUS me=active
+           },
+           &STATUS me=inactive
+         }
+-
+&CHECK_STATUS here=
+       @swi [v(STATUS)] = inactive,
+       {
+          &STATUS me=active;
+          @wait 5=@trigger me/va
+       }
+-
+# you can modify the interval if you want a quicker/slower response
+# This is in seconds.
+&INTERVAL here=900
+-
+# Status setup.
+&STATUS here=active
+-
+# A few typical messages.
+@Fail here=You put your hand into the cold water, watching it rush through 
+your fingers.
+-
+@Ofail here=puts %p hand into the cold water, watching it rush through %p 
+fingers.
+-
+@Odrop here=swirls %p hand in the cold water.
+-
+# A few directions for using the old waterfall.
+@Ause here=@pemit %#=%r%t'start Waterfall' to start the Waterfall%r%t'stop 
+Waterfall' to stop the Waterfall (note it will start again %r%t%tif someone 
+enters the room though)%r%t'reset Waterfall' if gets majorly confused due to a 
+crash%r%t'nudge Waterfall' To hear what the water is doing now%r%t'set 
+waterfall interval' to set how often a Waterfall effect is done, 
+%r%t%t(default is every five minutes)%r%rNote, once it is started, it will 
+continue to have effects every interval as long as someone is in the room. It 
+will stop by itself if it reaches the end of a cycle and no one is there, and 
+restart automatically when someone enters the room. It will also determine if 
+it should be running after a reboot, by checking to see if there are any 
+people in the room and starting it up if there are.%r
+-
+@Use here=You stare at the waterfall for a moment.
+-
+@Ouse here=chuckles as %s dangles %p hand in the water a moment.
+-
+# Start the sequence again.
+&RESET here=$RESET WATERFALL:@trigger me/va;&STATUS me=active
+-
+# Start the sequence.
+&START here=$START WATERFALL:@swi [v(STATUS)] = inactive,{@trigger 
+me/va;&STATUS me=active},{@pemit %#=The Waterfall effect is already started.}
+-
+# Stop the spam.
+&STOP here=$STOP WATERFALL:&STATUS me=inactive;@halt me
+-
+# A little bit of frilly noise.
+&NUDGE_WATERFALL here=$NUDGE WATERFALL:@trigger 
+me/nudge[v(nudgenum)]=[v(N)];&nudgenum 
+me=[mod(add(v(nudgenum),1),[v(nudgetotal)])]
+-
+# A couple of nudge responses.
+&NUDGE0 here=@pemit/contents #622= The water dances madly down over the rocks, making a 
+merry sound of spashing as [v(0)] leans over the rocks to listen.
+-
+&NUDGE1 here=@pemit/contents #622= [v(0)] stretches out a hand to take a drink of the 
+sweet water.
+-
+&NUDGENUM here=1
+-
+&NUDGETOTAL here=2
+-
+# change the interval to a new setting.
+&SET_INTERVAL here=$SET WATERFALL INTERVAL *:&INTERVAL me=[v(0)];@pemit %#=The 
+interval between emits is now set to [v(0)] seconds.
+-
+# The noises.
+@VA here=@pemit/contents #622= A whisp of a breeze ruffles your hair, the dampness of 
+the mist making you shiver slightly.;@wait [v(interval)]=@trigger me/vb
+-
+@VB here=@pemit/contents #622= The air is still, filled with the scent and feel of 
+water from the cool mist hanging in the air.;@wait [v(interval)]=@trigger me/vc
+-
+@VC here=@pemit/contents #622= A soft whisper of water dancing on the rocks below 
+catches your attention, the sound is almost musical...a fluid lullaby that 
+tantalizes your senses and yet sooths at the same time.;@wait 
+[v(interval)]=@trigger me/vd
+-
+@VD here=@pemit/contents #622=A flash of wings startles you from your reverie as a pair 
+of birds dive and gambol overhead. They dart into the mist that hangs over the 
+waterfall, their crooning and trilling song mingling with the 
+watersounds.;@wait [v(interval)]=@trigger me/ve
+-
+# If you are not using the climate-season driver, you will have to change
+# the following noise as the timedesc function call will fail.  Just put
+# in a text based one to replace it and take out the WATERFALL-* attribs.
+#
+@VE here=@pemit/contents #622= A flicker of [u(waterfall-[u(timedesc)])] reflects off 
+the falls, like the twinkling of a dragon's eyes.;@wait [v(interval)]=@trigger 
+me/vf
+-
+&WATERFALL-MORNING here=morning sunlight
+-
+&WATERFALL-AFTERNOON here=afternoon sunlight
+-
+&WATERFALL-EVENING here=moonlight
+-
+&WATERFALL-NIGHT here=wan moonlight
+-
+@VF here=@pemit/contents #622= The mist seems to jump out and caress your cheek as the 
+waterfall is swirled in its descent by a slight eddy of air.;@wait 
+[v(interval)]=@trigger me/vg
+-
+&MAKER here=@pemit %#=This emitter was adapted from a chime set crafted by 
+MasterMinerDanielle, September 1, 1992 for the Ice Castle of PernMush.
+-
+&PEOPLE here=none
+-
+@VG here=@pemit/contents #622= The water plunges down across the mossy rocks and into 
+the canyon bottom, searching for an outlet to the sea.;@wait 
+[v(interval)]=@trigger me/vh
+-
+@VH here=@pemit/contents #622= The delicate splashing and dancing sounds of the water 
+remind you of a summer day long ago.;@wait [v(interval)]=@trigger me/vi
+-
+@VI here=@pemit/contents #622= The watersounds almost lull you to sleep, so powerful is 
+the tranquilizing effect of the low rushing notes.;@wait 
+[v(interval)]=@trigger me/vj
+-
+@VJ here=@pemit/contents #622= The misty waterfall seems to wrap a sense of peace and 
+timelessness around you as it falls unheeding of the world around it.;@wait 
+[v(interval)]=@trigger me/vk
+-
+@VK here=@pemit/contents #622= A stray breeze causes a momentary splashing on the path 
+at your feet as the spray is swirled around. together.;@wait 
+[v(interval)]=@trigger me/vl
+-
+@VL here=@pemit/contents #622= Small bits of leaf and wood fall from above, plunging 
+out of sight into the tumult of the stream at the foot of the falls.;@wait 
+[v(interval)]=@trigger me/try_update
+-
+@Asucc here=@tr me/check_status
+-
+@set here=COMMANDS
+-
+@pemit me=>> The waterfall installation is now complete.
+-

@@ -1,0 +1,40 @@
+PARENT: Bulletin Board(#11549LVXh)
+Type: Thing Flags: LINK_OK VISUAL SAFE HALT
+To activate the parent, type 'bbhelp'
+Owner: Laolla  Key: Laolla  Credits: 1
+Parent: *NOTHING*
+Zone: *NOTHING*
+Use Key: *UNLOCKED*
+Enter Key: *UNLOCKED*
+Powers:
+COUNT [#5590]: 0
+CRETEPOST [#5590]: $POST *:&COUNT me= u(addcount);&POST_[v(count)] me=%0 -
+From: [name(%#)]-[time()];@set me/post_[u(count)]=no_command;@pemit %#=Your
+post has been added.
+CLEARLOG [#5590]: $CLEAR POSTS:@swi [controls(%#,me)]=1,{@wipe me/post*;&count
+me=0;@pemit %#=Posts cleared for [name(me)]},{@pemit %#=Access Denied.}
+READPOSTS [#5590]: $SEE POST *:@swi [match(lattr(me/POST_*),POST_%0)]=0,{@pemit
+%#=Sorry, that post number does not available.},{@pemit %#=POST_%0:%b[v
+(POST_%0)]}
+ADDCOUNT [#5590]: [add(v(count),1)]
+SUBCOUNT [#5590]: [add(v(count),-1)]
+DELETE [#5590]: $DELETE POST *:@swi [control(%#,me)]=1,{@switch [Match(lattr
+(me/POST_*),POST_%0)]=0,{@pemit %#=Sorry, that post number is not available.},
+{@dolist [edit(After(lattr(me/POST_*),POST_%0),POST_,)][add(1,Words(lattr
+(me/POST_*)))]=@mvattr me=POST_##,POST_[sub(##,1)];@pemit %#=Deleted.;&count
+me=[u(subcount)]}},{@pemit %#=Access Denied.}
+LSTPOSTS [#5590]: $LIST POSTS:@swt [v(count)]=0,{@pemit %#=There are no posts
+at this time.},{@dolist lnum[v(count)0=@2pemit %# = POST_[add(##,1)]:%b[v
+(post_[add(1,##)])]}
+CHECKNUM [#5590]: $CHECK POSTS:@pemit %#=There are [v(count)] posts on the
+board at this time.
+BBHELP [#5590]: $BBHELP:@pemit %#=[center(*,79,*)]%r[center(Bulletin Board
+Help,79)]%r%rREMEMBER: To make this boad work for, you must-%r@set board=
+!halt%r@lock board=me%r%rCommands for the Board are-%r%tpost <message> - Posts
+your message(ex. post Hi %n!)%r%tsee post <#> - Lets you read post #<#>%r%
+tdelete post <#> - Takes post #<#> off the board%r%tclear posts - Clears all
+posts from the board%r%tcheck posts - Checks to see how many posts are on the
+board.%r%rGOOD LUCK AND HAVE FUN!%r[center(*,79,*)]%r
+Home: SNW Free Code Room
+Location: SNW Free Code Room
+_______________________________________________________________________________

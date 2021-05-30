@@ -1,0 +1,242 @@
+##############################################################
+#              APPRAISAL SYSTEM                              #
+#                                                            #
+# by Stephanie Hope Accongio Dray                            #
+# First Draft: 8/2/98                                        #
+#                                                            #
+# Where #99 is the Economic Command Object                   #
+##############################################################
+
+
+#============================================================#
+#                COMMAND: APPRAISE <ITEM>                    #
+#                                                            #
+# This command enables players to get some information about #
+# the economic value of an item.                             #
+#============================================================#
+
+&cmd-appraise #99=$appraise *:
+
+# %q0 = thing to be appraised
+# %q1 = energy cost
+# %q2 = how much energy the player has
+# %q3 = appraisal skill required (default to 'general')
+
+  think setq(0, locate(%#, %0, *));
+  think setq(1, u(u-cost-appraise));
+  think setq(5, add(getaccount(%#, energy), getaccount(%#, energy reserves)));
+  think setq(3, default(%q0/appraisal-skill, general));
+  think setq(3, ulocal(ul-which-appraisal-skill, %q3, %#));
+  think setq(4, u(u-success-appraise, %q3, %#));
+
+# Did the player locate a valid object
+# Does the player have enough energy
+# Did the player succeed?
+
+  think setq(9, [isdbref(%q0)]
+                [and(not(hastype(%q0, player)), not(hastag(%q0, npc)))]
+                [gt(%q5, %q1)]
+                [gt(%q4, 0)]);
+
+  @switch/first %q9=
+   0???, {@error %#=locate %q0},
+   ?0??, {@pemit %#=Only slave traders need to know the value of other 
+                   sentient beings.},
+   ??0?, {@pemit %#=You don't have enough energy to appraise that.},
+   ???0, {think take_energy(%#, %q1, both, r);
+          @pemit %#=%cm%chUsing your [clip(%q3)] skill of [skill(%#, %q3)], 
+                    you failed!%cn;
+          @pemit %#=%cm%chYou used up %q1 energy points.%cn;
+          @pemit %#=[u(u-appraise-header, %q0, %#)]
+                    [u(u-default-appraise, %q0)]%r
+                    [u(u-appraise-footer, %q0, %#)]},
+   1111, {think take_energy(%#, %q1, both, r);
+          @pemit %#=%cm%chUsing your [clip(%q3)] skill of [skill(%#, %q3)], 
+                    you succeeded!%cn;
+          @pemit %#=%cm%chYou used up %q1 energy points.%cn;
+          @pemit %#=[u(u-appraise-header, %q0, %#)]
+                    [u(u-default-appraise, %q0)]%r%r
+                    [ulocal(ul-info-appraise, %q0)]%r
+                    [u(u-appraise-footer, %q0, %#)]}
+-
+&ul-info-appraise #99=
+ [setq(0, ulocal(ul-quality-appraise, %0))]
+ [setq(1, ulocal(ul-condition-appraise, %0))]
+
+ [columns(Type: [clip(trim(edit(edit(
+          default(%0/appraisal-skill, Unknown),appraisal/,), Appraisal/,)))]|
+          Quality: %q0|
+          Condition: %q1|
+          Estimated Value: [ulocal(ul-value-appraise, %0, %q0, %q1)] steni\(s\),
+          div(75, 2), |)]
+
+
+-
+# ulocal(ul-value-appraise, <item>, <quality word>, <condition word>)
+
+&ul-value-appraise #99=
+  [setq(0, price(get(%0/currency)))]
+  [setq(1, switch(%2, New, %q0, 
+                      Good, mul(%q0, .90),
+                      Average, mul(%q0, .75),
+                      Poor, mul(%q0, .5),
+                      Crappy, mul(%q0, .25),
+                      Broken, mul(%q0, .1)))]
+  [setq(2, switch(%1, Excellent, mul(%q1, 2),
+                      Good, mul(%q1, 1.5),
+                      Fair, mul(%q1, 1.3),
+                      Average, %q1,
+                      Poor, mul(%q1, .5),
+                      Unknown, %q1))]
+  [setq(3, mul(%q2, getaccount(%0, get(%0/currency))))]
+  [setq(3, round(%q3, 1))]
+  [setq(4, [iter(lcon(%0),
+		      ulocal(ul-value-appraise,##,
+			[ulocal(ul-quality-appraise, ##)],
+			[ulocal(ul-condition-appraise, ##)]))])]
+  [setq(5, fold(fold-add,%q4,%q3))]
+  [switch(and(isnum(%q5), gt(%q5, 0)), 1, %q5, Unknown)]
+                      
+-
+# A basic addition fold
+&fold-add #99=
+	[add(%0,%1)]
+
+-
+# ulocal(ul-condition-appraise, <item to be appraised>)
+# Returns a phrase describing the condition of the garment
+#
+# %q0 = maxquality of the object
+# %q1 = quality of the object
+# %q3 = maxquality divided by quality = condition
+
+&ul-condition-appraise #99=
+
+  [setq(0, default(%0/maxquality, Unknown))]
+  [setq(1, default(%0/quality, Unknown))]
+  [setq(3, fdiv(%q1, %q0))]
+
+  [switch(1, strmatch(%q1, [get([parent(%0)]/quality)]), New,
+             strmatch(%q0, Unknown), Unkown,
+             strmatch(%q1, Unknown), Unknown,
+             gt(%q3, .9), New,
+             gt(%q3, .7), Good,
+             gt(%q3, .35), Average,
+             gt(%q3, .2), Poor,
+             gt(%q3, 0), Crappy,
+             Broken)]
+-
+# ulocal(ul-quality-appraise, <item to be appraised>)
+# Returns a phrase describing the quality
+#
+# %q0 = currency type of the item
+# %q1 = parent of that currency type
+# %q2 = maxquality of the parent item
+# %q3 = quality of the parent item
+# %q4 = maxquality of the actual item
+# %q5 = quality of the actual item
+
+&ul-quality-appraise #99=
+ 
+  [setq(0, get(%0/currency))]
+  [setq(1, paccount(%q0))]
+  [setq(2, default(%q1/maxquality, Unknown))]
+  [setq(3, default(%q1/quality, Unknown))]
+  [setq(4, default(%0/maxquality, Unknown))]
+  [setq(5, default(%0/quality, Unknown))]
+
+# If any of the fields were unknown, return unknown
+
+  [switch(1, or(strmatch(%q2, Unknown), strmatch(%q3, Unknown), 
+                strmatch(%q4, Unkown)), Unknown,
+             
+# If the maxquality of the item is greater than or equal to the 
+# maxquality of the parent, and the item is not generic, return Excellent
+
+             and(gte(%q4, %q2), not(generic(%0))), Excellent,
+
+# If the maxquality of the item is greater or equal to the maxquality 
+# of the parent and the item is generic, return Good
+
+              gte(%q4, %q2), Good,
+
+# If the maxquality of the item is greater than or equal 
+# to that of the _quality_ 
+# of the parent and the item is not generic, return Fair
+
+             and(gte(%q4, %q3), not(generic(%0))), Fair,
+
+# If the maxquality of the item is greater than or equal to that of 
+# the _quality_ of the parent and the item is generic, return Average
+
+             gte(%q4, %q3), Average,
+
+# If the maxquality of the item is less than the _quality_ of the 
+# parent, return Poor
+                     
+              lt(%q4, %q3), Poor,
+            
+               Unknown)]
+
+
+
+-
+# u(u-default-appraise, <object to be appraised>)
+# Returns the minimum amount of information about an object even if 
+# the player fails.
+
+&u-default-appraise #99=
+ [columns(Approximate Weight: [round(get(%0/weight), 2)] pounds|
+          Approximate Volume: [round(get(%0/volume), 2)] liters|
+          Color: [ifelse(hasattr(%0, dye-color), get(%0/dye-color), 
+                         switch(get(%0/color), *r*, red, *b*, blue, *c*, aqua,
+                                        *g*, green, *w*, white, *m*, 
+                                         magenta, *x*, black, undetermined))],
+          div(75, 2), |)]
+-
+# u(u-appraise-header, <object to be appraised>, <player dbref>)
+&u-appraise-header #99=
+ %cg%chAppraisal information for [name(%q0)]:%r
+ [repeat(=, 75)]%cn%r
+-
+# u(u-appraise-footer, <object to be appraised>, <player dbref>)
+&u-appraise-footer #99=
+  %cg%ch[repeat(=, 75)]%cn%r
+  %cgTags for [name(%0)]: [ltags(%0)]%cn
+
+-
+# u(u-success-appraise, <skill to use>, <player>)
+
+&u-success-appraise #99=
+ successes(skill(%1, %0), sub(10, attribute(%1, shrewdness)))
+-
+
+
+&u-cost-appraise #99=.10
+ 
+-
+# ulocal(ul-which-appraisal-skill, <appraisal/skill>, <player>)
+# Returns the appraisal skill that the code should check on for the
+# player
+
+&ul-which-appraisal-skill #99=
+ 
+# %q0  list of the player's scores in each appraisal skill
+# %q1  the player's highest appraisal skill
+
+ [setq(0, trim(iter(v(appraisal-skills), skill(%1, ##))))]
+ [setq(1, munge(sort-appraise, %q0, v(appraisal-skills)))]
+ [setq(1, last(%q1))]
+
+ [trim(switch(%0, general, %q1, %0))]              
+  
+-
+&sort-appraise #99=[sort(%0)]
+-
+
+&appraisal-skills #99=
+
+appraisal/armor appraisal/horses appraisal/dogs appraisal/cloth_goods 
+appraisal/weapons appraisal/griffons appraisal/farm_animals 
+appraisal/boats_and_ships appraisal/luxury items appraisal/eagles 
+appraisal/property

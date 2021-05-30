@@ -1,0 +1,40 @@
+# File: +where
+# Author: Patrick Herrington <patrickh@innova.net>
+# Format: Mark Hassman (12/21/97)
+#########################################################################
+# The +where command will show the people who are in each room of
+# the MUSH. Unfindable people are shown, though that can be changed
+# by adding a U to orflags function in the setq 0.  If you don't
+# understand how to do it, contact Gilean@MistvaleMUSH and he can
+# walk you through.  Current addy of Mistvale is
+# dreams.2launch.com 1998
+#
+# Unfindable rooms are not shown on the +where.
+#
+# To quote the command in, just change all instances of #400 with
+# the number of your globals object.
+#########################################################################
+&CMD_WHERE #400=$+where:
+   @pemit %#=
+     [repeat(=,78)]%r%b[ljust(Location,30)]%b%bPlayers%r
+     [repeat(-,78)]%r
+     [setq(0,squish(iter(lwho(),switch(orflags(##,D),1,,##))))]
+     [setq(4,[iter(%q0,name(##))])]
+     [setq(1,[iter(%q0,[switch({[orflags(loc(##),UD)]},1,,loc(##))])])]
+     [setq(2,[setunion(%q1,%q1)])]
+     %b
+     [iter(%q2,[left([ljust([name(##)],30)],30)]
+       %b%b[setq(7,[setinter(%q0,lcon(##))])][setq(9,0)]
+       [map(me/where_fn,%q7)]%r)]
+     [repeat(=,78)]
+-
+&WHERE_FN #400=[setq(9,[add(%q9,1)])]
+    [switch([lte(%q9,3)],1,
+	{
+	  [ljust(left(name(%0),14),14)]
+ 	},0,
+	{
+          %r[space(33)][ljust(left(name(%0),14),14)][setq(9,1)]
+	}
+    )]
+-

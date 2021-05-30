@@ -1,0 +1,636 @@
+This is the weather thingy I created for Narnia about a year ago.  The
+code is the way it is because it was developed under the ill-fated 2.0.7
+MUSH code (this means it does not use some of the newer spiffy functions).
+
+This base code creates a climate that is rather like living where I do
+(the mountains of West Virginia).  Examples follow that show how to make 
+child objects that do other climates.  You are free to bastardize this
+code as you see fit.
+
+A note:  This is not an accurate simulation of weather by any means, it
+is just a means to produce cool dynamic descriptions.
+
+There are two ways to for a player to get the weather information.
+One way is to have the weather object itself evaluate an attribute
+on the target object with a get_eval() and force the target object to
+desc itself to that evaluation.  The is for the player to simply get
+the information from the visual weather data object.
+NOTE: To effect this you need to be able to create code that can resynch
+on time intervals (most MUSHes have a clock object for this) to trigger
+the attribute &DO_DAY (once a day) and &DO_QUARTER (every 15 minutes or
+an hour).
+
+Last Note:  The weather object is now designed to be used as a parent.
+Constants for each climate are located on the children.
+
+Before the code is presented, here is a brief description of the Weather
+Parent.  The weather Parent, as mentioned before, can manage an object and
+update it's desc by performing a get_eval() on an attribute named &T_WEATHER
+and setting that object's desc to the evaluation.  The alternative is that
+the owner of the object can simply do whatever they want the data on the
+visual data object that contains the current state of the weather for a
+climate.
+
+Here is a summary of the data stored on the visual data object:
+
+
+&PRECIP: type of precipatation at the moment
+ 
+	 values: none rain hail sleet snow fr_rain
+
+&PRATE: rate of precipatation at the moment
+ 
+        values:         meaning:
+        0               none
+        1               flurries/mist
+        2               light
+        3               moderate
+        4               storm
+
+&SKY: condition of the sky, how it looks at the moment
+ 
+        values: overcast cloudy some_clouds clear
+
+&WIND: current strength of the wind at the moment
+ 
+        values: hi_wind windy gusty breezy calm
+
+&MOON: current phase of the moon
+ 
+        values: new quarter crescent gibbous full
+
+	NOTE:  This uses a quirky modulus function that in no way reflects the
+		   actual phase of the moon.  I have a mush phoon() and a phoon bot.
+		   If you are interested send me email.
+
+&TEMP: basic description of the temperature
+ 
+        values:         meaning:
+ 
+        hot             (>76 F)
+        warm            (66 - 75 F)
+        crisp           (56 - 65 F)
+        cool            (46 - 55 F)
+        chilly          (36 - 45 F)
+        cold            (26 - 35 F)
+        freezing        (< 11 F)
+
+&GROUND: current ground conditions (what it looks like)
+ 
+        values:         meaning:
+ 
+        flooded         lots and lots of water!
+        wet             it's rained recently
+        normal          no flood, no drought, just normal.
+        snowy           it's snowed recently
+        dry             hasn't rained much recently
+        parched         we have a drought
+	    icy	            rain did freeze
+
+&TEMPF:                  holds current temperature F
+&TEMPC:                  holds current temperature C
+&LAST_PRECIP:            time in seconds when last precipation occurred
+&LAST_PRECIP_TYPE:       type of last precipatation
+
+&TIDE:                   Solar Tide
+        values: high-tide mid-tide low-tide
+
+&DAYTIME: 	descriptive current time of day
+ 
+        values:         meaning:                        time:
+ 
+        dawn            sunrise (if not cloudy)         6-7
+        sunrise         dawn (if it is cloudy)          6-7
+        morning                                         8-11
+        afternoon                                       12-18
+        dusk            sunset (if not cloudy)          19-20
+        sunset          dusk (if it is cloudy)          19-20
+        night                                           21-5
+
+&SEASON:	 current season
+ 
+        values: summer fall winter spring
+
+&WIND_DIR:	 Current wind direction.
+ 
+        values: north north-northeast northeast east-northeast east
+        east-southeast southeast south-southeast south south-southwest
+        southwest west-southwest west west-northwest northwest
+        north-northwest
+
+&WIND_SPEED:     speed of wind (mph)
+&WIND_SPEED_N:   speed of wind (knots)
+&WIND_SPEED_K:   speed of wind (kph)
+
+Example of use:
+
+        >examine foo
+        foo(#61)
+        Type: THING Flags:
+        [u(foo_desc)]
+        Owner: The_Emperor  Key: *UNLOCKED* Florin: 0
+        FOO_DESC:switch(get(#7/precip),rain,Foo looks wet.,Foo looks miserable)
+        No exits.
+        Home: A Meadow in the Forest(#43RF)
+        Location: The_Emperor(#1PWOc)
+ 
+        >look foo
+        foo(#61)
+        Foo looks miserable
+
+I hope you find this useful.  I also hope you have time to modify it and
+email me the corrections.
+
+Edmond aka Tangent@TooMUSH, Perfect Tommy@TooMUSH, Coriakin@Narnia,
+		   Arun Sood@The Awakening, Alaric@PernMUSH
+		
+		email: edmond@gb.nrao.edu
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+@create Generic Weather Parent
+
+&AVG_TEMP Generic Weather Parent=sub(v(TEMPF_HI),div(sub(v(TEMPF_HI),v(TEMPF_LO)),2))
+
+&BIAS Generic Weather Parent=sub(rand(100),50)
+
+&BREEZY Generic Weather Parent=add(5,u(RAND_WIND))
+
+&CALM Generic Weather Parent=fdiv(add(rand(100),1),10)
+
+&CHANGED Generic Weather Parent=switch(get(%vw/%0),v(old_%0),,%0)
+
+&CHANGED2 Generic Weather Parent=switch(not(and(match(get(%vw/%0),v(old_%0)),match(get(%vw/%1),v(old_%1)))),1,%0)
+
+&CMD_WLS Generic Weather Parent=$wls:@pemit %#=Objects under [name(me)] control:[iter(v(Forwardlist),u(FN_ROOM_INFO,##))]%r
+
+&CMD_WLS2 Generic Weather Parent=$wls *:@switch name(me)=*%0*,{@pemit %#=Objects under [name(me)] control:[iter(v(Forwardlist),u(FN_ROOM_INFO,##))]%r}
+
+&CMD_WLS_FX Generic Weather Parent=$wlsfx:@pemit %#=Objects under [name(me)] FX control:[iter(get(%vz/forwardlist),u(FN_ROOM_INFO,##))]%r
+
+&CMD_WLS_FX2 Generic Weather Parent=$wlsfx *:@switch name(me)=*%0*,{@pemit %#=Objects under [name(me)] FX control:[iter(get(%vz/forwardlist),u(FN_ROOM_INFO,##))]%r}
+
+&CTIME Generic Weather Parent=edit(extract(time(),4,1),:,space(1))
+
+&CUR_BASE Generic Weather Parent=add(mul(u(HR_DIFF),u(UNHOUR)),sub(rand(6),3))
+
+&C_LESSMORE1 Generic Weather Parent=switch(v(OLD_SKY),clear,A few clouds drift in creating patterns against the [get(%vw/DAYTIME)] sky.,The clouds begin to clear a bit leaving a few whispy streaks behind in the [get(%vw/DAYTIME)] sky.)
+
+&C_LESSMORE2 Generic Weather Parent=switch(v(olD_SKY),clear,A blanket of clouds gently sweep across the sky.,The clouds begin to clear a bit leaving a thick patchy cottony covering the sky.)
+
+&DAWN Generic Weather Parent=switch(get(%vw/SKY),overcast,dawn,cloudy,dawn,sunrise)
+
+&DAY Generic Weather Parent=extract(time(),3,1)
+
+&DBIASRAIN Generic Weather Parent=switch(div(add(%0,50),20),0,none,1,unlikely,2,possible,3,probable,4,definite)
+
+&DBIAS_CLOUD Generic Weather Parent=switch(div(add(%0,50),20),0,clear,1,some_clouds,2,clouds,3,cloudy,4,overcast)
+
+&DBIAS_WIND Generic Weather Parent=switch(div(add(%0,50),20),0,calm,1,breezy,2,gusty,3,windy,4,hi_winds)
+
+&DGROUND Generic Weather Parent=switch(get(%vw/PRECIP),snow,snowy,rain,wet,hail,wet,sleet,wet,fr_rain,icy,u(GROUND_STATUS))
+
+&DG_NONE Generic Weather Parent=switch(gt(u(SUM_ATR,PRECIP_history),100),1,flooded,switch(lt(u(SUM_ATR,PRECIP_history),10),1,parched,normal))
+
+&DG_WET Generic Weather Parent=switch(gt(u(SUM_ATR,PRECIP_history),100),1,flooded,wet)
+
+&DO_DAYTIME Generic Weather Parent=switch(get(%vw/DAYTIME),sunrise,In the east you see the sun slowly rising as dawn breaks.,dawn,Somewhere a cock crows signalling a new day.,dusk,You notice it is getting darker as the evening continues.,sunset,The sun begins to set in the west creating a beautiful scene of light and colour that stretches across half the sky,night,You notice that it is so dark that it is hard to see unaided.)
+
+&DO_PRATE Generic Weather Parent=switch(v(old_dPRATE),0,A [u(pforce)] [get(%vw/PRECIP)] begins.,u(do_PRATE2))
+
+&DO_PRATE2 Generic Weather Parent=switch(gt(get(%vw/PRATE),v(old_PRATE)),It begins to [get(%vw/PRECIP)] harder,The [get(%vw/PRECIP)] eases up a bit.)
+
+&DO_PRECIP Generic Weather Parent=switch(v(OLD_PRECIP),none,A [u(FORCE)][get(%vw/PRECIP)] begins to fall from the sky.,switch(get(%vw/PRECIP),none,The [v(old_PRECIP)] stops falling from the sky.,The [v(old_PRECIP)] changes to [get(%vw/PRECIP)].))
+
+&DO_SKY Generic Weather Parent=switch(get(%vw/SKY),clear,The clouds drift away revealing the [get(%vw/DAYTIME)] sky.,some_clouds,u(C_LESSMORE1),cloudy,u(C_LESSMORE2),overcast,Dark clouds roll in covering the [get(%vw/DAYTIME)] sky.)
+
+&DO_TEMP Generic Weather Parent=You notice that it is now quite [get(%vw/temp)].
+
+&DO_TEMPF Generic Weather Parent=You notice that it is now quite [get(%vw/TEMP)].
+
+&DO_WIND Generic Weather Parent=switch(get(%vw/WIND),calm,The wind dies down and the air becomes calm.,breezy,u(W_LESSMORE1),gusty,u(W_LESSMORE2),windy,u(W_LESSMORE3),hi_wind,The wind picks up and whistles through at dangerous speeds.)
+
+&DTIDE Generic Weather Parent=switch(gt(%0,10800),1,mid-tide,switch(gt(%0,21600),1,low-tide,high-tide))
+
+&DTIME Generic Weather Parent=switch(gt(u(FN_HOUR),11),1,u(DTIME_A),u(DTIME_B))
+
+&DTIME_A Generic Weather Parent=switch(u(FN_HOUR),20,u(dusk),19,u(dusk),18,afternoon,17,afternoon,16,afternoon,15,afternoon,14,afternoon,13,afternoon,12,afternoon,night)
+
+&DTIME_B Generic Weather Parent=switch(u(FN_HOUR),6,u(dawn),7,u(dawn),8,morning,9,morning,10,morning,11,morning,night)
+
+&DUSK Generic Weather Parent=switch(get(%vw/SKY),overcast,dusk,cloudy,dusk,sunset)
+
+&DWIND Generic Weather Parent=switch(div(get(%vw/wind_speed),10),0,calm,1,breezy,2,gusty,3,windy,4,windy,hi_wind)
+
+&EMIT_CHANGES Generic Weather Parent=&C_ATTR me=u(RAND_WORD,change_list);&cHANGE_LIST me=remove(v(CHANGE_LIST),v(C_ATTR));@pemit %vz=[u(do_[v(c_attr)])];@switch words(v(change_list))=>0,@wait add(30,rand(60))=@trig me/emit_changes
+
+&FN_AVERAGE Generic Weather Parent=add(min(%0,%1),fdiv(sub(max(%0,%1),min(%0,%1)),2))
+
+&FN_DTEMP Generic Weather Parent=switch(div(%0,10),0,freezing,1,freezing,2,switch(gt(%0,25),1,cold,freezing),3,switch(gt(%0,35),1,chilly,cold),4,switch(gt(%0,45),1,cool,cold),5,switch(gt(%0,55),1,crisp,cool),6,switch(gt(%0,65),1,warm,crisp),7,switch(gt(%0,75),1,hot,warm),hot)
+
+&FN_DWIND Generic Weather Parent=extract(v(LIST_WIND_DIRS),u(FN_NWIND,%0),1)
+
+&FN_HOUR Generic Weather Parent=add(extract(u(ctime),1,1),0)
+
+&FN_NWIND Generic Weather Parent=switch(%0,-2,14,-1,15,16,1,17,2,18,3,add(1,%0))
+
+&FN_ROOM_INFO Generic Weather Parent=%r%b%b%b[ljust(name(%0),50)][ljust([name(owner(%0))],14)][rjust([num(%0)],6)]
+
+&FN_WIND_DIR Generic Weather Parent=u(FN_DWIND,add(sub(rand(5),2),v(N_WIND_DIR)))
+
+&FORCE Generic Weather Parent=switch(get(%vw/PRATE),1,very light%b,2,light%b,3,steady%b,4,heavy%b)
+
+&GROUND_STATUS Generic Weather Parent=switch(gt(sub(secs(),get(%vw/LAST_PRECIP)),10800),1,dry,u(GROUND_WET))
+
+&GROUND_WET Generic Weather Parent=switch(gt(get(%vw/TEMPF),32),1,wet,switch(get(%vw/LAST_PRECIP_TYPE),snow,snowy,icy))
+
+&GUSTY Generic Weather Parent=add(10,mul(u(RAND_WIND),2))
+
+&HI_WIND Generic Weather Parent=add(30,mul(u(RAND_WIND),4))
+
+&HR_DIFF Generic Weather Parent=div(sub(v(TEMPF_HI),v(TEMPF_LO)),12)
+
+&ICUR_TEMP Generic Weather Parent=add(u(CUR_BASE),v(TEMPF_LO))
+
+&LCHANGES Generic Weather Parent=&GROUND %vw=u(DGROUND);&CHANGE_LIST me=u(CHANGED,prate) [u(CHANGED,precip)] [u(CHANGED,sky)] [u(CHANGED,wind)] [u(CHANGED,temp)] [u(CHANGED,daytime)];@switch words(v(change_list))=0,,@trig me/EMIT_CHANGES;@wait 30={@dolist v(Forwardlist)={@desc ##=get_eval(##/T_WEATHER);@chown ##/Desc=owner(##)}}
+
+&LIST_WIND_DIRS Generic Weather Parent=north north-northeast northeast east-northeast east east-southeast southeast south-southeast south south-southwest southwest west-southwest west west-northwest northwest north-northwest
+
+&MON Generic Weather Parent=extract(time(),2,1)
+
+&MONTH Generic Weather Parent=extract(time(),2,1)
+
+&NRMWIND Generic Weather Parent=div(add(add(rand(100),v(WIND_BIAS),v(LOCAL_WIND_BIAS)),50),20)
+
+&PFORCE Generic Weather Parent=switch(get(%vw/PRATE),1,very light,2,light,3,steady,4,heavy)
+
+&PHOON Generic Weather Parent=switch(mod(extract(time(),3,1),5),0,new,1,crescent,2,quarter,3,gibbous,full)
+
+&RAND_WIND Generic Weather Parent=fdiv(add(rand(100),1),20)
+
+&RAND_WORD Generic Weather Parent=extract(v(%0),add(1,random(words(v(%0)))),1)
+
+&SEASON Generic Weather Parent=switch(extract(time(),2,1),Jan,winter,Feb,winter,Mar,switch(gt(u(DAY),21),1,spring,winter),Apr,spring,May,spring,Jun,switch(gt(u(DAY),21),1,summer,spring),Jul,summer,Aug,summer,Sep,switch(gt(u(DAY),21),1,fall,summer),Oct,fall,Nov,fall,Dec,switch(gt(u(DAY),21),1,winter,fall))
+
+&SET_DPRECIP Generic Weather Parent=&dPRECIP %vw=u(u(pd[get(%vw/PRECIP)],get(%vw/PRATE)))
+
+&SET_PRECIP Generic Weather Parent=&LAST_PRECIP %vw=secs();@switch/first add(rand(120),v(PRECIP_BIAS))=>80,&PRATE %vw=4,>55,&PRATE %vw=3,>30,&PRATE %vw=2,>10,&PRATE %vw=1;@switch/first get(%vw/TEMPF)=>76,&PRECIP %vw=rain,>66,{@switch rand(100)=>98,&PRECIP %vw=hail,&PRECIP %vw=rain},>56,{@switch rand(100)=>90,&PRECIP %vw=hail,&PRECIP %vw=rain},>36,{@switch/first rand(100)=>95,&PRECIP %vw=hail,>90,&PRECIP %vw=snow,>78,&PRECIP %vw=hail,>40,&PRECIP %vw=sleet,&PRECIP %vw=rain},>11,{@switch rand(100)=>93,&PRECIP %vw=sleet,&PRECIP %vw=snow},&PRECIP %vw=snow;@wait 5={&LAST_PRECIP_TYPE %vw=get(%vw/PRECIP);&ground %vw=u(DGROUND)}
+
+&SET_SKY Generic Weather Parent=@switch/first add(rand(120),v(SKY_BIAS),v(LOCAL_SKY_BIAS))=>94,{&sky %vw=overcast;@switch add(rand(100),v(PRECIP_BIAS))=>30,@trig me/SET_PRECIP},>85,{&SKY %vw=cloudy;@switch add(rand(100),v(PRECIP_BIAS),v(LOCAL_PRECIP_BIAS))=>50,@trig me/SET_PRECIP},>55,{&sky %vw=some_clouds;@switch [add(rand(100),v(PRECIP_BIAS))]=>70,@trig me/SET_PRECIP},{&sky %vw=clear;&PRECIP %vw=none;&PRATE %vw=0}
+
+&SET_TEMP_CUR Generic Weather Parent=&TEMPF %vw=u(ICUR_TEMP);&TEMP %vw=u(FN_DTEMP,get(%vw/TEMPF));&TEMPC %vw=round(fdiv(mul(5,sub(get(%vw/TEMPF),32)),9),1)
+
+&SET_TEMP_DAY Generic Weather Parent=&TEMPF me=u(TRAND);&TEMPF_HI me=v(P_TEMPF_HI);&TEMPF_LO me=v(P_TEMPF_LO);&P_TEMPF_HI me=add(add(v(TEMPF),rand(15)),5);&P_TEMPF_LO me=sub(sub(v(TEMPF),rand(15)),5);&DP_TEMPF_A me=u(FN_DTEMP,round(u(FN_AVERAGE,v(P_TEMPF_HI),v(P_TEMPF_LO)),0));&TEMPF_A me=u(AVG_TEMP);@trig me/SET_TEMP_CUR
+
+&SUM_ATR Generic Weather Parent=u(SUM_ATR2,rest(v(%0)),first(v(%0)))
+
+&SUM_ATR2 Generic Weather Parent=switch(%0,,%1,u(sum_atr2,rest(%0),add(first(%0),%1)))
+
+
+&TRAND Generic Weather Parent=add(add(v(T[rand(15)]),v(extract(time(),2,1))),rand(10))
+
+&T_DAY Generic Weather Parent=&E_WIND_DIR me=v(T_WIND_DIR);&N_WIND_DIR me=v(NT_WIND_DIR);&NT_WIND_DIR me=rand(16);&T_WIND_DIR me=extract(v(LIST_WIND_DIRS),v(NT_WIND_DIR),1);&sky_BIAS me=v(T_SKY_BIAS);&PRECIP_BIAS me=v(t_PRECIP_BIAS);&PRAIN me=add(v(PRECIP_BIAS),50);&WIND_BIAS me=v(T_WIND_BIAS);&T_SKY_BIAS me=u(BIAS);&t_PRECIP_BIAS me=u(BIAS);&T_WIND_BIAS me=mul(abs(u(BIAS)),2);@trig me/SET_TEMP_DAY;&SEASON %vw=u(SEASON);&P_PRECIP_TOM me=u(dBIASRAIN,v(t_PRECIP_BIAS));&P_SKY_TOM me=u(dBIAS_CLOUD,v(T_SKY_BIAS));&P_WIND_TOM me=u(dBIAS_WIND,v(T_WIND_BIAS));&MOON %vw=u(phoon);&D_SKY_BIAS me=u(dBIAS_CLOUD,v(sky_BIAS));&d_WIND_BIAS me=u(dBIAS_WIND,v(WIND_BIAS));&d_PRECIP_BIAS me=u(dBIASRAIN,PRECIP_BIAS);&wind_speed %vw=u(wind_speed);@pemit %#=[name(me)] - Daily update completed.
+
+&T_QUARTER Generic Weather Parent=@wait mul(60,v(UPDATE_DELAY))={&WIND_DIR %vw=u(FN_WIND_DIR);&OLD_PRATE me=get(%vw/PRATE);&OLD_PRECIP me=get(%vw/PRECIP);&OLD_SKY me=get(%vw/SKY);&OLD_WIND me=get(%vw/WIND);&OLD_TEMP me=get(%vw/TEMP);&OLD_DAYTIME me=get(%vw/DAYTIME);&DAY_PRECIP me=add(v(DAY_PRECIP),get(%vw/PRATE));@trig me/SET_SKY;@trig me/SET_TEMP_CUR;&DAYTIME %vw=u(DTIME);&WIND_SPEED %vw=u(WIND_SPEED);&WIND_SPEED_N %vw=round(mul(get(%vw/WIND_SPEED),.8689756),1);&WIND_SPEED_K %vw=round(mul(get(%vw/WIND_SPEED),1.6093636),1);&WIND %vw=u(DWIND);@wait 30=@trig me/LCHANGES;&GROUND %vw=U(DGROUND);&TIDE %vw=u(DTIDE,mod(secs(),32400))}
+
+&UNHOUR Generic Weather Parent=extract(v(UNHOUR_LIST),u(FN_HOUR),1)
+
+&UNHOUR_LIST Generic Weather Parent=4 3 2 1 1 2 3 4 5 6 7 8 9 10 11 12 12 11 10 9 8 7 6 5
+
+&WINDY Generic Weather Parent=add(20,mul(u(RAND_WIND),2))
+
+&WIND_SPEED Generic Weather Parent=u(u(WIND_SPEED_CHOOSE))
+
+&WIND_SPEED_CHOOSE Generic Weather Parent=switch(u(WIND_SPEED_VAL),0,calm,1,breezy,2,breezy,3,gusty,4,gusty,5,gusty,6,windy,7,windy,8,windy,hi_wind)
+
+&WIND_SPEED_VAL Generic Weather Parent=div(add(v(WIND_BIAS),v(LOCAL_WIND_BIAS)),10)
+
+&W_LESSMORE1 Generic Weather Parent=switch(v(OLD_WIND),calm,A [get(%vw/TEMP)] breeze begins to waft by.,The winds cease until only a breeze is left.)
+
+&W_LESSMORE2 Generic Weather Parent=switch(v(OLD_WIND),hi_WIND,The high winds that were blowing slowly die down to steady winds that continue to blow.,none,Suddenly a strong wind picks up.,The winds pick up considerably making it quite windy.)
+
+&W_LESSMORE3 Generic Weather Parent=switch(v(OLD_WIND),hi_WIND,The high winds that were blowing slow down leaving a steady wind that continues to blow through.,gusty,The ocassional gusts slowly pick up to become strong winds.,breezy,The winds steadily pick up making it quite windy today.)
+
+@set Generic Weather Parent=HALTED
+
+@set Generic Weather Parent=INHERIT
+
+@set Generic Weather Parent=SAFE
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@
+@@ Now, are examples for different types of climates.
+@@
+@@ Comment out what the ones you want.
+@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+@@  Remeber the text in << >>'s means you must supply a dbref.
+
+
+@@ @create Temperate Wet Climate=5
+@@ &JAN Temperate Wet Climate=-5
+@@ &FEB Temperate Wet Climate=0
+@@ &MAR Temperate Wet Climate=10
+@@ &APR Temperate Wet Climate=30
+@@ &MAY Temperate Wet Climate=40
+@@ &JUN Temperate Wet Climate=45
+@@ &JUL Temperate Wet Climate=50
+@@ &AUG Temperate Wet Climate=55
+@@ &SEP Temperate Wet Climate=40
+@@ &OCT Temperate Wet Climate=25
+@@ &NOV Temperate Wet Climate=10
+@@ &DEC Temperate Wet Climate=-5
+@@ &T0 Temperate Wet Climate=0
+@@ &T1 Temperate Wet Climate=3
+@@ &T2 Temperate Wet Climate=5
+@@ &T3 Temperate Wet Climate=10
+@@ &T4 Temperate Wet Climate=13
+@@ &T5 Temperate Wet Climate=16
+@@ &T6 Temperate Wet Climate=20
+@@ &T7 Temperate Wet Climate=23
+@@ &T8 Temperate Wet Climate=25
+@@ &T9 Temperate Wet Climate=28
+@@ &T10 Temperate Wet Climate=30
+@@ &T11 Temperate Wet Climate=35
+@@ &T12 Temperate Wet Climate=37
+@@ &T13 Temperate Wet Climate=40
+@@ &PRECIP_HISTORY Temperate Wet Climate=1 0 32 69 0 20 9 54 0 26
+@@ &DAY_PRECIP Temperate Wet Climate=5
+@@ &T_SKY_BIAS Temperate Wet Climate=-29
+@@ &T_PRECIP_BIAS Temperate Wet Climate=-21
+@@ &T_WIND_BIAS Temperate Wet Climate=98
+@@ &SKY_BIAS Temperate Wet Climate=-16
+@@ &PRECIP_BIAS Temperate Wet Climate=-43
+@@ &WIND_BIAS Temperate Wet Climate=8
+@@ &TEMPF Temperate Wet Climate=46
+@@ &D_SKY_BIAS Temperate Wet Climate=some_clouds
+@@ &D_PRECIP_BIAS Temperate Wet Climate=possible
+@@ &DP_TEMPF_A Temperate Wet Climate=cool
+@@ &NT_WIND_DIR Temperate Wet Climate=0
+@@ &N_WIND_DIR Temperate Wet Climate=5
+@@ &OLD_TEMP Temperate Wet Climate=freezing
+@@ @VW Temperate Wet Climate=	<< Global Visual Data Object >>
+@@ @VZ Temperate Wet Climate=	<< An effects relay object, example below >>
+@@ &PRAIN Temperate Wet Climate=7
+@@ &P_PRECIP_TOM Temperate Wet Climate=unlikely
+@@ &P_SKY_TOM Temperate Wet Climate=some_clouds
+@@ &P_TEMPF_HI Temperate Wet Climate=64
+@@ &P_TEMPF_LO Temperate Wet Climate=34
+@@ &TEMPF_A Temperate Wet Climate=29
+@@ &TEMPF_LO Temperate Wet Climate=17
+@@ &TEMPF_HI Temperate Wet Climate=40
+@@ &OLD_SKY Temperate Wet Climate=overcast
+@@ &OLD_WIND Temperate Wet Climate=calm
+@@ &OLD_DAYTIME Temperate Wet Climate=morning
+@@ &OLD_PRECIP Temperate Wet Climate=snow
+@@ &OLD_PRATE Temperate Wet Climate=1
+@@ &LOCAL_PRECIP_BIAS Temperate Wet Climate=0
+@@ &LOCAL_SKY_BIAS Temperate Wet Climate=0
+@@ &LOCAL_WIND_BIAS Temperate Wet Climate=0
+@@ &UPDATE_DELAY Temperate Wet Climate=0
+@@ &C_ATTR Temperate Wet Climate=sky
+@@ &E_WIND_DIR Temperate Wet Climate=east
+@@ @Forwardlist Temperate Wet Climate=
+@@ &CHANGE_LIST Temperate Wet Climate=    
+@@ &D_WIND_BIAS Temperate Wet Climate=gusty
+@@ @set Temperate Wet Climate=INHERIT
+@@ @set Temperate Wet Climate=SAFE
+
+@@  EFFECTS RELAY object  You may wish each object to have a relay object
+
+@@ @create Temperate Relay Object
+@@ @Forwardlist Temperate Relay Object= << rooms to forward effects to >>
+@@ @Prefix Temperate Relay Object= << must be set to spaces: @va Temperate=%b;
+	@prefix me=v(vb) >>
+@@ @set Temperate Relay Object=INHERIT
+@@ @set Temperate Relay Object=AUDIBLE
+@@ @set Temperate Relay Object=SAFE
+
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@
+@@ A dry desert climate
+@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+@@ @create Desert Climate=25
+@@ @VW Desert Climate= << Global Visual Data Object >>
+@@ &DAY_PRECIP Desert Climate=0
+@@ &OLD_PRATE Desert Climate=0
+@@ &OLD_PRECIP Desert Climate=none
+@@ &OLD_SKY Desert Climate=clear
+@@ &OLD_WIND Desert Climate=windy
+@@ &OLD_TEMP Desert Climate=hot
+@@ &OLD_DAYTIME Desert Climate=morning
+@@ &JAN Desert Climate=60
+@@ &FEB Desert Climate=70
+@@ &MAR Desert Climate=70
+@@ &APR Desert Climate=75
+@@ &MAY Desert Climate=70
+@@ &JUN Desert Climate=70
+@@ &JUL Desert Climate=75
+@@ &AUG Desert Climate=75
+@@ &SEP Desert Climate=70
+@@ &OCT Desert Climate=70
+@@ &NOV Desert Climate=70
+@@ &DEC Desert Climate=70
+@@ &T0 Desert Climate=0
+@@ &T1 Desert Climate=5
+@@ &T2 Desert Climate=5
+@@ &T3 Desert Climate=5
+@@ &T4 Desert Climate=5
+@@ &T5 Desert Climate=10
+@@ &T6 Desert Climate=10
+@@ &T7 Desert Climate=10
+@@ &T8 Desert Climate=18
+@@ &T9 Desert Climate=19
+@@ &T10 Desert Climate=19
+@@ &T11 Desert Climate=20
+@@ &T12 Desert Climate=30
+@@ &T13 Desert Climate=40
+@@ @VZ Desert Climate= << Relay Object >>
+@@ &N_WIND_DIR Desert Climate=4
+@@ &NT_WIND_DIR Desert Climate=3
+@@ &SKY_BIAS Desert Climate=26
+@@ &PRECIP_BIAS Desert Climate=-43
+@@ &PRAIN Desert Climate=7
+@@ &WIND_BIAS Desert Climate=92
+@@ &T_SKY_BIAS Desert Climate=35
+@@ &T_PRECIP_BIAS Desert Climate=-17
+@@ &T_WIND_BIAS Desert Climate=62
+@@ &P_PRECIP_TOM Desert Climate=unlikely
+@@ &P_SKY_TOM Desert Climate=overcast
+@@ &D_SKY_BIAS Desert Climate=cloudy
+@@ &D_PRECIP_BIAS Desert Climate=possible
+@@ &PRECIP_HISTORY Desert Climate=1 1 1 5 1 1 1 1 6 0
+@@ &TEMPF Desert Climate=83
+@@ &TEMPF_HI Desert Climate=117
+@@ &P_TEMPF_HI Desert Climate=93
+@@ &TEMPF_LO Desert Climate=94
+@@ &P_TEMPF_LO Desert Climate=76
+@@ &DP_TEMPF_A Desert Climate=hot
+@@ &TEMPF_A Desert Climate=106
+@@ &LOCAL_PRECIP_BIAS Desert Climate=-20
+@@ &LOCAL_SKY_BIAS Desert Climate=-150
+@@ &LOCAL_WIND_BIAS Desert Climate=20
+@@ &CHANGE_LIST Desert Climate=     
+@@ &C_ATTR Desert Climate=daytime
+@@ &UPDATE_DELAY Desert Climate=6
+@@ @Forwardlist Desert Climate=
+@@ &T_WIND_DIR Desert Climate=northeast
+@@ &E_WIND_DIR Desert Climate=east-northeast
+@@ @set Desert Climate=INHERIT
+@@ @set Desert Climate=SAFE
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@
+@@  A cold almost tundra climate
+@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+@@ @create Cold Wet Cliamte Weather=25
+@@ @VW Cold Wet Cliamte Weather= << Global Visual Data Object >>
+@@ &DAY_PRECIP Cold Wet Cliamte Weather=26
+@@ &JAN Cold Wet Cliamte Weather=-12
+@@ &FEB Cold Wet Cliamte Weather=-12
+@@ &MAR Cold Wet Cliamte Weather=0
+@@ &APR Cold Wet Cliamte Weather=10
+@@ &MAY Cold Wet Cliamte Weather=20
+@@ &JUN Cold Wet Cliamte Weather=30
+@@ &JUL Cold Wet Cliamte Weather=40
+@@ &AUG Cold Wet Cliamte Weather=45
+@@ &SEP Cold Wet Cliamte Weather=30
+@@ &OCT Cold Wet Cliamte Weather=20
+@@ &NOV Cold Wet Cliamte Weather=10
+@@ &DEC Cold Wet Cliamte Weather=-15
+@@ &T0 Cold Wet Cliamte Weather=0
+@@ &T1 Cold Wet Cliamte Weather=5
+@@ &T2 Cold Wet Cliamte Weather=5
+@@ &T3 Cold Wet Cliamte Weather=5
+@@ &T4 Cold Wet Cliamte Weather=5
+@@ &T5 Cold Wet Cliamte Weather=10
+@@ &T6 Cold Wet Cliamte Weather=10
+@@ &T7 Cold Wet Cliamte Weather=10
+@@ &T8 Cold Wet Cliamte Weather=10
+@@ &T9 Cold Wet Cliamte Weather=15
+@@ &T10 Cold Wet Cliamte Weather=15
+@@ &T11 Cold Wet Cliamte Weather=20
+@@ &T12 Cold Wet Cliamte Weather=20
+@@ &T13 Cold Wet Cliamte Weather=25
+@@ &OLD_SKY Cold Wet Cliamte Weather=some_clouds
+@@ &OLD_WIND Cold Wet Cliamte Weather=breezy
+@@ &OLD_TEMP Cold Wet Cliamte Weather=freezing
+@@ &OLD_DAYTIME Cold Wet Cliamte Weather=morning
+@@ &OLD_PRATE Cold Wet Cliamte Weather=2
+@@ &OLD_PRECIP Cold Wet Cliamte Weather=snow
+@@ @VZ Cold Wet Cliamte Weather=#1276
+@@ &N_WIND_DIR Cold Wet Cliamte Weather=2
+@@ &NT_WIND_DIR Cold Wet Cliamte Weather=1
+@@ &SKY_BIAS Cold Wet Cliamte Weather=-32
+@@ &PRECIP_BIAS Cold Wet Cliamte Weather=-48
+@@ &PRAIN Cold Wet Cliamte Weather=2
+@@ &WIND_BIAS Cold Wet Cliamte Weather=46
+@@ &T_SKY_BIAS Cold Wet Cliamte Weather=-42
+@@ &T_PRECIP_BIAS Cold Wet Cliamte Weather=21
+@@ &T_WIND_BIAS Cold Wet Cliamte Weather=40
+@@ &P_PRECIP_TOM Cold Wet Cliamte Weather=probable
+@@ &P_SKY_TOM Cold Wet Cliamte Weather=clear
+@@ &D_SKY_BIAS Cold Wet Cliamte Weather=clear
+@@ &D_PRECIP_BIAS Cold Wet Cliamte Weather=possible
+@@ &PRECIP_HISTORY Cold Wet Cliamte Weather=1 1 1 5 1 1 1 1 6 184
+@@ &TEMPF Cold Wet Cliamte Weather=27
+@@ &TEMPF_HI Cold Wet Cliamte Weather=35
+@@ &P_TEMPF_HI Cold Wet Cliamte Weather=42
+@@ &TEMPF_LO Cold Wet Cliamte Weather=10
+@@ &P_TEMPF_LO Cold Wet Cliamte Weather=18
+@@ &DP_TEMPF_A Cold Wet Cliamte Weather=cold
+@@ &TEMPF_A Cold Wet Cliamte Weather=23
+@@ &LOCAL_PRECIP_BIAS Cold Wet Cliamte Weather=30
+@@ &LOCAL_SKY_BIAS Cold Wet Cliamte Weather=30
+@@ &LOCAL_WIND_BIAS Cold Wet Cliamte Weather=0
+@@ &C_ATTR Cold Wet Cliamte Weather=sky
+@@ &UPDATE_DELAY Cold Wet Cliamte Weather=9
+@@ @Forwardlist Cold Wet Cliamte Weather=#1331 
+@@ &T_WIND_DIR Cold Wet Cliamte Weather=north
+@@ &P_WIND_TOM Cold Wet Cliamte Weather=hi_winds
+@@ &E_WIND_DIR Cold Wet Cliamte Weather=north-northeast
+@@ &D_WIND_BIAS Cold Wet Cliamte Weather=hi_winds
+@@ &CHANGE_LIST Cold Wet Cliamte Weather=  
+@@ @set Cold Wet Cliamte Weather=INHERIT
+@@ @set Cold Wet Cliamte Weather=SAFE
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@
+@@ Warm windy tropical wet climate
+@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+@@ @create Wet Subtropical=25
+@@ @VW Wet Subtropical=  << Global Visual Data Object >>
+@@ &JAN Wet Subtropical=60
+@@ &APR Wet Subtropical=60
+@@ &JUN Wet Subtropical=60
+@@ &JUL Wet Subtropical=60
+@@ &AUG Wet Subtropical=60
+@@ &SEP Wet Subtropical=60
+@@ &NOV Wet Subtropical=60
+@@ &DEC Wet Subtropical=60
+@@ &T0 Wet Subtropical=0
+@@ &T1 Wet Subtropical=1
+@@ &T2 Wet Subtropical=2
+@@ &T5 Wet Subtropical=5
+@@ &T7 Wet Subtropical=7
+@@ &T8 Wet Subtropical=7
+@@ &T9 Wet Subtropical=8
+@@ &T12 Wet Subtropical=10
+@@ &FEB Wet Subtropical=60
+@@ &MAR Wet Subtropical=60
+@@ &MAY Wet Subtropical=60
+@@ &OCT Wet Subtropical=60
+@@ &T3 Wet Subtropical=3
+@@ &T4 Wet Subtropical=4
+@@ &T6 Wet Subtropical=6
+@@ &T10 Wet Subtropical=8
+@@ &T11 Wet Subtropical=9
+@@ &T13 Wet Subtropical=10
+@@ &DAY_PRECIP Wet Subtropical=37
+@@ &OLD_PRATE Wet Subtropical=0
+@@ &OLD_PRECIP Wet Subtropical=none
+@@ &OLD_SKY Wet Subtropical=clear
+@@ &OLD_WIND Wet Subtropical=gusty
+@@ &OLD_TEMP Wet Subtropical=hot
+@@ &OLD_DAYTIME Wet Subtropical=morning
+@@ @VZ Wet Subtropical=  << Relay Object >>
+@@ &N_WIND_DIR Wet Subtropical=9
+@@ &NT_WIND_DIR Wet Subtropical=2
+@@ &SKY_BIAS Wet Subtropical=9
+@@ &PRECIP_BIAS Wet Subtropical=-26
+@@ &PRAIN Wet Subtropical=24
+@@ &WIND_BIAS Wet Subtropical=34
+@@ &T_SKY_BIAS Wet Subtropical=48
+@@ &T_PRECIP_BIAS Wet Subtropical=-46
+@@ &T_WIND_BIAS Wet Subtropical=64
+@@ &P_PRECIP_TOM Wet Subtropical=none
+@@ &P_SKY_TOM Wet Subtropical=overcast
+@@ &D_SKY_BIAS Wet Subtropical=clouds
+@@ &D_PRECIP_BIAS Wet Subtropical=possible
+@@ &PRECIP_HISTORY Wet Subtropical=1 1 1 5 1 1 1 1 6 89
+@@ &TEMPF Wet Subtropical=62
+@@ &TEMPF_HI Wet Subtropical=85
+@@ &P_TEMPF_HI Wet Subtropical=75
+@@ &TEMPF_LO Wet Subtropical=61
+@@ &P_TEMPF_LO Wet Subtropical=48
+@@ &DP_TEMPF_A Wet Subtropical=crisp
+@@ &TEMPF_A Wet Subtropical=73
+@@ &LOCAL_PRECIP_BIAS Wet Subtropical=30
+@@ &LOCAL_WIND_BIAS Wet Subtropical=50
+@@ &LOCAL_SKY_BIAS Wet Subtropical=20
+@@ &C_ATTR Wet Subtropical=temp
+@@ &UPDATE_DELAY Wet Subtropical=12
+@@ &T_WIND_DIR Wet Subtropical=north-northeast
+@@ &E_WIND_DIR Wet Subtropical=south
+@@ @Forwardlist Wet Subtropical=
+@@ &D_WIND_BIAS Wet Subtropical=hi_winds
+@@ &CHANGE_LIST Wet Subtropical=   
+@@ @set Wet Subtropical=INHERIT
+@@ @set Wet Subtropical=SAFE

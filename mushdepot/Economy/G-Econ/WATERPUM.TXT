@@ -1,0 +1,30 @@
+@create Water Pumping Station Parent
+@link Water Pumping Station Parent = #455
+@parent Water Pumping Station Parent=#1297
+@lock/Basic Water Pumping Station Parent=#58
+@lock/Use Water Pumping Station Parent=canuse/1
+@set Water Pumping Station Parent = WIZARD
+&SYSTEM_1 Water Pumping Station Parent=#123
+&SET_MAX_CAPACITY Water Pumping Station Parent=150
+&CMD_UNSET_PUMP Water Pumping Station Parent=$unset pump *:th [switch([hasflag(%#,Wiz)],1,[switch([hasattr(me,WATER_%0)],1,[wipe(me/water_%0)][pemit(%#,No longer able to pump water to [name(%0)] %(%0%))],0,[pemit(%#,Not currently pumping water to there.)])],0,[pemit(%#,Permission denied.)])]
+&CMD_SET_MAX_WATER Water Pumping Station Parent=$set max water *:th [switch([hasflag(%#,Wiz)],1,[set(me,max_reactor:%0)][pemit(%#,[name(me)] can now generate up to %0 water.)],0,[pemit(%#,Permission denied.)])]
+&FUN_SET_PUMP Water Pumping Station Parent=[set(me,water_%0:0)][pemit(%#,[name(me)] can now pump water to [name(%0)] %(%0%))]
+&CMD_SET_PUMP Water Pumping Station Parent=$set pump *:th [switch([hasflag(%#,Wiz)],1,[switch([strmatch([zone([loc(%0)])],[zone([loc(me)])])],1,[u(fun_set_pump,%0)],0,[pemit(%#,Error: Zones do not match.)])],0,[pemit(%#,Permission denied.)])]
+&SYSTEMS Water Pumping Station Parent=
+&CMD_SET_WATER Water Pumping Station Parent=$set water *:th [switch([lte(%0,[v(max_reactor)])][gte(%0,0)],01,{[pemit(%#,The water generation plant cannot produce that much output.%rPlease chose a number between 0 and [v(max_reactor)].)]},10,[pemit(%#,Setting must be above 0.)],00,[pemit(%#,Setting must be above 0.)],11,{[u(fun_set_reactor,%0)]})]
+&CMD_PUMP Water Pumping Station Parent=$pump *=*:th [switch([u(fun_issystem,%0)][lte(%1,[add([v(remaining_power)],[v(WATER_[v(SYSTEM_%0)])])])][isnum(%1)],111,[switch([gte(%1,0)],1,[u(fun_transfer_power,%0,%1)],0,[pemit(%#,Number must be above 0.)])],011,[pemit(%#,That is not a system.)],101,[pemit(%#,You do not have that much free power.)],001,[pemit(%#,That is not a system.)],[pemit(%#,Argument must be a number.)])]
+&REACTOR_SETTING Water Pumping Station Parent=0
+&FUN_SET_REACTOR Water Pumping Station Parent=[set(me,reactor_setting:%0)][pemit(%#,Water generation plant now producing %0 water.%rWater output now at [mul([fdiv([v(reactor_setting)],[v(max_reactor)])],100)]%%.)][set(me,REMAINING_POWER:%0)][u(fun_check_power)][switch([lte([v(remaining_power)],0)],1,[iter([lattr(me/WATER_*)],[set(me,##:0)])][pemit(%#,Global water shortage.  Resetting allocations.)])]
+&MAX_REACTOR Water Pumping Station Parent=250
+@DESCRIBE Water Pumping Station Parent=[set(me,REMAINING_POWER:[v(reactor_setting)])][set(me,SYSTEMS:)]%b[ansi(v(border_color),[repeat(_,74)]%r/)]%b[ljust([ansi(v(name_color),[v(type)] Water Pumping Station)],73)][ansi(v(border_color),\\%r|[repeat(-,74)]|%r|)]%b[ljust([ansi(v(title_color),Owner:)] [v(owner)],73)][ansi(v(border_color),|%r|)]%b[ljust([ansi(v(title_color),Maximum Output:)] [v(max_reactor)],73)][ansi(v(border_color),|%r|[repeat(-,74)]|%r|)]%b[ljust([ansi(v(title_color),Current Output:)] [v(reactor_setting)]%b%([mul([fdiv([v(reactor_setting)],[v(max_reactor)])],100)]%%%),73)][ansi(v(border_color),|%r|)]%b[ljust([ansi(v(title_color),Pumping To:)],73)][if([lattr(me/WATER_*)],{[ansi(v(border_color),|%r|%b)][iter([lattr(me/WATER_*)],[set(me,SYSTEM_[v(current_power_num)]:[edit(##,WATER_,)])][ljust({[ansi(ny,[v(current_power_num)]:)] [name([edit(##,WATER_,)])]},39)][ljust([ansi(nc,[u(##)])],4)][rjust([ansi(v(border_color),|%r|)],34)][u(fun_calc_power,[u(##)])][set(me,SYSTEMS:[v(systems)] [v(current_power_num)])][set(me,CURRENT_POWER_NUM:[inc([v(current_power_num)])])])]},{[ansi(v(border_color),|%r|%b)][ljust(None.,73)][ansi(v(border_color),|%b|)]})][ansi(v(border_color),[repeat(-,74)]|%r|)]%b[ljust([ansi(v(title_color),Remaining Water:)]%b[v(remaining_power)],73)][ansi(v(border_color),|%r\\[repeat(_,74)]/)][set(me,CURRENT_POWER_NUM:1)]
+@set Water Pumping Station Parent/DESCRIBE=no_command visual
+&OWNER Water Pumping Station Parent=Administration Water Corp.
+&TYPE Water Pumping Station Parent=Type VI
+&FUN_CALC_POWER Water Pumping Station Parent=[set(me,REMAINING_POWER:[sub([v(remaining_power)],%0)])]
+&REMAINING_POWER Water Pumping Station Parent=0
+&CURRENT_POWER_NUM Water Pumping Station Parent=1
+&FUN_ISSYSTEM Water Pumping Station Parent=[hasattr(me,SYSTEM_%0)]
+&FUN_TRANSFER_POWER Water Pumping Station Parent=[set(me,WATER_[v(SYSTEM_%0)]:%1)][pemit(%#,System %0 %([name([v(SYSTEM_%0)])]%) is now pumped %1 water.)][set(me,REMAINING_POWER:[v(reactor_setting)])][u(fun_check_power)]
+&FUN_CHECK_POWER Water Pumping Station Parent=[iter([lattr(me/WATER_*)],[set(me,REMAINING_POWER:[sub([v(remaining_power)],[u(##)])])])]
+&VERSION Water Pumping Station Parent=2.1
+&CREDITS Water Pumping Station Parent=Dave@GalacticMUSH (davemilford@home.com)

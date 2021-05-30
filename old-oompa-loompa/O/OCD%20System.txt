@@ -1,0 +1,164 @@
+@@
+@@ Object Creation System
+@@ by Dahan
+@@
+
+
+@@ Object Creation Device (OCD)(#68TW)
+@@ Type: THING Flags: WIZARD
+@@ Owner: Economy  Zone: *NOTHING*  Pennies: 10
+@@ Parent: *NOTHING*
+@@ Powers: 
+@@ Warnings checked: none
+@@ Created: Mon Feb 02 11:41:22 2004
+@@ Last Modification: Sun Feb 22 15:16:31 2004
+@@ Home: Economy's Office(#65Rn)
+@@ Location: OCD Room(#89Rn)
+
+@create Object Creation Device (OCD)
+
+@set Object Creation Device (OCD) = !NO_COMMAND
+@set Object Creation Device (OCD) = WIZARD
+
+&CMD_ADD Object Creation Device (OCD)=$+ocd/add *=*:@swi [setq(0,squish(secure(%0)))][setq(1,lcstr(grab(lattr(%!/Make_*),secure(%1))))][hasflag(%#,Wizard)][and(isdbref(%q0),t(%q1))]=0*,{@pemit %#=[ansi(rh,-)] You must be a wizard to do that.},10,{@pemit %#=[ansi(rh,-)] That is either not a valid parent DB # or a valid method.},11,{@pemit %#=[ansi(gh,-)] [ulocal(FN_Name,%q0)]'s will be made using method [%q1].[set(%!,List_VObjects:[setunion(setdiff(v(List_VObjects),grab(v(List_VObjects),[%q0] *,|),|),[%q0] [%q1],|)])]},{@pemit %#=Burp!}
+&CMD_DEL Object Creation Device (OCD)=$+ocd/remove *:@swi [setq(0,squish(secure(%0)))][hasflag(%#,Wizard)][isdbref(%q0)]=0*,{@pemit %#=[ansi(rh,-)] You must be a wizard to do that.},10,{@pemit %#=[ansi(rh,-)] That made with the OCD.},11,{@pemit %#=[ansi(gh,-)] You have removed [ulocal(FN_Name,%q0)]'s from the OCD.[set(%!,List_VObjects:[setdiff(v(List_VObjects),[grab(v(List_VObjects),[%q0] *,|)],|)])]},{@pemit %#=Burp!}
+&CMD_LIST Object Creation Device (OCD)=$+ocd/list:@pemit %#=[ulocal(FN_List)]
+&CMD_MAKE Object Creation Device (OCD)=$+ocd/make *:@swi [isdbref(setr(0,ulocal(FN_VMatch,*[squish(secure(%0))]*)))]=0,{@pemit %#=[ansi(rh,-)] Invalid item.},1,{@trigger %!/TR_Setup=[setr(1,ulocal(FN_Form,%q0))];@pemit %#=[ifelse(isdbref(%q1),You now have a [name(%q1)].[tel(%q1,%#)],[ansi(rh,-)] Unable to create object.)];drop [%q1]},{@pemit %#=[ansi(rh,-)] Critical failure.}
+&CMD_SORT Object Creation Device (OCD)=$+ocd/sort:@pemit %#=[ansi(gh,-)] Sorted. [set(%!,List_VObjects:[sortby(FN_Sort,v(List_VObjects),|)])]
+@DESCRIBE Object Creation Device (OCD)=[ulocal(FN_List)]%r[ulocal(FN_Help)]
+@set Object Creation Device (OCD)/DESCRIBE=no_command visual prefixmatch
+&FN_FORM Object Creation Device (OCD)=[ifelse(isdbref(setr(1,[first(grab(v(List_VObjects),[%0] *,|))])),[setr(0,create(Temp))][null([parent(%q0,%0)][name(%q0,[ulocal(FN_Name,%0)] - [edit(%q0,#,)])])],#-1)]
+&FN_HEADER Object Creation Device (OCD)=[center([ansi(rh,. o O)] [ansi(wh,%0)] [ansi(rh,O o .)],%1)]%r[ansi(b,repeat(=,%1))]
+&FN_HELP Object Creation Device (OCD)=%b[ansi(rh,+ocd/add)] [ansi(y,<parent db #>)][ansi(rh,=)][ansi(y,<method>)] - Adds an object to the OCD database. Methods are 'make_ammo', etc.%r%b[ansi(rh,+ocd/remove)] [ansi(y,<parent #>)] - Removes parent from OCD database.  Check if it's sold/stored anywhere first.%r%b[ansi(rh,+ocd/sort)] - Sorts the database.%r%b[ansi(rh,+ocd/make)] [ansi(y,<#>)] - Makes the nth item on the list.
+&FN_ISVOBJ Object Creation Device (OCD)=[and(not(words(lcon(%0))),not(words(setdiff(lattr(%0),QUEUE HSPACE_LOCATION [get(parent(%0)/SKIP)]))),match(v(List_VObjects),[parent(%0)] *,|),match(ulocal(FN_Name,%0),[ulocal(FN_Name,parent(%0))]*,|))]
+&FN_LIST Object Creation Device (OCD)=[ulocal(FN_Header,OCD Objects,78)][iter(v(List_VObjects),%r[rjust(#@,3)][rjust(first(##),8)]%b%b[ljust(ulocal(FN_Name,first(##)),32)][ljust(rest(##),17)][name(owner(first(##)))],|,)]%r[ansi(b,repeat(=,78))]
+&FN_LIST_REFS Object Creation Device (OCD)=[iter(v(List_VObjects),[edit(ulocal(FN_Name,first(##)),%b,_)],|)]
+&FN_MAKE Object Creation Device (OCD)=[setq(1,first(extract(v(List_VObjects),match(u(FN_List_Refs),%0),1,|)))][ifelse(words(%q1),[setr(0,create(Temp))][pemit(%!,[name(%q0,[ulocal(FN_Name,%q1)] - [edit(%q0,#,)])][parent(%q0,%q1)])],)]
+&FN_NAME Object Creation Device (OCD)=[setq(0,name(%0))][squish(edit(edit(ifelse(match(-,extract(%q0,sub(words(%q0),1),1)),extract(%q0,1,sub(words(%q0),2)),%q0),Parent:,),Parent,))]
+&FN_SORT Object Creation Device (OCD)=[switch([comp(last(%0),last(%1))],0,[comp(ulocal(FN_Name,first(%0)),ulocal(FN_Name,first(%1)))],#$)]
+&FN_VMATCH Object Creation Device (OCD)=[first([extract(v(List_VObjects),match(u(FN_List_Refs),edit(%0,%b,_)),1,|)] #-1)]
+&LIST_VOBJECTS Object Creation Device (OCD)=#38 make_comm|#41 make_comm|#101 make_prop|#43 make_prop|#40 make_wiz_device|#37 make_wiz_device|#35 make_wiz_device|#36 make_wiz_device|#34 make_wiz_device|#39 make_wiz_device|#42 make_wiz_device|#71 make_wiz_device|#70 make_wiz_device
+&MAKE_AMMO Object Creation Device (OCD)=th [set(%0,inherit)]
+&MAKE_ARMOR Object Creation Device (OCD)=th [set(%0,inherit)]
+&MAKE_COMM Object Creation Device (OCD)=th [set(%0,!no_command)][set(%0,royal)][set(%0,hspace_comm)]
+&MAKE_DEVICE Object Creation Device (OCD)=th [set(%0,!no_command)][set(%0,inherit)]
+&MAKE_PROP Object Creation Device (OCD)=
+&MAKE_ROY_DEVICE Object Creation Device (OCD)=th [set(%0,!no_command)][set(%0,royalty)]
+&MAKE_WEAPON Object Creation Device (OCD)=th [set(%0,inherit)]
+&MAKE_WIZ_DEVICE Object Creation Device (OCD)=th [set(%0,!no_command)];@fo [owner(%0)]=@set [%0]=wizard
+&MAKE_WIZ_PROP Object Creation Device (OCD)=@fo [owner(%0)]=@set [%0]=wizard
+&TR_SETUP Object Creation Device (OCD)=@swi [setq(0,secure(%0))][isdbref(%q0)][ulocal(FN_IsVObj,%q0)]=11,{@chown [%q0]=[owner(setr(1,parent(%q0)))];@set [%q0]=!halt;@trigger %!/[extract(grab(v(List_VObjects),[%q1] *,|),2,1)]=[%q0];@trigger [%0]/aclone},
+
+
+@@ Parent: Vendor(#70TWXn)
+@@ Type: THING Flags: WIZARD SAFE NO_COMMAND
+@@ Owner: Economy  Zone: *NOTHING*  Pennies: 10
+@@ Parent: *NOTHING*
+@@ Basic Lock [#70i]: =Economy's Office(#65Rn)
+@@ Powers: 
+@@ Warnings checked: none
+@@ Created: Mon Feb 02 11:41:22 2004
+@@ Last Modification: Fri Feb 06 14:19:14 2004
+@@ Home: Economy's Office(#65Rn)
+@@ Location: Economy's Office(#65Rn)
+
+@create Parent: Vendor
+
+@lock/Basic Parent: Vendor==#65
+@lset Parent: Vendor/Basic=no_inherit
+@set Parent: Vendor = WIZARD
+@set Parent: Vendor = SAFE
+@set Parent: Vendor = NO_COMMAND
+
+@ADESCRIBE Parent: Vendor=th [ifelse(hasattr(%!,Describe),[pemit(%#,\(To use this vendor, type [ansi(rh,+vendor/list)].\))],)]
+@ADROP Parent: Vendor=@lock me==here
+
+&CMD_ADD Parent: Vendor=$+vendor/add *=*:@swi [setq(0,ulocal(v(DB_OCD)/FN_VMatch,*[secure(%0)]*))][setq(1,abs(val(secure(%1))))][hasflag(%#,Wizard)][isdbref(%q0)]=0*,{@pemit %#=[ansi(rh,-)] You lack the power to do that.},10,{@pemit %#=[ansi(rh,-)] That isn't produced by the OCD \([v(DB_OCD)]\).},11,{@pemit %#=[ansi(gh,-)] [ulocal(v(DB_OCD)/FN_Name,%q0)] will be sold here for [%q1] [v(CUrrency)][ifelse(eq(1,%q1),,s)].[set(%!,List_Items:[setunion(v(List_Items),[%q0] [%q1],|)])]},{@pemit %#=[ansi(rh,-)] Critical failure.}
+&CMD_BUY Parent: Vendor=$+vendor/buy *:@swi [setq(0,ulocal(FN_VMatch,*[secure(%0)]*))][setq(1,extract(grab(v(List_Items),[%q0] *,|),2,1))][setq(2,v(Currency))][isdbref(%q0)][gte(getmoney(%#,%q2),%q1)]=0*,{@pemit %#=[ansi(rh,-)] That isn't sold here.},10,{@pemit %#=[ansi(rh,-)] You lack the [%q1] [%q2][ifelse(eq(1,%q1),,s)] to buy a [ulocal(v(DB_OCD)/FN_Name,%q0)].},11,{@trigger [v(DB_OCD)]/TR_Setup=[setr(3,ulocal(v(DB_OCD)/FN_Form,%q0))];th [ifelse(isdbref(%q3),[pemit(%#,You have bought [name(%q3)] for [%q1] [%q2][ifelse(eq(1,%q1),,s)].)][oemit(%#,%N has bought [name(%q3)].)][addmoney(%!,%q1,%q2)][addmoney(%#,mul(-1,%q1),%q2)][tel(%q3,%l)][tel(%q3,%#)],[pemit(%#,[ansi(rh,-)] Unable to complete sale.  Report this bug to Dahan.)])];drop [%q3]},{@pemit %#=[ansi(rh,-)] Critical failure.}
+&CMD_LIST Parent: Vendor=$+vendor/list:@pemit %#=[ulocal(FN_List)]
+&CMD_PREVIEW Parent: Vendor=$+vendor/preview *:@pemit %#=[setq(0,ulocal(FN_VMatch,*[secure(%0)]*))][ifelse(isdbref(%q0),[ulocal(FN_Header,[ulocal(v(DB_OCD)/FN_Name,%q0)],78)]%r[objeval(owner(%q0),ulocal(%q0/Describe))]%r[ansi(b,'[repeat(=,76)]')],[ansi(rh,-)] That is not sold here.)]
+&CMD_REMOVE Parent: Vendor=$+vendor/remove *:@swi [setq(0,ulocal(FN_VMatch,*[secure(%0)]*))][hasflag(%#,Wizard)][isdbref(%q0)]=0*,{@pemit %#=[ansi(rh,-)] You lack the power to do that.},10,{@pemit %#=[ansi(rh,-)] That isn't sold here.},11,{@pemit %#=[ansi(gh,-)] [ulocal(v(DB_OCD)/FN_Name,%q0)] will no longer be sold here.[set(%!,List_Items:[setdiff(v(List_Items),grab(v(List_Items),[%q0] *,|),|)])]},{@pemit %#=[ansi(rh,-)] Critical failure.}
+&CMD_SORT Parent: Vendor=$+vendor/sort:@pemit %#=[ansi(gh,-)] Sorted.[set(%!,List_Items:[sortby(FN_Sort,v(List_Items),|)])]
+
+&CURRENCY Parent: Vendor=credit
+
+&DB_OCD Parent: Vendor=#68
+
+@DESCRIBE Parent: Vendor=[ifelse(hasflag(%!,No_Command),This terminal is out of order.,[ulocal(FN_List)])]
+
+&FN_HEADER Parent: Vendor=[center([ansi(rh,. o O)] [ansi(wh,%0)] [ansi(rh,O o .)],%1)]%r[ansi(b,.[repeat(=,sub(%1,2))].)]
+&FN_HELP Parent: Vendor=[ansi(b,|)] [ansi(rh,%0)][rjust(%1,sub(42,strlen(%0)))] [ansi(b,|)]
+&FN_LIST Parent: Vendor=[ulocal(FN_Header,[ulocal(v(DB_OCD)/FN_Name,%!)],46)]%r[ansi(b,|)] [ansi(yh,[ljust(Item,32)][rjust(Price,10)])] [ansi(b,|)]%r[ansi(b,>[repeat(-,44)]<)][iter(v(List_Items),[ifelse(match(get(v(DB_OCD)/List_VObjects),[first(##)] *,|),%r[ansi(b,|)] [ljust(ulocal(v(DB_OCD)/FN_Name,first(##)),32)][rjust(rest(##),10)] [ansi(b,|)],)],|,)]%r[ansi(b,|)][space(44)][ansi(b,|%r|)][center(All prices listed in [v(Currency)]s.,44)][ansi(b,|)]%r[ansi(b,>[repeat(-,44)]<)]%r[ulocal(FN_Help,+vendor/list,Shows this display)]%r[ulocal(FN_Help,+vendor/preview <Item>,Shows you the item)]%r[ulocal(FN_Help,+vendor/buy <Item>,Buys the item)][ifelse(hasflag(%#,Wizard),%r[ulocal(FN_Help,+vendor/add <Item>=<Price>,<Wiz-only>)]%r[ulocal(FN_Help,+vendor/remove <Item>,<Wiz-only>)]%r[ulocal(FN_Help,+vendor/sort,<Wiz-only>)],)]%r[ansi(b,'[repeat(=,44)]')]
+&FN_SORT Parent: Vendor=[comp(name(first(%0)),name(first(%1)))]
+&FN_VMATCH Parent: Vendor=[first([extract(v(List_Items),[match(iter(v(List_Items),ulocal(v(DB_OCD)/FN_Name,first(##)),|,|),%0,|)],1,|)] #-1)]
+
+
+@@ Parent: Storage Locker(#71TWXen)
+@@ Type: THING Flags: WIZARD SAFE ENTER_OK NO_COMMAND
+@@ Owner: Economy  Zone: *NOTHING*  Pennies: 10
+@@ Parent: *NOTHING*
+@@ Powers: 
+@@ Warnings checked: none
+@@ Created: Mon Feb 02 11:41:22 2004
+@@ Last Modification: Fri Feb 06 14:25:06 2004
+@@ Home: Economy's Office(#65Rn)
+@@ Location: Economy's Office(#65Rn)
+
+@create Parent: Storage Locker
+
+@set Parent: Storage Locker = WIZARD
+@set Parent: Storage Locker = SAFE
+@set Parent: Storage Locker = ENTER_OK
+@set Parent: Storage Locker = NO_COMMAND
+
+@ACLONE Parent: Storage Locker=@lock %!==%l;@lock/enter %!=FN_CanEnter/1;@set me=Enter_ok;&List_VObjs %!=
+@AENTER Parent: Storage Locker=@swi [u(FN_IsVObj,%#)]=1,{th [ulocal(FN_AddVObj,1,parent(%#))];@nuke %#;@nuke %#},{}
+@ARECEIVE Parent: Storage Locker=[oemit(%1,[name(%1)] gives [name(%0)] to [name(%!)].)][ulocal(FN_Log,%0,%1,In)]
+
+&CMD_CLOSE Parent: Storage Locker=$LOC CLOSE:@swi [u(FN_IsOpen)]=1,{@emit [%N] closes the door on [name(%!)].[set(%!,opaque)]},{@pemit %#=The door of [ansi(y,name(%!))] is allready shut!}
+&CMD_CODE Parent: Storage Locker=$LOC CODE *=*:@swi [setq(1,secure(%1))][match(v(Password),secure(%0))][isnum(%q1)]=0*,{@emit [%N] tries to change the combination of [ansi(y,name(%!))]\, but fails.},10,{@pemit %#=Combinations must be numbers.},11,{th [pemit(%#,You change the combination of [ansi(y,name(%!))] to [setr(2,mod(abs(%q1),10000))].)][oemit(%#,%N changes the combination of [name(%!)].)][set(%!,Password:[%q2])]},,{@pemit %#=[u(MSG_Crit)]}
+&CMD_HELP Parent: Storage Locker=$LOC HELP:@pemit %#=[u(FN_LLine,[squish(before(name(%!),-))] Commands,wh,b)]%r[u(FN_HelpLine,LOC HELP,Displays this screen)]%r[u(FN_HelpLine,LOC CODE <Old Code>=<New Code>,Changes the combination of this device)]%r[u(FN_HelpLine,LOC OPEN <Code>,Opens this device)]%r[u(FN_HelpLine,GIVE [name(%!)]=<Item>,Puts an item into this device)]%r[u(FN_HelpLine,LOC REMOVE <Item Name>,Removes an item from the locker)]%r[u(FN_HelpLine,LOC CLOSE,Closes this device)]%r[u(FN_HelpLine,LOC LOG,Displays log of recent transactions)]%r[u(FN_RLine,[name(%!)],w,b)]
+&CMD_LOG Parent: Storage Locker=$loc log:@pemit %#=[ulocal(FN_ShowLog,%!)]
+&CMD_OPEN Parent: Storage Locker=$LOC OPEN *:@swi [u(FN_IsOpen)][match(v(Password),secure(%0))]=1*,{@pemit %#=The door of [ansi(y,name(%!))] is allready open!},00,{@emit [%N] tries to open [ansi(y,name(%!))]\, but enters the wrong combination.},01,{@emit [%N] taps in the combination of [ansi(y,name(%!))]\, and opens its door.[set(%!,!opaque)]},{@pemit %#=[u(MSG_Crit)]}
+&CMD_REMOVE Parent: Storage Locker=$LOC REMOVE *:@swi [setq(0,secure(%0))][setq(1,locate(%!,%q0,i))][setq(2,ulocal(FN_VMatch,*[%q0]*))][ulocal(FN_IsOpen)][isdbref(%q1)][t(%q2)]=0*,{@pemit %#=[ansi(rh,-)] [name(%!)] is closed.  You'll have to open it before you can remove its contents.},100,{@pemit %#=[ansi(rh,-)] No such item could be found.},101,{@trigger [v(DB_OCD)]/TR_Setup=[setr(3,ulocal(v(DB_OCD)/FN_Form,%q2))];th [ifelse(isdbref(%q3),[pemit(%#,You have removed [name(%q3)] from [name(%!)].)][oemit(%N,%N removes [name(%q3)] from [name(%!)].)][ulocal(FN_Log,%q3,%#,Out)][ulocal(FN_AddVObj,-1,%q2)][tel(%q3,%#)],[pemit(%#,[ansi(rh,-)] Unable to comply.  Report this bug to Dahan.)])];drop [%q3]},11*,{th [pemit(%#,You have removed [name(%q1)] from [name(%!)].)][oemit(%N,%N removes [name(%q1)] from [name(%!)].)][ulocal(FN_Log,%q1,%#,Out)][tel(%q1,%#)];drop [%q1]},{@pemit %#=[u(MSG_Crit)]}
+
+@CONFORMAT Parent: Storage Locker=[ifelse(hasflag(%!,No_Command),,[setq(0,ulocal(FN_SortCol,[setunion([iter(lcon(%!),1 [name(##)],,|)],[iter(v(List_VCon),[first(##)] [ulocal(v(DB_OCD)/FN_Name,rest(##))],|,|)],|)]))][ansi(b,.[repeat(=,37)].[repeat(=,37)].)][iter(%q0,[ifelse(mod(#@,2),%r[ansi(b,|)],)] [ljust([left(rest(##),35)][ifelse(gt(first(##),1),%b[ansi(rh,\([first(##)]\))],)],35)] [ansi(b,|)],|,)]%r[ansi(b,'[repeat(=,37)]'[repeat(=,37)]')])]
+
+&DB_OCD Parent: Storage Locker=#68
+
+&DESC1 Parent: Storage Locker=It appears to be a locker made of metal alloy. It is about a meter and a half tall and half a meter wide. The hinged door of the locker has an electronic keypad secured to it.
+@DESCRIBE Parent: Storage Locker=[ifelse(hasflag(%!,No_Command),This locker is out of order.,[u(Desc1)]%r[ifelse(u(FN_IsOpen),It is open.,It is closed and locked.)])]
+
+&FN_ADDVOBJ Parent: Storage Locker=[ulocal(FN_SetVObj,add(%0,ulocal(FN_GetVObj,%1)),%1)]
+&FN_CANENTER Parent: Storage Locker=[and(u(FN_IsOpen),not(hastype(%#,Player)))]
+&FN_CLINE Parent: Storage Locker=[ansi(%2,[repeat(-,sub(37,ceil(fdiv(strlen(%0),2))))]<)] [ansi(%1,%0)] [ansi(%2,>[repeat(-,sub(37,div(strlen(%0),2)))])]
+&FN_COUNT Parent: Storage Locker=[ifelse(words(v(list_vobjs)),fold(FN_Count2,v(list_vobjs),0,|),0)]
+&FN_COUNT2 Parent: Storage Locker=[add(%0,first(%1))]
+&FN_EDIT Parent: Storage Locker=edit(%0,first(%1),rest(%1))
+&FN_GETVOBJ Parent: Storage Locker=[ifelse(match(v(List_VCon),* [%0],|),first(grab(v(List_VCon),* [%0],|)),0)]
+&FN_HELPLINE Parent: Storage Locker=[ansi(b,|)] [ansi(yh,lcstr(%0))][rjust(%1,sub(74,strlen(%0)),.)] [ansi(b,|)]
+&FN_ISOPEN Parent: Storage Locker=[not(hasflag(%!,Opaque))]
+&FN_ISVOBJ Parent: Storage Locker=[ulocal(v(DB_OCD)/FN_IsVObj,%0)]
+&FN_LINE Parent: Storage Locker=[ansi(%0,repeat(-~,39))]
+&FN_LLINE Parent: Storage Locker=[ansi(%2,.---<)] [ansi(%1,%0)] [ansi(%2,>[repeat(-,sub(69,strlen(%0)))].)]
+&FN_LOG Parent: Storage Locker=Header[iter(v(Log),%r[ansi(b,|)] [##],|,)]%rFooter
+&FN_RLINE Parent: Storage Locker=[ansi(%2,'[repeat(-,sub(69,strlen(%0)))]<)] [ansi(%1,%0)] [ansi(%2,>---')]
+&FN_RLLINE Parent: Storage Locker=[ansi(%4,---<)] [ansi(%2,%0)] [ansi(%4,>[repeat(-,sub(64,add(strlen(%0),strlen(%1))))]<)] [ansi(%3,%1)] [ansi(%4,>---)]
+&FN_SETVOBJ Parent: Storage Locker=[set(%!,List_VCon:[setdiff([switch([t(match(v(List_VCon),* [%1],|))][eq(%0,0)],11,[setdiff(v(List_VCon),grab(v(List_VCon),* [%1],|),|)],10,[setdiff(v(List_VCon),grab(v(List_VCon),* [%1],|),|)]|[%0] [%1],00,[setunion(v(List_VCon),[%0] [%1],|)],)],,|)])]
+&FN_SHOWLOG Parent: Storage Locker=%b[ansi(wh,Log: [name(%!)])]%r[ansi(b,.[repeat(-,22)].[repeat(-,24)].[repeat(-,5)].[repeat(-,22)].)]%r[ansi(b,|)] [ljust(ansi(yh,Person),21)][ansi(b,|)] [ljust(ansi(yh,Item),23)][ansi(b,|)][space(5)][ansi(b,|)] [ljust(ansi(yh,Time),21)][ansi(b,|)]%r[ansi(b,>[repeat(-,22)]+[repeat(-,24)]+[repeat(-,5)]+[repeat(-,22)]<)][iter(v(Log),%r[ansi(b,|)] [ljust(left(extract(##,3,1,^),20),20)] [ansi(b,|)] [ljust(left(extract(##,2,1,^),22),22)] [ansi(b,|)] [center(extract(##,4,1,^),3)] [ansi(b,|)] [ljust(timefmt($m-$d-$y $X,extract(##,1,1,^)),20)] [ansi(b,|)],|,)]%r[ansi(b,'[repeat(-,22)]'[repeat(-,24)]'[repeat(-,5)]'[repeat(-,22)]')]
+&FN_SORT Parent: Storage Locker=[comp(rest(%0),rest(%1))]
+&FN_SORTCOL Parent: Storage Locker=[setq(0,sortby(FN_Sort,%0,|))][setq(1,ceil(fdiv(words(%q0,|),2)))][iter(lnum(mul(2,%q1)),[setq(2,extract(%q0,add(1,mul(mod(##,2),%q1),mod(div(##,2),%q1)),1,|))][ifelse(%q2,%q2,)],,|)]
+&FN_VMATCH Parent: Storage Locker=[last(#-1 [extract(v(List_VCon),[match(iter(v(List_VCon),ulocal(v(DB_OCD)/FN_Name,last(##)),|,|),%0,|)],1,|)])]
+
+&MSG_CRIT Parent: Storage Locker=[ansi(rh,-)] Critical failure.  Report this bug at once!
+
+&PASSWORD Parent: Storage Locker=0000
+
+&TR_FIX Parent: Storage Locker=[set(%!,List_VObjs:[fold(FN_Edit,v(List_Edit),v(List_VObjs),|)])]
+&TR_UPDATE Parent: Storage Locker=[set(%!,List_VCon:[iter(v(List_VObjs),[first(##)] [ulocal(#860/fn_vmatch,rest(##))],|,|)])]
+
+@@ Configure
+
+th [iter(Locker Vendor,[set(##,DB_OCD:[num(OCD)])])]Done!
+
+@@ End of File

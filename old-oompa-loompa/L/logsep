@@ -1,0 +1,42 @@
+PATH=/usr/ucb:/usr/bin; export PATH
+if [ $# -eq 0 ]  
+	then
+	echo "Usage:  logsep [file]"  
+else
+	logfile=$1  
+
+awk 'BEGIN {
+	action["WIZ/PASS"] 	 
+	action["DIS/ACCT"] 	 
+	action["CON/BAD"] 	 
+	action["NET/DISC"] 	 
+	action["CON/CREA"] 	 
+	action["SEC/CNAME:"] 	 
+	action["DAM/OBJ"]	 
+	action["INI/START:"]	 
+	action["INI/LOAD"]	 
+	action["CFG/UPDAT:"]	
+	action["OBJ/DAMAG:"]	
+	action["WIZ/QUOTA:"]
+	action["WIZ/BOOT"]
+	action["CNF/NFND"]
+	action["WIZ/SHTDN:"]}
+{ found = 0 }
+{ for (type in action) { if ($3 == type) {found=1;action[type]++}}}
+{ if ( found !=1 ) {print "Unknown: " $3}}
+{ if ( $3 == "CON/BAD") \
+{print "BadConnection:",$9,"from",$5,"."}}
+{ if ( $3 =="CON/CREA") \
+{print "New:",$7,"site",$5"."}}
+{ if ( $3 =="SEC/CNAME:") \
+{print "Name:",$4,$5,$6,$7}}
+{ if ( $3 =="OBJ/DAMAG:") \
+{print "Damaged:",$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15}}
+{ if ( $3 =="WIZ/QUOTA:") \
+{print "Quota:",$4,$5,$6,$7,$8,$9,$10}}
+END { for (type in action) {if ( action[type] == "" ) \
+{print "Action:",type,"0"} \
+else {print "Action:",type,action[type]}}}' $logfile | \
+sort | more
+fi
+

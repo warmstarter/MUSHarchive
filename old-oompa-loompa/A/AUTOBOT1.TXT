@@ -1,0 +1,18 @@
+@create Auto-Defense Robot
+@link Auto-Defense Robot=[owner(me)]
+@set Auto-Defense Robot=!NO_COMMAND
+@set Auto-Defense Robot=INHERIT
+@set Auto-Defense Robot=OPAQUE
+@set Auto-Defense Robot=WIZARD
+@set Auto-Defense Robot=SAFE
+@set Auto-Defense Robot=ROYALTY
+@set Auto-Defense Robot=MONITOR
+@set Auto-Defense Robot=PUPPET
+&COMMUNICATE Auto-Defense Robot=@wait 3=comm set 0=1;@wait 3=comm set 1=9;@wait 3=comm label 0=Hailing;@wait 3=comm label 1=Distress;@wait 3=comm receive 0=visual;@wait 3=comm receive 1=visual;@wait 3=comm transmit 0=audio;@wait 3=comm transmit 1=audio
+&UNLOCK-1 Auto-Defense Robot=^Weapons lock from contact \[*\] * -- * has been broken.:say %1 has unlocked their weapons.;unlock weapons;ls
+&LOCK-1 Auto-Defense Robot=^Warning!  Contact \[*\]? * -- * has locked weapons.:say %2 has locked weapons onto us!;lock %0;rs
+@DESCRIBE Auto-Defense Robot=This is Jesse's Auto-Defense Sim Robot.
+@STARTUP Auto-Defense Robot=man;@wait 3=start reactor;@wait 3=esr 100;@wait 3=ea 60000 30000 0;@wait 3=ha 30000 30000;@wait 3=qa 0 30000;@wait 3=arm all phasers;@wait 3=omni on
+&FIRE-1 Auto-Defense Robot=^Enemy * fired by \[*\]? *:say %3 is attacking us. I'm returning fire!;@tr me/firing
+&FIRING Auto-Defense Robot=^photon torpedo * armed.;fpa;fga
+&DEFEND-1 Auto-Defense Robot=^Contact \[*\]? * fired upon contact \[*\]? *:say %2 is attacking %5. I'm going to defend %5!;lock %0;@wait 3=fga

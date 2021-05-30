@@ -1,0 +1,160 @@
+@@ Wiznote
+@@ 
+@@ Version 1.2, 8 July 1997
+@@
+@@ By Kynn Bartlett <kynn@idyllmtn.com>, Talok on Ascension City
+@@
+@@ This code is available from:
+@@ ftp://ftp.idyllmtn.com/pub/kynn/mushcode/WizTools/WizNote/wiznote-1.2.mca
+@@
+@@ Description:
+@@
+@@ A command for setting private notes on objects that only the wizards
+@@ (or appropriate staff members) can read.
+@@
+@@ Usage:
+@@
+@@ +wiznote OBJECT             - displays a listing of wiznotes currently
+@@                               set on a object
+@@ +wiznote/show OBJECT/NUM    - displays wiznote number 'NUM' on a given
+@@                               object
+@@ +wiznote/all OBJECT         - displays all wiznotes on a object
+@@ +wiznote/add OBJECT=NOTE    - adds a wiznote to a given object
+@@ +wiznote/clear OBJECT/NUM   - clears a given wiznote
+@@ +wiznote/purge OBJECT       - purges all wiznotes from a given object
+@@ +wiznote/who                - list who online has a wiznote set
+@@ +wiznote/version            - display version information
+@@
+@@ Attributes:
+@@ 
+@@ This program uses only one attribute, the 'Comment' attribute.
+@@ 'Comment' is intended for exactly this kind of thing, and thus
+@@ it's a good idea to use it.  Comments are not visible to the objects,
+@@ and can only be set by wizards.
+@@
+@@ The attribute is set up as follows:
+@@
+@@ DATE | SETTER | COMMENT ! DATE | SETTER | COMMENT ! ...
+@@
+@@ Comments are encoded and decoded to convert | and ! into &pipe; and
+@@ &bang; respectively.
+@@
+
+@@ Startup
+
+@pemit me=Starting upload.
+@pemit me=Wiping object to remove previous installations.
+@wipe WizNote Object
+
+@@ Flags:
+
+@pemit me=Setting flags...
+
+@pemit me=QUIET
+@set WizNote Object=QUIET
+
+@@ Uncomment the following only if your server requires the
+@@ COMMANDS flag to execute $commands
+
+@@ @pemit me=COMMANDS
+@@ @set WizNote Object=COMMANDS
+
+@pemit me=INHERIT
+@set WizNote Object=INHERIT
+
+@pemit me=SAFE
+@set WizNote Object=SAFE
+
+@pemit me=Flags set.
+
+@@ Startup attribute:
+@@
+@@ This locks the object so that only wizards can use it.  This is
+@@ more efficient than an evaluation lock.
+
+@pemit me=Setting @startup...
+@startup WizNote Object = @lock/use me = [edit(search(flags=PW),%b,|)]
+@pemit me=Triggering @startup...
+@trigger WizNote Object/Startup
+@pemit me=Startup executed.
+
+@@ Version Number
+
+@pemit me=Setting version number...
+&Version WizNote Object = 1.2
+
+@@ Source URL
+
+@pemit me=Setting source URL...
+&source_URL WizNote Object = ftp://ftp.idyllmtn.com/pub/kynn/mushcode/WizTools/WizNote/wiznote-1.2.mca
+
+@@ Description
+
+@pemit me=Setting description...
+@desc WizNote Object = This allows comments to be unset or set on a object.  Syntax:%r%r+wiznote OBJECT (list all wiznotes)%r+wiznote/show OBJECT/NUM (show one wiznote)%r+wiznote/all OBJECT (list wiznotes for one object)%r+wiznote/add OBJECT=NOTE (add a wiznote)%r+wiznote/clear OBJECT/NUM (clear one wiznote)%r+wiznote/purge OBJECT (clear all wiznotes on a object)%r%rThis was programmed by Kynn Bartlett <kynn@idyllmtn.com> for Ascension City.%rVersion [v(version)]%rThis code is available from [v(source_url)]
+
+@@ Encoding/Decoding Functions:
+
+@pemit me=Setting encoding/decoding functions...
+&fnc-encode WizNote Object = [edit(edit(%0,!,&bang\;),|,&pipe\;)]
+&fnc-decode WizNote Object = [edit(edit(%0,&bang\;,!),&pipe\;,|)]
+
+@@ Display functions:
+
+@pemit me=Setting display functions...
+&fnc-list_wiznotes WizNote Object = [iter(lnum(words(%0,!)),%r[rjust(add(##,1),4)].[space(3)][ljust(convsecs(index(index(%0,!,add(##,1),1),|,1,1)),25)][space(3)][name(index(index(%0,!,add(##,1),1),|,2,1))])]
+&fnc-show_wiznote WizNote Object = %r[setq(9,index(%0,!,%1,1))][switch(%q9,,No such WizNote.,[ljust(Date:,10)] [convsecs(index(%q9,|,1,1))]%r[ljust(Set by:,10)] [name(index(%q9,|,2,1))]%r--%r[u(fnc-decode,index(%q9,|,3,1))]%r--)]
+&fnc-all_wiznotes WizNote Object = [iter(lnum(words(%0,!)),%rWiznote #[add(##,1)]: [u(fnc-show_wiznote,%0,add(##,1))])]
+&fnc-who_wiznote WizNote Object = %r[setq(8,get(%0/comment))][ljust(mid(name(%0),0,20),20)][space(3)][center(words(%q8,!),8)][space(3)][mid(iter(lnum(words(%q8,!)),name(index(index(%q8,!,add(##,1),1),|,2,1))),0,40)]
+
+@@ Commands
+
+@pemit me=Setting commands...
+
+@@ +wiznote OBJECT
+
+&cmd-wiznote_object WizNote Object = $+wiznote *:@pemit %#=[setq(0,locate(%#,%0,*))][switch(%q0,#-1,There's no object by that name.,#-2,I don't know which one you mean!,[setq(1,get(%q0/comment))][switch(%q1,,[name(%q0)] has no WizNotes set.,Wiznotes for [name(%q0)]:[u(fnc-list_wiznotes,%q1)]%rType +wiznote/show %q0/NUM to read each one.)])]
+@pemit me=+wiznote OBJECT
+
+@@ +wiznote/show OBJECT/NUM
+
+&cmd-wiznote_show_object_num WizNote Object = $+wiznote/show */*:@pemit %#=[setq(0,locate(%#,%0,*)][switch(%q0,#-1,There's no object by that name.,#-2,I don't know which one you mean!,[setq(1,get(%q0/comment))][switch(%q1,,[name(%q0)] has no WizNotes set.,WizNote #[add(%1,0)] for [name(%q0)]:[u(fnc-show_wiznote,%q1,add(%1,0))])])]
+@pemit me=+wiznote/show OBJECT/NUM
+
+@@ +wiznote/all OBJECT
+
+&cmd-wiznote_all_object WizNote Object = $+wiznote/all *:@pemit %#=[setq(0,locate(%#,%0,*))][switch(%q0,#-1,There's no object by that name.,#-2,I don't know which one you mean!,[setq(1,get(%q0/comment))][switch(%q1,,[name(%q0)] has no WizNotes set.,Wiznotes for [name(%q0)]:[u(fnc-all_wiznotes,%q1)])])]
+@pemit me=+wiznote/all OBJECT
+
+@@ +wiznote/add OBJECT=TEXT
+
+&cmd-wiznote_add_object_text WizNote Object = $+wiznote/add *=*:@switch [setq(0,locate(%#,%0,*))]%q0=#-1,{@pemit %#=There's no object by that name.},#-2,{@pemit %#=I don't know which one you mean!},{@pemit %#=Setting WizNote on [name(%q0)].;@Comment %q0 = [setq(1,get(%q0/comment))][switch(%q1,,,%q1 ! )][secs()] | [num(%#)] | [u(fnc-encode,%1)]}
+@pemit me=+wiznote/add OBJECT=TEXT
+
+@@ +wiznote/clear OBJECT/NUM
+
+&cmd-wiznote_clear_object_num WizNote Object = $+wiznote/clear */*:@switch/first [setq(0,locate(%#,%0,*))][setq(1,get(%q0/Comment))]1=match(%q0,#-1),{@pemit %#=There's no object by that name.},#-2,{@pemit %#=I don't know which one you mean!}[or(lt(%1,1),gt(%1,words(%q1,!)))],{@pemit %#=[name(%q0)] has no wiznote with that number.},{@pemit %#=Removing Wiznote #[add(%1,0)] from [name(%q0)].;@comment %q0 = [ldelete(%q1,add(%1,0),!)]}
+@pemit me=+wiznote/clear OBJECT/NUM
+
+@@ +wiznote/purge OBJECT
+
+&cmd-wiznote_purge_object WizNote Object = $+wiznote/purge *:@switch [setq(0,locate(%#,%0,*))]%q0=#-1,{@pemit %#=There's no object by that name.},,#-2,{@pemit %#=I don't know which one you mean!},{@pemit %#=Purging WizNotes from [name(%q0)].;@Comment %q0}
+@pemit me=+wiznote/purge OBJECT
+
+@@ +wiznote/who
+
+&cmd-wiznote_who WizNote Object = $+wiznote/who:@pemit %#=[ljust(Character Name,20)][space(3)][center(WizNotes,8)][space(3)]Set By[iter(lwho(),u(fnc-who_wiznote,##))]
+@pemit me=+wiznote/who
+
+@@ +wiznote/version
+
+&cmd-wiznote_version WizNote Object = $+wiznote/version:@pemit %#=WizNote Version [v(version)]%rBy Kynn Bartlett <kynn@idyllmtn.com>%rOriginally written for Ascension City MUX%rSource code available from: [u(source_url)]
+@pemit me=+wiznote/version
+
+@@ End of Commands
+
+@pemit me =Commands set.
+
+@@ Done
+
+@pemit me=Upload complete.

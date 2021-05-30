@@ -1,0 +1,27 @@
+@create ID cards parent
+@link ID cards parent=[owner(me)]
+@lock ID cards parent=*[owner(me)]
+@set ID cards parent=LINK_OK
+@set ID cards parent=VISUAL
+@set ID cards parent=NO_COMMAND
+&COMMENT_6 ID cards parent=@mail giuseppe@Invid Invasion with any problems/suggestions.
+&COMMENT_5 ID cards parent=&level_1 <object>=<dbrfs #'s of people>.  You can set up to 5 levels this way, 1 being the highest.
+&COMMENT_4 ID cards parent=&master <object>=<dbrf# of object commands are run from>  ***Note.  Can be run from a zone.***
+&COMMENT_3 ID cards parent=@set <object>=!no_command
+&COMMENT_2 ID cards parent=@parent <object>=#1389
+&COMMENT_1 ID cards parent=@create <object>
+&MASTER ID cards parent=#1389
+&LOCK_STRING ID cards parent=[match(eval(v(master),level_[v(clear)]),%#)]
+&LEVEL_2 ID cards parent=[u(v(master)/level_1)]
+&LEVEL_3 ID cards parent=[u(v(master)/level_2)]
+&LEVEL_1 ID cards parent=[owner(v(master))]
+&LEVEL_4 ID cards parent=[u(v(master)/level_3)]
+&DO_OPEN ID cards parent=$id/open *:@swi [locate(%#,%0,Ee)]=#-*,{@pe %#=That is an invalid exit name.},{@swi [member(eval(v(master),level_[eval(locate(%#,%0,Ee),clear)]),%#)]=0,{@pe %#=You do not have access to open that door.},{@pe %#=You slide your ID card through the slot and the door slides open.;@unlock [locate(%#,%0,Ee)];@oemit %l/%#=%N opens [name(locate(%#,%0,Ee))] for a few seconds.;@wait 5={@lock [locate(%#,%0,Ee)]=pass/1;@remit %l=[name(locate(%#,%0,Ee))] slides closed.}}}
+&LEVEL_5 ID cards parent=[u(v(master)/level_4)]
+&DO_ADD ID cards parent=$id/add *=*:@swi [pmatch(%0)]=#-*,{@pe %#=[capstr(ansi(h,%0))] is not a player.},{@swi %1=>6,{@pe %#=%1 is not a valid level.},{@swi %1=<1,{@pe %#=%1 is not a valid level.},{@swi [member(eval(v(master),level_1),%#)]=0,{@pe %#=You do not have access to do that.},{@swi [member(iter(lattr(v(master)/level_*),[eval(v(master),##)]),[pmatch(%0)])]=>0,{@pe %#=That person already has a security level.},{@pe %#=[name(pmatch(%0))] is being added to level %1.;&level_%1 v(master)=[get(v(master)/level_%1)] [pmatch(%0)]}}}}}
+&DO_REMOVE ID cards parent=$id/remove *:@swi [pmatch(%0)]=#-*,{@pe %#=[capstr(ansi(h,%0))] is not a player.},{@swi [member(eval(v(master),level_1),%#)]=0,{@pe %#=You do not have access to do that.},{[setq(0,[grep(v(master),level_*,[pmatch(%0)])])];@swi %q0={},{@pe %#=[capstr(%0)] is not on any list.},{@pe %#=[name(pmatch(%0))] is being removed from the list.;&%q0 v(master)=[remove(get(v(master)/%q0),[pmatch(%0)])]}}}
+&DO_LIST ID cards parent=$id/list:@pe %#=[repeat(=,78)]%r[ansi(hb,center(I D %b S E C U R I T Y %b L E V E L S,78))]%r[repeat(-,78)]%r%b[iter(sort(lattr(v(master)/level_*)),[ansi(h,capstr(edit(##,_,%b)))]: [ufun(v(master)/fun_list,##)]%r)][repeat(=,78)]
+&DO_CONF ID cards parent=$id/conf *=*:@swi [locate(%#,%0,Ee)]=#-1,{@pe %#=I can't find that exit here.},{@swi %1=>6,{@pe %#=That is not a valid level.},{@swi %1=<1,{@pe %#=That is not a valid level.},{@swi [member(eval(v(master),level_1),%#)]=0,{@pe %#=You do not have access to do that.},{@swi [controls(%#,[locate(%#,%0,Ee)])]=0,{@pe %#=You don't own the exit.},{@pe %#=[name(locate(%#,%0,Ee))] is being set up under access level [ansi(h,%1)].;@lock [locate(%#,%0,Ee)]=!pass/0;&master [locate(%#,%0,Ee)]=[get(me/master)];&clear [locate(%#,%0,Ee)]=%1;@cpattr #1389/lock_string=[locate(%#,%0,Ee)]/pass}}}}}
+&DO_HELP ID cards parent=$id/help:@pe %#=[repeat(=,78)][ansi(hr,[center(I D %b H E L P,78)])]%r[repeat(-,78)]%r%r[space(3)][ansi(c,id/conf <)]exit[ansi(c,>=<)]level[ansi(c,>)][space(9)]Configures <exit> to security <level>.%r[space(3)][ansi(c,id/add <)]person[ansi(c,>=<)]level[ansi(c,>)][space(8)]Adds <person> to <level's> security list.%r[space(3)][ansi(c,id/remove <)]person[ansi(c,>=<)]level[ansi(c,>)][space(5)]Removes <person> from <levels> security list.%r[space(3)][ansi(c,id/open <)]exit[ansi(c,>)][space(17)]Opens <exit> for five seconds.%r[space(3)][ansi(c,id/list)][space(24)]Lists the ID levels.%r[space(3)][ansi(c,id/help)][space(24)]Lists this help.%r%r%r[ansi(hc,[center(*** Coded by Giuseppe@TBFF ***,78)])]%r[repeat(=,78)]%r
+&FUN_LIST ID cards parent=[iter(get(v(master)/%0),[switch(name(##),I can't*,{},[name(##)])])]
+@DESCRIBE ID cards parent=ex [name(me)]

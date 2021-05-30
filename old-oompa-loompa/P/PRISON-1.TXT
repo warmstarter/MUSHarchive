@@ -1,0 +1,17 @@
+@create Prison Transport Parent
+@link Prison Transport Parent=#40
+@set Prison Transport Parent=DARK
+@set Prison Transport Parent=INHERIT
+@set Prison Transport Parent=WIZARD
+@set Prison Transport Parent=NO_LEAVE
+&GROUPS Prison Transport Parent=#1950
+&TRANSPORT Prison Transport Parent=$transport to *:@switch [hasflag(%#,wizard)]=1,{@swi %0=1,{@remit [loc(%#)]=Transporting to Cell 1;@tel #25},2,{@remit [loc(%#)]=Transporting to Cell 2;@tel #31},3,{@remit [loc(%#)]=Transporting to Cell 3;@tel #34},4,{@remit [loc(%#)]=Transporting to Cell 4;@tel #37},{@pe %#=Invalid Cell}},0,{@pe %#=Permission Denied!}
+@LFAIL Prison Transport Parent=You try to walk out of the prison transport, but realize that you are chained to the wall.
+@OLFAIL Prison Transport Parent=tries to leave, but is held back by the chains around his wrists and feet.
+&GETEM Prison Transport Parent=$Arrest *:@swi [loc(%#)]=[num(me)],{@swi [hasflag(%#,wizard)]=1,{@remit [loc(%#)]=Locating [name(*%0)]...[name(%0)] has been found, transporting to their destination.;@wait 1=@tel #46;@wait 15=@tel [loc(*%0)];@wait 15=@tel *%0=[num(me)];@wait 15=@remit [loc(%#)]=[name(*%0)] has been arrested.  Awaiting orders...;@wait 15=@set *%0=fixed},{@pemit %#=You are not a wizard, and are not allowed to arrest people.}},{@pemit %#=You must me INSIDE the transport to use it!}
+@DESCRIBE Prison Transport Parent=A Prison Transport Car.
+&RELEASE Prison Transport Parent=$release *:@swi [hasflag(%#,wizard)]=1,{@remit [loc(*%0)]=%n unlocks the restraints on [name(*%0)].  He then shoves [name(*%0)] out of the transport car.;@wait 1=@tel %0=[loc(me)]},{@pemit %#=You aren't allowed to do that!}
+&EXIT Prison Transport Parent=$depart:@swi [hasflag(%#,wizard)]=1,{@remit [loc(%#)]=%n steps out of the car, and then reseals the door.;@wait 1=drop %n},{@fo %n=leave}
+@IDESCRIBE Prison Transport Parent=This is a moderate sized prison car, used for arresting of MUSH criminals.  The commands can be obtained by typing +help.%r[ansi(hc,The Prison Transport is currently located at:)]%r[ansi(c,[name([loc(me)])])]%rContents:%r%b[iter([lcon(me)],[name(##)]%r)]
+&HELP Prison Transport Parent=$+help:@pemit %#=Commands for this car are:%rArrest * -- Guess.  This takes 15 seconds to complete.%rrelease * -- Release one of your prisoners.%rdepart -- Leave the car.%rTransport to <1-4> -- Takes the car to the specified brig number.%r%r*****YOU MUST BE A WIZARD TO USE THIS CAR*****%r%rIf you enter this car, and get stuck, you must be released by a wizard.  If this happenes, you will be brigged for an ammount of time selected by the wizard that finds you.  Don't play with Wiztoys!
+&ISHERE Prison Transport Parent=[switch([num(here)],[loc(%#)],YES,NO)]

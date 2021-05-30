@@ -1,0 +1,183 @@
+Barkeeper Parent(#360VYhs)
+Type: THING Flags: VISUAL PARENT_OK HALTED SAFE
+A rather beautiful individual - roughly six feet tall at a guess, she appears
+to be in her late-thirtys. Well-build with a beautiful complexion and accent,
+she is a barkeep and server here. Sometimes loud, impatient, and usually in
+good spirits (sometimes literally) - she's ready to take orders.%R%R%T(OOC:
+Type 'assistance' for commands.)
+Owner: Nefara's Toadie  Key: Free Code Store(#349RF) Plocks: 10
+Zone: *NOTHING*
+Powers:
+ASSISTANCE: $assistance:@pemit %#=[center([u(realname)]'s Commands,78)]%R%R%T
+Menu%T%T%TSee a list of generally available entrees.%R%TDrinks%T%T%TSee a list
+of special drink commands.%R%TOrder <food or drink>%TOrder a unlisted drink or
+food item.%R%TAnother%T%T%TCall out for another refill.%R%TAnother <drink>%T%T
+Get a refil of a specific drink.%R%TPay%T%T%TPay your bill to the bartender.%R%
+TSend <drink> to <person> Send a drink over to someone.%R%TAnother Round%T%TBuy
+a round of drinks for everyone present.%R%TClean Table%T%TGet [u(realname)] To
+clear off a table for you.%R%TThanks%T%T%TThank [u(realname)] for everything.
+%R%TTip%T%T%TTip the bartender%R
+REALNAME: Barwench
+Sex: Female
+MOLOTOV: $molotov:@emit [u(realname)] looks a trifle worriedly at %N. "A
+Molotov? Well...if you are sure..." She shakes her head and moves off towards
+the bar.;@wait 5={@emit [u(realname)] returns a moment later, setting a tall
+glass filled with a strange dark red steaming liquid before %N.;@pemit %#=(OOC:
+When you're talking about this drink, you're not fooling around. This drink has
+a *serious* and stiff kick to it. Please act approproately.)}
+TIP: $tip:@emit [switch(rand(4),0,{[u(realname)] says, "Much obliged, [switch
+(%S,She,miss,sir)]." To %N as %s leave him a tip.},1,{[u(realname)] nods in
+gratitude to %N as %s leaves her a tip.},2,{[u(realname)] flashes %N a smile as
+%s leaves her a tip.},{[u(realname)] nods in thanks to %N as %s leaves him a
+tip.})]
+ENTREES: 1 2 3 4 5 6 7
+CKTIME: [switch(member(03 04 05 06 07 08 09 10,%vt),0,[switch(member(11 12 13
+14 15 16,%vt),0,2,1)],0)]
+WATER: $water:@emit [u(realname)] nods at %N's request and steps back behind
+the bar.;@wait 3=@emit [u(realname)] returns to %N a few moments later,
+carrying a tray and a large glass of ice-water which she sets before %o. "There
+you are..." She smiles.
+WHITE_WINE: $white wine:@emit [u(realname)] jots down %N's order and vanishes
+through the crowd towards the bar.;@wait 5=@emit [u(realname)] returns a moment
+later bearing a tall spiral-worked glass of white wine for %N. She sets it
+before %o with a smile.
+RED_WINE: $red wine:@emit [u(realname)] jots down %N's order and vanishes
+through the crowd towards the bar.;@wait 5=@emit [u(realname)] returns a moment
+later bearing a tall spiral-worked glass of red wine for %N. She sets it before
+%o with a smile.
+BLACK_VELVET: $black velvet:@emit [u(realname)] nods noting %N's request on a
+pad of paper pulled from her pocket. "One Black Velvet comin' right up...";
+@wait 5=@emit [u(realname)] returns to %N's table, setting the concoction of
+stout and champagne before %o. "There you are." She says with a smile.
+CHAMPAGNE: $champagne:@emit [u(realname)] nods, smiling pleasntly at %N as %s
+places an order. "Very good." She vanishes behind the bar.;@wait 4=@emit [u
+(realname)] returns, carrying a tray and a glass of sparkling champagne for %N.
+She sets the glass before %o and returns to the bar.
+MILK: $milk:@emit [u(realname)] nods at %N's request and hurries back,
+vanishing behind the bar.;@wait 3=@emit [u(realname)] returns to %N a few
+moments later, carrying a tray and a slender glass of milk which she sets
+before %o. "There you are..."
+TEA: $tea:@emit [u(realname)] nods in good spirits, jotting down %N's order.
+She moves easily through the crowd off in the direction of the bar.;@wait 3=
+@emit [u(realname)] returns setting a cup, saucer, and small teapot before %N.
+%R"Nothin' but the finest," she promises and returns to the bar.
+WHISKEY: $whiskey:@emit [u(realname)] grins in approval at %N. "One whiskey,
+comin' right up." She vaults casually over the bar and pulls a glass down off
+the rack.;@wait 3=@emit [u(realname)] returns to %N a moment later, setting %p
+whiskey before %o.
+BEER: $beer:@emit [u(realname)] grins in approval at %N's order. She steps
+behind the bar, pulling a mug down off the rack and begins pouring from one of
+the taps.;@wait 3={@emit [u(realname)] returns, handing %N %p beer.;@pemit #%=
+[u(realname)] says to you, "Let me know when you need 'another'." and grins.}
+ENABLE_MENU: $enable menu:@set me/menu=!no_command;@set me/serving=!no_command;
+@set me/lots=!no_command
+DISABLE_MENU: $disable menu:@set me/menu=no_command;@set me/serving=no_command;
+@set me/lots=no_command
+DRINKS: $drinks:@pemit %N=[repeat(*,78)]%R[center(Drink Menu,78)]%R[repeat
+(-,78)]%RThe following drinks are generally available here:%R%TBeer%T%T%T%T%T
+Whiskey%R%TRed Wine%T%T%T%TWhite Wine%R%TChampagne%T%T%T%TBlack Velvet%R%T
+Molotov (a *serious* drink)%T%TTea%R%TMilk%T%T%T%T%TWater%R%RTo order one of
+the above drinks, simply type its name.%RAlternatively, if you'd like something
+special, try 'order <drink-name>'.%R[repeat(*,78)]
+ORDER: $order *:@switch member(v(entrees),%0)=0,{@emit [switch(rand(4),0,{[u
+(realname)] scribbles down %N's order. She grins at %N. "Right. This'll take me
+a few moments." She heads for the bar.},1,{[u(realname)] nods at %N's order -
+taking it down on a pad of paper. "Excellent choice." She wanders back to the
+bar.},2,{[u(realname)] pulls a pencil and pad of paper from her pocket, taking
+down %N's order. "Comin' right up..." She heads for the bar.},{%N places an
+order with [u(realname)] who nods and heads for the bar.})];@wait 10=@emit
+[u(realname)] returns from the bar, setting %N's %0 before %o.},{@pemit %#=
+(OOC: Use the 'serving #' command to order a general entree.)}
+SERVING: $serving *:@switch member(v(entrees),%0)=0,{@pemit %#=That item is not
+available among the list of generally available entrees.},{@VT me=[extract
+(vtime(),4,1),1,1,:)];@emit %N places an order with [u(realname)], who gives a
+nod and heads for the kitchen.;@wait 10=@emit [u(realname)] returns, setting
+[index(v(food1),|,[switch(u(cktime),0,%0,1,[add(%0,7)],[add(%0,14)])],1)]
+before %N.}
+ANOTHER_ROUND: $another round:@emit %N raises %p voice: "Another round! Drinks
+are on me!"%RThere is a rousing cheer from the other patrons and [u(realname)]
+grins behind the bar. "Orders please," she requests.
+ANOTHER: $another *:@switch %0=round,{},{@emit %N waves a hand to indicate to
+[u(realname)] that %s'd like another.%R[u(realname)], in the act of walking by,
+deftly collects the glass, returning another %0 to %N a moment later.}
+CLEAN: $clean table:@emit %N raises a hand to attract [u(realname)]'s attention
+and motions towards %p table.;@wait 10=@emit [u(realname)] hurries over to %N's
+table, carring an empty tray. She removes the spare dishes and glasses and
+gives the table a quick mop with a rag pulled from her pocket.;@wait 15=@emit
+[u(realname)] says, "There you go." with a grin and returns with the tray to
+the bar.
+Pay: $pay:@emit [switch(rand(4),0,{%N pays %p tab.%R[u(realname)], with a
+single long practiced motion, sweeps the money out of sight.},1,{%N pays %p
+tab.%R[u(realname)], with a move long practiced before, sweeps the money out of
+sight.},2,{[u(realname)] nods politely to %N as %s pays %p tab.},{%N pays %p
+tab, leaving the money on the bar for [u(realname)] - who collects it a moment
+later.})];@switch member (v(men_,%N,|)=0,,{@pemit who collects it a moment
+later.})];@switch member(v(men),%N,|)=0,,{@pemit %#=[u(realname)] says, "Come
+again." smiling and winking at you slyly.}
+THANKS: $thanks:@emit %N says "Thank you, [u(realname)]."%R[switch(rand(4),0,
+[u(realname)] grins. "You're welcome.",1,{[u(realname)] gives %N a polite nod
+from behind the bar, smiling pleasantly.},2,{[u(realname)] says "A pleasure,
+[switch(%S,She,miss,sir)]."},{[u(realname)] grins. "Anytime."})]
+SEND_DRINK: $send * to *:@pemit %#=[u(realname)] nods as you quietly pass her
+your request.;@wait 4={@pemit %#=You watch as [u(realname)] approaches %1, a %0
+in hand.;@oemit %1=[u(realname)] approaches %1's table, setting a %0 before
+[obj(%1)].;@pemit %1=[u(realname)] approaches you, carrying a %0 on a tray. She
+sets the drink before you.%R"The [switch(%S,She,lady,gentleman)] over there
+sends this over." she explains, motioning at %N.}
+MENU: $menu:@vt me=[extract(extract(vtime(),4,1),1,1,:)];@pemit %#=[repeat
+(*,78)]%R[center(Todays Menu,78)]%R[repeat(-,78)]%RThe following entrees are
+currently available on the [switch(u(cktime),0,{Breakfast Menu:%R[iter(v
+(entrees),%R%T##-%T[index(v(breakfast),|,##,1)])]},1,{Lunch Menu:%R[iter(v
+(entrees),%R%T## -%T[index(v(lunch),|,##,1)])]},{Dinner Menu:%R[iter(v
+(entrees),%R%T## -%T[index(v(dinner),|,##,1)])]})]%R%RAvailable Commands:
+%R%R%TServing <entree #> - a general serving of one of the entrees.%R%TLots
+<entree #> - an extra-large serving of one of the entrees.%R[repeat(*,78)]
+VT: NOT
+LOTS: $lots *:@switch member(v(entrees),%0)=0,{pemit %#=That item is not
+available amoung the list of generally available entrees.},{@vt me=[extract
+(extract(vtime(),4,1),1,1,:)];@emit %N places an order with [u(realname)], who
+gives a nod and heads for the kitchen.;@wait 10=@emit [u(realname)] returns,
+setting [index(v(food2),|,[switch(u(cktime),0,%0,1,[add(%0,7)],[add(%0,14)])]
+,1)] before %N.}
+FOOD1: |a bowl of thick porridge with milk and treacle|a small plate of grilled
+herring|a small stack of somewhat cold toast and a pot of jam|a greasy plate of
+backon and eggs|a small omlet wafting with the smell od fresh herbs|a plate of
+flapjacks and a pitcher of syrup|a large plate of eggs, sausage, bacon, with
+toast|a hearty bowl of thick clam chowder|a plate of thick onion quiche|a small
+steak salad and a side of sweet dressing|a plate of shrimp scampi and angel
+hair pasta|a thick sandwich, oozing bacon, tomatoes, and lettuce|a large plate
+of flounder, prawns, haddock and a thick hunk of bread and cheese|a tossed
+salad of greens and vegetables from the market|a greasy plate o' fish & chips|a
+plate of roast beef, thich gravy and lots of mashed potatoes|a bowl of a lamb,
+potato, and onion casserole|a plate of prawns fresh from today's catch|a side
+of roast basted chicken|a full platter of steak, asparagus, two baked potatoes,
+a small salad and several rolls|
+FOOD2: |an immense bowl of stiff porridge, laden down with milk, honey and
+treacle|a large plate of grilled, kippered, and pickled herring|a mound of
+somewhat cold toast and a pot of jam|a platter of eggs and bacon still sizzling
+from the kitchen|a double size omlet wafting the delicious aroma of fresh herbs
+|a plater of flapjacks weighed down under a layer of fresh syrup|a huge greasy
+platter of scrambled eggs, sausages, bacon, hashbrowns, toast & jam|a large
+bowl od thick hearty clam chowder|a large plate of fine onion quiche|an immense
+steak salad and side of sweet dressing|a plateful of angel hair pasta and
+shrimp scampi|a full sandwich, stacked high with lettucke, bacon, and tomatoes|
+an immense platter of haddock cod, flounder, prawns and several other types of
+fish in addition to several potatoes, a small salad, and a thick hunk of bread
+and cheese|a truly immense salad of greens and other vegetables from the
+market|a platter containing a thick greasy mound of fish & chips|a platter of
+thick slabs of roast beef, swathed in gravy and mashed potatoes|an immense
+serving of lamb, potatoes, and onion casserole|a fnion casserole|a full platter
+of prawns, sauteed in garlic butter, fresh from todays catch|a full platter of
+roasted chicken, wafting deliciously through the room|a full platter of steak,
+asparagus, five baked potatoes, an extra-large salad, sweet dressing, rolls,
+and a slice of apple pie|
+BREAKFAST: Oatmeal|Kippered Herring|Toast & Jam|Bacon & Eggs|Fresh Herb Omelet|
+Flapjacks|Special Breakfast Platter|
+LUNCH: Soup of the day: Clam Chowder|Onion Quiche|Steak Salad|Shrimp Scampi|
+Bacon Sandwich|Fisherman's Platter|
+DINNER: Tossed Salad|Fish & Chips|Sheperd's Pie|Stew|Prawns|Roast Chicken|
+"The Special" <only for the hungriest>|
+No exits.
+Home: Free Code Store(#349RF)
+Location: Free Code Store(#349RF)
+_______________________________________________________________________________

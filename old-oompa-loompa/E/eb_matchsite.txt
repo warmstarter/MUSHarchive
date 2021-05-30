@@ -1,0 +1,29 @@
+@@ Here is a command used on 8BitMUSH to find alts
+@@ based upon the LASTSITE and LASTIP attributes.
+@@
+@@ Type 'lastsite <what to look for>' to search by
+@@ LASTSITE, and 'lastip <what to look for>' to search
+@@ by LASTIP. You may search for "the same ip/site as
+@@ another player" (as a way to find alts) by name or
+@@ dbref, or search directly for an address (using
+@@ wildcards if you wish).
+@@
+@@ Alternatively, 'lastip <what to look for>' works
+@@ exactly the same, but searches just the numerical
+@@ IP address, and not the resolved host name.
+@@
+@@ NOTE: I don't think TinyMUSH keeps a LASTIP address.
+@@ This code has only really been tested on PennMUSH.
+@@
+@@ Examples:
+@@
+@@    lastsite Luigi
+@@    lastsite d212-151-172-53.swipnet.se
+@@    lastsite *.swipnet.se
+@@    lastip 1.172.9.*
+
+
+&LASTSITE a wizard object=$lastsite *:[setq(0,switch(pmatch(%0),#-1*,%0,#-2*,%0,get(#$/lastsite)))]@dolist search(all,type,player)=@swi/first strmatch(get(##/lastsite),%q0)=1,{@pem/s %#=Site Matched: [name(##)]\(##\)}
+
+@@ Uncomment the next line if you are running on a PennMUSH, or a server that sets a LASTIP.
+@@ &LASTIP a wizard object=$lastip *:[setq(0,switch(pmatch(%0),#-1*,%0,#-2*,%0,get(#$/lastip)))]@dolist search(all,type,player)=@swi/first strmatch(get(##/lastip),%q0)=1,{@pem/s %#=Site Matched: [name(##)]\(##\)}

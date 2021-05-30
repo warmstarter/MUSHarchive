@@ -1,0 +1,3303 @@
+Message 1 on *Bug-Report(#544):
+Date:     Wed Dec  2 13:40:52 1992 EST
+From:     Blackbriar (#110)
+To:       *Theme-Issues (#120), *Core-DB-Issues (#350), and *Bug-Report (#544)
+Subject:  New Group
+
+What the hell. Let's have *Bugs
+
+--------------------------
+
+
+Message 2 on *Bug-Report(#544):
+Date:     Wed Dec  2 18:55:47 1992 EST
+From:     Snicklefritz (#156)
+To:       *Bug-Report (#544)
+Subject:  Am I the first?  huh?
+
+Now that I have a key, I can lock the door, but the door opens automatically
+when I enter without me having to unlock it.  I've set .automatic to 0, even.
+
+--Snick
+
+--------------------------
+
+
+Message 3 on *Bug-Report(#544):
+Date:     Wed Dec  2 19:27:13 1992 EST
+From:     Anne_Merkel (#114)
+To:       *Bug-Report (#544)
+Subject:  Re: Am I the first?  huh?
+
+>  From:     Snicklefritz (#156)
+>  Now that I have a key, I can lock the door, but the door opens
+>  automatically when I enter without me having to unlock it.  I've
+>  set .automatic to 0, even.
+
+I've been unable to find the problem Snicklefritz reports and when I tried to
+talk to her about it, she just said `nevermind' and ignored me.  If anyone
+else comes across this problem, I'd appreciate it if you'd tell me so I can
+try to find out what's going wrong.
+
+--------------------------
+
+
+Message 4 on *Bug-Report(#544):
+Date:     Sat Dec  5 22:04:17 1992 EST
+From:     Blackbriar (#110)
+To:       *Bug-Report (#544) and Anne_Merkel (#114)
+Subject:  Re: Bug:  Elevator(#287)
+
+I got this message in my mailbox... Anne, any ideas (since you wrote the
+traceback-producing verb)?
+
+>  Date:     Sat Dec  5 17:03:49 1992 EST
+>  From:     Cynicalman (#603)
+>  To:       Blackbriar (#110)
+>  Subject:  Bug:  Elevator(#287)
+>
+>  When trying to go to the third floor, I typed "3" and got
+>  traceback: #3:here_huh (this == #287), line 15:  Verb not found /
+>  ... called from #56:do_huh, line 8 // ... called from 31:huh (this
+>  == #287), line 2
+
+--------------------------
+
+
+Message 5 on *Bug-Report(#544):
+Date:     Sun Dec  6 03:19:11 1992 EST
+From:     Anne_Merkel (#114)
+To:       Blackbriar (#110) and *Bug-Report (#544)
+Subject:  Traceback from $room:here_huh()
+
+Yeah, I think I know what the problem is.  It's that `3' matches the third
+verb defined on whatever random object in the room we happen to look at
+regardless of the verb's name but you can't call a verb by it's number, only
+it's name.
+I have found a simple way around it that will fix the problem in cases of
+exits named after numbers.  However, it will still mess up if you try to call
+a verb named after a number which is defined on an exit.  Considering that
+this would never work in the old system anyway, it's not a loss.
+The new version of $room:here_huh() is written on #377:alt_huh().  One of the
+Wizzes can just copy it over and it should work fine.
+
+--------------------------
+
+
+Message 6 on *Bug-Report(#544):
+Date:     Sun Dec  6 12:53:30 1992 EST
+From:     Briar (#2)
+To:       Anne_Merkel (#114), Blackbriar (#110), and *Bug-Report (#544)
+Subject:  Re: Traceback from $room:here_huh()
+
+>  The new version of $room:here_huh() is written on #377:alt_huh().
+>  One of the Wizzes can just copy it over and it should work fine.
+
+Done.
+Bb
+
+--------------------------
+
+
+Message 7 on *Bug-Report(#544):
+Date:     Sun Dec  6 15:32:52 1992 EST
+From:     Anne_Merkel (#114)
+To:       *Bug-Report (#544)
+Subject:  $huh problem...
+
+Well, I just tested out the new version of :here_huh() and, at first, I
+thought it was broken because when I type `3' in the elevator, nothing
+happens.  I don't even get a traceback.
+So I copied it back onto my room and put in some :tell()'s to let me know if
+it was getting called at various points.  As it turned out, :here_huh() wasn't
+getting called at all.
+I suspect that there's some sort of problem with the new version of
+$player:my_huh() that's interfering but I don't know for sure.
+
+--------------------------
+
+
+Message 8 on *Bug-Report(#544):
+Date:     Sun Dec  6 15:44:59 1992 EST
+From:     Anne_Merkel (#114)
+To:       *Bug-Report (#544)
+Subject:  Re: $huh problem...
+
+Never mind.  It turns out that matching on exits with digit names just never
+worked to begin with.  (I tried it on another MOO.)
+
+--------------------------
+
+
+Message 9 on *Bug-Report(#544):
+Date:     Mon Dec 14 12:26:01 1992 EST
+From:     hagbard (#361)
+To:       *Bug-Report (#544)
+Subject:  There seems to be a problem with $you:say_action.
+
+When I run the following code:
+
+msg = iobjstr;
+if(!msg)
+  player:tell(this.name + " doesn't like t-shirts with no messages.");
+endif
+this.t_shirt = msg;
+$you:say_action("%N %<puts/put> a t-shirt on " + this.name + " that reads `" +
+msg + "'.");
+return;
+
+which is contained in the verb @t-shirt this is any, by typing `@t-shirt me is
+blah' I get the following:
+
+>@t-shirt me is blah
+You put a t-shirt on hagbard that reads `blah'.
+hagbard puts/put a t-shirt on hagbard that reads `blah'.
+
+The same code (exactly) on Lamda produces:
+
+>@t-shirt me is blah
+You put a t-shirt on yourself that reads `blah'.
+
+Does anybody know the difference between $you:say_action on here and on
+lambda?
+
+-hagbard
+
+--------------------------
+
+
+Message 10 on *Bug-Report(#544):
+Date:     Mon Dec 14 16:17:55 1992 EST
+From:     Blackbriar (#110)
+To:       *Bug-Report (#544)
+Subject:  Re: There seems to be a problem with $you:say_action.
+
+>  Date:     Mon Dec 14 12:26:01 1992 EST
+>  From:     hagbard (#361)
+>  To:       *Bug-Report (#544)
+>  Subject:  There seems to be a problem with $you:say_action.
+
+>  Does anybody know the difference between $you:say_action on here
+>  and on lambda?
+
+There -was- a difference, so I ported it over from LambdaMOO.
+Bb
+
+--------------------------
+
+
+Message 11 on *Bug-Report(#544):
+Date:     Wed Dec 16 08:27:10 1992 EST
+From:     Anne_Merkel (#114)
+To:       hagbard (#361) and *Bug-Report (#544)
+Subject:  Re: There seems to be a problem with $you:say_action.
+
+The problem is that LambdaMOO $player has a :verb_sub() and OpalMOO $player
+does not.  The code for :verb_sub() should be:
+
+text = args[1];
+if (a = $list_utils:assoc(text, this.verb_subs))
+  return a[2];
+else
+  return $gender_utils:get_conj(text, this);
+endif
+
+$player will also need the property .verb_subs which should be {} with perms
+"rc".
+
+--------------------------
+
+
+Message 12 on *Bug-Report(#544):
+Date:     Wed Dec 16 08:28:32 1992 EST
+From:     Anne_Merkel (#114)
+To:       *Bug-Report (#544)
+Subject:  Whoops!
+
+It looks like Bb beat me to a solution.  However, $player could probably still
+use some kind of :verb_sub() so that $string_utils:pronoun_sub() will work.
+
+--------------------------
+
+
+Message 13 on *Bug-Report(#544):
+Date:     Wed Dec 16 09:26:55 1992 EST
+From:     BabyBriar (#2)
+To:       Anne_Merkel (#114), hagbard (#361), and *Bug-Report (#544)
+Subject:  Re: There seems to be a problem with $you:say_action.
+
+Anne_Merkel reports:
+
+>  The problem is that LambdaMOO $player has a :verb_sub() and
+>  OpalMOO $player does not.  The code for :verb_sub() should be:
+>  [...]
+>  $player will also need the property .verb_subs which should be {}
+>  with perms "rc".
+
+Both done. I dunno if it's the Right Solution, but we got it.
+Briar
+
+--------------------------
+
+
+Message 14 on *Bug-Report(#544):
+Date:     Thu Dec 24 08:56:56 1992 EST
+From:     Praecox (#711)
+To:       *Bug-Report (#544)
+Subject:  @chparent syntax?
+
+The following command isn't working:
+>@chparent #712 to #382
+
+Where #712 is the entrance to my room.  In fact, @chparent doesn't
+seem to work for anything.  What's the deal?
+Am I confused?
+
+Love---praecox
+
+--------------------------
+
+
+Message 15 on *Bug-Report(#544):
+Date:     Thu Dec 24 12:40:59 1992 EST
+From:     Blackbriar (#110)
+To:       Praecox (#711) and *Bug-Report (#544)
+Subject:  Re: @chparent syntax?
+
+Praecox asks:
+
+>  The following command isn't working:
+>  >@chparent #712 to #382
+>
+>  Where #712 is the entrance to my room.  In fact, @chparent doesn't
+>  seem to work for anything.  What's the deal?
+
+@chparent is a programmer verb. I've been thinking about making a version that
+will work for non-programmers, but until I do, it's only available to
+programmers.
+Bb
+
+--------------------------
+
+
+Message 16 on *Bug-Report(#544):
+Date:     Thu Dec 24 13:15:15 1992 EST
+From:     BabyBriar (#2)
+To:       Blackbriar (#110), Praecox (#711), and *Bug-Report (#544)
+Subject:  Re: @chparent syntax?
+
+>  @chparent is a programmer verb. I've been thinking about making a
+>  version that will work for non-programmers, but until I do, it's
+>  only available to programmers.
+
+Sue me. I fixed it.
+Bb
+
+--------------------------
+
+
+Message 17 on *Bug-Report(#544):
+Date:     Wed Dec 30 17:53:28 1992 EST
+From:     Praecox (#711)
+To:       *Bug-Report (#544)
+Subject:  room integration....set_integration_substance
+
+I'm not sure about the set_integration_substance verb.  Can't we set
+this stuff from the command line?   (Its a TNT verb).  What about
+setting integration on objects other than oneself?  I'm not sure this
+is really a bug report, maybe I'm just not sure how to use the
+verbs....
+
+prae.
+
+--------------------------
+
+
+Message 18 on *Bug-Report(#544):
+Date:     Wed Dec 30 18:19:32 1992 EST
+From:     BabyBriar (#2)
+To:       Praecox (#711) and *Bug-Report (#544)
+Subject:  Re: room integration....set_integration_substance
+
+Praecox asks:
+
+>  I'm not sure about the set_integration_substance verb.  Can't we
+>  set this stuff from the command line?   (Its a TNT verb).  What
+>  about setting integration on objects other than oneself?  I'm
+>  not sure this is really a bug report, maybe I'm just not sure
+>  how to use the verbs....
+
+The :set_integration_substance and :set_integration_style verbs are -not-
+command-line verbs. They're internal verbs. They can be easily run in any
+number of ways, but perhaps the easiest (for those who use the eval
+substitutions, which are the default) is to do something like:
+  ;here:set_integration_substance(1);
+There is integration on players, rooms, and containers. They all work the same
+and are documented (imperfectly?) in `help integration'.
+
+I wrote this integration system myself and I'm more than willing to get
+comments/suggestions and implement them. Just say the word.
+Briar
+
+--------------------------
+
+
+Message 19 on *Bug-Report(#544):
+Date:     Fri Jan  1 19:30:52 1993 EST
+From:     Praecox (#711)
+To:       *Bug-Report (#544)
+Subject:  @audit bug?
+
+I'm wondering why #842, which is definately mine, is not showing up on my
+@audit ?
+
+praex.
+
+--------------------------
+
+
+Message 20 on *Bug-Report(#544):
+Date:     Fri Jan  1 19:39:52 1993 EST
+From:     Opal (#72)
+To:       Praecox (#711) and *Bug-Report (#544)
+Subject:  Re: @audit bug?
+
+Praecox:
+>  I'm wondering why #842, which is definately mine, is not showing
+>  up on my @audit ?
+
+#842 was a child of #810.  #810 hs an initialize verb which did not pass,
+which was actually not programmed at all.  Because it did not pass, the object
+was not entered into the player's .owned_objects.
+I edited #810:initialize so that it did pass. I also reset the .owned_objects
+lists so they'd be correct.
+Love Opal
+
+--------------------------
+
+
+Message 21 on *Bug-Report(#544):
+Date:     Fri Jan  1 21:52:07 1993 EST
+From:     BabyBriar (#2)
+To:       Opal (#72), Praecox (#711), and *Bug-Report (#544)
+Subject:  Re: @audit bug?
+
+When an item you KNOW you own is missing from your .owned_objects list, that
+invariably means that an :initialize verb somewhere is screwed up. The
+following verbs exist to manipulate your .owned_objects list:
+@verify-owned -- go through one's .owned_objects list and toss out things that
+don't belong.
+@add-owned -- add a specific object to one's .owned_objects list, if it is
+missing.
+@sort-owned-objects -- sort one's .owned_objects list in ascending order
+
+The @audit command works off of the .owned_objects list; if something is
+missing, you can use @auditDB, which plods through the database manually
+looking for your stuff. The syntax is the same in either case.
+Good day.
+Briar
+
+--------------------------
+
+
+Message 22 on *Bug-Report(#544):
+Date:     Mon Jan 11 09:06:19 1993 EST
+From:     BabyBriar (#2)
+To:       *Bug-Report (#544)
+Subject:  Bug in @edit
+
+Yes, I know I wrote it. I'm sending to *Bugs [1] so y'all know about it, and
+[2] so I'll remember to fix it later.
+In the olden days, if you stopped an editing session in the middle, like in
+the note editor, you could come back just by typing @notedit. The present
+system, with one command (@edit) which handles it all, doesn't know how to
+handle such things.
+The editing commands need to be slightly modified so that if given no
+arguments one will try the editor -anyway- just to see if there's an
+unfinished session.
+Bb
+
+--------------------------
+
+
+Message 23 on *Bug-Report(#544):
+Date:     Mon Jan 11 11:17:12 1993 EST
+From:     BabyBriar (#2)
+To:       *Bug-Report (#544)
+Subject:  Re: Bug in @edit
+
+>  Yes, I know I wrote it. I'm sending to *Bugs [1] so y'all know
+>  about it, and [2] so I'll remember to fix it later.
+>  In the olden days, if you stopped an editing session in the
+>  middle, like in the note editor, you could come back just by
+>  typing @notedit. The present system, with one command (@edit)
+>  which handles it all, doesn't know how to handle such things.
+>  The editing commands need to be slightly modified so that if given
+>  no arguments one will try the editor -anyway- just to see if
+>  there's an unfinished session.
+
+Okay, fixed (I think). If you've got an active session in either the Note
+Editor or the Verb Editor, it calls up that session. If you've got an active
+session in both, it asks you what you wanna do.
+Suggestions? I am sick as a dog and probably not thinking quite straight.
+
+--------------------------
+
+
+Message 24 on *Bug-Report(#544):
+Date:     Mon Jan 11 13:41:21 1993 EST
+From:     JoeFeedback (#390)
+To:       BabyBriar (#2) and *Bug-Report (#544)
+Subject:  Re: Bug in @edit
+
+Why not check for active sessions in all kids (descendants) of
+$generic_editor?  This would allow for returning to mail editing and any
+future editors.
+
+I haven't seen what you actually did, but your mail indicated you were just
+checking $note_editor and $verb_editor, which seems like an arbitrary
+limitation.
+
+--------------------------
+
+
+Message 25 on *Bug-Report(#544):
+Date:     Mon Jan 11 22:07:36 1993 EST
+From:     BabyBriar (#2)
+To:       JoeFeedback (#390), *Bug-Report (#544), and *Core-DB-Issues (#350)
+Subject:  Re: Bug in @edit
+
+JoeFeedback said:
+
+>  Why not check for active sessions in all kids (descendants) of
+>  $generic_editor?  This would allow for returning to mail editing
+>  and any future editors.
+
+Actually, this was a damned good idea. So I did this to @edit:
+
+If you use the @edit command with an object/obj.prop/obj:verb argument, it
+will act in the expected way.
+If you use the @edit command with no arguments and you have ONE unfinished
+session in ANY editor, you will go back there.
+If you use the @edit command with no arguments and you have MORE THAN ONE
+unfinished session in ANY editor, you will be asked which one you want.
+If you use the @edit command with no arguments and you have NO editing
+sessions to come back to, you'll get a one-liner help info.
+
+I also killed @notedit and @descedit once and for all.
+
+Briar
+
+--------------------------
+
+
+Message 26 on *Bug-Report(#544):
+Date:     Mon Jan 11 23:07:48 1993 EST
+From:     Jordan (#830)
+To:       *Bug-Report (#544)
+Subject:  shared owners for @show and @disp
+
+Fix @show and @disp to show shared owners like @exam does.
+
+--------------------------
+
+
+Message 27 on *Bug-Report(#544):
+Date:     Tue Jan 12 09:32:27 1993 EST
+From:     BabyBriar (#2)
+To:       Jordan (#830) and *Bug-Report (#544)
+Subject:  Re: shared owners for @show and @disp
+
+Jordan sez:
+
+>  Fix @show and @disp to show shared owners like @exam does.
+
+Ok, done.
+Briar
+
+--------------------------
+
+
+Message 28 on *Bug-Report(#544):
+Date:     Mon Jan 18 16:59:53 1993 EST
+From:     Dante (#271)
+To:       *Bug-Report (#544)
+Subject:  Re: Buncha Changes
+
+>
+>  2. I've modified @audit for all builders. Again, it should appear
+>  to be the same, but it's got improved flexibility for programmers.
+>  If you'd like to control the information that is displayed when
+>  one does an @audit, add an :audit_msg() to your generic.
+>
+I don't mean to whine, but @auditdb hasn't been so altered, has it ? Shouldn't
+@audit and @auditdb produce the same output ? Well, in the same format at
+least.
+
+--------------------------
+
+
+Message 29 on *Bug-Report(#544):
+Date:     Mon Jan 18 17:58:46 1993 EST
+From:     BabyBriar (#2)
+To:       Dante (#271) and *Bug-Report (#544)
+Subject:  Re: Buncha Changes
+
+Dante quotes me and responds:
+
+> > 2. I've modified @audit for all builders. Again, it should appear
+> > to be the same, but it's got improved flexibility for programmers.
+> > If you'd like to control the information that is displayed when
+> > one does an @audit, add an :audit_msg() to your generic.
+
+> I don't mean to whine, but @auditdb hasn't been so altered, has it
+> ? Shouldn't @audit and @auditdb produce the same output ? Well, in
+> the same format at least.
+
+Actually, you're right. (I'm surprised this hasn't come up before, since
+@audit has -never- given the same output as @auditDB because I installed a new
+@audit on about OpalMOO Day Three.)  I'll edit @auditDB right now.
+Briar
+
+--------------------------
+
+
+Message 30 on *Bug-Report(#544):
+Date:     Mon Jan 18 18:22:22 1993 EST
+From:     BabyBriar (#2)
+To:       *Bug-Report (#544)
+Subject:  Grrrrr @audit
+
+Ok, I fukd up again. @audit doesn't search FOR things any more, so. I'll fix
+it now.
+Briar
+
+--------------------------
+
+
+Message 31 on *Bug-Report(#544):
+Date:     Mon Jan 18 18:27:58 1993 EST
+From:     BabyBriar (#2)
+To:       *Bug-Report (#544)
+Subject:  Re: Grrrrr @audit
+
+>  Ok, I fukd up again. @audit doesn't search FOR things any more,
+>  so. I'll fix it now.
+
+Fixed.
+Bb
+
+--------------------------
+
+
+Message 32 on *Bug-Report(#544):
+Date:     Mon Jan 18 21:15:24 1993 EST
+From:     BeeKay (#167)
+To:       *Bug-Report (#544)
+Subject:  Where is @parents?
+
+On Lambda @parents is defioned on $builder; here it is not.  It *is* in the
+help database, though. Is it "BeeKay Error" or a real bug?
+
+--------------------------
+
+
+Message 33 on *Bug-Report(#544):
+Date:     Tue Jan 19 09:14:33 1993 EST
+From:     BabyBriar (#2)
+To:       BeeKay (#167) and *Bug-Report (#544)
+Subject:  Re: Where is @parents?
+
+>  On Lambda @parents is defioned on $builder; here it is not.  It
+>  *is* in the help database, though. Is it "BeeKay Error" or a real
+>  bug?
+
+It's neither. It's on the Builder's Feature Object (#987).
+Briar
+
+--------------------------
+
+
+Message 34 on *Bug-Report(#544):
+Date:     Wed Jan 20 22:34:06 1993 EST
+From:     Greene (#485)
+To:       *Bug-Report (#544)
+Subject:  You owe them so much
+
+What happened to the @parents verb. I'm pretty sure there used to be one. I
+want facts.
+
+--------------------------
+
+
+Message 35 on *Bug-Report(#544):
+Date:     Wed Jan 20 22:36:57 1993 EST
+From:     Greene (#485)
+To:       *Bug-Report (#544)
+Subject:  Nah, forget it
+
+Opal pointed me towards the new fo. So what's the utility of smaller player
+classes? Less taxes? I want facts.
+
+--------------------------
+
+
+Message 36 on *Bug-Report(#544):
+Date:     Thu Jan 21 12:13:52 1993 EST
+From:     BabyBriar (#2)
+To:       Opal (#72), *Theme-Issues (#120), Greene (#485), and *Bug-Report (#544)
+Subject:  Re: Builder's Feature Object
+
+Opal said:
+
+>  Hiya. I don't know what Blackbriar has mentioned about this, and
+>  don't feel like rereading all of theme or core or anything else,
+>  but since I've had many questions about it, I'll post here.
+>  All the nifty little things like @parents and @contents are now on
+>  #987.  If you'd like to take a look at the things that have been
+>  moved to said feature object, just type help #987.  Thanks
+
+And I was asked why I made these changes -- so I figure I might as well tell
+all.
+One of the goals of OpalCore is to make a more flexible core. While it can be
+handy to have the distinctions be $player/$builder/$prog this also has some
+disadvantages.
+I've been pushed by insane people to break up as much of LambdaCore as
+possible into features so that they are more easily controlled. (If you don't
+want random people being able to use @contents, put it on a feature and
+control who may use it, for example.)
+Thus, $builder is going to contain only those commands necessary to be a a
+builder. $prog is going to contain only those commands necessary to be a
+programmer.  And the handy utility commands will end up on features.
+I'm incoherent. Ask me again later.
+Bb
+
+--------------------------
+
+
+Message 37 on *Bug-Report(#544):
+Date:     Thu Jan 21 12:32:12 1993 EST
+From:     Anne_Merkel (#114)
+To:       BabyBriar (#2), Opal (#72), *Theme-Issues (#120), Greene (#485), and *Bug-Report (#544)
+Subject:  Re: Builder's Feature Object
+
+>  From:     BabyBriar (#2)
+>  Thus, $builder is going to contain only those commands necessary
+>  to be a a builder. $prog is going to contain only those commands
+>  necessary to be a programmer.  And the handy utility commands will
+>  end up on features.
+
+Perhaps it would be more helpful if programmers had the Programmer Feature by
+default and builders the Builder Feature, etc.?
+
+--------------------------
+
+
+Message 38 on *Bug-Report(#544):
+Date:     Thu Jan 21 19:35:13 1993 EST
+From:     Dante (#271)
+To:       *Bug-Report (#544)
+Subject:  $string_utils:is_numeric
+
+Uh, :is_numeric recogonizes numbers prefixed by a '-' as all numeric, but not
+if prefixed by a '+'. If '+25' is supposed to be a valid integer, then mabye
+you should fix this.
+
+--------------------------
+
+
+Message 39 on *Bug-Report(#544):
+Date:     Fri Jan 22 12:12:54 1993 EST
+From:     JoeFeedback (#390)
+To:       Dante (#271) and *Bug-Report (#544)
+Subject:  Re: $string_utils:is_numeric
+
+>  Uh, :is_numeric recogonizes numbers prefixed by a '-' as all
+>  numeric, but not if prefixed by a '+'. If '+25' is supposed to be
+>  a valid integer, then mabye you should fix this.
+
+For the sake of argument:
+| >;+25
+``The family circle is a triangle.  And a triangle has sharp edges.''
+
+There's a pair of handcuffs by the bed. They're surrounded by empty Chinese
+food cartons, an empty bottle of wine, and two wine glasses. One of the
+glasses has fallen over, leaving a red stain on the carpet which slowly
+creeps towards the handcuffs.
+
+The alarm clock went off an hour ago, but the room's inhabitants have shut
+it off, preferring the warmth of their shared bed to the cold of the real
+world.
+
+This is OpalMOO. Welcome to it.
+
++-----------------------------+   Wizards: Briar, Opal and Edison
+| connect <player> <password> |
+| connect Guest               | To register for a character, connect as a
++-----------------------------+ Guest and type 'create'.
+I don't understand that.  Valid commands at this point are
+   Help, Who, COnnect, CReate, Quit, UPtime, or Version
+I don't understand that.  Valid commands at this point are
+   Help, Who, COnnect, CReate, Quit, UPtime, or Version
+I don't understand that.  Valid commands at this point are
+   Help, Who, COnnect, CReate, Quit, UPtime, or Version
+I don't understand that.  Valid commands at this point are
+   Help, Who, COnnect, CReate, Quit, UPtime, or Version
+I don't understand that.  Valid commands at this point are
+   Help, Who, COnnect, CReate, Quit, UPtime, or Version
+| Line 1:  syntax error
+| 1 error.
+
+--------------------------
+
+
+Message 40 on *Bug-Report(#544):
+Date:     Fri Jan 22 13:05:01 1993 EST
+From:     Dante (#271)
+To:       JoeFeedback (#390) and *Bug-Report (#544)
+Subject:  Re: $string_utils:is_numeric
+
+>  >  Uh, :is_numeric recogonizes numbers prefixed by a '-' as all
+>  >  numeric, but not if prefixed by a '+'. If '+25' is supposed to
+>  be
+>  >  a valid integer, then mabye you should fix this.
+>
+>  For the sake of argument:
+>  | >;+25
+>  | Line 1:  syntax error
+>  | 1 error.
+
+Hm. Well, if you take the core's definition of an integer to be canon, then I
+suppose :is_numeric is right. But mabye the core is wrong too... I mean, is
+there any reason that +25 shouldn't be recognized ? It's super trivial, but
+it's a point.
+Oh, and the docco for :is_numeris is wrong, kinda. It doesn't return
+tonum(string) if the string is all numeric, it returns true. The code is right
+though, because otherwise \"000\" would return false from :is_numeric. But
+anyone could see that from looking at the code, so.
+
+--------------------------
+
+
+Message 41 on *Bug-Report(#544):
+Date:     Fri Jan 22 13:22:52 1993 EST
+From:     JoeFeedback (#390)
+To:       Dante (#271) and *Bug-Report (#544)
+Subject:  Re: $string_utils:is_numeric
+
+>  Hm. Well, if you take the core's definition of an integer to be
+>  canon, then I suppose :is_numeric is right. But mabye the core is
+>  wrong too... I mean, is there any reason that +25 shouldn't be
+>  recognized ? It's super trivial, but it's a point.
+
+In the language, there's a good reason: The more ambiguity a symbol (in this
+case, "+"), the more chance you have of writing code that's wrong but doesn't
+get caught by the compiler.  As for command usage, well, I suppose it's up to
+the wizards here.  I have no affection for the "+25" form, as (a) it's
+redundant (numbers are assumed to be nonnegative unless explicitly marked
+negative) and (b) I just didn't grow up with it.
+
+>  Oh, and the docco for :is_numeris is wrong, kinda. It doesn't
+>  return tonum(string) if the string is all numeric, it returns
+>  true. The code is right though, because otherwise \"000\" would
+>  return false from :is_numeric. But anyone could see that from
+>  looking at the code, so.
+
+Good point, I'll change the docs on LambdaMOO and JaysHouse.  BTW, if you're
+using $string_utils:is_numeric(), you might also check out $code_utils:tonum,
+which provides roughly the same function and is a lot faster.  (Actually, I
+thought :is_numeric had been fixed to use match(), but apparently I was
+wrong.)
+
+--------------------------
+
+
+Message 42 on *Bug-Report(#544):
+Date:     Fri Jan 22 13:28:58 1993 EST
+From:     JoeFeedback (#390)
+To:       Dante (#271) and *Bug-Report (#544)
+Subject:  Re: $string_utils:is_numeric
+
+Contradicting my earlier demonstration of the nonnumericity of "+25":
+| >;tonum("+25")
+| => 25
+
+The new version of $string_utils:is_numeric, should you choose to use it, goes
+like this:
+
+"Usage:  is_numeric(string)";
+"Is string numeric (composed of one or more digits possibly preceded by a
+minus sign)?";
+"Return true or false";
+return match(args[1], "^ *[-+]?[0-9]+ *$");
+
+This version accepts both "+25" and arbitrary spacing around the numeric part.
+
+--------------------------
+
+
+Message 43 on *Bug-Report(#544):
+Date:     Fri Jan 22 14:07:38 1993 EST
+From:     Dante (#271)
+To:       *Bug-Report (#544)
+Subject:  Re: $string_utils:is_numeric
+
+>  The new version of $string_utils:is_numeric, should you choose to
+>  use it, goes like this:
+>
+>  "Usage:  is_numeric(string)";
+>  "Is string numeric (composed of one or more digits possibly
+>  preceded by a minus sign)?";
+>  "Return true or false";
+>  return match(args[1], "^ *[-+]?[0-9]+ *$");
+>
+>  This version accepts both "+25" and arbitrary spacing around the
+>  numeric part.
+
+Uh, it ain't fixed here on OpalMOO it seems... not to mention how JoeF is
+supposed to go wild on $string_utils here... anyways, this looks like a
+perfect fix, so someone put in in, please ??
+
+--------------------------
+
+
+Message 44 on *Bug-Report(#544):
+Date:     Fri Jan 22 14:45:34 1993 EST
+From:     BabyBriar (#2)
+To:       Dante (#271), *Bug-Report (#544), and JoeFeedback (#390)
+Subject:  Re: $string_utils:is_numeric
+
+> > The new version of $string_utils:is_numeric, should you choose to
+> > use it, goes like this:
+> > "Usage:  is_numeric(string)";
+> > "Is string numeric (composed of one or more digits possibly
+> > preceded by a minus sign)?";
+> > "Return true or false";
+> > return match(args[1], "^ *[-+]?[0-9]+ *$");
+> > This version accepts both "+25" and arbitrary spacing around the
+> > numeric part.
+
+Installed.
+
+> Uh, it ain't fixed here on OpalMOO it seems... not to mention how
+> JoeF is supposed to go wild on $string_utils here... anyways, this
+> looks like a perfect fix, so someone put in in, please ??
+
+What does `JoeF is supposed to go wild on $string_utils here...' mean?
+
+Briar
+
+--------------------------
+
+
+Message 45 on *Bug-Report(#544):
+Date:     Thu Jan 28 03:37:41 1993 EST
+From:     Praecox (#711)
+To:       *Bug-Report (#544)
+Subject:  Lacking help?
+
+Noticed that $code_utils has a lot of verbs which are not documented in its
+help message.  Is there a good reason for this?  Is this a project?  Perhaps
+it's still unstable?  Maybe its a `feature' :)
+
+Just wondering,    --prae
+
+--------------------------
+
+
+Message 46 on *Bug-Report(#544):
+Date:     Thu Jan 28 19:28:44 1993 EST
+From:     Praecox (#711)
+To:       *Bug-Report (#544)
+Subject:  Running out of ticks:
+
+Uh oh.  The following was experienced:
+
+>accept 16 on board
+I don't understand that.
+#811:controls, line 8:  Task ran out of ticks
+.. called from #811:verb_info, line 5
+.. called from #59:find_verb_named, line 10
+.. called from #56:explain_syntax, line 8
+.. called from #56:do_huh, line 22
+.. called from #1:huh (this == #714), line 2
+(End of traceback)
+>accept 16 on #412
+You are now taking care of "@most-recently-updated"
+
+Hmmmm.....
+-prae
+
+--------------------------
+
+
+Message 47 on *Bug-Report(#544):
+Date:     Fri Jan 29 00:18:36 1993 EST
+From:     BabyBriar (#2)
+To:       Praecox (#711) and *Bug-Report (#544)
+Subject:  Re: Running out of ticks:
+
+Praecox:
+
+>  Uh oh.  The following was experienced:
+>
+>  >accept 16 on board
+>  I don't understand that.
+>  #811:controls, line 8:  Task ran out of ticks
+>  ... called from #811:verb_info, line 5
+>  ... called from #59:find_verb_named, line 10
+>  ... called from #56:explain_syntax, line 8
+>  ... called from #56:do_huh, line 22
+>  ... called from #1:huh (this == #714), line 2
+>  (End of traceback)
+>  >accept 16 on #412
+>  You are now taking care of "@most-recently-updated"
+
+Did you have the board in your possession when you tried the above commands?
+
+Briar
+
+--------------------------
+
+
+Message 48 on *Bug-Report(#544):
+Date:     Fri Jan 29 16:50:16 1993 EST
+From:     Blackbriar (#110)
+To:       *Core-DB-Issues (#350), *Bug-Report (#544), and *Q&A (#1111)
+Subject:  Announcement: New Mail Group
+
+After several requests, I've created *Q&A for your OpalMOO questions and
+answers. This lucky mail group (#1111) is ready and waiting for you. <grin>
+Thanks, Sancho.
+Bb
+
+--------------------------
+
+
+Message 49 on *Bug-Report(#544):
+Date:     Sat Jan 30 00:17:52 1993 EST
+From:     Anne_Merkel (#114)
+To:       BabyBriar (#2), Praecox (#711), and *Bug-Report (#544)
+Subject:  Re: Running out of ticks:
+
+Praecox:
+>  Uh oh.  The following was experienced:
+>
+>  >accept 16 on board
+>  I don't understand that.
+>  #811:controls, line 8:  Task ran out of ticks
+>  ... called from #811:verb_info, line 5
+>  ... called from #59:find_verb_named, line 10
+>  ... called from #56:explain_syntax, line 8
+>  ... called from #56:do_huh, line 22
+>  ... called from #1:huh (this == #714), line 2
+>  (End of traceback)
+>  >accept 16 on #412
+>  You are now taking care of "@most-recently-updated"
+
+Briar sez:
+>  Did you have the board in your possession when you tried the above
+>  commands?
+
+It still runs out of ticks on the huh stuff.  Assumably this means that many
+commands which are not understood may run out of ticks which should have been
+suspended or else aborted.
+ -- Anne
+
+--------------------------
+
+
+Message 50 on *Bug-Report(#544):
+Date:     Sat Jan 30 18:46:49 1993 EST
+From:     BabyBriar (#2)
+To:       Anne_Merkel (#114), Praecox (#711), and *Bug-Report (#544)
+Subject:  Re: Running out of ticks:
+
+>  Date:     Sat Jan 30 00:17:52 1993 EST
+>  From:     Anne_Merkel (#114)
+>  To:       BabyBriar (#2), Praecox (#711), and *Bug-Report (#544)
+>  Subject:  Re: Running out of ticks:
+>
+>  Praecox:
+>  >  Uh oh.  The following was experienced:
+>  >
+>  >  >accept 16 on board
+>  >  I don't understand that.
+>  >  #811:controls, line 8:  Task ran out of ticks
+>  >  ... called from #811:verb_info, line 5
+>  >  ... called from #59:find_verb_named, line 10
+>  >  ... called from #56:explain_syntax, line 8
+>  >  ... called from #56:do_huh, line 22
+>  >  ... called from #1:huh (this == #714), line 2
+>  >  (End of traceback)
+>  >  >accept 16 on #412
+>  >  You are now taking care of "@most-recently-updated"
+>
+>  Briar sez:
+>  >  Did you have the board in your possession when you tried the above
+>  >  commands?
+>
+>  It still runs out of ticks on the huh stuff.  Assumably this means
+>  that many commands which are not understood may run out of ticks
+>  which should have been suspended or else aborted.
+
+Atually, I can understand this -- there's a lot of stuff done in
+$player:my_huh now, and I can imagine that just eating up ticks. I've added a
+suspend_if_needed call in the #56:explain_syntax verb. Hopefully this will
+resolve the problem (has anyone else -seen- this problem?).
+Briar
+
+--------------------------
+
+
+Message 51 on *Bug-Report(#544):
+Date:     Sun Jan 31 23:08:52 1993 EST
+From:     Blackbriar (#110)
+To:       *Bug-Report (#544)
+Subject:  [Dutch_Tequila (#1157):  Bug:  The Living Room(#531)]
+
+Date:     Sun Jan 31 23:08:21 1993 EST
+From:     Dutch_Tequila (#1157)
+To:       Blackbriar (#110)
+Subject:  Bug:  The Living Room(#531)
+
+poking the cockatoo in the lambda living room fails
+
+--------------------------
+
+
+Message 52 on *Bug-Report(#544):
+Date:     Mon Feb  1 02:30:38 1993 EST
+From:     Blade (#1108)
+To:       *Bug-Report (#544)
+Subject:  @branches
+
+I get a type mismatch traceback from @branches #1167.
+
+--------------------------
+
+
+Message 53 on *Bug-Report(#544):
+Date:     Mon Feb  1 13:25:08 1993 EST
+From:     BabyBriar (#2)
+To:       Blade (#1108) and *Bug-Report (#544)
+Subject:  Re: @branches
+
+>  I get a type mismatch traceback from @branches #1167.
+
+> @branches #1167
+I don't understand that.
+
+> @find :@branches
+The verb :@branches is nowhere to be found.
+
+I have no clue. Anyone?
+
+Briar
+
+--------------------------
+
+
+Message 54 on *Bug-Report(#544):
+Date:     Mon Feb  1 18:27:48 1993 EST
+From:     Praecox (#711)
+To:       Blade (#1108), *Bug-Report (#544), and Anne_Merkel (#114)
+Subject:  Re: @branches
+
+Blade complains:
+>  I get a type mismatch traceback from @branches #1167.
+
+First, @branches is on Object Feature Object(#383).
+Second, I get a traceback also, line 12, type mismatch.  That might be because
+#1167 has no children (try @kids #1167), so server cmd children(o) returns {}?
+Anyhow, all that means is that the verb :@branches breaks on inappropriate
+input---it's up to the programmer how flexible or error-friendly e want eir
+verb to be....
+
+Yrs wahrlich,
+  prae.
+
+--------------------------
+
+
+Message 55 on *Bug-Report(#544):
+Date:     Tue Feb  2 14:03:32 1993 EST
+From:     Dante (#271)
+To:       *Bug-Report (#544) and Blade (#1108)
+Subject:  CD Player
+
+record "Oscillate Wildly" on s2
+[Type in the lines to the song then "@done" when done, or @abort to abort.]
+[Type a line of input or `@abort' to abort the command.]
+[An instrumental dirge fills the air]
+[Type a line of input or `@abort' to abort the command.]
+@done
+#1165:record (this == #1209), line 11:  Permission denied
+. called from #6:my_huh (this == #271), line 25
+. called from #56:do_huh, line 6
+. called from #1:huh (this == #279), line 2
+(End of traceback)
+
+I think there are some permissions problems on the CD/CD player objects.
+Dante.
+
+--------------------------
+
+
+Message 56 on *Bug-Report(#544):
+Date:     Tue Feb  2 22:18:03 1993 EST
+From:     Blade (#1108)
+To:       Dante (#271) and *Bug-Report (#544)
+Subject:  CD player
+
+The bugs in the CD Player and CD's should be fixed.
+I seem to remember someting about having to recycle your object and remake it
+in a case like this....
+But Im not sure...
+Blade
+
+--------------------------
+
+
+Message 57 on *Bug-Report(#544):
+Date:     Wed Feb  3 17:33:36 1993 EST
+From:     Dante (#271)
+To:       *Bug-Report (#544)
+Subject:  Is this right ??
+
+;#1209:set_opaque(0)
+#42:controls, line 3:  Type mismatch
+. called from #8:set_opaque (this == #1209), line 1
+. called from #-1:Input to EVAL, line 3
+. called from #58:eval_cmd_string (this == #271), line 18
+. called from #58:eval (this == #271), line 9
+(End of traceback)
+
+OK, I tried to set my CD player to always be non-dark, ie. .opaque = 0
+Why is sperm_utils giving a type mismatch ? Even if it's not a bug, how come I
+can't change the opacity of an object I own ??
+Dante
+
+--------------------------
+
+
+Message 58 on *Bug-Report(#544):
+Date:     Thu Feb  4 20:39:05 1993 EST
+From:     Praecox (#711)
+To:       *Bug-Report (#544)
+Subject:  *verbdoc* on #32 (generic help DB)
+
+I can't seem to be able to pass the *verbdoc* over to my verb on
+#779:"@go-stra*ight @gostra*ight @go_stra*ight".  Tried all kinds of
+combinations.  What sort of verb-name match does this need?
+
+prae
+
+--------------------------
+
+
+Message 59 on *Bug-Report(#544):
+Date:     Thu Feb  4 22:53:10 1993 EST
+From:     Praecox (#711)
+To:       *Bug-Report (#544)
+Subject:  Re: *verbdoc* on #32 (generic help DB)
+
+>  I can't seem to be able to pass the *verbdoc* over to my verb on
+>  #779:"@go-stra*ight @gostra*ight @go_stra*ight".  Tried all kinds
+>  of combinations.  What sort of verb-name match does this need?
+
+A prae-bug, not a real bug.  Furget it.  Just make sure that the verb
+documentation actually exists, okay, praecox?
+
+ak, prae (who was so sure it wasn't eir fault)
+
+--------------------------
+
+
+Message 60 on *Bug-Report(#544):
+Date:     Mon Feb  8 18:39:37 1993 EST
+From:     Dante (#271)
+To:       *Bug-Report (#544)
+Subject:  Event Scanner
+
+There is still a bug with the turn verb and the event scanner. I think the
+:add/remove_notify_event calls should be in :moveto ALONE and turn should just
+toggle wheter or not the scanner sez anything. Right now if a scanner is on,
+you pick it up and turn it off, it gags. It shouldn't do that I think... I
+think I have the right code in the :moveto of my generic welcomer... er,
+@audit me, etc.
+Dante
+
+--------------------------
+
+
+Message 61 on *Bug-Report(#544):
+Date:     Tue Feb  9 18:31:33 1993 EST
+From:     Praecox (#711)
+To:       Dante (#271) and *Bug-Report (#544)
+Subject:  Re: Event Scanner
+
+
+Whatever.  I had it check to see whether it's location was a room before
+calling the :add_event_notify etc.  It's got a boolean property .working which
+decide whether it's working.  I'd rather have it be off the .event_notify list
+when its off, tho' I suppose I don't have a real good reason why....
+
+proclivities, proclivities..prae.
+BTW, I never tested this extensively. There's no help.  It's just something to
+help me on my way....enuf disclaimers...
+>  There is still a bug with the turn verb and the event scanner. I
+>  think the :add/remove_notify_event calls should be in :moveto
+>  ALONE and turn should just toggle wheter or not the scanner sez
+>  anything. Right now if a scanner is on, you pick it up and turn it
+>  off, it gags. It shouldn't do that I think... I think I have the
+>  right code in the :moveto of my generic welcomer... er, @audit me,
+>  etc.
+>  Dante
+
+--------------------------
+
+
+Message 62 on *Bug-Report(#544):
+Date:     Tue Feb  9 21:38:55 1993 EST
+From:     Blade (#1108)
+To:       *Bug-Report (#544)
+Subject:  @lag
+
+#1083:@lag, line 2: Verb not found
+.. called from #6:myhuh (this == #1108), line 81
+.. called from #56:do_huh, line 6
+.. called from #1:huh (this == #47), line 2
+
+
+I got this using @lag from the lag meter...
+Any ideas??
+
+Blade
+
+--------------------------
+
+
+Message 63 on *Bug-Report(#544):
+Date:     Tue Feb  9 23:19:31 1993 EST
+From:     Dagard (#636)
+To:       Dreamy (#1038), Blade (#1108), and *Bug-Report (#544)
+Subject:  Traceback with @lag
+
+Pretty simple, it's either missing the verb trend_of, or more likely, Dreamy
+meant trend instead of trend_of
+
+Dagard
+
+--------------------------
+
+
+Message 64 on *Bug-Report(#544):
+Date:     Wed Feb 10 02:48:36 1993 EST
+From:     Praecox (#711)
+To:       *Bug-Report (#544)
+Subject:  A mild suggestion concerning traceback reporting:
+
+Personally, if you find a traceback to one of my objects, I'd prefer if you
+send mail to me, rather than *bug.  Keeps the public lists down, and more
+importantly...
+(Much less embarassing)  -Praecox
+
+--------------------------
+
+
+Message 65 on *Bug-Report(#544):
+Date:     Wed Feb 10 17:57:18 1993 EST
+From:     Praecox (#711)
+To:       *Bug-Report (#544)
+Subject:  #20:to_value()
+
+Praecox tears #20:_unquote apart.  Praecox curses its existence.  Why does it
+exist?  What is the functionality?  Why turn quoted strings into unquoted
+ones?  Circumvent it!
+
+Example input/output:
+[Type the event args, quoted and separated by commas or `@abort' to abort the
+command.]
+>{"hey","one","one"}
+Scanner is about to send `event_parse({hey, one, one})'.
+
+WRONG WRONG WRONG WRONG
+
+--------------------------
+
+
+Message 66 on *Bug-Report(#544):
+Date:     Wed Feb 10 23:35:15 1993 EST
+From:     Dante (#271)
+To:       *Bug-Report (#544)
+Subject:  @add-owner
+
+I dunno what's going wrong, but I @add-owner virgil to #1333 and it adds #981
+to #1333.owners, but virgil.owned_objects isn't updated. How come ? The code
+should be doing it, right ? I don't understand.
+Dante
+
+--------------------------
+
+
+Message 67 on *Bug-Report(#544):
+Date:     Thu Feb 11 00:17:06 1993 EST
+From:     Anne_Merkel (#114)
+To:       Praecox (#711), Blade (#1108), and *Bug-Report (#544)
+Subject:  Re: @branches
+
+Okay, it's fixed.  One interesting note:  While debugging
+@branches/@descendants I tested it on #1026 (Generic Relay Player) simply
+because @branches $player listed it as having no lower branches.  But when I
+used the verb on it, nothing happened.  Turns out that it's because #1026 has
+a * verb.  Duh!  I can only guess what was getting relayed.
+
+--------------------------
+
+
+Message 68 on *Bug-Report(#544):
+Date:     Thu Feb 11 10:10:13 1993 EST
+From:     BabyBriar (#2)
+To:       Dante (#271) and *Bug-Report (#544)
+Subject:  Re: @add-owner
+
+>  I dunno what's going wrong, but I @add-owner virgil to #1333 and
+>  it adds #981 to #1333.owners, but virgil.owned_objects isn't
+>  updated. How come ? The code should be doing it, right ? I don't
+>  understand.
+
+My bug. It's fixed. It was not adding the right object to the right place.
+Briar
+
+--------------------------
+
+
+Message 69 on *Bug-Report(#544):
+Date:     Fri Feb 12 01:21:38 1993 EST
+From:     Anne_Merkel (#114)
+To:       *Bug-Report (#544)
+Subject:  #974:@Generics bug?  Maybe #56:suspend_if_needed bug
+
+Typed:
+  @generics
+Got:
+#56:suspend_if_needed, line 9:  Invalid argument
+  ... called from #974:@generics, line 18
+  ... called from #6:my_huh (this == #114), line 81
+  ... called from #56:do_huh, line 6
+  ... called from #1:huh (this == #377), line 2
+  (End of traceback)
+
+--------------------------
+
+
+Message 70 on *Bug-Report(#544):
+Date:     Mon Feb 15 16:59:33 1993 EST
+From:     Dagard (#636)
+To:       Blackbriar (#110) and *Bug-Report (#544)
+Subject:  Problem with setting messages on other things
+
+I was trying to set the morph message of another object, ndam ... I typed
+@morph ndam is <message>
+Here's my traceback:::
+#20:find_prefix, line 6:  Type mismatch
+.. called from #1379:find_morph, line 12
+.. called from #1379:@page_origin @page_echo @page_absent
+@remote_emote_prefix @morph @omorph @depart @arrive @integration_separation
+@contents_location, line 3
+
+Any idears?
+
+--------------------------
+
+
+Message 71 on *Bug-Report(#544):
+Date:     Mon Feb 15 20:19:52 1993 EST
+From:     Anne_Merkel (#114)
+To:       Dagard (#636), Blackbriar (#110), and *Bug-Report (#544)
+Subject:  Re: Problem with setting messages on other things
+
+>  Here's my traceback:::
+>  #20:find_prefix, line 6:  Type mismatch
+>  ... called from #1379:find_morph, line 12
+>  ... called from #1379:@page_origin @page_echo @page_absent
+>  @remote_emote_prefix @morph @omorph @depart @arrive
+>  @integration_separation @contents_location, line 3
+
+#1379:find_morph, line 12 is incorrect.  The args for
+$string_utils:find_prefix() are prefix, then list.  The correct line should
+be:
+	 return $string_utils:find_prefix(what, this.names);
+
+--------------------------
+
+
+Message 72 on *Bug-Report(#544):
+Date:     Mon Feb 15 21:41:44 1993 EST
+From:     BabyBriar (#2)
+To:       *Core-DB-Issues (#350) and *Bug-Report (#544)
+Subject:  I suppose this is a bug report.
+
+I've found a bug in the Multiple Ownership Utilities which makes me very
+suspiciou and terribly sad. Thus, for the moment, the following things are
+disabled:
++ Shared Verb Ownership
++ Verb Timestamps
+
+I will try and get this fixed soon, I know a lot of people have gotten used to
+both.
+Briar
+
+--------------------------
+
+
+Message 73 on *Bug-Report(#544):
+Date:     Mon Feb 15 23:05:22 1993 EST
+From:     BabyBriar (#2)
+To:       *Core-DB-Issues (#350), *Bug-Report (#544), and Opal (#72)
+Subject:  Re: I suppose this is a bug report.
+
+>  I've found a bug in the Multiple Ownership Utilities which makes
+>  me very suspiciou and terribly sad. Thus, for the moment, the
+>  following things are disabled:
+>  + Shared Verb Ownership
+>  + Verb Timestamps
+
+I think it's fixed now. HAPPY, MAMMA OPAL? DO I HAVETA EAT STRAINED PEAS?
+
+Baby Briar
+
+--------------------------
+
+
+Message 74 on *Bug-Report(#544):
+Date:     Thu Feb 18 12:57:09 1993 EST
+From:     Paris (#1444)
+To:       *Bug-Report (#544)
+Subject:  *Event-Issues
+
+If anyone tried to subscribe to *event and couldn't, I didn't set some props
+correctly, so if you'd like to subscribe, please try again.
+
+Paris
+
+--------------------------
+
+
+Message 75 on *Bug-Report(#544):
+Date:     Sat Feb 20 01:40:55 1993 EST
+From:     Mr.Z (#1297)
+To:       *Bug-Report (#544)
+Subject:  Moveto verb.
+
+I thought that the @move checked the moveto verb of the person being checked.
+(oopsss, of the object being moved, rather)  Either that's not happening, or
+I'm my moveto verb is not doing what it should be....And I'm pretty sure it
+is.
+
+  -Mr.Z
+
+--------------------------
+
+
+Message 76 on *Bug-Report(#544):
+Date:     Sat Feb 20 02:16:49 1993 EST
+From:     Mr.Z (#1297)
+To:       *Bug-Report (#544)
+Subject:  Moveto  heeee.. oopsss...
+
+Um.. Sorry about that. Dagard Showed me what I was doing wrong with my verb.
+= )
+
+  -Mr.Z
+
+--------------------------
+
+
+Message 77 on *Bug-Report(#544):
+Date:     Sat Feb 20 15:07:41 1993 EST
+From:     Mr.Z (#1297)
+To:       *Bug-Report (#544)
+Subject:  @copy verb
+
+I got the following as the first line of my moveto verb I copied:
+`Copied from generic player (#6):moveto by Type mismatch (Variable not found)
+Sat Feb 20 02:02:13 1993 EST";'
+
+   -Mr.Z
+
+--------------------------
+
+
+Message 78 on *Bug-Report(#544):
+Date:     Sat Feb 20 21:35:21 1993 EST
+From:     Dagard (#636)
+To:       *Bug-Report (#544)
+Subject:  $login
+
+The login thang (conn <who> <password>) doesn't seem to accept aliases....
+When I type  conn dag <password>  I get the "that player doesn't exist, or has
+a different password.
+
+Dagard
+
+--------------------------
+
+
+Message 79 on *Bug-Report(#544):
+Date:     Sun Feb 21 02:54:55 1993 EST
+From:     Anne_Merkel (#114)
+To:       Dagard (#636) and *Bug-Report (#544)
+Subject:  Re: $login
+
+>  From:     Dagard (#636)
+>  The login thang (conn <who> <password>) doesn't seem to accept
+>  aliases....
+>  When I type  conn dag <password>  I get the "that player doesn't
+>  exist, or has a different password.
+
+Strange.  I type `conn anne <password>' and get no problem.  I'm not saying
+Dag is lying, just that whatever is happening is pretty screwy.  Perhaps the
+$player_db is on the blink?
+Hmmm... look at this:
+| ;$player_db:find_exact("dag")
+| => #-3  <$failed_match>
+| ;$player_db:find_exact("anne")
+| => #114  (Anne_Merkel)
+| ;#636.aliases
+| => {"Dagard", "Dag", "Synergy", "Fighter"}
+| ;me.aliases
+| => {"Anne_Merkel", "Anne", "Merkel"}
+I think the $player_db is confused.
+
+--------------------------
+
+
+Message 80 on *Bug-Report(#544):
+Date:     Sun Feb 21 12:14:30 1993 EST
+From:     BabyBriar (#2)
+To:       Anne_Merkel (#114), Dagard (#636), and *Bug-Report (#544)
+Subject:  Re: $login
+
+Dagard says:
+
+>  >  The login thang (conn <who> <password>) doesn't seem to accept
+>  >  aliases....
+>  >  When I type  conn dag <password>  I get the "that player doesn't
+>  >  exist, or has a different password.
+
+The login commands should accept anything which lets it know who you are.
+
+Anne_Merkel:
+
+>  Strange.  I type `conn anne <password>' and get no problem.  I'm
+>  not saying Dag is lying, just that whatever is happening is pretty
+>  screwy.  Perhaps the $player_db is on the blink?
+>  Hmmm... look at this:
+>  | ;$player_db:find_exact("dag")
+>  | => #-3  <$failed_match>
+>  | ;$player_db:find_exact("anne")
+>  | => #114  (Anne_Merkel)
+>  | ;#636.aliases
+>  | => {"Dagard", "Dag", "Synergy", "Fighter"}
+>  | ;me.aliases
+>  | => {"Anne_Merkel", "Anne", "Merkel"}
+>  I think the $player_db is confused.
+
+Just for the record, $player_db -was- confused, but I fixed it.
+  ;$player_db:load()
+
+This issue came up on LambdaMOO a little while ago.  I suspect it's because of
+morphing classes which use set_name but don't follow through and set_aliases
+as well after a morph.   I'm not sure whether $player:set_name should handle
+this.
+
+Briar
+
+--------------------------
+
+
+Message 81 on *Bug-Report(#544):
+Date:     Sun Feb 21 17:59:56 1993 EST
+From:     Paris (#1444)
+To:       *Bug-Report (#544)
+Subject:  @messages
+
+If you have a multi-line message prop, like a lot of .help_msg's are,
+shouldn't @messages print out something a little bit more meaningful than
+'@help #1265 is corrupted! **' ? It could print that it's a list of strings or
+actually check to make sure it's a valid multi-line prop or somesuch...
+anyways, there's got to be a clearer method to tell the person what the
+message prop contains.
+
+Paris.
+
+--------------------------
+
+
+Message 82 on *Bug-Report(#544):
+Date:     Sun Feb 21 18:12:18 1993 EST
+From:     BabyBriar (#2)
+To:       Paris (#1444), *Bug-Report (#544), and *Core-DB-Issues (#350)
+Subject:  Re: @messages
+
+Paris asks, on *Bug-Reports:
+
+>  If you have a multi-line message prop, like a lot of .help_msg's
+>  are, shouldn't @messages print out something a little bit more
+>  meaningful than '@help #1265 is corrupted! **' ? It could print
+>  that it's a list of strings or actually check to make sure it's a
+>  valid multi-line prop or somesuch... anyways, there's got to be a
+>  clearer method to tell the person what the message prop contains.
+
+I just modified $player:@messages so that it will print the value of -all-
+readable properties ending in _msg (so that the `is corrupted!' message won't
+come up any more, I trust).
+This will lead to spammier @messages output, but so what.
+
+Briar
+
+--------------------------
+
+
+Message 83 on *Bug-Report(#544):
+Date:     Thu Feb 25 12:41:41 1993 EST
+From:     Paris (#1444)
+To:       *Bug-Report (#544)
+Subject:  Funny :suspend_if_needed bug
+
+@when 10
+#56:suspend_if_needed, line 4:  Task ran out of ticks
+. called from #974:@when, line 69
+. called from #6:my_huh (this == #1444), line 81
+. called from #56:do_huh, line 6
+. called from #1:huh (this == #1473), line 2
+(End of traceback)
+
+Hm. So, what the heck, @when is running out of ticks while trying not to run
+out of ticks. Huh. Maybe @when should have some more suspends in it. Or just
+suspend as opposed to :suspend_if_needed.
+
+@when is on fo #974.
+
+Paris.
+
+--------------------------
+
+
+Message 84 on *Bug-Report(#544):
+Date:     Fri Feb 26 14:21:33 1993 EST
+From:     Paris (#1444)
+To:       *Bug-Report (#544)
+Subject:  Funny event bug
+
+I don't know why, and I didn't get any tracebacks, but when I was using my
+child of the event logger and turned it off, it said 'Permission Denied' and
+didn't get removed from the .event_notify list. It was added sans problem, but
+whenever it went to remove itself, it wouldn't. Is this a bug in the scanner,
+in the new event system security, what ?
+
+Paris.
+
+--------------------------
+
+
+Message 85 on *Bug-Report(#544):
+Date:     Fri Feb 26 14:46:19 1993 EST
+From:     Praecox (#711)
+To:       *Bug-Report (#544)
+Subject:  Well, security is really breaking everything...
+
+Security changes have rendered events virtually unusable.  I quote, for
+instance, line 4 from $room:remove_notify_event
+
+4:  if ($ownership_utils:controls(caller_perms(), object) ||
+$ownership_utils:controls(caller_perms(), this))
+
+Now, this is the condition for removing an event.  2 probs.  (1) An object,
+say the event scanner, which runs under my verb perms, will fail this
+condition.  I don't own the object and I don't own the room, assuming someone
+is using a child of #1310 and is in their own room.  Thus, only verbs with
+wizard dust (set_task_perms(caller)) will succeed.
+   (2) Why put so much security on remove anyway?
+
+I return to my plea for a different system.  Leave the security up to the room
+owners.  Make this sort of rabid E_PERMing stricktly optionall....Or else, why
+not just scrap event altogether, eh?
+
+--------------------------
+
+
+Message 86 on *Bug-Report(#544):
+Date:     Fri Feb 26 19:25:31 1993 EST
+From:     BabyBriar (#2)
+To:       *Bug-Report (#544)
+Subject:  [Silverhand (#1621):  Detailing a Memorable room]
+
+Date:     Fri Feb 26 19:24:41 1993 EST
+From:     Silverhand (#1621)
+To:       BabyBriar (#2)
+Subject:  Detailing a Memorable room
+
+Hi,
+	I'm getting an error when trying to detail the child of a memorable room
+(#631); it tells me #631:@det*ail (this == #1627), line 14:  Permission denied
+Which I find frustrating.  Can you help me?
+Thanks.
+Silverhand
+
+--------------------------
+
+
+Message 87 on *Bug-Report(#544):
+Date:     Wed Mar  3 20:48:25 1993 EST
+From:     Pendragon (#1491)
+To:       *Bug-Report (#544)
+Subject:  Bug Report
+
+i'm a secondary owner of this room and i tried to make an adjoinning
+room, but it said i had to have the REAL owner make me one...
+noone can figure this out..
+
+--------------------------
+
+
+Message 88 on *Bug-Report(#544):
+Date:     Tue Mar  9 13:04:55 1993 EST
+From:     Paris (#1444)
+To:       *Bug-Report (#544)
+Subject:  Funny multi-ownership stuff
+
+OK, so Praecox and I share an object. (for the record, I'm the 'owner' but I
+don't really think that's relevant, we're both owners) When I used @d object.
+I can't see the properties that Prae owns and that he has set !r. I -should-
+be able to. As a matter of fact, if I use $ownership_utils:property_value on
+the !r props, I can see them just fine. So, is @d not quite up to speed with
+multiple ownership yet ? Or should a sepearate version of @d be written with
+multiple ownership in mind ?
+
+Wondering and making work for Bb, Paris.
+
+--------------------------
+
+
+Message 89 on *Bug-Report(#544):
+Date:     Tue Mar  9 16:14:11 1993 EST
+From:     Blackbriar (#110)
+To:       Paris (#1444) and *Bug-Report (#544)
+Subject:  Re: Funny multi-ownership stuff
+
+>  OK, so Praecox and I share an object. (for the record, I'm the
+>  'owner' but I don't really think that's relevant, we're both
+>  owners) When I used @d object. I can't see the properties that
+>  Prae owns and that he has set !r. I -should- be able to. As a
+>  matter of fact, if I use $ownership_utils:property_value on the !r
+>  props, I can see them just fine. So, is @d not quite up to speed
+>  with multiple ownership yet ? Or should a sepearate version of @d
+>  be written with multiple ownership in mind ?
+
+I believe this is fixed.
+
+Bb
+
+--------------------------
+
+
+Message 90 on *Bug-Report(#544):
+Date:     Wed Mar 10 16:01:09 1993 EST
+From:     Praecox (#711)
+To:       *Bug-Report (#544)
+Subject:  :accept acceptance on room too slack?
+
+I have a room, where .free_entry is off, but it's still accepting anyone, from
+anywhere....Why is this. I thought the default behavior was *not* to
+accept...(I'm talking about accepting thru @move me to <room>, not coming thru
+an exit).
+
+??prae??
+
+--------------------------
+
+
+Message 91 on *Bug-Report(#544):
+Date:     Wed Mar 10 20:06:19 1993 EST
+From:     Paris (#1444)
+To:       *Bug-Report (#544)
+Subject:  Bug in Generic Detailed Room(#786)
+
+If, in a detailed room, I type (for example)
+
+look at bb
+
+when Blackbriar is in the room, I get,
+
+You see no "at bb" here.
+
+WHICH IS WRONG. The rooms owner (Alea ?) might want to have a look at this...
+
+--------------------------
+
+
+Message 92 on *Bug-Report(#544):
+Date:     Thu Mar 11 01:59:59 1993 EST
+From:     Praecox (#711)
+To:       *Bug-Report (#544)
+Subject:  $ownership_utils:chparent bug?
+
+I think there might be a bug in $ownership_utils:chparent.  Here's the
+relevant code:
+ 3:  who = caller_perms();
+ 4:  what = args[1];
+ 5:  papa = args[2];
+ 6:  if (!($ownership_utils:controls(who, what) &&
+$ownership_utils:controls(who, papa)))
+ 7:    set_task_perms(who);
+ 8:  endif
+ 9:  return chparent(@args);
+
+This seems a little stringent to me.  Shouldn't it ask instead (and this is
+from #58:@check-chparent),
+10:  elseif (!($perm_utils:controls(caller_perms(), object) && (newparent.f ||
+$perm_utils:controls(caller_perms(), newparent))))
+
+In other words, allow the chparent if the newparent is +f?
+
+Another multiple ownership question:  Is there any way to change the parent of
+properties?  They seem to be stuck with the person who created the prop.  This
+is just a bit of a pain given that eval won't work...
+
+Cheers now, and sorry to be so nitpicky ;)
+ prae
+
+--------------------------
+
+
+Message 93 on *Bug-Report(#544):
+Date:     Thu Mar 11 03:55:03 1993 EST
+From:     Praecox (#711)
+To:       *Bug-Report (#544)
+Subject:  Re: $ownership_utils:chparent bug?
+
+I think I've figured out why properties don't really have owners.  Unless I'm
+mistaken, that's all determined server-side.  Gak.  So no way to change the
+owner?  I dunno.
+
+Anyhow, I have another possible gripe: the lack of :set_verb_info and
+:set_property_info on $ownership_utils.  Is there any reason why these don't
+exist?  After all, you can set the verb code.  Why not the info stuff?
+(assuming you're not trying to assign ownership different than caller)  Maybe
+it's a security issue?!
+
+CUPCAKE,,,!   (prae)
+
+--------------------------
+
+
+Message 94 on *Bug-Report(#544):
+Date:     Thu Mar 11 11:23:16 1993 EST
+From:     BabyBriar (#2)
+To:       Praecox (#711) and *Bug-Report (#544)
+Subject:  Re: $ownership_utils:chparent bug?
+
+Praecox asks:
+
+>  I think there might be a bug in $ownership_utils:chparent.  Here's
+>  the relevant code:
+>   3:  who = caller_perms();
+>   4:  what = args[1];
+>   5:  papa = args[2];
+>   6:  if (!($ownership_utils:controls(who, what) &&
+$ownership_utils:controls(who, papa)))
+>   7:    set_task_perms(who);
+>   8:  endif
+>   9:  return chparent(@args);
+
+What this code does, in a twisted sorta way, is allow you to chparent() any
+object you control to any fertile object or to any object you control. Notice
+that this is done with a clever abuse of wizperms.
+
+>  This seems a little stringent to me.  Shouldn't it ask instead
+>  (and this is from #58:@check-chparent),
+>  10:  elseif (!($perm_utils:controls(caller_perms(), object) &&
+>  (newparent.f || $perm_utils:controls(caller_perms(), newparent))))
+>  In other words, allow the chparent if the newparent is +f?
+
+It -does- allow the chparent is the new parent is +f.
+
+>  Another multiple ownership question:  Is there any way to change
+>  the parent of properties?  They seem to be stuck with the person
+>  who created the prop.  This is just a bit of a pain given that
+>  eval won't work...
+
+The -parent- of properties? I expect you mean the -owner- of properties. And
+no, there isn't any supported method for changing the owner. This is the only
+yucki decision I've been forced to make with the multiple ownership utilities.
+
+Bb
+
+--------------------------
+
+
+Message 95 on *Bug-Report(#544):
+Date:     Thu Mar 11 11:24:59 1993 EST
+From:     BabyBriar (#2)
+To:       Praecox (#711) and *Bug-Report (#544)
+Subject:  Re: $ownership_utils:chparent bug?
+
+Praecox:
+
+>  I think I've figured out why properties don't really have owners.
+>  Unless I'm mistaken, that's all determined server-side.  Gak.  So
+>  no way to change the owner?  I dunno.
+
+We could change the owner. Tell me why it's a good idea, and under what
+circumstances the ownership would/should/could change. I personally don't see
+where it would be logical to put property ownership changing.
+
+>  Anyhow, I have another possible gripe: the lack of :set_verb_info
+>  and :set_property_info on $ownership_utils.  Is there any reason
+>  why these don't exist?  After all, you can set the verb code.  Why
+>  not the info stuff? (assuming you're not trying to assign
+>  ownership different than caller)  Maybe it's a security issue?!
+
+No, this is an oversight. Look for them later today.
+
+Bb
+
+--------------------------
+
+
+Message 96 on *Bug-Report(#544):
+Date:     Fri Mar 12 02:54:42 1993 EST
+From:     Praecox (#711)
+To:       Blackbriar (#110) and *Bug-Report (#544)
+Subject:  $ownership_utils:set_verb/property_info...
+
+I guess you're right about the property owner... What is needed is at least
+*some* way to change the ownership of a property, whether it's for the
+convenience of doing eval, or so one can use something which wants to edit the
+property but doesn't know about m.o....
+
+BTW, I see what the chparent scheme now..pretty clever...too clever for me, I
+guess..
+prae.
+
+--------------------------
+
+
+Message 97 on *Bug-Report(#544):
+Date:     Fri Mar 12 10:10:54 1993 EST
+From:     Blackbriar (#110)
+To:       Praecox (#711), *Bug-Report (#544), and *Core-DB-Issues (#350)
+Subject:  Re: $ownership_utils:set_verb/property_info...
+
+Praecox mentions (on *Bug-Report):
+
+>  I guess you're right about the property owner... What is needed is
+>  at least *some* way to change the ownership of a property, whether
+>  it's for the convenience of doing eval, or so one can use
+>  something which wants to edit the property but doesn't know about
+>  m.o....
+
+Ok. How about something like a verb which does this:
+  @chown obj:verb to me
+  @chown obj.prop to me
+.. and, o'course, you can't @chown to anyone except yourself ('xcepting
+wizzes, again). That way, you can forcibly grab ownership of any verb or
+property on an object you control (you can do this now, with verbs, merely by
+resetting the code).
+
+Bb
+
+--------------------------
+
+
+Message 98 on *Bug-Report(#544):
+Date:     Fri Mar 12 17:08:11 1993 EST
+From:     Paris (#1444)
+To:       Pluto (#1212) and *Bug-Report (#544)
+Subject:  Goofy word wrap
+
+All the descriptions in the MOOse lodge seem to be manually line wrapped for
+80 character screens. This makes it look really yucki if, for some reason, I
+have a 70 character wide window, or a really really wide window.
+
+It's not a bug I suppose, but it's kinda odd.
+
+Paris.
+
+--------------------------
+
+
+Message 99 on *Bug-Report(#544):
+Date:     Sun Mar 14 17:03:36 1993 EST
+From:     Paris (#1444)
+To:       Greene (#485) and *Bug-Report (#544)
+Subject:  Re: Sewers!
+
+>  Date:     Sat Mar 13 21:07:23 1993 EST
+>  From:     Greene (#485)
+>  To:       Paris (#1444)
+>  Subject:  Sewers!
+>
+>  Hya there. I've just tried to make sewers using #1333 and #1334,
+>  but I cannot (and neither can anyone else) because you "made a
+>  wizverb !wizzed by copying a verb onto it" to quote Baby Briar.
+>  Traceback to follow:
+>
+>  s
+>  #1334:move (this == #1842), line 12:  Permission denied
+>  .. called from #7:invoke (this == #1842), line 1
+>  .. called from #3:e east w west s south n north ne northeast nw
+>  northwest se
+>  southeast sw southwest u up d down (this == #1840), line 3
+>  (End of traceback)
+>
+>  Would appreciate your fixing this!
+>  Danke!
+
+OK, so this should be fixed. Note that I offer no warranty for my sewers - as
+far as I can tell, they work fine when I build them. I don't even know why
+they're generic... though I have no reason not to make them generic either. At
+any rate, I own most of the sewers and would appreciate that anyone who is
+considering a building project down there consult me first. Although having
+other people add something down there would be nice. Anyways, this problem
+should be fixed.
+
+Although your mileage may vary. :)
+
+Paris.
+
+--------------------------
+
+
+Message 100 on *Bug-Report(#544):
+Date:     Sun Mar 14 17:21:42 1993 EST
+From:     Blade (#1108)
+To:       Alea (#756) and *Bug-Report (#544)
+Subject:  Generic Detailed Room
+
+Im getting a traceback on the Generic Detailed Room on @detail, line 14.
+I get a "Permission Denied."
+It seems that the properties on the Generic Detailed room dont have their
+permissons set properly.
+
+Blade
+
+--------------------------
+
+
+Message 101 on *Bug-Report(#544):
+Date:     Sun Mar 14 17:33:59 1993 EST
+From:     Paris (#1444)
+To:       *Bug-Report (#544)
+Subject:  Well, not a bug, but a $zone thing
+
+With the new look protocol, how about a 'look in' verb for the zones, so one
+can see which rooms are in which zone. Maybe trivial, but it would be nice I
+think. (Besides, it makes more work for Bb, which -is- OpalMOO's real
+objective)
+
+Paris.
+
+--------------------------
+
+
+Message 102 on *Bug-Report(#544):
+Date:     Sun Mar 14 17:54:30 1993 EST
+From:     Lyssa (#1280)
+To:       *Bug-Report (#544)
+Subject:  generic bed
+
+THere is a bug on the generic bed. If i lie on it, then leave the room,
+whenever i come back in, it says i'm still on the bed. It should be changed
+whenever you leave (reset to not on).
+
+--------------------------
+
+
+Message 103 on *Bug-Report(#544):
+Date:     Sun Mar 14 18:31:28 1993 EST
+From:     Paris (#1444)
+To:       *Bug-Report (#544)
+Subject:  AIE ! 
+
+#26:set_owner, line 12:  Property not found
+. called from #61:_recycle, line 15
+. called from #4:_recycle (this == #1444), line 7
+. called from #4:@recycle*! (this == #1444), line 31
+(End of traceback)
+
+I just got this. Wierd. Object was the Parismobile, child of #1779. No
+multiple owners on it or anything... wierd.
+
+Paris.
+
+--------------------------
+
+
+Message 104 on *Bug-Report(#544):
+Date:     Sun Mar 14 18:38:49 1993 EST
+From:     Paris (#1444)
+To:       *Bug-Report (#544)
+Subject:  More wierd bugs
+
+put #1380 in box
+#26:set_owner, line 12:  Property not found
+. called from #61:_recycle (this == #1460), line 15
+. called from #1460:put, line 8
+(End of traceback)
+
+i
+You are carrying:
+(...)
+(#1380)
+
+put #1380 in box
+I'm sorry, Dave, I can't let you do that.
+
+Well, something is way messed up.
+Paris.
+
+--------------------------
+
+
+Message 105 on *Bug-Report(#544):
+Date:     Sun Mar 14 18:48:35 1993 EST
+From:     Paris (#1444)
+To:       *Bug-Report (#544)
+Subject:  ARGH!
+
+OK, when I tried to put #1380 in the magic number box, (see last message) it
+failed, but a) I still have the object, not a child of $garbage and owned by
+Hacker and b) I DIDN'T GET THE QUOTA REFUND !!
+
+Not that I think things are tight for quota around here, but messing up quota
+values is kinda a big bug IMO.
+
+Paris.
+
+--------------------------
+
+
+Message 106 on *Bug-Report(#544):
+Date:     Sun Mar 14 19:23:16 1993 EST
+From:     Blade (#1108)
+To:       *Bug-Report (#544)
+Subject:  Bug on Main Street.
+
+#3:is_integrating (this==#148) line 10: verb not found
+.. called from #3:look_self (this == #148), line 9
+.. called from #3:l*ook (this== #148), line 3
+
+This kind of traceback happens whenevr a 'look' type function is called when
+Im at #148...
+there doesnt seem to be a thing:room_integration_msg
+
+--------------------------
+
+
+Message 107 on *Bug-Report(#544):
+Date:     Sun Mar 14 20:29:42 1993 EST
+From:     Lyssa (#1280)
+To:       *Bug-Report (#544)
+Subject:  main street
+
+There appears to be an object here, but it can't be looked at. it says:
+
+You see  here.
+
+Please note the double space between see and here.
+If anyone can see what this is, it might solve the problem.
+
+--------------------------
+
+
+Message 108 on *Bug-Report(#544):
+Date:     Sun Mar 14 20:43:16 1993 EST
+From:     Zippy (#391)
+To:       *Bug-Report (#544)
+Subject:  #1855, currently in Main Street (South)
+
+There is a garbage object, #1855, in Main Street (South).  It has no :moveto,
+so cannot be moved away.  This is highly annoying.  Until a wizard shows up to
+do something about it, you're gonna get wicked traceback anytime you go to
+Main Street (South).  For now, swear at whoever the fuck it was who put an
+unnamed object there (referred to in Lyssa's mail) and then recycled it.
+  Zippy
+
+--------------------------
+
+
+Message 109 on *Bug-Report(#544):
+Date:     Sun Mar 14 21:53:10 1993 EST
+From:     BabyBriar (#2)
+To:       *Bug-Report (#544) and *Core-DB-Issues (#350)
+Subject:  Shit. Fuck. Ownership YUCK.
+
+Ok, I -think- I figured out what was wrong; I mucked up a verb on $wiz_utils
+and it made all ownership changed a little yucki. Please, everybody, check her
+ownership and your quota and report to me (private mail, please) anything you
+see that's screwed up, please? I will fix shortly.
+Briar
+
+--------------------------
+
+
+Message 110 on *Bug-Report(#544):
+Date:     Mon Mar 15 11:10:18 1993 EST
+From:     Blackbriar (#110)
+To:       BabyBriar (#2), *Bug-Report (#544), and *Core-DB-Issues (#350)
+Subject:  Re: Shit. Fuck. Ownership YUCK.
+
+Watch your language, Baby. And DEBUG DEBUG DEBUG DEBUG.
+
+What happened is that all recycles -- which involve changing ownership of the
+object to Hacker -- were being screwed up because Garbage objects are not
+multiply owned EVER and the $wiz_utils verb which changes object ownership
+assumed that the object might -want- to be multiply owned, so it set the
+object's .owners prop to {}.  Oooops.
+
+Shows ya how often I recycle stuff. <sigh>
+
+Bb
+
+--------------------------
+
+
+Message 111 on *Bug-Report(#544):
+Date:     Mon Mar 15 12:19:48 1993 EST
+From:     Paris (#1444)
+To:       *Bug-Report (#544)
+Subject:  #1855/Piece of Crap in Main St.
+
+#1855 was the first object that I tried to recycle when I discovered that
+recycling was hosed... so it's my fault/not my fault. And I didn't get the
+quota refund for it either.  So know you know who to blame. (ie. Not Me)
+
+Paris.
+
+--------------------------
+
+
+Message 112 on *Bug-Report(#544):
+Date:     Tue Mar 16 12:27:57 1993 EST
+From:     Anne_Merkel (#114)
+To:       *Bug-Report (#544)
+Subject:  @copy
+
+When I @copy-ed a verb onto a different verb on the same object, the first
+line came out:
+"Copied from Lender (#1855):put by Type mismatch (Variable not found) Tue Mar
+16 12:26:12 1993 EST";
+
+--------------------------
+
+
+Message 113 on *Bug-Report(#544):
+Date:     Tue Mar 16 20:50:26 1993 EST
+From:     Alea (#756)
+To:       *Bug-Report (#544)
+Subject:  Bug in Generic Detailed Room (Fixed)
+
+   I think that the bug in the Generic Detailed Room (#786)  that stopped one
+from using "l at <object>" is now fixed.  Please let me know if it's still
+broken... and I've had sporadic reports of a permission problem in @details.
+Please mail me if you have encountered this...
+		      Alea
+
+--------------------------
+
+
+Message 114 on *Bug-Report(#544):
+Date:     Wed Mar 17 16:18:26 1993 EST
+From:     BabyBriar (#2)
+To:       *Bug-Report (#544)
+Subject:  Re: [Pendragon (#1491):  Bug Report]
+
+>  Date:     Wed Mar  3 20:48:25 1993 EST
+>  From:     Pendragon (#1491)
+>  To:       *Bug-Report (#544)
+>  Subject:  Bug Report
+>
+>  i'm a secondary owner of this room and i tried to make an
+>  adjoinning
+>  room, but it said i had to have the REAL owner make me one...
+>  noone can figure this out..
+
+I think this is fixed.
+Briar
+
+--------------------------
+
+
+Message 116 on *Bug-Report(#544):
+Date:     Fri Mar 19 17:53:38 1993 EST
+From:     Paris (#1444)
+To:       Praecox (#711) and *Bug-Report (#544)
+Subject:  Let's try that again
+
+OK, event logger, I think that .logging sould be !c so I can press record and
+have it work...
+Paris.
+
+--------------------------
+
+
+Message 117 on *Bug-Report(#544):
+Date:     Fri Mar 19 22:07:27 1993 EST
+From:     Paris (#1444)
+To:       *Bug-Report (#544)
+Subject:  HEY !
+
+e
+You step into the hotel...
+Hotel
+#3:is_integrating (this == #145), line 10:  Verb not found
+. called from #3:look_self (this == #145), line 16
+. called from #3:enterfunc (this == #145), line 4
+. called from #1:moveto (this == #1444), line 2
+. called from #6:moveto (this == #1444), line 6
+. called from #7:move (this == #159), line 16
+. called from #7:invoke (this == #159), line 1
+. called from #3:e east w west s south n north ne northeast nw northwest se
+southeast sw southwest u up d down (this == #148), line 3
+(End of traceback)
+
+This seems bad.
+
+Paris.
+
+--------------------------
+
+
+Message 118 on *Bug-Report(#544):
+Date:     Sat Mar 20 01:13:19 1993 EST
+From:     Anne_Merkel (#114)
+To:       Paris (#1444) and *Bug-Report (#544)
+Subject:  Re: HEY !
+
+>  You step into the hotel...
+>  Hotel
+>  #3:is_integrating (this == #145), line 10:  Verb not found
+
+This is the result of an exit being recycled.  It's a good example of why my
+suggestion in 166 on *Core-DB-Issues would help things out.
+
+--------------------------
+
+
+Message 119 on *Bug-Report(#544):
+Date:     Sun Mar 21 01:41:19 1993 EST
+From:     CyberFox (#1878)
+To:       Alea (#756) and *Bug-Report (#544)
+Subject:  Can't remove noises from children(#786)
+
+Subject pretty much says it all...  Just noticed especially because I have a
+noise with a typo in it.. Here's the traceback I got:
+
+  #786:@rmn*oise (this == #1881), line 5:  Type mismatch
+(End of traceback)
+
+Thanks,
+====CF.
+
+--------------------------
+
+
+Message 120 on *Bug-Report(#544):
+Date:     Mon Mar 22 05:47:31 1993 EST
+From:     Cable (#1011)
+To:       *Bug-Report (#544)
+Subject:  Problem with @room_integration...
+
+I attempted to change the @room_integration message for my door this morning,
+and received the following traceback:
+
+@room_integration 276 is %{open}.
+#811:verb_info, line 6:  Task ran out of ticks
+. called from #52:has_callable_verb, line 7
+. called from #3:here_huh (this == #145), line 12
+. called from #56:do_huh, line 8
+. called from #1:huh (this == #145), line 2
+(End of traceback)
+
+Hope this helps...
+
+Thanks,
+Cable
+
+--------------------------
+
+
+Message 121 on *Bug-Report(#544):
+Date:     Mon Mar 22 15:42:05 1993 EST
+From:     Praecox (#711)
+To:       *Bug-Report (#544)
+Subject:  $object_utils:location outta ticks
+
+Like it said, $object_utils:location(<obj>) runs outof ticks.  Needs a suspend
+in there, no doubt.  Seems like a spammy verb, if I understand it's docs
+correctly, so maybe it oughta be a long suspend...
+
+prae
+
+--------------------------
+
+
+Message 122 on *Bug-Report(#544):
+Date:     Mon Mar 22 15:54:08 1993 EST
+From:     Anne_Merkel (#114)
+To:       Praecox (#711) and *Bug-Report (#544)
+Subject:  Re: $object_utils:location outta ticks
+
+>  Needs a suspend in there, no doubt.
+
+Actually, it has a suspend.  It's #0:core_objects() (called by
+#331:contents()), that is running out of ticks when it calls
+$list_utils:sort().
+#0:core_objects() should probably call $list_utils:sort_suspended() in line
+15.
+
+--------------------------
+
+
+Message 123 on *Bug-Report(#544):
+Date:     Mon Mar 22 15:57:09 1993 EST
+From:     Praecox (#711)
+To:       Anne_Merkel (#114) and *Bug-Report (#544)
+Subject:  Re: $object_utils:location outta ticks
+
+ [Anne argued:]
+>  Actually, it has a suspend.  It's #0:core_objects() (called by
+>  #331:contents()), that is running out of ticks when it calls
+ [...etc.]
+
+Damn, girl, you're good.  What investigative prowess.  I didn't even bother.
+(*sigh*)
+
+--------------------------
+
+
+Message 124 on *Bug-Report(#544):
+Date:     Tue Mar 23 18:04:15 1993 EST
+From:     Opal (#72)
+To:       *Bug-Report (#544)
+Subject:  hotel traceback
+
+i fixed the hotel traceback. just call me beautiful.
+
+--------------------------
+
+
+Message 125 on *Bug-Report(#544):
+Date:     Tue Mar 23 18:07:08 1993 EST
+From:     Blackbriar (#110)
+To:       Opal (#72) and *Bug-Report (#544)
+Subject:  Re: hotel traceback
+
+Opal:
+
+>  i fixed the hotel traceback. just call me beautiful.
+
+You're beautiful, Opal.
+
+Blackbriar
+
+--------------------------
+
+
+Message 126 on *Bug-Report(#544):
+Date:     Tue Mar 23 20:14:26 1993 EST
+From:     Profane (#603)
+To:       Blackbriar (#110) and *Bug-Report (#544)
+Subject:  Help! I can't get out of my room!
+
+Traceback:
+#274:here_huh (this == #586), line 1: Verb not found
+.. called from #786:here_huh (this == #586), line 5
+.. called from #56:do_huh, line 8
+.. called from #1:huh (this = #586), line 2
+
+This happened when I tried to go "Out" from my room to the hotel.
+My exit, named "Out" shows up in my Audit list, and in @ways.
+(#586 is my room, the exit is #585)
+This also happened with the other exit I have in my room.
+So, what the hell? What did I screw up? (I haven't playing with my
+exits or any of the various :huh verbs at all...
+Do the gods of MOO not like me?
+-Profane
+
+--------------------------
+
+
+Message 127 on *Bug-Report(#544):
+Date:     Tue Mar 23 20:19:26 1993 EST
+From:     Anne_Merkel (#114)
+To:       Profane (#603), Blackbriar (#110), and *Bug-Report (#544)
+Subject:  Re: Help! I can't get out of my room!
+
+>  From:     Profane (#603)
+>  Traceback:
+>  #274:here_huh (this == #586), line 1: Verb not found
+>  ... called from #786:here_huh (this == #586), line 5
+>  ... called from #56:do_huh, line 8
+>  ... called from #1:huh (this = #586), line 2
+
+Oops.  My fault.  I was working on a seat-related :here_huh() on my own room
+and then copied it over to the Area-Smart Room (#274) but I'd forgotten to
+copy the :find_seats() verb.  I didn't notice it because it was still on my
+own room.  Sorry about that.  The problem should be fixed now.
+---Anne
+
+--------------------------
+
+
+Message 128 on *Bug-Report(#544):
+Date:     Tue Mar 23 22:23:14 1993 EST
+From:     BabyBriar (#2)
+To:       Praecox (#711) and *Bug-Report (#544)
+Subject:  Re: $object_utils:location outta ticks
+
+Praecox:
+
+>  Like it said, $object_utils:location(<obj>) runs outof ticks.
+>  Needs a suspend in there, no doubt.  Seems like a spammy verb, if
+>  I understand it's docs correctly, so maybe it oughta be a long
+>  suspend...
+
+I didn't think anyone would ever -use- this verb. But Blackbriar wanted it. I
+think it's fixed. It'll run out of ticks on tick-consuming :contents() calls.
+But hell, it's WAY tick-intensive anyway.
+
+Briar
+
+--------------------------
+
+
+Message 129 on *Bug-Report(#544):
+Date:     Wed Mar 24 16:30:12 1993 EST
+From:     JoeFeedback (#390)
+To:       *Bug-Report (#544)
+Subject:  Hotel desk
+
+>l desk
+#146:description, line 6:  Permission denied
+. called from #1:look_self (this == #146), line 1
+. called from #3:l*ook (this == #145), line 7
+(End of traceback)
+
+--------------------------
+
+
+Message 130 on *Bug-Report(#544):
+Date:     Sat Mar 27 06:55:08 1993 EST
+From:     Praecox (#711)
+To:       *Bug-Report (#544)
+Subject:  @rename doesn't work for verbs or props...
+
+#6:@rename is not multiownership friendly, for either verb name changing or
+prop name changing.  For verb name setting, I suspect the problem has to do
+the lack of $ownership_utils:set_verb_info().  But I dunno.
+
+prae  (core complainer)
+
+--------------------------
+
+
+Message 131 on *Bug-Report(#544):
+Date:     Sat Mar 27 20:04:11 1993 EST
+From:     Jordan (#830)
+To:       *Bug-Report (#544)
+Subject:  @unrecycle
+
+Umm, @unrecycle doesn't understand literal objects, cause it only looks at the
+objects' aliases.
+
+--------------------------
+
+
+Message 132 on *Bug-Report(#544):
+Date:     Sat Mar 27 23:04:13 1993 EST
+From:     Juniper (#1484)
+To:       *Bug-Report (#544)
+Subject:  container problem
+
+	I had a problem with a container.  Quoting BBriar:
+"Containers use name/alias, not number, for removal..."
+
+
+			Thanks a bunch,
+			
+			Juniper
+
+--------------------------
+
+
+Message 133 on *Bug-Report(#544):
+Date:     Sun Mar 28 00:43:14 1993 EST
+From:     Commander_Sisko (#1491)
+To:       *Bug-Report (#544)
+Subject:  Bug report
+
+i get this error message:
+#1584:dispatch, line 9:  Verb not found
+(End off traceback)
+everytime i move or any thing..
+
+--------------------------
+
+
+Message 134 on *Bug-Report(#544):
+Date:     Mon Mar 29 23:36:36 1993 EST
+From:     Anne_Merkel (#114)
+To:       *Bug-Report (#544)
+Subject:  Yonder Tally Board:@Tally
+
+I just discovered that when I use the @tally command as the Banker character
+(#1889), it lists the @tally of my usual Anne Merkel self (#114).  The results
+for both characters are identical:
+
+Owner    ObjectPlayer Rooms ExitsThings NotesOthersParent Props Verbs  DBSize
+-------------------------------------------------------------------------------
+Anne_Merk    30     3     4     4    15     0     4     8   141   162  180577
+-------------------------------------------------------------------------------
+Totals     1994   235   424   690   478    50   117   112  4600  3360
+-------------------------------------------------------------------------------
+OpalMOO has 213 (161 active) players, including 126 (107) programmers.
+
+I can't see why this is happening.
+---Anne
+
+--------------------------
+
+
+Message 135 on *Bug-Report(#544):
+Date:     Tue Mar 30 00:07:02 1993 EST
+From:     Dagard (#636)
+To:       Anne_Merkel (#114) and *Bug-Report (#544)
+Subject:  Ye Olde Tally Boarde
+
+It shows the same stats regardless because you (Anne) and the Banker are
+'linked' together.  This is accomplished through the @register verb, it was/is
+originally intended so that known second characters on LM would have their
+things judged with the first characters stuff when going up for quota.
+You would have to get someone who the Tally Board trusts (a wizard, more than
+likely) to emancipate you from the Banker.
+
+Dag
+
+--------------------------
+
+
+Message 136 on *Bug-Report(#544):
+Date:     Tue Mar 30 23:05:23 1993 EST
+From:     Blackbriar (#110)
+To:       Anne_Merkel (#114) and *Bug-Report (#544)
+Subject:  Ye Olde Tally Board
+
+Banker & Anne are separate now.
+Bb.
+
+--------------------------
+
+
+Message 137 on *Bug-Report(#544):
+Date:     Tue Mar 30 23:06:11 1993 EST
+From:     Greene (#485)
+To:       *Bug-Report (#544)
+Subject:  Siamese
+
+Was it a difficult operation, doc?
+
+--------------------------
+
+
+Message 138 on *Bug-Report(#544):
+Date:     Tue Mar 30 23:42:46 1993 EST
+From:     Anne_Merkel (#114)
+To:       *Bug-Report (#544)
+Subject:  @Recycle
+
+I just discovered that if you use the @recycle command on someone else's
+object, it seems to work and displays the `slated for recycling in 5 minutes'
+message.  However, the object doesn't show up in your @doomed list.
+Luckily, the player:_recycle() verb called from player:@recycle*! uses
+task_perms == this so the recycle fails but it should have checked that in the
+first place.
+
+--------------------------
+
+
+Message 139 on *Bug-Report(#544):
+Date:     Wed Mar 31 20:51:59 1993 EST
+From:     Paris (#1444)
+To:       *Bug-Report (#544)
+Subject:  bug bug bug
+
+out
+You open the door.
+Hotel
+#3:is_integrating (this == #145), line 10:  Verb not found
+. called from #3:look_self (this == #145), line 16
+. called from #3:enterfunc (this == #145), line 4
+. called from #1:moveto (this == #1444), line 2
+. called from #6:moveto (this == #1444), line 6
+. called from #7:move (this == #1477), line 16
+. called from #382:move (this == #1477), line 7
+. called from #7:invoke (this == #1477), line 1
+. called from #3:here_huh (this == #1473), line 27
+. called from #274:here_huh (this == #1473), line 21
+. called from #56:do_huh, line 8
+. called from #1:huh (this == #1473), line 2
+(End of traceback)
+
+I don't figure 'em out, I just report 'em.
+
+--------------------------
+
+
+Message 140 on *Bug-Report(#544):
+Date:     Wed Mar 31 20:57:35 1993 EST
+From:     Paris (#1444)
+To:       *Bug-Report (#544)
+
+praecox
+
+--------------------------
+
+
+Message 141 on *Bug-Report(#544):
+Date:     Wed Mar 31 21:00:39 1993 EST
+From:     Paris (#1444)
+To:       Praecox (#711) and *Bug-Report (#544)
+Subject:  Try this again
+
+Sorry about that last message, contrary to popular belief, Praecox is not a
+bug. (I'm still laughing though... oh, that was funny)
+
+Um, Prae, the sittable object does, for example,
+
+Pandamonium is lying and Yasmin is lying on a mattress.
+
+Which seems a little funny to me. Maybe you could fix this.
+
+(As for Panda and Yasmin, well.)
+
+Paris.
+
+--------------------------
+
+
+Message 142 on *Bug-Report(#544):
+Date:     Thu Apr  1 00:50:21 1993 EST
+From:     Pertinax (#1936)
+To:       *Bug-Report (#544)
+Subject:  Room #145
+
+The problem with that room is it has an exit with either a
+:room_integration_msg
+verb on it that has not been programmed, or it could be !x.  I spent a while
+looking for it but I couldnt find it.
+
+------Pertinax
+
+--------------------------
+
+
+Message 143 on *Bug-Report(#544):
+Date:     Thu Apr  1 01:22:27 1993 EST
+From:     Anne_Merkel (#114)
+To:       Pertinax (#1936) and *Bug-Report (#544)
+Subject:  Re: Room #145
+
+>  From:     Pertinax (#1936)
+>  Subject:  Room #145
+>  The problem with that room is it has an exit with either a
+>  :room_integration_msg
+>  verb on it that has not been programmed, or it could be !x.  I
+>  spent a while
+>  looking for it but I couldnt find it.
+
+Probably, the best thing to do would be for $room:is_integrating() to check
+for a +x verb before trying to call it but checking for a programmed verb or
+not would be silly.  Anyway, doesn't an unprogrammed verb automatically pass
+to the parent unless it's !x?
+
+--------------------------
+
+
+Message 144 on *Bug-Report(#544):
+Date:     Thu Apr  1 02:17:18 1993 EST
+From:     Anne_Merkel (#114)
+To:       *Bug-Report (#544)
+Subject:  Update on Hotel :is_integrating() traceback.
+
+I ran a check on all the exits in #145:obvious_exits() and they all check out
+all right so, apparently, the offending object is not an $exit with .obvious
+== 1.
+The mostly likely cause is that some exit was recycled or chparented but was
+not removed from the .exits list (which is unreadable by me so I can't
+double-check that).
+
+--------------------------
+
+
+Message 145 on *Bug-Report(#544):
+Date:     Thu Apr  1 16:53:42 1993 EST
+From:     Pandamonium (#685)
+To:       BeeKay (#167) and *Bug-Report (#544)
+Subject:  gun permissions
+
+I am getting a traceback on the gun:
+shoot spaz to me
+#172:shoot fire (this == #2008), line 11:  Permission denied
+(End of traceback)
+
+just passing it along. :)
+
+Panda
+
+--------------------------
+
+
+Message 146 on *Bug-Report(#544):
+Date:     Fri Apr  2 17:40:05 1993 EST
+From:     Pandamonium (#685)
+To:       *Bug-Report (#544) and *Core-DB-Issues (#350)
+Subject:  Mr Spell!
+
+okay. I know how icky cleanup stuff is, but since mr. spell was killed,
+would it be possible to remove the help screen for spelling stuff?
+
+Panda
+
+--------------------------
+
+
+Message 147 on *Bug-Report(#544):
+Date:     Fri Apr  2 18:05:20 1993 EST
+From:     Pandamonium (#685)
+To:       *Bug-Report (#544)
+Subject:  hotel's lobby.
+
+big errors there. page of tracebacks. icky.
+
+thanks
+
+Panda
+
+--------------------------
+
+
+Message 148 on *Bug-Report(#544):
+Date:     Sat Apr  3 16:38:30 1993 EST
+From:     Jordan (#830)
+To:       *Bug-Report (#544)
+Subject:  Problems with :here_huh?
+
+Try entering numbers like:
+>1
+And you won't get a response from the server.
+
+-j
+
+--------------------------
+
+
+Message 149 on *Bug-Report(#544):
+Date:     Sat Apr  3 23:53:34 1993 EST
+From:     Miloslav (#1186)
+To:       *Bug-Report (#544)
+Subject:  #786 Generic Detailed Room.
+
+The GDR, #786, has a bug in its @rmnoise verb.
+@rmnoise n, where n is the number of the noise to be removed, results in:
+#786:@rmn*oise (this == #1292), line 5:  Type mismatch
+(End of traceback)
+
+It will give this result for any number n, whether or not the room
+has a noise for the number.
+
+--Miloslav "Why smoke, why not just print `STUPID' on your forehead?"
+
+--------------------------
+
+
+Message 150 on *Bug-Report(#544):
+Date:     Tue Apr  6 21:26:35 1993 EDT
+From:     Blade (#1108)
+To:       *Bug-Report (#544)
+
+#55:map_verb, line 9: Type Mismatch
+.. called from #20:title_list*c list_title*c, line 4
+.. called from #1779:inside_description, line 15
+
+What'd I mess up here???
+
+Blade
+
+--------------------------
+
+
+Message 151 on *Bug-Report(#544):
+Date:     Tue Apr  6 21:43:57 1993 EDT
+From:     Blade (#1108)
+To:       *Bug-Report (#544)
+
+Disregard that last message. I figured it out.
+
+Thanx
+Blade
+
+--------------------------
+
+
+Message 152 on *Bug-Report(#544):
+Date:     Mon Apr 12 16:25:08 1993 EDT
+From:     Yasmin (#1079)
+To:       *Bug-Report (#544)
+Subject:  On dual ownership....
+
+Even though I have been made the co-owner of a detailed room, I can't seeem to
+detail it.  Any help or words of wisdom from authorities higher than me?
+-Yaz
+
+--------------------------
+
+
+Message 153 on *Bug-Report(#544):
+Date:     Mon Apr 12 22:17:33 1993 EDT
+From:     Pandamonium (#685)
+To:       *Bug-Report (#544)
+Subject:  Generic Bed/Chair Room Area(#1222)
+
+acts funny if you have more than one person one it.
+
+Yasmin is lying and Pandamonium is lying on a mattress.
+
+-Sancho
+
+--------------------------
+
+
+Message 154 on *Bug-Report(#544):
+Date:     Tue Apr 13 02:47:56 1993 EDT
+From:     Praecox (#711)
+To:       Pandamonium (#685) and *Bug-Report (#544)
+Subject:  Re: Generic Bed/Chair Room Area(#1222)
+
+>  acts funny if you have more than one person one it.
+>
+>  Yasmin is lying and Pandamonium is lying on a mattress.
+>
+>  -Sancho
+Okay, I'll fix it!  Sheesh.  Is that really a bug?  No, its just ugly.
+
+Again, I'd like to stress:
+ SEND BUGS ON MY STUFF TO ME, NOT TO *BUGS!  PLS! S.V.P.!
+
+Easily embarassed,
+  pracox
+
+--------------------------
+
+
+Message 155 on *Bug-Report(#544):
+Date:     Tue Apr 13 12:44:09 1993 EDT
+From:     Zachariah (#2024)
+To:       *Bug-Report (#544) and Alea (#756)
+Subject:  Generic Detail Rom (#786)
+
+There have been periodic mentions of 'Permission Denied' error or tracebacks
+when trying to @detail or @addnoise to a GDR (#786). I believe some of the
+properties have the 'c' perm set so that the verbs can't change them. I can
+set the props on my room using eval, but the verbs on the room can't. Alea
+(the owner) or a wiz--since Alea hasn't been on in a while--just needs to
+check the perms on all the props. Or so it appears to me. :-)
+
+Later, Zachariah
+
+--------------------------
+
+
+Message 156 on *Bug-Report(#544):
+Date:     Tue Apr 13 19:16:30 1993 EDT
+From:     Paris (#1444)
+To:       *Bug-Report (#544)
+Subject:  #71:set_gender
+
+#71:set_gender still uses $sperm_utils I see. Any reason it uses this instead
+of $ownership_utils ?
+
+Paris.
+
+--------------------------
+
+
+Message 157 on *Bug-Report(#544):
+Date:     Tue Apr 13 21:49:04 1993 EDT
+From:     Blackbriar (#110)
+To:       Paris (#1444) and *Bug-Report (#544)
+Subject:  Re: #71:set_gender
+
+Paris sez:
+
+>  #71:set_gender still uses $sperm_utils I see. Any reason it uses
+>  this instead of $ownership_utils ?
+
+> ;$perm_utils
+ => #811 (Multiple Ownership Utilities)
+> ;$ownership_utils
+ => #811 (Multiple Ownership Utilities)
+
+I've taken to using $perm_utils in objects and hacks that may be ported to
+other MOOs, and $ownership_utils otherwise. It's artificial. I suppose I could
+do away with $ownership_utils... I dunno.
+Bb
+
+--------------------------
+
+
+Message 158 on *Bug-Report(#544):
+Date:     Thu Apr 15 06:04:56 1993 EDT
+From:     Xiombarg (#360)
+To:       *Bug-Report (#544)
+Subject:  bug with detailed room
+
+@rmnoise 5
+#786:@rmn*oise (this == #346), line 5:   Type mismatch
+(End of traceback)
+
+This is a simple error... Somewiz wanna fix it?
+	   -Xi
+
+--------------------------
+
+
+Message 159 on *Bug-Report(#544):
+Date:     Mon Apr 19 17:10:44 1993 EDT
+From:     Alea (#756)
+To:       *Bug-Report (#544)
+Subject:  Generic Detailed Room (#786)
+
+  Just passing through as I have little time these days, but I fixed the bug
+in the GDR's @rmnoise command.  I also switched the .help_msg to +c so that
+help on children may be customized.
+				       Alea, the intermittent.
+
+--------------------------
+
+
+Message 160 on *Bug-Report(#544):
+Date:     Tue Apr 20 06:52:21 1993 EDT
+From:     Praecox (#711)
+To:       *Advertisements (#1438) and *Bug-Report (#544)
+Subject:  #1222 bed/chair fixed up
+
+Finally I've fixed up the bed/chair, #1222.  Players in different states are
+listed in separate sentances.  A little repetative, but at least it's good
+english.  Also, the code is much less of a hack.  Hey, it was 2 months ago, I
+was still a programming yokel.  Now the code nestles in nicely with exiting
+#380 stuff.  So, there should be *no* tracebacks, but then, that's probably
+hoping for too much.
+
+I had to clear everyone's .occupants_states properties, which means that if
+you were lying on a bed, now you're merely occupying it.  Sorry.
+
+So if you haven't tried it, and wanna bed, try #1222. It has help, lotsa
+messages, and even a superverb!  If anyone wants new postures (now all you can
+do it sit, lie or stand), tell me and I'll add them, or even try to make it
+extendable.
+
+(BTW, plug, plug, sorry, sorry, #1812, the generic weather-recieving window,
+was !f when I advertised it... Its fertile now...(how come no one tells me
+about this stuff?;))
+
+praecox
+
+--------------------------
+
+
+Message 161 on *Bug-Report(#544):
+Date:     Wed Apr 21 00:09:57 1993 EDT
+From:     Anne_Merkel (#114)
+To:       *Bug-Report (#544)
+
+At 1am, I got the message...
+
+>From the bell tower, you hear:
+
+No bongs were displayed.
+
+--------------------------
+
+
+Message 162 on *Bug-Report(#544):
+Date:     Wed Apr 21 00:10:56 1993 EDT
+From:     Anne_Merkel (#114)
+To:       *Bug-Report (#544)
+
+Correction: It was midnight when there were no bongs.
+
+--------------------------
+
+
+Message 163 on *Bug-Report(#544):
+Date:     Wed Apr 21 02:41:14 1993 EDT
+From:     Dagard (#636)
+To:       *Bug-Report (#544)
+Subject:  Desk in the hotel
+
+Ok, it isn't pretty by any means, but I have fixed the desk in the hotel lobby
+so that you can look people up on it again. ie:  lookup <player> on desk
+Previously, it was giving all sorts of strange tracebacks. Should be all fixed
+now. Let myself or Blackbriar know if there's any problems.
+Dag
+
+--------------------------
+
+
+Message 164 on *Bug-Report(#544):
+Date:     Thu Apr 22 17:52:46 1993 EDT
+From:     Praecox (#711)
+To:       *Bug-Report (#544)
+Subject:  Getting anal about $exit:inventory_msg()
+
+Currently the code give output like this for unconnected exits:
+ | ... which is an exit leading from Invalid indirection (#-1) to Invalid
+indirection (#-1).
+
+I want it to read like this:
+ | ... which is an exit leading from nowhere (#-1) to nowhere (#-1).
+
+Here's the new code.
+
+@program $exit:inventory_msg
+return {tostr("... which is an exit leading from ", (valid(this.dest)) ?
+this.dest.name | "nowhere", " (", this.dest, ") to ", (valid(this.source)) ?
+this.source.name | "nowhere", " (", this.source, ")."), @pass(@args)};
+
+ Yrs in fetishism,
+  prae
+
+--------------------------
+
+
+Message 165 on *Bug-Report(#544):
+Date:     Fri Apr 23 12:41:04 1993 EDT
+From:     BabyBriar (#2)
+To:       Praecox (#711) and *Bug-Report (#544)
+Subject:  Re: Getting anal about $exit:inventory_msg()
+
+I installed a slightly more silly $exit:inventory_msg. I think it'll work.
+Briar
+
+--------------------------
+
+
+Message 166 on *Bug-Report(#544):
+Date:     Thu Apr 29 20:15:11 1993 EDT
+From:     Lyssa (#1280)
+To:       BeeKay (#167) and *Bug-Report (#544)
+Subject:  New Player Class 
+
+When I tried to @chparent to this, it gave me a Permission Denied statement.
+
+--------------------------
+
+
+Message 167 on *Bug-Report(#544):
+Date:     Thu Apr 29 21:56:03 1993 EDT
+From:     Blackbriar (#110)
+To:       Lyssa (#1280) and *Bug-Report (#544)
+Subject:  Re: New Player Class 
+
+>  Date:     Thu Apr 29 20:15:11 1993 EDT
+>  From:     Lyssa (#1280)
+>  To:       BeeKay (#167) and *Bug-Report (#544)
+>  Subject:  New Player Class
+>
+>  When I tried to @chparent to this, it gave me a Permission Denied
+>  statement.
+
+In future, it would help if you gave more information, like what player class
+you were trying to change -to-.
+
+Bb
+
+--------------------------
+
+
+Message 168 on *Bug-Report(#544):
+Date:     Thu Apr 29 21:56:50 1993 EDT
+From:     Blackbriar (#110)
+To:       Lyssa (#1280) and *Bug-Report (#544)
+Subject:  Oops.
+
+I just caught up on the mail. I assume you were talking about BeeKay's class.
+Still, the class -is- fertile -- what error did you get?
+Bb
+
+--------------------------
+
+
+Message 169 on *Bug-Report(#544):
+Date:     Sat May 29 19:24:37 1993 EDT
+From:     BabyBriar (#2)
+To:       *Bug-Report (#544)
+Subject:  $thing and $container messages
+
+Yes, I know there are small bugs in the new messages involved with using
+things and containers; these will be fixed as soon as I can, probably tomorrow
+during the day.
+Briar
+
+--------------------------
+
+
+Message 170 on *Bug-Report(#544):
+Date:     Sat May 29 21:48:32 1993 EDT
+From:     BabyBriar (#2)
+To:       *Bug-Report (#544)
+Subject:  Re: $thing and $container messages
+
+>  Yes, I know there are small bugs in the new messages involved with
+>  using things and containers; these will be fixed as soon as I can,
+>  probably tomorrow during the day.
+
+Done. Sorry.
+
+--------------------------
+
+
+Message 171 on *Bug-Report(#544):
+Date:     Sun May 30 11:15:36 1993 EDT
+From:     Panda (#685)
+To:       *Bug-Report (#544)
+Subject:  #8. Generic container
+
+it throws up if you look at it when there is nothing in it:
+#8:tell_contents, line 8:  Verb not found
+.. called from #8:examine_contents, line 2
+.. called from #1:do_examine (this == #8), line 16
+.. called from #6:@ex*amine ex*amine (this == #685), line 10
+(End of traceback)
+-Panda
+
+--------------------------
+
+
+Message 172 on *Bug-Report(#544):
+Date:     Sun May 30 11:17:42 1993 EDT
+From:     BabyBriar (#2)
+To:       Panda (#685) and *Bug-Report (#544)
+Subject:  Re: #8. Generic container
+
+Thank you, Panda.  That one was my mistake; I apologize.
+Briar
+
+--------------------------
+
+

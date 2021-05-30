@@ -1,0 +1,248 @@
+@create GLOBAL: Reclass-Attach Object
+@link GLOBAL: Reclass-Attach Object = #2
+@lock/Basic GLOBAL: Reclass-Attach Object==#2
+@set GLOBAL: Reclass-Attach Object = INHERIT
+@set GLOBAL: Reclass-Attach Object = OPAQUE
+@set GLOBAL: Reclass-Attach Object = QUIET
+@set GLOBAL: Reclass-Attach Object = WIZARD
+@set GLOBAL: Reclass-Attach Object = SAFE
+@DESCRIBE GLOBAL: Reclass-Attach Object=Reclass-Attach commands for Admin.
+@set GLOBAL: Reclass-Attach Object/DESCRIBE=no_command visual
+&BCREATE GLOBAL: Reclass-Attach Object=$@bcreate *=*/*:@switch [orflags(%#,Wr)]=1,{@pcreate %0=%1;@chz *%0=[zone(%#)];&empire *%0=%2;@lock *%0/empire=#1;@dol builder hide login idle unkillable no_pay no_quota=@power *%0=##;@force *%0=@mail *%0=This is the builder character you have requested. Don't abuse the powers or else you will suffer the consequences.%r%r[center(**New DeltaMUSH Admin [name(%#)]**,79)];&class *%0=Builder;&playstatus *%0=BLD;@lock *%0/playstatus=#1;@lock *%0/builder=#1;&rank *%0=0;@lock *%0/rank=#4;@lock *%0/class=#4;@pemit %#=BCREATE: Builder `%0' created with pword `%1' for Empire: `%2'.},0,{@pemit %#=BCREATE: Permission Denied. Ask a Wizard or Royalty.}
+&ATTACH GLOBAL: Reclass-Attach Object=$@attach *=*/*:@swi [num(*%0)]=#-1,@pemit %#=That player does not exist.,{@swi [get(%#/rank)]=>10,{@swi [get(%#/rank)]=>[get(*%0/rank)],{&organization [num(*%0)]=%1;&division [num(*%0)]=%2;@pemit %#=[name(*%0)] has been attached to <%1 - %2>;@pe [num(*%0)]=You have been attached to <%1 - %2>.;&lasttrans *%0=[extract(time(),2,2)] [extract(time(),5,1)]},@pe %#=You do not have the authority to do that.},@pe %#=You do not have the authority to do that.
+&RECLASS GLOBAL: Reclass-Attach Object=$@reclass *=*/*:@swi [and(hastype(%#,player),hastype([num(*%0)],player))]=1,{@swi [num(*%0)]=#-1,@pemit %#=There is no such player.,{@swi [get(%#/rank)]=>10,{@swi [get(%#/rank)]=>[get(num(*%0)/rank)],{&class [num(*%0)]=%1;&rank [num(*%0)]=%2;@dolist class rank={@lock *%0/##=Rank:>10;@set *%0/##=visual};@pemit %#=[name(*%0)] has been reclassed: %1 - <%2>;@pemit [num(*%0)]=You have been reclassed: %1 - <%2>.;&lastpro *%0=[extract(time(),2,2)] [extract(time(),5,1)]},@pemit %#=You have no authority to do that.},@pemit %#=You have no authority to do that.}},@pemit %#=I don't know who you mean.
+&SETEMP GLOBAL: Reclass-Attach Object=$@setemp *=*:@switch [hasflag(%#,Wizard)]=0, {@pemit %#=Permission denied.%b%bWizard bit required.}, {@switch [setq(0,locate(%#,%0,Ppn))]%q0=#-1, {@pemit %#=I don't see %0 here.}, #-2, {@pemit %#=I don't know which %0 you mean.}, {&Empire %q0=%1;@pemit %#=[name(%q0)] is now part of the %1 Empire.;@pemit %q0=%n joins you to the %1 Empire.;@lock %q0/empire=#4}}
+&PCREATE GLOBAL: Reclass-Attach Object=$+pcreate *=*/*:@switch [hasflag(%#,WIZARD)]=1,{@pcreate %0=%1;&empire *%0=None;@dol Public Newbie Recruit=@force *%0=@chan/on ##;@lock *%0/empire=#1;&class *%0=Visitor;&rank *%0=3;@lock *%0/class=#1;@lock *%0/rank=#1;&email *%0=%2;&playstatus *%0=OOC;@lock *%0/playstatus=#1;@lock *%0/email=#1;@pemit %#=PCREATE: Player `%0' created with password `%1' and Email Address `%2'.},0,{@pemit %#=PCREATE: Permission Denied! You are not a Wizard.}
+@create GLOBAL: TrekWho v1
+@link GLOBAL: TrekWho v1 = #2
+@lock/Basic GLOBAL: TrekWho v1=#2
+@set GLOBAL: TrekWho v1 = OPAQUE
+@set GLOBAL: TrekWho v1 = WIZARD
+@set GLOBAL: TrekWho v1 = SAFE
+@ADISCONNECT GLOBAL: TrekWho v1=@cemit Connect=<Connect> [ansi(hb,[name(%#)])] from [ansi(hy,[get(*%#/lastsite)])] has disconnected at [ansi(r,[time()])].
+@set GLOBAL: TrekWho v1/ADISCONNECT=no_command
+@ACONNECT GLOBAL: TrekWho v1=@cemit Connect=<Connect> [ansi(hb,[name(%#)])] from [ansi(hy,[get(*%#/lastsite)])] has connected at [ansi(r,[time()])].
+@set GLOBAL: TrekWho v1/ACONNECT=no_command
+@DESCRIBE GLOBAL: TrekWho v1=Jesse's TrekWHO version 1.0
+@set GLOBAL: TrekWho v1/DESCRIBE=no_command visual
+&MUSHMOTD-1A GLOBAL: TrekWho v1=$+amotd *:&mush_motd me=%0;@pemit %0=MUSH Motd Changed.;@dol [lwho()]=@pemit ##=New MUSH Motd!
+&EALL_FILTER GLOBAL: TrekWho v1=[switch(get(%0/Empire),%0,1,0)]
+&EALL-2 GLOBAL: TrekWho v1=$eall *:@pemit %#=[u(EALL_HEADER)][iter(pempire(%0),%r[u(EALL_ENTRY,##)])]%r[ansi(r,Wizard)] - [ansi(hy,Royalty)] - [ansi(c,Builder)] - [ansi(hg,Space)] - [ansi(hm,Empire Head)] - [ansi(b,Player)] - [ansi(hb,Theme)]
+&EALL-1 GLOBAL: TrekWho v1=$eall:@pemit %#=[u(EALL_HEADER)][iter(filter(Empire_Filter,lsearch(all, type, player)),switch(u(Can_See,%#,##),1,%r[u(EALL_ENTRY,##)]))]%r[ansi(hm,There are [words([filter(Empire_Filter,lsearch(all, type, player)])])] players in Empire [get(%#/empire)]%r[ansi(r,Wizard)] - [ansi(hy,Royalty)] - [ansi(c,Builder)] - [ansi(hg,Space)] - [ansi(hm,Empire Head)] - [ansi(b,Player)] - [ansi(hb,Theme)]
+&EWHO-1 GLOBAL: TrekWho v1=$ewho:@pemit %#=[u(EHeader)][iter(filter(Empire_Filter,lwho()),switch(u(Can_See,%#,##),1,%r[u(EEntry,##)]))]%r[ansi(hm,There are [words(filter(Empire_Filter,lwho()))] players in Empire [get(%#/Empire)] connected.)]%r[ansi(r,Wizard)] - [ansi(hy,Royalty)] - [ansi(c,Builder)] - [ansi(hg,Space)] - [ansi(hc,Judge)] - [ansi(b,Player)] - [ansi(hb,Theme)]
+&WHO-1 GLOBAL: TrekWho v1=$who:&record me=[ifelse(lt(words(lwho()),get(me/record)),get(me/record),words(lwho()))];@pemit %#=[u(header)][iter(lwho(),switch(u(can_see,%#,##),1,{%r[u(who_entry,##)]}))]%r[u(footer)]%r[ansi(r,Wizard)] - [ansi(hy,Royalty)] - [ansi(c,Builder)] - [ansi(hg,Space)] - [ansi(hb,Theme)] - [ansi(hc,Judge)] - [ansi(b,Player)]
+&HEADER GLOBAL: TrekWho v1=[ansi(c,%b_)]%r[ansi(c,|)]%b[ansi(c,|)][center([ansi(hw,[mudname()])],79)]%r[ansi(c,|)]%b[ansi(c,`)][repeat([ansi(c,_)],76)]%r[ansi(c,|)][repeat([ansi(c,_)],78)][ansi(c,%))]%r%r[u(mush_motd)]%r%b[repeat([ansi(c,_)],78)]%r[ansi(c,|)]Sta[ansi(c,%b_)][ansi(c,[ljust(Rank/Name,27,_)])][ansi(c,[ljust(Alias,6,_)])][ansi(c,[ljust(Empire,16,_)])][ansi(c,[ljust(On For,10,_)])][ansi(c,[ljust(Idle,14,_)])][ansi(c,%))]
+&FOOTER GLOBAL: TrekWho v1=[ansi(c,|)]%b%b%b[ansi(c,`)][ansi(c,[repeat(_,73)]%r[ansi(c,|)][space(5)][ansi(hb,Connected Players:)] [ansi(hw,[words(lwho())])][space(10)][ansi(hb,Hidden Players:)] [ansi(hw,[sub([words(lwho())],[words(mwho())])])][space(10)][ansi(hb,Record:)] [ansi(hw,[get(me/record)])][space(5)][ansi(c,|)]%r[ansi(c,|)][ansi(c,[repeat(_,77)])][ansi(c,|)]
+&EANN GLOBAL: TrekWho v1=$@eann *:@swi [gte([get(%#/rank)],12)]=1,{@dolist [filter(Empire_Filter,lwho())]=@pe ##=[ansi(r,Official [get(%#/empire)] Empire Announcement from %n:)] %0},0,{@pe %#=Permission Denied.}
+&EALL_ENTRY GLOBAL: TrekWho v1=[ansi(switch(u(Flag,%0),JUDGE,hc,SPACE,hg,HEAD,hm,THEME,hb,WIZARD,r,ROYALTY,hy,BUILDER,c,b),ljust(Name(%0),15))][ansi(y,ljust(get(%0/Alias),6))][ansi(r,ljust(mid(get(%0/Division),0,14),14))][ansi(g,ljust(get(%0/class),15))][ansi(hr,ljust(get(%0/organization),17))][switch(conn(%0),-1,{[ansi(hc,[ljust(mid([get(%0/last)],3,7),5)])]},{[ansi(c,[ljust(Connected,5)])]})]
+&EALL_HEADER GLOBAL: TrekWho v1=[ansi(hb,repeat(-,79))]%r[center([mudname()],79)]%r[center([eval(%#,empire)] Members,79)]%r[ansi(hb,repeat(-,79))]%r[ansi(c,Name%b%b%b%b%b%b%b%b%b%b%bAlias%bDivision%b%b%b%b%b%bClass%b%b%b%b%b%b%b%b%b%bOrganization%b%b%b%b%b%bConn.)]%r[ansi(hr,repeat(~,79))]
+&FLAG GLOBAL: TrekWho v1=[switch(get(%0/Class),Builder,BUILDER,switch(get(%0/admin),space,SPACE,switch(get(%0/admin),head,HEAD,switch(get(%0/admin),theme,THEME,switch(hasflag(%0,Judge),1,JUDGE,switch(hasflag(%0,WIZARD),1,WIZARD,switch(hasflag(%0,Royalty),1,ROYALTY,,OTHER)))))))]
+@IDLE GLOBAL: TrekWho v1=[ufun(fun_time,idle(%0))]
+@set GLOBAL: TrekWho v1/IDLE=no_command
+@SEX GLOBAL: TrekWho v1=[switch(poss(%0),his,M,her,F,its,O)]
+@set GLOBAL: TrekWho v1/SEX=no_command visual
+&HOURS GLOBAL: TrekWho v1=[switch(lt(div(mod(%0,86400),3600),10),1,0[div(mod(%0,86400),3600)],div(mod(%0,86400),3600))]
+&MINUTES GLOBAL: TrekWho v1=[switch(lt(div(mod(%0,3600),60),10),1,0[div(mod(%0,3600),60)],div(mod(%0,3600),60))]
+&CAN_SEE GLOBAL: TrekWho v1=[or(u(see_all,%0),not(hidden(%1)))]
+&DAYS GLOBAL: TrekWho v1=[div(%0,86400)]
+&IDLESCALE GLOBAL: TrekWho v1=[switch(lt(%0,60),1,seconds,switch(lt(%0,3600),1,minutes,switch(lt(%0,86400),1,hours,days)))]
+&SEE_ALL GLOBAL: TrekWho v1=[or(hasflag(%0,wizard),haspower(%0,see_all))]
+&EMPIRE_FILTER GLOBAL: TrekWho v1=[switch(get(%0/Empire),get(%#/Empire),1,0)]
+&WHO_ENTRY GLOBAL: TrekWho v1=[ansi(c,|)][switch(get(%0/PlayStatus),BLD,ansi(c,BLD),WIZ,ansi(r,WIZ),ROY,ansi(hy,ROY),SPC,ansi(hg,SPC),OOC,ansi(hc,OOC),IC,ansi(hg,%bIC),GOD,ansi(hr,GOD),THM,ansi(hb,THM),ansi(hx,ljust(#$,3)))][ansi(c,|)]%b[ansi(switch(u(Flag,%0),SPACE,hg,HEAD,hm,THEME,hb,WIZARD,r,ROYALTY,hy,BUILDER,c,JUDGE,hc,b),ljust([get(%0/class)] [name(%0)],26,%b))] [ansi(y,ljust(get(%0/Alias),5,%b))] [ansi(hr,ljust(get(%0/Empire),14,%b))] [ansi(r,rjust(u(Onfor,%0),9,%b))] [ansi(m,rjust(u(Idle,%0),9,%b))]
+&FUN_TIME GLOBAL: TrekWho v1=[setq(0,div(%0,3600))][switch(gt(%q0,9),0,0)]%q0:[setq(1,[div(sub(%0,[mul(div(%0,3600),3600)]),60)])][switch(gt(%q1,9),0,0)]%q1:[setq(2,[sub(%0,[mul(div(%0,60),60)])])][switch(gt(%q2,9),0,0)]%q2
+&ONFOR GLOBAL: TrekWho v1=[ufun(fun_time,conn(name(%0)))]
+&EHEADER GLOBAL: TrekWho v1=[ansi(c,%b_)]%r[ansi(c,|)]%b[ansi(c,|)][ansi(hw,[rjust([get(%#/empire)],74,%b)])]%r[ansi(c,|)]%b[ansi(c,`)][ansi(c,[repeat(_,75)])]%r[ansi(c,|)][ansi(c,_)][ansi(c,Name/Rank_____________On For___Idle_____Organization)][ansi(c,[repeat(_,24)])][ansi(c,%))]
+&EENTRY GLOBAL: TrekWho v1=%b%b[ansi(switch(u(Flag,%0),JUDGE,hc,SPACE,hg,HEAD,hm,THEME,hb,WIZARD,r,ROYALTY,hy,BUILDER,c,b),ljust([class(%0)] [Name(%0)],20))] [ansi(r,rjust(u(Onfor,%0),9))] [ansi(m,rjust(u(Idle,%0),4))] [ansi(hr,ljust([org(%0)] <[get(%0/division)]>,30))]
+&LINE GLOBAL: TrekWho v1=[repeat([ansi(r,*)],79)]
+&LINE2 GLOBAL: TrekWho v1=[repeat([ansi(c,~)],79)]
+&RECORD GLOBAL: TrekWho v1=7
+
+@create GLOBAL: Universal Functions
+@link GLOBAL: Universal Functions = #2
+@set GLOBAL: Universal Functions = INHERIT
+@set GLOBAL: Universal Functions = OPAQUE
+@set GLOBAL: Universal Functions = WIZARD
+@set GLOBAL: Universal Functions = SAFE
+@DESCRIBE GLOBAL: Universal Functions=The Universal Functions object. To make a function, set the FUN_<function name> attribute of this object to the function.
+@set GLOBAL: Universal Functions/DESCRIBE=no_command visual
+@STARTUP GLOBAL: Universal Functions=@dolist [lattr(me/FUN_*)]=@function [after(##,FUN_)]=me,##
+@set GLOBAL: Universal Functions/STARTUP=no_command
+&MONTH GLOBAL: Universal Functions=31
+&FUN_SECOND GLOBAL: Universal Functions=[first(rest(%0,%1),%1)]
+&FUN_THIRD GLOBAL: Universal Functions=[first(rest(rest(%0,%1),%1),%1)]
+&FUN_FOURTH GLOBAL: Universal Functions=[first(rest(rest(rest(%0,%1),%1),%1),%1)]
+&FUN_FIFTH GLOBAL: Universal Functions=[first(rest(rest(rest(rest(%0,%1),%1),%1),%1),%1)]
+&FUN_WORD GLOBAL: Universal Functions=[extract(%0,%1,1)]
+&FUN_ATPLACE GLOBAL: Universal Functions=[switch(or(controls(%#,%0),match(rloc(%L,100),rloc(%0,100))),1,extract(get(%0/PLACENUMS), %1, 1, |),PERMISSION DENIED)]
+&FUN_CLASS GLOBAL: Universal Functions=[switch(%0,me,[get(%#/class)],[get(*%0/class)])]
+&FUN_DATE GLOBAL: Universal Functions=[extract(time(),2,2)], [extract(time(),5,1)]
+&FUN_DTIME GLOBAL: Universal Functions=[extract(time(),1,3)] [sub([mid(extract(time(),4,1),0,2)],4)][mid(extract(time(),4,1),2,6)] [extract(time(),5,1)]
+&FUN_DIVISION GLOBAL: Universal Functions=[switch(%0,me,[name([get(%#/org)])],[name([get(*%0/org)])])]
+&FUN_ECONS GLOBAL: Universal Functions=[switch(locate(%#,%0,PT*),#-1,#-1 NO SUCH OBJECT VISIBLE,#-2,#-1 AMBIGUOUS MATCH,get(#$/money))]
+&FUN_EINZONE GLOBAL: Universal Functions=[squish(iter(inzone(swithc(ucstr(%0),HERE,zone(loc(%#)),%0)),[switch(type(##),EXIT,##)]))]
+&FUN_EMPIRE GLOBAL: Universal Functions=[switch(locate(%#,%0,PT*),#-1,#-1 NO SUCH OBJECT VISIBLE,#-2,#-1 AMBIGUOUS MATCH,get(#$/empire))]
+&FUN_HASDEVFLAG GLOBAL: Universal Functions=[switch(locate(%#,%0,*),#-1,#-1 NO SUCH OBJECT VISIBLE,#-2,#-1 AMBIGUOUS OBJECT,t(member(ucstr(get(#$/devflags)),ucstr(%1))))]
+&FUN_ISPLAYER GLOBAL: Universal Functions=[switch(type(%0),Player,1,0)]
+&FUN_INLIST GLOBAL: Universal Functions=[switch([member([v(0)],[v(1)])],0,0,1)]
+&FUN_IF GLOBAL: Universal Functions=[switch(t(v(0)),1,v(1))]
+&FUN_IFELSE2 GLOBAL: Universal Functions=[switch(t(%0),1,%1,%2)]
+&FUN_INDENT GLOBAL: Universal Functions=[ulocal(u_indent,%0,%1,%2,%3)]
+&FUN_ISBUILDER GLOBAL: Universal Functions=[haspower([num(*%0)],builder)]
+&FUN_ISCONN GLOBAL: Universal Functions=hasflag(secure(pmatch(%0)),CONNECTED)
+&FUN_ISDARK GLOBAL: Universal Functions=hasflag(secure(%0),DARK)
+&FUN_ISIC GLOBAL: Universal Functions=[switch([get(*%0/playstatus)],IC,1,0)]
+&FUN_ISINZONE GLOBAL: Universal Functions=[strmatch([switch(%1,,zone(loc(%#)),%1)],[zone(loc(%0))])]
+&FUN_INTEGER GLOBAL: Universal Functions=[before(abs(%0),.)]
+&FUN_INZONE GLOBAL: Universal Functions=[switch(%0,here,[lsearch(all,zone,[zone(loc(%#))])],[lsearch(all,zone,%0)])]
+&FUN_IFTHEN GLOBAL: Universal Functions=[switch([t(%0)],1,%1)]
+&FUN_ISCONPLAYER GLOBAL: Universal Functions=[and(and(hastype(%0,Player),orflags(%0,c)),not(hasflag(%0,Dark)))]
+&FUN_LCPLAYER GLOBAL: Universal Functions=[squish(iter(lcon(locate(%#,%0,*)),ifthen(u(isconplayer,##),##)))]
+&FUN_LCPLAYERS GLOBAL: Universal Functions=[setq(0,locate(%#,%0,PRT*))][switch(%q0,#-1,#-1 NO SUCH OBJECT VISIBLE,#-2,#-1 AMBIGUOUS MATCH,switch(u(can_lcplayer,%#,%q0),0,#-1 PERMISSION DENIED,squish(u(int_lcplayers,%q0))))]
+&FUN_LPLAYERS GLOBAL: Universal Functions=[squish(iter(lcon(%0),switch(type(##),PLAYER,##)))]
+&FUN_ORG GLOBAL: Universal Functions=[switch(%0,me,[get(%#/organization)],[get(*%0/organization)])]
+&FUN_PLAYSTATUS GLOBAL: Universal Functions=[switch(locate(%#,%0,PT*),#-1,#-1 NO SUCH OBJECT VISIBLE,#-2,#-1 AMBIGUOUS MATCH,get(#$/playstatus))]
+&FUN_POSITION GLOBAL: Universal Functions=[switch(%0,me,[get(%#/title)],[get(*%0/title)])]
+&FUN_POWERS GLOBAL: Universal Functions=[switch(locate(%#,%0,*),#-1,#-1,[setq(0,#$)][filter(haspower_filter,v(powers_list))])]
+&FUN_PINZONE GLOBAL: Universal Functions=[squish(iter(inzone(switch(ucstr(%0),HERE,zone(loc(%#)),%0)),lplayers(##)))]
+&FUN_PEMPIRE GLOBAL: Universal Functions=[squish(iter(lsearch(all,type,player),switch(get(##/empire),%0,##)))]
+&FUN_PLACES GLOBAL: Universal Functions=switch(0,gt(get(%0/placesmax),0),,rest(lnum(inc(get(%0/placesmax)))))
+&FUN_RANK GLOBAL: Universal Functions=[switch(%0,me,[get(%#/rank)],[get(*%0/rank)])]
+&FUN_RACE GLOBAL: Universal Functions=[switch(locate(%#,%0,PT*),#-1,#-1 NO SUCH OBJECT VISIBLE,#-2,#-1 AMBIGUOUS MATCH,get(#$/race))]
+&FUN_RINZONE GLOBAL: Universal Functions=[squish(iter(inzone(switch(ucstr(%0),HERE,zone(loc(%#)),%0)),[switch(type(##),ROOM,##)]))]
+&FUN_STARDATE GLOBAL: Universal Functions=[switch([extract([time(),2,1)])],Jan,[set(me,month:0)],Feb,[set(me,month:31)],Mar,[set(me,month:59)],Apr,[set(me,month:90)],May,[set(me,month:120)],Jun,[set(me,month:151)],Jul,[set(me,month:181)],Aug,[set(me,month:212)],Sep,[set(me,month:243)],Oct,[set(me,month:273)],Nov,[set(me,month:304)],Dec,[set(me,month:334)])][trunc([mul(1000,[add(50,[fdiv([add([get(me/month)],[extract(time(),3,1)])],365)])])])].[mid([round([fdiv([mid([time()],11,2)],24)],1)],2,1)]%b%b[extract(time(),4,1)]
+&FUN_SART GLOBAL: Universal Functions=[switch([member([mid([name(*%0)],[sub([strlen([name(*%0)])],1)],1)],s)],0,[name(*%0)]'s,1,[name(*%0)]')]
+&FUN_SECS2SD GLOBAL: Universal Functions=[mid(convsecs(%0),23,1)][mid(fdiv(%0,31556999),3,3)][mid(round(add(fdiv(mid(convsecs(%0),11,2),24),fdiv(mid(convsecs(%0),14,2),1440)),3),1,4)][space(1)][extract(convsecs(%0),4,1)]
+&FUN_SEX GLOBAL: Universal Functions=[switch(locate(%#,%0,PT*),#-1,#-1 NO SUCH OBJECT VISIBLE,#-2,#-1 AMBIGUOUS MATCH,get(#$/sex))]
+&FUN_TIMECONV GLOBAL: Universal Functions=[Edit(s({[Rjust(match(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec,Delete(Delete([time()],0,4),3,17)),2)]/[Delete(Delete([time()],0,8),2,14)]/[Delete([time()],0,22)]}),Space(1),0)] [Delete(Delete([time()],0,11),5,8)]
+&FUN_TITLE GLOBAL: Universal Functions=[switch(%0,me,[get(%#/title)],[get(*%0/title)])]
+&FUN_TRUE GLOBAL: Universal Functions=[switch(%0,0,0,1)]
+&FUN_USERDBREF GLOBAL: Universal Functions=ifelse(match(me,secure(%0)),%#,pmatch(secure(%0)))
+&FUN_VIEWS GLOBAL: Universal Functions=iter(lattr(%0/VIEW_*),[u(CAPITALIZE,edit(after(##,VIEW_), ~,%B))]%B%B)
+&FUN_WHICHPLACE GLOBAL: Universal Functions=[switch(or(controls(%#,%0),match(rloc(%L,100),rloc(%0,100))),1,match(get(%0/PLACENUMS), *%1%b*, |),PERMISSION DENIED)]
+&FUN_WIZ GLOBAL: Universal Functions=[switch(hasflag(%0,WIZARD),1,1,0)]
+&FUN_WIZARDGET GLOBAL: Universal Functions=[switch(hasflag(owner(%@),WIZARD),0,#-1 PERMISSION DENIED,get([locate(%@,%0,*)]/%1))]
+&FUN_WIZARDFLAGS GLOBAL: Universal Functions=[switch(hasflag(owner(%@),WIZARD),0,#-1 PERMISSION DENIED,flags(locate(%@,%0,*)))]
+&FUN_WIZARDS GLOBAL: Universal Functions=[squish([iter([lsearch(all,flag,PW)],[switch([hasflag(##,wizard)],1,{[switch([name(##)],*-BC,,##)]})])])]
+&POWERS_LIST GLOBAL: Universal Functions=announce boot builder cemit chat_privs functions guest halt hide idle login long_fingers no_pay no_quota pemit_all poll player_create queue quota search see_all see_queue tport_anything tport_anywhere unkillable
+&HASPOWER_FILTER GLOBAL: Universal Functions=[haspower(r(0),%0)]
+&ESC_COMMA GLOBAL: Universal Functions=[edit({%0},{,},{XXX-COMMA})]
+&ESC_PAREN GLOBAL: Universal Functions=[set(me,tmp_esc_paren:[edit(%0,{\(},{\\\(})])][edit(v(tmp_esc_paren),{\)},{\\\)})]
+&U_INDENT GLOBAL: Universal Functions=[setq(0, 0)][iter(u(esc_paren,u(esc_comma,escape(edit(%2,%r,%bXXX-NEWLINE%b)))),[switch(##,XXX-NEWLINE,%r[space(%0)][setq(0,0)],[switch(gt(r(0),0),1,%b)][setq(0,add(r(0),add(strlen(##),1)))][switch(gt(r(0),%1),1,%r[space(%0)][edit({##},XXX-COMMA,{,})][setq(0,strlen(##))],[edit({##},XXX-COMMA,{,})])])],,)]
+&CAPITALIZE GLOBAL: Universal Functions=iter(lcstr(%0),capstr(##))
+
+@create GLOBAL: Virtual ComLink
+@link GLOBAL: Virtual ComLink = #2
+@set GLOBAL: Virtual ComLink = INHERIT
+@set GLOBAL: Virtual ComLink = OPAQUE
+@set GLOBAL: Virtual ComLink = WIZARD
+@set GLOBAL: Virtual ComLink = SAFE
+@DESCRIBE GLOBAL: Virtual ComLink=This useful gadget allows people to use comlink commands without even carrying a comlink. Even objects can use this. Type `help comlink' for help.
+@set GLOBAL: Virtual ComLink/DESCRIBE=no_command visual
+&INSERT GLOBAL: Virtual ComLink=[trim(%0|%1,|)]
+@VJ GLOBAL: Virtual ComLink=$tel *:@switch [grab(get(%#/Tel_Dests),%0 *,|)]=, {@pemit %#=Teleport destination `%0' does not exist.}, {@tel %#=[rest(#$)]}
+@VI GLOBAL: Virtual ComLink=$listtel:@pemit %#=[ljust(Destination Name,20)] Destination%r[repeat(-,79)][iter(trim(get(%#/Tel_Dests),|),%r[ljust(first(##),20)] [ljust([name(rest(##))]([rest(##)][flags(rest(##))]),55)],|)]%r--- End ---
+@VH GLOBAL: Virtual ComLink=$deltel *:@switch [grab(get(%#/Tel_Dests),%0 *,|)]=, {@pemit %#=Teleport destination `%0' does not exist.}, {@pemit %#=Teleport destination `[first(#$)]' to `[name(rest(#$))]([rest(#$)][flags(rest(#$))])' removed.;&Tel_Dests %#=[remove(get(%#/Tel_Dests),#$,|)]}
+@VG GLOBAL: Virtual ComLink=$addtel *=*:@switch [grab(get(%#/Tel_Dests),%0 *,|)]=, {@switch [setq(0,locate(%#,%1,PRT*))]%q0=#-1, {@pemit %#=I don't see %1 here.}, #-2, {@pemit %#=I don't know which %1 you mean.}, {&Tel_Dests %#=[insert(get(%#/Tel_Dests),1,%0 %q0,|)];@pemit %#=Teleport destination `%0' set to: [name(%1)]([num(%1)][flags(%1)]).}}, {@pemit %#=Teleport destination `[first(#$)]' already exists for `[name(rest(#$))]([rest(#$)][flags(rest(#$))])'.}
+@VF GLOBAL: Virtual ComLink=$send *=*:@switch [num(*%0)]|[elock(*%0/Page,owner(%#))]=#-1|*, {@pemit %#=No such player.}, *|0, {@pemit %#=[name(*%0)]'s comlink is turned off.}, {@pemit %#=You tap your comlink and say `%1' to [name(*%0)].;@oemit %#=%n taps %p comlink and says `%1'.;@pemit *%0=Your comlink crackles with %n's voice: `%1';@oemit *%0=[name(*%0)]'s comlink crackles with %n's voice: `%1'}
+@VE GLOBAL: Virtual ComLink=$prefix *=*:@switch [grab(get(%#/Comlink_Alias),%0 *,|)]=, {@pemit %#=Comlink alias `%0' does not exist.}, {&Comlink_Title %#=[insert(remove(get(%#/Comlink_Title),grab(get(%#/Comlink_Title),%0 *,|),|),1,%0 %1,|)];@pemit %#=Prefix for alias `%0' ([rest(#$)]) set to '%1'.}
+@VD GLOBAL: Virtual ComLink=$listcom:@pemit %#={[ljust(Alias,10)] [ljust(Channel Name,20)] Prefix%r[repeat(=,75)][iter(get(%#/Comlink_Alias),%r[ljust(lcstr(first(##)),10)] [ljust(rest(##),20)] [ljust(rest(grab(get(%#/Comlink_Title),[first(##)] *,|)),45)],|)]%r[repeat(=,75)]}
+@VC GLOBAL: Virtual ComLink=$.* *:@switch [grab(get(%#/Comlink_Alias),%0 *,|)]=, {@pemit %#=Comlink alias '%0' does not exist.}, {@fo %#=[setq(0,rest(#$))][setq(1,[rest(grab(get(%#/Comlink_Title),%0 *,|))])][switch(%1,on,@chan/on %q0,off,@chan/off %q0,who,@chan/who %q0,@chat %q0={[switch(left(%1,1),:,[escape(%1)],;,[escape(%1)],[escape(switch(%q1,,\;: %1,\;: %q1 %1))])]})]}
+@VB GLOBAL: Virtual ComLink=$delcom *:@switch [grab(get(%#/Comlink_Alias),%0 *,|)]=, {@pemit %#=Comlink alias `%0' does not exist.}, {&Comlink_Alias %#=[remove(get(%#/Comlink_Alias),#$,|)];&Comlink_Title %#=[remove(get(%#/Comlink_Title),grab(get(%#/Comlink_Title),%0 *,|),|)];@pemit %#=Comlink alias `%0' for channel `[rest(%1)]' deleted.}
+@VA GLOBAL: Virtual ComLink=$addcom *=*:@switch [grab(get(%#/Comlink_Alias),%0 *,|)]=, {&Comlink_Alias %#=[u(Insert,get(%#/Comlink_Alias),%0 %1)];@pemit %#=Comlink alias `%0' added for channel `%1'.}, {@pemit %#=Comlink alias `%0' already exists for channel `[rest(#$)]'.}
+
+@create GLOBAL: MUSH Emotions
+@link GLOBAL: MUSH Emotions = #2
+@lock/Basic GLOBAL: MUSH Emotions==#2
+@set GLOBAL: MUSH Emotions = INHERIT
+@set GLOBAL: MUSH Emotions = OPAQUE
+@set GLOBAL: MUSH Emotions = WIZARD
+@set GLOBAL: MUSH Emotions = SAFE
+&WHINE31 GLOBAL: MUSH Emotions=Waaah!?!? What do you mean I can't do warp 100? I was only going 30 when the warp core blew up! WAAAAAAAAH!!!!
+&WHINE30 GLOBAL: MUSH Emotions=Waaaah!?!? I phasered the wrong person! WAAAAH!!!!?!?!?
+&WHINE29 GLOBAL: MUSH Emotions=WAAAH!?!? What do you mean, I can't start my own faction/empire!?!? Waaaaaaaahhhhhh!!!
+&WHINE28 GLOBAL: MUSH Emotions=Waaah!? What do you mean a 6-day waiting period!?!? WAAH!!!!
+&WHINE27 GLOBAL: MUSH Emotions=WAAAH!?!? How come he can defy the laws of physics and I can't!? Waaah?!?!
+&WHINE26 GLOBAL: MUSH Emotions=WAAAAH!?!?!?!? Why doesn't the other guy get shot instead of me!? WAAAH!!!!!!
+&WHINE25 GLOBAL: MUSH Emotions=WAAAAH!!!! Why do the men in white keep bothering me!?!? Waaah!!!!!
+&WHINE24 GLOBAL: MUSH Emotions=Waaaaah!?!?!? Why can't I get 100 trillon bars of Gold-Pressed Latinum!? WAAAAH!!!!
+&YAY-1 GLOBAL: MUSH Emotions=$@yay/*:@cemit %0=<[capstr(%0)]> %n jumps up and down hyperactively and screams `@yay!' over and over again.
+&YAY-2 GLOBAL: MUSH Emotions=$@yay:@remit loc(%#)=%n jumps up and down hyperactively screaming `@yay' many times over.
+&EEP-1 GLOBAL: MUSH Emotions=$@eep/*:@cemit %0=<[capstr(%0)]> %n [ansi([switch(rand(6),0,c,1,hg,2,hr,3,hb,4,hm,5,hy)],EEEEEPPPS and runs screaming from the room.)]
+&EEP-2 GLOBAL: MUSH Emotions=$@eep:@remit [loc(%#)]=%n EEEPPPS! and runs screaming from the room.
+&BAP-1 GLOBAL: MUSH Emotions=$@bap *:@remit [loc(%#)]=%N @baps [capstr(%0)] on the head hard!
+&BAP-2 GLOBAL: MUSH Emotions=$@bap/* *:@cemit %0=<[capstr(%0)]> %N @baps [capstr(%1)] on the head hard!
+&BOUNCE-1 GLOBAL: MUSH Emotions=$@bounce:@force [v(#)]=pose [lit([ansi([switch(rand(5),0,hg,1,hr,2,hb,3,hc,4,c,5,hx)],bounces around the room!!)]
+&BOUNCE-2 GLOBAL: MUSH Emotions=$@bounce/*:@cemit %0=<[capstr(%0)]> %N [ansi([switch(rand(5),0,hg,1,hr,2,hb,3,hc,4,c,5,hx)],bounces around the room!!)]
+&WHINE-1 GLOBAL: MUSH Emotions=$@whine:@remit [loc(%#)]=%n @whines, "[ansi([eval(me,color[rand(10)])],[eval(me,whine[rand(31)])])]"
+&WHINE-2 GLOBAL: MUSH Emotions=$@whine/*:@cemit [capstr(%0)]=<[capstr(%n)]> %N @whines, "[ansi([eval(me,color[rand(10)])],[eval(me,whine[rand(31)])])]"
+&WHEE-1 GLOBAL: MUSH Emotions=$@whee:@remit [loc(%#)]=%N [ansi([eval(me,color[rand(10)])],whee[repeat(e,[rand(20)])][repeat(s,[rand(20)])][repeat(!,[rand(10)])])]
+&WHEE-2 GLOBAL: MUSH Emotions=$@whee/*:@cemit %0=<[capstr(%0)]> %N [ansi([eval(me,color[rand(10)])],whee[repeat(e,[rand(20)])][repeat(s,[rand(20)])][repeat(!,[rand(10)])])]
+&DOH-1 GLOBAL: MUSH Emotions=$@doh:@remit [loc(%#)]=%N says, "D'oh!"
+&DOH-2 GLOBAL: MUSH Emotions=$@doh/*:@cemit %0=<[capstr(%0)]> %N says, "D'oh!"
+&LOL-1 GLOBAL: MUSH Emotions=$@lol:@remit [loc(%#)]=%N Laughs Out Loud!
+&LOL-2 GLOBAL: MUSH Emotions=$@lol/*:@cemit %0=<[capstr(%0)]> %N Laughs Out Loud!
+&ROTFLOL-1 GLOBAL: MUSH Emotions=$@rotflol:@remit [loc(%#)]=%N Rolls On The Floor, Laughing Out Loud!
+&ROTFLOL-2 GLOBAL: MUSH Emotions=$@rotflol/*:@cemit %0=<[capstr(%0)]> %N Rolls On The Floor, Laughing Out Loud!
+&DART-1 GLOBAL: MUSH Emotions=$@dart *:@remit [loc(%#)]=%N pulls a @dart out, and then tosses it at [capstr(%0)]!
+&DART-2 GLOBAL: MUSH Emotions=$@dart/* *:@cemit %0=<[capstr(%0)]> %N pulls a @dart out, and then tosses it at [capstr(%1)]!
+&ANVIL-1 GLOBAL: MUSH Emotions=$@anvil *:@remit [loc(%#)]=%N drops a @anvil on [capstr(%0)]!
+&ANVIL-2 GLOBAL: MUSH Emotions=$@anvil/* *:@cemit %0=<[capstr(%0)]> %N drops a @anvil on [capstr(%1)]!
+&THWAP-1 GLOBAL: MUSH Emotions=$@thwap *:@remit [loc(%#)]=%N @thwaps [capstr(%0)]!
+&THWAP-2 GLOBAL: MUSH Emotions=$@thwap/* *:@cemit %0=<[capstr(%0)]> %N @thwaps [capstr(%0)]!
+&COLOR0 GLOBAL: MUSH Emotions=hm
+&COLOR1 GLOBAL: MUSH Emotions=r
+&COLOR2 GLOBAL: MUSH Emotions=c
+&COLOR3 GLOBAL: MUSH Emotions=g
+&COLOR4 GLOBAL: MUSH Emotions=b
+&COLOR5 GLOBAL: MUSH Emotions=y
+&COLOR6 GLOBAL: MUSH Emotions=h
+&COLOR7 GLOBAL: MUSH Emotions=hb
+&COLOR8 GLOBAL: MUSH Emotions=hr
+&COLOR9 GLOBAL: MUSH Emotions=hc
+&COLOR10 GLOBAL: MUSH Emotions=hg
+&WHINE0 GLOBAL: MUSH Emotions=Waaah!??!  I want my own Quad Dec-Alpha 400?!  Waah!?
+&WHINE1 GLOBAL: MUSH Emotions=Waaah!?!?  I want my portable shield generator?! Waah!
+&WHINE2 GLOBAL: MUSH Emotions=Waah!?  What do you mean I can't do that?!? Waah?!
+&WHINE3 GLOBAL: MUSH Emotions=Waah!?! I run a diffrent mush, why can i run this one!!! WAHHHH!
+&WHINE4 GLOBAL: MUSH Emotions=Waah!?! Why can't i have a Wiz bit!!! WAHHH!!!
+&WHINE5 GLOBAL: MUSH Emotions=Waah?!  I want my mommmy?! Waah!!
+&WHINE6 GLOBAL: MUSH Emotions=Wwaaah!? Why come no wizzes will give me roy,,Waaaahh!!!
+&WHINE7 GLOBAL: MUSH Emotions=Waaah?!  What do you MEAN I have to wait 4-6 weeks for delivery?!?  Waaah!?!?
+&WHINE8 GLOBAL: MUSH Emotions=Waaah?!   What kind of a name is SpaceMUSH: The Great Frontier??!  Why can't it be [name(me)] MUSH?!?! Waah!?!?
+&WHINE9 GLOBAL: MUSH Emotions=Waah?!?  How can they be on for 4 days?!?  Waah?!
+&WHINE10 GLOBAL: MUSH Emotions=Waah?!  My eyes hurt?!  Waah!?
+&WHINE11 GLOBAL: MUSH Emotions=Waaah?!  I want my credits for being apart of this unique community!?!  Waah!?
+&WHINE12 GLOBAL: MUSH Emotions=Waah?!  So what if I'm just 9??!  I want to be AdmIn!?!  Waah!
+&WHINE13 GLOBAL: MUSH Emotions=Waah!?  What the heck is Spam?!?  oh... *shudder*
+&WHINE14 GLOBAL: MUSH Emotions=Waah?!  People say I'm spammy!?  I'm not spammy spammmy spammy spammy spammmy spammy spammy spammy spammy spammmy spammy spammy Waaah!!!?!?!?!?!?!?!?!?!?!??!?!?!?!?!?!!!
+&WHINE15 GLOBAL: MUSH Emotions=Waaah?!! I want to make my runabout to a BB?!  Waah?!
+&WHINE16 GLOBAL: MUSH Emotions=What do you mean there is no Risa?!?  Waah!??!
+&WHINE17 GLOBAL: MUSH Emotions=Waah!?  What is a Real Life?!?  These guys from it are bothering me?!  Waah?!?
+&WHINE18 GLOBAL: MUSH Emotions=Waaah!?!?  What the heck is Idle?!?  People are it all the time?!?
+&WHINE19 GLOBAL: MUSH Emotions=Waaah?!?!  I got a Z- in computer education!? So what if I fried every computer in school?!  Waah?!
+&WHINE20 GLOBAL: MUSH Emotions=Waah!?  Why am I crying?! Waah!?!?
+&WHINE21 GLOBAL: MUSH Emotions=Waaaah!?!?!?  How come we can't have TrekWars Space!? Waaaah!?!?
+&WHINE22 GLOBAL: MUSH Emotions=WAAH!!! I'M A LOSER, WHY CAN'T YOU BE ONE!?! WAHH!!!
+&WHINE23 GLOBAL: MUSH Emotions=WAAAH!?!?!? How come TWSpace hasn't been put in yet! WAAAH!!!!
+
+@create GLOBAL: Player Statistics
+@link GLOBAL: Player Statistics = #2
+@lock/Basic GLOBAL: Player Statistics=#2
+@set GLOBAL: Player Statistics = INHERIT
+@set GLOBAL: Player Statistics = WIZARD
+&FUN_POP GLOBAL: Player Statistics=[mul([add([sub(v(count_%0),50)],210)],64)]
+&PLAYER_LIST GLOBAL: Player Statistics=[lsearch(all,type,player)]
+@VA GLOBAL: Player Statistics=$emp* stat*:@pemit %#=Calculating player statistics...;@dolist lattr(me/COUNT_*)=&## me=0;@dolist u(player_list)={&COUNT_[edit({[get(##/empire)]},%b,_)] me=[add([get(me/COUNT_[edit({[get(##/empire)]},%b,_)])],1)];&COUNT_TOTAL me=[add(v(COUNT_TOTAL),1)];&[edit({[get(##/empire)]},%b,_)]INACT me=0;&TOTALINACT me=0;@switch [gt([sub(convtime(time()),convtime(xget(##,last)))],2592000)]=1,{&[edit({[get(##/empire)]},%b,_)]INACT me=[add([get(me/[edit({[get(##/empire)]},%b,_)]INACT)],1)];&TOTALINACT me=[add([get(me/TOTALINACT)],1)]}};@pemit %#=Statistics calculated.;@wait 3={@pemit %#=[ansi(c,[center(Player Statistics,79)])]%r[ansi(b,repeat(-,79))]%r[ansi(hg,[ljust(Empire,15)])]%b%b%b%b[ansi(hy,[ljust(No.,3)])]%b%b%b[ansi(g,[ljust(Inact.,6)])]%b%b%b[ansi(hm,Percentage)]%r[ansi(b,repeat(-,6))][space(13)][ansi(b,repeat(-,3))][space(3)][ansi(b,repeat(-,6))]%b%b%b[ansi(b,repeat(-,10))];@dolist lattr(me/COUNT_*)=@pemit %#=[ansi(g,[ljust([switch(##,COUNT_,*NONESET*,[after(##,COUNT_)])],15)])]%b%b%b%b[ansi(y,[ljust([u(##)],3)])]%b%b%b[ansi(g,[switch([u([after(##,COUNT_)]INACT)],,[ljust(0,6)],[ljust([u([after(##,COUNT_)]INACT)],6)])]%b%b%b[ansi(m,[mul(fdiv([u(##)],get(me/COUNT_TOTAL)),100)]%%)]
+@VB GLOBAL: Player Statistics=@pemit %#=[ansi(c,[center(Player Statistics,79)])]%r[ansi(b,repeat(-,79))]%r[ansi(hg,[ljust(Empire,15)])]%b%b%b%b[ansi(hy,[ljust(No.,3)])]%b%b%b[ansi(g,[ljust(Inact.,6)])]%b%b%b[ansi(hm,Percentage)]%r[ansi(b,repeat(-,6))][space(13)][ansi(b,repeat(-,3))][space(3)][ansi(b,repeat(-,6))]%b%b%b[ansi(b,repeat(-,10))];@dolist lattr(me/COUNT_*)=@pemit %#=[ansi(g,[ljust([switch(##,COUNT_,*NONESET*,[after(##,COUNT_)])],15)])]%b%b%b%b[ansi(y,[ljust([u(##)],3)])]%b%b%b[ansi(g,[switch([u([after(##,COUNT_)]INACT)],,[ljust(0,6)],[ljust([u([after(##,COUNT_)]INACT)],6)])]%b%b%b[ansi(m,[mul(fdiv([u(##)],get(me/COUNT_TOTAL)),100)]%%)]
+@DESCRIBE GLOBAL: Player Statistics=Type `statistics' to calculate the Player Statistics.%rType `summary' to view them after they have been calculated.
+@set GLOBAL: Player Statistics/DESCRIBE=no_command visual
+&RESET GLOBAL: Player Statistics=$@reset empire stats:@pemit %#=Reseting Stats.;@dolist lattr(#7639/count_*)=&## #7639;@dol lattr(#7639/*inact)=&## #7639;@pemit %#=Reseted.
+
+@create GLOBAL: Economy Commands
+@link GLOBAL: Economy Commands = #2
+@lock/Basic GLOBAL: Economy Commands=#3
+@set GLOBAL: Economy Commands = INHERIT
+@set GLOBAL: Economy Commands = WIZARD
+@set GLOBAL: Economy Commands = SAFE
+@VA GLOBAL: Economy Commands=$money:@pemit %#=You have [switch(or(hastype(%#,PLAYER),hasflag(%#,INHERIT)),1,get(owner(%#)/money),0)] Latinum Bars.
+@VB GLOBAL: Economy Commands=$pay *=*:@switch [or(hastype(%#,PLAYER),or(hasflag(%#,INHERIT),hasflag(%#,WIZARD)))]|[or(gte(%1,0),hasflag(%#,WIZARD))]|[or(lte(%1,get(owner(%#)/money)),hasflag(%#,wizard))]|[setq(0,locate(%#,%0,nTP))]%q0=0*, @pemit %#=Only players and inherit objects may give out money., 1|0*, @pemit %#=You cannot give negative Latinum Bars!, 1|1|0*, @pemit %#=You don't have that many Latinum Bars., 1|1|1|#-1, @pemit %#=I don't see %0 here., 1|1|1|#-2, @pemit %#=I don't know which %0 you mean., {@@ OKAY;;&money [owner(%q0)]=[add(get(owner(%q0)/money),%1)];&money [owner(%#)]=[sub(get(owner(%#)/money),%1)];@pemit %q0=%n gave you %1 Latinum Bars.;@verb %q0=%#,epay,You gave [name(%q0)] %1 Latinum Bars.,oepay,gave [name(%q0)] %1 Latinum Bars.,aepay,%1}

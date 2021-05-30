@@ -1,0 +1,125 @@
+& desc
+  +desc/list                     - List the names of all your descriptions.
+  +desc/view <desc-name>         - Look at a particular description.
+  +desc/get <desc-list>          - Change your @desc to the named one.
+  +desc/store <desc-name>=<text> - Create a new description from scratch.
+  +desc/kill <desc-name>         - Erase an old description.
+  +desc/save <desc-name>         - Copies your @desc for later retrieval.
+  +desc/edit <desc>=<old>/<new>  - Edits a saved description.
+  
+  This set of commands will allow you to use the global multi-description
+  system. If your character has more than one description, please use this
+  system, and not an object which wastes DB space. If an object is found, it
+  will be destroyed. These commands let you store any number of descriptions
+  and to retrieve them as needed. Your current description is the one loaded
+  into @desc on your character and is the one that rest of the world sees.
+  
+  Please see: desc2
+& desc2 
+  
+  Some helpful tips: '+desc/store' is used to author a new description. It does
+  not save or modify your current @desc but creates a brand new saved
+  description. Use '+desc/save' to save your current @desc so that you can
+  retrieve it later. This is also handy for porting descriptions from other
+  multi-descers as you can load them into your @desc and then use '+desc/save'.
+  
+  You can chain together sets of descriptions, making a complex multi-descer.
+  For instance, describe your character's facial features (but no clothes yet),
+  calling it BASIC. Then, create a second description containing only your
+  character's clothes, calling it something like CLOTHES. Then, you can use
+  '+desc/get BASIC CLOTHES', and it will install both descriptions, with BASIC
+  coming first and CLOTHES coming next.
+  
+  Please contact staff if you have any questions.
+
+
+@pemit %#=[ansi(hc,ANOMALY DESC:)] Please wait.
+@@ ===============================================================================
+@@
+@@ Anomaly Desc
+@@ Superior Description Technology
+@@ Version 2.0 18Jul2002
+@@
+@@ Written by: Kevin Thomas (Starfleet @ Anomaly) (station419@earthlink.net)
+@@                         with special guest
+@@             Taffy @ Full Circle
+@@
+@@ Platforms supported: MUX 2.x, MUSH 3
+@@
+@@ ===============================================================================
+@@ Installation Instructions:
+@@
+@@ Quote this file into your game. No need to edit anything, it is an entirely
+@@ automated process.
+@@
+@@ ===============================================================================
+@@ 
+@@ This code was written by Piouhgd @ Full Circle, aka Starfleet @ Anomaly, back
+@@ around 1994. It was modified by Taffy @ Full Circle, and further modified by
+@@ Starfleet @ Anomaly, allowing for permanent descriptions and patches for
+@@ security holes. If you have been running Full Circle's old multi-description
+@@ object, it is NOT SECURE, and malicious users can cause problems with it.
+@@
+@@ ===============================================================================
+@@
+@@ This code allows for staff-set permanent descriptions, such as standardized
+@@ uniforms or canonical suits of some kind (Anomaly uses them for their Starfleet
+@@ uniforms), but they must be hand set. If you do not wish to use permanent
+@@ descriptions, you do not need to make any modifications to the code, it will
+@@ run fine without them.
+@@
+@@ To set up a permanent description, you must set two attributes on the data
+@@ object: &DESC_<name> and &DESC_<name>_ACCESS. If the DESC_<name>_ACCESS
+@@ returns 1, the player can use the description.
+@@ 
+@@ &DESC_TEST Global Description Functions <GDF>=This is a permanent desc.
+@@ &DESC_TEST_ACCESS Global Description Functions <GDF>=[orflags(%0,WZ)]
+@@
+@@ In the above example, Wizards and Royalty can access the 'TEST' description.
+@@
+@@ ===============================================================================
+@@
+@set me=quiet
+@pemit %#=[ansi(hc,ANOMALY DESC:)] Installing Anomaly DESC v2.0
+@pemit %#=[ansi(hc,ANOMALY DESC:)] Creating Objects.
+@@
+@create Global Description Object <GDO>=10
+@create Global Description Functions <GDF>=10
+@@
+@pemit %#=[ansi(hc,ANOMALY DESC:)] Setting Commands.
+@@
+&CMD_DESC/SAVE Global Description Object <GDO>=$+desc/save *:@switch words(%0)=1,{@switch gt(member([lattr(%#/DESC_*)] [lattr(%#/DESC_*)],DESC_[ucstr(%0)]),0)=1,{@pemit %#=[ansi(ch,GAME:)] You already have a desc named [ucstr(%0)].},{@cpattr %#/DESC=%#/DESC_%0;@set %#/DESC_%0=no_command;@pemit %#=[ansi(ch,GAME:)] You save your [ucstr(%0)] description.}},{@pemit %#=[ansi(ch,GAME:)] ERROR, NOT STORED. Description names must be a single word.}
+&CMD_DESC/EDIT Global Description Object <GDO>=$+desc/edit *=*/*:@switch [not(hasattr(%va,DESC_[edit(%0,%b,_)]))][hasattr(%#,DESC_[edit(%0,%b,_)])]=0*,{@pemit %#=[ansi(ch,GAME:)] You cannot edit the permanent descriptions.},10*,{@pemit %#=[ansi(ch,GAME:)] You have no desc currently stored by that name.},{&DESC_[ucstr(%0)] %#=edit(get(%#/DESC_[ucstr(%0)]),%1,%2);@pemit %#=[ansi(ch,GAME:)] Description [ucstr(%0)] now reads:%R[repeat(-,78)]%R[get(%#/DESC_[ucstr(%0)])]%R[repeat(-,78)]}
+&CMD_DESC/GET Global Description Object <GDO>=$+desc/get *:@switch [gt(words(setr(1,setdiff(setdiff(iter(ucstr(secure(%0)),DESC_##),lattr(%#/DESC_*)),filter(%va/FIL_DESCS,lattr(%va/DESC_*))))),0)]=1,{@pemit %#=[ansi(ch,GAME:)] You do not have the following descriptions you requested: [iter(%q1,[after(##,DESC_)])]},0,{@desc %#=[iter(secure(%0),ifelse(hasattr(%va,DESC_##),get(%va/DESC_##),get(%#/DESC_##)))];@pemit %#=[ansi(ch,GAME:)] Description [ucstr(secure(%0))] now installed as your current character @desc.},@pemit %#=Error in DESC_GET! Contact a staff member.
+&CMD_DESC/KILL Global Description Object <GDO>=$+desc/kill *:@switch [not(hasattr(%va,DESC_%0))][member(lattr(%#/DESC_*),DESC_[ucstr(%0)])]=0*,{@pemit %#=[ansi(ch,GAME:)] You cannot destroy a permanent description.},10,{@pemit %#=[ansi(ch,GAME:)] You have no description currently stored by that name.},{&DESC_[ucstr(%0)] %#;@pemit %#=[ansi(ch,GAME:)] Description [ucstr(%0)] has been erased.}
+&CMD_DESC/LIST Global Description Object <GDO>=$+desc/list:@pemit %#=[setq(0,[lattr(%#/DESC_*)] [filter(%va/FIL_DESCS,lattr(%va/DESC_*))])][switch(words(r(0)),0,[ansi(ch,GAME:)] You have no descriptions currently stored.,[repeat(=,78)]%RYou have the following descriptions currently stored:%r%r[columns(iter(sort(r(0)),[ifelse(hasattr(%va,##),[ansi(hy,*)],)][after(##,DESC_)]),25)]%r%r[space(5)][ansi(hy,*)] Denotes permanent%, unalterable description.%r%r[repeat(=,78)])]
+&CMD_DESC/STORE Global Description Object <GDO>=$+desc/store *=*:@switch [not(gt(words(%0),1))][member([lattr(%#/DESC_*)] [lattr(%va/DESC_*)],DESC_[ucstr(%0)])]=0*,{@pemit %#=[ansi(ch,GAME:)] ERROR. Description names must be a single word.},10*,{&DESC_[ucstr(%0)] %#=[switch(%1,current,[get(%#/desc)],%1)];@pemit %#=[ansi(ch,GAME:)] Description [ucstr(%0)] stored.;@set %#/DESC_%0=no_command},{@pemit %#=[ansi(ch,GAME:)] You already have a description by that name stored. If you wish to overwrite it, use the command '[ansi(h,+desc/kill [ucstr(%0)])]' first.}
+&CMD_DESC/VIEW Global Description Object <GDO>=$+desc/view *:@pemit %#=[switch(member([lattr(%va/DESC_*)] [lattr(%#/DESC_*)],DESC_[ucstr(%0)]),0,[ansi(ch,GAME:)] You have no description currently stored by that name.,[repeat(=,78)]%RDesc Name: [ansi(h,[ucstr(%0)])][ifelse(hasattr(%va,DESC_%0),%b%b%(This is a permanent description.%),)]%R[repeat(-,78)]%R[ifelse(hasattr(%va,DESC_%0),get(%va/DESC_%0),get(%#/DESC_[ucstr(%0)]))]%R[repeat(=,78)])]
+&CMD_DESC/CREDITS Global Description Object <GDO>=$+desc/c*:@pemit %#=[center(| [ansi(hy,Anomaly DESC v[get(%va/VERSION)])] |,79)]%r%rVersion: [get(%va/VERSION)]%r%rRelease: [get(%va/RELEASE)]%r%r[get(%va/CREDITS)]
+&CMD_DESC Global Description Object <GDO>=$+desc:@fo %#=+desc/list
+@@
+@pemit %#=[ansi(hc,ANOMALY DESC:)] Setting controlling attributes.
+@@
+&FIL_DESCS Global Description Functions <GDF>=[u(me/%0_ACCESS)]
+@Desc Global Description Functions <GDF>=%r[columns(sort(lattr(me/*)),18)]%r
+@Desc Global Description Object <GDO>=%r[columns(sort(lattr(me/*)),18)]%r
+&VERSION Global Description Functions <GDF>=2.0
+&RELEASE Global Description Functions <GDF>=18Jul02
+&CREDITS Global Description Functions <GDF>=Starfleet @ Anomaly (station419@earthlink.net) wrote the core code. Taffy @ Full Circle made some modifications. Starfleet @ Anomaly added more functionality and repaired some security holes. You are free to distribute this code so long as these credits remain intact. Please report any problems to the email address listed above. The most recent version of this code can be found at http://anomaly.mushpark.com
+@@
+@pemit %#=[ansi(hc,ANOMALY DESC:)] Setting flags.
+@@
+@set Global Description Object <GDO>=INHERIT
+@switch [first(version())]=TinyMUSH,{@set Global Description Object <GDO>=COMMANDS},{@set Global Description Object <GDO>=!NO_COMMAND}
+@set Global Description Object <GDO>=SAFE
+@set Global Description Object <GDO>=STICKY
+@set Global Description Functions <GDF>=INHERIT
+@@
+@pemit %#=[ansi(hc,ANOMALY DESC:)] Cleaning up attributes.
+@@
+@fo me=&VA Global Description Object <GDO>=[num(gdf)]
+@tel gdf=gdo
+@set me=!quiet
+@@
+@pemit %#=[ansi(hc,ANOMALY DESC:)] Installation complete. Drop the object in the master room. Thanks for using Anomaly DESC!
+@@

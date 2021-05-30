@@ -1,0 +1,43 @@
+@create $turbolift parent
+@set $turbolift parent=LINK_OK
+@set $turbolift parent=WIZARD
+@set $turbolift parent=SAFE
+&TL_WHERE_MSG2 $turbolift parent=[ifthen(true(words(v(TL_COMMAND_LIST))),On the panel\, you can see that the [name(%!)] is currently in transit towards [capstr(v(TL_LEVEL_MSG))] [extract(v(TL_LEVEL_LIST),first(v(tl_command_list)),1,|)]: [extract(v(tl_name_list),first(v(tl_command_list)),1,|)]\, the overall travel time is estimated with [v(tl_time)] seconds.)]
+@STARTUP $turbolift parent=@drain me
+&DO_LIST $turbolift parent=$list:@pem %#=%bList of available destinations from this [name(%!)]:%r[ansi(b,repeat(-,78))][iter(lnuma(words(v(TL_EXIT_LIST),|)),%r[ifelse(comp(##,v(TL_POSITION)),space(14),Location%b===>%b)][ljust(cat(v(TL_LEVEL_MSG),extract(v(TL_LEVEL_LIST),##,1,|)):,10)][extract(v(TL_NAME_LIST),##,1,|)], ,)]%r[ansi(b,repeat(-,78))]
+&TL_EXIT_MSG $turbolift parent=You see a fairly standard two meter by one meter turbolift access door here.%r[u(TL_WHERE_MSG)]
+&TL_ROOM_MSG $turbolift parent=You are in the [name(%!)] and find that it is fairly standard - a cylinder%rthree meters high and two metersin diameter. There is a small strobe%rbar set into the wall near the door%, and its current color is [u(CONDITION)]. Below%rit is a list of destinations you may see by typing 'LIST'. [u(tl_where_msg2)]
+&TL_WHERE_MSG $turbolift parent=The [name(v(TL_DBREF))] is [ifelse(true(words(v(TL_COMMAND_LIST))),in transit.,on [capstr(v(TL_LEVEL_MSG))] [extract(v(TL_LEVEL_LIST),v(TL_POSITION),1,|)]: [extract(v(TL_NAME_LIST),v(TL_POSITION),1,|)])]
+&TL_SELECT_MSG $turbolift parent=You select a destination.
+&TL_OSELECT_MSG $turbolift parent=[name(%0)] selects a destination.
+&DO_LEVEL_CMD $turbolift parent=@swi [setq(0,ifelse(isnum(%0),match(v(TL_LEVEL_LIST),%0,|),match(v(TL_NAME_LIST),*%0*,|)))][u(CHECK_ONLINE)][true(%q0)][not(match(v(TL_POSITION),%q0))][not(v(TL_MOVING))]=????,{@oemit %!/%1=u(TL_OSELECT_MSG,%1);@pem %1=u(TL_SELECT_MSG,%1)},0???,{u(TL_OFFLINE_MSG)},10??,{say u(TL_INVALID_MSG)},110?,{say u(TL_ALREADY_MSG)},111?,{&TL_COMMAND_LIST %!=cat(v(TL_COMMAND_LIST),%q0);say u(TL_OK_MSG)},1111,{@tri %!/DO_MOVE}
+&DO_LEVEL_SAY $turbolift parent=@swi [setq(0,ifelse(isnum(%0),match(v(TL_LEVEL_LIST),%0,|),match(v(TL_NAME_LIST),*%0*,|)))][u(CHECK_ONLINE)][true(%q0)][not(match(v(TL_POSITION),%q0))][not(v(TL_MOVING))]=0???,{say u(TL_OFFLINE_MSG)},10??,{say u(TL_INVALID_MSG)},110?,{say u(TL_ALREADY_MSG)},111?,{&TL_COMMAND_LIST %!=cat(v(TL_COMMAND_LIST),%q0);say u(TL_OK_MSG)},1111,{@tri %!/DO_MOVE}
+&LEVEL_SAY $turbolift parent=^* says, "*level *"*:@tri %!/DO_LEVEL_SAY=secure(%2),%#
+&LEVEL_CMD $turbolift parent=$level *:@tri %!/DO_LEVEL_CMD=secure(%0),%#
+&HELP_MSG $turbolift parent=Usage is as follows:%r%r[v(TL_LEVEL_MSG)] <number/word>%r%tThis command tells the unit where to take you.%rinstall%r%tThis command will take you through installation each time you use it.%r%tOnly the owner may use it.
+&INSTALL $turbolift parent=$install:@swi [or(match(owner(%!),%#),orflags(%#,W))][hasattr(%!,TL_INSTALLED)][hasattr(%!,TL_EXIT_LIST)][hasattr(%!,TL_LEVEL_LIST)][hasattr(%!,TL_NAME_LIST)][hasattr(%!,TL_LEVEL_MSG)]=10????,{&TL_INSTALLED %!=1;&TL_DBREF %!=%!;@set %!=monitor;@set %!=transparent;@set %!=audible;@set %!=inherit;@dolist LEVEL_SAY LEVEL_CMD DESCRIBE={@cpattr parent(%!)/##=%!/##}},10????,{@pem %#=This [name(v(TL_DBREF))], the exit from it, and the exits leading into it, must all have the same owner, for installation to succeed.},110???,{@pem %#=You need to add a list of exits that go _into_ the turbolift, separated by '|'. For example:%r%r%t&TL_EXIT_LIST %! = #18589|#25799|#25800|#25801|#25802%r},1110??,{@dolist cat(exit(%!),iter(v(TL_EXIT_LIST),##,|))={@set ##=no_command;@set ##=!transparent;@set ##=!audible;@lock ##=%!;@parent ##=%!}},1110??,{@pem %#=You need to add a list of levels corresponding to the list of exits, separated by '|'. For example:%r%r%t&TL_LEVEL_LIST %! = 1|2|3|4|5%r},11110?,{@pem %#=You need to add a list of level names corresponding to the list of exits, separated by '|'. For example:%r%r%t&TL_NAME_LIST %! = Bridge|Transporter Room|Engineering|Laboratory|Computer Room%r},111110,{@pem %#=You need to select a command prefix, for the turbolift to listen for. For example:%r%r%t&TL_LEVEL_MSG %! = level%r},111111,{@pem %#=Installation appears to have been successful.},111111,{&LEVEL_SAY %!=edit(v(LEVEL_SAY),get(parent(%!)/TL_LEVEL_MSG),v(TL_LEVEL_MSG));&LEVEL_CMD %!=edit(v(LEVEL_CMD),get(parent(%!)/TL_LEVEL_MSG),v(TL_LEVEL_MSG))}
+&TL_OK_MSG $turbolift parent=Acknowleged.
+&TL_PAUSE $turbolift parent=5
+@OLEAVE $turbolift parent=leaves the [name(v(TL_DBREF))].
+@OENTER $turbolift parent=enters the [name(v(TL_DBREF))].
+@AFAILURE $turbolift parent=@swi [setq(0,match(v(TL_EXIT_LIST),%!,|))][u(CHECK_ONLINE)][true(%q0)][not(v(TL_MOVING))]=11?,{&TL_COMMAND_LIST v(TL_DBREF)=cat(v(TL_COMMAND_LIST),%q0)},111,{@tri v(TL_DBREF)/DO_MOVE}
+@OFAILURE $turbolift parent=pushes the [name(v(TL_DBREF))] call button.
+@FAILURE $turbolift parent=You press the [name(v(TL_DBREF))] call button.
+&DO_STOP $turbolift parent=@unlock exit(%!);@fo owner(%!)={@link [exit(%!)]=[home(extract(v(TL_EXIT_LIST),%0,1,|))];@notify %!};@wait me={@unlock extract(v(TL_EXIT_LIST),%0,1,|);@set exit(%!)=!Dark;&TL_POSITION %!=%0;@remit %!=u(TL_STOP_MSG);@remit loc(exit(%!))=u(TL_OPEN_MSG);&TL_TIME %!;&TL_COMMAND_LIST %!=squish(edit(v(TL_COMMAND_LIST),%0,));@swi true(words(v(TL_COMMAND_LIST)))=0,{&TL_MOVING %!=0},1,{@wait v(TL_PAUSE)=@tri %!/DO_MOVE}}
+&DO_MOVE $turbolift parent=@dolist lkids(%!)={@lock ##=%!};@set exit(%!)=Dark;@remit %!=u(TL_START_MSG);@remit loc(exit(%!))=u(TL_CLOSE_MSG);@unlink exit(%!);&TL_MOVING %!=1;think [setq(0,first(v(TL_COMMAND_LIST)))];&TL_TIME %!=round(abs(mul(sub(extract(v(tl_level_list),v(TL_POSITION),1,|),extract(v(tl_level_list),%q0,1,|)),v(TL_DELAY))),0);&TL_POSITION %!=0;@wait v(TL_TIME)={@tri %!/DO_STOP=%q0}
+&TL_LEVEL_MSG $turbolift parent=level
+&TL_POSITION $turbolift parent=1
+@DESCRIBE $turbolift parent=[ifelse(hastype(%!,room),u(TL_ROOM_MSG),u(TL_EXIT_MSG))]
+&CONDITION $turbolift parent=[ansi(g,GREEN)]
+&TL_INVALID_MSG $turbolift parent=You have specified an invalid [v(TL_LEVEL_MSG)].
+&TL_OPEN_MSG $turbolift parent=The [name(v(TL_DBREF))] doors open.
+&TL_STOP_MSG $turbolift parent=The [name(v(TL_DBREF))] stops%, and the doors open at [v(TL_LEVEL_MSG)] [extract(v(tl_level_list),v(tl_position),1,|)]
+&TL_ALREADY_MSG $turbolift parent=The [name(v(TL_DBREF))] is already at that [v(TL_LEVEL_MSG)].
+&TL_MOVING_MSG $turbolift parent=The [name(v(TL_DBREF))] is in motion. Please be patient.
+&TL_CLOSE_MSG $turbolift parent=The [name(v(TL_DBREF))] doors close.
+&TL_START_MSG $turbolift parent=The [name(v(TL_DBREF))] doors close%, and it begins to move.
+&TL_OFFLINE_MSG $turbolift parent=The [name(v(TL_DBREF))] is non-operational.
+&TL_DELAY $turbolift parent=2
+&TL_MOVING $turbolift parent=0
+&TL_DBREF $turbolift parent=#7727
+&CHECK_ONLINE $turbolift parent=1

@@ -1,0 +1,21 @@
+@create IC Room Parent
+@link IC Room Parent=#1091
+@lock/Basic IC Room Parent==[owner(me)]
+@set IC Room Parent=LINK_OK
+@set IC Room Parent=SAFE
+&VALID_PLAYERS IC Room Parent=squish([iter(lcon(me),switch(num(*##),#-1,,[switch(idle(##),-1,,##)]))])
+&CREDITS IC Room Parent=Slash@TrekWars.ml.org:1701
+&DESC-1 IC Room Parent=@set here=dark%r&DESC-1 here=DESCRIPTION
+&COLOR IC Room Parent=hxR
+&CLASS IC Room Parent=thing
+@DESCRIBE IC Room Parent=[ansi(b,%[)][get_Eval(zone(me)/ZONENAME)][ansi(b,%])]%r[ansi(b,[repeat(=,79)])]%r[ansi(h,[get_Eval(me/DESC-1)])]%r[ansi(b,[repeat(=,79)])]%r[ansi(hb,Alert[space(3)])] [ansi(h,%[)][get_Eval(zone(me)/SALERT)][ansi(h,%]%r)][ansi(hb,Stardate[space(1)])][ansi(h,%[)][ansi(hb,[stardate()])][ansi(h,%])]%r%r[ansi([v(bcolor)],Beings:)][iter(u(valid_players),%r%b%b[ansi(v(blcolor),[class(##)] [name(##)])] [switch(hasattr(##,sarmed),1,[space(5)][ansi(hr,ARMED)])])][iter(u(valid_holoobj),[ansi(v(blcolor),%r%b%b[xget(##,class)] [name(##)][space(5)][switch(hasattr(##,sarmed),1,[ansi(hr,ARMED)])])])]%r[ansi([get_eval(me/tcolor)],%rThings:)][ansi([get_Eval(me/TLCOLOR)],[iter(lcon(me),[switch(hastype(##,thing),1,[switch(hasattr(##,HOLO),1,,0,[switch(hasflag(##,dark),0,%r%b%b[name(##)],0,)])],)],)])]%r%r[ansi([get_Eval(me/ECOLOR)],Exits:)][ansi(GET_EVAL(me/ELCOLOR),[iter(lexits(me),[switch(hasflag(##,dark),0,%r%b%b[ljust(<[ucstr([extract(fullname(##),2,1,;)])]>,6)] [name(##)],1,)])])]
+&VALID_HOLOOBJ IC Room Parent=squish([iter(lcon(me),switch(hastype(##,thing),1,switch(hasattr(##,holo),1,##)))])
+&BCOLOR IC Room Parent=hb
+&TCOLOR IC Room Parent=hg
+&ECOLOR IC Room Parent=hc
+&BLOLOR IC Room Parent=hc
+&TLOLOR IC Room Parent=hc
+&ELOLOR IC Room Parent=hc
+&BLCOLOR IC Room Parent=b
+&TLCOLOR IC Room Parent=g
+&ELCOLOR IC Room Parent=c

@@ -1,0 +1,15 @@
+@create LapTop Computer
+@Desc LapTop Computer=A standard style IBM 686-266mhz computer, with a color active matrix display and a few other little doodads not readily visible.%r%r<For others to be able to 'see' you typing at the computer, you need to set yourself 'audible'.>
+&DIR LapTop Computer=$+dir:@pemit %#=%RDIRECTORY%R[v(line)];@dolist [v(context)]=@pemit %#=##
+&LINE LapTop Computer=<>================================= FILE =================================<>
+&EDIT LapTop Computer=$+edit *=*=*:@switch [member(v(context),%0)]=0,{@pemit %#=You can't revise something that isn't there. Check +dir to find the correct filename.},{@emit %N rapidly hits the keys on %p computer.};@edit me/page_%0={%1},{%2}
+&DELETE LapTop Computer=$+del *:@switch [member(v(context),%0)]=0,{@pemit %#=You can't delete something that isn't there. Check +dir to find the correct filename.},{@emit %N rapidly hits the keys on the computer.;&page_%0 me=;&context me=[remove(v(context),%0)]}
+&WRITE_MESG LapTop Computer=[name(owner(me))] types something into the computer.
+&ERASE_MESG LapTop Computer=[name(owner(me))] rapidly hits the keys on the computer.
+&HELP LapTop Computer=$+comhelp:@pemit %#=%t%t%t<*> COMHELP <*>%r%r+write%b<TITLE>=<TEXT>%t%twill enter TEXT in a file called TITLE.%R+load%b<TITLE>%t%t%twill display the file called TITLE.%r+edit%b<TITLE>=<TEXTA>=<TEXTB>%t%will replace TEXTA with TEXTB in file TITLE%r+del%b<TITLE>%t%t%twill delete file TITLE.
+@Adesc LapTop Computer=@pemit %#=%rType <+comhelp> for help.%rType <+dir> for a directory listing.
+&CREDIT LapTop Computer=Orginal code by Boone@Masq, Improved and typed by Peter Ross@DamnedMUSH
+@set LapTop Computer/CREDIT=visual
+&WRITE LapTop Computer=$+write *=*:@emit %N types something into the computer.;&page_%0 me=%1;&context me=[v(context)] %0
+&READ LapTop Computer=$+load *:@switch [member(v(context),%0)]=0,{@pemit %#=That is not a file in the dir. Check +dir for correct filename, Filename must be spelt EXCATLY as written.},{@pemit %#=%R[ucstr(%0)]%R[v(line)];@pemit %#=[s(v(page_%0))]}
+

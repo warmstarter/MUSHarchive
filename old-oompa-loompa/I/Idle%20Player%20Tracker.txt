@@ -1,0 +1,41 @@
+@@
+@@ Idle Player Tracker
+@@ by Dahan
+@@
+@@ This object helps sort a MUSHes playerbase into catagories and weed out inactive players for nuking.
+@@ Either trigger the object's TR_TOC attribute manually or use a Cron job to do so.
+@@ Please note that as an admin toy intended only for my use, it may not be very user friendly.
+@@
+
+@create Idle Player Tracker
+
+@lock/Basic Idle Player Tracker==me
+@set Idle Player Tracker = !NO_COMMAND
+@set Idle Player Tracker = ROYALTY
+@power Idle Player Tracker = See_All
+
+@ADESCRIBE Idle Player Tracker=@pemit %#=[ansi(mh,*)] Note: White colored names are safe to nuke, red ones aren't. Conditions that make @nuking unsafe include owning stuff and having inventory.
+@DESCRIBE Idle Player Tracker=[u(FN_LLine,Inactive Players,wh,b)][iter(sortby(FN_SortIdle,v(PNuke_PC)),[ifelse(mod(sub(#@,1),3),,%r)][ifelse(and(hastype(##,player),u(FN_Nukable,##,PC)),[ansi(ifelse(u(FN_NukeOk,##),w,rh),name(##))]: [rjust(ansi(c,extract(timestring(sub(secs(),convtime(get(##/last)))),1,2)),sub(23,strlen(name(##))))],[center(ansi(rh,-),25)][set(%!,PNuke_PC:[setdiff(v(PNuke_PC),##)])])])]%r[u(FN_LLine,Inactive Newbies,wh,b)][iter(sortby(FN_SortIdle,v(PNuke_New)),[ifelse(mod(sub(#@,1),3),,%r)][ifelse(and(hastype(##,player),u(FN_Nukable,##,New)),[ansi(ifelse(u(FN_NukeOk,##),w,rh),name(##))]: [rjust(ansi(c,extract(timestring(sub(secs(),convtime(get(##/last)))),1,2)),sub(23,strlen(name(##))))],[center(ansi(rh,-),25)][set(%!,PNuke_New:[setdiff(v(PNuke_New),##)])])])]%r[ansi(b,repeat(=,78))]%r[iter(lattr(%!/plist_*),[ljust([ansi(yh,[capstr(rest(##,_))]:)] [words(v(##))],10)])]
+
+&CMD_LIST Idle Player Tracker=$list *:@pemit %#=[u(FN_LLine,Inactive Players: [setr(0,squish(secure(%0)))],wh,b)][ulocal(FN_List2,%q0)]%r[ansi(b,repeat(=,78))]%r[ansi(mh,*)] Note: White colored names are safe to nuke, red ones aren't. Conditions that make @nuking unsafe include owning stuff and having inventory.
+
+&FN_SORTNAME Idle Player Tracker=[comp(name(%0),name(%1))]
+&FN_SORTIDLE Idle Player Tracker=[sign(sub(convtime(get(%0/last)),convtime(get(%1/last))))]
+&FN_RLLINE Idle Player Tracker=[ansi(%4,~~~<)] [ansi(%2,%0)] [ansi(%4,>[repeat(~,sub(64,add(strlen(%0),strlen(%1))))]<)] [ansi(%3,%1)] [ansi(%4,>~~~)]
+&FN_RLINE Idle Player Tracker=[ansi(%2,[repeat(~,sub(71,strlen(%0)))]<)] [ansi(%1,%0)] [ansi(%2,>~~~)]
+&FN_NUKEOK Idle Player Tracker=[and(match(1 0 0 0 1,lstats(%0),|),eq(0,words(lcon(%0))))]
+&FN_NUKABLE Idle Player Tracker=[switch(%1,New,[gt(sub(secs(),convtime(get(%0/last))),mul(86400,8))],PC,[gt(sub(secs(),convtime(get(%0/last))),mul(86400,60))],0)]
+&FN_LLINE Idle Player Tracker=[ansi(%2,~~~<)] [ansi(%1,%0)] [ansi(%2,>[repeat(~,sub(71,strlen(%0)))])]
+&FN_LIST2 Idle Player Tracker=[iter(sortby(FN_SortIdle,v(Plist_[%0])),[ifelse(mod(sub(#@,1),3),,%r)][ansi(ifelse(u(FN_NukeOk,##),w,rh),name(##))]: [rjust(ansi(c,extract(timestring(sub(secs(),convtime(get(##/last)))),1,2)),sub(23,strlen(name(##))))])]
+&FN_LIST Idle Player Tracker=[sortby(FN_SortName,iter(v(PList_[%0]),ifelse(match([%0],[u(FN_Class,##)]),##,)))]
+&FN_LINE Idle Player Tracker=[ansi(%0,repeat(~~,39))]
+&FN_IDLE Idle Player Tracker=[sub(secs(),convtime(get(%0/last)))]
+&FN_CLINE Idle Player Tracker=[ansi(%2,[repeat(~,sub(37,ceil(fdiv(strlen(%0),2))))]<)] [ansi(%1,%0)] [ansi(%2,>[repeat(~,sub(37,div(strlen(%0),2)))])]
+&FN_CLASS Idle Player Tracker=[ifelse(hasflag(%0,Wizard),wiz,ifelse(hasflag(%0,Royalty),roy,ifelse(haspower(%0,builder),bui,ifelse(haspower(%0,guest),Gst,ifelse(hasflag(%0,unregistered),new,ifelse(hasflag(%0,On-Vacation),VAC,PC))))))]
+
+&LIST_ALL Idle Player Tracker=
+
+&TR_TOC Idle Player Tracker=say Working;th [iter([lattr(%!/Pnuke_*)],wipe(%!/##))][set(%!,List_All:[search(all,type,player)])];@tr %!/tr_tic=0
+&TR_TIC Idle Player Tracker=@swi [gt(setr(0,add(1,mul(%0,10))),words(v(List_All)))]=1,{th [iter(lattr(%!/PList_*),wipe(%!/##))]Done.;@dolist [lattr(%!/PTemp_*)]={@mvattr %!/##=%!/PList_[rest(##,_)]};say Done.},0,{say Working on [%q0] to [min(words(v(List_All)),add(%q0,9))] of [words(v(List_All))].[squish(iter(extract(v(List_All),%q0,10),[set(%!,PTemp_[setr(1,[u(FN_Class,##)])]:[setunion(v(PTemp_[%q1]),##)])][ifelse(u(FN_Nukable,##,%q1),set(%!,PNuke_[%q1]:[setunion(##,v(PNuke_[%q1]))]),)]))];@tr %!/tr_tic=[add(%0,1)]},{say ERROR!}
+
+@@ End of File

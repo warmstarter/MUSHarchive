@@ -1,0 +1,73 @@
+# File: help-system.txt
+# Author: Patrick Herrington <patrickh@innova.net>
+# Format: Mark A. Hassman (12/21/97)
+#########################################################################
+#
+# Help System v1.1
+# This version has additions that make it easier to customize
+# the border around your help topics, and to clean up the list
+# of +help topics.
+#
+# First thing to do is create two objects.
+#
+# The first should be the Help System Object.  Replace all instances
+# of #200 with the dbref number of that object.
+#
+# The second object should be the Help Database.  Replace all
+# instances of #300 with the dbref of that object.
+#
+# +wizhelp will help you with adding topics once the help system
+# is setup.
+#
+# The &noborder attribute on #200 is a list of help topics that have their own
+#   border already.
+# The &offindex attribute on #300 is a list of help topics that you don't want
+#   to appear on the +help or +help index.
+#
+# Any questions/comments should be directed to Gilean@MistvaleMUSH
+# The current address is dreams.2launch.com 1998
+##############################################################################
+
+@VD #200=#300
+-
+&CMD_HELP #200=$+help:@pemit %#=[u(%vd/help_index)]
+-
+&CMD_HELP_TOPIC #200=$+help *:@pemit %#=[setq(1,[edit(%0,%b,_)])][setq(2,[iter([lattr(#44)],[rest(##,_)]%b)])][switch({[gte([match(%q2,%q1)],1)]},1,{[switch({[gte(match(get(me/noborder),%q1),1)]},1,[u(%vd/help_%q1)],{[center(%bHelp: [lcstr(%0)]%b,78,-)]%r[u(%vd/help_%q1)]%r[repeat(-,78)]})]},0,[u(%vd/notopic)])]
+-
+&CMD_ADDHELP #200=$addhelp *=*:@switch [gte(match([lattr(#44)],HELP_[edit(%0,%b,_)]),1)]=1,@pemit %#=There is already a help topic stored under that name.,{@set %vd=HELP_[edit(%0,%b,_)]:%1;@pemit %#=You add the help topic (%0) with the following text%r%1%r}
+-
+&CMD_EDITHELP #200=$edithelp *=*/*:@switch [gte(match([lattr(#44)],HELP_[edit(%0,%b,_)]),1)]=0,@pemit %#=There is no help topic with the name %0. Use addhelp to create one.,{@set #44=HELP_[edit(%0,%b,_)]:[edit([u(#44/help_[edit(%0,%b,_)])],{%1},{%2})];@wait 1=@pemit %#=The new help text is:%r[u(#44/HELP_[edit(%0,%b,_)])]%r}
+-
+&CMD_REMHELP #200=$remhelp *:@pemit %#=You delete the help file for (%0).;@set #44=HELP_[edit(%0,%b,_)]:
+-
+&ISWIZARD #200=[hasflag(%#,Wizard)]
+-
+&CMD_+WIZHELP #200=$+wizhelp:@pemit %#=[switch([hasflag(%#,Wizard)],0,{You aren't a wizard, so you can't use +wizhelp. Sorry to disappoint you.},1,[u(%vd/wizhelp_index)])]
+-
+@lock #200/cmd_addhelp=iswizard/1
+-
+@lock #200/cmd_edithelp=iswizard/1
+-
+@lock #200/cmd_remhelp=iswizard/1
+-
+@lock #200/cmd_+wizhelp #200=iswizard/1
+-
+&NOBORDER #200=bb bbread bbpost bbmisc compass index wear
+-
+@set #200=SAFE
+-
+@set #200=COMMANDS
+-
+@set #200=Inherit
+-
+&HELP_INDEX #300=[center(+help topics,78,-)]%r[setq(1,[iter([lattr(#44)],[lcstr([extract(##,2,1,_)])])])][setq(3,[setunion(%q1,%q1)])][setq(5,[setdiff(%q3,get(me/offindex))])][setq(4,[sort(%q5)])][setq(2,0)]%b[iter(%q4,[setq(2,[add(%q2,1)])][switch({[lte(%q2,4)]},1,{[ljust(mid(##,0,17),17)]},0,{%r%b[ljust(mid(##,0,17),17)][setq(2,1)]})])]%r[repeat(-,78)]
+-
+&NOTOPIC #300=There is no help available for that topic.
+-
+&WIZHELP_INDEX #300=[center(+wizhelp,78,-)]%r%rUse the following commands to add or remove help topics.%r%raddhelp <topic>=<text>%rremhelp <topic>%redithelp <topic>=<old text>/<new text>%r%rThat's all you'll need to do. To use the help texts available with programs like Brandy Mailer and Myrddin's Global BBS, you should just have to change the dbref of the help file of those texts to the dbref of your help file database object.%r%rNOTE: Never use edithelp to edit the index topic. That will cause major problems with your +help and +help index commands.%r%rIf one of your help commands has a border already on it, then just add it to the &noborder attribute on the Help System object. If you want a topic to be left off of the normal +help or +help index screen, then add it to the &offindex attribute on the Help Database object.[repeat(-,78)]
+-
+&OFFINDEX #300=bbread bbpost bbmisc bbwiz
+-
+@set #300=SAFE
+-
+

@@ -1,0 +1,39 @@
+@@ Object: Beeper Object
+@@ Version: 1.0
+@@ Author: Jonathan A. Booth
+@@ E-mail: kamikaze@N0$PAMimsa.edu
+@@ Web: http://www.N0$PAMimsa.edu/~kamikaze/
+@@ (remove N0$PAM from hostnames to use them)
+@@ Date: Mar 26, 1999
+@@ Written for: PennMUSH 1.7.2 pl21
+@@ Author is willing to support: Yes
+@@
+@@ This script creates a beeper object with the +beep command on it.
+@@ It is useful for trying to wake up sleeping players who you need to
+@@ chat with, to RP with, or whatever.
+@@ 
+@@ If a player doesn't want to be beeped, they can turn all beeps off,
+@@ or all beeps on, or individual players off or on.
+@@ 
+@@ Help is provided in the object's description, as well as in the
+@@ +beep/help command. I'd suggest copying the text output by
+@@ +beep/help into your standard help system, but you could also
+@@ reference +beep/help in there.
+@@ 
+@@ See the object's COPYRIGHT attribute for copyright information.
+@@
+
+@create Beeper Object
+@set Beeper Object = WIZARD
+@set Beeper Object = SAFE
+&CMD_BEEP Beeper Object=$^\+beep(/(setup|help|info|on|off|clear))?( (.+))?$:think setq(4,squish(iter(%4,switch(pmatch(##),#-1,,#$))));@sel %2:[words(%q4)]=setup:*,{&BEEP_DATA %#=ON|+:|-:;@pemit %#=Beep: Your are now beepable by everyone.},help:*,{@pemit %#=u(me/FUN_BEEP_HELP)},info:*,{@pemit %#=Beep: Beeping you is [if(strmatch(get(%#/BEEP_DATA),ON*),allowed,denied)] by default.%rAlways allowed: [iter(after(grab(get(%#/BEEP_DATA),+:*,|),:),name(##))]%rAlways denied: %b[iter(after(grab(get(%#/BEEP_DATA),-:*,|),:),name(##))]},on:0,{@edit %#/BEEP_DATA=OFF,ON;@pemit %#=Beep: Beeps will be accepted by default.},on:*,{&BEEP_DATA %#=u(FUN_BEEP_DATA,%#,%q4,+,-);@pemit %#=Beep: Beeps will be always accepted from '%4'.},off:0,{@edit %#/BEEP_DATA=ON,OFF;@pemit %#=Beep: Beeps will be refused by default.},off:*,{&BEEP_DATA %#=u(FUN_BEEP_DATA,%#,%q4,-,+);@pemit %#=Beep: Beeps will always be denied from '%4'.},clear:0,{&BEEP_DATA %#=[before(get(%#/BEEP_DATA),|)]|+:|-:;@pemit %#=Beep: Allow and deny lists cleared.},clear:*,{&BEEP_DATA %#=u(FUN_BEEP_DATA,%#,%q4,,- +);@pemit %#=Beep: '%4' has been cleared from allow and deny lists.},:1,{@pemit %#=if(u(fun_beep,%q4,%#),{Beep: Beeping [name(%q4)].},{Beep: Sorry, [name(%q4)] doesn't want to be disturbed.});@pemit %q4=if(u(fun_beep,%q4,%#),Beep: [beep()]%N has beeped you to get your attention.[beep()])},:*,{@pemit %#=Beep: Sorry, you can't beep multiple people at once.},{@pemit %#=Beep: I don't understand what you tried to do. See '+beep/help' for help.}
+@set Beeper Object/CMD_BEEP=regexp
+&FUN_BEEP Beeper Object=if(strmatch(ucstr(before(get(%0/BEEP_DATA),|)),ON),not(gt(match(after(grab(get(%0/BEEP_DATA),-:*,|),:),%1),0)),gt(match(after(grab(get(%0/BEEP_DATA),+:*,|),:),%1),0))
+&FUN_BEEP_DATA Beeper Object=iter(GET(%0/BEEP_DATA),switch([gt(match(%2,before(##,:)),0)]:[gt(match(%3,before(##,:)),0)],1:*,[before(##,:)]:[setunion(after(##,:),%1)],*:1,[before(##,:)]:[setdiff(after(##,:),%1)],##),|,|)
+@DESCRIBE Beeper Object=u(FUN_BEEP_HELP)%r%rNote to admin: If you put the default BEEP_DATA (consisting of 'ON|+:|-:') on the player, either through a parent, a wiz object setting it, or wiz object forcing them to +beep/setup they won't need to manually +beep/setup. Highly reccomended.%r%r[repeat(-,78)]
+@set Beeper Object/DESCRIBE=no_command visual
+&FUN_BEEP_HELP Beeper Object=[center(Help for the +beep command,78,-)]%rThe +beep command is a way for player to give an alert to someone who's connected, and by their computer, but not paying attention to their connection to this MU*. The various options of the command are:%r[iter(sort({/on&Allow beeps by default|/off&Deny beeps by default|/on <player>&Always allow <player> to beep you|/off <player>&Always deny <player> to beep you|/help&This help message|/info&Tells you info about your beep setup|/setup&Setup the beep system on you|%%b<player>&Send a "wake up beep" to <player>|/clear&Clears everyone from your allow/deny lists|/clear <player>&Clears <player> from your allow/deny lists},a,|),%r%t+beep[ljust(before(##,&),20)][after(##,&)],|)]%r%rNote you might not need to +beep/setup before you can use it, that depends on the particular MU* you're on (they may do it for you in character creation).%r%rAlso note that if player name spaces aren't enabled, you can pass beep multiple names and it'll parse through them all. You can try this when player name spaces is defined, but you may get unperdictable results. Conclusion: Player name spaces are evil don't use them.%r[repeat(-,78)]
+&COPYRIGHT Beeper Object=Copyright 1999, Jonathan A. Booth (kamikaze@imsa.edu). There is no warrenty on this code, if it breaks you get to keep all the peices. It is free for non-commercial use; contact me for info reguarding commercial use. You may redistribute this code provided it is unmodified and this COPYRIGHT notice is retained. Don't rip off this code and claim it as your own, that's lame. Bugs should be reported to me, as well as suggestions.
+@set Beeper Object/COPYRIGHT=visual
+
+

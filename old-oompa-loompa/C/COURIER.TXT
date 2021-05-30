@@ -1,0 +1,19 @@
+@create Courier Package Parent
+@lock/Basic Courier Package Parent==me
+@set Courier Package Parent = WIZARD
+@set Courier Package Parent = SAFE
+@set Courier Package Parent = NO_COMMAND
+@AHEAR Courier Package Parent=th [switch([strmatch([num(*%0)],[v(driver)])],1,[switch([strmatch([zone(here)],[zone([loc([v(driver)])])])],1,[tel(me,[loc([v(driver)])])],0,[pemit([v(driver)],[name(me)] can't go there.%rYou stop driving the [name(me)].)][wipe(me/driver)])])]
+@set Courier Package Parent/AHEAR=no_command
+&CAPACITY_USED Courier Package Parent=0
+@DESCRIBE Courier Package Parent=%b[ansi(hb,[repeat(_,74)]%r/%b)][ljust([ansi(hg,Courier Package)],73)][ansi(hb,\\%r|[repeat(-,74)]|%r|%b)][ljust([ansi(h,From:)] [ansi(nc,[name(v(from))])] on [ansi(ny,[name(zone(loc(v(from))))])],73)][ansi(hb,|%r|%b)][ljust([ansi(h,To%b%b:)] [ansi(nc,[name(v(to))])] on [ansi(ny,[name(zone(loc(v(to))))])],73)][ansi(hb,|%r|[repeat(-,74)]|%r|%b)][ljust([ansi(h,Contents:)],73)][ansi(hb,|%r|)][if(lattr(me/STORAGE_*),[u(fun_find_contents)],%b[ljust(None,73)][ansi(hb,|%r|)])][ansi(hb,[repeat(-,74)]|%r|)]%b[ljust([ansi(h,Total Storage Space Needed:)] [v(capacity_used)],73)][ansi(hb,|%r\\[repeat(_,74)]/)]
+@set Courier Package Parent/DESCRIBE=no_command visual
+&FROM Courier Package Parent=THIS IS TO BE SET UPON CREATION AUTOMATICALLY
+&FUN_CALC_CAPACITY_USED Courier Package Parent=[set(me,capacity_used:0)][iter([lattr(me/STORAGE_*)],[set(me,capacity_used:[add([v(capacity_used)],[mul([v(##)],[v([edit(##,STORAGE_,)].weight)])])])]
+&FUN_FIND_CONTENTS Courier Package Parent=%b[iter([lattr(me/STORAGE_*)],[ljust([ansi([switch([strmatch([v(commodlist)],*|[edit(##,STORAGE_,)]|*)],1,ng,0,n)],[capstr([lcstr([edit(##,STORAGE_,)])])])],35)][ljust([ansi(nc,[v(##)])],10)][ljust([ansi(nb,%[)][ansi(ny,[mul(v(##),v([edit(##,STORAGE_,)].weight))])][ansi(nb,%])],28)][ansi(v(border_color),|%r|)])]
+@LISTEN Courier Package Parent=* has left.
+@set Courier Package Parent/LISTEN=no_command
+@QUEUE Courier Package Parent=
+@set Courier Package Parent/QUEUE=wizard mortal_dark
+&TO Courier Package Parent=THIS IS TO BE SET UPON CREATION AUTOMATICALLY
+&VERSION Courier Package Parent=3.0

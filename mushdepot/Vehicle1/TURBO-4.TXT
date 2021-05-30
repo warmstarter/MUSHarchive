@@ -1,0 +1,49 @@
+@create Turbolift Parent
+@link Turbolift Parent=[owner(me)]
+@lock Turbolift Parent=[owner(me)]
+@lock/Zone Turbolift Parent==[owner(me)]
+@lock/Enter Turbolift Parent==[owner(me)]
+@set Turbolift Parent=WIZARD
+@set Turbolift Parent=LINK_OK
+@set Turbolift Parent=OPAQUE
+@set Turbolift Parent=VISUAL
+@set Turbolift Parent=!NO_COMMAND
+&FN_SORT Turbolift Parent=sort(%0,a,|)
+&INSTALL Turbolift Parent=$install:@swi or(orflags(%#,W),match(owner(%!),%#))=1,{@pem %#=Installing Panel.;&PANEL %!=%!;@set %!=Monitor;@pem %#=Installing Exit.;&EXIT %!=first(lexits(here));@pem %#=Installing Entrances.;&ENTRANCES %!=setunion(entrances(here,E),v(ENTRANCES));@pem %#=Installing Attributes.;@dol LEVEL_SAY LEVEL_CMD SPEED PAUSE={@cpattr parent(%!)/##=%!};@pem %#=Installing Links;@dol rest(v(ENTRANCES))={@link ##};@link first(v(ENTRANCES))=loc(%!);@link v(EXIT)=home(first(v(ENTRANCES)));@dol [v(EXIT)] [v(ENTRANCES)]={@parent ##=%!;@lock ##;@set ##=!HALT};@pem %#=Installing List;&ENTRANCES %!=iter(munge(fn_sort,iter(get(pan/entrances),get(##/LIST),,|),iter(get(pan/entrances),##,,|),|),##,|);@pem %#=Installation Complete.},0,{@pem %#=ansi(r,Permission denied.}
+&MSG_OFAILURE_2 Turbolift Parent=calls the [name(home(v(EXIT)))].
+&MSG_FAILURE_2 Turbolift Parent=You call the [name(home(v(EXIT)))].
+&MSG_OFAILURE_1 Turbolift Parent=calls the [name(home(v(EXIT)))].
+&MSG_FAILURE_1 Turbolift Parent=The doors do not open.
+@AFAILURE Turbolift Parent=@tri ifelse(match(v(EXIT),%!),,v(PANEL))/EXE_LEVEL_CALL=%!,%#
+&EXE_LEVEL_CALL Turbolift Parent=@swi/all [t(u(fn_operational))][v(ACTIVE)]=0?,{@pem %1=u(err_broken)},1?,{&LIST %!=v(LIST) %0},10,{&ACTIVE %!=1;@tri %!/EXE_MOVE_1}
+@OFAILURE Turbolift Parent=ifelse(match(v(EXIT),%!),u(msg_ofailure_1),u(msg_ofailure_2))
+@FAILURE Turbolift Parent=ifelse(match(v(EXIT),%!),u(msg_failure_1),u(msg_failure_2))
+@ODROP Turbolift Parent=arrives from the [name(home(%!))].
+@OSUCCESS Turbolift Parent=enters the [name(loc(%!))].
+@SUCCESS Turbolift Parent=You enter the [name(loc(%!))].
+&ACTIVE Turbolift Parent=0
+&PAUSE Turbolift Parent=5
+&EXE_MOVE_4 Turbolift Parent=@link v(EXIT)=home(v(NEXT));@link v(NEXT)=loc(%!);@remit loc(%!)=u(msg_door_open);@remit loc(v(EXIT))=u(msg_door_open);@swi t(words(v(LIST)))=1,{@wait v(PAUSE)=@tri %!/EXE_MOVE_1},0,{&ACTIVE %!=0}
+&EXE_MOVE_3 Turbolift Parent=@remit loc(%!)=u(msg_stop_move);@tri %!/EXE_MOVE_4
+&EXE_MOVE_2 Turbolift Parent=@remit loc(%!)=u(msg_begin_move);@wait abs(mul(sub(match(v(LIST),v(LAST)),match(v(LIST),v(NEXT))),v(SPEED)))=@tri %!/EXE_MOVE_3
+&EXE_MOVE_1 Turbolift Parent=&NEXT %!=first(v(LIST));&LIST %!=squish(edit(v(LIST),v(NEXT),%b));@remit loc(%!)=u(msg_door_close);@remit loc(v(EXIT))=u(msg_door_close);@dol [v(EXIT)] [v(ENTRANCES)]={@link ##};@tri %!/EXE_MOVE_2
+&MSG_DOOR_OPEN Turbolift Parent=name(loc(%!)) doors slide open.
+&MSG_DOOR_CLOSE Turbolift Parent=name(loc(%!)) doors slide closed.
+&MSG_STOP_MOVE Turbolift Parent=name(loc(%!)) glides to a stop at [name(home(v(NEXT)))].
+&MSG_BEGIN_MOVE Turbolift Parent=name(loc(%!)) shifts into motion.
+&SPEED Turbolift Parent=1
+&MSG_PANEL_DESC Turbolift Parent=[setq(0,center(%b[name(%!)]%b,79,-))][ansi(b,first(%q0))] [ansi(hy,name(%!))] [ansi(b,last(%q0))]%r[iter(v(ENTRANCES),[ifelse(match(loc(v(EXIT)),home(##)),|[ansi(hb,%[%])]|,|%b%b|)] [ifelse(hasattr(##,LIST),u(##/LIST),name(home(##)))],,%r)]%r[ansi(b,repeat(-,79))]
+&MSG_EXIT_DESC_CLOSED Turbolift Parent=Closed [name(home(v(EXIT)))] doors.%r[ifelse(loc(v(EXIT)),The [name(home(v(EXIT)))] is at: [name(loc(v(EXIT)))].,The [name(home(v(EXIT)))] is in motion.)]
+&MSG_EXIT_DESC_OPEN Turbolift Parent=Open [name(home(v(EXIT)))] doors leading to the [name(loc(%!))].
+&MSG_SELECTION Turbolift Parent=name(%#) selects a destination.
+&MSG_ACKNOWLEGED Turbolift Parent=Selection acknowleged.
+&ERR_BAD_LEVEL Turbolift Parent=ansi(r,"%0" is not a valid selection.)
+&ERR_ALREADY_THERE Turbolift Parent=ansi(r,name(loc(%!)) is already there.)
+&ERR_BROKEN Turbolift Parent=ansi(r,Broke!)
+&EXE_LEVEL_CMD Turbolift Parent=@swi/all [t(u(fn_operational))][setq(0,u(fn_word2exit,%0))][t(%q0)][not(match(loc(v(EXIT)),home(%q0)))][v(ACTIVE)]=0???,{@pem %1=u(err_broken)},10??,{@pem %1=u(err_bad_level,%0)},110?,{@pem %1=u(err_already_there)},111?,{@pem %1=u(msg_acknowleged);&LIST %!=v(LIST) %q0},1110,{&ACTIVE %!=1;@tri %!/EXE_MOVE_1}
+&EXE_LEVEL_SAY Turbolift Parent=@swi/all [t(u(fn_operational))][setq(0,u(fn_word2exit,%0))][t(%q0)][not(match(loc(v(EXIT)),home(%q0)))][v(ACTIVE)]=0???,{say u(err_broken)},10??,{say u(err_bad_level,%0)},110?,{say u(err_already_there)},111?,{say u(msg_acknowleged);&LIST %!=v(LIST) %q0},1110,{&ACTIVE %!=1;@tri %!/EXE_MOVE_1}
+&FN_OPERATIONAL Turbolift Parent=or(match(OPERATIVE,toolkit(space_crippled,zone(%!))),1)
+&FN_WORD2EXIT Turbolift Parent=extract(v(ENTRANCES),match(iter(v(ENTRANCES),ifelse(hasattr(##,LIST),u(##/list),name(home(##))),,|),*%0*,|),1)
+@DESCRIBE Turbolift Parent=ifelse(hastype(%!,E),ifelse(loc(%!),u(msg_exit_desc_open),u(msg_exit_desc_closed)),u(msg_panel_desc))
+&LEVEL_SAY Turbolift Parent=^* says* "level *"*:@tri %!/EXE_LEVEL_SAY=secure(%2),%#
+&LEVEL_CMD Turbolift Parent=$level *:@oemit %l/%#=u(msg_selection);@tri %!/EXE_LEVEL_CMD=secure(%0),%#

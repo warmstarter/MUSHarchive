@@ -1,0 +1,29 @@
+@create Warehouse Parent
+@lock/Use Warehouse Parent=canuse/1
+@lock/Basic Warehouse Parent==me
+@set Warehouse Parent = WIZARD
+@set Warehouse Parent = SAFE
+@set Warehouse Parent = NO_COMMAND
+&CAPACITY_REMAINING Warehouse Parent=100000
+&CAPACITY_USED Warehouse Parent=0
+&CARGOCAN Warehouse Parent=1
+@set Warehouse Parent/CARGOCAN=wizard mortal_dark
+&CARGO_CAN Warehouse Parent=1
+&CMD_LOAD Warehouse Parent=$wtransfer * of * to *:th [switch([u(fun_iscommod,%1)][u(fun_gotenough,%0,%1)][u(fun_validdest,%2)],111,[switch([gte([get(%2/capacity_remaining)],%0)],1,[u(fun_transfer_commod,%0,%1,%2)],0,[pemit(%#,The [name(%2)] cannot hold that much.)])],011,[pemit(%#,That is not a valid commodity.)],101,[pemit(%#,You do not have that much of that commodity.)],110,[pemit(%#,Invalid destination.)],[pemit(%#,Invalid syntax.)])]
+&CREDITS Warehouse Parent=Dave@GalacticMUSH [EMAIL: davemilford@home.com] [ICQ: 8516328]
+@set Warehouse Parent/CREDITS=no_command
+@DESCRIBE Warehouse Parent=%b[ansi(v(border_color),[repeat(_,74)]%r[ansi(v(border_color),/)]%b[ljust([ansi(v(name_color),[v(type)] Warehouse)],73)][ansi(v(border_color),\\%r|[repeat(-,74)]|%r|)]%b[ljust([ansi(v(title_color),Owner:)] [v(owner)],73)][ansi(v(border_color),|%r|)]%b[ljust([ansi(v(title_color),Storage Capacity:)] [v(max_capacity)],36)][ljust([ansi(h,Capacity Used:)] [v(capacity_used)],37)][ansi(v(border_color),|%r|[repeat(-,74)]|%r|)]%b[ljust([ansi(v(title_color),Contents:)],73)][ansi(v(border_color),|%r|)][if([lattr(me/STORAGE_*)],[u(fun_find_contents)],[ljust(%bNone,74)][ansi(v(border_color),|%r|)])][ansi(v(border_color),[repeat(-,74)]|%r|)]%b[ljust([ansi(h,Capacity Remaining:)] [v(capacity_remaining)],73)][ansi(v(border_color),|%r\\[repeat(_,74)]/)]
+@set Warehouse Parent/DESCRIBE=no_command visual
+&FUN_CALC_CAPACITY_REMAINING Warehouse Parent=[set(me,capacity_remaining:[v(max_capacity)])][iter([lattr(me/STORAGE_*)],[set(me,capacity_remaining:[sub([v(capacity_remaining)],[mul([v(##)],[v([edit(##,STORAGE_,)].weight)])])])]
+&FUN_CALC_CAPACITY_USED Warehouse Parent=[set(me,capacity_used:0)][iter([lattr(me/STORAGE_*)],[set(me,capacity_used:[add([v(capacity_used)],[mul([v(##)],[v([edit(##,STORAGE_,)].weight)])])])]
+&FUN_FIND_CONTENTS Warehouse Parent=%b[iter([lattr(me/STORAGE_*)],[ljust([ansi([switch([strmatch([v(commodlist)],*|[edit(##,STORAGE_,)]|*)],1,ng,0,[if(strmatch(v(hspacecommods),*|[edit(##,STORAGE_,)]|*),ny,n)])],[capstr([lcstr([edit(##,STORAGE_,)])])])],35)][ljust([ansi(nc,[v(##)])],10)][ljust([ansi(nb,%[)][ansi(ny,[mul(v(##),v([edit(##,STORAGE_,)].weight))])][ansi(nb,%])],28)][ansi(v(border_color),|%r|)])]
+&FUN_FIND_CONTENTS2 Warehouse Parent=[if([lattr(me/STORAGE_*)],%b[iter([lattr(me/STORAGE_*)],[ansi([switch([strmatch([v(commodlist)],*|[edit(##,STORAGE_,)]|*)],1,ng,0,n)],[ljust([capstr([lcstr([edit(##,STORAGE_,)])])],25)])][ljust([ansi(nc,[v(##)])],48)]%r)],None.%r)]
+&FUN_GOTENOUGH Warehouse Parent=[cand([lte(%0,[v(STORAGE_%1)])],[gt(%0,0)])]
+&FUN_ISCOMMOD Warehouse Parent=[hasattr(me,storage_%0)]
+&FUN_TRANSFER_COMMOD Warehouse Parent=[set(me,storage_%1:[sub([v(storage_%1)],%0)])][set(%2,storage_%1:[switch([hasattr(%2,storage_%1)],1,[add([get(%2/storage_%1)],%0)],0,%0)])][pemit(%#,The machinery hums as %0 [capstr([lcstr(%1)])] are moved to [name(%2)].)][switch([strmatch([v(storage_%1)],0)],1,[wipe(me/storage_%1)])][trigger(%2/fun_calc_capacity_remaining)][trigger(%2/fun_calc_capacity_used)][u(fun_calc_capacity_used)][u(fun_calc_capacity_remaining)]
+&FUN_VALIDDEST Warehouse Parent=[cand([hasflag(%0,Wiz)],[hasattr(%0,cargocan)])]
+&MAX_CAPACITY Warehouse Parent=100000
+&OWNER Warehouse Parent=Administration Storage Corp.
+&TYPE Warehouse Parent=Large
+&VERSION Warehouse Parent=3.0
+@set Warehouse Parent/VERSION=no_command

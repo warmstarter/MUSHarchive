@@ -1,0 +1,751 @@
+@@
+@@ The d6 Skills System
+@@  Softcoded by Dahan
+@@  Based of RPG system by West End Games
+@@
+@@ Developed under PennMUSH 1.7.7p23, but is very backwards compatable. (Tested successfully under 1.7.4p20)
+@@
+@@ This file is designed to be cut and pasted into the game while logged in as a wizard character. I generally create a special wizard-builder character named Skills or "Skills BC" for the task.
+@@ Once installed, use the +sinfo or +skills command to access documentation.  Skills and attributes can be added or removed via softcoded commands with ease.  However, someone may need to edit attributes to change attribute & skill limits, and the name of the attribute on which Body Points is based (default is Endurance). Softcode for +heal, natural healing, and +sheet backups provided but commented out.
+@@
+
+
+
+@@ d6 Global Commands(#103TWX)
+@@ Type: THING Flags: WIZARD SAFE
+@@ Owner: Skills  Zone: *NOTHING*  Pennies: 10
+@@ Parent: *NOTHING*
+@@ Powers: 
+@@ Warnings checked: none
+@@ Created: Fri Feb 06 14:38:26 2004
+@@ Last Modification: Wed Mar 10 00:51:47 2004
+@@ Home: OOC Area ZMO(#47Tn)
+@@ Location: Master Room(#2RF)
+
+@create d6 Global Commands
+
+@set d6 Global Commands = !NO_COMMAND
+@set d6 Global Commands = SAFE
+@set d6 Global Commands = WIZARD
+
+&CREDITS d6 Global Commands=Coded by Dahan@BTF
+
+&CMD_ADDWOUND d6 Global Commands=$+addwound *=*:@pemit %#=[ulocal([v(DB_Data)]/FN_AddWound,%#,secure(%0),secure(%1))]
+&CMD_ATTACK d6 Global Commands=$attack *:@pemit %#=[ulocal([v(DB_Data)]/FN_Attack,%#,secure(%0))]
+&CMD_ATTACK2 d6 Global Commands=$+attack *:@pemit %#=[ulocal([v(DB_Data)]/FN_Attack,%#,secure(%0))]
+&CMD_COMBINE d6 Global Commands=$+acom:@pemit %#=[ulocal([v(DB_Data)]/FN_Combine,%#)]
+&CMD_DELWOUND d6 Global Commands=$+delwound *=*:@pemit %#=[ulocal([v(DB_Data)]/FN_DelWound,%#,secure(%0),secure(%1))]
+&CMD_DICE d6 Global Commands=$+dice *:@pemit %#=[ulocal([v(DB_Data)]/FN_Dice,%#,secure(%0),1)]
+&CMD_DICE2 d6 Global Commands=$+dice/silent *:@pemit %#=[ulocal([v(DB_Data)]/FN_Dice,%#,secure(%0),0)]
+&CMD_DIVIDE d6 Global Commands=$+adiv * *:@pemit %#=[ulocal([v(DB_Data)]/FN_Divide,%#,secure(%0),secure(%1))]
+&CMD_GIVEXP d6 Global Commands=$+givecp *=*:@pemit %#=[ulocal([v(DB_Data)]/FN_GiveXP,%#,secure(%0),secure(%1))]
+&CMD_GIVEXP2 d6 Global Commands=$+givexp *=*:@pemit %#=[ulocal([v(DB_Data)]/FN_GiveXP,%#,secure(%0),secure(%1))]
+&CMD_HEAL d6 Global Commands=$heal *:@pemit %#=[ulocal([v(DB_Data)]/FN_Heal,%#,secure(%0))]
+&CMD_HEAL2 d6 Global Commands=$+heal *:@pemit %#=[ulocal([v(DB_Data)]/FN_Heal,%#,secure(%0))]
+&CMD_HELP d6 Global Commands=$+skills*:@pemit %#=[ulocal([v(DB_Data)]/FN_Help,%#,secure(%0))]
+&CMD_HELP2 d6 Global Commands=$+sinfo*:@pemit %#=[ulocal([v(DB_Data)]/FN_Help,%#,secure(%0))]
+&CMD_LOAD d6 Global Commands=$load *=* *:@pemit %#=[ulocal([v(DB_Data)]/FN_Load,%#,secure(%0),secure(%1),secure(%2))]
+&CMD_LOAD2 d6 Global Commands=$+load *=* *:@pemit %#=[ulocal([v(DB_Data)]/FN_Load,%#,secure(%0),secure(%1),secure(%2))]
+&CMD_NEWATTR d6 Global Commands=$+newattr *=*:@pemit %#=[ulocal([v(DB_Data)]/FN_NewAttr,%#,secure(%0),%1)]
+&CMD_NEWSKILL d6 Global Commands=$+newskill *=*/*:@pemit %#=[ulocal([v(DB_Data)]/FN_NewSkill,%#,secure(%0),secure(%1),%2)]
+&CMD_NOM_ADDAWARD d6 Global Commands=$+nom/addaward *=*/*:@pemit %#=[ulocal([v(DB_Data)]/FN_AddNomAward,%#,secure(%0),secure(%1),secure(%2))]
+&CMD_NOM_APPROVE d6 Global Commands=$+nom/approve *:@pemit %#=[ulocal([v(DB_Data)]/FN_Nom_Approve,%#,secure(%0))]
+&CMD_NOM_AWARD d6 Global Commands=$+nom/award:@pemit %#=[ulocal([v(DB_Data)]/FN_Nom_Award,%#,%#)]
+&CMD_NOM_AWARD2 d6 Global Commands=$+nom/award *:@pemit %#=[ulocal([v(DB_Data)]/FN_Nom_Award,%#,secure(%0))]
+&CMD_NOM_AWARDS d6 Global Commands=$+nom/awards:@pemit %#=[ulocal([v(DB_Data)]/FN_Nom_Levels,%#)]
+&CMD_NOM_CHECK d6 Global Commands=$+nom/check:@pemit %#=[ulocal([v(DB_Data)]/FN_Nom_Check,%#)]
+&CMD_NOM_CYCLE d6 Global Commands=$+nom/cycle:@pemit %#=[ulocal([v(DB_Data)]/FN_Nom_Cycle,%#)]
+&CMD_NOM_DELAWARD d6 Global Commands=$+nom/delaward *:@pemit %#=[ulocal([v(DB_Data)]/FN_DelNomAward,%#,secure(%0))]
+&CMD_NOM_LEADERS d6 Global Commands=$+nom/leaders:@pemit %#=[ulocal([v(DB_Data)]/FN_Nom_Leaders,%#,10)]
+&CMD_NOM_LEADERS2 d6 Global Commands=$+nom/leaders *:@pemit %#=[ulocal([v(DB_Data)]/FN_Nom_Leaders,%#,secure(%0))]
+&CMD_NOM_LEFT d6 Global Commands=$+nom*/left:@pemit %#=[ulocal([v(DB_Data)]/FN_Nom_Left,%#,%#)]
+&CMD_NOM_LEFT2 d6 Global Commands=$+nom*/left *:@pemit %#=[ulocal([v(DB_Data)]/FN_Nom_Left,%#,secure(%1))]
+&CMD_NOM_LEVELS d6 Global Commands=$+nom/levels:@pemit %#=[ulocal([v(DB_Data)]/FN_Nom_Levels,%#)]
+&CMD_NOM_LIST d6 Global Commands=$+nom/list:@pemit %#=[ulocal([v(DB_Data)]/FN_Nom_List,%#)]
+&CMD_NOM_REJECT d6 Global Commands=$+nom/reject *:@pemit %#=[ulocal([v(DB_Data)]/FN_Nom_Reject,%#,secure(%0))]
+&CMD_NOM_SUBMIT d6 Global Commands=$+nom *=*:@pemit %#=[ulocal([v(DB_Data)]/FN_NomSubmit,%#,secure(%0),%1)]
+&CMD_NOM_TOTALS d6 Global Commands=$+nom/totals:@pemit %#=[ulocal([v(DB_Data)]/FN_Nom_Totals,%#)]
+&CMD_NOM_VIEW d6 Global Commands=$+nom/view *:@pemit %#=[ulocal([v(DB_Data)]/FN_Nom_View,%#,secure(%0))]
+&CMD_NOM_WEEKMAX d6 Global Commands=$+nom/weekmax *:@pemit %#=[ulocal([v(DB_Data)]/FN_Nom_WeekMax,%#,secure(%0))]
+&CMD_NOM_WORDMIN d6 Global Commands=$+nom/wordmin *:@pemit %#=[ulocal([v(DB_Data)]/FN_Nom_WordMin,%#,secure(%0))]
+&CMD_RAISE d6 Global Commands=$+raise * to *:@pemit %#=[ulocal([v(DB_Data)]/FN_Raise,%#,secure(%0),secure(%1))]
+&CMD_RAISE2 d6 Global Commands=$+raise *=*:@pemit %#=[ulocal([v(DB_Data)]/FN_Raise,%#,secure(%0),secure(%1))]
+&CMD_RAISE3 d6 Global Commands=$+raise/cost * to *:@pemit %#=[ulocal([v(DB_Data)]/FN_RaiseCost,%#,secure(%0),secure(%1))]
+&CMD_RAISE4 d6 Global Commands=$+raise/cost *=*:@pemit %#=[ulocal([v(DB_Data)]/FN_RaiseCost,%#,secure(%0),secure(%1))]
+&CMD_READY d6 Global Commands=$ready *:@pemit %#=[ulocal([v(DB_Data)]/FN_Wield,%#,secure(%0))]
+&CMD_READY2 d6 Global Commands=$+ready *:@pemit %#=[ulocal([v(DB_Data)]/FN_Wield,%#,secure(%0))]
+&CMD_RELOAD d6 Global Commands=$reload *:@pemit %#=[ulocal([v(DB_Data)]/FN_Reload,%#,secure(%0))]
+&CMD_REMATTR d6 Global Commands=$+remattr *:@pemit %#=[ulocal([v(DB_Data)]/FN_RemAttr,%#,secure(%0))]
+&CMD_REMSKILL d6 Global Commands=$+remskill *:@pemit %#=[ulocal([v(DB_Data)]/FN_RemSkill,%#,secure(%0))]
+&CMD_ROLL d6 Global Commands=$+roll *:@pemit %#=[ulocal([v(DB_Data)]/FN_Roll,%#,ifelse(gt(words(secure(%0),/),1),first(secure(%0),/),%#),last(secure(%0),/),1)]
+&CMD_ROLL2 d6 Global Commands=$+roll/silent *:@pemit %#=[ulocal([v(DB_Data)]/FN_Roll,%#,ifelse(gt(words(secure(%0),/),1),first(secure(%0),/),%#),last(secure(%0),/),0)]
+&CMD_ROLLALL d6 Global Commands=$+rollall *:@pemit %#=[ulocal([v(DB_Data)]/FN_RollAll,%#,secure(%0),1)]
+&CMD_ROLLALL2 d6 Global Commands=$+rollall/silent *:@pemit %#=[ulocal([v(DB_Data)]/FN_RollAll,%#,secure(%0),0)]
+&CMD_SELECT d6 Global Commands=$+select *:@pemit %#=[ulocal([v(DB_Data)]/FN_Select,%#,get(%#/DD6_Weapon),secure(%0))]
+&CMD_SETMAXBP d6 Global Commands=$+setmaxbp *=*:@pemit %#=[ulocal([v(DB_Data)]/FN_SetMaxBP,%#,secure(%0),secure(%1))]
+&CMD_SETSKILL d6 Global Commands=$+setskill */* to *:@pemit %#=[ulocal([v(DB_Data)]/FN_Set,%#,secure(%0),secure(%1),secure(%2))]
+&CMD_SETSKILL2 d6 Global Commands=$+setskill */*=*:@pemit %#=[ulocal([v(DB_Data)]/FN_Set,%#,secure(%0),secure(%1),secure(%2))]
+&CMD_SHEET d6 Global Commands=$+sheet*:@pemit %#=[ulocal([v(DB_Data)]/FN_Sheet,%#,secure(%0))]
+&CMD_SHEETMAIL d6 Global Commands=$+sheetmail *:@swi [setq(0,pmatch(secure(%0)))][isdbref(%q0)]=0,{@pemit %#=[get(v(DB_Data)/VB)] [u(v(DB_Data)/MSG_Target)]},1,{@pemit %#={[get(v(DB_Data)/VA)] You have mailed your sheet to [name(%q0)].};@mail [%q0]=[%N]'s +sheet/[u(v(DB_Data)/FN_Sheet,%#,%#)]
+&CMD_UNLOAD d6 Global Commands=$unload *:@pemit %#=[ulocal([v(DB_Data)]/FN_Unload_All,%#,secure(%0))]
+&CMD_UNREADY d6 Global Commands=$unready*:@pemit %#=[ulocal([v(DB_Data)]/FN_Unwield,%#)]
+&CMD_UNREADY2 d6 Global Commands=$+unready*:@pemit %#=[ulocal([v(DB_Data)]/FN_Unwield,%#)]
+&CMD_USECP d6 Global Commands=$+usecp:@pemit %#=[ulocal([v(DB_Data)]/FN_UseCP,%#)]
+
+&DB_DATA d6 Global Commands=#96
+
+@DESCRIBE d6 Global Commands=This is a WEG style skills system.
+
+
+
+@@ d6 Chargen(#98TW)
+@@ Type: THING Flags: WIZARD
+@@ Owner: Skills  Zone: *NOTHING*  Pennies: 10
+@@ Parent: *NOTHING*
+@@ Powers: 
+@@ Warnings checked: none
+@@ Created: Fri Feb 06 14:38:14 2004
+@@ Last Modification: Mon Mar 08 10:29:21 2004
+@@ Home: Chargen(#93Rn)
+@@ Location: Skills Selection(#106Rn)
+
+@create d6 Chargen
+
+@set d6 Chargen = !NO_COMMAND
+@set d6 Chargen = SAFE
+@set d6 Chargen = WIZARD
+
+&CMD_RESET d6 Chargen=$+reset:@pemit %#=[ulocal(FN_Reset,%#)]
+&CMD_SET d6 Chargen=$+set * to *:@pemit %#=[ulocal(FN_Set,%#,secure(%0),secure(%1))]
+&CMD_SPECIAL d6 Chargen=$+specialize */*/*:@pemit %#=[ulocal(FN_Special,%#,secure(%0),secure(%1),secure(%2))]
+
+&DB_DATA d6 Chargen=#96
+
+@DESCRIBE d6 Chargen=%b%bThis this room, you will configure your character's sheet.  Your character sheet should reflect your background and abilities.%r%rCommands:%r%b%b[ansi(rh,+reset)]%r%b%b[ansi(rh,+set)] [ansi(y,<Attr/skill>)] [ansi(rh,to)] [ansi(y,<#>D+<#>)]%r%b%b[ansi(rh,+specialize)] [iter(skill_1 skill_2 skill_3,ansi(y,<[edit(itext(0),_,%b)]>),,ansi(rh,/))]%r%b%b[ansi(rh,+sheet)]%r%b%b[ansi(rh,+sinfo)] [ansi(y,\[<topic>\])]
+
+&FN_CANLEAVE d6 Chargen=[not(or(ulocal([v(DB_Data)]/FN_GetListItem,get(%0/DD6_Skills),Attr_Dice),ulocal([v(DB_Data)]/FN_GetListItem,get(%0/DD6_Skills),Skill_Dice)))]
+&FN_ONLEAVE d6 Chargen=[setq(0,[first(ulocal([v(DB_Data)]/FN_RollSkill,%0,Endurance,0,20))])][set(%0,DD6_Skills:[ulocal([v(DB_Data)]/FN_SetListItem,get(%0/DD6_Skills),%q0,BPMax)])][pemit(%0,[%va] Your maximum health has been set to [%q0].)]
+&FN_RESET d6 Chargen=[set(%0,DD6_Skills:[setunion(21 Attr_Dice|21 Skill_Dice,iter(get([v(DB_Data)]/List_Attrs),[ulocal([v(DB_Data)]/FN_Min_Attr,%0,##)] [##],,|),|)])][ansi(gh,-)] [name(%0)] has been reset.
+&FN_SET d6 Chargen=[@@(0 - %#, 1 - attr/skill, 2 - val)][setq(1,squish(edit(%1,%b,_),_))][setq(2,ulocal([v(DB_Data)]/FN_d62Pip,%2))][switch([t(setr(3,grab(get([v(DB_Data)]/List_Attrs),[%q1]*)))][t(setr(4,first(grab(iter(get([v(DB_Data)]/List_Attrs),graball(get([v(DB_Data)]/List_Skills),* [itext(0)],|),,|),[%q1]*,|))))][t(match(get([v(DB_Data)]/List_Skills),[%q1]*,|))],000,[ulocal([v(DB_Data)]/MSG_Stat)],001,[ansi(rh,-)] You may not use this command to set specialty skills.,01*,[ulocal(FN_SetSkill,%0,%q4,%q2)],1*,[ulocal(FN_SetAttr,%0,%q3,%q2)],[ulocal([v(DB_Data)]/MSG_Crit)])]
+&FN_SETATTR d6 Chargen=[@@(0 - %#, 1 - Attribute, 2 - # Pips)][setq(0,ulocal([v(DB_Data)]/FN_GetAttr,%0,%1))][switch([lte(sub(%2,%q0),ulocal([v(DB_Data)]/FN_GetListItem,get(%0/DD6_Skills),Attr_Dice))][lte(%2,[ulocal([v(DB_Data)]/FN_Max_Attr,%0,%1)])][gte(%2,[ulocal([v(DB_Data)]/FN_Min_Attr,%0,%1)])],0*,[%vb] You can't afford to raise [edit(%1,_,%b)] that high.,10*,[%vb] You may not set an attribute over [ulocal([v(DB_Data)]/FN_ColorPip,[ulocal([v(DB_Data)]/FN_Max_Attr,%0,%1)])] in chargen.,110,[%vb] You may not set an attribute below [ulocal([v(DB_Data)]/FN_ColorPip,[ulocal([v(DB_Data)]/FN_Min_Attr,%0,%1)])] in chargen.,111,[%va] You have set your [edit(%1,_,%b)] attribute to [ulocal([v(DB_Data)]/FN_ColorPip,%2)].[ulocal([v(DB_Data)]/FN_SetAttr,%0,%1,%2)][set(%0,DD6_Skills:[ulocal([v(DB_Data)]/FN_xListItem,get(%0/DD6_Skills),sub(%2,%q0),Attr_Dice,sub)])][iter(graball(get([v(DB_Data)]/List_Skills),* [%1],|),ifelse(gt(ulocal([v(DB_Data)]/FN_GetSkill,%0,first(##)),v(Max_Skill)),%r[ulocal(FN_SetSkill,%0,first(##),v(Max_Skill))],),|,)],[ulocal([v(DB_Data)]/MSG_Crit)])]
+&FN_SETSKILL d6 Chargen=[@@(0 - %#, 1 - Skill, 2 - # Pips)][setq(0,ulocal([v(DB_Data)]/FN_GetSkill,%0,%1))][setq(1,ulocal([v(DB_Data)]/FN_GetAttr,%0,[extract(grab(get([v(DB_Data)]/List_Skills),[%1] *,|),2,1)]))][switch([lte(sub(%2,%q0),ulocal([v(DB_Data)]/FN_GetListItem,get(%0/DD6_Skills),Skill_Dice))][lte(%2,v(Max_Skill))][gte(%2,%q1)],0*,[%vb] You can't afford to raise [edit(%1,_,%b)] that high.,10*,[%vb] You may not raise a skill over [ulocal([v(DB_Data)]/FN_ColorPip,v(Max_Skill))] in chargen.,110,[%vb] You may not lower a skill below it's base attribute.,[%va] You have set your [edit(%1,_,%b)] skill to [ulocal([v(DB_Data)]/FN_ColorPip,%2)].[ulocal([v(DB_Data)]/FN_SetSkill,%0,%1,%2)][set(%0,DD6_Skills:[ulocal([v(DB_Data)]/FN_xListItem,get(%0/DD6_Skills),sub(%2,%q0),Skill_Dice,sub)])])]
+&FN_SPECIAL d6 Chargen=[@@(0 - %#, 1 - Spec1, 2 - Spec2, 3 - Spec3)][setq(0,iter(setdiff(get([v(DB_Data)]/List_Skills),iter(get([v(DB_Data)]/List_Attrs),graball(get([v(DB_Data)]/List_Skills),* [itext(0)],|),,|),|),first(itext(0)),|,%b))][setq(1,iter(1 2 3,grab(%q0,[squish(edit(v(itext(0)),%b,_),_)]*),,%b))][switch([gte(ulocal([v(DB_Data)]/FN_GetListItem,get(%0/DD6_Skills),Skill_Dice),3)][eq(3,words(%q1))][[first([iter(get(%0/DD6_Skills),switch(grab(get([v(DB_Data)]/List_Skills),[rest(itext(0))] *,|),,,ifelse(match(get([v(DB_Data)]/List_Attrs),extract(#$,2,1)),,0)),|,%b)] 1)]],0*,[%vb] You lack the skill dice to afford that.,10,[%vb] Those are not three valid specializations.  Only the following of what you typed were valid: [iter(%q1,edit(itext(0),_,%b),,\,%b)],110,[%vb] You may only use 1D of your skill dice towards specalizations.,111,[%va] You have specialized in: [iter(%q1,edit(itext(0),_,%b),,\,%b)].[set(%0,DD6_Skills:[ulocal([v(DB_Data)]/FN_xListItem,get(%0/DD6_Skills),3,Skill_Dice,sub)])][iter(%q1,ulocal([v(DB_Data)]/FN_SetSkill,%0,itext(0),add(3,ulocal([v(DB_Data)]/FN_GetSkill,%0,itext(0)))),,)],[ulocal([v(DB_Data)]/MSG_Crit)])]
+
+&MAX_SKILL d6 Chargen=17
+
+@VA d6 Chargen=-
+@VB d6 Chargen=-
+
+
+
+@@ d6 Database(#96TWXn)
+@@ Type: THING Flags: WIZARD SAFE NO_COMMAND
+@@ Owner: Skills  Zone: *NOTHING*  Pennies: 10
+@@ Parent: *NOTHING*
+@@ Powers: 
+@@ Warnings checked: none
+@@ Created: Fri Feb 06 14:37:54 2004
+@@ Last Modification: Wed Mar 10 00:53:55 2004
+@@ Home: Chargen(#93Rn)
+@@ Location: Skill's Office(#111Rn)
+
+@create d6 Database
+
+@set d6 Database = NO_COMMAND
+@set d6 Database = SAFE
+@set d6 Database = WIZARD
+
+@AENTER d6 Database=@swi [ulocal(FN_IsAmmo,%#)]=1,{@nuke [##]},
+
+&DB_AMMO d6 Database=#101
+&DB_GARBAGE d6 Database=#119
+&DB_HELP d6 Database=#97
+&DB_NOM d6 Database=#99
+&DB_UNARMED d6 Database=#102
+&DB_WEAPON d6 Database=#100
+
+@DESCRIBE d6 Database=DB_*%t- Database number.%rFN_*%t- u-function.%rFUN_*%t- global function.%rLIST_*%t- A list.%rMSG_*%t- An error message.%r%rVA%t- Prefix for errorless skills output.%rVB%t- Prefix for skills error outputs.
+
+&FN_ADDNOMAWARD d6 Database=[@@(0 - %#, 1 - Text, 2 - Color, 3 - # noms)][setq(1,left(squish(edit(%1,_,%b)),30))][setq(2,squish(%2))][setq(2,edit(setinter(b B c C f F g G h H i I m M n r R u U w W x X y Y,iter(lnum(strlen(%q2)),mid(%q2,itext(0),1))),%b,))][setq(3,abs(val(%3)))][setq(4,grab(v(List_NomAwards),[%q3] *,|))][switch([ulocal(FN_IsWiz,%0)][not(words(%q4))],0*,[ulocal(MSG_Wiz)],10,[%vb] The [ansi(extract(%q4,2,1),extract(%q4,3,1000))] award already exists for [first(%q4)] noms.,11,[%va] You have added the [ansi(%q2,%q1)] nom award\, requiring a minimum of [%q3] noms.[set(%!,List_NomAwards:[sortby(FN_Sort_First,setunion(v(List_NomAwards),[%q3] [%q2] [%q1],|),|)])],[ulocal(MSG_Crit)])]
+&FN_ADDWOUND d6 Database=[@@(0 - %#, 1 - target, 2 - # hit points)][setq(1,ulocal(FN_Pmatch,%1))][setq(2,val(%2))][switch([or(ulocal(FN_IsWiz,%0),match(%q1,%0))][gt(%q2,0)],0*,[ulocal(MSG_Wiz)],10,[%vb] That is not a positive number of wound points.,11,[%va] You deduct [%q2] wound points from [ifelse(match(%q1,%0),yourself,name(%q1))].[ifelse(match(%q1,%0),,[oemit([loc(%q1)]/[%0],[%va] [name(%q1)] has lost [%q2] wound points.)])][set(%q1,DD6_Skills:[ulocal(FN_xListItem,get(%q1/DD6_Skills),%q2,BPDmg,add)])],[ulocal(MSG_Crit)])]
+&FN_ATTACK d6 Database=[@@(0 - %#, 1 - Target at Modifier)][setq(1,ucstr(squish(edit(%1,%b,_),_)))][ulocal(FN_Attack2,%0,before(%q1,_AT_),after(%q1,_AT_))]
+&FN_ATTACK2 d6 Database=[@@(0 - %#, 1 - Target, 2 - Modifier)][setq(1,ulocal(FN_Pmatch,%1))][setq(2,ucstr(squish(edit(%2,%b,_),_)))][setq(3,get(%0/DD6_Weapon))][ifelse(ulocal(FN_IsWeapon,%q3),,setq(3,[v(DB_Unarmed)]))][ifelse(eq(2,words(%q2,D)),[setq(4,val(before(%q2,D)))][setq(5,val(after(%q2,D)))],[setq(4,0)][setq(5,val(%q2))])][setq(6,val(%2))][setq(7,ulocal(%q3/FN_Ammo_Num))][setq(8,ulocal(%q3/FN_Ammo_Type))][switch([isdbref(%q1)][ulocal(FN_IsWeapon,%q3)][t(match(loc(%0),loc(%q1)))][gte(ulocal(FN_GetListItem,get(%q3/List_Ammo),%q8),%q7)],0*,[ulocal(MSG_Target)],10*,[ulocal(MSG_Weapon,%q3)],110*,[%vb] [name(%q1)] is nowhere in sight.,1110*,[%vb] You don't have enough ammo to do that.,1111,[remit(loc(%0),[%va] [ulocal(%q3/FN_MSG_Attack,%0,%q1,[ulocal(FN_RollStat,add(val(ulocal(FN_GetStat,%#,ulocal(FN_GrabStat,ulocal(%q3/FN_Skill,%0)))),mul(3,%q4)),%q5)],%q4,%q5)])][set(%q3,List_Ammo:[ulocal(FN_xListItem,get(%q3/List_Ammo),%q7,%q8,sub)])],[ulocal(MSG_Crit)])]
+&FN_COLORPIP d6 Database=[ansi([switch(%0,>21,c,>13,g,>8,y,r)]h,ulocal(FN_Pip2d6,%0))]
+&FN_COMBINE d6 Database=[@@(0 - %#)][setq(1,squish(iter(lcon(%0),ifelse(ulocal(FN_IsAmmo,itext(0)),itext(0),))))][switch([gte(words(%q1),2)],0*,[%vb] You do not have two or more ammunition containers to combine.,1,[%va] You combine all your ammunition into one container.[setq(2,)][iter(%q1,iter(get([itext(0)]/List_Ammo),setq(2,ulocal(FN_xListItem,%q2,first(itext(0)),rest(itext(0)),add)),|,),,)][set([first(%q1)],List_Ammo:[%q2])][iter([rest(%q1)],ulocal(FN_Nuke,itext(0)),,)],[ulocal(MSG_Crit)])]
+@@ &FN_CONVERT d6 Database=[@@(0 - Target)][setq(0,iter(v(List_Attrs),[ulocal(FN_d62pip,get(%0/Attr_[mid(itext(0),0,3)]))] [itext(0)],,|))][setq(0,setunion(%q0,iter(setdiff(lattr(%0/Skill_*),SKILL_DICE),[setq(1,grab(v(List_Skills),[rest(itext(0),_)]*,|))][sub(ulocal(FN_d62pip,get(%0/[itext(0)])),ulocal(FN_GetListItem,%q0,rest(%q1)))] [first(%q1)],,|),|))][setq(0,setunion(%q0,[val(get(%0/Noms_Total))] NomTotal|[val(get(%0/CharPts))] CP|[val(sub(last(get(%0/Health)),first(get(%0/Health))))] BPDmg|[ulocal(FN_d62pip,get(%0/Skill_Dice))] Skill_Dice|[ulocal(FN_d62pip,get(%0/Attr_Dice))] Attr_Dice,|))][setq(0,setdiff([iter(%q0,ifelse(and(eq(words(itext(0)),2),gt(first(itext(0)),0)),|[itext(0)],),|,)],,|))][set(%0,DD6_Skills:[%q0])][set(%0,DD6_Weapon:[get(%0/Weapon)])]
+&FN_COST d6 Database=[@@(0 - attr/skill, 1 - initial pips, 2 - final pips)][setq(0,switch([t(match(v(List_Attrs),%0))][t(match(v(List_Attrs),rest(grab(v(List_Skills),[%0] *,|))))],1*,10,00,0.5,1))][mul(sign(sub(%2,%1)),lmath(add,iter(lnum(min(%1,%2),sub(max(%1,%2),1)),ceil(mul(%q0,div(itext(0),3))))))]
+&FN_D62PIP d6 Database=[@@(0 - convert ad6+b into # of pips)][add(mul(val(before(ucstr(%0),D)),3),ulocal(FN_Val,after(ucstr(%0),D)))]
+&FN_DECOMP d6 Database=[@@(0 - %#)][pemit(%0,@@ Attributes%r)][iter(v(list_attrs),[pemit(%0,+newattr [##]=[edit(edit(get([v(DB_Help)]/Attr_[##]),%r,%%r),%t,%%t)])])][pemit(%0,%r@@ Skills%r)][iter(v(List_Skills),[pemit(%0,+newskill [first(##)]=[rest(##)]/[edit(edit(get([v(DB_Help)]/Skill_[first(##)]),%r,%%r),%t,%%t)])],|,)][pemit(%0,%r@@ End of List)]
+&FN_DELNOMAWARD d6 Database=[@@(0 - %#, 1 - # noms)][setq(1,val(%1))][setq(2,grab(v(List_NomAwards),[val(%1)] *,|))][switch([ulocal(FN_IsWiz,%0)][t(words(%q2))],0*,[ulocal(MSG_Wiz)],10,[%vb] No award exists that needs [%q1] noms.,11,[%va] You have removed the [ansi(extract(%q2,2,1),extract(%q2,3,1000))] nom award\, that required a minimum of [%q1] noms.[set(%!,List_NomAwards:[sortby(FN_Sort_First,setdiff(v(List_NomAwards),[%q2],|),|)])],[ulocal(MSG_Crit)])]
+&FN_DELWOUND d6 Database=[@@(0 - %#, 1 - target, 2 - # hit points)][setq(1,ulocal(FN_Pmatch,%1))][setq(3,ulocal(FN_BPDmg,%q1))][setq(2,val(min(%q3,%2)))][switch([ulocal(FN_IsWiz,%0)][gt(%q3,0)][gt(%q2,0)],0*,[ulocal(MSG_Wiz)],10*,[%vb] [name(%q1)] isn't wounded.,110,[%vb] That is not a positive number of wound points.,111,[%va] You restore [%q2] wound points on [ifelse(match(%q1,%0),yourself,name(%q1))].[ifelse(match(%q1,%0),,[oemit([loc(%q1)]/[%0],[%va] [name(%q1)] has restored [%q2] wound points.)])][set(%q1,DD6_Skills:[ulocal(FN_xListItem,get(%q1/DD6_Skills),%q2,BPDmg,sub)])],[ulocal(MSG_Crit)])]
+&FN_DICE d6 Database=[@@(0 - %#, 1 - diceString, 2 - isLoud)][setq(1,iter(edit(ucstr(edit(%1,-,+-)),%b,),[switch([match(##,*D*)][isnum(after(##,D))],0*,[val(##)] 1,10,[val(before(##,D))] 6,11,[val(before(##,D))] [abs(val(after(##,D)))],0 0)],+,|))][setq(3,lmath(add,[iter(%q1,mul(sign(first(##)),ifelse(first(##),die(abs(first(##)),last(##)),0)),|)]))][%va] You roll [setr(4,[iter(%q1,[switch(first(##),<0,,ifelse(gt(#@,1),+,))][first(##)][switch(last(##),>1,D[#$],)],|,)])] for a total of [%q3].[null([ifelse(%2,oemit([loc(%0)]/[%0],[%va] [name(%0)] rolls [%q4] for a total of [%q3].),)])]
+&FN_DIVIDE d6 Database=[@@(0 - %#, 1 - <#>, 2 - ammo type)][setq(1,max(1,val(%1)))][setq(2,squish(edit(%2,%b,_),_))][setq(4,first(setdiff(iter(lcon(%0),[ifelse(ulocal(FN_IsAmmo,##),[setq(3,grab(get(##/List_Ammo),* [%q2]*,|))][ifelse(and(gt(first(%q3),%q1),words(ulocal(FN_xListItem,get(##/List_Ammo),%q1,rest(%q3),sub))),|[##] [rest(%q3)],)],)],,),,|),|))][setq(5,first(%q4))][setq(6,rest(%q4))][ifelse(isdbref(%q5),[%va] You move [%q1] [edit(%q6,_,%b)] into a fresh ammunition box.[null([setq(7,ulocal(FN_MakeAmmo,[%q1] [%q6]))][ifelse(isdbref(%q7),[set(%q5,List_Ammo:[ulocal(FN_xListItem,get(%q5/List_Ammo),%q1,%q6,sub)])][tel(%q7,%0)],)])],[%vb] You do not have an ammunition box with more than [%q1] [%q2].)]
+&FN_FOOTER d6 Database=[ansi(b,'-[repeat(=,74)]-')]
+&FN_GETATTR d6 Database=[@@(0 - Target, 1 - Attribute)][ulocal(FN_GetListItem,get(%0/DD6_Skills),%1)]
+&FN_GETLISTITEM d6 Database=[switch(grab(%0,* [%1],|),,0,first(#$))]
+&FN_GETSKILL d6 Database=[add(ulocal(FN_GetListItem,get(%0/DD6_Skills),%1),ulocal(FN_GetStat,%0,extract(grab(v(List_Skills),[%1] *,|),2,1)))]
+&FN_GETSTAT d6 Database=[@@(0 - Target, 1 - Attr/Skill)][switch([t(setr(0,grab(v(List_Attrs),[%1]*)))][t(setr(1,first(grab(v(List_Skills),[%1]*,|))))],1*,[ulocal(FN_GetAttr,%0,%q0)],01,[ulocal(FN_GetSkill,%0,%q1)],#-1)]
+&FN_GIVEXP d6 Database=[@@(0 - %#, 1 - target, 2 - xp)][setq(1,ulocal(FN_Pmatch,%1))][setq(2,val(%2))][switch([ulocal(FN_IsWiz,%0)][isdbref(%q1)],0*,[ulocal(MSG_Wiz)],10,[ulocal(MSG_Target)],11,[set(%q1,DD6_Skills:[ulocal(FN_xListItem,get(%q1/DD6_Skills),%q2,CP,add)])][%va] You give [%q2] character points to [name(%q1)] for a total of [ulocal(FN_GetListItem,get(%q1/DD6_SKills),CP)] character points.[pemit(%q1,[%va] %N has given you [%q2] character points.)],[ulocal(MSG_Crit)])]
+&FN_GRABSTAT d6 Database=[first([grab(v(List_Attrs),[squish(edit(%0,%b,_),_)]*)] [grab(v(List_Skills),[squish(edit(%0,%b,_),_)]*,|)])]
+&FN_HEADER d6 Database=[center([ansi(rh,. o O)] [ansi(wh,%0)] [ansi(rh,O o .)],78)]%r[ansi(b,.-[repeat(=,74)]-.)]
+&FN_HELP d6 Database=[@@(0 - %#, 1 - Entry)][setq(0,squish(edit(%1,%b,_),_))][setq(1,grab([lattr([v(DB_Help)]/HELP_*)],HELP_[%q0]*))][setq(2,first(grab(v(List_Skills),[%q0]*,|)))][setq(3,grab(v(List_Attrs),[%q0]*))][switch([t(%q0)][t(%q1)][t(%q2)][t(%q3)],1001,[ulocal(FN_Help_Attr,%q3)],101*,[ulocal(FN_Help_Skill,%q2)],11*,[ulocal(FN_Help_Topic,%q1)],0*,[ulocal([v(DB_Help)]/HELP)],[ulocal(MSG_Help)])]
+&FN_HELP_ATTR d6 Database=[ulocal(FN_Header,Attribute: [edit(%0,_,%b)])][ulocal([v(DB_Help)]/FN_Border,[ansi(yh,Skills:)] [iter(graball(v(List_Skills),* [%0],|),edit(first(itext(0)),_,%b),|,\,%b)].%r%r[ulocal([v(DB_Help)]/Attr_[%0])])]%r[ulocal(FN_Footer)]
+&FN_HELP_SKILL d6 Database=[ulocal(FN_Header,Skill: [edit(%0,_,%b)])][ulocal([v(DB_Help)]/FN_Border,[ansi(yh,Base Attribute:)] [ifelse(match(v(List_Attrs),extract(setr(0,grab(v(List_Skills),[%0] *,|)),2,1)),[extract(%q0,2,1)],[extract(setr(1,grab(v(List_Skills),[extract(%q0,2,1)] *,|)),2,1)]%r[ansi(yh,Specialization of:)] [extract(%q1,1,1)])][switch(graball(v(List_Skills),* [%0],|),,,%r[ansi(yh,Specializations:)] [iter(#$,first(itext(0)),|,\,%b)])]%r%r[ulocal([v(DB_Help)]/Skill_[%0])])]%r[ulocal(FN_Footer)]
+&FN_HELP_TOPIC d6 Database=[ulocal(FN_Header,[edit(after(%0,HELP_),_,%b)])][ulocal([v(DB_Help)]/[%0])]%r[ulocal(FN_Footer)]
+&FN_BPDMG d6 Database=[ulocal(FN_GetListItem,get(%0/DD6_Skills),BPDmg)]
+&FN_BPMAX d6 Database=[ulocal(FN_GetListItem,get(%0/DD6_Skills),BPMax)]
+&FN_BPROLL d6 Database=[ifelse(match(Endurance,%1),[switch([first(ulocal(FN_RollSkill,%0,Endurance,0,20))],>[ulocal(FN_BPMax,%0)],[pemit(%0,[%va] Your maximum body points has increased to [#$].)][set(%0,DD6_Skills:[ulocal(FN_SetListItem,get(%0/DD6_Skills),#$,BPMax)])],)],)]
+&FN_ILINE d6 Database=[ansi(b,>---<)] [ansi(mh,%0)] [ansi(b,>[repeat(-,sub(69,strlen(%0)))]<)]
+&FN_ISADMIN d6 Database=[hasflag(owner(%0),Wizard)]
+&FN_ISALIVE d6 Database=1
+&FN_ISAMMO d6 Database=[and(not(hasflag(%0,Safe)),match(lparent(%0),v(DB_Ammo)))]
+&FN_ISROY d6 Database=[or(ulocal(FN_IsWiz,%0),hasflag(owner(%0,Royalty)))]
+&FN_ISWEAPON d6 Database=[t(match(lparent(%0),v(DB_Weapon)))]
+&FN_ISWIZ d6 Database=[hasflag(owner(%0),Wizard)]
+&FN_LIMIT d6 Database=[@@(0 - Target, 1 - Stat, 2 - pips)][ifelse(match(v(List_Attrs),%1),[setq(1,iter(graball(v(List_Skills),* [%1],|),setunion(itext(0),graball(v(List_Skills),* [first(itext(0))],|),|),|,|))][setq(3,sub(%2,ulocal(FN_GetAttr,%0,%1)))][squish([ifelse(gt(%2,ulocal(FN_Max_Attr,%0,%1)),%1,)] [iter(%q1,ifelse(gt(add(%q3,ulocal(FN_GetSkill,%0,first(itext(0)))),ulocal(FN_Max_Skill)),first(itext(0)),),|,%b)])],[ifelse(gt(%2,ulocal(FN_Max_Skill,%0,%1)),%1,)])]
+&FN_LIST_SKILLS d6 Database=[iter(v(List_Attrs),[itext(0)] [iter(graball(v(List_Skills),* [itext(0)],|),first(itext(0)),|,%b)])]
+&FN_LOAD d6 Database=[@@(0 - %#, 1 - Weapon, 2 - Amount, 3 - Ammo Type)][setq(1,locate(%0,%1,iX))][setq(2,max(1,val(%2)))][setq(3,grab(iter(get(%q1/List_Max_Ammo),rest(itext(0)),|,%b),[squish(edit(%3,%b,_),_)]*))][setq(4,grab(get(%q1/List_Max_Ammo),* [%q3]*,|))][setq(5,sub(first(%q4),lmath(add,iter(rest(%q4),ulocal(FN_GetListItem,get(%q1/List_Ammo),itext(0))))))][setq(6,first(iter(lcon(%0),ifelse(and(ulocal(FN_IsAmmo,itext(0)),gte(ulocal(FN_GetListItem,get(itext(0)/List_Ammo),%q3),%q2)),itext(0),))))][switch([ulocal(FN_IsWeapon,%q1)][t(%q3)][lte(%q2,%q5)][t(%q6)],0*,[ulocal(MSG_Weapon,%q1)],10*,[%vb] Your [name(%q1)] doesn't accept that kind of ammo.,110*,[%vb] Your [name(%q1)] cannot accept [ifelse(%q5,more than [%q5],any)] more [edit(%q3,_,%b)][ifelse(eq(1,%q5),,s)].,1110*,[%vb] You do not have [%q2] [edit(%q3,_,%b)][ifelse(eq(1,%q2),,s)] in your inventory.,1111,[remit(loc(%0),[%va] [ulocal(%q1/MSG_Load,%0,%q2,%q3)])][@@([%va] You load [%q2] [edit(%q3,_,%b)][ifelse(eq(1,%q2),,s)] into your [name(%q1)].)][set(%q1,List_Ammo:[ulocal(FN_xListItem,get(%q1/List_Ammo),%q2,%q3,add)])][set(%q6,List_Ammo:[ulocal(FN_xListItem,get(%q6/List_Ammo),%q2,%q3,sub)])][ifelse(t(get(%q6/List_Ammo)),,ulocal(FN_Nuke,%q6))],[ulocal(MSG_Crit)])]
+&FN_MAKEAMMO d6 Database=[setr(0,create(Ammo Box))][null([name(%q0,Ammo Box \([edit(%q0,#,)]\))][parent(%q0,v(DB_Ammo))][ifelse(%0,set(%q0,List_Ammo:[%0]),)])]
+&FN_MAX_ATTR d6 Database=[@@(0 - %#, 1 - Attribute)][switch(ulocal(FN_GetListItem,v(List_Max_Attr),[squish([get(%0/Race)]-[%1])]),0,12,#$)]
+&FN_MAX_SKILL d6 Database=[@@(0 - %#, 1 - Skill)]18
+&FN_MIN_ATTR d6 Database=[@@(0 - %#, 1 - Attribute)][switch(ulocal(FN_GetListItem,v(List_Min_Attr),[squish([get(%0/Race)]-[%1])]),0,6,#$)]
+&FN_NEWATTR d6 Database=[@@(0 - %#, 1 - Attribute, 2 - Desc)][setq(1,iter(edit(%1,_,%b),capstr(lcstr(itext(0))),,_))][switch([ulocal(FN_IsWiz,%0)][not(match(v(List_Attrs),%q1))],0*,[ulocal(MSG_Wiz)],10,[%vb] That attribute already exists.,11,[%va] You have added the '[edit(%q1,_,%b)]' attribute.[set(%!,List_Attrs:[setunion(v(List_Attrs),%q1)])][set(v(DB_Help),Attr_[%q1]:[%2])],[ulocal(MSG_Crit)])]
+&FN_NEWSKILL d6 Database=[@@(0 - %#, 1 - skill, 2 - attribute, 3 - desc)][setq(1,squish(edit(%1,%b,_),_))][setq(2,grab([iter(v(List_Attrs),[setunion(itext(0),iter(graball(v(List_Skills),* [itext(0)],|),first(itext(0)),|,|),|)],,|)],[squish(edit(%2,%b,_),_)]*,|))][switch([ulocal(FN_IsWiz,%0)][t(%q2)][not(match(v(List_Skills),[%q1] *,|))][not(match(v(List_attrs),[%q1]))],0*,[ulocal(MSG_Wiz)],10*,[%vb] That is not an attribute or primary skill.,110*,[%vb] That skill already exists.,1110*,[%vb] That attribute already exists.,1111,[%va] You have added the '[edit(%q1,_,%b)]' skill\, based on '[edit(%q2,_,%b)]'.[set(%!,List_Skills:[setunion(v(List_Skills),[%q1] [%q2],|)])][set(v(DB_Help),Skill_[%q1]:[%3])],[ulocal(MSG_Crit)])]
+&FN_NOM/LIST d6 Database=[ifelse([ulocal(FN_IsRoy,%0)],[ulocal(FN_Nom_List1,%0)],[ulocal(MSG_Admin)])]
+&FN_NOM_APPROVE d6 Database=[@@(0 - %#, 1 - nom)][setq(1,ulocal(FN_NomRef,%1))][switch([ulocal(FN_IsWiz,%0)][t(%q1)],0*,[ulocal(MSG_Wiz)],10,[ulocal(MSG_Nom)],11,[%va] You have approved [name(extract(%q1,2,1,_))]'s nomination for [name(extract(%q1,3,1,_))].[ulocal(FN_NomAllow,%q1)],[ulocal(MSG_Crit)])]
+&FN_NOM_AWARD d6 Database=[@@(0 - %#, 1 - target)][setq(1,ulocal(FN_Pmatch,%1))][setq(2,ulocal(FN_GetListItem,get(%0/DD6_Skills),NomTotal))][switch([match(%0,%q1)][ulocal(FN_IsWiz,%0)],00,[ulocal(MSG_Wiz)],01,[%va] [name(%q1)]'s nom award is [ulocal(FN_NomAward,%q1)] [ansi(wh,\()][%q2] noms received[ansi(wh,\))].,1*,[%va] Your nom award is [ulocal(FN_NomAward,%q1)] [ansi(wh,\()][%q2] noms received[ansi(wh,\))].,[ulocal(MSG_Crit)])]
+&FN_NOM_CHECK d6 Database=[@@(0 - %#)][setq(1,lattr([v(DB_Nom)]/NOM_[%0]_*))][ifelse(words(%q1),[%va] This cycle you have nominated: [iter(%q1,name(extract(itext(0),3,1,_)),,\,%b)].,[%va] You have not nominated anybody this cycle.)]
+&FN_NOM_CYCLE d6 Database=[@@(0 - %#)][switch([ulocal(FN_IsWiz,%0)],0*,[ulocal(MSG_Wiz)],1,[%va] You end the current nom cycle and begin the next one.[iter(lattr([v(DB_Nom)]/Nom_*_*),ulocal(FN_NomAllow,itext(0)),,)][iter(get([v(DB_Nom)]/List_PCs),[set(itext(0),DD6_Skills:[ulocal(FN_SetListItem,get([itext(0)]/DD6_Skills),0,NomUsed)])],,)][wipe([v(DB_Nom)]/List_PCs)][set(v(DB_Nom),LastCycle:[secs()])],[ulocal(MSG_Crit)])]
+&FN_NOM_LEADERS d6 Database=[@@(0 - %#, 1 - # to show)][setq(2,search(all,eplayers,\[hasattr(##,DD6_Skills)\]))][setq(1,min(words(%q2),val(%1)))][switch([ulocal(FN_IsWiz,%0)],0*,[ulocal(MSG_Wiz)],1,[setq(3,extract(sortby(FN_Sort_First,iter(%q2,[ulocal(FN_GetListItem,get([itext(0)]/DD6_Skills),NomTotal)] [itext(0)],,|),|),1,%q1,|))][ulocal(FN_Header,Top [%q1] Most Nominated Players)]%r[ansi(b,|)][rjust(Noms,5)] [ansi(b,|)] [ljust(Name \(Alias\),31)][ansi(b,|)][center(Nom Award,26)][ansi(b,|)][rjust(Age,8)] [ansi(b,|%r>[repeat(-,6)]+[repeat(-,32)]+[repeat(-,26)]+[repeat(-,9)]<)][iter(%q3,%r[ansi(b,|)][rjust(first(itext(0)),5)] [ansi(b,|)] [ljust(left([ansi(rh,name(rest(itext(0))))]\([ansi(c,get(rest(itext(0))/Alias))]\),30),30)] [ansi(b,|)][center(ulocal(FN_NomAward,rest(itext(0))),25)] [ansi(b,|)] [rjust([first(timestring(sub(secs(),convtime(ctime(rest(itext(0)))))))],7)] [ansi(b,|)],|,)]%r[ulocal(FN_Footer,mudname())],[ulocal(MSG_Crit)])]
+&FN_NOM_LEFT d6 Database=[@@(0 - %#, 1 - target)][setq(1,ulocal(FN_Pmatch,%1))][setq(2,[sub([val(v(Nom_Max))],ulocal(FN_GetListItem,get(%q1/DD6_Skills),NomUsed))])][switch([gt(val(v(Nom_Max)),0)][match(%0,%q1)][ulocal(FN_IsWiz,%0)],0*,[%va] There is no limit as to how many people anyone may nominate this cycle.,100,[ulocal(MSG_Wiz)],101,[%va] [name(%q1)] has [%q2] noms remaining to give this cycle.,11*,[%va] You have [%q2] remaining noms to give this cycle.,[ulocal(MSG_Crit)])]
+&FN_NOM_LEVELS d6 Database=[setq(1,ulocal(FN_GetListItem,get(%0/DD6_Skills),NomTotal))][center([ansi(rh,. o O)] [ansi(wh,Nom Levels)] [ansi(rh,O o .)],41)]%r[ansi(b,.[repeat(-,39)].%r|)][ansi(wh,[rjust(Total,7)] [center(Award,30)])] [ansi(b,|%r>[rjust(~~~~~,7)] [repeat(~,30)] <)][iter(v(List_NomAwards),%r[ansi(b,|)]%b%b[ansi(ifelse(gte(%q1,first(##)),Gwh,w),rjust(first(##),5))] [center(ansi(extract(##,2,1),rest(rest(##))),30)] [ansi(b,|)],|,)]%r[ansi(b,'[repeat(-,39)]')]
+&FN_NOM_LIST d6 Database=[ifelse([ulocal(FN_IsRoy,%0)],[ulocal(FN_Nom_List2,%0)],[ulocal(MSG_Admin)])]
+&FN_NOM_LIST1 d6 Database=[ulocal(FN_Header,Pending Nominations)][iter(sortby(FN_Sort_Noms,lattr([v(DB_Nom)]/Nom_*)),%r[ansi(b,|)]%b[ansi(wh,\[)][rjust(inum(0),3)][ansi(wh,\])]%b[ljust([setr(1,[ansi(c,[name(extract(itext(0),2,1,_))] for [name(extract(itext(0),3,1,_))])] \([timefmt($m/$d/$y,first(get([v(DB_Nom)]/[itext(0)]),|))]\))]: [setq(2,wrap(rest(get([v(DB_Nom)]/[itext(0)]),|),68,sub(66,strlen(%q1)),|))][first(%q2,|)],68)]%b[ansi(b,|)][iter(rest(%q2,|),%r[ansi(b,|)][space(7)][ljust(itext(0),68)] [ansi(b,|)],|,)])]%r[ansi(b,|[space(76)]|%r|)][center([ansi(rh,Noms [ifelse(isnum(get([v(DB_Nom)]/LastCycle)),were last cycled [timefmt($A\, $B $d\, $Y at $I:$m $p,get([v(DB_Nom)]/LastCycle))].,have never been cycled.)])],76)][ansi(b,|)]%r[ulocal(FN_Footer,name(%!))]
+&FN_NOM_LIST2 d6 Database=[setq(1,sortby(FN_Sort_Noms,lattr([v(DB_Nom)]/Nom_*)))][setq(2,sortby(FN_Sort_Names,setunion(iter(%q1,extract(itext(0),2,1,_)),)))][ulocal(FN_Header,Pending Nominations)][iter(%q2,%r[ansi(b,|)] [ljust([ansi(rh,name(itext(0)))]\([get(itext(0)/Alias)]\),20)][setq(3,wrap(iter(graball(%q1,*_[itext(0)]_*),[name(extract(itext(0),3,1,_))]\([ansi(wh,match(%q1,itext(0)))]\),,\,%b),54,54,|))][ljust(first(%q3,|),54)] [ansi(b,|)][iter(rest(%q3,|),%r[ansi(b,|)][space(21)][ljust(itext(0),54)] [ansi(b,|)],|,)])]%r[ansi(b,|[space(76)]|%r|)][center([ansi(rh,Noms [ifelse(isnum(get([v(DB_Nom)]/LastCycle)),were last cycled [timefmt($A\, $B $d\, $Y at $I:$m $p,get([v(DB_Nom)]/LastCycle))].,have never been cycled.)])],76)][ansi(b,|)]%r[ulocal(FN_Footer,name(%!))]
+&FN_NOM_REJECT d6 Database=[@@(0 - %#, 1 - nom)][setq(1,ulocal(FN_NomRef,%1))][switch([ulocal(FN_IsWiz,%0)][t(%q1)],0*,[ulocal(MSG_Wiz)],10,[ulocal(MSG_Nom)],11,[%va] You have rejected [name(extract(%q1,2,1,_))]'s nomination for [name(extract(%q1,3,1,_))].[wipe([v(DB_Nom)]/[%q1])],[ulocal(MSG_Crit)])]
+&FN_NOM_TOTALS d6 Database=[ifelse([ulocal(FN_IsRoy,%0)],[setq(1,lattr([v(DB_Nom)]/Nom_*_*))][setq(2,setunion(iter(%q1,extract(itext(0),3,1,_)),))][setq(3,sortby(FN_Sort_First,iter(%q2,[words(graball(%q1,NOM_*_[itext(0)]))] [itext(0)],,|),|))][center([ansi(rh,. o O)] [ansi(wh,Nom Leaders)] [ansi(rh,O o .)],40)]%r[ansi(b,.-====-v-[repeat(=,30)]-.%r|)] Noms [ansi(b,|)] [ljust(Player,30)] [ansi(b,|%r>~~~~~~+~[repeat(~,30)]~<)][iter(%q3,%r[ansi(b,|)] [rjust(ansi(c,first(itext(0))),4)] [ansi(b,|)] [ljust([ansi(rh,name(rest(itext(0))))]\([get([rest(itext(0))]/alias)]\),30)] [ansi(b,|)],|,)]%r[ansi(b,'-====-^-[repeat(=,30)]-')],[ulocal(Msg_Admin)])]
+&FN_NOM_VIEW d6 Database=[ifelse([ulocal(FN_IsRoy,%0)],[ulocal(FN_Nom_View1,%0,extract(sortby(FN_Sort_Noms,lattr([v(DB_Nom)]/Nom_*)),val(%1),1),%1)],[ulocal(MSG_Admin)])]
+&FN_NOM_VIEW1 d6 Database=[switch([t(%1)][match(%2,all)],1*,[ulocal(FN_Header,[name(extract(%1,2,1,_))]'s +Nom for [name(extract(%1,3,1,_))] on [timefmt($m/$d/$y,first(get([v(DB_Nom)]/[%1]),|))])][iter(wrap(rest(get([v(DB_Nom)]/[%1]),|),74,74,|),%r[ansi(b,|)] [ljust(itext(0),74)] [ansi(b,|)],|,)]%r[ulocal(FN_Footer,name(%!))],01,[ulocal(FN_Nom_List1)],00,[%vb] That is not a valid +nom number.)]
+&FN_NOM_WEEKMAX d6 Database=[@@(0 - %#, 1 - max noms per cycle)][setq(1,val(%1))][switch([ulocal(FN_IsWiz,%0)],0*,[ulocal(MSG_Wiz)],1,[%va] You have set the maximum number of people players may +nom per cycle to [%q1].[set(%!,Nom_Max:[%q1])],[ulocal(MSG_Crit)])]
+&FN_NOM_WORDMIN d6 Database=[@@(0 - %#, 1 - minimum words per nom)][setq(1,val(%1))][switch([ulocal(FN_IsWiz,%0)],0*,[ulocal(MSG_Wiz)],1,[%va] You have set the minimum of number of words required per nom to [%q1].[set(%!,Nom_Min:[%q1])],[ulocal(MSG_Crit)])]
+&FN_NOMALLOW d6 Database=[wipe([v(DB_Nom)]/[%0])][set([extract(%0,3,1,_)],DD6_Skills:[ulocal(FN_xListItem,ulocal(FN_xListItem,get(extract(%0,3,1,_)/DD6_Skills),1,NomTotal,add),2,CP,add)])]
+&FN_NOMAWARD d6 Database=[@@(0 - Target)][setq(1,ulocal(FN_GetListItem,get(%0/DD6_Skills),NomTotal))][setq(2,-1 xh No award)][iter(v(List_NomAwards),ifelse(and(gte(%q1,first(##)),gte(first(##),first(%q2))),setq(2,##),),|,)][ansi(extract(%q2,2,1),extract(%q2,3,1000))]
+&FN_NOMREF d6 Database=[extract(sortby(FN_Sort_Noms,lattr([v(DB_Nom)]/Nom_*_*)),val(%0),1)]
+&FN_NOMSUBMIT d6 Database=[@@(0 - %#, 1 - target, 2 - reason)][setq(1,ulocal(FN_Pmatch,%1))][setq(2,squish(secure(%2)))][switch([isdbref(%q1)][and(hastype(%0,Player),not(or(haspower(%0,builder),haspower(%0,guest),hasflag(%0,Unregistered))))][and(not(match(%q1,%0)),comp(get(%0/LastSite),get(%q1/LastSite)))][gte(words(%q2),[val(v(Nom_Min))])][not(hasattr(v(DB_Nom),Nom_[%0]_[%q1]))][or(lt(val(v(Nom_Max)),0),lt(ulocal(FN_GetListItem,get(%0/DD6_Skills),NomUsed),val(v(Nom_Max))))],0*,[ulocal(MSG_Target)],10*,[%vb] Guests\, builders\, and players who haven't completed chargen may not submit noms.,110*,[%vb] You may not nominate yourself or your alts.,1110*,[%vb] Your reason must be [val(v(Nom_Min))] words or longer.,11110*,[%vb] You have already nominated [name(%q1)] this cycle.,111110*,[%vb] You may only nominate [val(v(Nom_Max))] players per cycle.,111111,[%va] You have nominated [name(%q1)].[set(%0,DD6_Skills:[ulocal(FN_xListItem,get(%0/DD6_Skills),1,NomUsed,add)])][set(v(DB_Nom),Nom_[%0]_[%q1]:[secs()]|[%q2])][set(v(DB_Nom),List_PCs:[setunion(get([v(DB_Nom)]/List_PCs),%0)])],[ulocal(MSG_Crit)])]
+&FN_NUKE d6 Database=[wipe(%0/*)][tel(%0,v(DB_Garbage))]
+&FN_PIP2D6 d6 Database=[@@(0 - # of pips to convert to d6 format)][div(%0,3)]D+[fmod(%0,3)]
+&FN_PMATCH d6 Database=[switch(pmatch(squish(%0)),#-1,locate(%#,squish(%0),PTahilmna),#$)]
+&FN_RAISE d6 Database=[@@(0 - %#, 1 - Attr/skill, 2 - level)][setq(1,ulocal(FN_GrabStat,%1))][setq(2,ulocal(FN_d62pip,%2))][setq(3,ulocal(FN_GetStat,%0,%q1))][setq(4,ulocal(FN_Cost,%q1,%q3,%q2))][setq(6,ulocal(FN_Limit,%0,%q1,%q2))][switch([t(%q1)][lt(%q3,%q2)][gte(ulocal(FN_GetListItem,get(%0/DD6_Skills),CP),%q4)][not(words(%q6))],0*,[ulocal(MSG_Stat)],10*,[%vb] You may not lower [edit(%q1,_,%b)] with the +raise command.,110*,[%vb] You lack the [%q4] character points to afford that.,1110,[iter(%q6,[%vb] You may not raise your [edit(itext(0),_,%b)] [ifelse(setinter(itext(0),v(List_Attrs)),attribute over [ulocal(FN_ColorPip,ulocal(FN_Max_Attr,%0,%q1))],skill over [ulocal(FN_ColorPip,ulocal(FN_Max_Skill,%0,%q1))])].,%b,%r)],1111,[%va] You set your [edit(%q1,_,%b)] to [ulocal(FN_ColorPip,%q2)] at the cost of [%q4] character points.[null([set(%0,DD6_Skills:[ulocal(FN_xListItem,get(%0/DD6_Skills),%q4,CP,sub)])][ulocal(FN_SetStat,%0,%q1,%q2)])],[ulocal(MSG_Crit)])]
+&FN_RAISECOST d6 Database=[@@(0 - %#, 1 - Attr/skill, 2 - level)][setq(1,switch(grab(v(List_Attrs),[squish(edit(%1,%b,_),_)]*),,first(grab(v(List_Skills),[squish(edit(%1,%b,_),_)]* *,|)),#$))][setq(2,ulocal(FN_d62pip,%2))][setq(3,ulocal(FN_GetStat,%0,%q1))][setq(4,ulocal(FN_Cost,%q1,%q3,%q2))][switch([t(%q1)][neq(%q2,%q3)][gt(%q2,%q3)],0*,[ulocal(MSG_Stat)],10*,[%vb] Your [edit(%q1,_,%b)] is currently [ulocal(FN_ColorPip,%q2)].,110*,[%vb] You would regain [abs(%q4)] character points by having your [edit(%q1,_,%b)] lowered from [ulocal(FN_ColorPip,%q3)] to [ulocal(FN_ColorPip,%q2)].,111,[%va] It would cost you [%q4] character points to raise your [edit(%q1,_,%b)] from [ulocal(FN_ColorPip,%q3)] to [ulocal(FN_ColorPip,%q2)].,[ulocal(MSG_Crit)])]
+&FN_RELOAD d6 Database=[@@(0 - %#, 1 - Weapon)][setq(1,locate(%0,%1,iX))][setq(2,get(%q1/List_Max_Ammo))][switch([isdbref(%q1)][and(eq(2,words(%q2)),eq(1,words(%q2,|)))],11,[ulocal(FN_Load,%0,%1,sub(first(%q2),ulocal(FN_GetListItem,get(%q1/List_Ammo),rest(%q2))),rest(%q2))],10,[%vb] [name(%q1)] must be reloaded via the +load command.,0*,[%vb] You do not have that in your inventory.,[ulocal(MSG_Crit)])]
+&FN_REMATTR d6 Database=[@@(0 - %#, 1 - Attribute)][setq(1,grab(v(List_Attrs),[squish(edit(%1,%b,_),_)]))][switch([ulocal(FN_IsWiz,%0)][t(%q1)],0*,[ulocal(MSG_Wiz)],10,[ulocal(MSG_Attr)],11,[%va] You have removed the '[edit(%q1,_,%b)]' attribute.[set(%!,List_Attrs:[setdiff(v(List_Attrs),%q1)])][wipe(v(DB_Help)/ATTR_[%q1])][iter(graball(v(List_Skills),* [%q1],|),%r[ulocal(FN_RemSkill,%0,first(itext(0)))],|,)],[ulocal(MSG_Crit)])]
+&FN_REMSKILL d6 Database=[@@(0 - %#, 1 - skill)][setq(1,grab(v(List_Skills),[squish(edit(%1,%b,_),_)] *,|))][setq(2,graball(v(List_Skills),* [first(%q1)],|))][switch([ulocal(FN_IsWiz,%0)][t(%q1)],0*,[ulocal(MSG_Wiz)],10,[ulocal(MSG_Stat)],11,[iter(setunion(%q1,%q2,|),[wipe([v(DB_Help)]/SKILL_[first(itext(0))])][%va] You have removed the '[edit(first(itext(0)),_,%b)]' skill from the skills system.,|,%r)][set(%!,List_Skills:[setdiff(v(List_Skills),setunion(%q1,%q2,|),|)])],[ulocal(MSG_Crit)])]
+&FN_ROLL d6 Database=[@@(0 - %#, 1 - Target, 2 - Attr/Skill at Modifier, 3 - IsLoud)][setq(1,ulocal(FN_Pmatch,%1))][setq(2,ucstr(squish(edit(%2,%b,_),_)))][setq(3,ulocal(FN_GrabStat,before(%q2,_AT_)))][switch([or(match(%0,%q1),ulocal(FN_IsRoy,%0))][isdbref(%q1)][t(%q3)],0*,[ulocal(MSG_Admin)],10*,[ulocal(MSG_Target)],110,[ulocal(MSG_Stat)],111,[setq(4,after(%q2,_AT_))][ifelse(eq(2,words(%q4,D)),[setq(5,val(before(%q4,D)))][setq(6,val(after(%q4,D)))],[setq(5,0)][setq(6,val(%q4))])][setq(7,ulocal(FN_GetStat,%q1,%q3))][setq(8,ulocal(FN_RollStat,add(%q7,mul(3,%q5)),%q6))][%va] [ifelse(match(%0,%q1),You roll your,You roll [name(%q1)]'s)] [setr(9,[edit(%q3,_,%b)] [ansi(wh,\()][ulocal(FN_ColorPip,%q7)][ansi(wh,\))][ifelse(or(%q5,%q6),%bwith a modifier of [ifelse(%q5,[%q5]D,)][switch(%q6,>0,+[%q6],0,,[%q6])],)] [ifelse(extract(%q8,2,1),for a total of [ansi(yh,first(%q8))] [ansi(wh,\()]Wild Die: [ansi(switch(extract(%q8,2,1),>6,gh,>1,yh,rh),extract(%q8,2,1))][ansi(wh,\))]\, perhaps enough for a [ulocal(FN_RollDesc,first(%q8))] task.,and fails for lack of dice.)])][ifelse(t(%q3),oemit([loc(%q1)]/[%0],[%va] [name(%0)] rolls [ifelse(match(%0,%q1),[poss(%0)],[name(%q1)]'s)] [%q9]),)],[ulocal(MSG_Crit)])]
+@@ &FN_ROLL_OLD d6 Database=[@@(0 - %#, 1 - target, 2 - Attr/Skill, 3 - isLoud)][setq(0,squish(edit(%2,%b,_),_))][setq(1,ulocal(FN_PMatch,secure(%1)))][setq(2,switch([grab(v(List_Attrs),[before(%q0,_at)]*)],,[first(grab(v(List_Skills),[before(%q0,_at)]*,|))],#$))][setq(3,ulocal(FN_Val,after(%q0,_at_)))][switch([or(match(%0,%q1),ulocal(FN_IsWiz,%0))][isdbref(%q1)][t(%q2)],0*,[ulocal(MSG_Wiz)],10*,[ulocal(MSG_Target)],110,[ulocal(MSG_Stat)],111,[setq(4,ulocal(FN_GetStat,%q1,%q2))][setq(5,ulocal(FN_RollStat,%q4))][setq(6,add(first(%q5),%q3))][%va] You roll [ifelse(match(%0,%q1),your,[name(%q1)]'s)] [edit(%q2,_,%b)] \([ulocal(FN_Pip2d6,%q4)]\)[ifelse(eq(%q3,0),,%bwith a modifer of [ifelse(gte(%q3,0),+,)][%q3])] for a total of [%q6] \(Wild Die: [rest(%q5)]\)\, perhaps enough for a [ulocal(FN_RollDesc,%q6)] task.[ifelse(%3,oemit([loc(%q1)]/%0,[%va] [name(%0)] rolls [ifelse(match(%0,%q1),[poss(%0)],[name(%q1)]'s)] [edit(%q2,_,%b)][ifelse(eq(%q3,0),,%bwith a modifer of [ifelse(gte(%q3,0),+,)][%q3])] for a total of [%q6] \(Wild Die: [rest(%q5)]\)\, perhaps enough for a [ulocal(FN_RollDesc,%q6)] task.),)],[ulocal(MSG_Crit)])]
+@@ &FN_ROLL_OLD2 d6 Database=[@@(0 - %#, 1 - target, 2 - Attr/Skill at modifier, 3 - isLoud)][setq(0,ucstr(squish(edit(%2,%b,_),_)))][setq(1,ulocal(FN_PMatch,secure(%1)))][setq(2,switch([grab(v(List_Attrs),[before(%q0,_AT)]*)],,[first(grab(v(List_Skills),[before(%q0,_AT)]*,|))],#$))][setq(3,after(%q0,_AT_))][ifelse(eq(2,words(%q3,D)),[setq(4,ulocal(FN_Val,before(%q3,D)))][setq(3,ulocal(FN_Val,after(%q3,D)))],[setq(4,0)][setq(3,ulocal(FN_Val,%q3))])][switch([or(match(%0,%q1),ulocal(FN_IsWiz,%0))][isdbref(%q1)][t(%q2)],0*,[ulocal(MSG_Wiz)],10*,[ulocal(MSG_Target)],110,[ulocal(MSG_Stat)],111,[setq(5,ulocal(FN_GetStat,%q1,%q2))][setq(6,ulocal(FN_RollStat,add(mul(%q4,3),%q5),%q3))][setq(7,first(%q6))][%va] You roll [ifelse(match(%0,%q1),your,[name(%q1)]'s)] [edit(%q2,_,%b)] \([ulocal(FN_Pip2d6,%q5)]\)[setr(8,[ifelse(and(eq(%q3,0),eq(%q4,0)),,%bwith a modifer of [ifelse(eq(%q4,0),,[%q4]D)][ifelse(eq(%q3,0),,[ifelse(gte(%q3,0),+,)][%q3])])] [ifelse(eq(0,rest(%q6)),which fails for lack of dice.,for a total of [%q7] \(Wild Die: [rest(%q6)]\)\, perhaps enough for a [ulocal(FN_RollDesc,%q7)] task.)])][ifelse(%3,oemit([loc(%q1)]/%0,[%va] [name(%0)] rolls [ifelse(match(%0,%q1),[poss(%0)],[name(%q1)]'s)] [edit(%q2,_,%b)][%q8]),)],[ulocal(MSG_Crit)])]
+&FN_ROLLALL d6 Database=[@@(0 - %#, 1 - Attr/Skill at Modifier, 2 - IsLoud)][setq(1,ucstr(squish(edit(%1,%b,_),_)))][setq(2,ulocal(FN_GrabStat,before(%q1,_AT_)))][setq(3,after(%q1,_AT_))][ifelse(eq(2,words(%q3,D)),[setq(4,val(before(%q3,D)))][setq(5,val(after(%q3,D)))],[setq(4,0)][setq(5,val(%q3))])][switch([ulocal(FN_IsRoy,%0)][t(%q2)][t(%2)],0*,[ulocal(MSG_Admin)],10*,[ulocal(MSG_Stat)],110,[ulocal(FN_RollAll2,%0,%q2,%q4,%q5)],111,[remit(loc(%0),ulocal(FN_RollAll2,%0,%q2,%q4,%q5))],[ulocal(MSG_Crit)])]
+&FN_ROLLALL2 d6 Database=[@@(0 - %#, 1 - Attr/Skill, 2 - dice mod, 3 - flat mod)][setq(0,iter(setinter(lwho(),lcon(loc(%0))),ifelse(ulocal(FN_IsAlive,##),##,)))][setq(1,sortby(FN_Sort_Rolls,iter(%q0,[ulocal(FN_RollSkill,%0,%1,%2,%3)] [##],,|),|))]%r[center([ansi(rh,. o O)] [ansi(wh,[%1] Rolls[ifelse(or(%2,%3),%bat [ifelse(%2,[%2]D,)][switch(sign(%3),1,+[%3],-1,[%3],)],)])] [ansi(rh,O o .)],48)]%r[ansi(b,.----.----.[repeat(-,31)].----.%r|)][ansi(wh,Roll)][ansi(b,|)] [ansi(wh,WD)] [ansi(b,|)] [ljust(ansi(wh,Player),30)][ansi(b,|)][ansi(wh,Idle)][ansi(b,|%r>----+----+[repeat(-,31)]+----<)][iter(%q1,%r[ansi(b,|)][rjust(first(##),3)] [ansi(b,|)][rjust(extract(##,2,1),3)] [ansi(b,|)] [ljust([name(extract(##,3,1))][ansi(wh,\()][get(extract(##,3,1)/alias)][ansi(wh,\))],30)][ansi(b,|)][rjust(ansi(switch(idle(extract(##,3,1)),>3600,r,>60,y,w),ansi(switch(idle(extract(##,3,1)),>900,r,>60,y,w),first(timestring(idle(extract(##,3,1)))))),4)][ansi(b,|)],|,)]%r[ansi(b,'----'----'[repeat(-,31)]'----')]
+&FN_ROLLDESC d6 Database=[switch(%0,>25,Heroic,>20,Very Difficult,>15,Difficult,>10,Moderate,>5,Easy,>0,Very Easy,Brain Damaged)]
+&FN_ROLLSKILL d6 Database=[setq(0,ulocal(FN_PMatch,%0))][setq(1,ulocal(FN_GetStat,%q0,%1))][switch([t(%q0)][t(%q1)],0*,#-1 Invalid target,10,#-1 Invalid attribute or skill,11,ulocal(FN_RollStat,add(%q1,mul(3,%2)),%3),#-1 Critical Failure)]
+&FN_ROLLSTAT d6 Database=[ifelse(gte(%0,3),[lmath(add,[%1] [mod(%0,3)] [setr(0,ulocal(FN_WildDie))] [ifelse(gte(%0,6),die(sub(div(%0,3),1),6),0)])] [%q0],[%1] 0)]
+&FN_SELECT d6 Database=[@@(0 - %#, 1 - Weapon, 2 - Setting)][setq(1,ifelse(isdbref(%1),%1,v(DB_Unarmed)))][setq(2,grab(get(%q1/List_Settings),[squish(edit(%2,%b,_),_)]*))][switch([ulocal(FN_IsWeapon,%q1)][t(%q2)][neq(0,comp(%q2,get(%q1/Setting)))],0*,[ulocal(MSG_Weapon,%q1)],10*,[%vb] Invalid setting. Valid weapon setting\(s\) for [name(%q1)] are: [iter(get(%q1/List_Settings),edit(##,_,%b),,\,%b)].,110,[%vb] Your [name(%q1)] is already on the '[%q2]' setting.,111,[remit(loc(%0),[%va] [ulocal(%q1/MSG_Select,%0,%q2)])][ifelse(match(v(DB_Unarmed),%q1),[set(%0,DD6_Setting:[%q2])],[set(%q1,Setting:[%q2])])],[ulocal(MSG_Crit)])]
+&FN_SET d6 Database=[@@(0 - %#, 1 - Target, 2 - Attr/Skill, 3 - # pips)][setq(1,ulocal(FN_Pmatch,%1))][setq(2,ulocal(FN_GrabStat,%2))][setq(3,ulocal(FN_d62pip,%3))][setq(4,ulocal(FN_Cost,%q2,ulocal(FN_GetStat,%q1,%q2),%q3))][switch([ulocal(FN_IsWiz,%0)][isdbref(%q1)][t(%q2)],0*,[ulocal(MSG_Wiz)],10*,[ulocal(MSG_Target)],110,[ulocal(MSG_Stat)],111,[%va] You set [ifelse(match(%0,%q1),your,[name(%q1)]'s)] [setr(5,[edit(%q2,_,%b)] to [ulocal(FN_ColorPip,%q3)] [ifelse(gt(%q4,0),at the cost,with a refund)] of [abs(%q4)] character points.)][ulocal(FN_SetStat,%q1,%q2,%q3)][set(%q1,DD6_Skills:[ulocal(FN_xListItem,get(%q1/DD6_Skills),%q4,CP,sub)])][pemit(setdiff(%q1,%0),[%va] %N sets your [%q5])],[ulocal(MSG_Crit)])]
+&FN_SETATTR d6 Database=[@@(0 - Target, 1 - Attribute, 2 - # pips)][set(%0,DD6_Skills:[ulocal(FN_SetListItem,get(%0/DD6_Skills),%2,%1)])][ulocal(FN_BPRoll,%0,%1)]
+&FN_SETLISTITEM d6 Database=[sortby(FN_Sort,setdiff([setunion([ifelse(eq(0,ulocal(FN_Val,%1)),,[ulocal(FN_Val,%1)] [%2])],[switch(grab(%0,* [%2],|),,%0,setdiff(%0,#$,|))],|)],,|),|)]
+&FN_SETMAXBP d6 Database=[@@(0 - %#, 1 - target, 2 - max body points)][setq(1,ulocal(FN_Pmatch,%1))][setq(2,val(%2))][switch([ulocal(FN_IsWiz,%0)][isdbref(%q1)],0*,[ulocal(MSG_Wiz)],10,[ulocal(MSG_Target)],11,[%va] You have set [name(%q1)]'s maximum body points to [%q2].[null([pemit(%q1,[%va] [name(%0)] has set your maximum body points to [%q2].)][set(%q1,DD6_Skills:[ulocal(FN_SetListItem,get(%q1/DD6_Skills),%q2,BPMax)])])],[ulocal(MSG_Crit)])]
+&FN_SETSKILL d6 Database=[@@(0 - Target, 1 - Skill, 2 - # pips)][set(%0,DD6_Skills:[ulocal(FN_SetListItem,get(%0/DD6_Skills),[sub(%2,sub(ulocal(FN_GetSkill,%0,%1),ulocal(FN_GetListItem,get(%0/DD6_Skills),%1)))],%1,add)])]
+&FN_SETSTAT d6 Database=[@@(0 - Target, 1 - Attr/Skill, 2 - # pips)][switch([t(setr(0,grab(v(List_Attrs),[%1]*)))][t(setr(1,first(grab(v(List_Skills),[%1]*,|))))],1*,[ulocal(FN_SetAttr,%0,%q0,%2)],01,[ulocal(FN_SetSkill,%0,%q1,%2)],#-1)]
+&FN_SHEET d6 Database=[@@(0 - %#, 1 - argument)][setq(1,lcstr(%1))][ifelse(match(/,mid(%q1,0,1)),[setq(2,first(after(%q1,/)))][setq(3,rest(after(%q1,/)))],[setq(2,)][setq(3,%q1)])][setq(4,ifelse(t(%q3),ulocal(FN_PMatch,%q3),%0))][switch([not(match(mail,first(%q1)))][t(%q4)][or(match(%0,%q4),ulocal(FN_IsRoy,%0))][t(%q2)],0*,,10*,[ulocal(MSG_Target)],110*,[ulocal(MSG_Admin)],1110,[ulocal(FN_Sheet_Body,%q4)],1111,[ulocal(FN_Sheet2,%0,%q4,%q2)],[ulocal(MSG_Crit)])]
+&FN_SHEET_BODY d6 Database=[ulocal(FN_Sheet_Header,%0)]%r[ulocal(FN_Sheet_Health,%0)]%r[ulocal(FN_Sheet_Skills,%0)][ulocal(FN_Sheet_Weapons,%0)]%r[ulocal(FN_Footer)]
+@@ &FN_SHEET_BODY_OLD d6 Database=[name(%0)]%r%b%bExperience Points: [val(get(%0/DD6_XP))]%r[iter(v(List_Attrs),%r%b%b[ljust(##,25,.)][ulocal(FN_Pip2d6,ulocal(FN_GetAttr,%0,itext(0)))][iter(graball(v(List_Skills),* [itext(0)],|),%r%b%b%b%b[ljust(edit(first(itext(0)),_,%b),23)][ulocal(FN_Pip2d6,ulocal(FN_GetSkill,%0,first(itext(0))))],|,)],,)]
+&FN_SHEET_HEADER d6 Database=[setq(1,Race:[default(%0/Race,N/A)]|Sex:[switch(poss(%0),his,Male,her,Female,N/A)]|Age:[default(%0/age,N/A)][switch(ulocal(FN_GetListItem,get(%0/DD6_Skills),CP),0,,|Character Points:#$)][switch(ulocal(FN_GetListItem,get(%0/DD6_Skills),Attr_Dice),0,,|Attribute Dice:[ulocal(FN_Pip2d6,#$)])][switch(ulocal(FN_GetListItem,get(%0/DD6_Skills),Skill_Dice),0,,|Skill Dice:[ulocal(FN_Pip2d6,#$)])])][ulocal(FN_Header,name(%0))][iter(%q1,[ifelse(mod(sub(#@,1),3),,%r[ansi(b,|)]%b)][ljust([ansi(wh,[first(##,:)]:)] [rest(##,:)],25)][ifelse(mod(#@,3),,[ansi(b,|)])],|,)][switch(mod(words(%q1,|),3),0,,1,[space(50)][ansi(b,|)],2,[space(25)][ansi(b,|)])]
+&FN_SHEET_HEALTH d6 Database=[ulocal(FN_ILine,Health)]%r[ansi(b,|)] [ljust([ansi(wh,Body Points:)] [setr(0,sub(setr(1,ulocal(FN_BPMax,%0)),ulocal(FN_BPDmg,%0)))]/[%q1],25)][ansi(wh,\[)][ifelse(eq(%q1,0),[setq(0,1)][setq(1,1)],)][ljust(ansi(switch(div(mul(100,%q0),%q1),>75,Gg,>30,Yy,Rr),repeat(#,div(mul(47,%q0),%q1))),47)][ansi(wh,\])] [ansi(b,|)]
+&FN_SHEET_SKILLS d6 Database=[ifelse(gt(add(words(v(List_Skills),|),words(v(List_Attrs))),32),ulocal(FN_Sheet_Skills4,%0),ulocal(FN_Sheet_Skills3,%0))]
+&FN_SHEET_SKILLS1 d6 Database=[setq(0,v(List_Skills))][ulocal(FN_ILine,Skills)][iter(lnum(ceil(fdiv(words(v(List_Attrs)),2))),[setq(1,extract(v(List_Attrs),sub(mul(inum(0),2),1),1))][setq(2,extract(v(List_Attrs),mul(inum(0),2),1))][setq(3,graball(%q0,* [%q1],|))][setq(4,graball(%q0,* [%q2],|))]%r[ansi(b,|)] [ljust(ansi(wh,%q1),30,.)][rjust(ulocal(FN_ColorPip,ulocal(FN_GetAttr,%0,%q1)),6,.)]%b%b[ifelse(t(%q2),[ljust(ansi(wh,%q2),30,.)][rjust(ulocal(FN_ColorPip,ulocal(FN_GetAttr,%0,%q2)),6,.)],[space(36)])] [ansi(b,|)][iter(lnum(max(words(%q3,|),words(%q4,|))),[setq(5,first(extract(%q3,inum(0),1,|)))][setq(6,first(extract(%q4,inum(0),1,|)))]%r[ansi(b,|)]%b[ifelse(t(%q5),%b%b[ljust(edit(%q5,_,%b),28)][rjust(ulocal(FN_ColorPip,ulocal(FN_GetSkill,%0,%q5)),6)],[space(36)])]%b%b[ifelse(t(%q6),%b%b[ljust(edit(%q6,_,%b),28)][rjust(ulocal(FN_ColorPip,ulocal(FN_GetSkill,%0,%q6)),6)],[space(36)])]%b[ansi(b,|)],,)],,)]
+&FN_SHEET_SKILLS2 d6 Database=[setq(0,iter(v(List_Attrs),[ulocal(FN_GetAttr,%0,itext(0))] Attr [itext(0)][switch(graball(v(List_Skills),* [itext(0)],|),,,|[iter(#$,[ulocal(FN_GetSkill,%0,first(itext(0)))] Skill [first(itext(0))],|,|)])],,|))][setq(0,iter(%q0,ifelse([match(Skill,extract(itext(0),2,1))],switch([graball(v(List_Skills),* [extract(itext(0),3,1)],|)],,itext(0),[itext(0)]|[iter(#$,[ulocal(FN_GetSkill,%0,first(itext(0)))] SSkill [first(itext(0))],|,|)]),[itext(0)]),|,|))][setq(0,ulocal(FN_SortNCol2,%q0,|,2))][ulocal(FN_ILine,Skills)][iter(%q0,[ifelse(mod(#@,2),%r[ansi(b,|)]%b,%b%b)][ifelse(eq(3,words(itext(0))),[ljust([switch(extract(itext(0),2,1),Skill,%b%b,SSkill,%b%b%b%b,)][ansi(switch(extract(itext(0),2,1),Attr,wh,w),edit(extract(itext(0),3,1),_,%b))],30)][rjust(ulocal(FN_ColorPip,extract(itext(0),1,1)),6)],[space(36)])][ifelse(mod(#@,2),,%b[ansi(b,|)])],|,)]
+&FN_SHEET_SKILLS3 d6 Database=[setq(0,iter(v(List_Attrs),[ulocal(FN_GetAttr,%0,itext(0))] [itext(0)],,|))][setq(0,ulocal(FN_SortNCol2,iter(%q0,[##][iter(graball(v(List_Skills),* [rest(itext(0))],|),|[setr(1,add(first(itext(1)),ulocal(FN_GetAttr,%0,first(itext(0)))))] [first(itext(0))][iter(graball(v(List_Skills),* [first(itext(0))],|),|[add(%q1,ulocal(FN_GetAttr,%0,first(itext(0))))] [first(itext(0))],|,)],|,)],|,|),|,2))][ulocal(FN_ILine,Skills)][iter(%q0,[ifelse(mod(#@,2),%r[ansi(b,|)]%b,%b%b)][ifelse(t(edit(itext(0),_,)),[ljust([setq(1,rest(itext(0)))][switch([t(match(v(List_Attrs),%q1))][t(match(v(List_Attrs),rest(grab(v(List_Skills),[%q1] *,|))))],1*,[ansi(wh,edit(%q1,_,%b))],01,%b%b[edit(%q1,_,%b)],%b%b%b%b[edit(%q1,_,%b)])],30)][ljust(ulocal(FN_ColorPip,first(itext(0))),6)],[space(36)])][ifelse(mod(#@,2),,%b[ansi(b,|)])],|,)]
+&FN_SHEET_SKILLS4 d6 Database=[setq(0,iter(v(List_Attrs),[ulocal(FN_GetAttr,%0,itext(0))] [itext(0)],,|))][setq(0,iter(%q0,[##][iter(graball(v(List_Skills),* [rest(itext(0))],|),[ifelse(setr(2,grab(get(%0/DD6_Skills),* [first(itext(0))],|)),|[setr(1,add(first(itext(1)),first(%q2)))] [rest(%q2)],setq(1,first(itext(1))))][iter(graball(v(List_Skills),* [first(itext(0))],|),[switch(ulocal(FN_GetListItem,get(%0/DD6_Skills),first(itext(0))),0,,|[add(#$,%q1)] [first(itext(0))])],|,)],|,)],|,|))][setq(0,ulocal(FN_SortNCol2,%q0,|,2))][ulocal(FN_ILine,Skills)][iter(%q0,[ifelse(mod(#@,2),%r[ansi(b,|)]%b,%b%b)][ifelse(t(edit(itext(0),_,)),[ljust([setq(1,rest(itext(0)))][switch([t(match(v(List_Attrs),%q1))][t(match(v(List_Attrs),rest(grab(v(List_Skills),[%q1] *,|))))],1*,[ansi(wh,edit(%q1,_,%b))],01,%b%b[edit(%q1,_,%b)],%b%b%b%b[edit(%q1,_,%b)])],30)][ljust(ulocal(FN_ColorPip,first(itext(0))),6)],[space(36)])][ifelse(mod(#@,2),,%b[ansi(b,|)])],|,)]
+&FN_SHEET_WEAPONS d6 Database=[setq(0,sortby(FN_Sort_Names,iter(lcon(%0),ifelse(ulocal(FN_IsWeapon,itext(0)),itext(0),))))][ifelse(words(%q0),%r[ulocal(FN_ILine,Weapons)][iter(%q0,[ifelse(mod(sub(#@,1),2),,%r[ansi(b,|)])]%b[ljust(name(##),36)]%b[ifelse(mod(#@,2),,[ansi(b,|)])],,)][switch(mod(words(%q0),2),0,,[space(mul(38,mod(sub(2,#$),2)))][ansi(b,|)])],)]
+&FN_SHEET2 d6 Database=[@@(0 - %#, 1 - Target, 2 - Switch)][setq(3,health skills skills2 weapons)][setq(2,grab(%q3,[%2]*))][ifelse(t(%q2),[ulocal(FN_Sheet_Header,%1)][switch(%q2,skills,%r[ulocal(FN_Sheet_Skills3,%1)],skills2,%r[ulocal(FN_Sheet_Skills1,%1)],weapons,[ulocal(FN_Sheet_Weapons,%1)],%r[ulocal(FN_Sheet_[%q2],%1)])]%r[ulocal(FN_Footer)],[%vb] Invalid switch. Please use one of the following: [iter(%q3,itext(0),,\,%b)].)]
+&FN_SORT d6 Database=comp(rest(%0),rest(%1))
+&FN_SORT_FIRST d6 Database=sign(sub(first(%1),first(%0)))
+&FN_SORT_NAMES d6 Database=comp(name(%0),name(%1))
+&FN_SORT_NOMS d6 Database=comp([name(extract(%0,2,1,_))][name(extract(%0,3,1,_))],[name(extract(%1,2,1,_))][name(extract(%1,3,1,_))])
+&FN_SORT_ROLLS d6 Database=[sign(switch(sub(first(%1),first(%0)),0,sub(extract(%1,2,1),extract(%0,2,1)),#$))]
+&FN_SORTNCOL d6 Database=[@@(0 - list, 1 - delimiter, 2 - # columns)][setq(0,sort(%0,a,%1))][setq(1,ceil(fdiv(words(%q0,%1),%2)))][iter(lnum(mul(%2,%q1)),[setq(2,extract(%q0,add(1,mul(mod(itext(0),%2),%q1),mod(div(itext(0),%2),%q1)),1,%1))][ifelse(%q2,%q2,_)],%1,%1)]
+&FN_SORTNCOL2 d6 Database=[@@(0 - list, 1 - delimiter, 2 - # columns)][setq(1,ceil(fdiv(words(%0,%1),%2)))][iter(lnum(mul(%2,%q1)),[setq(2,extract(%0,add(1,mul(mod(itext(0),%2),%q1),mod(div(itext(0),%2),%q1)),1,%1))][ifelse(%q2,%q2,_)],,%1)]
+&FN_STATTYPE d6 Database=[switch([t(match(v(List_Attrs),%0))][t(match(v(List_Skills),[%0]*,|))],1*,Attribute,01,Skill,#-1)]
+&FN_UNLOAD_ALL d6 Database=[@@(0 - %#, 1 - Weapon)][setq(1,locate(%0,%1,iX))][setq(2,first(iter(lcon(%0),ifelse(ulocal(FN_IsAmmo,itext(0)),itext(0),))))][switch([ulocal(FN_IsWeapon,%q1)][t(get(%q1/List_Ammo))][t(ulocal(%q1/FN_Can_Unload))],0*,[ulocal(MSG_Weapon,%q1)],10*,[%vb] [name(%q1)] wasn't loaded.,110*,[%vb] [name(%q1)] cannot be unloaded.,111,[remit(loc(%0),[%va] [ulocal(%q1/MSG_Unload,%0)])][ifelse(isdbref(%q2),,[setq(2,ulocal(FN_MakeAmmo))][tel(%q2,%0)])][setq(3,get(%q2/List_Ammo))][iter(get(%q1/List_Ammo),setq(3,ulocal(FN_xListItem,%q3,first(itext(0)),rest(itext(0)),add)),|,)][set(%q2,List_Ammo:[%q3])][wipe(%q1/List_Ammo)],[ulocal(MSG_Crit)])]
+&FN_UNWIELD d6 Database=[@@(0 - %#)][setq(1,get(%0/DD6_Weapon))][switch([isdbref(%q1)],0,[%vb] You do not have a weapon readied.,1,[remit(%l,[%va] [ulocal(%q1/MSG_Unwield,%0)])][lock(%q1/drop,)][lock(%q1/give,)][wipe(%0/DD6_Weapon)],[ulocal(MSG_Crit)])]
+&FN_USECP d6 Database=[@@(0 - %#)][switch([gte(ulocal(FN_GetListItem,get(%0/DD6_Skills),CP),1)],0,[%vb] You don't have a character point to spend.,1,[%va] You use a character point to improve a roll by [setr(1,ulocal(FN_WildDie))] points.[oemit([loc(%0)]/[%0],[%va] %N uses a character point to improve a roll by [%q1] points.)][set(%0,DD6_Skills:[ulocal(FN_xListItem,get(%0/DD6_Skills),1,CP,sub)])],[ulocal(MSG_Crit)])]
+&FN_VAL d6 Database=ifelse(isnum(%0),edit(%0,+,),val(%0))
+&FN_WIELD d6 Database=[@@(0 - %#, 1 - Weapon)][setq(1,locate(%0,%1,iX))][switch([isdbref(%q1)][ulocal(FN_IsWeapon,%q1)][not(ulocal(FN_IsWeapon,get(%0/DD6_Weapon)))],0*,[%vb] No such item could be found.,10*,[ulocal(MSG_Weapon,%q1)],110*,[%vb] You already have your '[name(get(%0/DD6_Weapon))]' readied.,111,[remit(%l,[%va] [ulocal(%q1/MSG_Wield,%0)])][lock(%q1/drop,=[%q1])][lock(%q1/give,=[%q1])][set(%0,DD6_Weapon:[%q1])],[ulocal(MSG_Crit)])]
+&FN_WILDDIE d6 Database=[switch(die(1,6),6,add(6,ulocal(FN_WildDie)),#$)]
+&FN_XLISTITEM d6 Database=[ulocal(FN_SetListItem,%0,first([%3](ulocal(FN_GetListItem,%0,%2),%1)),%2)]
+
+&FUN_GETSKILL d6 Database=[ifelse(ulocal(FN_IsWiz,%@),ulocal(FN_Pip2d6,ulocal(FN_GetStat,ulocal(FN_PMatch,secure(%0)),secure(%1))),#-1 Permission denied)]
+&FUN_GETSKILL2 d6 Database=[ifelse(ulocal(FN_IsWiz,%@),ulocal(FN_GetStat,ulocal(FN_PMatch,secure(%0)),secure(%1)),#-1 Permission denied)]
+&FUN_ROLLSKILL d6 Database=[@@(0 - Player, 1 - Skill, 2 - <#>D, 3 - D+<#>)][ifelse(ulocal(FN_IsWiz,%@),ulocal(FN_RollSkill,secure(%0),secure(%1),val(secure(%2)),val(secure(%3))),#-1 Permission denied)]
+
+&LIST_ATTRS d6 Database=Coordination Endurance Intellect Knowledge Perception Reflexes Strength
+&LIST_NOMAWARDS d6 Database=100 Bhw Blue Ribbon|50 hRw Red Ribbon|25 hwY Gold Ribbon|20 ch Silver Star|10 hy Gold Star|5 hm Bronze Star|0 hx No award
+&LIST_SKILLS d6 Database=Acting Perception|Animal_Riding Perception|Archery Coordination|Artifical_Intelligence Knowledge|Balance Reflexes|Blunt_Weapons Reflexes|Brawling Reflexes|Cartography Intellect|Climbing Reflexes|Computers Intellect|Contacts Perception|Cryptography Intellect|Cybernetics Knowledge|Demolitions Intellect|Disguise Intellect|Dodging Reflexes|Driving Reflexes|Genetic_Engineering Knowledge|Haggling Perception|Heavy_Weapons Strength|History Knowledge|Investigation Perception|Jumping Strength|Knifes Reflexes|Law Knowledge|Lockpicking Coordination|Pick_Pocket Coordination|Pilot_Aircraft Intellect|Pilot_Spacecraft Intellect|Pistols Coordination|Repair Intellect|Research Knowledge|Rifles Coordination|Shadowing Perception|Sneak Perception|Swimming Endurance|Swords Reflexes|Throwing Coordination|Tracking Perception
+
+&MSG_ADMIN d6 Database=[%vb] You are not an admin.
+&MSG_ATTR d6 Database=[%vb] That is not a valid attribute.
+&MSG_CRIT d6 Database=[%vb] Please report this error at once.
+&MSG_HELP d6 Database=[%vb] That is not a valid entry.
+&MSG_NOM d6 Database=[%vb] That is not a valid nom number.
+&MSG_STAT d6 Database=[%vb] That is not a valid skill or attribute.
+&MSG_TARGET d6 Database=[%vb] No such target could be found.
+&MSG_WEAPON d6 Database=[%vb] [ifelse(isdbref(%0),name(%0),That)] is not a weapon.
+&MSG_WIZ d6 Database=[%vb] You are not a wizard.
+
+&NOM_MAX d6 Database=-1
+&NOM_MIN d6 Database=8
+
+@STARTUP d6 Database=@drain %!;@notify %!;@dolist DD6_Backup DD6_Setting DD6_Skills DD6_Weapon={@attribute/access/retroactive [##]=no_command no_inherit no_clone mortal_dark wizard};@dolist [lattr(%!/FUN_*)]={@function [rest(##,_)]=%!,##}
+
+&TR_BACKUP d6 Database=@tr %!/TR_Backup2=[search(all,eval,\[hasattr(##,DD6_Skills)\])]
+&TR_BACKUP2 d6 Database=@dolist %0=@cpattr ##/DD6_Skills=##/DD6_Backup
+&TR_HEAL d6 Database=@tr %!/TR_Heal2=[search(all,eplayer,\[and(ulocal(FN_IsAlive,##),match(get(##/DD6_Skills),*BPDmg*))\])]
+&TR_HEAL2 d6 Database=say Healing: [iter(%0,[set(##,DD6_Skills:[ulocal(FN_xListItem,get(##/DD6_Skills),1,BPDmg,sub)])][pemit(##,[%va] You have regained a single wound point due to natural healing.)][name(##)],,\,%b)].
+
+@VA d6 Database=-
+@VB d6 Database=-
+
+
+
+@@ d6 Help(#97TWXn)
+@@ Type: THING Flags: WIZARD SAFE NO_COMMAND
+@@ Owner: Skills  Zone: *NOTHING*  Pennies: 10
+@@ Parent: *NOTHING*
+@@ Powers: 
+@@ Warnings checked: none
+@@ Created: Fri Feb 06 14:38:06 2004
+@@ Last Modification: Tue Mar 09 08:20:28 2004
+@@ Home: Chargen(#93Rn)
+@@ Location: Skill's Office(#111Rn)
+
+@create d6 Help
+
+@set d6 Help = NO_COMMAND
+@set d6 Help = SAFE
+@set d6 Help = WIZARD
+
+&ATTR_COORDINATION d6 Help="Alternate Names: Aim, Dexterity.%r%r%b%bCoordination represents a character's ability to preform feats that require manual dexterity or hand-eye cooperation, i.e., fine motor skills. Such tasks include firing a bow or gun, picking a lock, and throwing a grenade."%r%r[rjust(- The D6 System: The Customizable Roleplaying Game \[WEG 51005\],78)]
+&ATTR_ENDURANCE d6 Help="Alternate Names: Constitution, Stamina.%r%r%b%bEndurance is a measure of a character's bodily resistance, i.e., how well his body stands up to attack, whether from direct injury or more insidious sources like poison, disease, or magical sickness."%r%r[rjust(- The D6 System: The Customizable Roleplaying Game \[WEG 51005\],78)]
+&ATTR_INTELLECT d6 Help="Alternate Names: Intelligence, Reasoning.%r%r%b%bThis attribute measures the mathematical, conceptual, and deductive capabilities of a character. Typical skills which it could govern include estimation (mentally figuring out values), deciphering languages, or code-breaking."%r%r[rjust(- The D6 System: The Customizable Roleplaying Game \[WEG 51005\],78)]
+&ATTR_KNOWLEDGE d6 Help="Alternate Names: Lore, Wisdom, Science.%r%r%b%bThe Knowledge attribute represents a character's level of education in various fields, from scientific pursuits like physics to philosophical concepts, from history and languages to magical lore and planetary systems. Any information a character could know in the game world could fall underneath this attribute. Again, if you're playing in a universe wehre combat rules the day and thinking takes a far second, then youse ain't gonna care 'bout Kn-no-ligee (I's hates dose silent letters - now where's my big gun?)."%r%r[rjust(- The D6 System: The Customizable Roleplaying Game \[WEG 51005\],78)]
+&ATTR_PERCEPTION d6 Help="Alternate Names: Awareness, Cognition, Observation, Sense.%r%r%b%bSometimes a character may have the opportunity to notice something in his surroundings that might provide an important piece of information. For example, a charcter might spot a bulging pocket on an adversary, which may indicate the presence of a concealed weapon. The perception attribute covers such instances as well those skills that require the ability to read the emotions or logical reasoning or another, like bargaining, commanding, or persuading."%r%r[rjust(- The D6 System: The Customizable Roleplaying Game \[WEG 51005\],78)]
+&ATTR_REFLEXES d6 Help="Alternate Names: Agility, Balance.%r%r%b%bReflexes gauges a character's gross motor coordination, i.e., the ability of his mind and his muscles to react to a potiental threat or a sudden occurance. Examples of skills that rely on Reflexes include dodging an attack, fighting with a melee weapon (a sword, knife, et ecetera), and balancing on a tight rope."%r%r[rjust(- The D6 System: The Customizable Roleplaying Game \[WEG 51005\],78)]
+&ATTR_STRENGTH d6 Help="Alternate Names: Athletics, Phsique.%r%r%b%bStrength represents a character's physical power - his ability to lift heavy objects and to inflict damage with a handheld weapon (like a sword or a knife)."%r%r[rjust(- The D6 System: The Customizable Roleplaying Game \[WEG 51005\],78)]
+
+&DB_DATA d6 Help=#96
+
+@DESCRIBE d6 Help=This object contains the help files for the skills system.%r%t[words(lattr(%!/HELP_*))] regular +sinfo entries.%r%t[words(lattr(%!/ATTR_*))] attribute entries.%r%t[words(lattr(%!/SKILL_*))] skill entries.
+
+&FN_BORDER d6 Help=[iter([iter(edit(%0,%r,|),wrap(itext(0),74,74,|),|,|)],%r[ansi(b,|)] [ljust(itext(0),74)] [ansi(b,|)],|,)]
+&FN_HELPLINE d6 Help=%r[ansi(b,|)] [ansi(wh,ucstr(%0))][rjust(%1,sub(74,strlen(%0)),.)] [ansi(b,|)]
+
+&HELP d6 Help=[ulocal([v(DB_Data)]/FN_Header,Table of Contents)][ulocal(FN_HelpLine,About d6,Comments about this RPG system)][ulocal(FN_HelpLine,TRAITS,Explains what is displayed on a character sheet)][ulocal(FN_HelpLine,COMBAT,How combat works in d6)][ulocal(FN_HelpLine,GLOBAL COMMANDS,Common skills commands)][ulocal(FN_HelpLine,FUNCTIONS,Documentation for skill-related funtions)][ulocal(FN_HelpLine,Index,An index of all availible topics)]%r[ulocal([v(DB_Data)]/FN_Footer)]
+&HELP_+ACOM d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,+acom)]%r%r%b%bThis command will combine all the ammunition containers in your inventory into a single object.])]
+&HELP_+ADDWOUND d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,+addwound)] [ansi(y,<player>)][ansi(rh,=)][ansi(y,<#>)]%r%r%b%bThis command allows a player to take damage. Players may only specify themself, while admins may specify anyone.])]
+&HELP_+ADIV d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,+adiv)] [ansi(y,<#> <ammo type>)]%r%r%b%bThis command will find an ammunition container in your inventory, and seperate the specified amount of ammunition into a new ammunition container.])]
+&HELP_+ATTACK d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,+attack)] [ansi(y,<Target>)] [ansi(ch,\[)][ansi(rh,at)] [ansi(y,<modifier>)][ansi(ch,\])]%r%r%b%bUse this command to attack somebody or something with your readied weapon, or with your bare hands should you have no weapon ready.  This command will handle ammo depletion, the to-hit roll, and the damage roll.  It is up to the judge to handle defensive rolls and to determine whether the attack succeeds.  Modifiers work the same way as in the +roll command.])]
+&HELP_+DELWOUND d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,+delwound)] [ansi(y,<player>)][ansi(rh,=)][ansi(y,<#>)]%r%r%b%bThis command allows an admin to deduct damage from a player.])]
+&HELP_+DICE d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,+roll)] [ansi(y,<args>)]%r%b%b[ansi(rh,+roll/silent)] [ansi(y,<args>)]%r%r%b%bAnyone may use this command to roll any number or combination of any-sided dice and tally together with any given constants.  See below for sample arguments:%r%b%b3D+1 -> Roll 3 six-sided dice and add 1 to the total.%r%b%b1D8-2D6 -> Roll one 8-sided die, & subtract total of two 6-sided dice.])]
+&HELP_+GIVECP d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,+givecp)] [ansi(y,<player>)][ansi(rh,=)][ansi(y,<#>)]%r%r%b%bThis command allows an admin to award character points to a player.  It may also be used to dock character points, should a negative number be used.])]
+&HELP_+HEAL d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,+heal)] [ansi(y,<Target>)]%r%r%b%bUse this command to apply first aide on an injured person.  Please note that the injured person may only be treated once an hour\, and there is a slim chance of making things worse if the injury is massive and the healer's Medical skill is poor.])]
+&HELP_+LOAD d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,+load)] [ansi(y,<weapon>)][ansi(rh,=)][ansi(y,<#> <Ammo>)]%r%r%b%bThis command will load the given amount and type of ammo into the specified weapon, if possible.  All of the ammunition will come from one ammo container in your inventory.])]
+&HELP_+NEWATTR d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,+newattr)] [ansi(y,<Attribute>)][ansi(rh,=)][ansi(y,<Description>)]%r%r%b%bThis command allows an admin to create a new attribute.])]
+&HELP_+NEWSKILL d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,+newskill)] [ansi(y,<Skill>)][ansi(rh,=)][iter(<Attribute> <Description>,ansi(y,##),,[ansi(rh,/)])]%r%r%b%bThis command allows an admin to create a new skill, based on said attribute.  The description will appear in that skill's help file.])]
+&HELP_+NOM d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,+nom)] [ansi(y,<player>)][ansi(rh,=)][ansi(y,<reason>)]%r%r%b%bUse this command to nominate fellow players for good roleplaying.  If your nom is approved\, the target player will receive some character point\(s\).  You may only nominate players once per cycle\, and you may not nominate yourself or your alts.])]
+&HELP_+NOM/ADDAWARD d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,+nom/addaward)] [ansi(y,<Text>)][ansi(rh,=)][ansi(y,<ANSI color code>)][ansi(rh,/)][ansi(y,<# noms>)]%r%r%b%bThis command allows admin to create custom nom award lists.  Players automatically gain the highest award they are eligable for.])]
+&HELP_+NOM/APPROVE d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,+nom/approve)] [ansi(y,<#>)]%r%r%b%bThis command allows an admin to manually approve a nomination.  The number refers to the number listed in +nom/list.])]
+&HELP_+NOM/AWARD d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,+nom/award)] [ansi(y,\[<player>\])]%r%r%b%bThis command will allow you to view your current nom award, or if you are an admin, the nom award of others.])]
+&HELP_+NOM/CHECK d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,+nom/check)]%r%r%b%bUse this command to view which of the nominations you have given are still pending this cycle.])]
+&HELP_+NOM/CYCLE d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,+nom/cycle)]%r%r%b%bThis command allows an admin to end the current nomination cycle and begin the next one. It is highly recommended that this command be triggered weekly by the cron.])]
+&HELP_+NOM/DELAWARD d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,+nom/delaward)] [ansi(y,<# noms>)]%r%r%b%bThis command allows admin to remove any given nom award.])]
+&HELP_+NOM/LEADERS d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,+nom/leaders)] [ansi(y,\[<#>\])]%r%r%b%bThis command will display the top ten or top <#> most nominated players in the game.])]
+&HELP_+NOM/LEFT d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,+nom/left)] [ansi(y,\[<player>\])]%r%b%b[ansi(rh,+noms/left)] [ansi(y,\[<player>\])]%r%r%b%bIf no argument is given, or you select yourself, you'll see how many nominations you can still make this cycle.  Only admins may view this data for other players.])]
+&HELP_+NOM/LEVELS d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,+nom/levels)]%r%r%b%bThis command will display a chart of the various nom awards, which are given when you gain the prerequisite number of nominations.])]
+&HELP_+NOM/LIST d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,+nom/list)]%r%r%b%bThis command allows the staff to review pending nominations for approval or rejection.])]
+&HELP_+NOM/REJECT d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,+nom/reject)] [ansi(y,<#>)]%r%r%b%bThis command allows an admin to reject a nomination.  The number refers to the number listed in +nom/list.])]
+&HELP_+NOM/TOTALS d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,+nom/totals)]%r%r%b%bThis admin command displays who has been received the most/least pending nominations this cycle.  Approved and rejected noms are not included.])]
+&HELP_+NOM/VIEW d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,+nom/view)] [ansi(y,<# or all>)]%r%r%b%bThis command allows an admin to view the text of any one pending nomination, or of all nominations.  Use the numbers shown on +nom/list.])]
+&HELP_+NOM/WEEKMAX d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,+nom/weekmax)] [ansi(y,<#>)]%r%r%b%bThis command allows an admin to set the maximum number of noms any given player may give each cycle.])]
+&HELP_+NOM/WORDMIN d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,+nom/wordmin)] [ansi(y,<#>)]%r%r%b%bThe +nom command requires players enter a minimum number of words in the reason for it to be accepted into the system.  This command allows an admin to set what that number of words is.])]
+&HELP_+RAISE d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,+raise)] [ansi(y,<attr/skill>)] [ansi(rh,to)] [ansi(y,<#>D+<#>)]%r%b%b[ansi(rh,+raise/cost)] [ansi(y,<attr/skill>)] [ansi(rh,to)] [ansi(y,<#>D+<#>)]%r%r%b%bThe first version of this command will raise the specified attribute or skill, provided you have the character points needed to do so. Raising an attribute will raise all skills and specializations dependant on it.  Raising a skill will not raise dependant specializations, though a specialization will never be lower than its dependant skill.%r%b%bThe second version with the cost switch will only report the character point cost related to raising a skill, without actually doing so.])]
+&HELP_+READY d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,+ready)] [ansi(y,<weapon>)]%r%r%b%bUse this command to ready or wield your weapon of choice.])]
+&HELP_+RELOAD d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,+reload)] [ansi(y,<weapon>)]%r%r%b%bThis handy command is a simplier version of the +load command, except it is limited to weapons with a single ammunition magazine that accepts only one type of ammo.])]
+&HELP_+REMATTR d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,+remattr)] [ansi(y,<Attribute>)]%r%r%b%bThis command allows an admin to delete an attribute from the game, as well as all skills dependent on that attribute.  It's a very dangerous command, so you must type in the attribute name in full.])]
+&HELP_+REMSKILL d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,+remskill)] [ansi(y,<skill>)]%r%r%b%bThis admin command will completely remove a skill from the skills system.  Since this is usually a big deal, you must type out the skill name in full. Any specializations of that skill are also removed from the system.])]
+&HELP_+ROLL d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,+roll)] [ansi(y,<Attribute or Skill>)] [ansi(ch,\[)][ansi(rh,at)] [ansi(y,<modifier>)][ansi(ch,\])]%r%b%b[ansi(rh,+roll)] [ansi(y,<Player>)][ansi(rh,/)][ansi(y,<Attribute or Skill>)] [ansi(ch,\[)][ansi(rh,at)] [ansi(y,<modifier>)][ansi(ch,\])]%r%b%b[ansi(rh,+roll/silent)] [ansi(y,<Attribute or Skill>)] [ansi(ch,\[)][ansi(rh,at)] [ansi(y,<modifier>)][ansi(ch,\])]%r%b%b[ansi(rh,+roll/silent)] [ansi(y,<Player>)][ansi(rh,/)][ansi(y,<Attribute or Skill>)] [ansi(ch,\[)][ansi(rh,at)] [ansi(y,<modifier>)][ansi(ch,\])]%r%r%b%bUse this command to roll any given skill or attribute.  The silent switch will prevent others from seeing the results of the roll  Only admins may roll the attributes or skills of other players.%r%b%bModifiers may be given in the form <#>, <#>D, <#>D+<#>, or <#>D-<#>. A modifier with a negative number of dice means that many fewer six-sided dice should be rolled.  For example, a skill at 4D with a modifier of -1D would only roll 3 six-sided dice. Should an attribute or skill level lack a positive number of dice\, the roll will automatically fail.%r%b%bOne of the dice in any given roll is called the Wild Die, which has some special rules to represent good or bad luck.  Should the wild die come up a six, six is added to the total and the wild die is rolled again. If the wild die comes up a one on the first roll, then the judge has several options of how to treat it.])]
+&HELP_+ROLLALL d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,+rollall)] [ansi(y,<Attribute or Skill>)] [ansi(ch,\[)][ansi(rh,at)] [ansi(y,<modifier>)][ansi(ch,\])]%r%b%b[ansi(rh,+rollall/silent)] [ansi(y,<Attribute or Skill>)] [ansi(ch,\[)][ansi(rh,at)] [ansi(y,<modifier>)][ansi(ch,\])]%r%r%b%bThis command allows an admin or judge to make a mass skill or attribute check with ease. The silent switch will prevent others from seeing the results of the roll. The results are sorted by highest rolls, followed by highest wild die rolls. Please note that this will make a check for ALL non-dead players at your location, including hidden or dark wizards. So if you're a dark wizard hiding, you might want to kill..um, @set yourself DEAD.%r%b%bModifiers may be given in the form <#>, <#>D, <#>D+<#>, or <#>D-<#>. A modifier with a negative number of dice means that many fewer six-sided dice should be rolled.  For example, a skill at 4D with a modifier of -1D would only roll 3 six-sided dice. Should an attribute or skill level lack a positive number of dice\, the roll will automatically fail.%r%b%bOne of the dice in any given roll is called the Wild Die, which has some special rules to represent good or bad luck.  Should the wild die come up a six, six is added to the total and the wild die is rolled again. If the wild die comes up a one on the first roll, then the judge has several options of how to treat it.])]
+&HELP_+SELECT d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,+select)] [ansi(y,<setting>)]%r%r%b%bUse this command to select a setting for your weapon.  You must have your weapon ready to use this command.%r%b%bNote: If the 'unarmed attack' object is configured to have multiple settings\, you may select your 'unarmed attack' setting. This is an easy way of handling cheep and common weapons.])]
+&HELP_+SETMAXBP d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,+setmaxbp)] [ansi(y,<player>)][ansi(rh,=)][ansi(y,<#>)]%r%r%b%bThis command allows an admin to change a player's maximum body points.])]
+&HELP_+SETSKILL d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,+setskill)] [ansi(y,<player>)][ansi(rh,/)][ansi(y,<Attr/Skill>)] [ansi(rh,to)] [ansi(y,<#>D+<#>)]%r%b%b[ansi(rh,+setskill)] [ansi(y,<player>)][ansi(rh,/)][ansi(y,<Attr/Skill>)][ansi(rh,=)][ansi(y,<#>D+<#>)]%r%r%b%bThis command allows an admin to set a player's skill or attribute to the given level, along with the appropriate refund/cost of character points.  Please note that you can set a skill below its parent attribute's value.])]
+&HELP_+SHEET d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,+sheet)] [ansi(y,\[<player>\])]%r%b%b[ansi(rh,+sheet/mail)] [ansi(y,\[<player>\])]%r%r%b%bThe first example of this command is used to view a character's sheet.  Only admins may view other people's character sheets.  The second option allows you to @mail your sheet to another player.])]
+&HELP_+SHEETMAIL d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,+sheetmail)] %r%r%b%bThis command allows you to @mail your sheet to another player.  This is the only way to share your sheet with other players who are not members of the staff.])]
+&HELP_+UNREADY d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,+unready)]%r%r%b%bUse this command to put your drawn weapon away.])]
+&HELP_+USECP d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,+usecp)]%r%r%b%bWhile the +raise command allows you to spend your character points to improve an attribute or skill permanently, you may also use character points to improve the results of any given roll.  Before or after the roll, declare that you are using a character point to improve the results of that roll and type '+usecp'.  This command will both deduct your character point and announce to all present the amount your roll improved by.])]
+&HELP_ABOUT_D6 d6 Help=[ulocal(FN_Border,%b%bThis skills system is based loosely on the 'D6 Classic System' by West End Games.  Anyone interested in learning more about the D6 System in general or about West End Games should visit their website at: [ansi(c,http://www.westendgames.com/)]. This version is designed to run on PennMUSH\, to be easily configured by without much coding knowledge.)]
+&HELP_ACTIONS d6 Help=[ulocal(FN_Border,[%b%bFor the purposes of combat, the following items are defined as a single action. Please note that there may be exceptions to these rules. In addition, a player may be allowed to move a reasonable distance in a round.%r])]   [iter(Draw a weapon|Make a single attack (punch, shot, etc) against an opponent|Reload a weapon|Avoid an attack|Use a skill,%r[ansi(b,|)]%b%b[ansi(ch,*)]%b%b[ljust(##,71)][ansi(b,|)],|,)]
+&HELP_ATTACKS d6 Help=[ulocal(FN_Border,[%b%bWhen an attack is made, we first need to resolve whether or not it is successful, which is done by making the appropriate skill check with any appropriate modifiers for range, visibility, scale, etc.  If the target chooses, it may make a skill roll of its own to determine how hard it is to hit.  Otherwise, the GM should assign a number.  A human-sized target has a base difficulty of 10 to hit.  However, if a human rolls less than 10 for his dodge or parry roll, then he may be easier to hit than if he hadn't moved at all.%r%b%bIf the attack roll is greater than or equal to the number needed to strike the target, then we resolve damage. The attacker rolls for damage, while the target makes a roll to resist damage.  We subtract the target's roll from the attacker's roll, and if the result is positive we deduct that many body points from the target.  If the target's roll to resist damage is higher than the damage roll, then no damage occurs.])]
+&HELP_COMBAT d6 Help=[ulocal(FN_HelpLine,ROUNDS,How time is handled in combat)][ulocal(FN_HelpLine,ACTIONS,What you can do in a round)][ulocal(FN_HelpLine,ATTACKS,Resolving an attack)][ulocal(FN_HelpLine,SCALE,How to handle opponents of unequal size)]
+&HELP_FUNCTIONS d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,getskill\()][ansi(y,<player>)][ansi(rh,\,)][ansi(y,<attr/skill>)][ansi(rh,\))]%r%r%b%bThis function will return a player's attribute or skill in <#>D+<#> notation.]%r%r%b%b[ansi(rh,getskill2\()][ansi(y,<player>)][ansi(rh,\,)][ansi(y,<attr/skill>)][ansi(rh,\))]%r%r%b%bThis function is much like the one above it\, except it returns the answer in # of pips notation.%r%r%b%b[ansi(rh,rollskill\()][iter(<player> <attr/skill> <#_dice> <#_pips>,ansi(y,edit(##,_,%b)),,ansi(rh,\,))][ansi(rh,\))]%r%r%b%bThis function will preform a skill check based on the player's attribute or skill, plus a <# dice>D+<# pips> modifier. It will return two numbers, the first being the result of the skill check and the second being the total given from the wild die.)]
+&HELP_GLOBAL_COMMANDS d6 Help=[ulocal(FN_Border,[%b%bThe following commands may be used by anyone. However, some are of limited in use should any player involved not completed chargen, while others are of expanded use to members of the staff.%r[iter(+acom +addwound +adiv +attack +dice +heal +load +nom +nom/award +nom/check +nom/leaders +nom/left +nom/levels +raise +ready +reload +roll +select +sheet +unready +usecp,[ifelse([mod(sub(#@,1),4)],,%r)][ljust(ansi(wh,ucstr(itext(0))),18)],,)]%r%rThe following commands may only be used by the staff.%r[iter(+delwound +givecp +newattr +newskill +nom/addaward +nom/approve +nom/cycle +nom/delaward +nom/list +nom/reject +nom/totals +nom/weekmax +nom/wordmin +nom/view +remattr +remskill +rollall +setskill +setmaxbp,[ifelse([mod(sub(#@,1),4)],,%r)][ljust(ansi(wh,ucstr(itext(0))),18)],,)]%r%rTo learn about any command, type [ansi(rh,+sinfo)] [ansi(y,<command>)].])]
+&HELP_INDEX d6 Help=[iter(ulocal([v(DB_Data)]/FN_SortNCol,lattr(%!/HELP_*),%b,4),[ifelse(mod(dec(#@),4),,%r[ansi(b,|)]%b)][ljust(edit(after(itext(0),HELP_),_,%b),18)][ifelse(mod(#@,4),,%b%b%b[ansi(b,|)])],,)]%r[ansi(b,|[space(76)]|%r|)][ljust(%b[ansi(rh,Note: There is an +sinfo file for every one of the [words(get([v(DB_Data)]/List_Skills),|)] skills.)],76)][ansi(b,|)]
+&HELP_LIST_ATTRIBUTES d6 Help=[iter(get([v(DB_Data)]/List_Attrs),[setq(0,wrap(v(Attr_[itext(0)]),72,sub(72,strlen(itext(0))),|))]%r[ansi(b,|)] [ljust([ansi(yh,[edit(itext(0),_,%b)]:)] [first(%q0,|)],75)][ansi(b,|)][iter(rest(%q0,|),%r[ansi(b,|)]%b%b%b[ljust(itext(0),73)][ansi(b,|)],|,)],,)]
+&HELP_LIST_SKILLS d6 Help=[setq(0,ulocal([v(DB_Data)]/FN_SortNCol,[iter(get([v(DB_Data)]/List_Skills),first(##),|,%b)],%b,3))][iter(%q0,[ifelse(mod(sub(#@,1),3),,%r[ansi(b,|)]%b)][ljust(edit(##,_,%b),25)][ifelse(mod(#@,3),,[ansi(b,|)])],,)][ulocal(FN_Border,[%r%bTo learn about any one of these [words(get([v(DB_Data)]/List_Skills),|)] skills, type [ansi(rh,+sinfo)] [ansi(y,<skill>)]])]
+&HELP_LOAD d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,load)] [ansi(y,<weapon>)][ansi(rh,=)][ansi(y,<#> <Ammo>)]%r%r%b%bThis command will load the given amount and type of ammo into the specified weapon, if possible.  All of the ammunition will come from one ammo container in your inventory.])]
+&HELP_READY d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,ready)] [ansi(y,<weapon>)]%r%r%b%bUse this command to ready or wield your weapon of choice.])]
+&HELP_ROUNDS d6 Help=[ulocal(FN_Border,[%b%bCombat is broken down into five second long rounds.  Once combat begins, all involved characters make Reflexes rolls.  The character with the highest roll acts first, followed by the character with the next highest roll and so forth until all participants have acted.  If a character dies before their turn comes around, they do not get to make an action.%r%b%bWhen a character's turn comes around, he or she needs to declare the number of actions they will be taking that round.  For every action after the first a character intends to take, they take a cumulative -1D penalty to all actions taken that round.  So if a character declares that they will take three actions that round, all three actions are taken with a -2D modifier. Then the actions are resolved and the character pose is made%r%b%bShould a character be attacked before their turn, they may be allowed to make a Dodging or similiar roll to avoid being hit.  Should they do so, the target must also declare the number of actions they will take on their turn, though those actions are not resolved until the target's turn.])]
+&HELP_SCALE d6 Help=[ulocal(FN_Border,[%b%bSometimes two opponents of unequal size will engage in combat with one another, such as an infantry soldier and a tank.  To handle this situation, we introduce the concept of scale which is measured in number of dice.%r%b%bThe difference in scale is added to the smaller attackers to-hit rolls against the larger target, and subtracted from the larger attackers to-hit rolls when attacking the smaller target.  After all, its easier to hit the broad side of a barn than it is to strike a fly.%r%b%bThe difference in scale also factors into damage.  When the larger attacker is struck, it adds the difference in scale to its damage resistance roll.  However, if the larger attacker strikes the smaller target, it adds that difference in scale to the damage roll.])]
+&HELP_TRAITS d6 Help=[ulocal(FN_Border,%b%b[ansi(wh,Character Points:)] Character points are awarded for getting +noms\, or for good roleplay\, or whatever the staff decides to give them away for.  They are generally used for character development (raising attributes/skills).  However\, if the staff/judge allows\, a character point may also be spent to gain an extra die in a roll.%r%r%b%b[ansi(wh,Attributes:)] These measure certain universal qualities about your character. These can be tested when no skill seems to apply to a given task. They also affect how proficient you are with certain skills. You may increase your attributes over time by using experience points.%r%r%b%b[ansi(wh,Skills:)] Skills measure how proficient you are when performing certain tasks.%r%r%b%b[ansi(wh,Specialty Skills:)] These are the most specialized skills of all.  If there was a Marksman skill\, than a specialty skill might be a given model of gun.)]
+&HELP_UNLOAD d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,unload)] [ansi(y,<weapon>)]%r%r%b%bUse this command to completely unload your weapon.)]
+&HELP_UNREADY d6 Help=[ulocal(FN_Border,[%b%b[ansi(rh,unready)]%r%r%b%bUse this command to put your drawn weapon away.])]
+&HELP_WILD_DIE d6 Help=[ulocal(FN_Border,[%b%bWhen a skill or attribute is rolled, one of the six-sided dice is designated as the 'wild die'.  If the result of the wild die is not a 1 or a 6, it is added into the total normally.  However, if the wild die is a 6, 6 is added to the total and the wild die is rolled again. If the rerolled die comes up six again, the process repeats.  This means there is no theoretical upper limit to what any given roll may be.  However, if the wild die comes up a '1' the first time it is rolled, complications may arise.])]
+
+&SKILL_ACTING d6 Help=This skill covers your ability to act. It may be used when playing the lead part in a play, or delivering a convincing lie through body language and vocal inflection. It also may cover in part your ability to improvise should someone miss their cue or react in an unexpected way.
+&SKILL_ANIMAL_RIDING d6 Help=This skill measures your ability to ride horses, camels, and/or other large animals. Please note that the animal must be able to support your weight in order to ride it. The animal's disposition and training may make it harder or easier to ride the beast and get it to do what you want it to do.
+&SKILL_ARCHERY d6 Help=The ability to use bow and arrows well. While mostly a sport, some colony worlds may favor bows over guns for weapons, due to the simplier technology involved in constructing bows and arrows, and the reusability of its ammunition.
+&SKILL_ARTIFICAL_INTELLIGENCE d6 Help=This skill represents your character's knowledge in the field of A.I., where computers try to simulate human (or animal or instect) intellgence. A true A.I. should be able to react to unexpected circumstances.
+&SKILL_BALANCE d6 Help=This skill reflects how stable on your feet your character is. The narrower, slicker, and more unstable the surface you're standing on is, the harder it becomes to remain upright.
+&SKILL_BLUNT_WEAPONS d6 Help=This skill measures your ability to use a whole class of weapons in combat. The term 'Blunt Weapons' includes such weapons as canes, clubs, quarterstaffs, and warhammers. These weapons can often be easily crafted or found, and they are rarely classified as weapons.
+&SKILL_BRAWLING d6 Help=This skill reflects ones ability to fight without weapons.
+&SKILL_CARTOGRAPHY d6 Help=Use this skill to read and make maps. Most of the time reading a typical map isn't difficult, but some esoteric kinds of maps can be confusing at first. But mostly this skill is intended for people who wish to create maps.
+&SKILL_CLIMBING d6 Help=This skill is used to determine if you can climb steep inclines, mountains, and/or buildings as the situation warrents. The steeper the incline, the fewer the hand and footholds, the more weight the climber is carrying, the difficult the climb. Appropriate use of ropes though can make an ascent easier.
+&SKILL_COMPUTERS d6 Help=The ability to get computers to do what you want.
+&SKILL_CONTACTS d6 Help=This skill represents your ability to cultivate a relationship with a specific person and get him to share information and/or services with you. This relationship may last days, weeks, or even years. Often a contact will remain so out of friendship or loyalty, but money and fear are other ways of maintaining a good contact.
+&SKILL_CRYPTOGRAPHY d6 Help=The ability to create and break codes.
+&SKILL_CYBERNETICS d6 Help=How does one fuse artifical technology directly to the human frame? Cybernetics is the answer. This is the science needed to make artifical prosthetics that work without strange control structures, or to wire a human brain directly to a computer.
+&SKILL_DEMOLITIONS d6 Help=This skill describes the ability to properly use explosives for a desired effect, and the ability to disarm bombs. Should one roll poorly, unfortunate side effects may occur.
+&SKILL_DISGUISE d6 Help=This is the primary skill of make-up artists everywhere, to alter ones appearence via clothing and make-up so one's identity is concealed. A proper Disguise attempt ussually requires several minutes to an hour or more in private to pull off a reasonable result. Judges should make these rolls in secret, though players may try to see how good the results are via the appropriate skill check before venturing out in public.
+&SKILL_DODGING d6 Help=The ability to avoid damage.
+&SKILL_DRIVING d6 Help=This skill reflects the ability to drive ground-based vehicles, ranging from electric carts to bulldozers.
+&SKILL_GENETIC_ENGINEERING d6 Help=This skill represents your theoretical and practical knowledge of genetic engineering. Want to play god and create flying rats, merfolk, or disposable replicant labor?
+&SKILL_HAGGLING d6 Help=The ability to cut a great deal.
+&SKILL_HEAVY_WEAPONS d6 Help=Heavy weapons often depend less on accuracy than the strength to carry and use them. These may include missile launchers, bazookas, miniguns, flamethrowers, etc.
+&SKILL_HISTORY d6 Help=Knowledge of the past. This may be specialized into various eras, areas, etc.
+&SKILL_INVESTIGATION d6 Help=This skill mainly represents how well you can gather information by talking to people, which is often the only way to learn about a new rumor, supressed news story, or undocumented events. Players more interested in written references should use the Research skill instead. Players using this skill may also be able to read more out of what they see and hear, such as noticing the guns those corperate security guards were shooting at you with were military grade as you were running for your life.
+&SKILL_JUMPING d6 Help=This skill measures how far or high one can jump. It may also be used to lessen damage taken from a fall.
+&SKILL_KNIFES d6 Help=This skill measures how skillfully you may use a knife in combat. Knifes are extremely common in most societies and difficult to outlaw. Still, in some settings they are defined as a weapon, such as schools or passenger transports.
+&SKILL_LAW d6 Help=The skill of lawyers, along with some law enforcement officials and businessmen. This skill represents a character's working knowledge of the law and ability to function in a legal enviroment such as a courtroom. A player very familiar with the law should also be able to write legal documents such as contracts and wills.
+&SKILL_LOCKPICKING d6 Help=The ability to pick locks.
+&SKILL_PICK_POCKET d6 Help=This skill represents a character's ability to pick pockets, to lift items from a mark without the mark figuring it out until the pickpocket is long gone from the scene. In most societies, this is ussually an illegal act, so players be warned. Difficulty in picking a pocket should factor in size of the item to steal, placement of the item on the mark, and awareness level of the mark. In most cases, the mark will be allowed to make a roll to detect the pickpocket attempt.
+&SKILL_PILOT_AIRCRAFT d6 Help=This skill reflects the ability to operate vehicles that fly through atmosphere, such as helicopters, airplanes, and gliders.
+&SKILL_PILOT_SPACECRAFT d6 Help=This skill reflects the ability to pilot spacecraft through the vacuum of space.
+&SKILL_PISTOLS d6 Help=This skill reflects ones ability to fire pistols accurately.
+&SKILL_REPAIR d6 Help=This skill represents the ability to preform small-scale repairs. This may involve the use of glues, paints, bolts, cleaning products, tapes, wires, cleaning products, etc. Certain kinds of specialized or intricate repairs may be covered by other skills.
+&SKILL_RESEARCH d6 Help=This skill represents how familiar and well you can use libraries, databases, and catalogs to find useful information about a topic of your choosing. Without this skill, your character may not be able to find a particular reference he or she needs. The difficulty in finding information is based on quality of materials availible, complexity and obscurity of the topic, and the character's familiarity of the topic.
+&SKILL_RIFLES d6 Help=This skill reflects ones ability to fire rifles accurately.
+&SKILL_SHADOWING d6 Help=This skill represents how well you can follow and monitor someone without drawing their attention. Its possible that your target may see and hear you along the way, but as long as you blend into the crowd and avoid drawing their attention you're fine. Characters trying to avoid being seen and heard should use the Sneak skill instead.
+&SKILL_SNEAK d6 Help=This skill represents your ability to sneak, to move around silently and quickly dart out of sight.  Sneaky characters can steal candy from sleeping babies.
+&SKILL_SWIMMING d6 Help=The ability to move through water, and to avoid drowning.
+&SKILL_SWORDS d6 Help=This skill measures how skillfully you may use a sword in combat. While somewhat archaic, swords are still highly effective melee weapons. They are also commonly worn with some dress uniforms, and often used for sport.
+&SKILL_THROWING d6 Help=This skill is used to determine how well and accurately you can throw stuff. Some items may be easier to throw than others. Also, some Judges may call for a Strength check to determine if you can lift the item in question or achieve sufficient range to reach the intended destination in some cases.
+&SKILL_TRACKING d6 Help=This skill allows you to understand and follow tracks. These may include such things as footprints, drops of blood, broken twigs and flipped leaves. Difficulty should be based both on terrain and age of tracks.
+
+
+
+@@ Nom Storage(#99TXn)
+@@ Type: THING Flags: SAFE NO_COMMAND
+@@ Owner: Skills  Zone: *NOTHING*  Pennies: 10
+@@ Parent: *NOTHING*
+@@ Powers: 
+@@ Warnings checked: none
+@@ Created: Fri Feb 06 14:38:17 2004
+@@ Last Modification: Tue Feb 10 01:58:32 2004
+@@ Home: Chargen(#93Rn)
+@@ Location: Skills(#92PWXenACc)
+
+@create Nom Storage
+
+@set Nom Storage = NO_COMMAND
+@set Nom Storage = SAFE
+
+@DESCRIBE Nom Storage=%b%bThis object stores all +nom data.  There are currently [words(lattr(%!/NOM_*_*))] pending nominations on file.  It was last cycled [timestring(sub(secs(),v(LastCycle)))] ago.
+
+&LASTCYCLE Nom Storage=1070018498
+
+
+
+@@ Parent: Weapon(#100TXn)
+@@ Type: THING Flags: SAFE NO_COMMAND
+@@ Owner: Skills  Zone: *NOTHING*  Pennies: 10
+@@ Parent: *NOTHING*
+@@ Powers: 
+@@ Warnings checked: none
+@@ Created: Fri Feb 06 14:38:19 2004
+@@ Last Modification: Wed Mar 10 00:55:39 2004
+@@ Home: Chargen(#93Rn)
+@@ Location: Weapons Room(#125Rn)
+
+@create Parent: Weapon
+
+@set Parent: Weapon = SAFE
+@set Parent: Weapon = NO_COMMAND
+
+&CLR_A Parent: Weapon=b
+&CLR_B Parent: Weapon=ch
+&CLR_C Parent: Weapon=w
+
+&DB_DATA Parent: Weapon=#96
+
+&DESC1 Parent: Weapon=This is the default weapon desc. Yell at an admin to properly desc this weapon.
+
+@DESCRIBE Parent: Weapon=[ulocal(Desc1)]%r%r[rjust(ansi(v(Clr_A),Damage:),18)] [ljust(ansi(v(Clr_C),edit(extract(v(List_Damage),ulocal(FN_Setting,%#),1),_,%b)),14)][switch(extract(v(List_Range),ulocal(FN_Setting,%#),1,|),,,[ansi(v(Clr_A),Range:)] [ansi(v(Clr_C),[#$] meters)])]%r[ifelse(gt(words(v(List_Settings)),1),[rjust(ansi(v(Clr_A),Current Setting:),18)] [ansi(v(Clr_C),edit(extract(v(List_Settings),ulocal(FN_Setting,%#),1),_,%b))]%b[ansi(v(Clr_B),\()][ansi(v(Clr_A),Skill:)] [ansi(v(Clr_C),edit(ulocal(FN_Skill),_,%b))][switch(ulocal(FN_Ammo_Num),0,,\, [ansi(v(Clr_A),Ammo Use:)] [ansi(v(Clr_C),[#$] [edit(ulocal(FN_Ammo_Type),_,%b)][ifelse(eq(1,#$),,s)])])][ansi(v(Clr_B),\))]%r[rjust(ansi(v(Clr_A),Settings:),18)] [iter(v(List_Settings),ansi(v(Clr_C),edit(itext(0),_,%b)),,\,%b)].,[rjust(ansi(v(Clr_A),Skill:),18)] [ljust(ansi(v(Clr_C),edit(ulocal(FN_Skill),_,%b)),11)][switch(ulocal(FN_Ammo_Num),0,,[ansi(v(Clr_A),Ammo Use:)] [ansi(v(Clr_C),[#$] [edit(ulocal(FN_Ammo_Type),_,%b)][ifelse(eq(1,#$),,s)])].)])][iter(v(List_Max_Ammo),%r[rjust([ansi(v(Clr_A),Ammo:)],18)] [ljust([ansi(v(Clr_C),lmath(add,[iter(rest(itext(0)),ulocal(FN_GetListItem,v(List_Ammo),itext(0)))]))][ansi(v(Clr_B),/)][ansi(v(Clr_C),first(itext(0)))],10)][ansi(v(Clr_A),Ammo Type:)] [iter(rest(itext(0)),[ansi(v(Clr_C),edit(itext(0),_,%b))] [ansi(v(Clr_B),\()][ansi(v(Clr_C),ulocal(FN_GetListItem,v(List_Ammo),[itext(0)]))][ansi(v(Clr_B),\))],,\,%b)].,|)]
+
+&FN_AMMO_NUM Parent: Weapon=[extract(v(List_Ammo_Num),ulocal(FN_Setting,%0),1)]
+&FN_AMMO_TYPE Parent: Weapon=[extract(v(List_Ammo_Type),ulocal(FN_Setting,%0),1)]
+&FN_BODY_LOC Parent: Weapon=[extract(Right_Hand Left_Hand Right_Leg Left_Leg Right_Foot Left_Foot Abdomen Chest Chest Head,add(1,mod(%0,10)),1)]
+&FN_CAN_LOAD Parent: Weapon=1
+&FN_CAN_UNLOAD Parent: Weapon=1
+&FN_DAMAGE Parent: Weapon=[sub([ulocal(FN_Damage_[ulocal(FN_Setting,%0)],%0,%1,%2,%3,%4)],[val(first(rollskill(%1,Endurance,0,0)))])]
+&FN_DAMAGE_0 Parent: Weapon=0
+&FN_DAMAGE_1 Parent: Weapon=0
+&FN_GETLISTITEM Parent: Weapon=[switch(grab(%0,* [%1],|),,0,first(#$))]
+&FN_MSG_ATTACK Parent: Weapon=[@@(0 - %#, 1 - Target DB, 2 - Total Skill Roll, 3 - <#>D modifier, 4 - D+<#> modifier)][ulocal(MSG_Attack,%0,%1,%2,%3,%4)][ulocal(MSG_To_Hit,%0,%1,%2,%3,%4)][ulocal(MSG_Damage,%0,%1,%2,%3,%4)]
+&FN_SETTING Parent: Weapon=[max(1,match(v(List_Settings),v(Setting)))]
+&FN_SKILL Parent: Weapon=[extract(v(List_Skills),ulocal(FN_Setting,%0),1)]
+
+&LIST_AMMO_NUM Parent: Weapon=0
+&LIST_AMMO_TYPE Parent: Weapon=N/A
+&LIST_MAX_AMMO Parent: Weapon=
+&LIST_SETTINGS Parent: Weapon=Kill
+&LIST_SKILLS Parent: Weapon=Melee
+
+&MSG_ATTACK Parent: Weapon=[ulocal(MSG_Attack_[ulocal(FN_Setting,%0)],%0,%1,%2,%3,%4)]
+&MSG_ATTACK_0 Parent: Weapon=[name(%0)] attacks with a weapon set to an invalid setting.
+&MSG_ATTACK_1 Parent: Weapon=[name(%0)] attacks [name(%1)] with [poss(%0)] [name(%!)].
+&MSG_DAMAGE Parent: Weapon=%r%b%b[ansi(gh,-)] This attack will do [switch([ulocal(FN_Damage,%0,%1,%2,%3,%4)],>0,[ansi(rh,#$)] points of damage if it hits,no damage)].
+&MSG_LOAD Parent: Weapon=[name(%0)] loads [%1] [edit(%2,_,%b)][ifelse(eq(%2,1),,s)] into [poss(%0)] [name(%!)].
+&MSG_SELECT Parent: Weapon=[name(%0)] puts the selector switch on [poss(%0)] [name(%!)] to [edit(%1,_,%b)].
+&MSG_TO_HIT Parent: Weapon=%r%b%b[ansi(gh,-)] [name(%0)] rolls [poss(%0)] [edit(ulocal(FN_Skill,%0),_,%b)][ifelse(or(%3,%4),%bwith a modifier of [ifelse(%3,[%3]D,)][switch(sign(%4),-1,%4,1,+[%4],)],)] [ifelse(rest(%2),for a total of [ansi(yh,first(%2))] [ansi(wh,\()]Wild Die: [switch(rest(%2),>6,ansi(gh,#$),>1,ansi(yh,#$),ansi(rh,#$))][ansi(wh,\))],and fails for lack of dice)].
+&MSG_UNLOAD Parent: Weapon=[name(%0)] unloads [poss(%0)] [name(%!)].
+&MSG_UNWIELD Parent: Weapon=[name(%0)] puts [poss(%0)] [name(%!)] away.
+&MSG_WIELD Parent: Weapon=[name(%0)] readies [poss(%0)] [name(%!)] for use.
+
+&SETTING Parent: Weapon=Kill
+
+
+
+@@ Parent: Ammo Box(#101TXn)
+@@ Type: THING Flags: SAFE NO_COMMAND
+@@ Owner: Skills  Zone: *NOTHING*  Pennies: 10
+@@ Parent: *NOTHING*
+@@ Powers: 
+@@ Warnings checked: none
+@@ Created: Fri Feb 06 14:38:23 2004
+@@ Last Modification: Sun Feb 29 09:22:07 2004
+@@ Home: Chargen(#93Rn)
+@@ Location: Skills(#92PWXenACc)
+
+@create Parent: Ammo Box
+
+@set Parent: Ammo Box = NO_COMMAND
+@set Parent: Ammo Box = SAFE
+
+&CLR_A Parent: Ammo Box=ch
+&CLR_B Parent: Ammo Box=c
+
+@@ &LIST_AMMO Parent: Ammo Box=<max ammo in magazine1> <ammotype1 storable in magazine1> <ammotype2 storable magazine1> <..>|<max ammo in magazine2> <ammotype1 storable in magazine2> <ammotype2 storable magazine2> <..>|<...>
+
+@DESCRIBE Parent: Ammo Box=%b%bThis is a standard container used for holding ammunition.  Its metal frame and foam padding ensure that the contents are protected from heat and impact.  It may even be able to contain a small explosion, should it be properly secured.  If you were to look inside, one would find [ifelse(words(v(List_Ammo)),[iter(v(List_Ammo),[ansi(v(Clr_A),first(itext(0)))] [ansi(v(Clr_B),[edit(itext(0),_,%b)][ifelse(eq(first(itext(0)),1),,s)])],|,\,%b)],[ansi(v(Clr_A),nothing)])].
+
+
+
+@@ Unarmed Attack(#102TWXn)
+@@ Type: THING Flags: WIZARD SAFE NO_COMMAND
+@@ Owner: Skills  Zone: *NOTHING*  Pennies: 10
+@@ Parent: Parent: Weapon(#100TXn)
+@@ Powers: 
+@@ Warnings checked: none
+@@ Created: Fri Feb 06 14:38:24 2004
+@@ Last Modification: Sun Mar 07 15:07:46 2004
+@@ Home: Chargen(#93Rn)
+@@ Location: Weapons Room(#125Rn)
+
+@create Unarmed Attack
+
+@parent Unarmed Attack=Parent: Weapon
+
+@set Unarmed Attack = NO_COMMAND
+@set Unarmed Attack = SAFE
+@set Unarmed Attack = WIZARD
+
+&DESC1 Unarmed Attack=%b%bThis is the weapon 'parent' for unarmed attacks, though it shouldn't have children.  Instead, the skills code defaults to this object when the player is wielding no weapon at all.
+
+&FN_AMMO_NUM Unarmed Attack=0
+&FN_AMMO_TYPE Unarmed Attack=N/A
+&FN_DAMAGE_1 Unarmed Attack=[first(rollskill(%0,Strength,0,0))]
+&FN_DAMAGE_2 Unarmed Attack=[first(rollskill(%0,Strength,0,2))]
+&FN_DAMAGE_3 Unarmed Attack=[first(rollskill(%0,Strength,1,0))]
+&FN_SETTING Unarmed Attack=[max(1,match(v(List_Settings),get(%0/DD6_Setting)))]
+
+&LIST_AMMO Unarmed Attack=
+&LIST_DAMAGE Unarmed Attack=STR STR+2 STR+1D
+&LIST_RANGE Unarmed Attack=||
+&LIST_SETTINGS Unarmed Attack=Fist Knife Club
+&LIST_SKILLS Unarmed Attack=Brawling Knifes Clubs
+
+&MSG_ATTACK_1 Unarmed Attack=[name(%0)] takes a swing at [name(%1)] with [poss(%0)] bare fist.
+&MSG_ATTACK_2 Unarmed Attack=[name(%0)] thrust a knife with deadly intent at [name(%1)]!
+&MSG_ATTACK_3 Unarmed Attack=[name(%0)] swings [poss(%0)] club at [name(%1)]!
+&MSG_SELECT Unarmed Attack=[ulocal(MSG_Select_[match(v(List_Settings),%1)],%0)]
+&MSG_SELECT_1 Unarmed Attack=[name(%0)] clenches [poss(%0)] hands into fists.
+&MSG_SELECT_2 Unarmed Attack=[name(%0)] draws a knife concealed on [poss(%0)] person.
+&MSG_SELECT_3 Unarmed Attack=[name(%0)] brandishes a club.
+
+&SETTING Unarmed Attack=Fist
+
+
+
+@@ Pistol(#114TXn)
+@@ Type: THING Flags: SAFE NO_COMMAND
+@@ Owner: Skills  Zone: *NOTHING*  Pennies: 10
+@@ Parent: Parent: Weapon(#100TXn)
+@@ Powers: 
+@@ Warnings checked: none
+@@ Created: Mon Feb 09 23:34:36 2004
+@@ Last Modification: Sun Mar 07 05:54:40 2004
+@@ Home: Skill's Office(#111Rn)
+@@ Location: Weapons Room(#125Rn)
+
+@create Pistol
+
+@parent Pistol=Parent: Weapon
+
+@set Pistol = NO_COMMAND
+@set Pistol = SAFE
+
+&DESC1 Pistol=%b%bThis is a sample weapon created to display how weapons should be constructed.  This weapon features several settings which consume different amounts and kinds of ammunition.  The LIST_* attributes are ussually ordered lists.
+
+&FN_DAMAGE_1 Pistol=[first(rollskill(%0,Strength,0,1))]
+&FN_DAMAGE_2 Pistol=[add(die(3,6),2)]
+&FN_DAMAGE_3 Pistol=[add(die(4,6),1)]
+&FN_DAMAGE_4 Pistol=0
+&FN_DAMAGE_5 Pistol=[die(6,6)]
+
+&LIST_AMMO Pistol=10 9mm_round|2 gas_grenade|3 HE_grenade
+&LIST_AMMO_NUM Pistol=0 1 3 1 1
+&LIST_AMMO_TYPE Pistol=N/A 9mm_round 9mm_round gas_grenade HE_grenade
+&LIST_DAMAGE Pistol=STR+1 3D+2 4D+1 Special 6D+6
+&LIST_MAX_AMMO Pistol=10 9mm_round|5 gas_grenade HE_grenade
+&LIST_RANGE Pistol=|15/30/70|15/30/70|20/40/55|20/40/55
+&LIST_SETTINGS Pistol=Safety Single-shot Burst Gas_Grenade HE_Grenade
+&LIST_SKILLS Pistol=Melee Pistols Pistols Heavy_Weapons Heavy_Weapons
+
+&MSG_ATTACK_1 Pistol=[name(%0)] clubs [name(%1)] with [poss(%0)] [name(%!)].
+&MSG_ATTACK_2 Pistol=[name(%0)] shoots a single round at [name(%1)] with [poss(%0)] [name(%!)].
+&MSG_ATTACK_3 Pistol=[name(%0)] shoots three shots in quick succession at [name(%1)] with [poss(%0)] [name(%!)].
+&MSG_ATTACK_4 Pistol=[name(%0)] shoots a gas grenade at [name(%1)] with [poss(%0)] [name(%!)].
+&MSG_ATTACK_5 Pistol=[name(%0)] shoots a high-explosive grenade at [name(%1)] with [poss(%0)] [name(%!)].
+
+&SETTING Pistol=Safety
+
+
+
+@@ Sword(#127TXn)
+@@ Type: THING Flags: SAFE NO_COMMAND
+@@ Owner: Skills  Zone: *NOTHING*  Pennies: 10
+@@ Parent: Parent: Weapon(#100TXn)
+@@ Powers: 
+@@ Warnings checked: none
+@@ Created: Wed Feb 25 02:39:13 2004
+@@ Last Modification: Sun Mar 07 05:47:09 2004
+@@ Home: Skill's Office(#111Rn)
+@@ Location: Weapons Room(#125Rn)
+
+@create Sword
+
+@parent Sword=Parent: Weapon
+
+@set Sword = NO_COMMAND
+@set Sword = SAFE
+
+&DESC1 Sword=%tSwords have long held a place in human societies, whether it be for battle, sport, or show.  They vary in length roughly between two and four feet, and may have a single or double edge.  Some may be curved, while others are straight.
+
+&FN_DAMAGE_1 Sword=[first(rollskill(%0,Strength,1,1))]
+
+&LIST_AMMO_NUM Sword=1
+&LIST_AMMO_TYPE Sword=N/A
+&LIST_DAMAGE Sword=STR+1D+1
+&LIST_SKILLS Sword=Swords
+
+&MSG_ATTACK_1 Sword=[name(%0)] swings [poss(%0)] sword at [name(%1)]!
+
+
+
+@@ Crossbow(#128TXn)
+@@ Type: THING Flags: SAFE NO_COMMAND
+@@ Owner: Skills  Zone: *NOTHING*  Pennies: 10
+@@ Parent: Parent: Weapon(#100TXn)
+@@ Powers: 
+@@ Warnings checked: none
+@@ Created: Wed Feb 25 02:15:38 2004
+@@ Last Modification: Sun Mar 07 05:45:47 2004
+@@ Home: Skill's Office(#111Rn)
+@@ Location: Weapons Room(#125Rn)
+
+@create Crossbow
+
+@parent Crossbow=Parent: Weapon
+
+@set Crossbow = NO_COMMAND
+@set Crossbow = SAFE
+
+&DESC1 Crossbow=%tCrossbows are suprisingly sophisicated and effective weapons, even in todays modern world. They lack the need for gunpower, and fresh bolts can be created and reused cheeply. The combination of stirrup and crank allows almost anyone to reload the weapon with ease. The main drawback of a crossbow is the long reloading time needed between shots
+
+&FN_DAMAGE_1 Crossbow=[add(die(4,6),1)]
+
+&LIST_AMMO Crossbow=2 bolt
+&LIST_AMMO_NUM Crossbow=1
+&LIST_AMMO_TYPE Crossbow=bolt
+&LIST_DAMAGE Crossbow=4D+1
+&LIST_MAX_AMMO Crossbow=2 bolt
+&LIST_RANGE Crossbow=10/20/40
+&LIST_SKILLS Crossbow=Archery
+
+&MSG_ATTACK_1 Crossbow=[name(%0)] fires a crossbow bolt at [name(%1)]!
+
+
+
+@@ Options
+
+@@ Add these attributes for a global +heal command.
+@@
+@@ &CMD_HEAL d6 Global Commands=$+heal *:@pemit %#=[ulocal([v(DB_Data)]/FN_Heal,%#,secure(%0))]
+@@ &FN_HEAL d6 Database=[@@(0 - %#, 1 - Target)][setq(1,ulocal(FN_Pmatch,%1))][setq(2,sub(ulocal(FN_GetListItem,get(%q1/DD6_Skills),HealTimer),secs()))][setq(3,ulocal(FN_RollStat,ulocal(FN_GetStat,%0,Medical),0))][setq(4,ulocal(FN_BPDmg,%q1))][setq(5,switch(fdiv(ulocal(FN_BPDmg,%q1),ulocal(FN_BPMax,%q1)),>2,25,>1.5,20,>1,15,>0.5,10,5))][setq(6,sub(first(%q3),%q5))][ifelse(eq(rest(%q3),1),,setq(5,max(0,%q6)))][switch([match(loc(%0),loc(%q1))][ulocal(FN_IsAlive,%q1)][gt(%q4,0)][lte(%q2,0)],0*,[ulocal(MSG_Target)],10*,[%vb] You cannot raise the dead!,110*,[%vb] [name(%q1)] has no obvious injuries.,1110,[%vb] [name(%q1)] cannot be healed for another [timestring(%q2)].,1111,[set(%q1,DD6_Skills:[ulocal(FN_SetListItem,[ulocal(FN_SetListItem,get(%q1/DD6_Skills),max(0,sub(%q4,%q6)),BPDmg)],add(3600,secs()),HealTimer)])][%va] You attempt to heal [name(%q1)] [setr(7,[ifelse(gte(%q6,0),with [switch(%q6,>9,excellent,>4,moderate,>0,minor,no)] success,and makes it worse)])].[remit(loc(%q1),[%va] [name(%0)] attempts to heal [name(%q1)] [%q7].)],[ulocal(MSG_Crit)]-[#$])]
+
+@@ Use these attributes when using a straight formula for max body points instead of a rolling system on attribute increase.
+@@
+@@ &FN_BPBASE d6 Database=[setq(0,ulocal(FN_GetListItem,get(%0/DD6_Skills),Endurance))][round(add(20,mod(%q0,3),mul(div(%q0,3),3.5)),0)]
+@@ &FN_BPDMG d6 Database=[ulocal(FN_GetListItem,get(%0/DD6_Skills),BPDmg)]
+@@ &FN_BPMAX d6 Database=[add(ulocal(FN_BPBase,%0),ulocal(FN_GetListItem,get(%0/DD6_Skills),BPOffset))]
+@@ &FN_SETATTR d6 Database=[@@(0 - Target, 1 - Attribute, 2 - # pips)][set(%0,DD6_Skills:[ulocal(FN_SetListItem,get(%0/DD6_Skills),%2,%1)])]
+@@ &FN_SETMAXBP d6 Database=[@@(0 - %#, 1 - target, 2 - max BP)][setq(1,ulocal(FN_Pmatch,%1))][setq(2,val(%2))][setq(3,sub(%q2,ulocal(FN_BPBase,%q1)))][switch([ulocal(FN_IsWiz,%0)][isdbref(%q1)],0*,[ulocal(MSG_Wiz)],10,[ulocal(MSG_Target)],11,[%va] You have set [name(%q1)]'s maximum body points to [%q2] \(Offset [%q3]\).[null([pemit(%q1,[%va] [name(%0)] has set your maximum body points to [%q2].)][set(%q1,DD6_Skills:[ulocal(FN_SetListItem,get(%q1/DD6_Skills),%q3,BPOffset)])])],[ulocal(MSG_Crit)])]
+
+@@ Add these attributes to the Cron for daily natural healing. Be sure to edit #11067 to the dbref of the d6 Database.
+@@
+@@ &CRON_JOB_HEAL CRON - Myrddin's mushcron=@tr #11067/TR_Heal
+@@ &CRON_TIME_HEAL CRON - Myrddin's mushcron=|||05|04|
+
+@@ Add these attributes to backup player sheets weekly. Be sure to edit #11067 to the dbref of the d6 Database.
+@@
+@@ &CRON_JOB_SHEETBAK CRON - Myrddin's mushcron=@tr #11067/TR_Backup
+@@ &CRON_TIME_SHEETBAK CRON - Myrddin's mushcron=||Mon|05|03|
+
+
+
+@@ Configure the system
+
+think Setting DB_Data attributes. [iter(d6 Global Commands|d6 Chargen,[set(##,DB_Data:[num(d6 Database)])][set(##,VA:[ansi(gh,-)])][set(##,VB:[ansi(rh,-)])],|)]
+think Setting Database DB_* attributes. [iter(AMMO Parent: Ammo Box|GARBAGE d6 Database|HELP d6 Help|NOM Nom Storage|UNARMED Unarmed Attack|WEAPON Parent: Weapon,[set(d6 Database,DB_[first(##)]:[num(rest(##))])],|)]
+think Teleporting global object to #2. [tel(d6 Database,#2)]
+
+
+
+@@ End of File

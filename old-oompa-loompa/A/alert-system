@@ -1,0 +1,148 @@
+@@ See CREDIT and CREDIT2 attributes for credits
+@@ 
+@@ In Alexandria we use a softcoded alert command to monitor logins and 
+@@ logoffs ('friends list' seems a misnomer to me, as I like to keep 
+@@ track of my enemies as well :p ).
+@@ 
+@@ The Disconnect Monitor does a variety of things for us and lives in 
+@@ the Master Room; I had one of my coder pull the alert code off it and 
+@@ made a mini-alert object to share.
+@@ 
+@@ Our alert code performs a variety of checks, including looking for 
+@@ the JUDGE and JURY_OK flags. This is because we have recycled those 
+@@ flags for our own purposes, you can safely omit them.
+@@ 
+@@ The Admin +hide command hides you on all your channels, does 
+@@ alert/hide, and @hide in one easy step; it lives on the Admin-only 
+@@ global object. You can parcel out the commands to whichever objects 
+@@ make sense to you, I put them on one object to share.
+@@ 
+@@ Features in the alert code:
+@@ 
+@@ Alert/mute and alert/hide (available to all players), the default 
+@@ beeps you on alert. Beep respects HAVEN.
+@@ 
+@@ +delete command updates alert list.
+@@ 
+@@ Alert performs self-check and wipes a corrupt alert list. This is a 
+@@ recent addition, I think there is room for improvement on this 
+@@ particular feature.
+@@ 
+@@ Lists disconnected and connected players in different colors, hidden 
+@@ users are listed exactly the same as disconnected users.
+@@ 
+@@ Note: If you use the @hide command, but neglect to do alert/hide, 
+@@ your disconnect is visible.  However, you do not need to have @hide 
+@@ power to use alert/hide, it is available to all users.
+@@ 
+
+@link #728 = #2179
+@set #728 = WIZARD
+
+@ACONNECT #728=@dolist 
+[squish(iter(lwho(),if(and(match(get(##/alert),%#),not(hasflag(##,haven)),or(and(not(strmatch(elements(get(%#/alert),2),Y)),not(hasflag(%#,dark)),not(hidden(%#))),orflags(##,JrW),haspower(##,see_all))),##)))]=@pemit 
+## = [ansi(wh, %n)] has [ansi(mh, connected)]. 
+[if(strmatch(first(get(##/alert)),N),[beep()])]
+
+
+@ADISCONNECT #728=@dolist 
+[squish(iter(lwho(),if(and(match(get(##/alert),%#),not(hasflag(##,haven)),or(and(not(strmatch(elements(get(%#/alert),2),Y)),not(hasflag(%#,dark))),orflags(##,JrW), 
+haspower(##,see_all))),##)))]=@pemit ## = [ansi(wh, %n)] has 
+[ansi(mh, disconnected)]. 
+[if(strmatch(first(get(##/alert)),N),[beep()],)]
+
+
+&ALERT-SHOW_COMMAND #728=$alert:think 
+[if(hasattrval(%#,alert),if(and(match(Y 
+N,first(get(%#/alert))),match(Y 
+N,elements(get(%#/alert),2))),[set(%#,alert:[elements(get(%#/alert),1 
+2)] 
+[squish(iter(ldelete(ldelete(get(%#/alert),1),1),if(hastype(##,player),##)))])],[pemit(%#,Your 
+alert list is corrupted!%rErasing...starting a new list...please 
+drive through.)][set(%#,alert:N N)]),[set(%#,alert:N N)])];@pemit 
+%#=ansi(c,repeat(-,78)) %rThe following [ansi(mh,connected)] and 
+[ansi(w,disconnected)] people are on your alert list: 
+[if(gt(words(get(%#/alert)),2),%r%r)][sort(iter(ldelete(ldelete(get(%#/alert),1),1),ansi(if(setinter(##,objeval(%#,lwho())),mh,w),name(##))))]%r%r[ljust([ansi(m, 
+MUTE:)] 
+[switch(first(get(%#/alert)),Y,Yes,N,No)],38)]%b%b[rjust([ansi(m,HIDE:)] 
+[switch(elements(get(%#/alert),2),Y,Yes,N,No)],38)]%r[ansi(c,repeat(-,78))]
+
+
+&ALERT/HIDE_COMMAND #728=$alert/hide:@switch 
+[elements(get(%#/alert),2)]=Y,{@pemit %#=You will now be seen on 
+alerts.;&alert %#=[replace(get(%#/alert),2,N)]},N,{@pemit %#=You will 
+no longer be seen on alerts.;&alert %#=[replace(get(%#/alert),2,Y)]}
+
+
+&ALERT/MUTE_COMMAND #728=$alert/mute:@switch 
+[if(strlen(first(setr(0,get(%#/alert)))),first(%q0), n)]=Y,{@pemit 
+%#=You are now accepting beeps from alerts.;&alert 
+%#=[replace(%q0,1,n)]},N,{@pemit %# = You are no longer accepting 
+beeps from alerts.;&alert %# = [replace(%q0,1,Y)]}
+
+
+&ALERT_COMMAND #728=$alert *:@switch 
+if(setr(0,pmatch(squish(%0))),1,pemit(%#,There is no such 
+player.))=1,{@pemit %#=[name(%q0)] has been 
+[if(match(setr(1,get(%#/alert)),%q0),removed from,added to)] your 
+alert list.;&alert %#=[if(match(%q1,%q0),remove(%q1,%q0),%q1 %q0)]}
+
+
+@CREDIT #728=Original code by Alexander @ Alexandria; modification by 
+Kasirm @ Alexandria
+
+
+&CREDIT2 #728=Code design and help files by Oriens @ Alexandria
+
+
+&HIDE_COMMAND #728=$+hide:@switch orflags(%#,jJrW)={@switch 
+if(orflags(%#,rW),1,if(haspower(%#,hide),1))={@force 
+%#=@hide/on};&alert %#=[replace(get(%#/alert),2,Y)];@pemit %#=You no 
+longer appear on alerts. ;@dolist channels(%#)=@force %#=@chan/hide 
+##=yes}
+
+
+
+&SHOW_COMMAND #728=$+show:@switch orflags(%#,jJrW)={@switch 
+if(orflags(%#,rW),1,if(haspower(%#,hide),1))={@force 
+%#=@hide/off};&alert %#=[replace(get(%#/alert),2,N)];@pemit %#=You 
+now appear on alerts.;@dolist channels(%#)=@force %#=@chan/hide ##=no}
+
+
+
+ALERT alert alert/mute alert/hide [This is the general user's help file]
+    This command enables you to set an alert to notify you when 
+certain people log on or log off. This command cannot be used to 
+track hidden or dark users. You will not receive alerts if you are 
+set HAVEN.
+
+    To add a person to your alert list, type: alert Username -- where 
+'Username' is the name of the person you are adding to your alert 
+list.
+    To remove a person from your alert list, type: alert Username -- 
+it's a toggle.
+    To see who is on your alert list, type: alert -- with nothing following it.
+    To mute the beeps and receive text-only alerts, type: alert/mute
+    To hear beeps again, type: alert/mute -- it's also a toggle.
+    To hide from whomever might be watching for you with alert, type: alert/hide
+    To unhide, type: alert/hide -- it's also a toggle.
+
+
+HIDE +hide +show  [The +ahelp file for the Admin only +hide command]
+    This command allows people with the HIDE power to hide from the 
+'who' and 'WHO' list. Hidden users can be seen by Royalty, 
+Archangels, and people with SEE_ALL power, however ordinary users 
+cannot see them unless they are in the same room with them, or they 
+speak on a public chat channel or otherwise give away their presence 
+-- it's hiding, not invisibility.
+
+    To use, type: @hide/on
+    To reappear on the who list, type: @hide/off
+    To hide from a @channel/who that is hide_ok, type: @chan/hide 
+channelname = yes
+    To reappear on the @channel/who, type: @chan/hide channelname = no
+    To hide from the alert list, type: alert/hide
+    Or, to hide from everything at once, type: +hide
+    To reappear all at once, type: +show
+
+

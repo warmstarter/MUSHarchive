@@ -1,0 +1,12 @@
+&cmd-bootme #7 = $@bootme: 
+  @wait me = {
+    @switch gt(words(ports(%#)), 1) = 1, {
+      @boot/port [first(revwords(ports(%#)))]; 
+      @pemit %#=Booted.; 
+      @notify me
+    }, {
+      @pemit %#=No one to boot. You only have one connection.; 
+      @notify me
+    }
+  }
+-

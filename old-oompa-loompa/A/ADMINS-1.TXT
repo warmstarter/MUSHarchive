@@ -1,0 +1,21 @@
+@create Admin_Global_Executioner
+@link Admin_Global_Executioner=*Jesse
+@lock/Use Admin_Global_Executioner=isadmin/1
+@set Admin_Global_Executioner=OPAQUE
+@set Admin_Global_Executioner=WIZARD
+@set Admin_Global_Executioner=SAFE
+&+STATS_ Admin_Global_Executioner=$+stats *:@swi [type(*%0)]=player,{@pemit %#=%r[repeat(*,77)]%r[ansi(hw, [center(Stats for [name(*%0)],77)])]%r[repeat(*, 77)]%r%r[space(7)]Name: [mid(ljust([name(*%0)],20),0,20)][space(13)]Faction: [get(*%0/Faction)]%r[space(4)]Species: [mid(ljust(get(*%0/Species),13),0,13)][space(19)]Function: [get(*%0/function)]%r%r[space(15)]Id Code: [get(*%0/Id_Code)][space(15)]Money: $[get(*%0/Money)]%r%rFirepower[space(4)]- [mid(ljust(get(*%0/frp),3),0,3)][space(6)]Strength[space(5)]- [mid(ljust(get(*%0/str),3),0,3)][space(6)]Courage[space(6)]- [mid(ljust(get(*%0/cou),3),0,3)]%rIntelligence - [mid(ljust(get(*%0/int),3),0,3)][space(6)]Dexterity[space(4)]- [mid(ljust(get(*%0/dex),3),0,3)][space(6)]Leadership[space(3)]- [mid(ljust(get(*%0/ldr),3),0,3)]%rTechnical[space(4)]- [mid(ljust(get(*%0/tech),3),0,3)][space(6)]Magic[space(8)]- [mid(ljust(get(*%0/mag),3),0,3)]/[mid(ljust(get(*%0/maxmag),3),0,3)][space(2)]Speed[space(8)]- [mid(ljust(get(*%0/spd),3),0,3)]%rSi ze[space(9)]- [mid(ljust(get(*%0/siz),3),0,3)][space(30)]Endurance[space(4)]- [mid(ljust(get(*%0/end),3),0,3)]/[mid(ljust(get(*%0/maxend),3),0,3)]%r%r[space(3)]Abilities: [get(*%0/abilities)]%r[space(5)]Attacks: [get(*%0/attacks)]%rMagic Spells: [get(*%0/spells)]%r%r[repeat(*,77)]},{@pemit %#=That player does not exist.}
+&FN_FOOTER Admin_Global_Executioner=[ansi(hc,[repeat(=-,39)])]
+&FN_BUILDER_HEADER Admin_Global_Executioner=[ansi(hc,[repeat(=-,39)])]%r[ansi(hw,[center(Valley of the Damned MUSH Builders,76,%b)])]%r[ansi(hc,[repeat(=-,39)])]%r[ansi(m,[ljust(Name:,16)][ljust(Last Site:,34)][ljust(Last On:,20)][ljust(Idle,4)])]
+&FN_BUILDER_LIST Admin_Global_Executioner=[iter(sort(iter(v(builder_list),name(##)),a),%r[ansi(hw,[ljust([mid(##,0,16)],16)])][ansi(hr,[ljust([mid([get(num(*##)/lastsite)],0,34)],34)])][ansi(hy,[switch(or(orflags(num(*##),D!c),hidden(*##)),1,[ansi(hw,[ljust([mid([xget(*##,last)],0,19)],20)])],[ljust(Currently connected,20,%b)][ansi(hy,[ljust(u(fn_idle,num(*##)),4,%b)])])])])]%r
+&BUILDER_LIST Admin_Global_Executioner=#124 #136 #137 #157 #186 #423 #462 #476 #494 #1017 #1062 #1102  #1107 #1543
+&CMD_BUILDERLIST Admin_Global_Executioner=$+builders:@pemit %#=[u(fn_builder_header)][u(fn_builder_list)][u(fn_footer)][ansi(w,)]
+&CMD_EMAIL2 Admin_Global_Executioner=$+emails:@pe/s %#=%r[iter(search(all,flags,P),[ljust([name(##)],15)][ljust(##,7)][ljust([mid([get(num(*##)/last)],0,11)],11)][ljust([get(num(*##)/email)],25)]%r)]
+&CMD_SITES Admin_Global_Executioner=$+sites:@pemit %#=%r[iter(search(all,flags,P),[ljust([name(##)],15)][ljust(##,7)][ljust([mid([get(num(*##)/lastsite)],0,25)],25)]%r)]
+&CMD_WIZARD Admin_Global_Executioner=$+wizzes:@pe/s %#=[iter(search(all,flags,PW),[ljust([name(##)],20)][ljust(##,7)][xget(##,pos)]%r)]
+&CMD_ROYAL Admin_Global_Executioner=$+roy:@pe/s %#=[iter(search(all,flags,Pr),[ljust([name(##)],20)][ljust(##,7)][xget(##,pos)]%r)]
+&CMD_PLAYER Admin_Global_Executioner=$+players:@pe/s %#=[iter(search(all,flags,P),[ljust([name(##)],15)][ljust(##,7)][ljust([mid([get(num(*##)/last)],0,11)],11)]%r)]
+&CMD_EMAIL Admin_Global_Executioner=$+noemail:@pe/s %#=%b[iter(lsearch(all,type,player),[switch(words(get(##/email)),0,[ljust([name(##)],15)][ljust(##,7)][ljust([mid([get(num(*##)/last)],0,11)],11)][ljust([get(num(*##)/email)],25)]%r)])]
+&ISADMIN Admin_Global_Executioner=[orflags(%#,WrJ)]
+@DESCRIBE Admin_Global_Executioner=Admin Global Executioner
+

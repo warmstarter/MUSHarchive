@@ -1,0 +1,89 @@
+@create PARENT: Light Saber
+@link PARENT: Light Saber=[loc(owner(me))]
+@lock PARENT: Light Saber==[owner(me)]
+@set PARENT: Light Saber=!NO_COMMAND
+@set PARENT: Light Saber=SAFE
+@set PARENT: Light Saber=WIZARD
+@set PARENT: Light Saber=OPAQUE
+@set PARENT: Light Saber=DARK
+@set PARENT: Light Saber=HAVEN
+@set PARENT: Light Saber=HALT
+@DESCRIBE PARENT: Light Saber=[space(8)]________| |_______[ansi(r,**)]|[space(7)]|_|
+&STATUS PARENT: Light Saber=HOLSTER
+&TURNON PARENT: Light Saber=$on:@switch [v(status)]=HOLSTER,{@remit [loc(%#)]=%N draws his Light Saber and extracts the beam.;&status me=DRAWN;@set me=!dark;@desc me=%[space(8)]_%r_______| |_________________________________%r_______%[ansi(r,**)]%B%[ansi(HB,_________________________________)]%[ansi(hb,%))]%r%[space(7)]|_|},DRAWN,{@pemit %#=Your sabre is already on.}
+&TURNOFF PARENT: Light Saber=$off:@switch [v(status)]=DRAWN,{@remit [loc(%#)]=%N retracts the Light Saber beam.;&status me=HOLSTER;@set me=dark;@desc me=%[space(8)]_%r_______| |%r_______%[ansi(r,**)]|%r%[space(7)]|_|},HOLSTER,{@pemit %#=Your Light Saber is already off.}
+&SPIN PARENT: Light Saber=$spin:@emit %n spins %p Light Saber wildly at %p opponent.
+&STUN_ROOM PARENT: Light Saber=#157
+&DEAD_ROOM PARENT: Light Saber=#161
+&HOLDING PARENT: Light Saber=[switch(%#,loc(me),1,0)]
+&SETTING PARENT: Light Saber=0
+@VA PARENT: Light Saber=$lhelp:@pemit %#=[u(line)]%r[center(Help for [name(me)],79)]%r[u(line)]%r%r[u(whelp,SET <setting>,{Sets the weapon to <setting>.})]%r[u(whelp,LINFO <setting>,{Obtains information about <setting>.})]%r[u(whelp,RECHARGE,{Recharges the weapon, if a weapon recharger is present.})]%r[u(whelp,ON,{Draws the weapon.})]%r[u(whelp,OFF,{Holsters the weapon.})]%r[u(whelp,STRIKE <target>,{Strikes the weapon at <target>.})]%r[u(line)]
+&WHELP PARENT: Light Saber=[ljust(%0,20)] - [indent(23,65,%1)]
+&LINE PARENT: Light Saber=[repeat(=,79)]
+@VB PARENT: Light Saber=$set *:&setting me=[setq(0,switch(add(%0,0),#-1 ARGUMENTS MUST BE NUMBERS,0,%0))][switch(lt(%q0,v(minsetting)),1,v(minsetting),switch(gt(%q0,v(maxsetting)),1,v(maxsetting),%q0))];@pemit %#=[name(me)] set to [v(setting)].;@oemit %#=%n presses a few buttons on %p [name(me)].
+@VC PARENT: Light Saber=$recharge:@switch [u(recharger_present)]=0, {@pemit %#=There is no weapon recharger in this room.}, {@pemit %#=You connect [name(me)] to the weapon recharger.;@oemit %#=%n connects a [name(me)] to the weapon recharger.;&charge me=[v(maxcharge)];@pemit %#=Weapon recharged.}
+&RECHARGER_PRESENT PARENT: Light Saber=[trim([set(me,temp_recharger_present:0)][iter(lcon(loc(%#)),switch(hasdevflag(##,recharger),1,set(me,temp_recharger_present:1)))][v(temp_recharger_present)])]
+&DAMAGE_INDEX PARENT: Light Saber=1 0|2 0|3 1|4 3.5|5 7|6 15|7 50|8 120|9 300|10 450|11 670|12 940|13 1100|14 1430|15 1850|16 2450
+&ENERGY_USED PARENT: Light Saber=1 15.75|2 45.30|3 160.65|4 515.75|5 857.5|6 2700|7 4900|8 15000|9 65000|10 125000|11 300000|12 540000|13 720000|14 930000|15 1170000|16 1550000
+&WEAPON_STRING PARENT: Light Saber=blaster mark
+&ERROR_DONTSEE PARENT: Light Saber=[pemit(%#,I don't see that here.)]
+&ERROR_WHICHONE PARENT: Light Saber=[pemit(%#,I don't know which %0 you mean.)]
+@VF PARENT: Light Saber=$SLASH *:@tr me/[switch(hasflag(me,dark),1,u(error_holstered),[switch([setq(0,locate(%#,%0,PTEne))]%q0,#-1,u(error_dontsee),#-2,u(error_whichone,%0),switch(type(%q0),EXIT,u(shoot_exit,%q0),THING,u(shoot_thing,%q0),u(shoot_player,%q0)))])]=%#,[locate(%#,%0,PTEne)]
+&SHOOT_UNLOCKED_EXIT PARENT: Light Saber=[pemit(%#,The exit `[name(%0)]' is not locked.)]
+&ERROR_HOLSTERED PARENT: Light Saber=[pemit(%#,You must DRAW your weapon first.)]
+&SHOOT_EXIT PARENT: Light Saber=[switch(lock(%q0),*UNLOCKED*,u(shoot_unlocked_exit,%0),u(shoot_locked_exit,%0))]
+&SHOOT_PLAYER PARENT: Light Saber=[switch(hasdevflag(%0,invincible),1,pemit(%#,[name(%0)] is set invincible.), switch(u(shoot_player_roll),1,[u(msg_shoot_player,%0)][u(setting_effect,%0)],u(msg_miss_player,%0)))]
+&SHOOT_PLAYER_ROLL PARENT: Light Saber=[gt(rand(100),30)]
+&CHARGESUSED PARENT: Light Saber=[rest(grab(v(energy_used),[v(setting)] *,|))]
+&MSG_SHOOT_PLAYER PARENT: Light Saber=[pemit(%#,You slash your [name(me)] at [name(%0)] and hit!)][pemit(%0,%n slashes [poss(%#)] [name(me)] at you and hits!)][pemit(u(pemit_except,lcon(loc(%#)),%#,%0),%n fires [poss(%#)] [name(me)] at [name(%0)] and hits!)][u(drain_charges)]
+&MSG_MISS_PLAYER PARENT: Light Saber=[pemit(%#,You slash your [name(me)] at [name(%0)] but miss.)][pemit(%0,[name(%#)] slashes [poss(%#)] [name(me)] at you but misses.)][pemit(u(pemit_except,lcon(loc(%#)),%#,%0),[name(%#)] fires [poss(%#)] [name(me)] at [name(%0)] but misses.)][set(me,Charges:[sub(v(Charges),u(Chargesused))])]
+&PEMIT_EXCEPT PARENT: Light Saber=[remove(remove(%0,%1),%2)]
+&SETTING_EFFECT PARENT: Light Saber=[setq(1,rest(grab(v(setting_effects),[v(setting)] *,|)))][switch(first(%q1),NONE,none_player,PAIN,pain_player,STUN,[set(me,STUN_TIME:[rest(%q1)])]stun_player,KILL,kill_player,VAPORIZE,vaporize_player,EXPLODE,explode_player)]
+&SETTING_EFFECTS PARENT: Light Saber=1 STUN 300|2 STUN 900|3 STUN 3600|4 KILL|5 KILL|6 KILL|7 KILL|8 VAPORIZE|9 VAPORIZE|10 VAPORIZE|11 EXPLODE|12 EXPLODE|13 EXPLODE|14 EXPLODE|15 EXPLODE|16 EXPLODE
+&COMMENT_EFFECTS PARENT: Light Saber=STUN stuns the player, use Stun Parent. KILL kills the player, use Corpse Parent. VAPORIZE vaporizes the player, and drops posessions. EXPLODE blows up the player, does not drop posessions. Gut-splattering.
+&STUN_PLAYER PARENT: Light Saber=&body_num me=[create(stunned body)];@set [v(body_num)]=royalty;@parent [v(body_num)]=[v(stunned_parent)];@tr [v(body_num)]/stun_person=%1,[v(stun_time)];&weapon_string [v(body_num)]=[v(weapon_string)]
+&CORPSE_PARENT PARENT: Light Saber=#120
+&STUNNED_PARENT PARENT: Light Saber=#128
+&VAPORIZE_PLAYER PARENT: Light Saber=@pemit %1=You have been vaporized!;@oemit %1=[name(%1)] has been vaporized!;@dolist lcon(%1)=@switch [hasdevflag(##,nosteal)]=0, @tel ##=[loc(%0)];@tel %1=[v(dead_room)]
+&EXPLODE_PLAYER PARENT: Light Saber=@pemit %1=You instantly explode, sending your blood and guts spraying everywhere!;@oemit %1=[name(%1)] instantly explodes, sending [poss(%1)] blood and guts spraying everywhere!;@tel %1=[v(dead_room)]
+@CHARGES PARENT: Light Saber=10000000000
+&STUN_TIME PARENT: Light Saber=900
+&BODY_NUM PARENT: Light Saber=#228
+&DRAIN_CHARGES PARENT: Light Saber=[set(me,Charge:[sub(v(Charge),u(Chargesused))])][switch(lt(v(Charge),0),1,[pemit(%#,Your [name(me)] fizzles as it runs out of charges.)][oemit(%#,%n's [name(me)] fizzles at it runs out of charges.)][set(me,Charge:-1)]DONT_TRIGGER)]
+&TEMP_RECHARGER_PRESENT PARENT: Light Saber=1
+&SHOOT_THING PARENT: Light Saber=[switch(hasdevflag(%0,invincible),1,pemit(%#,[name(%0)] is set invincible.),switch(u(shoot_thing_roll),1,[u(msg_shoot_player,%0)][switch(lt(v(Charge),0),1,,u(damage_effect,%0))],u(msg_miss_player,%0)))]
+&DAMAGE_EFFECT PARENT: Light Saber=[setq(1,rest(grab(v(damage_index),[v(setting)] *,|)))][set(%0,hitpoints:[sub(get(%0/hitpoints),%q1)])][switch(gt(get(%0/hitpoints),v(thing_damage_threshold)),1,u(msg_damage_thing,%0),[u(msg_destroy_thing,%0)]trig_destroy_thing)]
+&MSG_DAMAGE_THING PARENT: Light Saber=[remit(loc(%#),[name(%0)] withstands the slash.)]
+&MSG_DESTROY_THING PARENT: Light Saber=[remit(loc(%#),The slash causes [name(%0)] to explode!)]
+&TRIG_DESTROY_THING PARENT: Light Saber=@tel %1=[v(trash_room)];@halt %1=@tr me/a_destroy=%0
+&SHOOT_THING_ROLL PARENT: Light Saber=1
+&SHOOT_LOCKED_EXIT PARENT: Light Saber=[switch(hasdevflag(%0,invincible),1,pemit(%#,[name(%0)] is set invincible.),switch(u(shoot_exit_roll),1,[u(msg_shoot_player,%0)][switch(lt(v(Charge),0),1,,u(damage_exit_effect,%0))],u(msg_miss_player,%0)))]
+&SHOOT_EXIT_ROLL PARENT: Light Saber=1
+&DAMAGE_EXIT_EFFECT PARENT: Light Saber=[setq(1,rest(grab(v(damage_index),[v(setting)] *,|)))][set(%0,hitpoints:[sub(get(%0/hitpoints),%q1)])][switch(gt(get(%0/hitpoints),v(exit_damage_threshold)),1,u(msg_damage_exit,%0),[u(msg_destroy_exit,%0)]trig_destroy_exit)]
+&MSG_DAMAGE_EXIT PARENT: Light Saber=[remit(loc(%#),[name(%0)] withstands the slash.)][remit(loc(%0),[name(%0)] from [name(home(%0))] shakes as it withstands a slash from outside.)]
+&MSG_DESTROY_EXIT PARENT: Light Saber=[remit(loc(%#),The slash of the Saber blows [name(%0)] wide open!)][remit(loc(%0),[name(%0)] from [name(home(%0))] is blown wide open by a slash from a Light Saber from outside!)]
+&TRIG_DESTROY_EXIT PARENT: Light Saber=@lock/user:oldlock %1=[lock(%1)];@unlock %1;@tr %1/a_destroy=%0
+@VG PARENT: Light Saber=$linfo *:&sinfo_setting me=[setq(0,switch(add(%0,0),#-1 ARGUMENTS MUST BE NUMBERS,0,%0))][switch(lt(%q0,v(minsetting)),1,v(minsetting),switch(gt(%q0,v(maxsetting)),1,v(maxsetting),%q0))];@pemit %#=[u(line)]%r[center(Information for Weapon Setting [v(sinfo_setting)],79)]%r[u(line)]%r[u(sinfo_[v(sinfo_setting)])]%r[u(line)]
+&SINFO_1 PARENT: Light Saber=Light Stun; discharge energy index 15.75 for 0.25 seconds, SEM:NDF ratio not applicable. This setting is calibrated for base humanoid physiology, and causes temporary central nervous system (CNS) impairment. Subjects remain unconscious for up to five minutes. Higher levels of reversible CNS damage result from repeated long exposures. The discharge energy index if related to RNE protonic charge levels. Standard median-density composite structural material samples are not permanently affected, although small vibrational warming will be detected. A standard composite sample consists of multiple layers of tritanium, duranium, cortenite, lignin, and lithium-silicon-carbon 372. A standardized damage index is derived for setting comparisons; each whole number represents the number of cm of material penetrated or molecularly damaged. The damage index for this setting is zero.
+&SINFO_2 PARENT: Light Saber=Medium Stun; discharge energy 45.30 for 0.75 seconds, SEM:NDF ratio not applicable. Base-type humanoids are rendered unconscious for up to fifteen minutes, resistant humanoids up to five minutes. Long exposures produce low levels of irreversible CNS and epithelial damage. Structural materials are not affected, though higher levels of vibrational warming are evident. The damage index is zero.
+&SINFO_3 PARENT: Light Saber=Heavy Stun; discharge energy 160.65 for 1.025 seconds, SEM:NDF ratio not applicable. Base humanoids remain in a sleep state for approximately one hour, resistant bioforms for fifteen minutes. Single discharges raise 1cc of liquid water by 100 deg C. Structural samples experience significant levels of thermal radiation. The damage index is 1.
+&SINFO_4 PARENT: Light Saber=Thermal Effects; discharge energy 515.75 for 1.5 seconds, SEM:NDF ratio not applicable. base humanoids experience extensive CNS damage and epidermal EM trauma. Structural materials exhibit visible thermal shock. Discharges of longer than five seconds produce deep heat storage effects within metal alloys. The damage index is 3.5.
+&SINFO_5 PARENT: Light Saber=Thermal Effects; discharge energy 857.5 for 1.5 seconds, SEM:NDF ratio 250:1. Humanoid tissue experiences severe burn effects but, due to water content, deep layers will not char. Simple personnel forcefields are penetrated after five seconds. Large Away Team fields will not be affected. The damage index is 7.
+&SINFO_6 PARENT: Light Saber=Disruption Effects; discharge energy 2,700 for 1.75 seconds, SEM:NDF ratio 90:1. Organic tissues and structural materials exhibit comparable penetration and molecular damage effects as higher energies cause matter to dissociate rapidly. Familiar thermal effects begin decreasing at this level. The damage index is 15.
+&SINFO_7 PARENT: Light Saber=Disruption Effects; discharge energy 4900 for 1.75 secnds, SEM:NDF ratio 1:1. Organic tissue damage causes immediate cessation of life processes, since disruption effects become widespread. The damage index is 50.
+&SINFO_8 PARENT: Light Saber=Disruption Effects; discharge energy 15,000 for 1.75 seconds, SEM:NDF ratio 1:3. Cascadian disruption forces cause humanoid organisms to vaporize, as 50%% of affected matter transistions out of the continuum. The damage index is 120; all unprotected matter is affected and penetrated according to depth/time.
+&SINFO_9 PARENT: Light Saber=Disruption Effects; discharge energy 65,000 for 1.5 seconds, SEM:NDF ratio 1:7. The damage index is 300; medium alloy or ceramic structural materials over 100 cm thickness begin exhibiting energy rebound prior to vaporization.
+&SINFO_10 PARENT: Light Saber=Disruption Effects; discharge energy 125,000 for 1.3 seconds, SEM:NDF ratio 1:9. The damage index is 450; heavy alloy structural materials absorb or rebound energy, 0.55 sec delay before material vaporizes.
+&SINFO_11 PARENT: Light Saber=Explosive/Disruption Effects; discharge energy 300,000 for 0.78 seconds, SEM:NDF ratio 1:11. The damage index is 670; ultradense alloy structural materials absorb/rebound energy, 0.20 sec delayed reaction before material vaporizes. Light geologic displacement; <=10 m^3 rock/ore of 6.0 g/cm^3 explosively uncoupled per discharge.
+&SINFO_12 PARENT: Light Saber=Explosive/Disruption Effects; discharge energy 540,000 for 0.82 seconds, SEM:NDF ratio 1:14. The damage index is 940; ultradense alloy structural materials absorb/rebound energy, 0.1 sec delayed reaction before material vaporizes. Medium geologic displacement; <=50 m^3 rock/ore of 6.0 g/cm^3 explosively uncoupled per discharge.
+&SINFO_13 PARENT: Light Saber=Explosive/Disruption Effects; discharge energy 720,000 for 0.82 seconds, SEM:NDF ratio 1:18. The damage index is 1,100; shielded matter exhibits minor vibrational heating effects. Medium geologic displacement; <=90 m^3 rock/ore of 6.0 g/cm^3 explosively uncoupled per discharge.
+&NONE_PLAYER PARENT: Light Saber=@pemit %1=You withstand the slash from the Light Saber without even wincing.;@oemit %1=[name(%1)] withstands the slash from the Light Saber without even wincing.
+&PAIN_PLAYER PARENT: Light Saber=@pemit %1=You wince in pain from the slash of the Light Saber.;@oemit %1=[name(%1)] winces in pain from the slash of the Light Saber.
+&THING_DAMAGE_THRESHOLD PARENT: Light Saber=-20
+&EXIT_DAMAGE_THRESHOLD PARENT: Light Saber=-20
+&RECHARGE PARENT: Light Saber=&Charge me=[v(MaxCharges)]
+&TRASH_ROOM PARENT: Light Saber=#111
+&MAXSETTING PARENT: Light Saber=16
+&MAXCHARGE PARENT: Light Saber=10000000000
+&CHARGE PARENT: Light Saber=10000000000
+&SINFO_SETTING PARENT: Light Saber=16

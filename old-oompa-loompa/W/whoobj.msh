@@ -1,0 +1,12 @@
+&DO_+WHO Who Object=$+who:@pemit %#=[repeat(-,78)]%R[ansi(hc,[center(%BPopulace of Something%B,78)])]%r[repeat(-,78)]%R[ansi(hr,[ljust(Flags,10)])][ansi(hg,[ljust(Name,14)])][ansi(hm,[ljust(Conn/Idle,10)])][ansi(hy,[ljust(Location,45)])]%R[repeat(-,78)][setq(9,switch(orflags(%#,Wr),1,lwho(),mwho()))][iter(%q9,[setq(0,name(##))][setq(1,switch(hasattr(##,sex),1,trim(get(##/sex)),N))][setq(2,switch(hasattr(##,race),1,trim(get(##/race)),-Unknown-))][setq(5,switch(hasflag(##,Sticky),1,IC,OOC))][setq(3,switch(hasflag(##,U),0,name(loc(##)),*Unfindable*))][setq(7,switch(orflags(%#,Wr),1,\([loc(##)]\)))][setq(6,u(conv_time2,idle(##)))][setq(4,switch(hasflag(##,W),1,W,switch(hasflag(##,royalty),1,R,P)))][setq(9,u(conv_time2,conn(##)))]%R[mid(strcat(%q4,space(2)),0,1)]-[mid(strcat(%q1,space(1)),0,1)]-[mid(strcat(%q5,space(4)),0,3)][space(3)][mid(strcat(%q0,space(14)),0,14)]([mid(strcat(%q9,space(3)),0,3)]/[mid(strcat(%q6,space(3)),0,3)]) [mid(strcat(strcat(mid(%q3,0,sub(45,[strlen(%q7)])),switch(strmatch(%q3,*Unfindable*),0,%b%q7,%b)),space(45)),0,45)])]%R[repeat(-,78)]%R[ansi(hb,There are [words([iter(lwho(),[switch(hasflag(##,dark),0,##)])])] players connected.)]%R[repeat(-,78)]
+&CONV_TIME Who Object=[u(days_[gt(div(%0,86400),0)],%0)][u(hours_[gt(div(%0,3600),0)],%0)][u(minutes_[gt(div(%0,60),0)],%0)][mod(%0,60)]s
+&CONV_TIME2 Who Object=[mid([u(days_[gt(div(%0,86400),0)],%0)][u(hours_[gt(div(%0,3600),0)],%0)][u(minutes_[gt(div(%0,60),0)],%0)][mod(%0,60)]s,0,3)]
+&CONNTIME Who Object=[switch(1,lt(conn(%0),60),[ljust(conn(%0)s,3)],lt(div(conn(%0),60),60),[ljust(div(conn(%0),60)m,3)],lt(div(conn(%0),3600),24),[ljust(div(conn(%0),3600)h,3)],[ljust(div(conn(%0),84600)d,3)])]
+&HOURS_1 Who Object=[div(mod(%0,86400),3600)]h%b
+&HOURS_0 Who Object=[]
+&HOURS Who Object=[trunc(div(conn(%0),3600))]
+&DAYS_0 Who Object=[]
+&DAYS_1 Who Object=[div(%0,86400)]d%b
+&MINUTES_1 Who Object=[div(mod(%0,3600),60)]m%b
+&MINUTES_0 Who Object=[]
+&MINUTES Who Object=[div(sub(conn(%0),[mul([u(hours,%0)],3600)]),60)]

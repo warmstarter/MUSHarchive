@@ -1,0 +1,294 @@
+##############################################################################
+# Chat System Version 3.0
+# Mark Hassman (mhassman@du.edu)
+# 5/22/96
+# 
+# This System was written for TinyMUSH 2.2.2.  Code can be used in whole or
+# in part provided proper credit is given within help files
+# 
+# Notes: This uses the amolitor_mush_unformatter.c program. It is available
+#  off the web site or from ftp.tinymush.org.  Format the file with the
+#  unformatter and quote with god if using restricted channels.  If you are
+#  not using restricted channels, search for '@attribute' and comment those
+#  lines.
+# 
+# Comments, Questions, and Suggestions should be sent to mhassman@du.edu
+#
+# Code Functionality and Guidelines for Use
+#
+# 	This code provides a communication mechanism for players. It is 
+# designed to operate from the master room.  The code provides support
+# for both private and public channels.  Players can belong to as many
+# channels as they wish or no channels. The base channels provided are
+# 'Help' and 'Ooc'. These are public channels.  The only private channel
+# provided is 'Wiz'.
+#	To use private channels, the attributes which the chat system
+# uses must be restricted to wizards.  This will be automatically done
+# if the system is quoted by god.  In addition, the 'Group' attribute 
+# should be wizard only as well.  The group attribute access is not 
+# automatically set within this program because the support code for
+# group membership is not provided as the implementation of groups 
+# varies between games.  To be able to access a private channel, the
+# player must have it in his group attribute.  For example,
+#   &group Mark=Merchants Staff Wiz
+# Mark could then turn any of those channels on/off or chat to them.
+#	To add more channels to the system before formatting it into
+# quotable format, search for 'data-private-channels' or 
+# 'data-public-channels' and add the channel name to the end of the
+# appropriate list.  Channel names cannot contain special characters or
+# spaces.  You may also add more channel names at any point after the
+# object is quoted to the game.  Support to do this via +commands is
+# not included as it should be restricted to wizards or other admins.
+# Many games do not put such commands within the master room so the 
+# code was excluded from this package.
+# 	Additional comments are provided before sections and code
+# segments throughout the remainder of the file.  If you have difficulty
+# or have comments, send email to mhassman@du.edu
+#		- Enjoy the Code,
+#			Mark
+##############################################################################
+
+# Create the Two Objects the System Uses.  Not the Functions and Data Object
+# can be placed anywhere.  Typically, I just put it inside the command object. 
+@create Chat Commands
+-
+@create Chat Functions and Data
+-
+# Set the flags on both objects.  Since the chat system writes attributes
+# on players, it must be wiz-inherit.  If you are using private channels,
+# you will also need to set two restricted attributes.
+
+@set Chat Commands=INHERIT
+-
+@set Chat Commands=STICKY
+-
+@set Chat Commands=STOP
+-
+@set Chat Commands=SAFE
+-
+@set Chat Commands=COMMANDS
+-
+@set Chat Functions and Data=INHERIT
+-
+@set Chat Functions and Data=STICKY
+-
+@set Chat Functions and Data=HALTED
+-
+@set Chat Functions and Data=SAFE
+-
+
+# Link the functions to the commands module.  Thus it'll always return
+# to the inventory of the commands.  Comment this line if you want to
+# place it elsewhere. Remove the STICKY flag as well.
+@link Chat Functions and Data=Chat Commands
+-
+# Parent-
+# This allows the commands module to call the proper functions. 
+@parent Chat Commands=Chat Functions and Data
+-
+# Restricted Attributes-
+# If you do not plan on having private channels, comment the following
+# lines.  Private Channels require that the channel name is in a 
+# players 'GROUP' attribute.  The format for these is a space separated
+# list. Support for adding/deleting groups on a player is not included
+# in this code considering the implementation of groups varies highly
+# between games.  If you need help adjusting the code to support your
+# group implementations, contact mhassman@du.edu
+#
+# Get the attribs on the attr list
+&data-chat-channels me=Ooc
+-
+&data-chat-default me=Ooc
+-
+# Set the permissions. These fail if not god.
+@attribute/access data-chat-channels=wizard private no_command
+-
+@attribute/access data-chat-default=wizard private no_command
+-
+# Remove the attr foo
+&data-chat-channels me
+-
+&data-chat-default me
+-
+# Locks-
+# You typically don't want mortals picking this stuff up.  Not that they
+# should be in the MR but just a precaution. The locks are set to wizards.
+&is-wiz Chat Functions and Data=[hasflag(%#,W)]
+-
+@lock Chat Functions and Data=is-wiz/1
+-
+@lock Chat Commands=is-wiz/1
+-
+# Chat Commands
+# Commands take two forms.  The first is channel specific, the second
+# allows the use of a default channel for convenience.  The default
+# channel is turned on and set at the time when the player turns his
+# first channel on.  It is removed if the channel to which it is set is
+# turned off.  Default channel can be changed after being set.
+#
+# Command List & Help
+#	+channel/<name> on              (Turns a channel on)
+#	+channel/<name> off             (Turns a channel off)
+#	+chat/<name> [<"/:/;>] <text>   (Chat to specific channel)
+#	+chat [<"/;/:>] <text>          (Chat to default channel)
+#	+chat/default <name>            (Sets the default channel on a player)
+#	+channels                       (Lists a players channels)
+#	+channels/all                   (Lists all available channels)
+#	+macro/<name> <macro-syntax>    (Sets a macro for chatting on a channel)
+#       +cwho/<name>			(Lists connect members for a channel)
+#	+cwho				(Lists connected members for default channel)
+#
+# Players can use ", :, or ; to perform actions similar to normal speech
+# and page formatting.
+#
+&CMD-CHANNEL-ON Chat Commands=$+channel/* on:@switch 
+  0=[not(match(u(data-public-channels),%0))],{&data-chat-channels 
+  %#=[cat(capstr(%0),[get(%#/data-chat-channels)])];@pemit/list 
+ [u(func-send-to,%0,%#)]=<[ucstr(%0)] [name(%#)] has joined this 
+ channel.;@switch [hasattr(%#,data-chat-default)]=0,{&data-chat-default 
+ %#=%0}},[not(match(u(data-private-channels),%0))],{@switch 
+ match(u(%#/group),%0)=0,{@pemit <CHAT> You are not a member of that 
+ group!},{&data-chat-channels 
+ %#=[cat(capstr(%0),[get(%#/data-chat-channels)])];@pemit/list 
+ [u(func-send-to,%0,%#)]=<[ucstr(%0)]> [name(%#)] has joined this 
+ channel;@switch [hasattr(%#,data-chat-default)]=0,{&data-chat-default 
+ %#=%0}}},{@pemit %#=<CHAT> I do not recognize channel '%0'.}
+-
+&CMD-CHANNEL-OFF Chat Commands=$+channel/* off:@switch 
+ [u(func-has-channel,capstr(%0),%#)]=1,{@pemit/list 
+ u(func-send-to,%0,%#)=<[ucstr(%0)]> %N has left the 
+ channel.;&data-chat-channels 
+ %#=remove(u(%#/data-chat-channels),capstr(%0))},0,{@pemit %#=<CHAT> You are 
+ not a member of the '%0' channel.};@switch 
+ 1=[and(hasattr(%#,data-chat-default),match(u(%#/data-chat-default),%0))],&data-
+ chat-default %#
+-
+&CMD-CHAT-TO-CHANNEL Chat Commands=$+chat/* *:@switch 
+ u(func-has-channel,%0,%#)=1,{@switch 
+ match(u(data-good-channels),u(func-capstr,%0))=0,{@pemit %#=<CHAT> That is 
+ not a supported channel. Choose from the following: 
+ [u(data-good-channels)].},{@pemit/list 
+ [u(func-send-to,%0,%#)]=<[ucstr(%0)]> [switch(mid(%1,0,1),:,%N 
+ [mid(%1,1,strlen(%1))],;,%N[mid(%1,1,strlen(%1))],",%N says 
+ "[mid(%1,1,strlen(%1))]",%N: [v(1)])]}},0,{@pemit %#=<CHAT> You must type 
+ '+channel/%0 on' before chatting to this channel.}
+-
+&CMD-CHAT-TO-DEFAULT Chat Commands=$+chat *:@switch 
+ u(func-has-channel,u(%#/data-chat-default),%#)=0,{@pemit %#=<CHAT> You must 
+ join a channel before using +chat. See +help chat.},1,{@pemit/list 
+ u(func-send-to,u(%#/data-chat-default),%#)={<[ucstr(u(%#/data-chat-default))
+ ]> [switch(mid(%0,0,1),:,%N 
+ [mid(%0,1,strlen(%0))],;,%N[mid(%0,1,strlen(%0))],",%N says 
+ "[mid(%0,1,strlen(%0))]",%N: [v(0)])]}}
+-
+&CMD-CHANNEL-LIST Chat Commands=$+channels/all:@pemit %#=<CHAT> Available 
+ channels on [mudname()]:%r%b%bPublic %bChannels: 
+ [v(data-public-channels)]%r%b%bPrivate Channels: 
+ [v(data-private-channels)]
+-
+&CMD-MAKE-MACRO Chat Commands=$+macro/* *:@switch 
+ u(func-has-channel,%0,%#)=0,@pemit %#=<CHAT> Permission Denied. You do not 
+ belong to channel '%0'.,{&cmd-chat-%0 %#={$%1 *:+chat/%0 \%0}};@switch 
+ hasflag(%#,Commands)=0,@pemit %#=<CHAT> Warning! The macro just created 
+ will not function until you are set with the commands flag. '@set 
+ me=Commands';@switch elock(%#/use,*Mother)=1,@pemit %#=<CHAT> Warning! 
+ Your 
+ uselock is not properly set. The macro just created could be used by 
+ others. '@lock/use me=me'
+-
+&CMD-PERSONAL-CHANNELS Chat Commands=$+channels:@pemit %#=<CHAT> You're 
+ currently a member of the following 
+ channels:%r%b%b-->%b%b[u(%#/data-chat-channels)]
+-
+&CMD-SET-DEFAULT-CHANNEL Chat Commands=$+chat/default *:@switch 
+ match(u(data-good-channels),u(func-capstr,%0))=0,{@pemit %#=<CHAT> That is 
+ not an approved channel. See +channels/all for a list.},{@switch 
+ u(func-has-channel,%0,%#)=0,{@pemit %#=<CHAT> You must join the channel 
+ before setting your default. '+channel/%0 on'},{&data-chat-default 
+ %#=u(func-capstr,%0);@pemit %#=You're default chat channel is now set to 
+ '[secure(%0)]'.}}
+-
+&CMD-CWHO-CHANNEL Chat Commands=$+cwho/*:@switch 
+ u(func-has-channel,%0,%#)=0,@pemit %#=<CHAT> Error! You must be a member of 
+ the channel.,1,{@pemit %#=<Chat/[capstr(%0)]> Members of 
+ [u(func-capstr,%0)] are:%r[ljust(Name,19)][rjust(On 
+ For,10)]%b%b%b[rjust(Idle,10)]%r[repeat(-,78)];@dolist 
+ u(func-who-is,%0,%#)={@switch hasflag(%#,Dark)=0,@pemit 
+ %#=[ljust(name(##),19)][rjust(u(func-conn-time,##),12)]%b[rjust(u(func-idle-time,
+ ##),12)]};@wait 1={@pemit %#=[repeat(-,78)]}}
+-
+&CMD-CWHO-DEFAULT Chat Commands=$+cwho:@switch hasattr(%#,data-chat-default)=0,
+ @pemit %#=<CHAT> Error! You have no default 
+ channel.,1,{@pemit %#=<Chat/[capstr([u(%#/data-chat-default)])]> Members of 
+ [capstr([u(%#/data-chat-default)])] are:%r[ljust(Name,19)][rjust(On 
+ For,10)]%b%b%b[rjust(Idle,12)]%r[repeat(-,78)];@dolist 
+ u(func-who-is,u(%#/data-chat-default),%#)={@switch 
+ hasflag(%#,Dark)=0,@pemit 
+ %#=[ljust(name(##),19)][rjust(u(func-conn-time,##),12)]%b[rjust(u(func-idle-time,
+ ##),12)]};@wait 1={@pemit %#=[repeat(-,78)]}}
+-
+
+# The data object
+# The channels which must be in a players group attribute before they
+# can access the chat capabilities.  Private channels are not required
+# for the operation of the system. 
+&DATA-PRIVATE-CHANNELS Chat Functions and Data=Wiz
+-
+# Public Channels-
+# Anyone can belong to these channels.  To add a channel, just add it
+# to the list in space separated format.  Channel names cannot include
+# spaces.
+&DATA-PUBLIC-CHANNELS Chat Functions and Data=Help Ooc
+-
+# Good Channels are the sum of the private and public attribs.
+&DATA-GOOD-CHANNELS Chat Functions and Data=[u(data-public-channels)] 
+ [u(data-private-channels)]
+-
+&FUNC-SEND-TO Chat Functions and 
+ Data=[sort(setunion(iter(lwho(),switch(match(u(##/data-chat-channels),u(func-capstr,%0)),0,,##
+ )),%1))]
+-
+# Capstr() is foobar in Tiny IMO. This corrects the format in case a
+# player types the channel name with all caps.
+&FUNC-CAPSTR Chat Functions and Data=[capstr(lcstr(%0))]
+-
+# Checks to see if a player can access a channel.
+&FUNC-HAS-CHANNEL Chat Functions and 
+ Data=[neq(match(u(%1/data-chat-channels),u(func-capstr,%0)),0)]
+-
+&FUNC-WHO-IS Chat Functions and Data=
+ [sort(setunion(iter(lwho(),switch(match(u(##/data-chat-channels),u(func-capstr,%0)),0,,##)),%1))]
+-
+&FUNC-WHO-FORMAT Chat Functions and 
+ Data=[ljust(name(%0),20)][switch(hasflag(%0,c),1,[rjust(u(func-conn-time,%0),12
+ )][rjust(u(func-idle-time,%0),12)],0,[space(24)])]
+-
+# These are the formatting functions for the time info in +cwho
+&FUNC-CONN-MINS Chat Functions and Data=[div(mod(conn(%0),3600),60)]
+-
+&FUNC-CONN-SECS Chat Functions and Data=[mod(mod(conn(%0),3600),60)]
+-
+&FUNC-CONN-TIME Chat Functions and 
+ Data=[switch(1,gt([u(func-conn-hours,%0)],0),[u(func-conn-hours,%0)]h)][switch(
+ 1,gt([u(func-conn-mins,%0)],0),[rjust(%b[u(func-conn-mins,%0)]m,4)])][switch(1,
+ gt([u(func-conn-secs,%0)],0),[rjust(%b[u(func-conn-secs,%0)]s,4)])]
+-
+&FUNC-IDLE-HOURS Chat Functions and Data=[div(idle(%0),3600)]
+-
+&FUNC-CONN-HOURS Chat Functions and Data=[div(conn(%0),3600)]
+-
+&FUNC-IDLE-SECS Chat Functions and Data=[mod(mod(idle(%0),3600),60)]
+-
+&FUNC-IDLE-MINS Chat Functions and Data=[div(mod(idle(%0),3600),60)]
+-
+&FUNC-IDLE-TIME Chat Functions and 
+ Data=[switch(1,gt([u(func-idle-hours,%0)],0),[u(func-idle-hours,%0)]h)][switch(
+ 1,gt([u(func-idle-mins,%0)],0),[rjust(%b[u(func-idle-mins,%0)]m,4)])][switch(1,
+ gt([u(func-idle-secs,%0)],0),[rjust(%b[u(func-idle-secs,%0)]s,4)])]
+-
+# Do the finishing touches.
+@Tel Chat Functions and Data=Chat Commands
+-
+@pemit me=\[Chat Program\] You can now put the Chat Commands object in the master room.  Enjoy.
+-
+# End of File

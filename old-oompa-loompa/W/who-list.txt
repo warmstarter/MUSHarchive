@@ -1,0 +1,31 @@
+@create Who Widget2000<TM>
+@link Who Widget2000<TM> = #2
+@lock/Basic Who Widget2000<TM>=me
+@set Who Widget2000<TM> = INHERIT
+@set Who Widget2000<TM> = WIZARD
+@set Who Widget2000<TM> = !NO_COMMAND
+&CMD_POLL Who Widget2000<TM>=$+poll *:@dolist [lwho()]=@pemit ##=%n has changed the poll on the who list;&inf_lastpoll me=[name(%#)];&inf_poll me=%N's Poll:%%r%%r%0
+&CMD_WHO Who Widget2000<TM>=$who:@pe %#=[u(me/inf_header)][u(me/inf_top_border)][iter([u(me/inf_conplayers,%#)],%r[u(me/inf_data,##,%#)])]%r[u(me/inf_bottom_border)]%r[u(me/inf_trailer)]%r[u(me/inf_bottom_border)]
+&CREDITS Who Widget2000<TM>=Coded by Jamie. Help provided by Corum, Nveid and Ashen-Shugar. For permission to use email jamie@dj-tech.org.
+&FUN_HOURS Who Widget2000<TM>=[switch(lt(div(mod(%0,86400),3600),10),1,0[div(mod(%0,86400),3600)],div(mod(%0,86400),3600))]
+&FUN_IDLE Who Widget2000<TM>=[switch([setq(0,idle(name(%0)))][u(fun_idlescale,r(0))],inf_seconds,[r(0)]s,inf_minutes,[div(r(0),60)]m,inf_hours,[div(r(0),3600)]h,inf_days,[div(r(0),86400)]d)]
+&FUN_IDLESCALE Who Widget2000<TM>=[switch(lt(%0,60),1,inf_seconds,switch(lt(%0,3600),1,inf_minutes,switch(lt(%0,86400),1,inf_hours,inf_days)))]
+&FUN_IDLESCANE Who Widget2000<TM>=[switch(lt(%0,60),1,inf_seconds,switch(lt(%0,3600),1,inf_minutes,switch(lt(%0,86400),1,inf_hours,inf_days)))]
+&FUN_ONFOR Who Widget2000<TM>=[switch(gt(conn(name(%0)),86400),1,[u(inf_days,conn(name(%0)))]d)] [u(inf_hours,conn(name(%0)))]:[u(inf_minutes,conn(name(%0)))]
+&FUN_SEX Who Widget2000<TM>=[switch([poss(%0)],his,{M},her,{F},{N})]
+&INF_BOTTOM_BORDER Who Widget2000<TM>=[ansi(hb,[repeat(=,76)])]
+&INF_CONPLAYERS Who Widget2000<TM>=[objeval(%0,[lwho()])]
+&INF_DATA Who Widget2000<TM>=[ljust(Name(%0),16)][ljust(get(%0/Alias),8)][ljust(u(me/fun_sex,%0),2)]%b%b[ljust(u(inf_onfor,%0),8)]%b%b%b[ljust(ansi(hc,u(fun_idle,%0)),6)]%b%b%b[u(%0/Guild)]
+&INF_DAYS Who Widget2000<TM>=[div(%0,86400)]
+&INF_HEADER Who Widget2000<TM>=%r[switch([hasattr(me,inf_poll)],0,{[u(inf_poll_none)]},1,{[u(me/inf_poll)]},,{[ansi(hr,ERROR: CONTACT A DIRECTOR)]})]%r%r[ansi(hc,Name)][space(12)][ansi(hg,Alias)][space(2)][ansi(hc,Sex)][space(3)][ansi(hg,On For)][space(4)][ansi(hc,Idle)][space(5)][ansi(hg,Organization)]%r
+&INF_HOURS Who Widget2000<TM>=[switch([lt([div([mod(%0,86400)],3600)],10)],1,0[div([mod(%0,86400)],3600)],[div([mod(%0,86400)],3600)])]
+&INF_LASTPOLL Who Widget2000<TM>=Rachel
+&INF_MINUTES Who Widget2000<TM>=[switch([lt([div([mod(%0,3600)],60)],10)],1,0[div([mod(%0,3600)],60)],[div([mod(%0,3600)],60)])]
+&INF_ONFOR Who Widget2000<TM>=[switch(gt(conn(name(%0)),86400),1,[u(inf_days,conn(name(%0)))]d)] [u(inf_hours,conn(name(%0)))]:[u(inf_minutes,conn(name(%0)))]
+&INF_POLL_NONE Who Widget2000<TM>=[ansi(hc,No Poll Set:)]
+&INF_SECONDS Who Widget2000<TM>=[mod(%0,60)]
+&INF_TOP_BORDER Who Widget2000<TM>=[ansi(hb,[repeat(=,76)])]
+&INF_TRAILER Who Widget2000<TM>=[center([mudname()] current time is: [time()],76)]%r[center(There are currently [objeval(%0,[words([lwho()])])] players connected.,76)]
+@dolist [lattr(Who Widget2000<TM>/inf_*)] [lattr(Who Widget2000<TM>/fun_*)] credits=@set Who Widget2000<TM>/##=no_command
+@set Who Widget2000<TM>/credits=visual
+@wait me/10=@pe/silent %#=[ansi(hr,INSTALLATION COMPLETE.)]%r[ansi(hc,Email jamie@dj-tech.org with comments/feedback/questions)]%r[ansi(hg,@tel the who widget2000<TM> into your master room.)]%r[ansi(hy,The organization part of the who list is currently set to retrieve the guild attribute of players.)]

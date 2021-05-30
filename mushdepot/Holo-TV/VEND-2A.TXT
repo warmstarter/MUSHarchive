@@ -1,0 +1,41 @@
+-The first step you should take is @create Balloon Machine.
+-The next step you have to take, is to describe the balloon and the machine.
+-To do this, type @describe Big Balloon = <anything>
+-Type @describe Balloon Machine= <anything>
+-Type @set Big Balloon=Inherit
+-This flag setting will allow the balloons you create with your machine to be
+just like the model one with the inherit flag.
+-When you have completed this step, type OBJECTS SET.
+objects set
+-The last step you have to do with the balloon is place it inside the machine.
+-To do this, you must first list your inventory with the `i' command.
+-Write the object #'s down for the Big Balloon and the Balloon Machine.
+-Now, type @tel <#ofBigBalloon>=<#ofMachine>(substituting in their respective
+#'s).
+-Now, we will setup the machine to handle the transactions.
+-Type @cost Machine=10.
+-This will set the cost value for the balloons(on the machine) to 10cr. This
+is used (in conjunction with the next step) with the @apay command register on
+the machine.
+-Now, type @apay Balloon Machine={@create Big Balloon; @addparent
+con(me)=<#ofmodelBalloon>; @set con(me)=chown_ok; drop con(me)}
+-This sets the @apay register to create a new balloon exactly like the model
+and drop it when the machine receives 10 credits(s).
+-It also makes it so the buyer can become the new owner by @chowning the new
+balloon
+-When you have done this, type MACHINE SET.
+machine set
+-You might also want to set the @pay value on the machine to print a nice
+reminder message to the user
+-Type @pay Balloon Machine=Thank you for buying a jolly balloon. Don't forget
+to take it and @chown it!
+-For more, type: HINTS
+hints
+-To encourage people to use your machine, you might want to put in the @desc
+or @adesc instructions on how to use it.
+-For example, 'To get a jolly balloon, type: give machine=10'
+-To keep your machine safe, don't forget to lock it!
+-Type @lock machine=me
+-Congratulations! You have made a Balloon Dispenser Machine!
+-Thank you for taking the new and improved vending machine course!
+_______________________________________________________________________________

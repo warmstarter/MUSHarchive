@@ -1,0 +1,367 @@
+############################################################
+#                   APARTMENTS LITE                        #
+#                                                          #
+# Code that allows players to rent apartments on a         #
+# monthly basis from someone who has apartments to rent.   #
+# This version should really only be used with NPC's       #
+#                                                          #
+# Where #44 is the Apartment/Hotel Code Object             #
+############################################################
+
+@set #44=wizard
+-
+@set #44=!halt
+-
+@tel #44=#2
+-
+@lock/use #44=IS-IC/1|IS-ROYAL-OR-WIZARD/1
+-
+&is-ic #44=[not(hastag(%L, ooc))]
+-
+&IS-ROYAL-OR-WIZARD #44=[or(hasflag(%#, royal), hasflag(%#,wizard))]
+-
+
+#=================================================================#
+&CMD-RENT-APARTMENT #44=$RENT/APARTMENT FROM *:
+#=================================================================#
+
+#-----------------------------------------------------------------#
+# Set the Registers:
+# 
+# %q0 = dbref of the npc
+# %q1 = list of apartments the npc has to rent
+# %q2 = list of vacant apartments the npc has to rent
+# %q3 = choose one randomly from the list to offer the player
+# %q4 = monthly rent for the apartment
+#-----------------------------------------------------------------#
+
+  think setq(0, locate(%#, %0, *));
+  think setq(1, get(%q0/apartments-for-rent));
+  think setq(2, filter(filter-vacant, %q1));
+  think setq(3, first(shuffle(%q2)));
+  think setq(4, default(%q0/cost-%q3, mul(price(shelter), 30)));
+
+#------------------------------------------------------
+# Error check:
+#   a) Did we locate the puppet to rent from?
+#   b) Is the puppet a valid npc 
+#   c) Does the puppet have any apartments to rent
+#   d) Are any of the NPC's apartments vacant?
+#------------------------------------------------------
+
+  think setq(9, [isdbref(%q0)]
+                [hastag(%q0, npc)]
+                [t(words(%q1))]
+                [t(words(%q2))]);
+
+  @switch/first %q9=
+    0???, {@error %#= locate %q0},
+    ?0??, {@pemit %#=You can only use the 'rent/apartment' command on 
+                  NPCs.},
+    ??0?, {@fpose %#=inquires about renting an apartment from [name(%q0)].;
+           @fo %q0=say I'm sorry %N, but I'm not a landlord.},
+    ???0, {@fpose %#=inquires about renting an apartment from [name(%q0)].;
+           @fo %q0=say I'm sorry %N, but I don't have any vacancies 
+               this month.  Try back with me next month and I'll see 
+               what I can do.},
+    1111, {@program %#=me/prog-confirm-rent:
+                    [name(%q0)] says, "I could rent you 
+                    [trim(edit(name(%q3), Anarinuell:,))] 
+                    for %q4 stenis.  Will you take it?" 
+                    (Answer 'yes' or 'no')}
+-
+# %q0 = dbref of the npc
+# %q1 = list of apartments the npc has to rent
+# %q2 = list of vacant apartments the npc has to rent
+# %q3 = choose one randomly from the list to offer the player
+# %q4 = monthly rent for the apartment
+#
+# %0 = yes or no
+
+&prog-confirm-rent #44=
+ 
+  @switch %0=
+    n*, {@remit loc(%#)=[name(%#)] and [name(%q0)] discuss the 
+         possibility of [name(%#)] renting an apartment, but 
+         [name(%#)] turns [obj(%q0)] down.},
+    y*, {
+
+#         See if player even has enough money
+          @switch [gte(getaccount(%#, stenis), %q4)]=
+            0, {@pemit %#=You don't even have enough money 
+                       on you to pay that!  Forget it.},
+            1, {@tr me/trig-rent-apartment=%q0, %q3, %q4, %#}}
+-
+
+#==========================================================#
+&CMD-RENT-RENEW #44=$RENT/RENEW FROM *:
+#==========================================================#
+
+#--------------------------------------------------------------#
+# Set the Registers:
+# 
+# %q0 = dbref of the npc
+# %q1 = list of apartments the npc has to rent
+# %q2 = list of vacant apartments the npc has to rent
+# %q3 = choose one randomly from the list to offer the player
+# %q4 = monthly rent for the apartment
+#
+# %0 = yes or no
+#--------------------------------------------------------------#
+
+  think setq(0, locate(%#, %0, *));
+  think setq(1, lattr(%q0/renter-*));
+  think setq(8, %#);
+  think setq(1, filter(filter-renters, %q1));
+  think setq(1, first(shuffle(%q1)));
+  think setq(3, last(%q1,-));
+  think setq(4, default(%q0/cost-%q3, mul(price(shelter),30)));
+
+  think setq(9, [isdbref(%q0)]
+                [t(words(%q1))]);
+
+  @switch/first %q9=
+    0?, {@error %#= locate %q0},
+    ?0, {@fpose %#=inquires about renewing %p lease with [name(%q0)].;
+         @fo %q0=pose looks at %N and says, "I'm sorry, but I 
+             don't believe that I am your landlord."},
+    11, {@program %#=me/prog-confirm-rent-renew:
+                    [name(%q0)] says, "You wanna renew the 
+                    lease on 
+                    [trim(edit(name(%q3), Anarinuell:,))] 
+                    for %q4 stenis?" 
+                    (Answer 'yes' or 'no')}
+
+-
+# %q0 = dbref of the npc
+# %q1 = list of apartments the npc has to rent
+# %q2 = list of vacant apartments the npc has to rent
+# %q3 = choose one randomly from the list to offer the player
+# %q4 = monthly rent for the apartment
+#
+# %0 = yes or no
+
+&prog-confirm-rent-renew #44=
+ 
+  @switch %0=
+    n*, {@remit loc(%#)=[name(%#)] and [name(%q0)] discuss the 
+         possibility of [name(%#)] renewing the lease on an 
+         apartment, but [name(%#)] turns [obj(%q0)] down.},
+    y*, {
+
+#         See if player even has enough money
+          @switch [gte(getaccount(%#, stenis), %q4)]=
+            0, {@pemit %#=You don't even have enough money 
+                       on you to pay that!  Forget it.},
+            1, {@tr me/trig-rent-renew=%q0, %q3, %q4, %#}}
+
+
+-
+# Where %q0 = the landlord's dbref
+# Where %q8 = %#
+# Returns only those rooms that %# actually rents from the landlord
+
+&filter-renters #44=
+ [strmatch(get(%q0/%0), %q8)]
+-
+
+# %0 = dbref of the landlord
+# %1 = dbref of the apartment
+# %2 = monthly rent
+# %3 = tenant
+
+&trig-rent-renew #44=
+
+# Remove the vacant tag from the room
+  @cleartag %1=vacant;
+
+# exchange the money
+  @money/transfer %2 from %3 to %0;
+  @remit loc(%3)=[name(%3)] pays [name(%q0)] to renew the lease.;
+
+  @fo %0=say She's yours for another month.;
+
+# store when the lease is up (where that mul() = secs in 30 ic days)
+
+  &lease-ends-%1 %0=[add(get(%0/lease-ends-%1), div(mul(30, 24, 60,60), 2))]
+
+-
+
+# %0 = dbref of the landlord
+# %1 = dbref of the apartment
+# %2 = monthly rent
+# %3 = tenant
+
+&trig-rent-apartment #44=
+
+# Remove the vacant tag from the room
+  @cleartag %1=vacant;
+
+# exchange the money
+  @money/transfer %2 from %3 to %0;
+  @remit loc(%3)=[name(%3)] pays [name(%q0)] rent money.;
+
+# give the player the key
+  think setq(0, get(%0/key-%1));
+  @tel %q0=%0;
+  @tel %q0=%3;
+  @fo %0=pose gives [name(%3)] a key.;
+  @fo %0=say There you go.  She's yours for the month [name(%3)].;
+
+
+# store the renter for that apartment
+  &renter-%1 %0=%3;
+
+# store when the lease is up (where that mul() = secs in 30 ic days)
+
+  &lease-ends-%1 %0=[add(secs(), div(mul(30, 24, 60,60), 2))];
+
+# change player's ic-home
+
+  &ic-home %3=%1;
+
+# store the daily on the landlord
+
+  @daily %0=lit({&landlords #44 = setunion(get(#44/landlords), num(me))})
+-
+
+
+&cronic_time_aptrent #63 = 
+  |||05|40|@@ every morning at 5:40 am @@
+-
+&cronic_job_aptrent #63 = 
+  @dolist get(#44/landlords) = {
+    @tr #44/trig-evict-tenants = ##; 
+    @tr #44/trig-warn-tenants = ##; 
+  }
+-
+
+
+
+# %0 - dbref of the landlord
+# 172800 is 48 hours
+
+&trig-warn-tenants #44=
+
+ think setq(0, secs());
+ @dolist lattr(%0/lease-ends*)=
+   @switch [sub(get(%0/##), %q0)]=
+      >172800, {@@ do nothing, tenant has plenty of time @@},
+      {@qmail [get(%0/renter-[last(##,-)])]/Rent Renewal=
+             Your lease for your apartment is almost up. 
+             You'll want to see your landlord [name(%0)] 
+             at [name(loc(%0))] and rent/renew.}
+
+
+-
+# %0 = dbref of the landlord
+
+&trig-evict-tenants #44=
+
+#--------------------------------------------------------#
+# Set the Registers:
+#                                          
+# %q0 = list of rented apartments
+#--------------------------------------------------------# 
+
+  think setq(0, get(%0/apartments-for-rent));
+  think setq(1, filter(filter-vacant, %q0));
+  think setq(0, setdiff(%q0, %q1));
+  
+
+# for each room
+
+  @dolist %q0=
+    @switch [u(u-lease-is-up, default(%0/lease-ends-##, 0))]=
+      0, {@@ do nothing, lease hasn't ended @@},
+
+      1, {
+
+#          Set the apartment vacant
+           @tag ##=vacant;
+
+#          Clean out the apartment
+           @tr me/trig-empty-apartment=##, [get(%0/renter-##)];
+
+#          Change the lock on the apartment
+           @tr me/trig-change-locks=##, [get(%0/key-##)];
+
+#          Send the authorities out for the old key
+           @tel [get(%0/key-##)]=%0;
+
+#          Send a notice of eviction
+           @qmail [get(%0/renter-##)]/Eviction Notice=
+                    You've been evicted from your apartment. ;
+
+#          Clean up attributes
+
+#  Check to see if current IC-HOME and apartment dbref are the same
+
+           &ic-home [ifelse(strmatch(##, 
+                    get(get(%0/renter-##)/ic-home)), 
+                    get(%0/renter-##), )]=#2948;
+           &renter-## %0;
+           &lease-ends-## %0}
+-
+# NOTE, THIS REQUIRES THAT APARTMENTS HAVE ONE EXIT AND ONE EXIT ONLY
+# %0 = apartment to change the locks on
+# %1 = key
+
+&trig-change-locks #44=
+
+# %q0 = exit out of the apartment
+# %q1 = other side of the door
+# %q2 = new key code
+
+  think setq(0, lexits(%0));
+  think setq(1, exittwin(%q0));
+  think setq(2, scramble(secs()));
+
+  @dolist %q0 %q1 %1=&code ##=%q2  
+
+-
+# %0 = apartment to empty
+# %1 = evicted tenant
+# #2948 is the boarding room in the Barnacle
+
+&trig-empty-apartment #44=
+
+# For every item in the apartment
+  @dolist lcon(%0)=
+    {@switch/first 1=
+
+#       If it's a player, kick out
+        hastype(##, player), {@tel ##=#2948 },
+
+#       If it's a sleeper or body, kick out
+        hastag(##, body), {@tel ##=#2948},
+
+#       Otherwise send it with a messenger to be delivered to player
+        {@deliver %1=##}}
+
+-
+
+# u(u-lease-is-up, <secs when the lease ends>)
+# Returns a 1 if the lease is up and a 0 if not
+
+&u-lease-is-up #44=
+ [gte(secs(), %0)]
+-
+
+
+
+
+# Returns only those room dbrefs that have the 'vacant' tag
+
+&filter-vacant #44=[hastag(%0, vacant)]
+
+
+
+
+
+
+
+
+
+
+

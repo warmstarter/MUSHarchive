@@ -1,0 +1,51 @@
+Name of code:Eithelnar's +FINGER
+Version, if any:2
+Date of release:November 30th, 2002
+
+Description of the code, number of objects, its functions, $commands it
+defines, etc.:
+
+A simple +FINGER system to provide OOC information about a player.  It comes with help.
+
+
+Code Author:Eitheliar@M*U*S*H
+Email Address:liam@firdeloth.net
+
+	
+"As used on" this MUSH, if any:Amanquelle, Eithelian
+
+Server required for code: PennMUSH (untested on anything else)
+Patchlevel/version of server required/tested on: 1.7.5p9 (possibly earlier - untested on anything else)
+Privileges required: The object must be in the master room (It @links and @tel's to #2 - change this if that isn't yuor master room)
+
+Terms of code use: You can change this however you like IF, and only if, you send any changes to liam@firdeloth.net.  My name MUST remain in &credits.
+Support policy: If you see me on any MUSHes (Eitheliar/Eithelnar most places) page me or @mail me.  If not, send me email.
+
+Installation instructions: Just copy and paste the code below into your client send window.
+
+@set me=quiet
+
+@create +Finger Object
+@link +Finger Object = #2
+@set +Finger Object = SAFE
+@set +Finger Object = WIZARD
+@set +Finger Object = !NO_COMMAND
+&CMD.CONFIG.FINGER +Finger Object=$+finger/config *: @nspemit %#=[squish(iter(v(fields),switch(0,match(%0,##),,hasattr(#8,%#.##),\[+FINGER\] You don't have [art(##)] ##%r,setq(0,%q0 ##))))][if(%q0,wipe(#8/%#.use.*)[iter(%q0,set(#8,%#.use.##:1))]\[+FINGER\] CONFIG/Set.)]
+
+&CMD.FINGER.HELP +Finger Object=$+finger/help:@nspemit %#=[wrap({[ansi(hc,[center([ansi(hy,+FINGER HELP)],80,=)])]%R[ansi(hc,Syntax)]: [ansi(hy,+FINGER [ansi(hg,<NAME>)])]%R[space(8)][ansi(hy,+FINGER/SET [ansi(hg,<FIELD NAME>)]=[ansi(hg,<CONTENT>)])]%R[space(8)][ansi(hy,+FINGER/CONFIG [ansi(hg,<FIELD NAMES>)])]%R%RSyntax 1 retrieves +finger information for <player name>.  It will accept aliases.  If the other player has an afinger (explained further down), they will receive a notification you +finger'd them.%R%RSyntax 2 sets <Field name> information for you.  Possible fields are OOCDESC NOTE PLAN PROJECT QUOTES.  Other fields which are shown are REAL NAME, SEX, EMAIL, CULTURE, IDLE|LAST-CONNECT TIME, POSITION.  You may choose which of the first group of fields to show, but not the second.  If you do not want people to see your real name|email etc...store them as arealname|aemail etc...%R%RSyntax 3 sets which of the configurable fields to show.  The list can be in any order, but +finger will show them in a set order.  e.g [ansi(hc,+finger/config oocdesc plan project)] is the same as typing  [ansi(hc,+finger/config plan oocdesc project)]%R%RIf you wish to receive a message when someone +finger's you, type [ansi(hy,&afinger me=1)].  This will then notify you when you are +finger'd.},80)]%R[ansi(hc,[center([ansi(hy,+FINGER HELP)],80,=)])]
+&CMD.FINGER.HELP.FIELDS +Finger Object=$+finger/help f*:@nspemit %#=[wrap({[ansi(hc,[center([ansi(hy,+FINGER HELP - FIELDS)],80,=)])]%RBelow is an explanation of all customizable fields.  Some MU*s may not have all fields enabled, and some MU*s may have extras.  If in doubt, ask your friendly neighbourhood wizard.%R%R OOCDESC - A description of what you, the player, looks like, not you the character.%R%R NOTE - This is up to you.  Please do not put anything inappropriate in this field.%R%R PLAN - A plan of what you are going to try to achieve on the MU*.  It can be IC or OOC, just as long as it's MU* related.%R%R PROJECT - This is for Non-MU* plans.  This can include college/work things etc. %R%R QUOTES - This is for quotes, and can be edited in two ways.  You can +finger/addquote to add the most recent one, preceded by two line breaks, or you can +finger/set your quotes field.  This second option will wipe the current contents.},80)]%R[ansi(hc,[center([ansi(hy,+FINGER HELP)],80,=)])]
+&CMD.PLUS.FINGER +Finger Object=$+finger *:[setq(0,type(pmatch(%0)))];[setq(1,name(pmatch(%0)))];[nspemit(%#,[switch(%q0,PLAYER,[u(me/show.finger,%q0,%q1)],#-1,[u(#8/error.not.player)],#-2,[u(#8/error.ambiguous)])])]
+&CMD.SET.FINGER +Finger Object=$+finger/set *=*:[setq(0,lcstr(%0))];[nspemit(%#,[switch(%q0,oocdesc,{[set(#8, %#.oocdesc:%1)]%[+FINGER%] OOCDESC set},note,{[set(#8, %#.note:%1)]%[+FINGER%] NOTE set},plan,{[set(#8, %#.plan:%1)]%[+FINGER%] PLAN set},project,{[set(#8, %#.project:%1)]%[+FINGER%] PROJECT set},quotes,{[set(#8, %#.quotes:%1)]%[+FINGER%] QUOTES set},{%[+FINGER%] That is not a valid field.})]
+@DESCRIBE +Finger Object=
+@set +Finger Object/DESCRIBE=no_command visual prefixmatch
+&ERROR.AMBIGUOUS +Finger Object=\[+FINGER\] I don't know which one you mean!
+&ERROR.NOT.PLAYER +Finger Object=\[+FINGER\] That's not a player!
+&FIELDS +Finger Object=OOCDESC NOTE PLAN PROJECT QUOTES
+&SHOW.FINGER +Finger Object=[ansi(hc,[center([ansi(hy,%1)]'s +finger,80,=)])]%R[ansi(i,REAL NAME)]:[ljust({[switch(hasattr(pmatch(%1),realname),1,get(pmatch(%1)/realname),0,None-set)]},31)][rjust({[ansi(i,CULTURE)]:[switch(hasattr(pmatch(%1),culture),1,get(pmatch(%1)/culture),OOC)]},39)]%R[rjust([ansi(i,SEX)],9)]:[ljust({[switch(hasattr(pmatch(%1),sex),1,get(pmatch(%1)/sex),0,Neuter)]},30)][rjust({[switch(hasflag(pmatch(%1),CONNECTED),1,[ansi(i,IDLE)]:[timestring(idle(pmatch(%1)))],0,[ansi(i,LAST-CONNECTED)]:[get(pmatch(%1)/last)])]},40)]%R[rjust([ansi(i,EMAIL)],9)]:[ljust({[switch(hasattr(pmatch(%1),email),1,get(pmatch(%1)/email),0,None-set)]},30)][rjust({[switch(hasattr(pmatch(%1),position),1,[ansi(i,POSITION)]:[left(get(pmatch(%1)/position),3)],0,[ansi(i,POSITION)]:N/A)]},40)]%R[ansi(hc,[center([ansi(hy,SPAM)],80,=)])]%R[switch(v([pmatch(%1)].use.oocdesc),1,{[wrap({[ansi(i,OOCDESC)]%R[get(#8/[pmatch(%1)].oocdesc)]%R},80)]},0,[ansi(hc,)])]{[switch(v([pmatch(%1)].use.note),1,[wrap({[ansi(i,NOTE)]%R[get(#8/[pmatch(%1)].note)]},80)]%R,0,[ansi(hc,)])]}[switch(v([pmatch(%1)].use.plan),1,[wrap({[ansi(i,PLAN)]%R[get(#8/[pmatch(%1)].plan)]},80)]%R,0,[ansi(hc,)])][switch(v([pmatch(%1)].use.project),1,[wrap({[ansi(i,PROJECT)]%R[get(#8/[pmatch(%1)].project)]},80)]%R,0,[ansi(hc,)])][switch(v([pmatch(%1)].use.quotes),1,[wrap({[ansi(i,QUOTES)]%R[get(#8/[pmatch(%1)].quotes)]},80)]%R,0,[ansi(hc,)])]%R[ansi(hc,[center([ansi(hy,[mudname()] +Finger)],80,=)])][switch(hasattr([pmatch(%1)], afinger),1,[nspemit([pmatch(%1)], [ansi(hc,%[)][ansi(hg,+FINGER)][ansi(hc,%])] [ansi(hy,name(%#))] just +finger'ed you)])]
+&credits +FINGER OBJECT = Eithelnar@Elendor, Will@Elendor
+th Install complete.  You will need to @edit the object to replace #8 with DBREF of the object you just created.
+th To do this, type @edit +Finger Object=#8/<Dbref of +Finger Object>
+@set me=!quiet
+
+
+Help instructions: See +finger/help

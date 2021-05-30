@@ -1,0 +1,78 @@
+@@ @@ @@ @@ @@ @@ @@ @@ @@ @@ @@ @@ @@ @@ @@ @@ 
+@@  MushTalk Version 3.0 For TinyMush 2.2.1
+@@  First Public Release
+@@  By Kathleen Shea
+@@  Feedback/Complaints Welcome: Shae@together.net
+@@
+@@  Features:
+@@
+@@  On the Fly Channel Creation/Deletion.
+@@  Lock channels using EVAL Locks.
+@@  Considers Dark Wizardly Types.
+@@  Uses Pemit/List.
+@@  Customizable WHO_DISPLAY
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@  Commands (See also the Help Files)
+@@
+@@ CHAN_TALKPUB: Pub * Default Public Channel
+@@ CHAN_TALKWIZ: Wiz *  Default Wizard Channel
+@@ COMMAND_CHANLIST: @Chanlist *  
+@@ COMMAND_CHANLOCKS: @chanlocks Lists Installed Channel Locks
+@@ COMMAND_CHANNELS: +channels Lists All Channels with Totals
+@@ COMMAND_DELCHAN: @delchan * Staff Delete Channel
+@@ COMMAND_JOIN: +channel join * Join a Channel
+@@ COMMAND_JOIN_QUIET: +channel join/quiet * Staff Only Option
+@@ COMMAND_LEAVE: +channel leave * Leave a Channel
+@@ COMMAND_LEAVE_QUIET: +channel leave/quiet * Staff Only Option
+@@ COMMAND_LIST: +channel list Another Form of Channels List
+@@ COMMAND_LOCK: @chanlock *=* Staff:  Lock a Channel 
+@@ COMMAND_MAKE: @makechan *=* Staff: Make a Channel
+@@ COMMAND_PURGE: @chanpurge  Remove Non-Players (After a Purge)
+@@ COMMAND_PURGE_IDLE: @chanpurge idle  Remove Idle (45 Days) Players
+@@ COMMAND_WHO: +channel who * Show Connected and Listening
+@@
+@@ Components:
+@@ Channel Object (For Master Room)
+@@ Channel Parent (For Storage Room)
+@@ 
+@@ Notes for After Upload:
+@@
+@@ &FUNC_CAN Channel System Parent houses the EVAL function for who has 
+@@ staff rights. Default is hasflag(%0,WIZARD), Change accordingly.
+@@ &WHO_DISPLAY Channel System Parent houses the WHO Format for the Channels.
+@@ Quote in the Help files to read about the commands.
+@@ ________________ SNIP HERE ____________________
+@create Channel System=10
+&COMMAND_CHANNELS Channel System=$+channels:@pemit %#=%t%t[ mudname() ] Channel Summary%r[ repeat( _ ,70 ) ]%r%r%tChannel Name%b%bTotal%tConnected%tStatus%tAccess%r[ repeat( _ , 70 ) ]%r[ setq( 0 , iter( lwho() ,  switch( hasflag( %# , DARK) , 0 , {##} )  ) ) ][ iter( sort( v( channel_list ) ) , {%r%t[ ljust( ## , 16 ) ][ setq( 1 , v( chan_##_list ) ) ][ ljust( words( %q1 ) , 12 ) ][ ljust( words( setinter( %q1 , %q0 ) ) , 14 ) ][ ljust( switch( match( %q1 , %# ) , 0 , Off , On ) , 5 ) ]%b[ switch( u(chanlock[first(v(chan_##))]) , 1, Allowed , Restricted ) ] } ) ]%r[ repeat( _ , 70 ) ]
+&COMMAND_DELCHAN Channel System=$@delchan *:@switch u( FUNC_CAN , %# ) = 0 , {@pemit %#=Permission Denied.} , {@switch words( v( chan_%0 ) ) = 0 , {@pemit %#=I can't find a channel named %0.} , {&channel_list me=[ setdiff( v( channel_list ) , [ capstr( %0 ) ] ) ];@pemit %#=Channel deleted.;@pemit/list setinter( v( chan_%0_list ) , lwho() ) = %N just deleted the [ capstr( %0 ) ] channel.;&chan_%0 [ parent( me ) ]=;&chan_talk%0 me=;&chan_%0_list [ parent( me ) ]=} }
+&COMMAND_JOIN Channel System=$+channel join *:@switch words( v( chan_%0 ) ) = 0 , {@pemit %#=There is no channel %0.} , {@switch [ u( chanlock[ first( u( chan_%0 ) ) ] ) ]= 0 , {@pemit %#=That channel has restricted access.} , {@switch [setq( 0 , v( chan_%0_list ) ) ][ match( %q0 , %# ) ] = >0 , {@pemit %#=You are already on that channel.}, {&chan_%0_list [ parent( me ) ]=%q0 %#;@switch hasflag( %# , DARK )=0,{@pemit/list %q0 %#=[ rest( v(chan_%0) ) ] %N joins the channel.},{@pemit %#=You quietly slip onto the channel.} } } }
+&COMMAND_LIST Channel System=$+channel list:@pemit %#=repeat( _ , 60 )%r%r[ center( [ mudname() ] Channel System , 60 ) ]%r[ repeat( _ , 60 ) ]%r%rThe following channels are available:%r%r%tChannel Name%b%b%b%b%b%b%b%bRestriction%r%t[ repeat( _ , 31 ) ]%r[ iter( v( channel_list ) , %r%t[ ljust( ## , 20 ) ][ v( lockname[ first( v( chan_## ) ) ] ) ] ) ]%r%r%t'+channel join <name>' to join.%r%r[ center( MushTalk 3.0 - shae@guardians , 60 ) ]%r[ repeat( _ , 60 ) ]
+&COMMAND_LOCK Channel System=$@chanlock *=*:@switch u( FUNC_CAN , %# ) = 0 , {@pemit %#=Sorry that function is restricted to the channel administrators.} , {@switch words( v( chan_%0 ) ) = 0 , {@pemit %#=I cannot find a channel by that name to lock.} , {@switch match( lattr( parent( me )/chanlock* ) , CHANLOCK%1 ) = 0 , {@pemit %#=I don't understand that lock.} , {@pemit %#=Channel %0's lock value set to %1 :%b[ u( lockname%1 ) ];&chan_%0 [ parent( me ) ] = %1 [ rest( v( chan_%0 ) ) ]} } }
+&COMMAND_MAKE Channel System=$@makechan *=*:@switch u( FUNC_CAN , %# ) = 0 , {@pemit %#=Permission Denied.} , {@switch words( %0 ) = >1 , {@pemit %#= Channel names must be one word long.} , {@switch words( v( chan_%0 ) ) = >0 , {@pemit %#= That channel already exists.} , {&chan_%0 [ parent( me ) ]=0 %1;@pemit %#=[ capstr( %0 ) ] channel created.;&channel_list me=[sort( [ v( channel_list ) ] [ capstr( %0 ) ] ) ];&chan_talk%0 me=$%0 *:@switch [ v( dotalk ) ]%0[ v( dotalk1 ) ]%1[ v( dotalk2 ) ] } } }
+&COMMAND_LEAVE Channel System=$+channel leave *:@switch words( v( chan_%0 ) ) = 0 , {@pemit %#=There is no channel %0.} , {@switch [setq( 0 , v( chan_%0_list ) ) ][ match( %q0 , %# ) ] = 0 , {@pemit %#=You are not on that channel.}, {@switch hasflag( %# , DARK)= 0 , {&chan_%0_list [ parent( me ) ]=[ remove( %q0 , %# ) ];@pemit/list %q0=[ rest( v(chan_%0) ) ] %N leaves the channel.}, {&chan_%0_list [ parent( me ) ]=[ remove( %q0 , %# ) ];@pemit %#=You slip quietly from the %0 channel.} } }
+&COMMAND_WHO Channel System=$+channel who *:@switch match( v( channel_list ) , %0 ) = 0 , {@pemit %#=I can't find a channel by that name.} , {@switch setq( 0 , setinter( v( chan_%0_list ) , lwho() ) ) [ or( U( FUNC_CAN , %# ) , match( %q0 , %# ) ) ] = 0 , {@pemit %#=You aren't on that channel.} , {@pemit %#=Connected listeners of [ capstr( %0 ) ]:%r%r[ iter( %q0 , [ switch( hasflag( ## , DARK ) , 1 , , %r[ u( WHO_DISPLAY, ## ) ] ) ] ) ] } }
+&COMMAND_PURGE Channel System=$@chanpurge:@switch u( FUNC_CAN , %# ) = 0 , {@pemit %#=Permission Denied} , {@switch words( lwho() )=>20 , {@pemit %#=There's quite a few people on to be doing a channel purge idle , maybe later hmm?} , {@pemit %#=Purging Non-Players from the channels.;@dolist lattr( parent( me )/chan_*_list )=@trigger [ parent( me ) ]/do_purge=##} }
+&COMMAND_PURGE_IDLE Channel System=$@chanpurge idle:@switch u( FUNC_CAN , %# ) = 0 , {@pemit %#=Permission Denied} , {@switch words( lwho() )=>20 , {@pemit %#=There's quite a few people on to be doing a channel purge idle , maybe later hmm?} , {@pemit %#=Purging Idle-Players from the channels.;@dolist lattr( parent( me )/chan_*_list )=@trigger [ parent( me ) ]/do_purge_idle=##} }
+&COMMAND_CHANLOCKS Channel System=$@chanlocks:@pemit %#=%t%tChannel System Locks%r[ repeat( _ , 60 ) ]%r%r[ iter( lattr( parent( me )/chanlock* ), %r[ setq( 0 , after( ## , CHANLOCK ) ) ]%q0%t[ ljust( u( lockname%q0 ) , 20 ) ][ v( ## ) ] ) ]%r[repeat( _ , 60 ) ]%r%r%t%b%b'@chanlock <channelname>=<lock#>'%r%t%b%b'
+&CHANNEL_LIST Channel System= Pub Wiz
+&CHAN_TALKPUB Channel System=$Pub *:@switch [ setq( 0 , setinter( v( chan_Pub_list ) , lwho() ) )][ match( %q0 , %# ) ] = 0 , {@pemit %#=You aren't on that channel.} , {@pemit/list %q0=<Public>%b%N[ switch( %0 , :* , {%b[ delete( %0 , 0 , 1 ) ]} , ;* , {[ delete( %0 , 0 , 1 ) ]} , "* , {%bsays, %0"} , {%bsays, "%0"} ) ]}
+&CHAN_TALKWIZ Channel System=$Wiz *:@switch [ setq( 0 , setinter( v( chan_Wiz_list ) , lwho() ) )][ match( %q0 , %# ) ] = 0 , {@pemit %#=You aren't on that channel.} , {@pemit/list %q0=<Wizard>%b%N[ switch( %0 , :* , {%b[ delete( %0 , 0 , 1 ) ]} , ;* , {[ delete( %0 , 0 , 1 ) ]} , "* , {%bsays, %0"} , {%bsays, "%0"} ) ]}
+&COMMAND_CHANLIST Channel System=$@Chanlist *:@switch [words(v(chan_%0))]=0,{@pemit %#=That doesn't appear to be a channel.},{@switch  u(FUNC_CAN,%#)=0,{@pemit %#=Permission Denied.},{@pemit %#=Characters on the %0 Channel:%r%r[sort([iter(get(parent(me)/chan_%0_list),[name(##)])])]}}
+&COMMAND_JOIN_QUIET Channel System=$+channel join/quiet *:@switch u( FUNC_CAN , %# ) = 0 , {@pemit %#=Permission Denied.} , {@switch words( v( chan_%0 ) ) = 0 , {@pemit %#=There is no channel %0.} , {@switch [ u( chanlock[ first( u( chan_%0 ) ) ] ) ]= 0 , {@pemit %#=That channel has restricted access.} , {@switch [setq( 0 , v( chan_%0_list ) ) ][ match( %q0 , %# ) ] = >0 , {@pemit %#=You are already on that channel.}, {&chan_%0_list [ parent( me ) ]=%q0 %#;@pemit %#=You slip quietly onto the %0 channel.} } } }
+&COMMAND_LEAVE_QUIET Channel System=$+channel leave/quiet *:@switch u( FUNC_CAN , %# ) = 0 , {@pemit %#=Permission Denied.} , {@switch words( v( chan_%0 ) ) = 0 , {@pemit %#=There is no channel %0.} , {@switch [ u( chanlock[ first( u(chan_%0) ) ] ) ] = 0 , {@pemit %#=That channel has restricted access.} , {@switch [setq( 0 , v( chan_%0_list ) ) ][ match( %q0 , %# ) ] = 0 , {@pemit %#=You are not on that channel.}, {&chan_%0_list [ parent( me ) ]=[ remove( %q0 , %# ) ];@pemit %#=You slip quietly from the %0 channel.} } } }
+&FUNC_CAN Channel System=hasflag(%0  , WIZARD)
+@set Channel System=INHERIT
+@create Channel System Parent=10
+&CHANLOCK0 Channel System Parent=hasflag(%#,CONNECTED)
+&LOCKNAME0 Channel System Parent=MUSH Wide
+&CHANLOCK1 Channel System Parent=hasflag(%#,WIZARD)
+&LOCKNAME1 Channel System Parent=Wizards
+&DOTALK Channel System Parent=[ setq( 0 , setinter( v( chan_
+&DOTALK1 Channel System Parent=_list ) , lwho() ) )][ match( %q0 , %# ) ] = 0 , {@pemit %#=You aren't on that channel.} , {@pemit/list %q0=
+&DOTALK2 Channel System Parent=%b%N[ switch( %0 , :* , {%b[ delete( %0 , 0 , 1 ) ]} , ;* , {[ delete( %0 , 0 , 1 ) ]} , "* , {%bsays, %0"} , {%bsays, "%0"} ) ]}
+&WHO_DISPLAY Channel System Parent=name(%0)
+&DO_PURGE Channel System Parent=&%0 me=[ iter( v( %0 ) , {[ switch( match( Type( ## ) , PLAYER ) , 1 , {##} ) ] } ) ]
+&DO_PURGE_IDLE Channel System Parent=&%0 me=[ iter( v( %0 ) , {[ switch( gte( sub( secs() , convtime( get( ##/last ) ) ), 3888000 ) , 0 , {##} ) ] } ) ]
+&CHAN_PUB Channel System Parent=0 <Public>
+&CHAN_WIZ Channel System Parent=1 <Wizard>
+@parent channel system=channel system parent

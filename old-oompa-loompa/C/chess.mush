@@ -1,0 +1,45 @@
+@Desc Chess Parent=[repeat(=,78)]%rThis is the classic game of chess.%b%bThe commands on how to use it can be shown by using this game.%b%bThe game itself is too difficult to explain in this short description.%b%bAny good library covers the rules of chess.%r[repeat(=,78)]
+@Use Chess Parent=%r[center(!Chess!,78)]%r%r%tRESETC%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%bWill reset the game for another play.%r%tBEGINC <person>%b%b%b%b%b%b%b%b%b%b%b%b%b%b%bWill begin a game with <person>.%r%tMOVEC <move>%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%bWill move as specified by <move>.%r%tREMOVEC <position>%b%b%b%b%b%b%b%b%b%b%b%bWill remove the piece at <position>.%r%tPLACEC <piece> at <position>%b%bWill place <piece> at <position>%r%tDISPC%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%bWill display the board.%r%tWATCHC%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%bWill watch the game.%r%r%tExamples: <position> = A1, <move> = A1-A2, <piece> = WR%r
+@OUse Chess Parent=uses the chess game.
+&REM-0 Chess Parent=========== Commands ==========
+&RESET-C Chess Parent=$resetc:@wait me={@emit --- [name(me)] reset by %n ---;&last-player me;&last-move me;&board me=[v(null)];&playing me;&watchers me;@notify me}
+&BEGIN-C Chess Parent=$beginc *:@wait me={@select [u(can-begin,%#,%0)]=,{@emit --- [name(me)] begun by %n with [name(%0)].%b%bType WATCHC to watch. ---;&last-player me;&last-move me;&board me=[v(null)];&playing me=[setunion(num(%0),%#)];&watchers me=[setunion(num(%0),%#)];@tr me/status},{@pemit %#=[u(can-begin,%#,%0)];@notify me}}
+&DISP-C Chess Parent=$dispc:@pemit %#=[u(fulldisp,Last Move: [v(last-move)],Last Player: [name(v(last-player))])]
+&MOVE-C Chess Parent=$movec *:@wait me={@select [u(can-move,%#,%0)]=,{&board me=[u(make-move,v(board),%0)];&last-player me=%#;&last-move me=[ucstr(%0)];@tr me/status},{@pemit %#=[u(can-move,%#,%0)];@notify me}}
+&REMOVE-C Chess Parent=$removec *:@wait me={@select [u(can-remove,%#,%0)]=,{&board me=[u(make-remove,v(board),%0)];&last-player me=%#;&last-move me=REMOVE [ucstr(%0)];@tr me/status},{@pemit %#=[u(can-remove,%#,%0)];@notify me}}
+&PLACE-C Chess Parent=$placec * at *:@wait me={@select [u(can-place,%#,%0,%1)]=,{&board me=[u(make-place,v(board),%0,%1)];&last-player me=%#;&last-move me=PLACE [ucstr(%0)] AT [ucstr(%1)];@tr me/status},{@pemit %#=[u(can-place,%#,%0,%1)];@notify me}}
+&WATCH-C Chess Parent=$watchc:@wait me={&watchers me=[setunion(v(watchers),%#)];@emit --- %N is now watching [name(me)] ---;@notify me}
+&STATUS Chess Parent=@dolist [v(watchers)]=@pemit ##=[u(fulldisp,Last Move: [v(last-move)],Last Player: [name(v(last-player))])];@notify me
+&REM-1 Chess Parent=========== Validity Checks ==========
+&CAN-BEGIN Chess Parent=[switch(1,gt(words(v(playing)),0),--- Someone is playing at the moment ---,strmatch(num(%1),#-1*),--- There is noone here named '%1' ---)]
+&CAN-MOVE Chess Parent=[switch(1,eq(match(v(playing),%0),0),--- You are not playing ---,not(u(valid-move,%1)),--- [ucstr(%1)] is an invalid move ---)]
+&CAN-REMOVE Chess Parent=[switch(1,eq(match(v(playing),%0),0),--- You are not playing ---,not(u(valid-position,%1)),--- [ucstr(%1)] is an invalid position ---)]
+&CAN-PLACE Chess Parent=[switch(1,eq(match(v(playing),%0),0),--- You are not playing ---,eq(match(v(pieces),%1),0),--- [ucstr(%1)] is not a valid piece. ---%r--- Valid pieces are: [v(pieces)] ---,not(u(valid-position,%2)),--- [ucstr(%2)] is an invalid position ---)]
+&VALID-MOVE Chess Parent=[switch(1,not(u(valid-position,mid(%0,0,2))),0,not(u(valid-position,mid(%0,3,2))),0,not(strmatch(mid(%0,2,1),-)),0,eq(strlen(%0),5))]
+&VALID-POSITION Chess Parent=[switch(1,eq(match(v(rows),mid(%0,0,1)),0),0,eq(match(v(columns),mid(%0,1,1)),0),0,eq(strlen(%0),2))]
+&REM-2 Chess Parent=========== Board Manipulations ==========
+&MAKE-MOVE Chess Parent=[u(make-move-0,%0,u(get-x,mid(%1,0,2)),u(get-y,mid(%1,0,2)),u(get-x,mid(%1,3,2)),u(get-y,mid(%1,3,2)))]
+&MAKE-MOVE-0 Chess Parent=[setq(0,u(at-coor,%0,%1,%2))][u(replace,u(replace,%0,%3,%4,r(0)),%1,%2,--)]
+&MAKE-REMOVE Chess Parent=[u(replace,%0,u(get-x,%1),u(get-y,%1),--)]
+&MAKE-PLACE Chess Parent=[u(replace,%0,u(get-x,%2),u(get-y,%2),%1)]
+&REM-3 Chess Parent=========== Display ==========
+&FULLDISP Chess Parent=--- %0 ---%r[u(disp)]%r--- %1 ---
+&DISP Chess Parent=[u(top)]%r[u(line,7)]%r[u(mid)]%r[u(line,6)]%r[u(mid)]%r[u(line,5)]%r[u(mid)]%r[u(line,4)]%r[u(mid)]%r[u(line,3)]%r[u(mid)]%r[u(line,2)]%r[u(mid)]%r[u(line,1)]%r[u(mid)]%r[u(line,0)]%r[u(bottom)]%r[u(numbers)]
+&LINE Chess Parent=[space(25)][extract(v(rows),add(%0,1),1)] |%b[setq(0,extract(v(board),add(%0,1),1))][iter(lnum(8),[setq(1,mid(r(0),mul(##,2),2))][switch(r(1),--,%b%b,r(1))]|)]
+&TOP Chess Parent=[space(27)]+---+---+---+---+---+---+---+---+
+&MID Chess Parent=[space(27)]+---+---+---+---+---+---+---+---+
+&BOTTOM Chess Parent=[space(27)]+---+---+---+---+---+---+---+---+
+&NUMBERS Chess Parent=[space(27)][iter(v(columns),%b%b##)]
+&REM-4 Chess Parent=========== Low-Level Functions ==========
+&REPLACE Chess Parent=[mid(%0,0,u(locate,%1,%2))][ucstr(%3)][mid(%0,add(u(locate,%1,%2),2),sub(strlen(%0),add(u(locate,%1,%2),2)))]
+&AT-COOR Chess Parent=[mid(%0,u(locate,%1,%2),2)]
+&LOCATE Chess Parent=[add(mul(%0,2),mul(%1,17))]
+&GET-X Chess Parent=[sub(match(v(columns),mid(%0,1,1)),1)]
+&GET-Y Chess Parent=[sub(match(v(rows),mid(%0,0,1)),1)]
+&REM-5 Chess Parent=========== Data ==========
+&BOARD Chess Parent=WRWNWBWQWKWBWNWR WPWPWPWPWPWPWPWP ---------------- ---------------- ---------------- ---------------- BPBPBPBPBPBPBPBP BRBNBBBQBKBBBNBR
+&NULL Chess Parent=WRWNWBWQWKWBWNWR WPWPWPWPWPWPWPWP ---------------- ---------------- ---------------- ---------------- BPBPBPBPBPBPBPBP BRBNBBBQBKBBBNBR
+&ROWS Chess Parent=A B C D E F G H
+&COLUMNS Chess Parent=1 2 3 4 5 6 7 8
+&PIECES Chess Parent=BK BQ BB BN BR BP WK WQ WB WN WR WP
+

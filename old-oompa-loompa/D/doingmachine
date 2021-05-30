@@ -1,0 +1,71 @@
+From: u9228616@athmail1.causeway.qub.ac.uk
+Message-Id: <9304021407.AA00590@bot12>
+Subject: A little bit of code
+Date: Fri, 02 Apr 93 15:07:53 BST
+
+
+Well its that time again when I bring to you a simple little bit
+of code. Most of you will probably have one of these already but
+for those of you who dont here goes.
+
+
+
+The Doing Machine
+-----------------
+This is a small machine that allows you to switch between several @doing
+messages. The commands are:
+
+        doings          - list all doing messages
+        add <doing>     - add a new doing message to memory
+        doing #         - select a certain @doing message
+
+
+
+---------------------------- CODE ----------------------------------
+
+@create Doing Machine<dm>=10
+@Desc Doing Machine<dm>=%rThis is a small machine that allows you to
+are:%r%r%tdoings%t%t- list all doing messages%r%tadd <doing>%t- add a
+new doing message to memory%r%tdoing #%t%t- select a certain @doing message%r%r
+&ADD_DOING Doing Machine<dm>=$add *:&DOING[v(num_doings)]
+me=%0;&NUM_DOINGS me=add(1,v(num_doings));@pemit %#=You have just added
+another @doing message.
+&LIST_DOINGS Doing Machine<dm>=$doings:@pemit %#=The following @doing
+messages have been stored:%r;@dolist lnum(v(num_doings))=@pemit %#=## -
+[v(doing[##])]
+&USE_DOING Doing Machine<dm>=$doing *:@switch v(doing[%0])=>"",@fo
+%#=@doing [v(doing[%0])],@pemit %#=You do not have a @doing message set
+for that number.
+@set Doing Machine<dm>=INHERIT
+&NUM_DOINGS Doing Machine<dm>=0
+
+----------------- PRETTY LISTED VERSION ----------------------------
+
+ADD_DOING:$add *:
+        &DOING[v(num_doings)] me=%0;
+        &NUM_DOINGS me=add(1,v(num_doings));
+        @pemit %#=You have just added another @doing message.
+LIST_DOINGS:$doings:
+        @pemit %#=The following @doing messages have been stored:%r;
+        @dolist lnum(v(num_doings))=@pemit %#=## - [v(doing[##])]
+USE_DOING:$doing *:
+        @switch v(doing[%0])=>"",@fo %#=@doing [v(doing[%0])],@pemit
+%#=You do not have a @doing message set for that number.
+
+--------------------------------------------------------------------
+
+
+Well thats it. Have fun!
+
+By the way thanks you one and all for the great response to my
+question about @edit. Also thanks Josh for the correct version
+of the Pretty Lister.
+
+Anyway till next time!
+
+Hangover the Alcoholic Beer monster aka Stephen McNabb
+UK_MUSH         - 134.83.128.247   4201
+FUBARmush       - 137.148.20.7     7719
+
+Drink and be merry!
+8-)

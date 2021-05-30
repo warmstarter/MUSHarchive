@@ -1,0 +1,33 @@
+Turbo-Lift Parent(#550LOVn)
+Type: Thing Flags: LINK_OK OPAQUE VISUAL NO_COMMAND
+A nice Elevator Panel, installed at [v(location)].%r[center([ansi(h,OOC)]: Type
+`[ansi(hc,ELHELP)]' for help,79)]
+Owner: Killian  Zone: *NOTHING*  Code Credits: 1
+Parent: *NOTHING*
+Powers:
+Warnings checked: none
+Created: Wed Mar  6 05:24:49 1996
+Last Modification: Wed Mar  6 05:49:36 1996
+INSTALL [#3]: $installhelp:@pemit %#=[eval(me,elevhelp)]
+ELHELP [#3]: $elhelp:@pemit %#=[repeat(-,79)]%r[center([ansi(hc,E's Elevator
+Parent)],79)]%r[repeat(-,79)]%r[ljust([ansi(h,LIST FLOORS)],25)] - [ansi(c,List
+available floors.)]%r[ljust([ansi(h,PUSH <FLOORNUM>)],25)] - [ansi(c,Go to
+floor <FLOORNUM>.)]%r[center([ansi(hr,This is yet another one of E's
+Contraptions.)],79,-)]%r[repeat(-,79)]
+ELEVHELP [#3]: Instructions for setting up E's elevator:%rDig an elevator and
+teleport into it.%r@create Console%r@lock Console=me%r@set console=!no_command
+%r@parent console=[num(me)]%r&location console=<where the Elevator is at>%r
+&floors console=<Space-seperated list of floors>%r&what_<floor> console=<For
+each floor, what is at that floor.>%r&linked_<Floor> console=<For each floor,
+the room that Out should be linked to.>%r@open <O>ut;o;out%RYer done :)
+PUSH [#3]: $push *:@swi [match([v(floors)],%0)]=0,{@pemit %#=[ansi(hr,That's
+not a valid floor.)]},{@pemit %#=You punch in %0.;@oemit %n=%n pushes floor
+%0.;@unlink o;@wait 1=@emit The elevator quickly goes to level %0.;@wait 2=
+@emit The doors open.;@link o=[V(linked_%0)]}
+LOCATION [#3]: parent
+DESTS [#3]: $list floors:@pemit %#=[repeat(-,79)]%r[center([ansi(hc,[v
+(location)] Floors)],79)]%r[repeat(-,79)]%r[iter([v(floors)],##. [v(what_##)]
+%r)]%r[repeat(-,79)]
+Home: KiMax Productions Presents...
+Location: Parent Room
+_______________________________________________________________________________

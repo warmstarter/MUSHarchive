@@ -1,0 +1,53 @@
+@create PARENT: Chess Board
+@lock PARENT: Chess Board==*[owner(me)]
+@set PARENT: Chess Board=VISUAL
+@set PARENT: Chess Board=PARENT_OK
+@set PARENT: Chess Board=NO_COMMAND
+@set PARENT: Chess Board=HALT
+@desc PARENT: Chess Board=[repeat(:=,39)]:%R[u(MAIN_DESC)]%R[repeat(:=,39)]:
+&Use PARENT: Chess Board=%r[center(!Chess!,78)]%r%r%tRESETC%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%bWill reset the game for another play.%r%tBEGINC <person>%b%b%b%b%b%b%b%b%b%b%b%b%b%b%bWill begin a game with <person>.%r%tMOVEC <move>%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%bWill move as specified by <move>.%r%tREMOVEC <position>%b%b%b%b%b%b%b%b%b%b%b%bWill remove the piece at <position>.%r%tPLACEC <piece> at <position>%b%bWill place <piece> at <position>%r%tDISPC%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%bWill display the board.%r%tWATCHC%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%b%bWill watch the game.%r%r%tExamples: <position> = A1, <move> = A1-A2, <piece> = WR%r
+&Ouse PARENT: Chess Board=uses the chess game.
+&REM-0 PARENT: Chess Board=========== Commands ==========
+&RESET-C PARENT: Chess Board=$resetc:@wait me={@emit --- [name(me)] reset by %n ---;&last-player me;&last-move me;&board me=[v(null)];&playing me;&watchers me;@notify me}
+&BEGIN-C PARENT: Chess Board=$beginc *:@wait me={@select [u(can-begin,%#,%0)]=,{@emit --- [name(me)] begun by %n with [name(%0)].%b%bType WATCHC to watch. ---;&last-player me;&last-move me;&board me=[v(null)];&playing me=[setunion(num(%0),%#)];&watchers me=[setunion(num(%0),%#)];@tr me/status},{@pemit %#=[u(can-begin,%#,%0)];@notify me}}
+&DISP-C PARENT: Chess Board=$dispc:@pemit %#=[u(fulldisp,Last Move: [v(last-move)],Last Player: [name(v(last-player))])]
+&MOVE-C PARENT: Chess Board=$movec *:@wait me={@select [u(can-move,%#,%0)]=,{&board me=[u(make-move,v(board),%0)];&last-player me=%#;&last-move me=[ucstr(%0)];@tr me/status},{@pemit %#=[u(can-move,%#,%0)];@notify me}}
+&REMOVE-C PARENT: Chess Board=$removec *:@wait me={@select [u(can-remove,%#,%0)]=,{&board me=[u(make-remove,v(board),%0)];&last-player me=%#;&last-move me=REMOVE [ucstr(%0)];@tr me/status},{@pemit %#=[u(can-remove,%#,%0)];@notify me}}
+&PLACE-C PARENT: Chess Board=$placec * at *:@wait me={@select [u(can-place,%#,%0,%1)]=,{&board me=[u(make-place,v(board),%0,%1)];&last-player me=%#;&last-move me=PLACE [ucstr(%0)] AT [ucstr(%1)];@tr me/status},{@pemit %#=[u(can-place,%#,%0,%1)];@notify me}}
+&WATCH-C PARENT: Chess Board=$watchc:@wait me={&watchers me=[setunion(v(watchers),%#)];@emit --- %N is now watching [name(me)] ---;@notify me}
+&STATUS PARENT: Chess Board=@dolist [v(watchers)]=@pemit ##=[u(fulldisp,Last Move: [v(last-move)],Last Player: [name(v(last-player))])];@notify me
+&REM-1 PARENT: Chess Board=========== Validity Checks ==========
+&CAN-BEGIN PARENT: Chess Board=[switch(1,gt(words(v(playing)),0),--- Someone is playing at the moment ---,strmatch(num(%1),#-1*),--- There is no one here named '%1' ---)]
+&CAN-MOVE PARENT: Chess Board=[switch(1,eq(match(v(playing),%0),0),--- You are not playing ---,not(u(valid-move,%1)),--- [ucstr(%1)] is an invalid move ---)]
+&PDB: #1232
+&CAN-REMOVE PARENT: Chess Board=[switch(1,eq(match(v(playing),%0),0),--- You are not playing ---,not(u(valid-position,%1)),--- [ucstr(%1)] is an invalid position ---)]
+&CAN-PLACE PARENT: Chess Board=[switch(1,eq(match(v(playing),%0),0),--- You are not playing ---,eq(match(v(pieces),%1),0),--- [ucstr(%1)] is not a valid piece. ---%r--- Valid pieces are: [v(pieces)] ---,not(u(valid-position,%2)),--- [ucstr(%2)] is an invalid position ---)]
+&VALID-MOVE PARENT: Chess Board=[switch(1,not(u(valid-position,mid(%0,0,2))),0,not(u(valid-position,mid(%0,3,2))),0,not(strmatch(mid(%0,2,1),-)),0,eq(strlen(%0),5))]
+&VALID-POSITION PARENT: Chess Board=[switch(1,eq(match(v(rows),mid(%0,0,1)),0),0,eq(match(v(columns),mid(%0,1,1)),0),0,eq(strlen(%0),2))]
+&REM-2 PARENT: Chess Board=========== Board Manipulations ==========
+&MAKE-MOVE PARENT: Chess Board=[u(make-move-0,%0,u(get-x,mid(%1,0,2)),u(get-y,mid(%1,0,2)),u(get-x,mid(%1,3,2)),u(get-y,mid(%1,3,2)))]
+&MAKE-MOVE-0 PARENT: Chess Board=[setq(0,u(at-coor,%0,%1,%2))][u(replace,u(replace,%0,%3,%4,r(0)),%1,%2,--)]
+&MAKE-REMOVE PARENT: Chess Board=[u(replace,%0,u(get-x,%1),u(get-y,%1),--)]
+&MAKE-PLACE PARENT: Chess Board=[u(replace,%0,u(get-x,%2),u(get-y,%2),%1)]
+&REM-3 PARENT: Chess Board=========== Display ==========
+&FULLDISP PARENT: Chess Board=--- %0 ---%r[u(disp)]%r--- %1 ---
+&DISP PARENT: Chess Board=[u(top)]%r[u(line,7)]%r[u(mid)]%r[u(line,6)]%r[u(mid)]%r[u(line,5)]%r[u(mid)]%r[u(line,4)]%r[u(mid)]%r[u(line,3)]%r[u(mid)]%r[u(line,2)]%r[u(mid)]%r[u(line,1)]%r[u(mid)]%r[u(line,0)]%r[u(bottom)]%r[u(numbers)]
+&LINE PARENT: Chess Board=[space(25)][extract(v(rows),add(%0,1),1)] |%b[setq(0,extract(v(board),add(%0,1),1))][iter(lnum(8),[setq(1,mid(r(0),mul(##,2),2))][switch(r(1),--,%b%b,r(1))]|)]
+&TOP PARENT: Chess Board=[space(27)]+---+---+---+---+---+---+---+---+
+&MID PARENT: Chess Board=[space(27)]+---+---+---+---+---+---+---+---+
+&BOTTOM PARENT: Chess Board=[space(27)]+---+---+---+---+---+---+---+---+
+&NUMBERS PARENT: Chess Board=[space(27)][iter(v(columns),%b%b##)]
+&REM-4 PARENT: Chess Board=========== Low-Level Functions ==========
+&REPLACE PARENT: Chess Board=[mid(%0,0,u(locate,%1,%2))][ucstr(%3)][mid(%0,add(u(locate,%1,%2),2),sub(strlen(%0),add(u(locate,%1,%2),2)))]
+&AT-COOR PARENT: Chess Board=[mid(%0,u(locate,%1,%2),2)]
+&LOCATE PARENT: Chess Board=[add(mul(%0,2),mul(%1,17))]
+&GET-X PARENT: Chess Board=[sub(match(v(columns),mid(%0,1,1)),1)]
+&GET-Y PARENT: Chess Board=[sub(match(v(rows),mid(%0,0,1)),1)]
+&REM-5 PARENT: Chess Board=========== Data ==========
+&BOARD PARENT: Chess Board=WRWNWBWQWKWBWNWR WPWPWPWPWPWPWPWP ---------------- ---------------- ---------------- ---------------- BPBPBPBPBPBPBPBP BRBNBBBQBKBBBNBR
+&NULL PARENT: Chess Board=WRWNWBWQWKWBWNWR WPWPWPWPWPWPWPWP ---------------- ---------------- ---------------- ---------------- BPBPBPBPBPBPBPBP BRBNBBBQBKBBBNBR
+&ROWS PARENT: Chess Board=A B C D E F G H
+&COLUMNS PARENT: Chess Board=1 2 3 4 5 6 7 8
+&PIECES PARENT: Chess Board=BK BQ BB BN BR BP WK WQ WB WN WR WP
+&MAIN_DESC PARENT: Chess Board=%TYou see a marble chess board set upon a table, a chair placed at each side. Upon the board is a full set of stone-carved pieces.%R%R[center(<USE [UCSTR([name(me)])] for help>,79)]
+&CREDITS Parent: Chess Board=I don't know who wrote the original code for the chess board, but if you ever find him (or her), thank him for writing the code.

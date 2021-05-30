@@ -1,0 +1,67 @@
+@@ This file is fully compilable.  Copy and paste the entire contents.
+
+@@ A collection of useful commands for MUSH play and administration,
+@@ written by Sholevi (mrdyg@yahoo.com)
+@@ Released Oct 5, 2003
+@@ For the general public, free of charge and freely distributable with
+@@ any modifications you wish to make and no warranty whatsoever.
+@@ 
+@@ Copy the attributes from the object GC to your global commands object
+@@ in the master room.
+
+
+@create GC
+
+
+@@ Syntax:  +bcreate <name>,<alias>=<password>
+@@ Example:  +bcreate EarthBC,EBC=blueberry
+@@ Description:  Creates a mortal player character and configures him as
+@@ a builder with various powers and pre-defined attributes.  You may 
+@@ wish to customize some of these.  Useable by Wizards and Royals.
+&CMD_BCREATE GC=$+bcreate *,*=*:@pemit %#=[switch([orflags(%#,Wr)][isdbref(setr(0,pcreate(iter(%0,capstr(##)),%2)))],0?,Who do you think you are?,10,Could not create a builder with that name.,[set(%q0,!unregistered)][set(%q0,alias:%1)][null(iter(builder tport_anywhere tport_anything long_fingers login idle nopay link_anywhere open_anywhere search,powers(%q0,##)))][set(%q0,rquota:20)][link(%q0,#21)][set(%q0,adisconnect:home)][set(%q0,email:Builder@wc.com)][ansi(hg,-%b)]Created builder [ansi(hg,[name(%q0)]\(%1\))]\(%q0\) with password [ansi(hg,%2)].)];@break not(isdbref(%q0));+bbpost Building/[name(%q0)] Created=[name(%q0)] was created by %n today, [time()].
+
+
+
+@@ Syntax:  +pcreate <name>=<email>
+@@ Example:  +pcreate Bob Bobbit=bob@bobsdomain.com
+@@ Description:  Allows a Wizard or Royal to create a mortal player with a
+@@ predefined &EMAIL attribute and randomized password.  Mostly useful
+@@ on systems which have enabled email registration.
+&CMD_PCREATE GC=$+pcreate *=*:@pemit %#=switch([orflags(%#,Wr)][eq(2,words(%1,@))],0*,Who do you think you are?,10,The second argument doesn't look like a valid email address. :\(,11,if(isdbref(setr(u,pcreate(%0,setr(p,scramble(beef[secs()]cake))))),[set(%qu,email:%1)][ansi(hg,-%b)]Created new player [ansi(hm,name(%qu)\(%qu\))] with password [ansi(hm,%qp)] and email address [ansi(hm,%1)].,[ansi(hr,-%b)]I could not create a player with that name.),Critical error occured.)
+
+
+
+@@ Syntax:  +beep <player>
+@@ Description:  Will allow any player to send a bell to another player's
+@@ terminal if the target player's terminal supports it.  It sets a timer
+@@ on the caller that prevents abuse, since bell() is a wizard-only 
+@@ function.
+&CMD_BEEP GC=$+beep *:@pemit %#=switch(isdbref(setr(0,num(*[squish(secure(%0))]))),0,No such player by that name.,if(gte(sub(secs(),if(hasattrval(%#,lastbeep),get(%#/lastbeep),0)),300),[set(%#,lastbeep:[secs()])][set(%#/lastbeep,wizard mortal_dark)][pemit(%q0,beep())][pemit(%q0,ansi(hy,[name(%#)] notifies you with a +beep.))][ansi(hy,You send a bell notification to [name(%q0)]'s terminal.)],You must wait a few minutes before you can use this command again.))
+
+
+
+@@ Syntax:  osay <message>
+@@ Description:  Allows any player to speak in a room with a prefix to
+@@ the message that designates it as OOC.  osay also has three aliases:
+@@ +osay, ooc and +ooc.
+&CMD_OSAY GC=$^(osay|\+osay|ooc|\+ooc) (.*):@remit %l=[ansi(hx,<)][ansi(c,OOC)][ansi(hx,>)]%b[switch(left(%2,1),\;,%n[after(%2,;)],\:,%n%b[after(%2,:)],%n says\, "%2")]
+@set GC/CMD_OSAY=regexp
+
+
+
+@@ Syntax:  +sweep [<location>]
+@@ Example:  +sweep loc(*sholevi)
+@@ Description:  With no arguments, will summarize the contents of the caller's
+@@ location and distinguish between players, connected players and objects.
+@@ With a <location> argument, will allow a Wizard, Royal or SEE_ALL player
+@@ to sweep a location from afar.
+&CMD_SWEEP GC=$+sweep*:@pemit %#=[setq(0,or(orflags(%#,Wr),haspower(%#,see_all)))]%rContents for [name(if(cand(%q0,isdbref(setr(1,s(%0)))),%q1,%L))]\([if(%q1,%q1,%L)]\)%bOwned by [name(owner(if(%q1,%q1,%L)))]\([owner(if(%q1,%q1,%L))]\)%r[ljust(Name,26)][ljust(Owner,26)]Type%r[repeat(-,62)]%r[iter(if(%q0,lcon(if(%q1,%q1,%L)),lvcon(%L)),[ansi(if(neq(conn(##),-1),hg,n),[ljust([left(name(##),18)]\(##\),26,.)][ljust([left(name(owner(##)),18)]\([owner(##)]\),26,.)][ljust(if(hastype(##,Player),Player,Object),10)][if(neq(conn(##),-1),\(connected\)%b)][if(and(%q0,hasflag(##,dark)),\(dark\))]%r)],,)][repeat(-,62)]
+
+
+
+@@ Syntax:  +whereis <object>
+@@ Example:  +whereis #8100
+@@ Example:  +whereis *sholevi
+@@ Description:  Will allow a Wizard or Royal player to location objects with
+@@ a verbose answer including the object's location's dbref.
+&CMD_WHEREIS GC=$+whereis *:@pemit %#=switch([orflags(%#,Wr)][t(setr(0,switch([isdbref(num(*%0))][isdbref(num(%0))],1?,num(*%0),?1,num(%0))))],0*,Who do you think you are?,10,I couldn't find it.,[ansi(hg,name(%q0))]\(%q0\) is located at [ansi(hg,name(loc(%q0)))]\([loc(%q0)]\).)

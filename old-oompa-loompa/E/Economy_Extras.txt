@@ -1,0 +1,83 @@
+@@ Object: Various economy Extras
+@@ Version: 1.0
+@@ Author: Jonathan A. Booth
+@@ E-mail: kamikaze@N0$PAMimsa.edu
+@@ Web: http://www.N0$PAMimsa.edu/~kamikaze/
+@@ (remove N0$PAM from hostnames to use them)
+@@ Date: March 31, 1999
+@@ Written for: PennMUSH 1.7.2 pl22
+@@ Author is willing to support: Yes
+@@
+@@ Creates some little extras object. The Econ Data is the data that
+@@ the economy system uses, and there's code on god that breaks it
+@@ apart and puts it into the db.tcl system. I suggest you write
+@@ that code yourself, it's not very hard and it's a good excercize
+@@ in synchronization.
+@@ 
+@@ See the Economy system's COPYRIGHT attribute for copyright information.
+@@
+@@ See the Economy system's CHANGES attribute for a list of changes in each
+@@ version.
+@@
+
+@create Econ Data
+@link Econ Data = #28
+@set Econ Data = NO_COMMAND
+&TYPE_GOLD_ORE Econ Data=mineral&Gold Ore&GOL
+&TYPE_SILVER_ORE Econ Data=mineral&Silver Ore&SIL
+&TYPE_IORN_ORE Econ Data=mineral&Iorn Ore&IOR
+&TYPE_BRONZE_ORE Econ Data=mineral&Bronze Ore&BRO
+&TYPE_GEMSTONES Econ Data=mineral&Gemstones&GEM
+&DATA_GOODS_MAGIC Econ Data=teleport
+@set Econ Data/DATA_GOODS_MAGIC=no_command
+&DATA_GOODS_MINERAL Econ Data=Bronze Ore|Gemstones|Glass|Gold Ore|Iorn Ore|Limestone|Silver Ore
+@set Econ Data/DATA_GOODS_MINERAL=no_command
+&DATA_GOODS_CLASSES Econ Data=magic|mineral|money
+@set Econ Data/DATA_GOODS_CLASSES=no_command
+&REBUILD Econ Data=@dol [lattr(me/type_*)]={&data_goods_classes me=[setunion(v(data_goods_classes),extract(v(##),1,1,&),|)];&data_goods_[extract(v(##),1,1,&)] me=[setunion(v(data_goods_[extract(v(##),1,1,&)]),extract(v(##),2,1,&),|)]}
+@DESCRIBE Econ Data=These are all the types of economic goods there are.
+@set Econ Data/DESCRIBE=no_command visual
+&TYPE_TELEPORT Econ Data=magic&teleport&TEL
+&TYPE_GLASS Econ Data=mineral&Glass&GLA
+&TYPE_LIMESTONE Econ Data=mineral&Limestone&RLIM
+&TYPE_GOLD_COINS Econ Data=money&Gold Coins&GC
+&DATA_GOODS_MONEY Econ Data=Gold Coins
+@set Econ Data/DATA_GOODS_MONEY=no_command
+@create Master Treasurer Object
+@link Master Treasurer Object = #28
+@lock/user:ECON_TAKE Master Treasurer Object=func_can_take/1
+@DESCRIBE Master Treasurer Object=Before you sits a short, stubby man. He looks up at you as you look at him and says, "I suppose you're here for your pay too, eh? Alright, alright, give me a minute to find what you should get..."%r%rHe flips through a few pages of the red book on his desk, and then says, "According to my records, you have [u(func_waiting,%#)] [v(data_pay_with)]... So how many of them do you want?"%r%r(OOC: use the +take command to get your pay from me. '+help +take' for help)
+@set Master Treasurer Object/DESCRIBE=no_command visual
+&FUNC_WAITING Master Treasurer Object=[default(me/total_%0,0)] Gold Coins
+&DATA_PAY_WITH Master Treasurer Object=Gold Coins
+&FUNC_CAN_TAKE Master Treasurer Object=lte(%q9,first(u(func_waiting,%#)))
+&DATA_AUTH Master Treasurer Object=#1 #4 #6
+&CMD_DISPLAY Master Treasurer Object=$display:@pemit %#=- Listing of all players I know and how much they make -%r[ljust(ansi(uh,Player),20)]%b[rjust(ansi(uh,Pay),7)]%b[rjust(ansi(uh,Total),7)][iter(lattr(me/PAY_*),%r[ljust(name(after(##,_)),20)]%b[rjust(default(me/##,0),7)]%b[rjust(default(me/TOTAL_[after(##,_)],0),7)])]
+&PAY_#268 Master Treasurer Object=20
+&CMD_SET Master Treasurer Object=$set *=*:think setq(0,pmatch(secure(%0)));@select [isdbref(%q0)]:[isnum(secure(%1))]=0:*,{@pemit %#=No player named '%0' exists.},*:0,{@pemit %#=You cannot set [name(%q0)]'s pay to '%1'.},{&PAY_%q0 me=[secure(%1)];@pemit %#=You set [name(%q0)]'s pay to %1 [v(data_pay_with)].}
+@STARTUP Master Treasurer Object=@tr me/do_pay
+@set Master Treasurer Object/STARTUP=no_command
+&DO_PAY Master Treasurer Object=@wait #4197={@cemit EconBabble=<EconBabble [extract(time(),4,1)]> [name(me)] is running payday.;@dol [lattr(me/PAY_*)]={&TOTAL_[after(##,_)] me=[add(v(TOTAL_[after(##,_)]),v(##))]};@tr me/do_pay}
+@create Master Resource Parent
+@link Master Resource Parent = #28
+@set Master Resource Parent = WIZARD
+@set Master Resource Parent = NO_COMMAND
+@STARTUP Master Resource Parent=@wait #4181={@tr me/do_resources}
+@set Master Resource Parent/STARTUP=no_command
+&DO_RESOURCES_OBJECT Master Resource Parent=think [setq(0,)][setq(1,)][iter(get(%0/EGAIN),[setq(0,setunion(%q0,edit(rest(##),%b,_)))][setq(1,setunion(%q1,first(##)))],&)];@dol %q0={+give %0=[extract(%q1,#@,1)] %q0}
+&DO_RESOURCES Master Resource Parent=@dol [lsearch(owner(me),eval,%[hasattr(##,EGAIN)%])]={@tr me/do_resources_object=##};@wait #4181={@tr me/do_resources}
+&DESC_TYPE Master Resource Parent=It's a [rest(u(desc_prod))] source.
+@DESCRIBE Master Resource Parent=[u(desc_type)]%r%rThis resource produces [u(desc_prod)] per [u(desc_interval)].
+@set Master Resource Parent/DESCRIBE=no_command visual
+&DESC_INTERVAL Master Resource Parent=day
+&DESC_PROD Master Resource Parent=[v(EGAIN)]
+@create Master Factory Parent
+@link Master Factory Parent = #28
+@set Master Factory Parent = NO_COMMAND
+&COMM_ECOST Master Factory Parent=Format of ECOST is: <number> <type>&<number2> <type2>&...
+@DESCRIBE Master Factory Parent=[u(desc_type)]%r%rThis factory takes '[u(desc_take)]' and uses that to produces '[u(desc_prod)]'.
+@set Master Factory Parent/DESCRIBE=no_command visual
+&DESC_TAKE Master Factory Parent=[iter(v(ECOST),##,&,\,)]
+&DESC_PROD Master Factory Parent=stuff
+&DESC_TYPE Master Factory Parent=It's a factory. It takes goods and produces stuff.
+&ECOST Master Factory Parent=0 gold coin

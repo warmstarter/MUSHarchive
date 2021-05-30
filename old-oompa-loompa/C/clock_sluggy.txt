@@ -1,0 +1,8 @@
+@create Clock
+@Desc Clock=This device is always set to Mux time. It will tell you the time when you type 'time'.
+&TIME Clock=$time:@emit [u(me/timefunc)]
+@Adesc Clock=@pemit %#=[u(me/timefunc)]
+&TIMEFUNC Clock=[center(The time is [inc(mod(dec(first(setr(0,extract(extract(time(),4,1),1,2,:)),:)),12))]:[rest(%q0,:)]%b[ifelse(gte(mod(first(%q0,:),24),12),PM,AM)],25,*)]
+@set Clock=VISUAL
+@set Clock=PARENT_OK
+@set Clock=!NO_COMMAND

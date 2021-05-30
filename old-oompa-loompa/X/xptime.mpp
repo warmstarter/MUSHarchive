@@ -1,0 +1,37 @@
+@@ Granting XP for time. By Javelin, as used at Rio:MdC
+@@ Use this under the Artistic License.
+@@
+@@ At irregular intervals, we add to player online time, and possibly
+@@ XP. If the player was eligible at time t, and is eligible at time
+@@ u (>t), and the player has been idle for less than u-t seconds,
+@@ up the player's connected time by u-t-idletime seconds and their
+@@ XP by (u-t-idletime)*(XP/secs ratio)
+@@
+@@ Eligibility: a player is qualified if they have been active at some
+@@ point since the last check, if they are IC. A player is eligible
+@@ if they are qualified and in a room with at least one other qualified
+@@ player.
+
+@set xptime=wizard
+
+&QUALIFIED xptime = 
+	[cand(hastype(%0,player),gt(conn(%0),-1),ic(%0),
+	     lt(idle(%0),sub(secs(),v(LASTCHECK))))]
+
+&ELIGIBLE xptime=
+	[cand(u(QUALIFIED,%0),
+	     lmath(or,iter(setdiff(lcon(loc(%0)),%0),u(QUALIFIED,##))))]
+
+&LOOP xptime = @wait me/[add(60,rand(300))]=
+	{ 
+	  @wait me={ &LASTCHECK me=[secs()]; @tr me/LOOP };
+  	  @dol/notify [lwho()]=	{
+		&ACTIVETIME ##=[add(get(##/ACTIVETIME),
+			setr(0,if(u(ELIGIBLE,##),lmath(sub,[secs()] [v(LASTCHECK)] [idle(##)]),0)))];
+		&XP ##=[add(get(##/XP),fdiv(%q0,v(SECS_TO_XP)))] }
+	}
+
+&SECS_TO_XP xptime = 86400
+
+@startup xptime = @drain me; &LASTCHECK me=[secs()]; @tr me/loop
+

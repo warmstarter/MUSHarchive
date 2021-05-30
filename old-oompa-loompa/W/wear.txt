@@ -1,0 +1,149 @@
+#   Author: Ellan West (Ellan@Lost Tribes [lost.strange.com 1066])
+#   Format: Ellan West (12/30/96)
+###########################################################################################
+#
+#   +wear is a system to allow quick desc changes, using alternative text for your
+#   garments (+wear) hair (+hair) mood (+mood) and special effects (+fx) by storing
+#   favorite description text on an object you own, and revealing only the one you
+#   select in your character description. +wear can be run in 'quiet' mode, when it 
+#   merely changes your description silently, or in 'noisy' mode, when it will 
+#   trigger emits to your location that are equivalent to odrop and osucc if you have
+#   entered them on your wear-source, letting others in the room with you know you
+#   are changing from one outfit/wear/hair/mood/fx to another.
+#
+#   To set up for use of +wear:
+#
+#   Type '+setup wear <dbref>' where <dbref> is the game id number of the object on
+#   which you wish to use to store your wardrobe text.
+#
+#   +wear                       List currently stored clothing descs.
+#   +wear <keyword>             Select one of your stored clothing descs.
+#   +hair                       List stored hair or headgear descs you have.
+#   +hair <keyword>             Select a stored hair or headgear desc.
+#   +mood                       List stored mood descriptions.
+#   +mood <keyword>             Select a stored mood description.
+#   +fx                         List available special descriptions.
+#   +fx <keyword>               Select one of your stored Special Descs
+#
+#   In case of a mistake, you can undo:
+#   Type '+unset wear' and your wear linking information will be cleared, and your
+#   original desc restored.
+#
+#   To clear an entry from your current desc:
+#   Type '+wear none' or '+fx none'
+#
+#   Each +wear/hair/mood/fx entry begins as a single attribute on the object you 
+#   have selected to record +wear info on.
+#
+#   &wear-red-dress <wear object>=Sue wears a red dress.
+#   &hair-braided <wear object>=Her hair is braided neatly.
+#   &mood-perky <wear object>=Sue is perky today, bright and alert.
+#   &fx-cowboy-boots <wear-source#=She wears white leather cowboy boots.
+#
+#   'Noisy' +wear will need two more attributes for each wear item you want to show
+#    emits.
+#
+#   &osucc-wear-red-dress <wear object>=Sue puts on her favorite red dress.
+#   &odrop-wear-red-dress <wear object>=Sue removes her red dress.
+#   &osucc-hair-braided <wear object>=Sue braids up her hair with a ribbon.
+#   &odrop-hair-braided <wear object>=Sue unbraids her hair.
+#
+#   To configure +wear:
+#   Type '+config wear <noisy|quiet>'
+#
+#  CREDITS: Aerin@Soucon Jenessa@Conspiracy! Ellan@LostTribes
+##########################################################################################
+#  CONFIGURATION NOTES
+#
+#  +wear was developed first as a personal code object in 1989, then rewritten as a global
+#  in 1992 for Soucon, and later for the opening of Conspiracy. 
+#  
+#  To use it as a global, it needs to be wizard owned, placed in the Master Room 
+#  and has two reserved attributes &wear-config and &wear-source.
+#
+#  @attribute/access wear-source=wizard !hidden !private !internal
+#  @attribute/access wear-config=wizard !hidden !private !internal
+#
+##########################################################################################
+#  Create the object (If you wish to add this code to an existing object, comment 
+#  out the next line, and edit all occurances of WWW to the desired dbref.)
+@create Wear Object=10
+-
+#  It is safe to desc this object as something else, it will not affect the code, and allows
+#  you to make dual use of your object. This code is compatible with the generic controller
+#  code available at the same site, and both may be written on the same object with no
+#  conflicts of code.
+#
+#  The setup command is the single most complex part of an otherwise simple code. This 
+#  version refuses to accept a player dbref.  It is prudent to avoid putting attributes
+#  on any object likely to be adjacent to other players, including one's own player object
+#  to limit command-search lag. Marking attributes &no_command helps, but does not
+#  entirely solve the problem. If your population is small, or your machine swift, this
+#  may be a moot issue. 
+#
+&CMD-WEAR-SETUP Wear Object = $+setup wear *:@switch/first %0=%#,{@pemit %#=You may 
+     not use your own dbref ##. Create a new object or enter the number of one you 
+     already own, not your player number.},{[setq(0,[u(%#/wear-source)])];@switch 
+     [r(0)]=,{@mvattr %#=desc,backup-desc;&WEAR-CONFIG %#=quiet;&wear-source 
+     %#=%0;[setq(0,%0)];@desc %#=\[u([r(0)]/player-desc)];&player-desc  
+     [r(0)]=\[u(base-desc)] \[u(wear-\[u(wear)])] \[u(hair-\[u(hair)])] 
+     \[u(mood-\[u(mood)])] \[u(fx-\[u(fx)])];@pemit %#=\[GAME\] Your wear
+     -source is setup. Your prior desc is saved as 'backup-desc'. &base-desc [r(0)] with 
+     parts of your description that do not usually change. Then add as many 
+     &wear-<wardrobe-name> [r(0)]=<text of wardrobe description> as you like. Select one 
+     with +wear and you are ready to look at.},@pemit %#=\[GAME\] You already have a 
+     wear-source setup. It is [r(0)].}
+-
+#  Always leave a way to start over :)
+&CMD-WEAR-UNSET Wear Object=$+unset wear:[setq(0,[u(%#/wear-source)])];@switch 
+     [r(0)]=,@pemit %#=You do not have +wear set. There is nothing to unset.
+     ,{@mvattr %#=backup-desc,desc;&wear-config %#=;&wear-source %#=;&player-desc 
+     [r(0)]=;@pemit %#=Your +wear setup is cleared. 
+     To use +wear, you will have to run the +setup wear command again. See +help wear.}
+-
+#  The command to switch 'noisy mode' on and off.
+&CMD-WEAR-CONFIG Wear Object=$+config wear *:@switch/first %0=noisy,{&wear-config 
+     %#=noisy;@pemit %#=\[GAME\] Your wear-config is now 'NOISY'.},{&wear-config 
+     %#=quiet;@pemit %#=\[GAME\] Your wear-config is now 'QUIET'.}
+-
+#  The commands to list the various sets of text, and to select them for display.
+&CMD-WEAR-LIST Wear Object=$+wear:[setq(0,lattr([u(%#/wear-source)]/wear-*))];@switch/first 
+     [r(0)]=,{@pemit %# = \[GAME\] You have no virtually 'wear'able clothing recorded. 
+     Check to see if your 'wear-source' is set.},{@pemit %# = \[GAME\] You have the follow
+     ing wardrobe items listed: [lcstr(iter([r(0)],%b[after(##,WEAR-)]))]%rYour wear-config 
+     is '[ucstr([u(%#/wear-config)])]'.}
+-
+&CMD-WEAR Wear Object=$+wear *:[setq(0,[u(%#/wear-source)])]
+      [setq(1,[u([r(0)]/wear-%0)])]
+      ;@switch/first [lcstr(u(%#/wear-config))]=noisy,{@remit 
+      %l=[u([r(0)]/odrop-wear-[u([r(0)]/wear)])];&wear [r(0)]=%0;@wait 5=@remit 
+      %l=[u([r(0)]/osucc-wear-%0)]},{&wear [r(0)]=%0;@pemit %#=You are now wearing %0: 
+      [r(1)].}
+-
+&CMD-HAIR-LIST Wear Object=$+hair:[setq(0,lattr([u(%#/wear-source)]/hair-*))]
+      ;@switch/first [r(0)]=,{@pemit %#=\[GAME\] You have no virtual hairdo's or 
+      headgear recorded. Check to see if your 'wear-source' is set.},{@pemit %#=\[GAME\] 
+      You have the following Hair wardrobe items listed: 
+      [lcstr(iter([r(0)],%b[after(##,HAIR-)]))]%rYour wear-config is 
+      '[ucstr([u(%#/wear-config)])]'.}
+-
+&CMD-HAIR Wear Object=$+hair *:[setq(0,[u(%#/wear-source)])][setq(1,[u([r(0)]/hair-%0)])]
+      ;@switch/first [lcstr(u(%#/wear-config))]=noisy,{@remit  
+      %l=[u([r(0)]/odrop-hair-[u([r(0)]/hair)])];&hair [r(0)]=%0;@wait 5=@remit 
+      %l=[u([r(0)]/osucc-hair-%0)]},{&hair [r(0)]=%0;@pemit %#=You are now wearing %0: 
+      [r(1)].}
+-
+&CMD-FX-LIST Wear Object=$+fx:[setq(0,lattr([u(%#/wear-source)]/fx-*))]
+      ;@switch/first [r(0)]=,{@pemit %#=\[GAME\] You have no 'fx' descriptions recorded. 
+      Check to see if your 'wear-source' is set.},{@pemit %#=\[GAME\] You have the 
+      following FX wardrobe items listed: [lcstr(iter([r(0)],%b[after(##,FX-)]))]%rYour 
+      wear-config is '[ucstr([u(%#/wear-config)])]'.}
+-
+&CMD-FX Wear Object=$+fx *:[setq(0,[u(%#/wear-source)])][setq(1,[u([r(0)]/fx-%0)])]
+      ;@switch/first [lcstr(u(%#/wear-config))]=noisy,{@remit 
+      %l=[u([r(0)]/odrop-fx-[u([r(0)]/fx)])];&fx [r(0)]=%0;@wait 5=@remit 
+      %l=[u([r(0)]/osucc-fx-%0)]},{&fx [r(0)]=%0;@pemit %#=You are now attired 
+      with %0: [r(1)].}
+-
+@set Wear Object=SAFE
+############################################################################################

@@ -1,0 +1,26 @@
+@create T-D Room 2
+@set T-D Room 2=INHERIT
+@set T-D Room 2=ENTER_OK
+@desc T-D Room 2=This is a new T/D Room made by Jesse_Krug. It has finished construction. It has a locked door on it. It is temporary HQ for the Spam Club. This room can be used, only if I know of its use first...:)
+@Vw T-D Room 2=$speak *:@emit %n says "%0"
+@Vj T-D Room 2=$peep:@force #4561=look
+@Vv T-D Room 2=$action *:@emit %n %0
+&Xc T-D Room 2=$spin:@remit #4561=The next Question goes to [name(lrand(lcplayers(#4561)))].
+@Vt T-D Room 2=$kick:@dol lcon(#4561)=drop ##
+@Idescribe T-D Room 2=This is the 2nd Truth or Dare Room. It has been recently constructed, so it has 8 Couches, 1 pool, 1 jacuzzi, 40 chairs, 2 BIG Tables, and a massage/water bed. There is a <Replicator> at the far left corner of the room, and <Guidelines> at every wall and the door of the Room. There is a office for Jesse at the far right corner of the room, and at the far left corner, next to the replicator is the meeting room for the Spam Club. There are contols near the door and Jesse's desk that control the music.
+@Ve T-D Room 2=$GUIDELINES:@pe %n=PLEASE CHECK RATING FIRST BEFORE JOINING <RATING>.%%r[Spc(7)]1. The Purpose of Truth or Dare is to have _FUN_.%%r[Spc(7)]2. This game can be played IC/OOC as long as the parties involved are OK.%%r[Spc(7)]3. All QUESTIONS and ANSWERS are confidential and WILL NOT be discussed outside this room.%%r[Spc(7)]4. When played IC, any information given is confidential and when discussed outside of this room, the info will be considered OOC (To protect the rights of other players that are involved).%%r[Spc(7)]5. A Player with the Question(Q) picks a Victim and asks Truth or Dare.%%r[Spc(7)]6. The Victim chooses one of the Options.%%r[Spc(7)]7. If you get Dared to do something which is against your ethics/morals/principles/whatever, don't do it!%%r[Spc(7)]8. If preforming a Dare is going to hurt you in any way, Don't do it.%%r[Spc(7)]9. Upon Completion of the Dare or Truth, the Victim becomes the Questioner.%%r[Spc(7)]10. Almost always the NO ASK BACK rule is in place (unless specified).%%r[spc(7)]11. If unable to think ask friends for help. DO NOT just go idle and halt the game.%%r[Spc(7)]12. Preferable use Channels or Pages so as to reduce SPAM.%%r[Spc(7)]
+@Fail T-D Room 2=You have failed to pick up property of Jesse Krug. It is locked either due to a T/D game, or he wants personal time with his wife.
+@Vb T-D Room 2=!* says "Replicator, *":@rem #4561=The computer chimes, and you hear the replicator starting to work. As the sound fades, a small door opens and you see %0's %1.
+@Vc T-D Room 2=!* says "Lights, *":@rem #4561=The Computer chimes and you see the room lights go %1.
+@Aleave T-D Room 2=@wa me=[remove(get(me/wa),v(n))];@tr me/wb
+@Aenter T-D Room 2=@npe %#=Contents:[iter(lcon(me),{%r[name(v(0))]})]
+@Va T-D Room 2=$LOOK:/[match(lcon(me),v(#))]/@npe %#=[Name(##)]%r[get(me,idesc)]%rContents:[iter(lcon(me),{%r[Name(v(0))]})]
+@Afail T-D Room 2=page Jesse=%n was trying to break into me.
+@Ofail T-D Room 2=%n has tried to take Jesse's property and has failed.
+@Vl T-D Room 2=$lock:@elock #4561=#14503;@llock #4561=#14503;@remit #4561=Locked.
+@Vm T-D Room 2=$unlock:@elock #4561;@llock #4561;@remit #4561=Unlocked.
+@Vk T-D Room 2=!* says "Computer, play *":@remit #4561=The computer chirps, and starts playing %0's song, %1, over T/D Room 2's hidden speakers.
+@Vg T-D Room 2=$eject *:@force #4561=drop [v(0)];@remit #4561=T/D Room 2 has ejected [v(0)] for a reason/purpose.
+@Vs T-D Room 2=$time:@remit #4561=The Time is: [time()].
+@Vy T-D Room 2=$stardate:@remit #4561=The stardate is: [stardate()]
+@Vx T-D Room 2=$rank *:@pemit %#=[name(v(0))]'s rank is [class(v(0))].

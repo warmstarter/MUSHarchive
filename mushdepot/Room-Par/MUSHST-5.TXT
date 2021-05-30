@@ -1,0 +1,61 @@
+@create LFN Ship Room Parent
+@link LFN Ship Room Parent=#2
+@set LFN Ship Room Parent=!NO_COMMAND
+@DESCRIBE LFN Ship Room Parent=[ansi([xget([zone(me)],bcolor)],[center(`[name(zone(me))]`,79,-)]%r[ansi(hw,[eval(me,desc-1)])]%r[ansi([xget([zone(me)],bcolor)],[center('[name(zone(me))]',79,-)]%r%r[ansi(h[eval(me,pcolor)],Players:)]%r [ansi([eval(me,pcolor)],[squish([iter(lcon(me),switch(type(##),PLAYER,switch(idle(##),-1,,switch(hasflag(##,Dark),0,edit(name(##),Console,)[switch(hasflag(##,Fixed),1,(IC))] [switch(hasattr(##,CAPTION),1,{Brandishing: [get(##/CAPTION)]})] %r))))])])][switch([get(me/roomtype)],bridge,[u(bridgeroom)],[ansi(h[eval(me,ocolor)],Contents:)]%r[ansi([eval(me,ocolor)],[squish([iter(lcon(me),switch(type(##),THING,switch(hasflag(##,Dark),0,edit(name(##),Console,) [switch(hasflag(##,Fixed),1,(IC))] [switch(hasattr(##,CAPTION),1,{Brandishing: [get(##/CAPTION)]})] %r)))])])]%r[ansi(hb,Current Status:%b)][get([zone(me)]/salert)]%r[ansi(c,Obvious Exits:)]%r%b[iter([lexits(me)],[switch([hasflag(##,Dark)],0,[ansi(r,[ljust(<[ucstr([extract([fullname(##)],2,1,;)])]>,5)])] [ansi(hg,[ljust([name(##)],24)])][switch(hasflag(##,Transparent),0,%r,[ansi(hc,[before({[name([loc(##)])]%r},-> <-)])]
+&OCOLOR LFN Ship Room Parent=c
+&PCOLOR LFN Ship Room Parent=b
+&DESC-1 LFN Ship Room Parent=Store the desc in &desc-1, &Ocolor is objectcolor, &pcolor is player color.Be shure to set here dark and if you want players to see where an exit leads set it transparent.. You can also set &light_type here=<type>. Types, alertlights, roomlights, lamplights, torchlights.
+&BCOLOR LFN Ship Room Parent=r
+&TORCHLIGHT LFN Ship Room Parent=[ansi(c,A torch on the wall burns brightly, lighting up the room.)]
+@SUCCESS LFN Ship Room Parent=[switch([v(light_type)],alertlights,[eval(me,alert_lights)],torchlight,[eval(me,torchlight)],streetlights,[eval(me,street_lights)],buildinglights,[eval(me,Building_Lights)],lamplights,[eval(me,Lamp_Lights)],roomlights,[eval(me,Room_Lights)],turbolights,[eval(me,Turbo_lights)],daylight,[eval(me,Sun_Light)],hall-light,[eval(me,Hall_lights)],windowlightt,[eval(me,Windows)],default,[eval(me,defaultlights)])]
+&WINDOWS LFN Ship Room Parent=[ansi(c,switch([u(me/daylight)],1,{Sunlight shines through a window here, lighting the room.},0,{Pale moonlight shines darkly through a window, giving the room just enough illumination not to run in to anything.}))]
+&STREETLIGHTS LFN Ship Room Parent=[ansi(c,[switch([u(me/daylight)],1,The Street lights which line the sidewalks here are currently off.,0,The Street lights shine brightly on to the street below.)])]
+&ALERT_LIGHTS LFN Ship Room Parent=[ansi(c,Large panels that line the wall are [get(zone(me)/alertpanel)].)]
+&TURBO_LIGHTS LFN Ship Room Parent=[ansi(c,The turbolift lights illuminate the lift perfectly.)]
+&HALL_LIGHTS LFN Ship Room Parent=[ansi(c,The upper part of the ceiling are lights, illuminating the hallway.)]
+&ROOM_LIGHTS LFN Ship Room Parent=[ansi(c,An overhead light illuminates the room.)
+&LAMP_LIGHTS LFN Ship Room Parent=[ansi(c,A small lamp in the room illuminates it's surroundings.)]
+&BUILDING_LIGHTS LFN Ship Room Parent=[ansi(c,Overhead lights illuminate the building well.)]
+&SUN_LIGHT LFN Ship Room Parent=[ansi(c,The sun shines down from above, lighting the area up.)]
+&BRIDGEROOM LFN Ship Room Parent=[ansi(m,Consoles:)][space(3)][ansi(hm,Manning:)]%r[ansi(c,Helm Console)] <[ansi([xget(me,pcolor)],[switch([get(helm/xb)],,Unmanned,[class([name([get(helm/xb)])])])] [name([get(helm/xb)])])]>%r[ansi(c,Navigation Console)] <[ansi([xget(me,pcolor)],[switch([get(navigation/xb)],,Unmanned,[class([name([get(navigation/xb)])])])] [name([get(navigation/xb)])])]>%r[ansi(c,Command Console)] <[ansi([xget(me,pcolor)],[switch([get(command/xb)],,Unmanned,[class([name([get(command/xb)])])])] [name([get(command/xb)])])]>%r[ansi(c,Communications Console)] <[ansi([xget(me,pcolor)],[switch([get(communications/xb)],,Unmanned,[class([name([get(communications/xb)])])])] [name([get(communications/xb)])])]>%r[ansi(c,Engineering Console)] <[ansi([xget(me,pcolor)],[switch([get(engineering/xb)],,Unmanned,[class([name([get(engineering/xb)])])])] [name([get(engineering/xb)])])]>%r[ansi(c,Security Console)] <[ansi([xget(me,pcolor)],[switch([get(security console/xb)],,Unmanned,[class([name([get(security console/xb)])])])] [name([get(security console/xb)])])]>%r%r[ansi([xget(me,ecolor)],Obvious Exits:)]%r%b[iter([lexits(me)],[switch([hasflag(##,Dark)],0,[ansi(r,[ljust(<[ucstr([extract([fullname(##)],2,1,;)])]>,5)])] [ansi(hg,[ljust([name(##)],24)])][switch(hasflag(##,Transparent),0,%r,[ansi(hc,[before({[name([loc(##)])]%r},-> <-)])]
+&ECOLOR LFN Ship Room Parent=hr
+
+@create LFN Parent
+@link LFN Parent=#2
+@set LFN Parent=!NO_COMMAND
+@set LFN Parent=INHERIT
+@set LFN Parent=ROYALTY
+@DESCRIBE LFN Parent=[ansi([xget(me,bcolor)],[center([name(zone(me))],79,*)]%r[ansi(hw,[eval(me,desc-1)])]%r[ansi([xget(me,bcolor)],[center([name(zone(me))],79,*)]%r%r[ansi(h[eval(me,pcolor)],Players:)]%r [ansi([eval(me,pcolor)],[squish([iter(lcon(me),switch(type(##),PLAYER,switch(idle(##),-1,,switch(hasflag(##,Dark),0,edit(name(##),Console,)[switch(hasflag(##,IC),1,(IC))] [switch(hasattr(##,CAPTION),1,{Brandishing: [get(##/CAPTION)]})] %r))))])])][ansi(h[eval(me,ocolor)],Contents:)]%r [ansi([eval(me,ocolor)],[squish([iter(lcon(me),switch(type(##),THING,switch(hasflag(##,Dark),0,edit(name(##),Console,) [switch(hasflag(##,IC),1,(IC))] [switch(hasattr(##,CAPTION),1,{Brandishing: [get(##/CAPTION)]})] %r)))])])]%r[ansi(hb,Current Alert Status:%b)][get([zone(me)]/salert)]%r[ansi(c,Obvious Exits:)]%r%b[iter([lexits(me)],[switch([hasflag(##,Dark)],0,[ansi(r,[ljust(<[ucstr([extract([fullname(##)],2,1,;)])]>,5)])] [ansi(hg,[ljust([name(##)],24)])][switch(hasflag(##,Transparent),0,%r,[ansi(hc,[before({[name([loc(##)])]%r},-> <-)])]
+&OCOLOR LFN Parent=c
+&PCOLOR LFN Parent=b
+&DESC-1 LFN Parent=Store the desc in &desc-1, &Ocolor is objectcolor, &pcolor is player color, &bcolor is the border color. Be shure to set here dark and if you want players to see where an exit leads set it transparent.
+&BCOLOR LFN Parent=r
+&TORCHLIGHT LFN Parent=[ansi(c,A torch on the wall burns brightly, lighting up the room.)]
+@SUCCESS LFN Parent=[switch([v(light_type)],alertlights,[eval(me,alert_lights)],torchlight,[eval(me,torchlight)],streetlights,[eval(me,street_lights)],buildinglights,[eval(me,Building_Lights)],lamplights,[eval(me,Lamp_Lights)],roomlights,[eval(me,Room_Lights)],turbolights,[eval(me,Turbo_lights)],daylight,[eval(me,Sun_Light)],hall-light,[eval(me,Hall_lights)],windowlightt,[eval(me,Windows)],default,[eval(me,defaultlights)])]
+&WINDOWS LFN Parent=[ansi(c,switch([u(me/daylight)],1,{Sunlight shines through a window here, lighting the room.},0,{Pale moonlight shines darkly through a window, giving the room just enough illumination not to run in to anything.}))]
+&STREETLIGHTS LFN Parent=[ansi(c,[switch([u(me/daylight)],1,The Street lights which line the sidewalks here are currently off.,0,The Street lights shine brightly on to the street below.)])]
+&ALERT_LIGHTS LFN Parent=[ansi(c,Large panels that line the wall are [get(zone(me)/salert)].)]
+&TURBO_LIGHTS LFN Parent=[ansi(c,The turbolift lights illuminate the lift perfectly.)]
+&HALL_LIGHTS LFN Parent=[ansi(c,The upper part of the ceiling are lights, illuminating the hallway.)]
+&ROOM_LIGHTS LFN Parent=[ansi(c,An overhead light illuminates the room.)
+&LAMP_LIGHTS LFN Parent=[ansi(c,A small lamp in the room illuminates it's surroundings.)]
+&BUILDING_LIGHTS LFN Parent=[ansi(c,Overhead lights illuminate the building well.)]
+&SUN_LIGHT LFN Parent=[ansi(c,[switch([u(me/daylight)],1,{The sun shines down from above, lighting the area up.},0,The pale moon shines its cold light here.)])]
+@create LFN Parent
+@link LFN Parent = #480
+&SUN_LIGHT LFN Parent=[ansi(c,The sun shines down from above, lighting the area up.)]
+&BUILDING_LIGHTS LFN Parent=[ansi(c,Overhead lights illuminate the building well.)]
+&LAMP_LIGHTS LFN Parent=[ansi(c,A small lamp in the room illuminates it's surroundings.)]
+&ROOM_LIGHTS LFN Parent=[ansi(c,An overhead light illuminates the room.)
+&HALL_LIGHTS LFN Parent=[ansi(c,The upper part of the ceiling are lights, illuminating the hallway.)]
+&TURBO_LIGHTS LFN Parent=[ansi(c,The turbolift lights illuminate the lift perfectly.)]
+&ALERT_LIGHTS LFN Parent=[ansi(c,Large panels that line the wall are [get(zone(me)/salert)].)]
+&STREETLIGHTS LFN Parent=[ansi(c,[switch([u(me/daylight)],1,The Street lights which line the sidewalks here are currently off.,0,The Street lights shine brightly on to the street below.)])]
+&WINDOWS LFN Parent=[ansi(c,switch([u(me/daylight)],1,{Sunlight shines through a window here, lighting the room.},0,{Pale moonlight shines darkly through a window, giving the room just enough illumination not to run in to anything.}))]
+@SUCCESS LFN Parent=[switch([v(light_type)],alertlights,[eval(me,alert_lights)],torchlight,[eval(me,torchlight)],streetlights,[eval(me,street_lights)],buildinglights,[eval(me,Building_Lights)],lamplights,[eval(me,Lamp_Lights)],roomlights,[eval(me,Room_Lights)],turbolights,[eval(me,Turbo_lights)],daylight,[eval(me,Sun_Light)],hall-light,[eval(me,Hall_lights)],windowlightt,[eval(me,Windows)],default,[eval(me,defaultlights)])]
+&TORCHLIGHT LFN Parent=[ansi(c,A torch on the wall burns brightly, lighting up the room.)]
+&BCOLOR LFN Parent=r
+&DESC-1 LFN Parent=Store the desc in &desc-1, &Ocolor is objectcolor, &pcolor is player color, &bcolor is the border color. Be shure to set here dark and if you want players to see where an exit leads set it transparent.
+&PCOLOR LFN Parent=b
+&OCOLOR LFN Parent=c
+@DESCRIBE LFN Parent=[ansi([xget(me,bcolor)],[center([name(zone(me))],79,*)]%r[ansi(hw,[eval(me,desc-1)])]%r[ansi([xget(me,bcolor)],[center([name(zone(me))],79,*)]%r%r[ansi(h[eval(me,pcolor)],Players:)]%r [ansi([eval(me,pcolor)],[squish([iter(lcon(me),switch(type(##),PLAYER,switch(idle(##),-1,,switch(hasflag(##,Dark),0,edit(name(##),Console,)[switch(hasflag(##,Fixed),1,(IC))] [switch(hasattr(##,CAPTION),1,{Brandishing: [get(##/CAPTION)]})] %r))))])])][ansi(h[eval(me,ocolor)],Contents:)]%r [ansi([eval(me,ocolor)],[squish([iter(lcon(me),switch(type(##),THING,switch(hasflag(##,Dark),0,edit(name(##),Console,) [switch(hasflag(##,Fixed),1,(IC))] [switch(hasattr(##,CAPTION),1,{Brandishing: [get(##/CAPTION)]})] %r)))])])]%r[ansi(hb,Current Status:%b)][get([zone(me)]/salert)]%r[ansi(c,Obvious Exits:)]%r%b[iter([lexits(me)],[switch([hasflag(##,Dark)],0,[ansi(r,[ljust(<[ucstr([extract([fullname(##)],2,1,;)])]>,5)])] [ansi(hg,[ljust([name(##)],24)])][switch(hasflag(##,Transparent),0,%r,[ansi(hc,[before({[name([loc(##)])]%r},-> <-)])]

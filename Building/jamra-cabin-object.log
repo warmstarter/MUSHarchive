@@ -1,0 +1,29 @@
+@@
+@@ This cabin was something I threw together when a character had to go into hiding.
+@@ I wanted a retreat that would allow me to stay in seclusion on a larger estate.
+@@ By making it a single object I was able to keep my quota down and still lock it.
+@@ This project taught me how an object can be used to represent something large,
+@@ like a house or a wagon, rather than something small and to be carried.
+@@ To use it as is, you'll want places code.
+@@
+@@ change vtime() to your in game virtual time function.
+@@ The hot/cold switch based on an extended season switch is probably overkill.
+
+
+@Desc lc=%r[space(5)]An interesting stone and wood cabin triangulated between another cabin, and a stream. At the back is a single twelve-foot water wheel that turns with the current of the stream. This building is small enough to only house one person, or, it might be a guest cabin. It has a porch that partially wraps around the sides of the cabin, with grilled windows on three sides. The outer stone wall opposite the wall with the wheel supports a stone chimney. Overall, it's rather snug and sturdy looking.%r%r[space(5)]Scattered in quaint little groupings are growing circles filled with roses, carnations, tulips, and dark purple lilies, each nook deeply banked with straw during the colder months. Jasmine shrubs grow beneath each of the windows.%r
+@Idesc lc=%r[space(5)]The interior of this retreat is designed to be colorful and comfortable, with something of a Middle Eastern flair. Below, overlapping fringed rugs of soft bright wool pad the floor. Above, the high ceiling and sturdy walls have been covered with stucco panels that are painted with floral and geometric designs alternated with bands of Arabic calligraphy. The large windows have been covered with fretwork screens shaped into keyhole openings to add another exotic detail. A winding staircase of recycled iron pipes leads up to a loft with a sleeping area, bathroom, and bookcases. Knotted to the railing are vivid silk scarves whose edges are trimmed with tiny silver bells. The bells chime with movement on the stairs.%r%r[space(5)]The large, open space includes a seating area with low backless chairs, a pair of divan-style love seats, and colorful silken cushions. There's also a kitchen with an outdated gas stove and minimal appliances. The floor here is made up of alternating small tiles of blue and orange. Dominating the center of the east wall is a fireplace of local grey stone above a raised hearth. [switch(u(hot-cold),cold,A cheerful fire crackles within.,The hearth is cool but blackened from past cold seasons.)]%r%r[space(5)]'Places' and '+view here' work.%r
+&PLACESMAX lc=3
+&PLACESCLEANUP1 lc=^* has left.:placescleanup(%#)
+&PLACESCLEANUP2 lc=^* has disconnected.:placescleanup(%#)
+&PLACENUMS lc=|||
+&PLACE1 lc=Seating Area|8|8||I'm sorry, there's no room to add a place there.|I'm sorry, there's no place to move there.|You sit down at|sits down at|You stand and leave|stands and leaves|At the Seating Area
+&PLACE2 lc=Kitchen Table|4|4||I'm sorry, there's no room to add a place there.|I'm sorry, there's no place to move there.|You sit down at|sits down at|You stand and leave|stands and leaves|At the Kitchen Table
+&PLACE3 lc=Bedroom Loft|4|4||I'm sorry, there's no room to add a place there.|I'm sorry, there's no place to move there.|You head upstairs to the|heads up the stairs, causing the bell-trimmed scarves to chime on the way up to the|You go back downstairs from the|heads down the stairs, causing the bell-trimmed scarves to chime on the way down from the|At the Bedroom Loft
+&VIEW_FLOWERS lc=%rFlowerpots are tucked into spare nooks here and there around the room. Spiky aloes, fragrant boneset, the brightly-colored buttons of tansy, anemone like red-sprinkled coins, lavender, and flowering nettles, each growing or blooming in the terra-cotta pots they were tucked into.%r
+&SEASON lc=switch(mid(vtime(), 4, 3), Jan, WINTER, Feb, WINTER, Mar,TRAN-SPRING, Apr, TRAN-SPRING, May, SPRING, Jun, switch(gte(mid(vtime(), 8, 2),21),1,SUMMER,SPRING),Jul, SUMMER, Aug, SUMMER, Sep,switch(gte(mid(vtime(), 8, 2),21),1,AUTUMN,SUMMER), Oct, TRAN-AUTUMN, Nov, TRAN-AUTUMN, Dec, WINTER)
+&HOT-COLD lc=switch(u(season),WINTER,cold,TRAN-AUTUMN,cold,TRAN-SPRING,cold,hot)
+&AVIEW_FLOWERS lc=@pemit #2926=%N looked at your Flowers.
+@Lalias lc=out;ou;o;return;exit;leave;back;
+@Ealias lc=nc;new cabin;new;log cabin;lc;log;
+&CREDITS lc=This cabin coded and desced by Gwen Morse.
+@set lc=MONITOR

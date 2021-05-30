@@ -1,0 +1,81 @@
+Master TV Set(#257OnM)
+Type: Thing Flags: OPAQUE NO_COMMAND MONITOR
+Owner: Duncan Brannart  Zone: *NOTHING*  Virtual Dollars: 1
+Parent: *NOTHING*
+Basic Lock: Master TV Set(#257OnM)
+Enter Lock: Master TV Set(#257OnM)
+Powers:
+Warnings checked: none
+Created: Sun May 19 16:22:31 1996
+Last Modification: Fri May 24 00:38:49 1996
+CHANNEL [#249]: 1
+AVAIL [#249]: 1
+STATUS [#249]: OFF
+REC1 [#249]: #265
+ADESCRIBE [#249$]: @swi [v(status)]=OFF,{@pemit %#=The TV is OFF.},{@pemit %#=
+[ansi(i,ON THE TV SCREEN:)]%r[center(-,79,-)]%r[center(Channel [v(channel)]%b%b
+%b%b[get([get(#257/rec[v(channel)])]/name[v(channel)])],79)]%r[center(-,79,-)]
+%r[get_eval([get([get(#257/rec[v(channel)])]/studio[v(channel)])]/desc)]%r[ansi
+(h,Other Features:)] [iter([lcon([get([get(#257/rec[v(channel)])]/studio[v
+(channel)])])],[name(##)])]%r[center(-,79,-)]}
+FLIP_ON [#249]: $flip on:@swi [match([v(status)],ON)]=1,{@pemit %#=The [name
+(me)] is already ON.},{@oemit %N turns the [name(me)] on.;@pemit %#=You turn
+the [name(me)] on.;&status me=ON;&ch[v(channel)] [get(#257/rec[v(channel)])]=
+[cat([get([get(#257/rec[v(channel)])]/ch[v(channel)])],[num(me)])]}
+FLIP_OFF [#249]: $flip off:@swi [match([v(status)],OFF)]=1,{@pemit %#=The [name
+(me)] is already OFF.},{@oemit %N turns the [name(me)] off.;@pemit %#=You turn
+the [name(me)] off.;&status me=OFF;&ch[v(channel)] [get(#257/rec[v(channel)])]=
+[remove([get([get(#257/rec[v(channel)])]/ch[v(channel)])],[num(me)])]}
+Home: Duncan Brannart's Code Room Deluxe **OOC**(#253Rnt)
+Location: Parenting Room(#395Rnt)
+_______________________________________________________________________________
+Broadcasting Console(#265IOM)
+Type: Thing Flags: INHERIT OPAQUE MONITOR
+Owner: Duncan Brannart  Zone: *NOTHING*  Virtual Dollars: 1
+Parent: *NOTHING*
+Enter Lock: Broadcasting Console(#265IOM)
+Basic Lock: Broadcasting Console(#265IOM)
+Powers:
+Warnings checked: none
+Created: Sun May 19 16:29:19 1996
+Last Modification: Fri Jun 21 22:08:22 1996
+CH1 [#249]:  #291 #257
+FAILURE [#249$]: Sorry, its too heavy..and too big..and too high-tech for you.
+TPORT [#249$]: broa
+STUDIOS [#249]: 1
+STUDIO1 [#249]: #251
+ON [#249]: $studio * on:@swi [match([v(studios)],%0)]=0,{@pemit %#=That is not
+an available studio.},{@set [v(studio%0)]/mike2=!no_command;@pemit/l [lcon
+(here)]=Studio #%0 is now [ansi(hg,ON THE AIR)].;@pemit/l [lcon([v(studio%0)])]
+=This Studio is now [ansi(hg,ON THE AIR)];@edit [v(studio%0)]/adesc={hr,OFF THE
+AIR},{hg,ON THE AIR}}
+OFF [#249]: $studio * off:@swi [match([v(studios)],%0)]=0,{@pemit %#=That is
+not an available studio.},{@cpattr [v(studio%0)]/default=[v(studio%0)]/
+describe;@halt [v(studio%0)];@set [v(studio%0)]=!halt;@set [v(studio%0)]=
+no_command;@pemit/l [lcon(here)]=Studio #%0 is now [ansi(hr,OFF THE AIR)].;@set
+[v(studio%0)]=!halt;@set [v(studio%0)]=no_command;@pemit/l [lcon([v
+(studio%0)])]=This Studio is now [ansi(hr,OFF THE AIR)];@edit [v(studio%0)]/
+adesc={hg,ON THE AIR},{hr,OFF THE AIR}}
+STATUS [#249]: $studio status:@pemit %#=[center(-STUDIO STATUS-,79,-)]%r%r
+STUDIO #1%t[v(name1)]%b%b%bChannel 1%t[extract([get_eval([v(studio1)]/adesc)],
+3,3)]%r%r[center(-,79,-)]
+NAME1 [#249]: MPT -- Manhattan Public Television
+Home: Broadcasting Control Room - MBC(#255RntF)
+Location: Broadcasting Control Room - MBC(#255RntF)
+_______________________________________________________________________________
+Studio #1 - MBC(#251RntFM)
+Type: Room Flags: NO_COMMAND TRANSPARENT FLOATING MONITOR
+Owner: Duncan Brannart  Zone: *NOTHING*  Virtual Dollars: 0
+Parent: *NOTHING*
+Powers:
+Warnings checked: none
+Created: Sun May 19 16:22:58 1996
+Last Modification: Sat Jun  8 21:11:14 1996
+ADESCRIBE [#249$]: @pemit %#=[ansi(i,SIGN:)] [ansi(hg,ON THE AIR)]
+MIKE2 [#249]: ^*:&num me=[add([v(num)],1)];@fo [extract([get(#265/ch1)],
+[v(num)],1)]=@emit <FROM THE [name([extract([get(#265/ch1)],[v(num)],1)])]> %0;
+@swi [v(num)]=[words([get(#265/ch1)])],{&num me=0},{@trigger me/mike2}
+NUM [#249]: 0
+DEFAULT [#249]: %r[center(** M P T **,79)]%r%r[center(Manhattan Public
+Television,79)]%r%r[center(OFF THE AIR,79)]%r
+_______________________________________________________________________________

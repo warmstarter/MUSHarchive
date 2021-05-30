@@ -1,0 +1,172 @@
+@@  GLOBAL PLACES AND MUTTER CODE
+@@
+@@  This package includes code for 'places', and code for 'mutter'.
+@@
+@@  'Places' is a global system which allows for the creation of virtual
+@@  places within rooms. This allows tables, chairs, rugs, alcoves, and
+@@  similar areas to exist without the necessity of physical objects.
+@@
+@@  'mutter' is a set of globals which allow players to mutter messages
+@@  to each other. Muttered messages are shown in part to other players
+@@  in the room, with some of the text removed.
+@@
+@@  ----
+@@
+@@  The 'places' code is based upon Gahron (Meg's) original TableCode.
+@@  This rewrite was done by Osric, with bugfixes by Meg, and a lot of
+@@  rewriting for speed by Deirdre. All three people are from AmberMUSH.
+@@
+@@  The 'mutter' code provided here was written by Deirdre. The basic
+@@  mutter code does not require that the 'places' system be globally
+@@  installed. There are, however, two switches to mutter that are
+@@  specifically for using mutter with places.
+@@
+@@  Permission is granted to freely use and copy this code, as long as
+@@  credit is given in the +help files or some similar place (if you use
+@@  the +help files provided in this distribution, credit is already given).
+@@  Bugs and suggestions should be given to Deirdre@AmberMUSH.
+@@
+@@  ----
+@@
+@@  This code is intended to be installed in the Master Room. The main global
+@@  places object must be owned by a wizard, and set Inherit. Support for
+@@  the auxiliary functions also requires setting a @startup on the God.
+@@
+@@  This code was designed to run under TinyMUSH 2.0.10p5.
+@@  It can be used with PennMUSH 1.50p10 with minimal modifications; it
+@@  is suggested that anyone doing so replace @dolist/@pemit combinations
+@@  with the far more efficient @pemit/list.
+@@
+@@  ----
+@@
+@@  Globally edit the following dbrefs in this file to suit your own needs.
+@@
+@@  #1   -- God
+@@  #200 -- Global Place Object
+@@  #300 -- Non-privileged Evaluator Object
+@@  #400 -- Main Globals Object
+@@  #500 -- Functions Object (to which the Main Globals Object is parented)
+@@  #600 -- Global Help Data
+@@
+@@  Once the dbrefs have been adjusted for your particular MUSH, you should
+@@  be able to simply use a program such as TinyFugue to quote this file to
+@@  the MUSH. 
+@@
+@@
+@@  ---  PLACES CODE  ---
+@@
+@Desc #200=The Places Code. Tables, rugs, beds, ladders, etc.
+&EVAL_OBJ #200=#300
+@set #200=INHERIT
+@set #200=SAFE
+@@
+@@ @@ Configuring Places
+@@
+&DO_CONFIGURE #200=$configure * places: @switch/first [controls(%#,%l)]:[isnum(%0)]:%0=0:*:*, {@pemit %#=You do not control [name(%l)].},*:0:*, {@pemit %#=The number of places needs to be a number!},*:*:0, {@dolist rest(lnum(add(get(%l/PLACESMAX),1)))={@unlock %l/PLACE##; &PLACE## %l}; @unlock %l/PLACESCLEANUP1; @unlock %l/PLACESCLEANUP2; @unlock %l/PLACESMAX; &PLACESCLEANUP1 %l; &PLACESCLEANUP2 %l; &PLACESMAX %l; @set %l=!MONITOR; @pemit %#=Places removed from [name(%l)].}, {&PLACESMAX %l=%0; @dolist rest(lnum(add(%0,1)))={@unlock %l/PLACE##; &PLACE## %l=u(SETUP_FN,##,add(rand(9),1))}; @unlock %l/PLACESCLEANUP1; @unlock %l/PLACESCLEANUP2; @unlock %l/PLACESMAX; @set %l=MONITOR; &PLACESCLEANUP1 %l=v(PLACESCLEANUP1); &PLACESCLEANUP2 %l=v(PLACESCLEANUP2);&PLACENUMS %l=[repeat(|,%0)];@pemit %#=Configuration for %0 places complete.}
+&SETUP_FN #200=Table %0|%1|[add(rand(%1),1)]||I'm sorry, there's no room to add a place there.|I'm sorry, there's on place to move there.|You sit down at|sits down at|You stand and leave|stands and leaves|At your table
+@@
+@@ @@ Update
+@@
+&DO_UPDATE #200=$update */*=*: @switch/first [controls(%#,%l)]:[and(isnum(%0),lte(%0,get(%l/PLACESMAX)))]:[member(NAME MAXPLACES CURPLACES FIXED FULL EMPTY JOIN OJOIN DEPART ODEPART PREFIX,ucstr(%1))]=0:*:*, {@pemit %#=Permission denied.},*:0:*, {@pemit %#=I'm sorry, but `%0' isn't a valid place number.},*:*:0, {@pemit %#=I'm sorry, but `%1' isn't a valid configuration option.}, {@unlock %l/PLACE%0; &PLACE%0 %l=u(UPDATEINFO,%l,%0,%1,%2); @pemit %#=The %1 for [u(GETINFO,%l,%0,NAME)] is now set to:%r[space(5)][u(GETINFO,%l,%0,%1)]}
+@@
+@@ @@ Mv
+@@
+&DO_MV #200=$mv from * to *: @switch/first 0=and(gt(%0,0),lte(%0,get(%l/PLACESMAX))), {@pemit %#='%0' is not a valid place number.},and(gt(%1,0),lte(%1,get(%l/PLACESMAX))), {@pemit %#='%1' is not a vaild place number.},not(words(u(GETINFO,%l,%0,FIXED))), {@pemit %#=u(GETINFO,%l,%0,FIXED)},not(words(u(GETINFO,%l,%1,FIXED))), {@pemit %#=u(GETINFO,%l,%1,FIXED)},sub(u(GETINFO,%l,%0,CURPLACES),words(extract(get(%l/PLACENUMS),%0,1,|))), {@pemit %#=u(GETINFO,%l,%0,EMPTY)},neq(u(GETINFO,%l,%1,CURPLACES),u(GETINFO,%l,%1,MAXPLACES)), {@pemit %#=u(GETINFO,%l,%1,FULL)}, {@unlock %l/PLACE%0; @unlock %l/PLACE%1; &PLACE%0 %l=u(UPDATEINFO,%l,%0,CURPLACES,sub(u(GETINFO,%l,%0,CURPLACES),1)); &PLACE%1 %l=u(UPDATEINFO,%l,%1,CURPLACES,add(u(GETINFO,%l,%1,CURPLACES),1));@pemit %#=You move a place from [u(GETINFO,%l,%0,NAME)] to [u(GETINFO,%l,%1,NAME)].}
+@@
+@@ @@ Places Cleanup
+@@
+&PLACESCLEANUP1 #200=^* has left.:placescleanup(%#)
+&PLACESCLEANUP2 #200=^* has disconnected.:placescleanup(%#)
+&PLACESCLEANUPCMD #200=$placescleanup(*):@switch [setq(0, U(WHICHPLACE, %#, %0))][r(0)]=>0, {&PLACENUMS %#=[replace(get(%#/PLACENUMS), r(0), remove(extract(get(%#/PLACENUMS), r(0), 1, |), %0), |)]}
+@@
+@@ @@ Join
+@@
+&DO_JOIN #200=$join *: @switch/first [not(u(WHICHPLACE,%l,%#))] [lcstr(%0)]=0 *, {@pemit %#=Don't you think you should 'depart' first?},1 at #*, {@trig me/PLACEFUNCTION=%l,%#,[delete(rest(%0),0,1)]},1 #*, {@trig me/PLACEFUNCTION=%l,%#,[delete(%0,0,1)]},1 with *, {@pemit [setq(1,locate(%#,rest(%0),niPT))][setq(0,u(WHICHPLACE,%l,r(1)))]%#=switch(r(0),0,There isn't anyone named '[capstr(rest(%0))]' at a special place.,You go over to join [name(r(1))].); @trig me/[switch(r(0),0,-,PLACEFUNCTION)]=%l,%#,[r(0)]},{@trig me/PLACEFUNCTION=%l,%#,[match(iter(rest(lnum(add(get(%l/PLACESMAX),1))),[u(GETINFO,%l,##,NAME)]|),*%0*,|)]}
+&PLACEFUNCTION #200=@switch/first 0= [lte(%2, get(%0/PLACESMAX))], @pemit %1=Invalid Place Number '%2'.,[setq(1, extract(get(%0/PLACENUMS), %2, 1, |))][gt(u(GETINFO, %0, %2, CURPLACES), words(r(1)))], {@pemit %1=There aren't any free spaces there.},{@verb v(eval_obj)=[setq(0,u(getinfo,%0,%2,NAME))]%1,eval_msg,,oeval_msg,,,{[edit([U(GETINFO, %0, %2, JOIN)] [r(0)].,%,,%%%,)],[edit([U(GETINFO, %0, %2, OJOIN)] [r(0)].,%,,%%%,)]};@dolist [r(1)]={@pemit ##=[name(%1)] joins you.};&PLACENUMS %0=[replace(get(%0/PLACENUMS), %2, [r(1)]%1%b, |)]}
+@@
+@@ @@ Depart
+@@
+&DO_DEPART #200=$depart:@switch [setq(1, U(WHICHPLACE, %l, %#))][setq(0,U(GETINFO,%l,r(1),NAME))][r(1)]=0, {@pemit %#=You aren't placed anywhere.}, {&PLACENUMS %l=[replace(get(%l/PLACENUMS), r(1), [remove(extract(get(%l/PLACENUMS), r(1), 1, |), %#)], |)]; @verb v(eval_obj)=%#,eval_msg,,oeval_msg,,,{[edit([U(GETINFO, %l, r(1), DEPART)] [r(0)].,%,,%%%,)],[edit([U(GETINFO, %l, r(1), ODEPART)] [r(0)].,%,,%%%,)]};@dolist [extract(get(%l/PLACENUMS), r(1), 1, |)]={@pemit ##=%N has departed.}}
+@@
+@@ @@ Places and Place
+@@
+&DO_PLACES #200=$places: @pemit %#=switch(get(%l/PLACESMAX),,There are no special places here.,0,There are no special places here.,map(PLACES_FN,rest(lnum(add(get(%l/PLACESMAX),1)))))
+&DO_PLACE #200=$place *: @pemit %#=switch(get(%l/PLACESMAX),,There are no special places here.,0,There are no special places here.,map(PLACES_FN,edit(%0,#,)))
+&PLACES_FN #200=%r[setq(0,u(GETINFO,%l,%0,CURPLACES))][setq(1,extract(get(%l/PLACENUMS),%0,1,|))][capstr(u(GETINFO,%l,%0,NAME))] (#%0) has [setq(2,sub(r(0),words(r(1))))][switch(r(2),0,no empty places,1,1 empty place,[r(2)] empty places)].[switch(words(r(1)),0,,1,%r%tPresent is: %b[name(r(1))].,%r%tPresent are: %b[u(PLACE_LOOK,r(1))])]
+&PLACE_LOOK #200=[setq(9,words(%0))][switch(r(9),0,,1,name(%0),2, [name(first(%0))] and [name(rest(%0))],[iter(extract(%0,1,sub(r(9),1)),{name(##),})] and [name(extract(%0,r(9),1))])]
+@@
+@@ @@ Plook
+@@
+&DO_PLOOK #200=$plook: @pemit %#=[setq(0,edit(get(%l/PLACENUMS),|,))][fold(PLOOK_FOLD_FN,rest(lnum(add(get(%l/PLACESMAX),1))),-----)]%rNo place [space(3)] [setq(3,setdiff(setinter(lcon(%l),lwho()),r(0)))][rjust([words(r(3))] at no places,15)] [space(3)] [setq(4,sort(iter(r(3),name(##))))][ljust(mid(extract(r(4),1,1),0,14),14)] [ljust(mid(extract(r(4),2,1),0,14),14)] [ljust(mid(extract(r(4),3,1),0,14),14)][switch(gt(words(r(4)),3),1,u(NAME_3COL_FN,extract(r(4),4,3999)))]%r-----
+&PLOOK_FOLD_FN #200=%0%r[setq(1,extract(get(%l/PLACENUMS),%1,1,|))]Place #[ljust(%1,5)] [rjust([sub(u(GETINFO,%l,%1,CURPLACES),words(r(1)))] empty places,15)] [space(3)] [setq(2,sort(iter(r(1),name(##))))][ljust(mid(extract(r(2),1,1),0,14),14)] [ljust(mid(extract(r(2),2,1),0,14),14)] [ljust(mid(extract(r(2),3,1),0,14),14)][switch(gt(words(r(2)),3),1,u(NAME_3COL_FN,extract(r(2),4,3999)))]
+&NAME_3COL_FN #200=[fold(NAME_3AUX_FN,rest(%0),%r[space(33)][ljust(mid(first(%0),0,14),15)])]
+&NAME_3AUX_FN #200=%0[switch(mod(words(%0),4),0,%r[space(33)][ljust(mid(%1,0,14),15)],[ljust(mid(%1,0,14),15)])]
+@@
+@@ @@ TT
+@@
+&DO_TT #200=$tt *: @dolist [setq(0,u(WHICHPLACE,%l,%#))][switch(r(0),0,%#[setq(1,Please join a place first.)],[extract(get(%l/PLACENUMS),r(0),1,|)][setq(1,\{[u(GETINFO,%l,r(0),PREFIX)], [switch(%0,:*,%N [delete(%0,0,1)],;*,%N[delete(%0,0,1)],"*,%N says "[delete(%0,0,1)]",|*,delete(%0,0,1),%N says "%0")]\})])]={@pemit ##=r(1)}
+@@
+@@ @@ Support functions
+@@
+&WHICHPLACE #200=[match(get(%0/PLACENUMS), *%1%b*, |)]
+&GETINFO #200=[extract(get(%0/PLACE%1),match(NAME MAXPLACES CURPLACES FIXED FULL EMPTY JOIN OJOIN DEPART ODEPART PREFIX,%2),1,|)]
+&UPDATEINFO #200=[replace(get(%0/PLACE%1),match(NAME MAXPLACES CURPLACES FIXED FULL EMPTY JOIN OJOIN DEPART ODEPART PREFIX,%2),%3,|)]
+&ATPLACE #200=[extract(get(%0/PLACENUMS), %1, 1, |)]
+@@
+@@ @@ Nonprivleged evaluator
+@@
+@Desc #300=This evaluator can be used with @verb to send literal messages with correct substitutions. To use it, go @verb [num(me)]=<actor>,eval_msg,,oeval_msg,,%{<msg>,<omsg>%}%rExtra arguments may be passed via setq(), and recovered in msg, omsg via %[r(X)%].
+&EVAL_MSG #300=[s(%0)]
+&OEVAL_MSG #300=[s(%1)]
+@set #300=!INHERIT
+@set #300=SAFE
+@@
+@@ @@ Help
+@@
+&HELP_PLACES #600=%rPlaces are virtual places to sit, stand or occupy. You remain in the same%rroom, but join a group of people within that room who may or may not be%rhaving a quiet conversation only with others placed with them.%r%r%b%bCommands:%r%b%b---------%r%b%b[ljust(Mv from <#> to <#>,28)]Moves a vacancy from one place to another.%r%b%b[ljust(Join <place name>,28)]Puts you at <place name>%r%b%b[ljust(Join at #<num>,28)]Puts you at place #<num>.%r%b%b[ljust(Join with <name>,28)]Puts you at the place with <name>.%r%b%b[ljust(Depart,28)]Removes you from your place.%r%b%b[ljust(Places,28)]Lists who's present at all places.%r%b%b[ljust(Place <num>,28)]Lists who's present at place <num>.%r%b%b[ljust(Plook,28)]Lists in column format everyone around the room.%r%b%b[ljust(tt <message>,28)](Tete a tete) Relays a message%r[space(30)]to all those at your place. This command takes%r[space(30)]the usual say/pose tokens, and TT |<message>%r[space(30)]will emit.%r%b%b[ljust(Update <#>/<Option>
+=<text>,28)]See '+help places options'%r%rFor installation help, type '+help places config'. This code is provided courtesy of Deirdre, Meg, and Osric of AmberMUSH.
+&HELP_PLACES_CONFIG #600=%rPLACES configuration:%r%b%bConfigure <num> places%r%b%bUnconfigure places%r%r%b%bNotes: A null fixed message means vacancies can be moved freely to and from the place. % This does not make sense for things like couches and rugs. % Set it to something like "That makes no sense." if you are using such a place.%r%b%b(O)Join and (O)depart messages take like this: %%%%N. All Join and Depart messages are appended with the place name.%r%rFunctions:%r%b%bWHICHPLACE(<loc num>,<dbnum>) gives the number of a place where <dbnum> is.%r%b%bATPLACE(<loc num>,<place num>) gives you a list of things at a place.%r%b%bPLACEINFO(<loc num>,<place num>,<option>) gives the value of <option> at place.%r%r
+&HELP_PLACES_OPTIONS #600=%b%bUpdate <Place #>/<Option>=<Configuration Text>%r%r%b%bOption Description%t<Option>%tDefault Configuration Text%r%b%b------------------%t--------%t--------------------------%r%b%bPlace Name%t%tNAME%t%tTable x%r%b%bMaximum # of places%tMAXPLACES%tRandom%r%b%bCurrent # of places%tCURPLACES%tRandom (1 >= # >= MAXPLACES)%r%b%bFixed fail message%tFIXED%t%t<NULL>%r%b%bFull fail message%tFULL%t%tThat table has no more room.%r%b%bJoin message%t%tJOIN%t%tYou sit down at <place>.%r%b%bOjoin message%t%tOJOIN%t%tsits down at <place>.%r%b%bDepart message%tDEPART%t%tYou stand and leave <place>.%r%b%bOdepart message%tODEPART%t%tstands and leaves <place>.%r%b%bSay prefix%t%tPREFIX%t%tAt your table%r
+@@
+@@ @@ Global functions
+@@
+&FUNC_ATPLACE #200=[switch(or(controls(%#,%0),match(rloc(%l,100),rloc(%0,100))),1,extract(get(%0/PLACENUMS), %1, 1, |),PERMISSION DENIED)]
+&FUNC_PLACEINFO #200=[switch(or(controls(%#,%0),match(rloc(%l,100),rloc(%0,100))),1,extract(get(%0/PLACE%1),match(NAME MAXPLACES CURPLACES FIXED FULL EMPTY JOIN OJOIN DEPART ODEPART PREFIX,%2),1,|),PERMISSION DENIED)]
+&FUNC_WHICHPLACE #200=[switch(or(controls(%#,%0),match(rloc(%l,100),rloc(%0,100))),1,match(get(%0/PLACENUMS), *%1%b*, |),PERMISSION DENIED)]
+@@
+@@ @@ Setup on God
+@@
+@startup #1=@function/privileged whichplace=#200/func_whichplace; @function/privileged atplace=#200/func_atplace; @function/privileged placeinfo=#200/func_placeinfo
+@@
+@pemit me=[center(*** QUOTE OF PLACES DONE ***,78)]
+@@
+@@
+@@  ---  MUTTER CODE  ---
+@@
+@@ @@ The Commands
+@@
+&DO_MUTTER #400=$mutter *=*: @remit [setq(0,locate(%#,%0,nimP))][switch(r(0),#-1,XX,#-2,XX,%l)]={[switch(%1,:* "*"*,{%N [first(delete(%1,0,1),")]%S mutters to [setq(1,u(MUTTER_FN,extract(%1,2,1,")))][switch(r(0),%#,%oself,name(r(0)))][switch(r(1),...,.,{, "[r(1)]"})] [rest(rest(%1,"),")]},:*,{%N mutters to [switch(r(0),%#,%oself,name(r(0)))].},;* "*"*,{%N[first(delete(%1,0,1),")]%S mutters to [setq(1,u(MUTTER_FN,extract(%1,2,1,")))][switch(r(0),%#,%oself,name(r(0)))][switch(r(1),...,.,{, "[r(1)]"})] [rest(rest(%1,"),")]},;*,{%N mutters to [switch(r(0),%#,%oself,name(r(0)))].},{[setq(1,u(MUTTER_FN,%1))]%N mutters to [switch(r(0),%#,%oself,name(r(0)))][switch(r(1),...,.,{, "[r(1)]"})]})]}; @pemit %#[setq(2,edit(edit(%1,<,),>,))]=switch(r(0),#-1,I don't see that here.,#-2,I'm not sure which %0 you mean.,u(MUTTER_FROM_FN,%#,r(0),r(2))); @pemit [switch(r(0),%#,XX,r(0))]=u(MUTTER_TO_FN,%#,r(0),r(2))
+&DO_MUTTER_PLACE #400=$mutter/place *=*: @switch and(gte(%0,1),lte(%0,get(%l/PLACESMAX)))=0, {@pemit %#=There is no such place here.}, {@remit %l={[switch(%1,:* "*"*,{%N [first(delete(%1,0,1),")]%S mutters to [PlaceInfo(%l,%0,NAME)][setq(1,u(MUTTER_FN,extract(%1,2,1,")))][switch(r(1),...,.,{, "[r(1)]"})] [rest(rest(%1,"),")]},:*,{%N mutters to [PlaceInfo(%l,%0,NAME)],},;* "*"*,{%N[first(delete(%1,0,1),")]%S mutters to [PlaceInfo(%l,%0,NAME)][setq(1,u(MUTTER_FN,extract(%1,2,1,")))][switch(r(1),...,.,{, "[r(1)]"})] [rest(rest(%1,"),")]},;*,{%N mutters to [PlaceInfo(%l,%0,NAME)]},{[setq(1,u(MUTTER_FN,%1))]%N mutters to [PlaceInfo(%l,%0,NAME)][switch(r(1),....,.,{, "[r(1)]"})]})]}; @dolist [setq(2,edit(edit(%1,<,),>,))][setq(3,{[PlaceInfo(%l,%0,PREFIX)], [switch(r(2),:*,%N [delete(r(2),0,1)],;*,%N[delete(r(2),0,1)],%N says "[r(2)]")]})][setunion(AtPlace(%l,%0),%#)]=@pemit ##=r(3)}
+&DO_MUTTER_TT #400=$mutter/tt *=*: @switch/first [setq(0,locate(%#,%0,nimP))][r(0)] [setq(9,WhichPlace(%l,%#))][switch(r(9),0,setq(9,WhichPlace(%l,r(0))))][r(9)]=#-1 *, {@pemit %#=I don't see that here.},#-2 *, {@pemit %#=I'm not sure which %0 you mean.},* 0, {@pemit %#=Neither you nor [name(r(0))] is at a special place.}, {@dolist [setq(8,{[PlaceInfo(%l,r(9),PREFIX)], [switch(%1,:* "*"*,{%N [first(delete(%1,0,1),")]%S mutters to [setq(1,u(MUTTER_FN,extract(%1,2,1,")))][switch(r(0),%#,%oself,name(r(0)))][switch(r(1),...,.,{, "[r(1)]"})] [rest(rest(%1,"),")]},:*,{%N mutters to [switch(r(0),%#,%oself,name(r(0)))].},;* "*"*,{%N[first(delete(%1,0,1),")]%S mutters to [setq(1,u(MUTTER_FN,extract(%1,2,1,")))][switch(r(0),%#,%oself,name(r(0)))][switch(r(1),...,.,{, "[r(1)]"})] [rest(rest(%1,"),")]},;*,{%N mutters to [switch(r(0),%#,%oself,name(r(0)))].},{[setq(1,u(MUTTER_FN,%1))]%N mutters to [switch(r(0),%#,%oself,name(r(0)))][switch(r(1),...,.,{, "[r(1)]"})]})]})][setunion(AtPlace(%l,r(9)),%
+# [r(0)])]=@pemit ##=r(8); @pemit %#=[setq(2,edit(edit(%1,<,),>,))][u(MUTTER_FROM_FN,%#,r(0),r(2))]; @pemit r(0)=u(MUTTER_TO_FN,%#,r(0),r(2))}
+@set #400=INHERIT
+@@
+@@ @@ The Functions
+@@
+&MUTTER_FN #500=[edit(u(DOTS_FN,u(SELECT_WORDS_FN,%0)),%b...,...)]
+&MUTTER_TO_FN #500=[switch(%2,:*,{You sense [name(%0)] [delete(%2,0,1)]},;*,{You sense [name(%0)][delete(%2,0,1)]},{[name(%0)] whispers "%2"})]
+&MUTTER_FROM_FN #500=[switch(%0,%1,switch(%2,:*,{You sense "[name(%0)] [delete(%2,0,1)]"},;*,{You sense "[name(%0)][delete(%2,0,1)]"},{You mutter to yourself, "%2"}),switch(%2,:*,{[name(%1)] senses "[name(%0)] [delete(%2,0,1)]"},;*,{[name(%1)] senses "[name(%0)][delete(%2,0,1)]"},{You whisper "%2" to [name(%1)].}))]
+&DOTS_FN #500=[switch(%0,*... ...*,u(DOTS_FN,edit(%0,... ...,...)),%0)]
+&SELECT_WORDS_FN #500=[switch(%0,*<*>*,[map(KILL_WORDS_FN,before(%0,<))] [before(after(%0,<),>)] [u(SELECT_WORDS_FN,after(%0,>))],map(KILL_WORDS_FN,%0))]
+&KILL_WORDS_FN #500=[switch([rand(3)]%0,0,,1,,2,,0*,%0,...)]
+@@
+@@ @@ The Help
+@@
+&HELP_MUTTER #600=mutter <target>=<string>%rmutter/tt <target>=<string>%rmutter/place <place number>=<string>%r%r[space(5)]The first form of this command behaves identically to "whisper", except that the other players in the room will see that you have said something. A regular message, or part of a pose enclosed in "quotes", will have some of its words or groups of words replaced by "..." If you enclose a phrase with <angle brackets>, it will not be replaced. Poses without "quotes" will simply show that you have muttered something. <target> can be any player in the same room as you.%r[space(5)]The second form of this command behaves like the first, except that instead of the entire room hearing the mutter, only people at a place will do so. If you are at a place, those at your place will hear the mutter; if you are not, and the target is, those at that place will hear the mutter. If neither of you are at a place, an error message will be generated.%r[space(5)]The final version of this command allows everyone at a place to hear the message in full, while the rest of the room hears the mutter.%r%rThis code was written by Deirdre@AmberMUSH.%r%rSee `+help mutter2' for examples.
+&HELP_MUTTER2 #600=Examples:%r%r[space(5)]mutter Finndo=Can you loan me thirty Pence? I'm broke!%r[space(5)]Meg mutters to Finndo, "Can... loan... thirty... broke!"%r%r[space(5)]mutter Bleys=:frowns. "What a <cheapskate> he is!" She shrugs.%r[space(5)]Meg frowns. She mutters to Bleys, "What... cheapskate..." She shrugs.%r%r[space(5)]mutter/place 1=:chuckles. "Thank you very much."%r[space(5)]Meg chuckles. She mutters to the long, mahogany bar, "Thank you..."%r%r[space(5)]mutter/tt Deirdre=Where did you hide those Trumps?%r[space(5)]At the bar, Meg mutters to Deirdre, "Where... Trumps?"
+@@
+@pemit me=[center(*** QUOTE OF MUTTER DONE ***,78)]
+@@
+@pemit me=[center(*** END OF QUOTE ***,78)]
+@@
+@@ @@ END OF FILE

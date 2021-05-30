@@ -1,0 +1,64 @@
+From: u9228616@athmail1.causeway.qub.ac.uk
+Message-Id: <9303221028.AA00747@bot29>
+Subject: A little bit of code!
+Date: Mon, 22 Mar 93 10:28:43 GMT
+
+
+I just thought I would make a small contribution to this mailing
+list that seems to be rather dead at the moment! I built a little
+device that I have found extremely handy. The code is not very
+complicated and the device is simple. 
+
+I wish more people would post their masterpieces here even if they
+are extremely simple, afterall what seems simple to you may not
+be so simple to a begginner. So here goes(Excuse the name! I 
+couldn't think of anything better - suggestions please!)
+
+The Room Rememberer
+Designed and coded by Hangover
+February 1993
+
+-------------------------------------------------------------------
+
+@create Room Remember<rr>=10
+
+@Desc Room Remember<rr>=%rThis is a small device that lets you remember the numb
+ers of rooms that you visit. It is very handy when you want to go back to a cert
+ain room and you can't get its number. The commands available are:%r%r%tstore%t-
+ store a room name and number%r%trecall%t- display all the rooms currently store
+d%r%twipe #%t- wipe a room number from memory eg. wipe #1234%r%rThis device also
+ stores whether a room can be teleported to ie. if they are set jump_ok or you ow
+n them.%r%r%tDesigned and coded by Hangover.%r%r
+
+&REMEMBER_ROOM Room Remember<rr>=$store:@switch member(v(stored),rloc(me,2))=>0,
+{@pemit num(*%N)=You already have this room stored.},{&STORED me=v(stored) [rloc
+(me,2)];@pemit num(*%N)=You store [name(rloc(me,2))] in memory.}
+
+&REMEMBERED_ROOMS Room Remember<rr>=$recall:@pemit num(*%N)=You have stored the
+following rooms(* = jump_ok):%r;@dolist v(stored)={@switch hasflag(##,J)=1,{@pem
+it num(*%N)=* [name(##)] [##]},{@pemit num(*%N)=%b%b[name(##)] [##]}}
+
+&FORGET_ROOM Room Remember<rr>=$wipe *:@switch member(v(stored),%0)=>0,{&STORED
+me=edit(v(stored),%0,);@pemit num(*%N)=You have wiped %0 from memory.},{@pemit n
+um(*%N)=You do not have room %0 stored in memory.}
+
+&STORED Room Remember<rr>=
+
+-------------------------------------------------------------------
+
+would mail it anyway in the hope of getting more people to use the
+mailing list.
+Improvements will be greatly appreciated!
+
+One question(I know this is going to sound stupid) but what is a
+Dynamic Room Builder???
+
+Anyway till next time.
+
+Hangover the Alcoholic Beer monster.
+UK_MUSH 	- 134.83.128.247   4201
+FUBARmush 	- 137.148.20.7 	   7719
+
+
+Drink and be merry!
+8-)

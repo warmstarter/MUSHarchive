@@ -1,0 +1,24 @@
+@create Bartender
+&ORDER Bartender=$order *:@oemit %n=%N yells for %0 from [name(me)].;@pemit %#=You order %0.;@swi %s=he,{@wait 5=@emit [name(me)] smiles demurely and says, "At once, milord. I shall get you your %0 immediately." She hurries off to the kitchen.},{@wait 5=@emit [name(me)] smiles and says, "At once, milady. I shall get your %0 immediately." She hurries off to the kitchen.};@wait 10=@emit [name(me)] returns from the kitchen and places %N's %0 in front of %o, sparing %o a wink and a smile.
+@Desc Bartender=If you can't find the number of this Bartender parent code to @parent it then you prob shouldn't be trying to parent it :)
+@Adesc Bartender=@pemit %#=To order from [name(me)], simply 'order <whatever>'
+@Sex Bartender=Female
+&CDSTATS Bartender=PLAYING
+&REPORT Bartender=$reporting::smiles and lets %n take over. "All yours!" she says softly, smiling appreciatively at %N.;&on_duty me=1;&duty me=%n
+&ON_DUTY Bartender=1
+&OFFDUTY Bartender=$off duty::smiles and slides back behind the bar, taking over for %n. "Good morrow," she says with a smile and a wink.;&duty me;&on_duty me=0
+&REQUEST Bartender=$request * by *:@swi [get(me/song_on)]=0,{&song_on m==1;@pemit %n=You go over to [name(me)] and request her to play %0, by %1.;@oemit %n=%n heads over to [name(me)] and whispers something.;@wait 4=:smiles and pops in a Disc.;@wait 7=@emit [get(#774/pref[rand(5)])] %1's "%0" [get(#774/last[rand(4)])];@wait 15=ambi;@wait 120=ambi;@wait 200=@emit The dancing slowly stops as "%0" ends.;@wait 200=&song_on me=0},1,{@pemit %n=[name(me)] grins, "Hey, let the Disc finish first, cool?"}
+&SONG_ON Bartender=0
+&PREF0 Bartender=Suddenly the speakers spring to life as
+&PREF1 Bartender=The sound system blares as
+&PREF2 Bartender=The crowd cheers as
+&PREF3 Bartender=A few people head out to the dance floor as
+&PREF4 Bartender=The lighting plays across the crowd as
+&LAST0 Bartender=begins playing
+&LAST1 Bartender=can be heard throughout the club.
+&LAST2 Bartender=echoes throughout the club.
+&LAST3 Bartender=blares to life on the sound system.
+&DUTY Bartender=Beauty
+@set Bartender=MONITOR
+@set Bartender=ENTER_OK
+@set Bartender=SAFE

@@ -1,0 +1,98 @@
+This script will create a bulletin board. It fixes these problems I've seen
+in other boards:
+
+  - Security. On some boards, you can just 'post thing=$command:@destroy me'
+    then type 'command' and kill the board. Not on this one.
+  
+  - Display. Other boards just don't look as good as this one.
+
+Things this board does NOT have:
+
+  - A display of the poster's name on the 'show' screen. This is not too
+much of a drawback.
+
+===================
+Coded by:   Freud @ NowhereMUSH (gauss.hamline.edu 1941)
+Send comments to:  stevem@comtch.iea.com
+
+This is distributed with no guarantees made about anything. If you make a
+board like this and the Theme Wiz toads you (or, as we say on MushMUSH,
+"impales your head"), too bad.  If I've secretly put
+in a command like "@dolist search(me)=@dest ##" then too bad.  You should
+check the code BEFORE you quote it.
+===================
+You may wish to remove all lines beginning with '@@' as they are comments.
+------- CUT HERE ------------------------------ CUT HERE --------------
+
+@create Bulletin Board <bb>=10
+
+@@ Don't want lots of Set messages.
+
+@set Bulletin Board <bb>=QUIET
+@Desc Bulletin Board <bb>=A bulletin board. Type 'bb help' for help.%rThere
+[switch(words(lattr(me/title*)),1,is 1 note,are [words(lattr(me/title*))]
+notes)] posted.
+&HELP Bulletin Board <bb>=[center(-< Bulletin Board Help >-,78)]%r%rSHOW -
+Shows you the titles of the notes on the board.%rSHOW # - Shows you note #.%r
+POST <title>=<note> - Posts a note on the board.%rREMOVE # - Deletes a note
+from the board, if you wrote it.
+
+@@ Help text is all in one attribute, seperate from the command.
+
+&SHOW_HELP Bulletin Board <bb>=$bb help:@pemit %#=u(help)
+&SHOW Bulletin Board <bb>=$show:@pemit %#=[repeat(_,78)]%r[center(There [switch
+(words(lattr(me/title*)),1,is 1 note,are [words(lattr(me/title*))] notes)]
+posted.,78)]%r[repeat(~,78)][iter(v(list),%r[rjust(##,2)] | [ljust(v(title##),
+60)] | [u(parse_date,v(date##))])]%r[repeat(~,78)]
+
+@@ You can use your own parse_date function. It accepts a time() format
+@@ string as %0.  It's displayed on the 'show' screen.
+
+&PARSE_DATE Bulletin Board <bb>=[rjust(member(v(months),extract(%0,2,1))/[rjust
+(extract(%0,3,1),2,0)]/[mid(extract(%0,5,1),2,2)],9)]
+&MONTHS Bulletin Board <bb>=Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec
+&COPYRIGHT Bulletin Board <bb>=$copyright:@pemit %#=This board was coded by
+Freud @ NowhereMUSH.
+&SHOW_NOTE Bulletin Board <bb>=$show *:@switch member(v(list),%0)=>0,{@pemit
+%#=[repeat(_,78)]%r[center(Note #%0,78)]%r[repeat(~,78)]%rTitle: [v(title%0)]%r
+[ljust(Author: [name(v(author%0))],30)]Date: [v(date%0)]%r[repeat(-,78)]%r[s(v
+(note%0))]},{@pemit %#=Sorry, but that's an invalid note number!}
+&POST Bulletin Board <bb>=$post *=*:&author[v(next_note)] me=%#;&note[v
+(next_note)] me={%1};&title[v(next_note)] me={%0};&date[v(next_note)] me=
+time();@set me/note[v(next_note)]=no_command;@set me/title[v(next_note)]=
+no_command;@pemit %#=You posted note #[v(next_note)].;&list me=cat(v(list),v
+(next_note));&next_note me=add(v(next_note),1)
+
+@@ Used to find out which note comes next. It isn't changed when a note is
+@@ removed.
+
+&NEXT_NOTE Bulletin Board <bb>=1
+
+@@ If you're a member of admin_list, you can kill other people's messages.
+
+&REMOVE Bulletin Board <bb>=$remove *:@switch member(v(list),%0)=>0,{@switch or
+(gt(member(u(admin_list),%#),0),eq(%#,v(author%0)))=1,{&author%0 me;&title%0
+me;&date%0 me;&note%0 me;&list me=remove(v(list),%0);@pemit %#=You removed note
+#%0.},{@pemit %#=You can't do that!}},{@pemit %#=Sorry, that's an invalid note
+number.}
+
+@@ Resets the next_note to 1.
+
+&RESET_NEXT Bulletin Board <bb>=$reset next:@switch member(u(admin_list),%#)=>
+0,{&next_note me=1;@pemit %#=Reset.},{@pemit %#=You can't do that!!}
+
+@@ Insert your own admin list here. It defaults to just you.
+
+&ADMIN_LIST Bulletin Board <bb>=[owner(me)]
+
+@@ Clean up.
+
+@set Bulletin Board <bb>=!QUIET
+
+@@ Copyright notice.
+
+@Pemit me=Bulletin Board completed.
+@Pemit me=Coded by Freud @ NowhereMUSH.
+@Pemit me=Tell everyone about MushMUSH! Coming soon! E-Mail
+@Pemit me=stevem@comtch.iea.com for more info.
+_______________________________________________________________________________

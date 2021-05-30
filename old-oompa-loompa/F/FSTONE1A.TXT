@@ -1,0 +1,20 @@
+@create PARENT: Friend Stone
+@link PARENT: Friend Stone=[owner(me)]
+@lock PARENT: Friend Stone==*[owner(me)]
+@Desc PARENT: Friend Stone=A warm, rough grey stone of ovular shape. [switch(nearby(%!, %#),1, %(Type: 'friendhelp'%))]
+&FRIENDHELP PARENT: Friend Stone=$friendhelp:@pemit %#=%rGenuine friendstone to help you keep contact with your friends.%r%r[space(4)]addfriend <name>=<alias> % Adds a friend to your list of friends.%r[space(4)]listfriends[space(15)]Lists all friends and%r[space(32)]connected and idle times.%r[space(4)]rmfriend <alias>[space(10)]Removes a friend from list.%r[space(4)]fp <alias>=<message>[space(6)]Sends a page message to specified friend.%r[space(4)]fmp <message>[space(13)]Sends page message to all friends connected.%r
+&ADDFRIEND PARENT: Friend Stone=$addfriend *=*:@switch num(*%0)=#-1,{@pemit %#=%0 does not seem to be the name of any player.},{@switch and(eq(words(%1), 1), eq(member(v(aliases), ucstr(%1)), 0))=1,{@switch member(v(friends), num(*%0))=0,{@pemit %#=[name(*%0)] added with alias [ucstr(%1)] added to your list of friends.;&friends me=s([v(friends)] [num(*%0)]);&aliases me=s([v(aliases)] [ucstr(%1)])}, {@pemit %#=You seem to have already recorded %0 with the alias [extract(v(aliases), member(v(friends), num(*%0)), 1)].}, {@pemit %#=I am sorry, that is an invalid alias. Please select another.}}
+&LISTFRIENDS PARENT: Friend Stone=$listfriends:@pemit %#=Friends recorded: [iter(iter(lnum(words(v(friends))), add(##, 1)), [name(extract(v(friends), ##, 1))] %([extract(v(aliases), ##, 1)]%))]
+&LCF PARENT: Friend Stone=$lcf:@pemit %#=Friends (Alias/Conn/Idle): [iter(setinter(v(friends), lwho()), [name(##)] %([extract(v(aliases), member(v(friends), ##), 1)]/[div(conn(##), 3600)]:[switch(lt(mod(div(conn(##), 60), 60), 10), 1, 0)][mod(div(conn(##), 60), 60)]/[div(idle(##), 60)]%))]
+&RMFRIEND PARENT: Friend Stone=$rmfriend *:@switch member(v(aliases), ucstr(%0))=0,{@pemit %#=[ucstr(%0)] is not listed as a friend alias.},{@pemit %#=You have removed [name(extract(v(friends), member(v(aliases), ucstr(%0)), 1))] %([ucstr(%0)]%) from your list of friends.; &friends me=ldelete(v(friends), member(v(aliases), ucstr(%0))); &aliases me=remove(v(aliases), ucstr(%0))}
+&PAGE PARENT: Friend Stone=$fp *=*:@switch hasflag(extract(v(friends),member(v(aliases), ucstr(%0)), 1), connected)=-1,{@pemit %#=switch(member(v(aliases), ucstr(%0)), 0, [ucstr(%0)] is not a recorded friend alias., [name(extract(v(friends), member(v(aliases), ucstr(%0)), 1))]%([ucstr(%0)]%) is not currently connected.)},{@pemit extract(v(friends), member(v(aliases), ucstr(%0)), 1)=switch(mid(%1, 0, 1), ;, From afar%, %N[mid(%1, 1, add(strlen(%1), -1))], :, From afar%, %N [mid(%1, 1, add(strlen(%1), -1))], %N pages: %1); @pemit %#=switch(mid(%1, 0, 1), ;,Long distance to [name(extract(v(friends), member(v(aliases), ucstr(%0)),1))]: %N[mid(%1, 1, add(strlen(%1), -1))], :, Long distance to [name(extract(v(friends), member(v(aliases), ucstr(%0)), 1))]: %N [mid(%1, 1, add(strlen(%1), -1))], You paged [name(extract(v(friends), member(v(aliases), ucstr(%0)), 1))] with '%1'.)}
+@Succ PARENT: Friend Stone=You pick up [name(me)].
+@Fail PARENT: Friend Stone=You cannot pick up [name(me)].
+@Osucc PARENT: Friend Stone=picks up [name(me)].
+@Odrop PARENT: Friend Stone=drops [name(me)].
+@Drop PARENT: Friend Stone=You reluctantly loosen your grasp upon the friendstone.
+&MASSPAGE PARENT: Friend Stone=$fmp *:@dolist setinter(v(friends), lwho())={@pemit ##=switch(mid(%0, 0, 1), ;, From afar%, %N[mid(%0, 1, add(strlen(%0), -1))], :, From afar%, %N [mid(%0, 1, add(strlen(%0), -1))], %N pages: %0)}; @pemit %#=[setq(0, all connected friends %([iter(setinter(v(friends), lwho()), name(##))]%))][switch(mid(%0, 0, 1), ;, Long distance to [r(0)]: %N[mid(%0, 1, add(strlen(%0), -1))], :, Long distance to [r(0)]: %N [mid(%0, 1, add(strlen(%0), -1))], You paged [r(0)] with '%0'.)]
+@set PARENT: Friend Stone=VISUAL
+@set PARENT: Friend Stone=PARENT_OK
+@set PARENT: Friend Stone=HALT
+@set PARENT: Friend Stone=SAFE

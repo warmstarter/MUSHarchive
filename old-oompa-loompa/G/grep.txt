@@ -1,0 +1,27 @@
+@@   Global Grep Code                                   @@
+@@   This command will take a <string>, and search for  @@
+@@   it within every attribute on every object listed.  @@
+@@   Every attribute containing the <string> will be    @@
+@@   emitted to the player.                             @@
+@@                                                      @@
+@@   The 'HELP_GREP' attribute is to place on your      @@
+@@   Global Help Text file. Reformat however you like,  @@
+@@   but keep the credit at the end, please.            @@
+@@                                                      @@
+@@   Forever King @ TalesMUSH (tales.net 6666)          @@
+@@        fk@tales.net                                  @@
+
+@create Grep Object=10
+
+@set Grep Object=safe
+
+@set Grep Object=commands
+
+@set Grep Object=Inherit
+
+&GREP_CMD Grep Object=$grep *=*:@switch [and(strlen(%0),strlen(%1))][setq(0,[parse(%0,locate(%#,##,*))])]=0,{@pemit %#=Usage: grep <Object list>=<text to be searched for>},{@dolist %q0=@switch [controls(%#,##)]=0,{@pemit %#=ERROR: You do not own [name(##)] (##).},{@trigger me/grep_emiter=%#,##,%1}}
+
+&GREP_EMITER Grep Object=@dolist [lattr(%1)]=@switch [visible(%0,%1/##)]=1,{@pemit %0=[switch(strmatch(get(%1/##),*%2*),1,[repeat(#,78)]%r[name(%1)] (%1 [flags(%1)]) - Attr: ## - String: %2%r[repeat(-,78)]%r[get(%1/##)]%r)]}
+
+&HELP_GREP Global Help Text=%r Command: grep <object list>=<string>%r%r%tThis command will take <string>, and search for it within every%rattribute on every object you own or can control in the <object list>.%rIt will then print out to your screen, each attribute containing that%rstring. In the object list, the words 'me', 'here', and names of things%rand objects in your room, and inventory, may also be used, along with%r#DBrefs.%r%r%tCoded by Forever King @ TalesMUSH. (fk@tales.net)
+

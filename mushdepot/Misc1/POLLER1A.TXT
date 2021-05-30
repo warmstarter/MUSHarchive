@@ -1,0 +1,13 @@
+@create Polling Object
+@set Polling Object=OPAQUE
+&TOP Polling Object=1
+&ENTERQ Polling Object=&q[v(top)] me=%0;&a[v(top)] me=%1;&y[v(top)] me=0;&n[v(top)] me=0;@set me/q[v(top)]=no_command;@set me/a[v(top)]=no_command;@set me/y[v(top)]=no_command;@set me/n[v(top)]=no_command;@pemit %1=Your question `%0' has been added as poll #[v(top)].;&questions me=[v(questions)] [v(top)];&top me=[add(1,v(top))]
+&DELQ Polling Object=$delete *:@switch [comp(%#,[v(a%0)])]=0,{&questions me=remove(v(questions),%0);&q%0 me=;&a%0 me=;&y%0 me=;&n%0 me=;&v%0 me=;@pemit %#=Question deleted.},@pemit %#=You are not the author of that poll.
+&SHOWQ Polling Object=$show *:@switch member(v(questions),%0)=0,{@pemit %#=That is not a valid poll ID number.},{@pemit %#=Poll #%0: Author: [name(v(a%0))]([v(a%0)])%r%r    [v(q%0)]%r%rCurrent tallies: [v(y%0)] yes: [v(n%0)] no}
+&YES Polling Object=$yes *:@switch [type(%#)]=PLAYER,{@switch [member(v(questions),%0)]=0,{@pemit %#=That is not a valid poll ID number.},{@switch [member(v(v%0),%#)]=0,{&y%0 me=[add(1,v(y%0))];&v%0 me=[v(v%0)] %#;@pemit %#=Your vote has been recorded.},{@pemit %#=Our records indicate you have already voted on this question.;@trigger me/caught1=%#}}}
+&NO Polling Object=$no *:@switch [type(%#)]=PLAYER,{@switch [member(v(questions),%0)]=0,{@pemit %#=That is not a valid poll ID number.},{@switch [member(v(v%0),%#)]=0,{&n%0 me=[add(1,v(n%0))];&v%0 me=[v(v%0)] %#;@pemit %#=Your vote has been recorded.},{@pemit %#=Our records indicate you have already voted on this question.;@trigger me/caught1=%#}}}
+&LVOTES Polling Object=$votes:@pemit %#=[iter(v(questions),%r##.  [v(q##)]%r)]
+&VHEELP Polling Object=$vhelp:@pemit %#=Commands for the Polling Object:%rpoll <question>:%tAdd a new question.  Ex:  poll Yes?%rdelete #:%t%tIf you are the author, delete that poll.%rshow #:%t%t%tGet current information for poll #.%rvotes:%t%t%tList current polls and their IDs.%ryes #:%t%t%tvote `yes' on poll #.%rno #:%t%t%tvote `no' on poll #
+@Desc Polling Object=Yes, it's a polling object.  Type `vhelp' for help.
+&FFMT Polling Object=switch(lt(strlen(%0),60),1,
+&ADDQ2 Polling Object=$poll *:@trigger me/enterq=%0,%#

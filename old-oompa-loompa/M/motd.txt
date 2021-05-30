@@ -1,0 +1,95 @@
+# MOTD Manager
+# Author: Unkown
+# Format: Mark Hassman (11/11/97)
+#--------------------------------------------------------------------------#
+# Requires wiz inheritance and is two objects -- comands and data.
+# 
+# The Help:
+#
+#This object is used to easily set, edit and clear the motd. There
+#are are 36 motd entries (0-9, a-z), (these are displayed to all players at
+#login), the wiz motd, the downmotd and the fullmotd. Motd's (0-z) and the
+#wiz motd may be set and edited by commands, down and full motd's must be
+#set by hand.The commands are: 
+#
+#+setmotd. This actually sets the motd.
+#+preview motds. This lets you preview what you've set for the motds
+#without setting them.
+#+setmotd* where * = 0-9 and a-z &
+#+wizmotd <motd>. These commands set the player motds and wiz motd.
+#+wipe motd*,wizmotd. These clear the selected motd.
+#+wipe motd will clear all motd's.
+#+edit motd*,wizmotd=<old>/<new>. These commands edit the selected motd.
+#-------------------------------------------------------------------------#
+# The actual stuff
+#  If you wish to add these commands to an existing globals object,
+#  make certain it is only usable by wizards.  Edit the string
+#  '+commands 4 (Wiz)' to the dbref or name of the existing object.
+#  in vi this can be done by:
+#	:%s/+commands 4 (Wiz)/<dbref>/g
+@create +commands 4 (Wiz)
+-
+&CMD-EDITMOTD +commands 4 (Wiz)=
+	$+edit motd?=*/*:&motd%0 #40 = edit(u(#40/motd%0),%1,%2);
+	@pemit %# =\[MOTD\] Motd%0 has been edited. Be sure 
+		to +setmotd to reset the motds.
+-
+&CMD-SETMOTD +commands 4 (Wiz)=
+	$+setmotd:@trigger #40/fun-setmotd=%#
+-
+&CMD-CLEARWIZMOTD +commands 4 (Wiz)=
+	$+wipe wizmotd:&wizmotd #40=;@trigger #40/fun-setmotd=%#; 
+	@pemit %#=Wizmotd has been cleared.
+-
+&CMD-WRITE-MOTD +commands 4 (Wiz)=
+	$+setmotd? *:&motd%0 #40=%r* %1;
+	@pemit %#=\[MOTD\] Motd%0 set to:%r[u(#40/motd%0)].%r
+		\[MOTD\] Don't forget to '+setmotd' if you are happy with this motd.
+-
+&CMD-PREVIEW-MOTD +commands 4 (Wiz)=
+	$+preview motds:@pemit %# =\[MOTD\] PREVIEW MOTDS:%r
+	[iter(lattr(#40/motd*),## [u(#40/##)]%r)]WIZMOTD%r[u(#40/wizmotd)]
+-
+&CMD-CLEARALL-MOTD +commands 4 (Wiz)=
+	$+wipe motd:@dolist lattr(#40/motd*) = 
+	{
+	  &[##] #40 =
+	};
+	@pemit %#=\[MOTD\] All motds are cleared.
+-
+&CMD-CLEAR-MOTD +commands 4 (Wiz)=
+	$+wipe motd?:&motd%0 #40=;
+	@pemit %#=\[MOTD\] Motd%0 has been cleared.
+-
+&CMD-SETWIZ-MOTD +commands 4 (Wiz)=
+	$+wizmotd *:&wizmotd #40=%0%r;
+	@pemit %#=\[MOTD\] Wizmotd set to:%r[u(#40/wizmotd)]%r
+		\[MOTD\] Don't forget to '+setmotd' if you are happy with this motd.
+-
+&CMD-EDITWIZ-MOTD +commands 4 (Wiz)=
+	$+edit wizmotd=*/*:&wizmotd #40 = edit(u(#40/wizmotd),%0,%1);
+	@pemit %N=\[MOTD\] The wizmotd has been edited. Be sure 
+		to do +setmotd to reset the motds.
+-
+# Set up the data object
+#
+@create MOTD Data Object
+-
+@lock MOTD Data Object=me
+-
+&FUN-SETMOTD MOTD Data Object=
+	@motd [iter(lattr(#40/motd*),[switch(strlen(v(##)),0,,v(##))])];
+	@motd/wizard [u(WIZMOTD)];
+	@motd/down [u(DOWNMOTD)];
+	@motd/full [u(FULLMOTD)];
+	@pemit %0=\[MOTD\] MOTDs set.
+-
+@set MOTD Data Object=SAFE
+-
+# Do the edit to make things jive.
+@fo %#=
+  {
+     @edit +commands 4 (Wiz)/*motd*=#40,[num(MOTD Data Object)];
+     @edit MOTD Data Object/*motd*=#40,[num(MOTD Data Object)]
+  }
+-

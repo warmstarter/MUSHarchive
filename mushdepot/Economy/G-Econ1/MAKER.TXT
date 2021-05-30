@@ -1,0 +1,26 @@
+@create Econ Maker
+@link Econ Maker = #60
+@lock/Basic Econ Maker=#58
+@set Econ Maker = WIZARD
+&CMD_MARKET Econ Maker=$make market *=*:@create %0 Market;@lock %0 Market=me;@set %0 Market=wiz;@set %0 Market=!no_c;@parent %0 Market=[v(market)];&operator %0 Market=%1;@ulock market=canuse/1;@tel %0 Market=[loc([loc(me)])];@pemit %#=%0 Market installed.
+&MARKET Econ Maker=#1141
+@DESCRIBE Econ Maker=Type HELP ECON ADMIN MAKER for help.
+@set Econ Maker/DESCRIBE=no_command visual
+&VERSION Econ Maker=2.1
+@set Econ Maker/VERSION=no_command
+&CARGO_TRANSPORT Econ Maker=#1567
+&WAREHOUSE Econ Maker=#1555
+&FACTORY Econ Maker=#935
+&MINE Econ Maker=#937
+&FARM Econ Maker=#1295
+&WATER_PUMP Econ Maker=#1296
+&POWER_PLANT Econ Maker=#458
+&BANKER Econ Maker=#59
+&CMD_CARGO_TRANSPORT Econ Maker=$make cargo transport *=*/*:@create %0 Cargo Transport;@lock %0 Cargo Transport=me;@set %0 Cargo Transport=wiz;@set %0 Cargo Transport=MONITOR;@set %0 Cargo Transport=puppet;@set %0 Cargo Transport=!no_nommand;@listen %0 Cargo Transport=* has left.;@parent %0 Cargo Transport=[v(cargo_transport)];&owner %0 Cargo Transport=%1;@set %0 Cargo Transport=!no_c;&type %0 Cargo Transport=%2;&CARGOCAN %0 Cargo Transport=1;@ulock %0 Cargo Transport=canuse/1;@tel %0 Cargo Transport=[loc([loc(me)])];@pemit %#=%0 Cargo Transport installed.
+&CMD_WARE Econ Maker=$make warehouse *=*/*:@create %0 Warehouse;@lock %0 Warehouse=me;@set %0 Warehouse=!NO_COMMAND;@set %0 Warehouse=wiz;@parent %0 Warehouse=[v(warehouse)];&owner %0 Warehouse=%1;&type %0 Warehouse=%2;@ulock %0 Warehouse=canuse/1;&cargocan %0 Warehouse=1;@tel %0 Warehouse=[loc([loc(me)])];@pemit %#=%0 Warehouse installed.
+&CMD_FACTORY Econ Maker=$make factory *=*/*:@create %0 Factory;@lock Factory=me;@parent Factory=[v(factory)];@set Factory=wiz;@set factory=!no_c;&owner Factory=%1;&type Factory=%2;&planet Factory=%2;@ulock factory=canuse/1;@tel Factory=[loc([loc(me)])];@pemit %#=Factory installed.
+&CMD_MINE Econ Maker=$make mine *=*/*:@create %0 Mining Console;@lock Mining Console=me;@set Mining Console=!no_command;@set Mining Console=wiz;@parent Mining Console=[v(mine)];&owner Mining Console=%1;&planet Mining Console=%2;@ulock mining console=canuse/1;@tel Mining Console=[loc([loc(me)])];@pemit %#=Mining Console installed.
+&CMD_FARM Econ Maker=$make farm *=*/*:@create %0 Farm;@lock %0 Farm=me;@set %0 Farm=!no_c;@set %0 Farm=wiz;@parent %0 Farm=[v(farm)];&owner %0 Farm=%1;&type %0 Farm=%2;@ulock farm=canuse/1;@tel %0 Farm=[loc([loc(me)])];@pemit %#=%0 Farm installed.
+&CMD_WATER_PUMP Econ Maker=$make water pump *=*/*:@create %0 Water Pumping Station;@lock %0 Water Pumping Station=me;@set %0 Water Pumping Station=!NO_COMMAND;@set %0 Water Pumping Station=wiz;@parent %0 Water Pumping Station=[v(water_pump)];&owner %0 Water Pumping Station=%1;@ulock Water Pumping Station=canuse/1;&type %0 Water Pumping Station=%2;@tel %0 Water Pumping Station=[loc([loc(me)])];@pemit %#=%0 Water Pumping Station installed.
+&CMD_POWER_PLANT Econ Maker=$make power plant *=*/*:@create %0 Power Plant;@lock %0 Power Plant=me;@set %0 Power Plant=!NO_COMMAND;@set %0 Power Plant=wizard;@parent %0 Power Plant=[v(power_plant)];&owner %0 Power Plant=%1;&type %0 Power Plant=%2;@ulock %0 Power Plant=canuse/1;@tel %0 Power Plant=[loc([loc(me)])];@pemit %#=A Power Plant for %0 has been installed.
+&CMD_BANKER Econ Maker=$make banker *=*:@create Banker;@lock Banker=me;@parent Banker=[v(banker)];@set Banker=!NO_COMMAND;&race Banker=%0;@sex Banker=%1;@set Banker=wizard;@ulock Banker=canuse/1;@tel Banker=[loc([loc(me)])];@pemit %#=A %0 %1 Banker has been created.

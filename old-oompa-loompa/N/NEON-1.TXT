@@ -1,0 +1,87 @@
+Dodge Neon(#4368DQVYaehs$)
+Type: THING Flags: DARK QUIET VISUAL PARENT_OK AUDIBLE ENTER_OK HALTED SAFE
+COMMANDS
+You see a [name(me)] with [get(me/xcolor)] exterior.
+Owner: Apollo  Key: *UNLOCKED* Coins: 1
+START:$start:@switch [get(me/engine)]=on,@pemit [v(#)]=The [name(me)]'s engine
+is already running.,off,{@switch [num(me)]=[loc([v(#)])],{&engine me=on;@Pemit
+me=[v(n)] turns the key, and the ignition turns over.;@emit [name(me)]'s engine
+rumbles to life.}}
+Listen:*
+Prefix:From inside the [name(me)],
+Inprefix:From the outside,
+ENGINE:off
+STOP:$stop:@switch [num(me)]=[loc([v(#)])],{@switch [get(me/engine)]=off,@pemit
+[v(#)]=The engine is already off.,on,{@pemit me=[v(n)] turns the key.;@emit
+[name(me)]'s engine comes to a halt.;&engine me=off;&speed me=0}}
+DRIVE:$dri *:@switch [num(me)]=[loc([v(#)])],{@switch [get(me/engine)]=off,
+@pemit [v(#)]=The [name(me)]'s engine is not running.,on,{@force me=[iter(%0,
+secure(move ##);)]}}
+Oenter:sits down inside.
+Oxenter:opens a door of the [name(me)], and climbs inside.
+Enter:You open a door, and climb inside.
+Leave:You open a door, and climb outside.
+Oleave:gets out of the car.
+Oxleave:gets out of the [name(me)] and closes the door behind %o with a slam.
+Idesc:You are in a [name(me)] with [get(me/icolor)] interior. %r%r[get_eval
+(me/WHAT_IS_HERE)]%r%rType CARHELP for help.
+ICOLOR:Black
+XCOLOR:Black
+Fail:It's too heavy.
+HORN:$honk:@switch [num(me)]=[loc([v(#)])],{@pemit me=[v(n)] honks the horn.;
+@emit The [name(me)]'s horn HONKS!}
+HELP_CAR:$carhelp:@switch [num(me)]=[loc([v(#)])],{@pemit [v(#)]==-=-=-=-=-=
+Car Help=-=-=-=-=-=-=-=%rStart %rCarStats%rStatus%rDri <direction list>%rAccel
+<amount>%rDecel <amount>%rBrake%rHonk%rStop%rScan%rScan <object>%rDrive home
+%r=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=}
+Ealias:drive
+SPEED:0
+ACCELERATE:$accel *:@switch [num(me)]=[loc([v(#)])],{@switch [get(me/engine)]=
+off,@pemit [v(#)]=Perhaps you should start the [name(me)] before trying to
+speed?,on,{@pemit me=[v(n)] pushes down on the accelerator.;&speed me=[add([get
+(me/speed)],[v(0)])];@emit [name(me)] speeds along at [get(me/speed)] MPH.}}
+DECELERATE:$decel *:@switch [num(me)]=[loc([v(#)])],{@switch [get(me/engine)]=
+off,@pemit [v(#)]=If the car is off... it's not moving anyway.,on,{@pemit me=[v
+(n)] presses on the brakes slightly to slow.;&speed me=[sub([get(me/speed)],[v
+(0)])];@emit [name(me)] slows to [get(me/speed)] MPH.}}
+BRAKE:2
+STATUS:$status:@switch [num(me)]=[loc([v(#)])],{@pemit me=[v(n)] examines the
+gauges closely.;@pemit [v(#)]=Engine: [get(me/engine)]%rSpeed: [get(me/speed)]
+MPH%rBattery: [get(me/battery)]%rOil: [get(me/oil)]%rFuel: [get(me/gas)]}
+GAS:full
+OIL:full
+SPEED_SAFE:100
+MAX_SPEED:170
+MANUEVER:#CoRrUpTeD#
+SPEED_MAX:190
+Cost:$22k
+STATS_CAR:$carstats:@switch [num(me)]=[loc([v(#)])],@pemit [v(#)]=-------[name
+(me)] Stats-------%rType: [get(me/type)]%rSafe Speed: [get(me/Brake: [get(me/
+brake)]%rCost: [get(me/cost)]
+BRAKES:$brake:@switch [num(me)]=[loc([v(#)])],{@pemit me=[v(N)] slams on the
+brakes.;@emit [name(me)] screeches to a halt.}
+CREDITS:PENTEX@ElysiumMUSH, Brought to you here by Jade@CitadelMUSH%b%b
+Ergonomic modifications by Dragonne@CitadelMUSH
+MANEUVER:0
+Filter:* has left.,* has arrived.
+Infilter:* has left,* has arrived.
+SCAN:$scan:look
+SCAN2:$scan *:look %0
+GO_HOME:$drive home:@force me=home
+REV:$rev:: 's engine roars as %N revs it.
+Odesc:checks out the [name(me)]
+Lalias:out;o;leave;exit
+FORCE_CAR:$cardo *:@force me=%0
+Aenter:@unlock/enter me
+Aleave:@switch %#=owner(me),@elock me=[owner(me)]
+WHAT_IS_HERE:You are currently at [name(here)]. [setq(0,iter(lcon(here),switch
+(type(##),player,switch(hasflag(##,connected),1,##))))][setq(1,setdiff(iter
+(lcon(here),switch(and(strmatch(type(##),T*),not(hasflag(##,DARK))),1,##)),
+%!))]Around the car you see [switch(words(r(0)),0,nobody,1,name(r(0)),iter(rest
+(r(0)),name(##),%vz) and [name(first(r(0)))])] walking in the area, and [switch
+(words(r(1)),0,nothing,1,name(r(1)),iter(rest(r(1)),name(##)%vz) and [name
+(first(r(1)))])] else here.
+No exits.
+Home: The Mist - OOC Room(#0RJh)
+Location: Free Code Room
+_______________________________________________________________________________

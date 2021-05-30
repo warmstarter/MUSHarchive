@@ -1,0 +1,25 @@
+@create Room Parent v.04
+@link Room Parent v.04 = here
+@set Room Parent v.04 = INHERIT
+@set Room Parent v.04 = NO_COMMAND
+@CONFORMAT Room Parent v.04=[u(me/inf_contents_header)][iter(lcon(me),[switch(##,%#,,[switch(hasflag(##,DARK),0,[switch(type(##),PLAYER,[switch(idle(##),-1,,%r%b[ansi(u(inf_player_color),[name(##)])])],THING,%r%b[ansi(u(inf_obj_color),[name(##)])])])])])]
+@set Room Parent v.04/CONFORMAT=no_command
+&CREDITS Room Parent v.04=Coded by Jamie. For permission to use email jamie@dj-tech.org.
+@DESCRIBE Room Parent v.04=[u(me/inf_desc_border_t)]%r[u(me/inf_desc)]%r[u(me/inf_desc_border_b)]
+@set Room Parent v.04/DESCRIBE=no_command visual
+@EXITFORMAT Room Parent v.04=[u(me/inf_exits_header)]%r[iter(lexits(me),[switch(hasflag(##,DARK),0,{%b[ansi([u(me/inf_alias_bra)],<)][ansi([u(me/inf_alias_c)],[ucstr([extract([fullname(##)],2,1,;)])])][ansi([u(me/inf_alias_bra)],>)][ansi(r,-)][ansi([u(me/inf_exit_c)],name(##))]},{})],)]
+@set Room Parent v.04/EXITFORMAT=no_command
+&EXITFORMAT2 Room Parent v.04=[u(me/inf_exits_header)]%r[iter(lexits(me),[switch(hasflag(##,DARK),0,{%b[ansi(hr,<#@>)] -%b[ansi([u(me/inf_alias_bra)],<)][ansi([u(me/inf_alias_c)],[ucstr([extract([fullname(##)],2,1,;)])])][ansi([u(me/inf_alias_bra)],>)]%b[ansi([u(me/inf_exit_c)],name(##))]},{})],)]
+&INF_ALIAS_BRA Room Parent v.04=hb
+&INF_ALIAS_C Room Parent v.04=hc
+&INF_CONTENTS_HEADER Room Parent v.04=[ansi(hg,Contents:)]
+&INF_DESC Room Parent v.04=%tThis is the default description for the room parent by Jamie. You can set your own description with the inf_desc attribute. You can customize your top describe border with inf_desc_border_t and the bottom one with inf_desc_border_b. Also you can customize the headers for the contents and exits using inf_contents_header and inf_exits_header. Changing the color that objects and players show up in can be done with the inf_player_color and inf_obj_color. Changing the colors for the exits can be done with inf_exit_c. Further the exit alias color can be set with inf_alias_c and the brackets around the alias with inf_alias_bra.
+&INF_DESC_BORDER_B Room Parent v.04=[ansi(hb,[repeat(=,76)])]
+&INF_DESC_BORDER_T Room Parent v.04=[ansi(hb,[repeat(=,76)])]
+&INF_EXITS_HEADER Room Parent v.04=[ansi(hg,Obvious Exits:)]
+&INF_EXIT_C Room Parent v.04=c
+&INF_OBJ_COLOR Room Parent v.04=hb
+&INF_PLAYER_COLOR Room Parent v.04=hc
+@dolist [lattr(Room Parent v.04)] credits=@set Room Parent v.04/##=no_command
+@set Room Parent v.04/credits=visual
+@wait me/10=@pe/silent %#=[ansi(hr,INSTALLATION COMPLETE.)]%r[ansi(hc,Email jamie@dj-tech.org with comments/feedback/questions)]

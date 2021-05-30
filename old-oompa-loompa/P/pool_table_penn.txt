@@ -1,0 +1,25 @@
+@create Pool Table
+@link Pool Table = #1956
+@lock/Basic Pool Table=#1854
+@lset Pool Table/Basic=no_inherit
+@lock/Enter Pool Table==#1
+@lset Pool Table/Enter=no_inherit
+@set Pool Table = MONITOR
+&BALLS Pool Table=1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
+&CMD_HELP Pool Table=$+pool/help:@pe %#=%R[center([ansi(y,Pool Table Help)],40)]%R[ansi(hb,[repeat(=,40)])]%R%B%B[ljust([ansi(hw,Command)],15)][ansi(hw,Description)]%R[ansi(hb,[repeat(=,40)])]%R%B[ljust([ansi(hy,+pool/join)],15)][ansi(hb,=)]Joins the table.%R%B[ljust([ansi(hy,+pool/leave)],15)][ansi(hb,=)]Leaves the table.%R%B[ljust([ansi(hy,+pool/players)],15)][ansi(hb,=)]Lists players/score.%R%B[ljust([ansi(hy,+pool/rack)],15)][ansi(hb,=)]Starts new game.%R%B[ljust([ansi(hy,+pool/shoot)],15)][ansi(hb,=)]Takes a shot.%R
+&CMD_JOIN Pool Table=$+pool/join:[switch([items([v(CURRPLYRS)])],4,[pemit(%#,u(TITLE) #-1 The pool table is already at its maximum number of players.)],[switch([member([v(CURRPLYRS)],%#)],1,[pemit(%#,[u(TITLE)] #-1 You are already playing pool.)],[set(me, CURRPLYRS:[v(CURRPLYRS)]%B%#)][set(me, PLYR_[squish([name(%#)])]:0)][switch([hasattrval(me, CURRSHTR)],0,[set(me, CURRSHTR:%#)],1)][emit([u(TITLE)]%B[name(%#)]%Bjoins the pool table.)])])]
+&CMD_LEAVE Pool Table=$+pool/leave:[switch([member([v(CURRPLYRS)],%#)],0,[pemit(%#, u(TITLE) #-1 You are not playing pool.  You can not do that.)],[set(me, CURRPLYRS:[setdiff(v(CURRPLYRS), %#)])][set(me, CURRSHTR:[first([v(CURRPLYRS)])])][wipe(me/PLYR_[squish([name(%#)])])][emit(u(title)%B[name(%#)]%Bleaves the pool table.)])]
+&CMD_PLAYERS Pool Table=$+pool/players:@pe %#=%R[center([ansi(y,Current Pool Players)],40)]%R[ansi(hb,[repeat(=,40)])]%R%B[ljust([ansi(hw,Name)],25)][ansi(hw,Score)]%R[ansi(hb,[repeat(=,40)])]%R%B[iter(v(CURRPLYRS),[ljust([ansi(hg,[name(##)])],25)][v(PLYR_[name(##)])]%R)]%R
+&CMD_RACK Pool Table=$+pool/rack:@sel 0=[member([v(CURRPLYRS)], %#)], @pe %#=[u(TITLE)] #-1 You are not currently playing pool.  You can't do that., [set(me, BALLS:1 2 3 4 5 6 7 8 9 10 11 12 13 14 15)][iter([lattr(me/PLYR_*)],[set(me, ##:0)])][emit(u(TITLE)%B[name(%#)] racks the balls on the pool table for another game.)]
+&CMD_RESET Pool Table=$+pool/reset:&currplyrs me=;&currshtr me=;&balls me=1 2 3 4 5 6 7 8 9 10 11 12 13 14 15;@emit [u(TITLE)]%B[name(%#)]%Bhas reset the Pool Table.
+&CMD_SHOOT Pool Table=$+pool/shoot:[switch(v(CURRSHTR),%#,[switch(hasattrval(me, BALLS),0,[emit(u(TITLE) #-1 There are no more balls on the table.  Rack'em up to play again.)],[switch([member([v(CURRPLYRS)],%#)],0,[pemit(%#,u(TITLE) #-1 You are not playing pool.  You can not do that.)],[emit([name(%#)] takes a shot at the pool table.)][switch([rand(3)],2,[emit([name(%#)] successfully sinks a ball.)][set(me, PLYR_[squish([name(%#)])]:[add([v(PLYR_[name(%#)])],1)])][set(me, BALLS:[extract([shuffle([v(BALLS)])],2,15)])],u(FUN_TURN, %#)[emit([name(%#)] misses his shot.)])])])],[pemit(%#, u(TITLE) #-1 It is not your turn.)])]
+&CURRPLYRS Pool Table=
+&CURRSHTR Pool Table=
+@DESCRIBE Pool Table=[ansi(yY,[repeat(_,31)]%R_)][ansi(Xy,O)][ansi(yY,[repeat(_,13)])][ansi(Xy,O)][ansi(yY,[repeat(_,13)])][ansi(Xy,O)][ansi(yY,_%r__)][repeat([ansi(gG,_)],27)][ansi(yY,__%r__)][repeat([ansi(gG,_)],27)][ansi(yY,__%r__)][repeat([ansi(gG,_)],27)][ansi(yY,__%r__)][repeat([ansi(gG,_)],27)][ansi(yY,__%r__)][repeat([ansi(gG,_)],27)][ansi(yY,__%r__)][repeat([ansi(gG,_)],27)][ansi(yY,__%r__)][repeat([ansi(gG,_)],27)][ansi(yY,__%R_)][ansi(Xy,O)][ansi(yY,[repeat(_,13)])][ansi(Xy,O)][ansi(yY,[repeat(_,13)])][ansi(Xy,O)][ansi(yY,_%r[repeat(_,31)])]%R[ansi(Xhw,Balls currently on the table:%B)] [iter(sort(v(BALLS),n),[ansi(Xh,##)])]%R[ansi(hw,Type '+pool/help' for help.)]%R
+@set Pool Table/DESCRIBE=no_command visual
+&DO_DCONNECT Pool Table=^* has disconnected.:[setq(0,[num(%0)])][u(FUN_REMOVE, %q0)]
+&DO_LEAVE Pool Table=^* has left.:[setq(0,[num(%0)])][u(FUN_REMOVE, %q0)]
+&FUN_REMOVE Pool Table=[switch([member([v(CURRPLYRS)],%#)],0,[pemit(%#, u(TITLE) #-1 [name(%0)] is not playing pool.)],[set(me, CURRPLYRS:[setdiff(v(CURRPLYRS), %#)])][set(me, CURRSHTR:[first([v(CURRPLYRS)])])][wipe(me/PLYR_[squish([name(%#)])])][emit(u(title)%B[name(%#)]%Bleaves the pool table.)])]
+&FUN_TURN Pool Table=[set(me, CURRSHTR:[switch([first([after([v(CURRPLYRS)], %0)])],,[first([v(CURRPLYRS)])],[first([after([v(CURRPLYRS)], %0)])])])]
+&PLYR_THE_PROF Pool Table=0
+&TITLE Pool Table=[ansi(y,%[)][ansi(hg,POOL)][ansi(y,%])]

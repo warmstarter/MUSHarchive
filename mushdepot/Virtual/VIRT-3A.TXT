@@ -1,0 +1,47 @@
+@create Places: PARENT
+@link Places: PARENT=[owner(me)]
+@lock Places: PARENT=*[owner(me)]
+@set Places: PARENT=LINK_OK
+@set Places: PARENT=OPAQUE
+@set Places: PARENT=VISUAL
+@set Places: PARENT=SAFE
+@set Places: PARENT=NO_COMMAND
+@set Places: PARENT=MONITOR
+&UNCONFIGURE Places: PARENT=$unconfigure places:@pemit %#=Attempting to remove Places code...;@dolist [rest(lnum(inc(v(maxplaces))))]={&maxseats## me=;&place## me=;&place##names me=};@aleave me=;&cleanupseats me=;&cleanupseatsa me=;&cleanupseatsb me=;@set me=!MONITOR;&maxplaces me=;@parent me=
+&PLACES_CMD Places: PARENT=$places:@dolist [rest(lnum(add(v(maxplaces), 1)))]=@pemit %#=[setq(0,sub(v(maxseats##),words(v(place##names))))][capstr(v(place##))] ({#}##) has [switch(%q0,0,no,%q0)] empty [switch(%q0,1,seat,seats)].[switch(words(v(place##names)),0,,1,%r%b%b%bSeated is:%b[name(u(place##names))].,%r%b%b%bSeated are:%b[u(#2122/place_look,v(place##names))])]
+@DESCRIBE Places: PARENT=How to set up Places:%r%rFirst type: @parent <room/thing>=#2121%rThis allows an object or room to use the places code.%r%rNext you MUST type: configure <number of places> places%rThis will set up the number of places you want with a random maximum of seats per place, and a name for each place of `place <number>'.%rNext type: `@set <thing>=!HALT' and `@set <thing>=!NO_COMMAND'.%r%rTo set the number of available seats, type:%r&maxseats<place number> <object>=<number of seats>%r%rPlaces can be renamed by typing:%r&place<place number> <object>=<new place name>%rThe place name should not start with a capital letter, or end in a period.%rDo not set the room or object DARK.%r%rFor places instructions, type `placehelp'.%r%rTo remove places code, type `unconfigure places'.%r%r<<Report any bugs to the Coding Staff!>>
+&JOINPLACE1 Places: PARENT=$sit at #*:@switch 0=[isnum(%0)],@pemit %#=You can join a place by name or number only.,[not(member(iter(rest(lnum(add(v(maxplaces), 1))), [v(place##names)]), %#))],@pemit %#=Don't you think you should 'stand' first?,[lte(%0, v(maxplaces))],@pemit %#=It would help if there were that many places.,[gt(v(maxseats%0), words(v(place%0names)))],@pemit %#=There aren't any free seats at that place.,{@oemit %#=%N sits down at the [v(place%0)].;@pemit %#=You sit down at the [v(place%0)].;@dolist [v(place%0names)]=@pemit ##=%N sits down and joins you.;&place%0names me=[v(place%0names)] %#}
+&JOINPLACE Places: PARENT=$sit with *:[setq(0, extract(iter(rest(lnum(add(v(maxplaces), 1))), [switch(words(v(place##names)), 0,, [repeat(%b##, words(v(place##names)))])]),member(iter(rest(lnum(add(v(maxplaces), 1))), [v(place##names)]), num(%0)), 1))];@switch 0=[member(iter(rest(lnum(add(v(maxplaces), 1))), [v(place##names)]),num(%0))],{@pemit %#=There isn't anyone named '%0' sitting here.},[not(member(iter(rest(lnum(add(v(maxplaces), 1))), [v(place##names)]), %#))],{@pemit %#=Don't you think you should `stand' first?},[lte(r(0), v(maxplaces))],{@pemit %#=It would help if there were that many places.},[gt(v(maxseats[r(0)]), words(v(place[r(0)]names)))],{@pemit %#=There aren't any free seats at the place %0 is at.},{@oemit %#=%N sits down at the [v(place[r(0)])].;@pemit %#=You sit down at the [v(place[r(0)])].;@dolist [v(place[r(0)]names)]=@pemit ##=%N sits down and joins you.;&place[r(0)]names me=[v(place[r(0)]names)] %#}
+&STANDPLACE Places: PARENT=$stand:@switch [member(iter(rest(lnum(add(v(maxplaces), 1))),[v(place##names)]), %#)]=0,{@pemit %#=Well, you stretch, but standing is hard considering you already are.},{[setq(0, [extract(s(iter(rest(lnum(add(v(maxplaces), 1))), [switch(words(v(place##names)), 0,, [repeat(%b##, words(v(place##names)))])])), member(iter(s(rest(lnum(add(v(maxplaces), 1)))), [v(place##names)]), %#), 1)])];&place[r(0)]names me=[remove(v(place[r(0)]names), %#)];@pemit %#=You stand and stretch, leaving your seat.;@dolist [v(place[r(0)]names)]=@pemit ##=%N stands, leaving the [v(place[r(0)])].}
+&TALK Places: PARENT=$tt *:@switch [member(iter(rest(lnum(add(v(maxplaces),1))), [v(place##names)]), %#)]=0,{@pemit %#=Try sitting down at a place first, perhaps?},{@dolist [v(place[extract(iter(rest(lnum(add(v(maxplaces), 1))),[switch(words(v(place##names)), 0,, [repeat(%b##, words(v(place##names)))])]),member(iter(rest(lnum(add(v(maxplaces), 1))), [v(place##names)]), %#),1)]names)]={@pemit ##=At your place, %N[switch(%0,:*,%b[delete(%0,0,1)],;*,[delete(%0,0,1)],%bsays "%0")]}}
+&PLACEHELP Places: PARENT=$placehelp:@pemit %#=u(#2122/help)
+&CONFIGURE Places: PARENT=$configure * places:@switch isnum(%0)=0,@pemit %#=The number of places needs to be a number!,{@aleave me=get(#2122/leaving);&MAXPLACES me=%0;@dolist [lnum(v(maxplaces))]={&maxseats[add(##,1)] me=[add(rand(9),1)];&place[add(##,1)] me=place [add(##,1)]};@set me=MONITOR;&cleanupseats me=get(#2122/cleanupseats);@pemit %#=[name(me)] configured for %0 places.}
+&CREDITS Places: PARENT=Place code parent from Dark Web. Coder unknown. Originaly from Damned? Edited by Lindsey.
+&MAXPLACES Places: PARENT=7
+&MAXSEATS1 Places: PARENT=1
+&PLACE1 Places: PARENT=place 1
+&MAXSEATS2 Places: PARENT=6
+&PLACE2 Places: PARENT=place 2
+&MAXSEATS3 Places: PARENT=7
+&PLACE3 Places: PARENT=place 3
+&MAXSEATS4 Places: PARENT=9
+&PLACE4 Places: PARENT=place 4
+&MAXSEATS5 Places: PARENT=1
+&PLACE5 Places: PARENT=place 5
+&MAXSEATS6 Places: PARENT=1
+&PLACE6 Places: PARENT=place 6
+&MAXSEATS7 Places: PARENT=7
+&PLACE7 Places: PARENT=place 7
+&MAXSEATS8 Places: PARENT=6
+&PLACE8 Places: PARENT=place 8
+&TABLES_CMD Places: PARENT=$tables:@dolist [rest(lnum(add(v(maxplaces), 1)))]=@pemit %#=[setq(0,sub(v(maxseats##),words(v(place##names))))][ansi(h[extract(u(#2122/colors),mod(##,2),1)],capstr(v(place##)))] ({#}##) has [switch(%q0,0,[ansi(h,no)],[ansi(h,%q0)])] empty [switch(%q0,1,seat,seats)].[switch(words(v(place##names)),0,,1,%rSeated is:%b[name(u(place##names))].,%rSeated are:%b[u(#2122/place_look,v(place##names))])]
+&CLEANUPSEATS Places: PARENT=^* disconnected.:@dolist [lnum(add(v(maxplaces),1))]=&place##names me=[setdiff(v(place##names),%#)]
+&JOINNAME Places: PARENT=$sit at *:@switch/first [match(%0,#*)]=0,{@switch [setq(0,match(iter(rest(lnum(inc(v(maxplaces)))),[u(place##)]|),*%0*,|))]0=%q0,@pemit %#=I don't know any place named '%0'.,[not(member(iter(rest(lnum(inc(v(maxplaces)))),[u(place##names)]),%#))],@pemit %#=You should 'stand' before changing seats.,[gt(u(maxseats%q0),words(u(place%q0names)))],@pemit %#=There aren't any seats available at that place. Type 'places'.,{@pemit %#=You sit down at the [u(place%q0)].;@dolist [u(place%q0names)]=@pemit ##=%N sits down and joins you.;@oemit %#=%N sits down at the [v(place%q0)].;&place%q0names me=[u(place%q0names)] %#}}
+&PLACE0NAMES Places: PARENT=
+&PLACE1NAMES Places: PARENT=
+&PLACE2NAMES Places: PARENT=
+&PLACE3NAMES Places: PARENT=
+&PLACE4NAMES Places: PARENT=
+&PLACE5NAMES Places: PARENT=
+&PLACE6NAMES Places: PARENT=
+&PLACE7NAMES Places: PARENT=

@@ -1,0 +1,86 @@
+@@ Object: Friends-List Code
+@@ Version: 1.0
+@@ Author: Jonathan A. Booth
+@@ E-mail: kamikaze@N0$PAMimsa.edu
+@@ Web: http://www.N0$PAMimsa.edu/~kamikaze/
+@@ (remove N0$PAM from hostnames to use them)
+@@ Date: Mar 25, 1999
+@@ Written for: PennMUSH 1.7.2 pl21
+@@ Author is willing to support: Yes
+@@
+@@ This script creates a friends-code object, suitable for placment
+@@ in your master room. For help, look at the object, or download the
+@@ Friends_System.hlp file that is in the same directory that this was.
+@@ 
+@@ See the object's COPYRIGHT attribute for copyright information.
+@@
+
+@create Friends-List Code
+@set Friends-List Code = WIZARD
+@set Friends-List Code = SAFE
+@STARTUP Friends-List Code=@dol lattr(me/FRIENDS_OF_*)={@sel hasattrval(me,##)=0,{&## me}}
+@set Friends-List Code/STARTUP=no_command
+@ACONNECT Friends-List Code=@sel not(hasflag(%#,DARK))=1,{@dol v(friends_of_%#)={@pemit ##=[objeval(##,udefault(##/FRIEND_CONNECTED,Friends-List: %N has connected.,%N))]}
+@set Friends-List Code/ACONNECT=no_command
+@ADISCONNECT Friends-List Code=@sel not(hasflag(%#,DARK))=1,{@dol v(friends_of_%#)={@pemit ##=[objeval(##,udefault(##/friend_disconnected,Friends-List: %N has disconnected.,%N))]}
+@set Friends-List Code/ADISCONNECT=no_command
+&CMD_FRIEND_ADD Friends-List Code=$^\+friend(s?)/add (.+)$:think setq(0,pmatch(secure(%2)));@sel isdbref(%q0)=1,{&friends_of_%q0 me=[setunion(v(freinds_of_%q0),%#)];@pemit %#=[name(%q0)] added to your friends list.},{@pemit %#=I can't seem to find %2. Did you spell the name right?}
+@set Friends-List Code/CMD_FRIEND_ADD=regexp
+&CMD_FRIEND_REMOVE Friends-List Code=$^\+friend(s?)/remove (.+):think setq(0,pmatch(secure(%2)));@sel isdbref(%q0)=1,{&friends_of_%q0 me=[setdiff(v(freinds_of_%q0),%#)];@pemit %#=[name(%q0)] removed from your friends list.},{@pemit %#=I can't seem to find %2. Did you spell the name right?}
+@set Friends-List Code/CMD_FRIEND_REMOVE=regexp
+&CMD_FRIEND_LIST Friends-List Code=$^\+friend(s?)/list$:@pemit %#=Your friends-list to watch: [edit(sort(iter(grep(me,friends_of_*,%#),[name(last(##,_))],%b,@),a,@),@,%,%b)]
+@set Friends-List Code/CMD_FRIEND_LIST=regexp
+@DESCRIBE Friends-List Code=BASIC USER:%r%rThe friends-list is a global system on the MUSH to help people track if their friends are on or off the MUSH without having these connections be announced to everyone, possibly multiple times. The commands for the system are:%r%r%t+friend/add <name>%tAdds <name> to your friends-list%r%t+friend/remove <name>%tRemoves <name> from your friends-list%r%t+friend/list%t%tShows who is on your friends-list%r%t+friend%t%t%tShows a summary (who's on/off now)%r%rNote: You may use '+friends' as a synonym for '+friend' in any of these commands.%r%rADVANCED USERS:%r%rAdditionally, the messages you receive when someone connects or disconnects are user-configurable. Simply put the message to be displayed on connect/disconnect in your FRIEND_CONNECTED/FRIEND_DISCONNECTED attribute, and use '%%0' to reference their name. You may use functions in these attributes, however they will be evaluated as your player.%r%rFRIEND_ALL_CONNECTED/FRIEND_ALL_DISCONNECTED work the same way as FRIEND_CONNECTED/FRIEND_DISCONNECTED, except they are used for the '+friend' command to show everyone on your list who is (dis)connected. They will be passed a list of names seperated by '@'s.
+@set Friends-List Code/DESCRIBE=no_command visual
+&CMD_FRIEND Friends-List Code=$^\+friend(s?)$:think setq(0,)[setq(1,)][iter(grep(me,friends_of_*,%#),if(andflags(last(##,_),!Dc),setq(0,setunion(%q0,name(last(##,_)),@)),setq(1,setunion(%q1,name(last(##,_)),@))))];@pemit %#=[objeval(%#,udefault(%#/FRIEND_ALL_CONNECTED,{Friends connected: [edit(%q0,@,%,%b)]},%q0))]%r[objeval(%#,udefault(%#/FRIEND_ALL_DISCONNECTED,{Friends disconnected: [edit(%q1,@,%,%b)]},%q1))]
+@set Friends-List Code/CMD_FRIEND=regexp
+&COPYRIGHT Friends-List Code=Friends-List Code/Friends System is Copyright Jonathan Booth (Rhysem@[M*U*S*H|SW2]), 1999. The author of this code takes no responsibility for it's sutibility or safety. If it breaks you get to keep all the pieces. This code is free for non-commercial use; contact me for info reguarding commercial use. You may redistribute this code provided it is unmodified and this COPYRIGHT notice is retained. Don't go and rip off the code as yours, that sucks and makes you suck. Bugs should be reported to me, as well as suggestions. Have fun with it, don't get too addicted. :)
+@set Friends-List Code/COPYRIGHT=no_command visual
+
+
+@@ HELP FILES @@
+
+& friends-list
+& friend-list
+& friend
+______________________________________________________________________________
+0=0=0  The Annointed: help on friends-lists for ADVANCED USERS
+ |||   
+ |||   The messages the friends-list sends you when someone connects or
+ |||   disconnects are user-configurable. Simply put the message to be
+ |||   displayed on (connect/disconnect) in your
+ |||   (FRIEND_CONNECTED/FRIEND_DISCONNECTED) attribute, and use '%0' to
+ |||   reference their name.
+ |||   
+ |||   FRIEND_ALL_CONNECTED/FRIEND_ALL_DISCONNECTED work the same way as
+ |||   FRIEND_CONNECTED/FRIEND_DISCONNECTED, except they are used for the
+ |||   '+friend' command to show everyone on your list who is
+ |||   (dis)connected. They will be passed a list of names seperated by
+ |||   '@'s in '%0'.
+ |||   
+ |||   You may use functions in these attributes. The functions will be
+ |||   evaluated as if you had typed them though, so don't bother trying
+ |||   to hack special privs with them.
+ |||
+0=0=0  See also: 'help +friends'
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+& +friends
+& +friend
+______________________________________________________________________________
+0=0=0  The Annointed: help on +friends command
+ |||
+ |||   The friends-list is a global system on the MUSH to help people
+ |||   track if their friends are on or off the MUSH without having these
+ |||   connections be announced to everyone, possibly multiple times. The
+ |||   commands for the system are:
+ |||
+ |||		+friend/add <name>      Adds <name> to your friends-list
+ |||		+friend/remove <name>   Removes <name> from your list
+ |||		+friend/list            Shows who is on your friends-list
+ |||		+friend                 Shows a summary (who's on/off now)
+ |||
+ |||   Note: You may use '+friends' as a synonym for '+friend' in any of
+ |||   these commands.
+ |||
+0=0=0  See also: 'help friends-lists'
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

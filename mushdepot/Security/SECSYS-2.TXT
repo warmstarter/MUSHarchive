@@ -1,0 +1,67 @@
+*** Full Security System ***
+Copyright (c) 1996 neko. She retains no liability for any damage/destruction/
+fun stuff it may cause.
+
+Here is the code for a security system I just finished writing. It has some
+real nice goodies, including:
+* two levels of security: one for folks who you don't want to log, and another
+for those who can change the settings.
+* records all movement and dialog
+* allows you to restore the last cleared log
+* really pretty log! (:B
+This script has *two* parts: The security system proper, and a camera which
+serves as the `eyes' of the system. Take the camera with you, set it dark, and
+@clone the heck out of it.
+IMPORTANT: be sure to @edit the #9999 db to the db# of the security system!
+This was coded for Penn 1.5 pl10. I don't know how it'll port to other
+versions.
+
+Btw, this is my first major coding project, so there's bound to be some bugs/
+`features' in it. please let me know if there are any. I'd also like to hear of
+any comments or criticisms you may have regarding this script.
+I can be reached at:
+	GlobalMUSH: lancelot.cif.rochester.edu 4201
+	UnnamedMUSH: panther.cat.syr.edu 4201
+	email: neko@amfrontier.net
+	
+ttfn,
+neko (meow)
+p.s. don't forget to @lock it!
+
+
+@create Security System
+&PRIVILEGES-HELP Security System=$sshelp Privileges:@pemit %#=There are two levels of access with this system. Those on the OK Player list can move around without the cameras picking them up, and those with full access can look at/clear the logs and so forth.
+&SSCREDITS-HELP Security System=$SSCredits:@pemit %#=[center(Full Security System version 1.0,72,~)]%r[center([Coded by neko on April 9, 1996],72)]%r[center([Last Revision: April 9, 1996],72)]%r%rYou are free to use/modify this code for your own security system, but I do ask you to include this credits line. If you need the code, just email neko.%r%rYou can reach neko at:%r%tUnnamedMUSH: panther.cat.syr.edu 4201%r%tGlobalMUSH: lancelot.cis.syr.edu 4201%r%temail: neko@amfrontier.net%r%r[center(Full Security Security System Copyright 1996 by neko.,72)]
+&UNDOLOGS-HELP Security System=$SSHelp Undo:@pemit %#=Undo%rSyntax: Undo%r%rBrings back the last log used. To get the current log back, type undo again.
+&CLEARLOGS-HELP Security System=$SSHelp ClearLogs:@pemit %#=ClearLogs%rSyntax: ClearLogs%r%rEmpties the log. If you accidentally dump the log, you can use `undo' to restore it.
+&CHECKLOGS-HELP Security System=$SSHelp Logs:@pemit %#=CheckLogs%rSyntax: CheckLogs%r%rDisplays the full log and the last times it was read and cleared.
+&REMOVEFULL-HELP Security System=$SSHelp RemoveFull:@pemit %#=RemoveFull%rSyntax: RemoveFull <Player Name>%r%rThis command removes the player specified from having full access to the security system. NOTE: The player will still be on the OK Player list, so they'll still be able to be in a room without triggering off the cameras! To remove them from the OK Players list, type RemoveOK <Player>.%rSee sshelp on PRIVILEGES for further information.
+&ADDFULL-HELP Security System=$SSHelp AddFull:@pemit %#=AddFull%rSyntax: AddFull <Player Name>%r%rThis command gives the player specified full access to the security system. This will also add the player to the OK player list, if he/she/it is not already on it.%rSee sshelp on PRIVILEGES for further information.
+&UNDOLOGS-CMD Security System=$Undo:@switch/first [match(v(FullAccess-List),%#)]=0,{@pemit %#=You do not have access to this command.;@tr me/logit=[s([u(DateTime-Fun)]--[%n] of [owner(%#)] tried to restore the logs.)];},{&temp me=[v(log)];&Log me=[v(UndoLog)];&UndoLog me=[v(temp)];&temp me=;&LastLogClear me=Log last restored on [u(datetime-fun)] by %n.;@pemit %#=Undone. To restore, type undo again.;}
+&MONTH-LIST Security System=Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec
+&DATETIME-FUN Security System=[match(v(Month-List),extract(time(),2,1))/[extract(time(),3,1)]/[mod(extract(time(),5,1),100)] [extract(time(),4,1)]]
+&REMOVEOK-HELP Security System=$SSHelp RemoveOK:@pemit %#=RemoveOK%rSyntax: RemoveOK <Player Name>%r%rThis command removes the specified player from the OK player list.
+@DESCRIBE Security System=A small box stuck on the wall from which monitors unwelcome guests. Here are the commands:%r%rOK Player Commands: AddOK%tRemoveOK%tAddFull%tRemoveFull%rLog Commands:%tLogs%tClearlogs%tUndo%rPrivelidged Informaton:%t PrivInfo%r%rPlease note that if you're not cleared in the house, you can't use these commands.%rFor help on these commands, type SSHelp <command>.%rFor a list of credits, type SSCredits%r%rCopyright (c) 1996 by neko
+&LOGIT Security System=&log me=[get(#807/log)]%r%0
+&LASTLOGCLEAR Security System=Log last cleared on 4/10/96 14:05:05 by neko.
+&UNDOLOG Security System=SECURITY SYSTEM LOG
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+&CLEARLOGS-CMD Security System=$ClearLogs:@switch/first [match(v(FullAccess-List),%#)]=0,{@pemit %#=You do not have access to this command.;@tr me/logit=[s([u(DateTime-Fun)]--[%n] of [owner(%#)] tried to clear the logs.)];},{&UndoLog me=[v(Log)];&Log me=SECURITY SYSTEM LOG%r[repeat(~,72)];&LastLogClear me=Log last cleared on [u(datetime-fun)] by %n.;@pemit %#=Cleared. To restore, type `undo'.;}
+&LASTLOGLOOK Security System=Log last checked on 4/10/96 14:04:58 by neko.
+&CHECKLOGS-CMD Security System=$Logs:@switch/first [match(v(FullAccess-List),%#)]=0,{@pemit %#=You do not have access to this command.;@tr me/logit=[s([u(DateTime-Fun)]--%n of [owner(%#)] tried to look at the logs.)];},{@pemit %#=[v(Log)]%r[repeat(~,72)]%r[v(LastLogLook)]%r[v(LastLogClear)];&LastLogLook me=Log last checked on [u(datetime-fun)] by %n.}
+&ADDFULL-CMD Security System=$AddFull *:think [setq(0,num(*%0))];@switch/first [match(v(FullAccess-List),%#)]|%q0|[member(v(FullAccess-List),%q0)]=0|*|*,{@pemit %#=You do not have access to this command.;@tr me/logit== [u(datetime-fun)]--%n of [owner(%#)] tried to add [secure(%0)] to the full access list.},1|#-1|*,{@pemit %#=That is not a player as far as I can tell!},1|*|0,{&FullAccess-List me=[v(FullAccess-List)] [%q0];@pemit %#=%0 (%q0) has been added to the full access list.;@switch [member(v(PlayerOK-List),%q0)]=0,{&PlayerOK-List #9999=[v(PlayerOK-List)] %q0;@pemit %#=[capstr(subj(%q0))] was also added to the OK player list.}},{@pemit %#=[capstr(subj(%q0))] is already on the list, silly!}
+&PRIVINFO-HELP Security System=$SSHelp PrivInfo:@pemit %#=PrivInfo%rSyntax: PrivInfo%r%rThis command is the only command that can be used by those who do not have full access to thesecurity system. You still need to be on the OK Player list to use it, however. PrivInfo gives a list of all the players who are on the OK Player and Full Access lists, as well as the last times the logs were read/cleared and who did so.
+@SEMAPHORE Security System=-1
+&PRIVINFO-CMD Security System=$PrivInfo:@switch/first [match(v(PlayerOK-List),%#)]=0,{@pemit %#=You do not have access to this command.;@tr me/logit== [s(u(datetime-fun)--%n of [owner(%#)] tried to get privliged info.)]},{@pemit %#=These players are allowed in:%r [iter([v(PlayerOK-List)],[ljust([name(##)],30)][rjust(%(##%),10)]%r)]%rThese players have special access:%r [iter([v(FullAccess-List)],[ljust([name(##)],30)][rjust(%(##%),10)]%r)]%rNote that puppets never have access, even if their owner does.%r[v(LastLogLook)]%r[v(LastLogDump)];}
+&REMOVEFULL-CMD Security System=$RemoveFull *:think [setq(0,num(*%0))];@switch/first [match(v(FullAccess-List),%#)]|[member(v(FullAccess-List),%q0)]=0|*,{@pemit %#=You do not have access to this command.;@tr me/logit=[s([u(datetime-fun)]--%n of [owner(%#)] tried to remove [secure(%0)] from the full access list.)]},1|0,{@pemit %#=That player is not on the list!},{&FullAccess-List me=[squish(remove(v(FullAccess-List),%q0))];@pemit %#=#9999: %0 has been removed from the full access list.%rNote that [subj(%q0)] is still on the OK players list.%rTo remove [subj(%q0)], type: RemoveOK %0}
+&LOG Security System=SECURITY SYSTEM LOG
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+&FULLACCESS-LIST Security System=[owner(me)]
+&PLAYEROK-LIST Security System=[owner(me)]
+&REMOVEOK-CMD Security System=$RemoveOK *:think[setq(0,num(*%0))];@switch/first [member(v(FullAccess-List),%#)]|[member(v(PlayerOK-List),%q0)]|[gt(member(v(FullAccess-List),%q0),0)]=0|*|*,{@pemit %#=You do not have access to this command.;@tr me/logit== [s([u(datetime-fun)]--[%n] of [owner(%#)] tried to remove [secure(%0)] from the allowed players list.)]},1|0|*,{@pemit %#=That player is not on the list!},1|*|0,{&PlayerOK-List me=[squish(remove(v(PlayerOK-List),%q0))];@pemit %#=%0 (%q0) has been removed from the allowed players list.},{@pemit %#=[capstr(subj(%q0))] is currently on the full access list. Please remove [obj(%q0)] from that list using RemoveFull first.}
+&ADDOK-HELP Security System=$SSHelp AddOK:@pemit %#=AddOK%rSyntax: AddOK <Player Name>%r%rThis adds a player to the OK player list. These people can move around without having the security%rsystem log their actions, but they do not necessarily have full access to look at the logs and such.%rNote that while you give the command the Player name, it stores the player's db#, so that name%rChanging and such doesn't have any effect.
+&ADDOK-CMD Security System=$AddOK *:think [setq(0,num(*%0))];@switch/first [match(v(FullAccess-List),%#)]|%q0|[member(v(PlayerOK-List),%q0)]=0|*|*,{@pemit %#=You do not have access to this command.;@tr me/logit== [s([u(datetime-fun)]--[%n] of [owner(%#)] tried to add [secure(%0)] to the OK players list.)]},1|#-1|*,{@pemit %#=That is not a player as far as I can tell!},1|*|0,{&PlayerOK-List me=[v(PlayerOK-List)] [%q0];@pemit %#=%0 (%q0) has been added to the OK players list.%r;},{@pemit %#=[capstr(subj(%q0))] is already on the list, silly!}
+
+@create Camera
+@LISTEN Camera=*
+@AHEAR Camera=@switch/first [member(get(#807/PlayerOK-List),%#)]=0,{@tr #807/logit== [u(#807/datetime-fun)] at [loc(me)] ([name(loc(me))]): [%#] [secure(%0)]}

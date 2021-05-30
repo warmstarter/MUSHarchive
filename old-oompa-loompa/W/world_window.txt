@@ -1,0 +1,22 @@
+This code creates a window which shows a variety of landscapes.
+I created this as part of a Lovecraft-inspired area I was building.
+It can also be used for magick mirrors and similar devices. There
+are 10 different descriptions, one of which is displayed at randome
+when someone uses the GAZE AT WINDOW command.
+
+@create window
+@DESCRIBE window=Despite it's relatively small size, the window somehow dominates the room. It sheds no light, but you feel your eyes being drawn to it, and an overwhelming urge to GAZE AT WINDOW.
+&GAZE_ACTION1 window=You gaze through the strangely tinted glass and sees a stark and barren plain beneath a violet sky, lit by a faint sun. In the distance, you glimpse perversly shaped creatures beyond the imaginings of man.
+&GAZE_ACTION10 window=You gaze through the glass, and are suddenly blinded by a burning light. Your eyes slowly clear, but the window now shows nothing but darkness.
+&GAZE_ACTION9 window=You see a dead world, lit by a dying sun. Inexplicably, you feel a grief so great as to break the heart, and turn away.
+&GAZE_ACTION7 window=A swirling void is all that is visible behind the window's glass.
+&GAZE_ACTION6 window=The window is dark.
+&GAZE_ACTION5 window=Through the window is visible a foggy landscape, populated by moving shapes which are mercifully indistinct.
+&GAZE_ACTION4 window=You see a dark vaulted room, with a window in the same form and place as this. Through the window, an oddly familiar figure gazes, giving a sinister smile as you back away.
+&GAZE_ACTION3 window=The window has developed large cracks along it's surface. You jump back and cower on the floor as it shatters inwards. After a couple of moments, you rise. The window is as it always was.
+&GAZE_ACTION2 window=You gaze through the window. A beautiful courtyard is visble, with children playing happily by a clear bubbling fountain. As you continues to gaze, the children in moments wither, die, and become nothing more than skeletal remains. The fountain runs red, and the flagstones of the courtyard crack. You turn away.
+&GAZE_ACTION8 window=The window shows what seems to be a sunken city. Strange fish swim about cuboid buildings, and seaweed drifts gently in the current in a manner almost sentient.
+@set window=!NO_COMMAND 
+&GAZE window=$gaze at window:@pemit %#= [u(gaze_action[rand(10)])]
+@set window=!ENTER_OK
+@lock window=me

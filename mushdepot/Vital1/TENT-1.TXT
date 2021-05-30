@@ -1,0 +1,32 @@
+@create PARENT: Tent
+@Desc PARENT: Tent=[name(owner(me))]'s tent is a sturdy functional tent of tanned leathers. Do `tent help' to see the things that you can do with it.
+@Prefix PARENT: Tent=From within [name(owner(me))]'s tent,
+@Enter PARENT: Tent=You step quietly into [name(me)].
+@Oenter PARENT: Tent=quietly enters [name(me)].
+@Fail PARENT: Tent=[name(owner(me))] probably wouldn't be very happy with the thought of you walking away with [poss(owner(me))] tent.
+@Succ PARENT: Tent=You pack up your tent and carry it away.
+@Osucc PARENT: Tent=packs up %p tent to carry it off.
+@Leave PARENT: Tent=You step outside the tent into the world outside.
+@Oleave PARENT: Tent=emerges from [name(owner(me))]'s tent.
+&OPEN-ARG PARENT: Tent=$open *:@switch v(0)=here,{@switch member(lcon(me),v(#))=1,{@tr me/do-open=%L,%N}}, {@switch num(v(0))=v(!),{@tr me/do-open=%L,%N}}
+@Drop PARENT: Tent=You set up your tent.
+@Odrop PARENT: Tent=sets up %p tent for the night.
+&OPEN PARENT: Tent=$open:@switch elock(me,%#)=1,{@set me=audible; @set me=!opaque; @remit %L= %N opens the flaps of the tent.}
+@Lalias PARENT: Tent=out
+@Inprefix PARENT: Tent=From outside the tent,
+@Filter PARENT: Tent=*has arrived.,*has left.
+@Infilter PARENT: Tent=*has arrived.,*has left.
+@Listen PARENT: Tent=* &DO-OPEN Tent=@set me=audible; @set me=!opaque; @remit %0=%1 opens the flaps to the tent.
+&DO-CLOSE PARENT: Tent=@remit %0=%1 closes the flaps to the tent.; @set me=!audible; @set me=opaque
+&CLOSE-ARG PARENT: Tent=$close *:@switch v(0)=here,{@switch member(lcon(me),v(#))=1,{@tr me/do-close=%L,%N}}, {@switch um(v(0))=v(!),{@tr me/do-close=%L, %N}}
+&HELP PARENT: Tent=$tent help:@pemit %#={This is a standard portable tent. It can be entered with `enter tent' and exited with `out'; you can customize those with @ealias and @lalias.%rYou can `open tent' to throw back the curtains and let everyone see what happens inside, or `close tent' to conceal what's inside.}
+@Oxenter PARENT: Tent=quietly enters [name(me)].
+@Oxleave PARENT: Tent=emerges from [name(owner(me))]'s tent.
+@Ofail PARENT: Tent=considers taking [name(owner(me))]'s tent and decides not to do so.
+&CLOSE PARENT: Tent=$close:@switch elock(me,v(#))=1,{@remit %L=%N closes the flaps of %p tent.; @set me=opaque; @set me=!audible
+@Aclone PARENT: Tent=@pemit %#={Please use the `copy' command to create copies of objects in here, not @clone.}; @destroy/override me
+@set PARENT: Tent=OPAQUE
+@set PARENT: Tent=VISUAL
+@set PARENT: Tent=PARENT_OK
+@set PARENT: Tent=HALT
+@set PARENT: Tent=SAFE

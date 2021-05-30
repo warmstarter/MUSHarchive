@@ -1,0 +1,26 @@
+@create $turbolift panel
+@set $turbolift panel=LINK_OK
+@set $turbolift panel=WIZARD
+@set $turbolift panel=SAFE
+@set $turbolift panel=NO_COMMAND
+@set $turbolift panel=MONITOR
+&RESET $turbolift panel=$turbolift reset:@dolist [v(exit_list)]={@lock ##=me;@set ##=!halt;@set ##=!no_command;@set ##=Safe;};@pemit %#=Turbolift locks reset.
+&VOICECMDS $turbolift panel=^* says, "Deck *":@trig me/do_level=[ucstr(%1)],%#
+@DESCRIBE $turbolift panel=%R[ansi(c,This dark panel is embedded in the side of the turbolift. A display in the%Rcenter of it\, reads off the following:)]%R%R[space(2)][ansi(hb,Deck Directory -%b)][ansi(hw,[switch(strlen(v(installation_name)),0,name(org(num(me))),[v(installation_name)])])]%R[iter(v(floor_list),switch(match(v(current_level),##),0,%R[space(5)][ansi(c,Deck ##:)] [ansi(hw,[v(deck_##)])],1,%R[space(3)][ansi(fr,*)][space(1)][ansi(c,Deck ##:)] [ansi(hw,[v(deck_##)])]))]%R%R[ansi(c,The display indicates that the turbolift is currently on Deck [v(current_level)].)][ansi(w,)]
+&ROOM_LIST $turbolift panel=#7456 #7207 #7061 #6966
+&HELP $turbolift panel=^*says, "*help*:@remit [loc(%#)]=[ansi(c,The turbolift panel replies%, "To list available decks%, say%, ')][ansi(hw,list decks)][ansi(c,'.%RTo travel to a different deck%, say%, ')][ansi(hw,Deck <number>)][ansi(c,'.")][ansi(w,)]
+&DO_LIST $turbolift panel=@emit The turbolift replies, "Affirmitive, [rankname(*[name({%0})])] [name({%0})]. The vessel's%Rdecks are listed on the console.";@oemit [loc({%0})]/{%0}=[name({%0})] looks at the turbolift display.;@pemit %0=[space(2)]%R[ansi(hb,Deck Directory -%b)][ansi(hw,[switch(strlen(v(installation_name)),0,name(org(num(me))),[v(installation_name)])])]%R[iter(v(floor_list),switch(match(v(current_level),##),0,%R[space(5)][ansi(c,Deck ##:)] [ansi(hw,[v(deck_##)])],1,%R[space(3)][ansi(fr,*)][space(1)][ansi(c,Deck ##:)] [ansi(hw,[v(deck_##)])][ansi(w,)]))]%R
+@ADESCRIBE $turbolift panel=@pemit %#=%R[ansi(c,The turbolift panel says%, "For a list of lift commands%, say%, ')][ansi(hw,list help)][ansi(c,'.")][ansi(w,)]
+&LIST_LEVELS $turbolift panel=^*says*list*decks*"*:@trig me/do_list=%#
+&MOVE_ELEVATOR $turbolift panel=@trig me/move_elevator2=%0,[extract(v(exit_list),[member(v(floor_list),v(current_level))],1)],[extract(v(exit_list),[member(v(floor_list),%0)],1)]
+&CUR_LEVEL $turbolift panel=[extract(v(EXIT_LIST),match(v(FLOOR_LIST),v(CURRENT_LEVEL)),1)]
+&AT_CUR_LEVEL $turbolift panel=The turbolift panel says, "Currently, at Deck [v(current_level)]. Type '[ansi(wh,OUT)][ansi(c,'%, to exit.")]
+&OARRIVED $turbolift panel=The turbolift arrives and the doors open.%r
+&ARRIVED $turbolift panel=The turbolift stops at Deck [v(current_level)] and the doors open.
+@FAILURE $turbolift panel=You can't take that... it's attached to the wall!
+&NO_FLOOR $turbolift panel=[ansi(c,The turbolift panel chirps%, "Invalid deck%, say ')][ansi(hw,list help)][ansi(c,' for assistance.")][ansi(w,)]
+&DO_LEVEL $turbolift panel=@swi [not(not(member(v(floor_list),ucstr(%0))))][match(v(CURRENT_LEVEL),%0)]=0?,{@remit here=[s(v(no_floor))]},11,{@remit here=[ansi(c,[s(v(at_cur_level))])][ansi(w,)]},{@remit here=Turbolift Panel chirps, "Affirmative, [rankname(%1)] [name(%1)].";@tr me/move_elevator2=%0,[extract(v(exit_list),[member(v(floor_list),v(current_level))],1)],[extract(v(exit_list),[member(v(floor_list),%0)],1)]}
+@MOVE $turbolift panel=You feel a slight acceleration as the turbolift begins moving.
+@OMOVE $turbolift panel=The turbolift leaves.
+&MOVE_ELEVATOR2 $turbolift panel=@emit [s(v(MOVE))];@remit [home(%1)]=[s(v(OMOVE))];@lock [v(main_exit)]=me;@lock %1=me;&current_level me=%0;@link [v(main_exit)]=[home(%2)];@unlock [v(main_exit)];@unlock %2;@emit [s(v(ARRIVED))];@remit [home(%2)]=[s(v(oarrived))]
+&INSTALL $turbolift panel=$install voicecmds:@dolist list_levels voicecmds help=@cpattr #20993/##=me/##;@set me=Listener;@set me=Safe;@pemit %#=Installation complete.

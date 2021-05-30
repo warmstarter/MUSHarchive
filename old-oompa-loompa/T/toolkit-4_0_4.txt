@@ -1,0 +1,468 @@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@pemit/silent me=WcWizard: Starting script. Please wait.
+@@
+@@ SECTION 0: Script initiation section. DO NOT TOUCH.
+@@
+@@ Tampering with anything in this section will break this script.
+@@
+@switch [hasattr(me,~.)]=0,,@mvattr me/~.=me/tktildedot
+@switch [hasattr(me,~~.)]=0,,@mvattr me/~~.=me/tksecs
+@pemit/silent me=WcWizard: Started at [ansi(h,time())][set(me,~~.:[secs()])]
+@@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@
+@@ SECTION 1: Requirements, Notes, and Instructions
+@@
+@@ Server: PennMUSH
+@@ PennMUSH Version:
+@@
+@@ Side-effects required: YES
+@@
+@@ Other: Requires ToolKit version 4.0.0 or newer to run as an update.
+@@        See the instructions in SECTIONS 2&3
+@@
+@@ This script, and the object[s] created by it, REQUIRE side-effect
+@@ functions to be ENABLED on your MUSH. If your game does not have
+@@ side-effects ENABLED, DO NOT USE THIS SCRIPT. (You have been warned!)
+@@
+@@ 1 second runtime:
+@@
+@@ Installation instructions are simple enough...
+@@
+@@ Read and follow the instructions in sections 2-4, then quote the script
+@@ into your game.
+@@
+@pemit/silent me=WcWizard \([timestring(sub(secs(),v(~~.)))]\): Configuring for Selections. Please wait..
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@
+@@ SECTION 2: Installation Method (default)
+@@
+@@ If you are installing from scratch (i.e., no previously existing 
+@@ installation), you do not need to change this script.
+@@
+@@ The update only works for version 4.0.0 or newer. So, for updating
+@@ older versions, you need to delete the old version and install this one
+@@ from scratch.
+@@
+@@ If you are updating an existing 4.x.x or newer installation,
+@@
+@@ 1)  comment the lines in this section (i.e., put two @ symbols followed
+@@     by a space at the beginning of each line of code),
+@@
+@@  and
+@@
+@@ 2)  proceed to "SECTION 3: Update Method".
+@@
+@pemit/silent me=WcWizard \([timestring(sub(secs(),v(~~.)))]\): Method selected. Installing new ToolKit...
+@wait 0=@set me=~.:[create(TKcmnd,10)]
+@link [v(~.)]=me
+@parent [v(~.)]=[create(TKufun,10)]
+@parent [parent(v(~.))]=[create(TKproc,10)]
+@parent [last(lparent(v(~.)))]=[create(TKhelp,10)]
+@dol [elements(lparent(v(~.)),2 3 4)]=@link ##=[v(~.)]
+@dol [elements(lparent(v(~.)),1 2 3 4)]=@lock/Basic ##==me
+@dol [elements(lparent(v(~.)),1 2 3 4)]=@lset ##/Basic=no_inherit
+@dol [elements(lparent(v(~.)),1 2 3 4)]=## home
+@parent [setr(o,create(ToolKit,10))][set(%qo,!no_command)][lock(%qo/use,=me)][lock(%qo/basic,=me)][link(%qo,me)]=[v(~.)]
+@@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@
+@@ SECTION 3: Update Method.
+@@
+@@ The update only works for version 4.0.0 or newer. So, for updating
+@@ older versions, you need to delete the old version and install this one
+@@ from scratch.
+@@
+@@ If you are updating a previously existing 4.x.x installation:
+@@
+@@ 1) comment the lines of code in SECTION 2.
+@@ 2) Set the first line of code in this section to contain the #dbref of
+@@    your TKcmnd object.
+@@ 3) uncomment the next three lines of code in this section.
+@@
+@@ &~. me=#1618
+@@ @pemit/silent me=WcWizard \([timestring(sub(secs(),v(~~.)))]\): Method Selected. Updating...
+@@ @dol TKcmnd TKproc TKdata TKhelp=@name [elements(lparent(v(~.)),#@)]=##
+@@
+@@ If you think your previous install is possibly garbaged somehow, and
+@@ would like the update to do a full cleanup and reinstall, also uncomment
+@@ this line of code.
+@@
+@@ @dolist [elements(lparent(v(~.)),1 2 3 4)]=@wipe ##
+@@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@
+@@ SECTION 4: Quiet Mode
+@@
+@@ If you do not want to see all of the spam from the installation, you
+@@ do not need to make any further changes to this script.
+@@
+@@ However, if you actually prefer to see all of the spam, then change the
+@@ 1 to a 0 in the following line.
+@@
+&quietstatus [parent(parent(parent(v(~.))))]=1
+@@
+@@ There are no further changes required for this script.
+@@
+@pemit/silent me=[setq(f,get(parent(parent(parent(v(~.))))/quietstatus))][set(parent(parent(parent(v(~.)))),quietstatus:[hasflag(me,quiet)])]WcWizard \([timestring(sub(secs(),v(~~.)))]\): Proceeding [if(%qf,set(me,quiet)muted,noisy)].
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@
+@@ SECTION 5: Universal
+@@
+@pemit/silent me=WcWizard \([timestring(sub(secs(),v(~~.)))]\): Setting WARPEDcore information.
+&~. [v(~.)]=~http://www.elsemu.net/~nemo/warpedcore/
+&~.author [v(~.)]=Trispis @ M*U*S*H
+&~.author.email [v(~.)]=trispis@mush.pennmush.org
+&~.copyright [v(~.)]=Copyright, Chuc McGuire, 2002
+&~.license [v(~.)]=GPL (Gnu General Public License)
+&~.license.url [v(~.)]=http://www.gnu.org/copyleft/gpl.html
+&~.update [v(~.)]=[time()]
+&~.url [v(~.)]=http://www.elsemu.net/~nemo/softcode/
+&~.version [v(~.)]=4.0.4
+@set [parent(parent(v(~.)))]=data.cmnd:[v(~.)]
+@set [parent(parent(v(~.)))]=data.proc:[parent(v(~.))]
+@set [parent(parent(v(~.)))]=data.data:[parent(parent(v(~.)))]
+@set [parent(parent(v(~.)))]=data.help:[parent(parent(parent(v(~.))))]
+@@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@
+@@ Section 5: commands
+@@
+@pemit/silent me=WcWizard \([timestring(sub(secs(),v(~~.)))]\): Installing commands.
+@set [v(~.)] = OPAQUE
+@set [v(~.)] = STICKY
+@set [v(~.)] = VISUAL
+@set [v(~.)] = NO_COMMAND
+@set [v(~.)] = LINK_OK
+@DESCRIBE [v(~.)]=%r[u(ufun.header)]%r%r[space(5)]This is your [v(data.name)]. It is equiped with several useful tools for object and attribute management. It also has several commands for shortening, condensing, and/or combining @channel commands as well as an exlusive extended paging system.%r%rFor help with this gadget, do: [ansi(bh,tkhelp)]%r%r[switch(%#,owner(me),To help someone else get a toolkit\, type: share with <player>,For instructions on how to get your own Toolkit\, type: tkshare with me)]%r[u(ufun.footer)]
+@set [v(~.)]/DESCRIBE=no_command visual
+&CMND.AEX [v(~.)]=$aex ?*/?*:@pemit %#=[if(setr(o,u(ufun.input,%0%1)),if(words(setr(a,lattr(%qo/%2%3))),[setq(1,v(conf.ansi_brackets))][setq(2,v(conf.ansi_parens))][setq(3,v(conf.ansi_commas))][setq(4,v(conf.ansi_braces))][iter(%qa,ansi(h,[itext(0)] \[[owner(%qo/[itext(0)])][flags(%qo/[itext(0)])]\]:) [edit(get(%qo/[itext(0)]),\[,[ansi(%q1,\[)],\],[ansi(%q1,\])],\(,[ansi(%q2,\()],\),[ansi(%q2,\))],\,,[ansi(%q3,\,)],\{,[ansi(%q4,\{)],\},[ansi(%q4,\})])],%b,%r)],No matching attributes.),Unable to locate object '%0%1')]
+&CMND.AEX-SWITCH [v(~.)]=$aex/?* ?*/?*:@pemit %#=[setq(s,grab(braces brackets parentheses punctuation,[left(%0%1,5)]*))][if(words(%qs),if(setr(o,u(ufun.input,%2%3)),if(words(setr(a,lattr(%qo/%4%5))),[setq(1,switch(%qs,braces,\{,brackets,\[,paren*,\(,punctuation,\,))][setq(2,switch(%qs,braces,\},brackets,\],paren*,\),punctuation,))][setq(3,v(conf.ansi_%qs))][iter(%qa,ansi(h,[itext(0)] \[[owner(%qo/[itext(0)])][flags(%qo/[itext(0)])]\]:) [edit(get(%qo/[itext(0)]),%q1,ansi(%q3,%q1),%q2,ansi(%q3,%q2))],%b,%r)],No matching attributes.),Unable to locate object '%2%3'),I don't know the switch '%0%1')]
+&CMND.ATRWHERE [v(~.)]=$atrwhere */*:@pemit %#=[switch(setr(o,u(ufun.input,%0)),#-1,I can't locate '%0'.,iter(lparent(%qo),[ansi(h,[name(itext(0))]([itext(0)])/%1:)] [if(setr(a,lattr(itext(0)/%1)),%r[iter(%qa,[ansi(h,itext(0) \[[owner(itext(1)/[itext(0)])]\]:)] [get(itext(1)/[itext(0)])],%b,%r)],No match.)],%b,%r%r))]
+&CMND.ADD [v(~.)]=$add *:@pemit %#=[if(lmath(and,iter(%0,isnum(itext(0)),+,%b)),Sum of %0 = [lmath(add,edit(%0,+,%b))],Input must be numbers.)]
+&CMND.DIV [v(~.)]=$div *:@pemit %#=[if(lmath(and,iter(%0,isnum(itext(0)),/,%b)),Quotient of %0 = [lmath(fdiv,edit(%0,/,%b))],Input must be numbers.)]
+&CMND.MUL [v(~.)]=$mul *:@pemit %#=[if(lmath(and,iter(%0,isnum(itext(0)),*,%b)),Product of %0 = [lmath(mul,edit(%0,\*,%b))],Input must be numbers.)]
+&CMND.SUB [v(~.)]=$sub *:@pemit %#=[if(lmath(and,iter(%0,isnum(itext(0)),-,%b)),Difference of %0 = [lmath(sub,edit(%0,-,%b))],Input must be numbers.)]
+&CMND.CEMU [v(~.)]=$cemu */*:@pemit %#=[if(setr(o,u(ufun.input,%0)),[u(ufun.cemu.setup,%qo,%1)][foreach(ufun.cemu,edit(edit(edit(get(%qo/%1),\)\],%xa),\)\,,%xb),\(,%xc))])]
+&CMND.CHAN-COMP_C_C [v(~.)]=$ccomp * *:@pemit %#=[setq(x,setdiff(setr(0,cwho(setr(f,grab(stripansi(channels(|)),%0*,|))),setr(1,cwho(setr(s,grab(stripansi(channels(|)),%1*,|)))))][setq(z,setdiff(%q1,%q0))][setq(y,setinter(%q0,%q1))]%r[center(ucstr(%qf),25)][center(BOTH,25)][center(ucstr(%qs),25)]%r[iter(lnum(1,max(words(%qx),words(%qy),words(%qz))),%r[center(name(elements(%qx,itext(0))),25)][center(name(elements(%qy,itext(0))),25)][center(name(elements(%qz,itext(0))),25)])]%r
+&CMND.CHAN-GAG [v(~.)]=$chan/gag:@dolist/delimit | [set(me,list.chan.gagged:[u(ufun.channels.me_0,|)])][v(list.chan.gagged)]=@fo %#=@channel/gag ##=yes
+&CMND.CHAN-GAG_CLIST [v(~.)]=$chan/gag *:@switch [words(setr(1,squish(iter(%0,if(setr(i,grab(stripansi(channels(|)),itext(0)*,|)),%qi,setq(0,%q0 [itext(0)])),%b,|),|)),|)]=0,{@pemit %#=No valid channels. (%q0)},@dolist/delimit | %q1[set(me,list.chan.gagged:[setinter(u(ufun.channels.me_0,|),setunion(v(list.chan.gagged),%q1,|),|)])][if(words(%q0),pemit(%#,Invalid channels. \(%q0\)))]=@fo %#=@channel/gag ##=yes
+&CMND.CHAN-OFF [v(~.)]=$chan/off:@wait 1[set(me,list.resume:[u(ufun.channels.me_0,|)])]=@dolist/delimit | [v(list.resume)]=@fo %#=@channel/off ##
+&CMND.CHAN-OFF_CLIST [v(~.)]=$chan/off *:@dolist %0=@fo %#=@channel/off ##
+&CMND.CHAN-ON [v(~.)]=$chan/on:@dolist/delimit | [v(list.resume)]=@fo %#=@channel/on ##
+&CMND.CHAN-ON_CLIST [v(~.)]=$chan/on *:@dolist %0=@fo %#=@channel/on ##
+&CMND.CHAN-LIST [v(~.)]=$chan/list:@pemit %#=You are [if(words(setr(c,u(ufun.channels.me_0,|)),|),on the following channels: [itemize(%qc,|)],not presently on any channels.)]
+&CMND.CHAN-LIST_P [v(~.)]=$chan/list *:@pemit %#=[switch(setr(p,pmatch(%0)),#-1,No such player.,#-2,I don't know which '%0' you mean.,setr(c,squish(iter(stripansi(channels(|)),if(member(cwho(itext(0)),%qp),if(member(cwho(itext(0)),%#),ansi(h,itext(0)),itext(0)))),|))[name(%qp)] [if(words(%qc,|),can be found on the following channels: [itemize(%qc,|)],cannot be found on any channels at this time.)])]
+&CMND.CHAN-UNGAG [v(~.)]=$chan/ungag:@dolist/delimit | [setinter(u(ufun.channels.me_0,|),v(list.chan.gagged),|)][set(me,list.chan.gagged:)]=@fo %#=@channel/gag ##=no
+&CMND.CHAN-UNGAG_CLIST [v(~.)]=$chan/ungag *:@switch [words(setr(1,squish(iter(%0,if(setr(i,grab(stripansi(channels(|)),itext(0)*,|)),%qi,setq(0,%q0 [itext(0)])),%b,|),|)),|)]=0,{@pemit %#=No valid channels: (%q0)},@dolist/delimit | %q1[set(me,list.chan.gagged:[setdiff(setinter(u(ufun.channels.me_0,|),v(list.chan.gagged),|),%q1,|)])][if(or(words(%q0),pemit(%#,Invalid channels \(%q0\)))]=@fo %#=@channel/gag ##=no
+&CMND.CHAN-WHO [v(~.)]=$chan/who:@pemit %#=[tagwrap(SAMP,%r[setq(c,add(3,lmath(max,u(ufun.strlens_012,setr(l,default(conf.channels,u(ufun.channels.me_0,|)))|channels,|,%b))))][rjust(CHANNEL,%qc)]: %bPLAYERS%r%r[iter(%ql,[rjust(<[itext(0)]>,%qc)]:[space(2)][ulocal(ufun.hindent_01234,iter(setinter(cwho(itext(0)),lwho()),name(itext(0)),%b,\,%b),setr(w,sub(v(conf.width),add(3,%qc))),%qw,0,add(3,%qc))],|,%r%r)])]
+&CMND.CWHO [v(~.)]=$cwho:@pemit %#=[tagwrap(SAMP,%r[setq(c,add(3,lmath(max,u(ufun.strlens_012,setr(l,default(conf.channels,u(ufun.channels.me_0,|)))|channels,|,%b))))][rjust(CHANNEL,%qc)]: %bPLAYERS%r%r[iter(%ql,[rjust(<[itext(0)]>,%qc)]:[space(2)][ulocal(ufun.hindent_01234,iter(setinter(cwho(itext(0)),lwho()),name(itext(0)),%b,\,%b),setr(w,sub(v(conf.width),add(3,%qc))),%qw,0,add(3,%qc))],|,%r%r)])]
+&CMND.CHAN-WHO_C [v(~.)]=$chan/who *:@pemit %#=[tagwrap(SAMP,if(words(setr(c,grab(stripansi(channels(|)),%0*,|))),if(setr(l,setinter(cwho(%qc),lwho())),Connected players on <%qc>:%r[setq(m,lmath(max,u(ufun.strlens_012,setr(p,iter(%ql,u(ufun.name-num-flags,itext(0)),%b,|)),|,%b)))][u(ufun.table_012,iter(%qp,[ljust(itext(0),%qm)][rjust([first(timestring(idle(elements(%ql,inum(0)))))],5)],|,|),|,|)],There are no connected players on that channel.),What channel is '%0'?))]
+&CMND.CWHO_C [v(~.)]=$cwho *:@pemit %#=[tagwrap(SAMP,if(words(setr(c,grab(stripansi(channels(|)),%0*,|))),if(setr(l,setinter(cwho(%qc),lwho())),Connected players on <%qc>:%r[setq(m,lmath(max,u(ufun.strlens_012,setr(p,iter(%ql,u(ufun.name-num-flags,itext(0)),%b,|)),|,%b)))][u(ufun.table_012,iter(%qp,[ljust(itext(0),%qm)][rjust([first(timestring(idle(elements(%ql,inum(0)))))],5)],|,|),|,|)],There are no connected players on that channel.),What channel is '%0'?))]
+&CMND.CWHO-ALL [v(~.)]=$cwho/all:@pemit %#=[tagwrap(SAMP,%r[rjust(CHANNEL NAME,15)]:[space(2)]PLAYERS%r%r[iter(stripansi(channels(|)),[rjust(<[itext(0)]>,15)]:[space(2)][setq(0,iter(cwho(itext(0)),name(itext(0)),%b,\,%b))][u(ufun.hindent_01234,%q0,setr(w,sub(v(conf.width),18)),%qw,0,18)],|,%r%r)])]
+&CMND.CWHO-ALL_C [v(~.)]=$cwho/all *:@pemit %#=[tagwrap(SAMP,if(words(setr(c,grab(default(conf.channels,stripansi(channels(|))),%0*,|))),if(cwho(%qc),Connected to <%qc>:%r[iter(cwho(%0),[ifelse(mod(inum(0),2),%r,|)]%b[ljust(u(ufun.name-num-flags,itext(0)),29)] [rjust(\([first(timestring(idle(itext(0))))]\),6)]%b,%b,)],There are no connected players on that channel.),What channel is '%0'?))]
+&CMND.EP.0 [v(~.)]=$ep?:@switch cor(isnum(%0),strmatch(?,%0),isword(%0))=0,,@pemit %#=Lastpaged[if(or(isnum(%0),isword(%0)),%0: [switch(setr(p,u(data.ep.%0,%#)),,\[EMPTY\],name(%qp))],%r[table(iter(data.ep.0 [lattr(me/data.ep.?)],last(itext(0),.): [switch(setr(p,u(itext(0),%#)),,\[EMPTY\],name(%qp))],%b,|),add(3,config(player_name_len)),v(conf.width),|,%b)])]
+&CMND.EP.1 [v(~.)]=$ep? *=*:@switch cor(cand(isnum(%0),%0),isword(%0))=0,,@pemit %#=switch(setr(r,pmatch(%1)),#-1,No such player as '%1'.,#-2,I don't know which '%1' you mean.,if(member(lwho(),%qr),[set(me,data.ep.%0:%qr)][u(ufun.ep,%#,%qr,%2)],That player is not connected.%rUnable to page: '%1'))
+&CMND.EP.2 [v(~.)]=$ep? *:@switch cand(cor(cand(isnum(%0),%0),isword(%0)),not(strmatch(%1,*=*)))=0,,@pemit %#=[setq(r,v(data.ep.%0))][switch(0,words(%qr),That page register is empty.,member(lwho(),%qr),That player is not connected.%rUnable to page: [name(%qr)].,u(ufun.ep,%#,%qr,%1))]
+&CMND.GREP [v(~.)]=$grep */*=*:@pemit %#=[iter(%0,switch(setr(i,u(ufun.input,itext(0))),#-*,Toolkit cannot locate '[itext(0)]'.,[u(ufun.name-num-flags,%qi)][iter(%1,if(words(setr(g,grepi(%qi,itext(0),%2))),%r[u(ufun.table_012,sort(%qg),%b,%b)],%b-- No matches found.))]),%b,%r%r)]
+&CMND.INFO [v(~.)]=$info:@pemit %#=[setq(b,v(conf.ansi_border))][u(ufun.header_x,mudname())][u(ufun.just)][u(ufun.just_x,Your name)]: [name(%#)] \(%#[u(ufun.ansi.flags_x,%#)]\)[u(ufun.just)][u(ufun.just)]Your location: [name(%l)]\(%l[u(ufun.ansi.flags_x,%l)]\)[u(ufun.just)][u(ufun.just)]You [switch(setr(c,conn(%#)),<0,are you dark/hidden.,have been connected: [timestring(%qc)])][u(ufun.just)][u(ufun.footer)]
+&CMND.INFO_X [v(~.)]=$info *:@pemit %#=[iter(iter(%0,u(ufun.input,itext(0))),switch(itext(0),*#-*,I can't locate '[elements(%0,inum(0))]'.,[u(ufun.info_x,itext(0))]))]
+&CMND.IWHO [v(~.)]=$iwho:@pemit %#=[ljust(Player Name,21)][ljust(On For,9)][ljust(Idle,6)][poll()]%r[iter(setr(9,munge(ufun.sort.num,iter(setr(u,setunion(,lwho())),idle(itext(0))),%qu,%b)),[ljust(name(itext(0)),17)][ifelse(gt(setr(0,conn(itext(0))),86400),rjust(div(%q0,86400)d,4)[setq(1,mod(%q0,86400))],[space(4)][setq(1,%q0)])] [rjust(div(%q1,3600),2,0)]:[rjust(div(mod(%q1,3600),60),2,0)][rjust(first(timestring(idle(itext(0)))),7)][switch(1,hasflag(itext(0),DARK),D,not(member(mwho(),itext(0))),H,%b)] [doing(itext(0))],%b,%r)]%rThere [ifelse(eq(setr(9,words(%q9)),1),is,are)] %q9 player[ifelse(eq(%q9,1),,s)] connected.
+&CMND.MP.0 [v(~.)]=$mp?:@switch cor(isnum(%0),strmatch(?,%0),isword(%0))=0,,@pemit %#=Lastpaged[if(or(isnum(%0),isword(%0)),%0: [switch(setr(l,u(data.mp.%0,%#)),,\[EMPTY\],iter(%ql,name(itext(0))))],%r[iter(data.mp.0 [lattr(me/data.mp.?)],last(itext(0),.): [switch(setr(l,u(itext(0),%#)),,\[EMPTY\],iter(%ql,name(itext(0))))],%b,%r)])]
+&CMND.MP.1 [v(~.)]=$mp? *=*:@switch cor(cand(isnum(%0),%0),isword(%0))=0,,@pemit %#=iter(%1,switch(setr(p,pmatch(itext(0))),#-1,No such player as '[itext(0)]'.%r,#-2,I don't know which '[itext(0)]' you mean.%r,if(not(member(lwho(),%qp)),Not connected: '[itext(0)]'%r,setq(r,%qr %qp))),%b,)[set(me,data.mp.%0:[trim(%qr)])][if(words(%qr),if(dec(words(%qr)),u(ufun.ep,%#,%qr,%2),Use normal paging for single individuals.),No one left to page. Register cleared.)]
+&CMND.MP.2 [v(~.)]=$mp? *:@switch cand(cor(cand(isnum(%0),%0),isword(%0)),not(strmatch(%1,*=*)))=0,,@pemit %#=iter(v(data.mp.%0),if(member(lwho(),itext(0)),setq(r,%qr [itext(0)]),Not connected: [name(itext(0))]%r),%b,)[if(words(%qr),if(dec(words(%qr)),set(me,data.mp.%0:%qr)[u(ufun.ep,%#,%qr,%1)],Use normal paging for single individuals.),No one left to page. Register cleared.)]
+&CMND.MSET [v(~.)]=$mset *=*:@pemit %#=[iter(%0,switch(u(ufun.itext(0)),#-*,Toolkit can't find '[elements(%0,inum(0))]'.,if(controls(me,itext(0)),Setting: [name(itext(0))]\([itext(0)][u(ufun.ansi.flags_x,itext(0))]\)%r[iter(%1,set(itext(1),itext(0)))],Toolkit doesn't control [name(itext(0))]\([itext(0)][u(ufun.ansi.flags_x,itext(0))]\))))]
+&CMND.PALETTE [v(~.)]=$palette:@pemit %#=[iter(n [ucstr(setr(0,u(list.ansi.colors)))],iter(%q0,ljust(ansi(setr(1,itext(1)[itext(0)]),trim(%q1,n,l)),3))| [iter(%q0,ljust(ansi(setr(1,itext(1)[itext(0)]h),trim(%q1,n,l)),4))],%b,%r)]
+&CMND.PALETTE2 [v(~.)]=$palette2:@pemit %#=[iter(n [ucstr(setr(0,u(list.ansi.colors)))],iter(%q0 u f,ljust(ansi(setr(1,itext(1)[itext(0)]),trim(%q1,n,l)),2)) | [iter(%q0 u f,ljust(ansi(setr(1,itext(1)[itext(0)]h),trim(%q1,n,l)),3))],%b,%r)]
+&CMND.RULER [v(~.)]=$ruler:@pemit %#=[tagwrap(SAMP,u(ufun.ruler,ruler))]
+&CMND.TKCONFIG [v(~.)]=$tkconfig:@pemit %#=[setq(b,v(conf.ansi_border))][tag(SAMP)][u(ufun.header)][u(ufun.tkconfig)][u(ufun.footer)][endtag(SAMP)]
+&CMND.TKCONFIG_X [v(~.)]=$tkconfig *:@pemit %#=[setq(b,v(conf.ansi_border))][tag(SAMP)][u(ufun.header)][u(ufun.tkconfig_x,%0)][u(ufun.footer)][endtag(SAMP)]
+&CMND.TK-CONFIG_X-X [v(~.)]=$tk/config *=*:@pemit %#=[if(hasattr(v(data.data),conf.%0),if(strmatch(%1,default),[set(me,conf.%0:[get(v(data.data)/conf.%0)])]Config %0 set to default.,if(words(setr(e,u(ufun.conf.errors.%0,%1))),iter(%qe,itext(0),|,%r),set(me,conf.%0:%1)Config %0 set to: [switch(%0,ansi*flags*,iter(%1,ansi(rest(itext(0)),first(itext(0))),\,),ansi*,ansi(%1,%1),%1)])),No such config option.)]
+&CMND.TK-DISABLE_CANCEL [v(~.)]=$tk/disable cancel:@switch words(setr(0,v(temp.disable.list)))=0,{@pemit %#=Nothing to cancel.},{@halt me=@pemit %#=Action (disable: %q0) cancelled.[set(me,temp.disable.list:)]}
+&CMND.TK-DISABLE_CMND.X [v(~.)]=$tk/disable cmnd.?*:@pemit %#={[switch(hasattrval(me,temp.disable.list):[or(strmatch(*,%0),strmatch(*,%1),strmatch(disable,before(%0%1,_)*),strmatch(enable,before(%0%1,_)*))],1:*,Unable to accept new input until previous process is complete.,0:1,Yeah\, right.,if(words(setr(l,lattr(v(data.cmnd)/cmnd.%0%1))),set(me,temp.disable.list:%ql)Are you sure you want to disable the following [ansi(bh,ToolKit)] command\(s\)?%r%r[table(%ql,lmath(max,u(ufun.strlens_0,%ql)),v(conf.width))]%r%rThe above command attribute[if(dec(words(%ql)),s)] will be disabled in 2 minutes.%rTo confirm this action immediately\, type: [ansi(gh,tk/disable confirm)]%rTo cancel this action\, type: [ansi(rh,tk/disable cancel)],No such command attribute\(s\) to disable.))]};@switch strmatch(%ql,v(temp.disable.list))=1,{@wait 120=@trig me/trig.disable.cmnd}
+&CMND.TK-DISABLE_CONFIRM [v(~.)]=$tk/disable confirm:@halt me=@trig me/trig.disable.cmnd
+&CMND.TK-ENABLE_CMND.X [v(~.)]=$tk/enable cmnd.*:@pemit %#=[if(words(setr(l,lattr(me/cmnd.%0))),wipe(me/cmnd.%0)Command attribute[if(words(dec(%ql)),s)] \(%ql\) enabled.,No command such attribute\(s\) to enable.)]
+&CMND.TKH [v(~.)]=$tkh:@pemit %#=[setq(b,v(conf.ansi_border))][u(ufun.help_x,topics)]
+&CMND.TKH_X [v(~.)]=$tkh *:@pemit %#=[setq(b,v(conf.ansi_border))][if(hasattr(v(data.help),help.%0),u(ufun.help_x,%0),No help available on '%0')]
+&CMND.TKHELP [v(~.)]=$tkhelp:@pemit %#=[setq(b,v(conf.ansi_border))][u(ufun.help_x,topics)]
+&CMND.TKHELP_X [v(~.)]=$tkhelp *:@pemit %#=[setq(b,v(conf.ansi_border))][if(hasattr(v(data.help),help.%0),u(ufun.help_x,%0),No help available on '%0')]
+&CMND.TKL [v(~.)]=$tkl:@pemit %#=[setq(b,v(conf.ansi_border))][u(ufun.tklook_x,%l)]
+&CMND.TKL_X [v(~.)]=$tkl *:@pemit %#=[setq(b,v(conf.ansi_border))][setq(0,u(ufun.input,%0))][switch(%q0,#-*,I can't locate '%0'.,[u(ufun.tklook_x,%q0)])]
+&CMND.TKLOOK [v(~.)]=$tklook:@pemit %#=[setq(b,v(conf.ansi_border))][u(ufun.tklook_x,%l)]
+&CMND.TKLOOK_X [v(~.)]=$tklook *:@pemit %#=[setq(b,v(conf.ansi_border))][setq(0,u(ufun.input,%0))][switch(%q0,#-*,I can't locate '%0'.,[u(ufun.tklook_x,%q0)])]
+&CMND.TKLS [v(~.)]=$tkls:@pemit %#=[setq(b,v(conf.ansi_border))][u(ufun.tkls.a,%l/*?)]
+&CMND.TKLS_X [v(~.)]=$tkls *:@pemit %#=[setq(b,v(conf.ansi_border))][iter(before(%0,/),switch(setr(i,u(ufun.input,itext(0))),#-*,I can't locate '[elements(before(%0,/),inum(0))]',u(ufun.tkls.a,%qi/[after(%0,/)])),%b,%r)]
+&CMND.TKLS-X [v(~.)]=$tkls/?:@pemit %#=[setq(b,v(conf.ansi_border))][if(member(a c e f s $ ^,%0),[switch(%0,d,The 'd' switch doesn't apply to this.,u(ufun.tkls.[switch(%0,^,l,%0)],%l[switch(%0,c,,e,,/*)]))],I don't know the switch: %0)]
+&CMND.TKLS-X_X [v(~.)]=$tkls/? *:@pemit %#=[setq(b,v(conf.ansi_border))][if(member(a c d e f s $ ^,%0),[setq(1,iter(before(%1,/),u(ufun.input,itext(0))))][switch(%0,d,if(neq(words(%q1),2),Wrong number of inputs for /d,if(lmath(and,iter(%q1,isdbref(itext(0)))),u(ufun.tkls.d,first(%q1),rest(%q1)),I can't locate '[elements(%1,member(%q1,grab(%q1,#-*)))]'.)),iter(%q1,iter(if(setr(a,after(%1,/)),%qa,*?),if(isdbref(itext(1)),u(ufun.tkls.[switch(%0,^,l,%0)],itext(1)[switch(%0,c,,e,,/[itext(0)])]),I can't locate '[elements(before(%1,/),inum(0))]'),%b,%r),%b,%r))],I don't know the switch: %0)]
+&CMND.TKSCAN [v(~.)]=$tkscan *=*:@pemit %#=[setq(b,v(conf.ansi_border))][iter(lparent(%0),iter(lattr(itext(0)),if(strmatch(before(get(itext(1)/[itext(0)]),:),$%1*),setq(0,%q0 [itext(1)]/[itext(0)])),%b,),%b,)][iter(%q0,[ansi(h,[name(before(itext(0),/))]\([before(itext(0),/)]\)/[after(itext(0),/)]:)] [get(itext(0))],%b,%r)]
+&CMND.TKSEARCH [v(~.)]=$tksearch/f *:@switch [and(gte(elements(setr(w,elements(setr(v,version()),3)),1,.),1),gte(elements(%qw,2,.),7),gte(elements(%qw,3,.),5),gte(elements(%qv,5),5))]|[lte(words(%0),10)]=0|*,{@pemit %#=Not new enough pennmush.},*|0,{@pemit %#=Too many entries.},@dol Searching... %0 Relevance~Sort=@wait [mul(2,dec(#@))]=@pemit %#=[switch(setr(i,##),Searching...,##,Relevance~Sort,Relevance Sort: [iter(elements(revwords(sort(iter(setunion(,iter(lnum(words(%0)),v(temp.[itext(0)]))),lmath(add,iter(lnum(words(%0)),t(member(v(temp.[itext(0)]),itext(1)))))[itext(0)]))),lnum(10)),after(itext(0),val(itext(0))))],[rjust(##,14)]: [set(me,temp.[sub(#@,2)]:[squish(iter(functions(),if(or(match(setr(t,textfile(help,itext(0)\(\))),%qi),match(%qt,<%qi>),match(%qt,%qi?)),itext(0))))])][u(ufun.hindent_01234,v(temp.[sub(#@,2)]),setr(w,sub(v(conf.width),16)),%qw,0,16)]
+&CMND.TKSHARE_WITH_X [v(~.)]=$tkshare with *:@pemit %#=[switch(setr(p,switch(%0,me,%#,pmatch(%0))),#-1,No such player.,#-2,I don't know which '%0' you mean.,You share the instructions with [switch(%qp,%#,yourself,name(%qp))].[pemit(%qp,u(ufun.tkshare_with,%qp))])]
+&CMND.TKSHARE_WITH_X.MUSH [v(~.)]=$tkshare with *:@switch %l/%0=room(#943)/me,,@pemit %#=[switch(setr(p,switch(%0,me,%#,pmatch(%0))),#-1,No such player.,#-2,I don't know which '%0' you mean.,You share the instructions with [switch(%qp,%#,yourself,name(%qp))].[pemit(%qp,u(ufun.tkshare_with,%0))]
+&CMND.TKSPAWN [v(~.)]=$tkspawn *=*:@@Syntax: tkspawn <name of new child object>=<parent #dbref>@@;@pemit %#=[switch(0,isdbref(%1),'%1' is not a #dbref.,[hastype(%1,thing)],'%1' is not a THING.,[hasflag(%1,link_ok)],'%1' is not link_ok.,[parent(setr(0,create(%0,10)),%1)][link(%q0,%#)][set(%q0,sticky)][lock(%q0,=%#)][lock(%q0/use,=%#)][set(%q0,!no_command)]'%1\(%q0[u(ufun.ansi.flags_x,%q0)]\)' created\, set !no_command\, and locked\, uselocked\, and linked to you.)]
+@switch [mudname()]=[lit(M*U*S*H)],{@mvattr [v(~.)]/cmnd.tkshare_with_x.mush=[v(~.)]/cmnd.tkshare_with_x},{&cmnd.tkshare_with_x.mush [v(~.)]}
+@@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@
+@@ Section 6: processes
+@@
+@pemit/silent me=WcWizard \([timestring(sub(secs(),v(~~.)))]\): Installing processes.
+@set me=~.:[parent(v(~.))]
+@set [v(~.)] = STICKY
+@set [v(~.)] = VISUAL
+@set [v(~.)] = NO_COMMAND
+@DESCRIBE [v(~.)]=ToolKit trigger or evaluated attribute processes
+@set [v(~.)]/DESCRIBE=no_command visual
+&TRIG.DISABLE.CMND [v(~.)]=@switch hasattrval(me,temp.disable.list)=0,,{@dolist [setr(l,v(temp.disable.list))][pemit(owner(me),Command attribute[if(dec(words(%ql)),s)] \(%ql\) disabled.)][wipe(me/temp.disable.list)]={@set me=##:}}
+&UFUN.ANSI.ATRFLAGS_X [v(~.)]=[localize([setq(f,flags(%0))][iter(v(conf.ansi_atrflags),setq(f,edit(%qf,setr(i,first(itext(0))),ansi(rest(itext(0)),%qi))),\,,)]%qf)]
+&UFUN.ANSI.FLAGS_X [v(~.)]=[localize([setq(f,flags(%0))][iter(v(conf.ansi_flags_[type(%0)]),setq(f,edit(%qf,setr(i,first(itext(0))),ansi(rest(itext(0)),%qi))),\,,)]%qf)]
+&UFUN.ANSI.DBREF_X [v(~.)]=[ansi(n[v(conf.ansi_dbref)],%0)]
+&UFUN.ANSI.NAME_X [v(~.)]=[ansi(n[v(conf.ansi_[switch(poss(%0),his,male,her,female,its,neuter,plural)])],name(%0))]
+&UFUN.ANSI.NAME_X_L [v(~.)]=[ansi(n[v(conf.ansi_[switch(poss(%0),his,male,her,female,its,neuter,plural)])],left(name(%0),%1))]
+&UFUN.BREAK [v(~.)]=[if(%qj,u(ufun.footer))]%r[ansi(%qb,\()][ansi(%qb,repeat(_,max(0,sub(12,strlen(%0)))))] %0[setq(j,-1)]
+&UFUN.BREAK_ [v(~.)]=[if(%qj,u(ufun.footer))]%r[u(ufun.indent)] %0[setq(j,0)]
+&UFUN.CHANNELS.ME_0 [v(~.)]=[squish(iter(stripansi(channels(|)),if(member(cwho(itext(0)),%#),itext(0)),|,%0),%0)]
+&UFUN.CEMU [v(~.)]=[switch(%0,%xc,\(%r[repeat(|[space(3)],setr(0,add(%q0,1)))],\),%r[repeat(|[space(3)],setr(0,sub(%q0,1)))]\),\,,\,%r[repeat(|[space(3)],%q0)],\[,%r[repeat(|[space(3)],%q0)]\[,%xa,%r[repeat(|[space(3)],setr(0,sub(%q0,1)))]\)\],%xb,%r[repeat(|[space(3)],setr(0,sub(%q0,1)))]\)\,%r[repeat(|[space(3)],%q0)],s(\\%0))]
+&UFUN.CEMU.SETUP [v(~.)]=[setq(0, 3)][wipe(me/xa)][wipe(me/xb)][wipe(me/xc)][iter(v(list.safe.8859-1),if(cand(%q0,not(match(get(%0/%1), *[itext(0)]*))),switch(%q0,3,[setq(0,2)][set(me, xa:[itext(0)])],2,[setq(0,1)][set(me, xb:[itext(0)])],1,[setq(0,0)][set(me,xc:[itext(0)])])),%b,)][if(neq(1,strlen(%xa)),[set(me, xa:`)][pemit(%#, Warning: Using %xa for attribute processing.)])][if(neq(1,strlen(%xb)),[set(me, xb:|)][pemit(%#, Warning: Using %xb for attribute processing.)])][if(neq(1,strlen(%xc)),[set(me,xc:@)][pemit(%#,Warning: Using %xc for attribute processing.)])]
+&UFUN.CONF.ERRORS.ANSI_X [v(~.)]=setq(0,0)[foreach(ufun.is_ansi,%0)][if(%q0,Unacceptible ansi code\(s\).)]
+&UFUN.CONF.ERRORS.ANSI_BORDER [v(~.)]=[u(ufun.conf.errors.ansi_x,%0)]
+&UFUN.CONF.ERRORS.ANSI_BRACES [v(~.)]=[u(ufun.conf.errors.ansi_x,%0)]
+&UFUN.CONF.ERRORS.ANSI_BRACKETS [v(~.)]=[u(ufun.conf.errors.ansi_x,%0)]
+&UFUN.CONF.ERRORS.ANSI_DBREF [v(~.)]=[u(ufun.conf.errors.ansi_x,%0)]
+&UFUN.CONF.ERRORS.ANSI_FEMALE [v(~.)]=[u(ufun.conf.errors.ansi_x,%0)]
+&UFUN.CONF.ERRORS.ANSI_ATRFLAGS [v(~.)]=[squish(iter(%0,u(ufun.conf.errors.ansi_x,rest(itext(0))),\,,|),|)]
+&UFUN.CONF.ERRORS.ANSI_FLAGS_EXIT [v(~.)]=[squish(iter(%0,u(ufun.conf.errors.ansi_x,rest(itext(0))),\,,|),|)]
+&UFUN.CONF.ERRORS.ANSI_FLAGS_PLAYER [v(~.)]=[squish(iter(%0,u(ufun.conf.errors.ansi_x,rest(itext(0))),\,,|),|)]
+&UFUN.CONF.ERRORS.ANSI_FLAGS_ROOM [v(~.)]=[squish(iter(%0,u(ufun.conf.errors.ansi_x,rest(itext(0))),\,,|),|)]
+&UFUN.CONF.ERRORS.ANSI_FLAGS_THING [v(~.)]=[squish(iter(%0,u(ufun.conf.errors.ansi_x,rest(itext(0))),\,,|),|)]
+&UFUN.CONF.ERRORS.ANSI_MALE [v(~.)]=[u(ufun.conf.errors.ansi_x,%0)]
+&UFUN.CONF.ERRORS.ANSI_NEUTER [v(~.)]=[u(ufun.conf.errors.ansi_x,%0)]
+&UFUN.CONF.ERRORS.ANSI_PLURAL [v(~.)]=[u(ufun.conf.errors.ansi_x,%0)]
+&UFUN.CONF.ERRORS.ANSI_PARENTHESES [v(~.)]=[u(ufun.conf.errors.ansi_x,%0)]
+&UFUN.CONF.ERRORS.ANSI_PUNCTUATION [v(~.)]=[u(ufun.conf.errors.ansi_x,%0)]
+&UFUN.CONF.ERRORS.ANSI_TEXT [v(~.)]=[u(ufun.conf.errors.ansi_x,%0)]
+&UFUN.CONF.ERRORS.CONFIG_GAME [v(~.)]=[u(ufun.conf.errors.yes-no_x,%0)]
+&UFUN.CONF.ERRORS.CONFIG_GAME_ALL [v(~.)]=[u(ufun.conf.errors.yes-no_x,%0)]
+&UFUN.CONF.ERRORS.CONFIG_TOOLKIT [v(~.)]=[u(ufun.conf.errors.yes-no_x,%0)]
+&UFUN.CONF.ERRORS.CONFIG_TOOLKIT_ALL [v(~.)]=[u(ufun.conf.errors.yes-no_x,%0)]
+&UFUN.CONF.ERRORS.INFO_EXIT [v(~.)]=[setq(c,lcstr(v(conf.info_exit)))][squish(iter(lcstr(%0),if(member(%qc,itext(0)),,Invalid option: [itext(0)]),%b,|),|)]
+&UFUN.CONF.ERRORS.INFO_PLAYER [v(~.)]=[setq(c,lcstr(v(conf.info_player)))][squish(iter(lcstr(%0),if(member(%qc,itext(0)),,Invalid option: [itext(0)]),%b,|),|)]
+&UFUN.CONF.ERRORS.INFO_ROOM [v(~.)]=[setq(c,lcstr(v(conf.info_room)))][squish(iter(lcstr(%0),if(member(%qc,itext(0)),,Invalid option: [itext(0)]),%b,|),|)]
+&UFUN.CONF.ERRORS.INFO_THING [v(~.)]=[setq(c,lcstr(v(conf.info_thing)))][squish(iter(lcstr(%0),if(member(%qc,itext(0)),,Invalid option: [itext(0)]),%b,|),|)]
+&UFUN.CONF.ERRORS.TKLOOK_CONTENTS [v(~.)]=[setq(c,lcstr(v(conf.tklook_contents)))][squish(iter(lcstr(%0),if(member(%qc,itext(0)),,Invalid option: [itext(0)]),%b,|),|)]
+&UFUN.CONF.ERRORS.TKLOOK_EXIT [v(~.)]=[setq(c,lcstr(v(conf.tklook_exit)))][squish(iter(lcstr(%0),if(member(%qc,itext(0)),,Invalid option: [itext(0)]),%b,|),|)]
+&UFUN.CONF.ERRORS.TKLOOK_PLAYER [v(~.)]=[setq(c,lcstr(v(conf.tklook_player)))][squish(iter(lcstr(%0),if(member(%qc,itext(0)),,Invalid option: [itext(0)]),%b,|),|)]
+&UFUN.CONF.ERRORS.TKLOOK_ROOM [v(~.)]=[setq(c,lcstr(v(conf.tklook_room)))][squish(iter(lcstr(%0),if(member(%qc,itext(0)),,Invalid option: [itext(0)]),%b,|),|)]
+&UFUN.CONF.ERRORS.TKLOOK_THING [v(~.)]=[setq(c,lcstr(v(conf.tklook_thing)))][squish(iter(lcstr(%0),if(member(%qc,itext(0)),,Invalid option: [itext(0)]),%b,|),|)]
+&UFUN.CONF.ERRORS.WIDTH [v(~.)]=trim(switchall(0,isint(%0),Must be an integer.,gte(%0,75),|Must be greater than 75.,),|)
+&UFUN.CONF.ERRORS.YES-NO_X [v(~.)]=[if(or(strmatch(%0,yes),strmatch(%0,no)),,Must be 'yes' or 'no'.)]
+&UFUN.EP [v(~.)]=[u(ufun.ep.smsg,%0,setr(r,u(ufun.ep.list.recip,%1)),%2)][pemit(%1,u(ufun.ep.rmsg,%0,%qr,%2))]
+&UFUN.EP.LIST.RECIP [v(~.)]=[if(dec(words(%0)),itemize(iter(%0,name(itext(0))[switch(itext(0),%#,%b\(idle [first(timestring(idle(%#)))]\))],%b,|),|),name(%0))]
+&UFUN.EP.RMSG [v(~.)]=[switch(%2,:*,From afar[if(dec(words(%1)),\, to %1\,,\,)] [name(%0)] [after(%2,:)],;*,From afar[if(dec(words(%1)),\,to %1\,,\,)] [name(%0)][after(%2,;)],[name(%0)] pages[if(dec(words(%1)),%bto %1)]: %2)]
+&UFUN.EP.SMSG [v(~.)]=[switch(%2,:*,Long distance to %1: [name(%0)] [after(%2,:)],;*,Long distance to %1: [name(%0)][after(%2,;)],You paged %1 with: '%2'.)]
+&UFUN.FIND.SAFE [v(~.)]=[localize(iter(v(list.safe.8859-1),if(strmatch(%0,*[itext(0)]*),,setq(0,itext(0))),%b,)[if(%q0,%q0,~)])]
+&UFUN.FOOTER [v(~.)]=[if(%qj,%r[ansi(%qb,%b[repeat(_,sub(v(conf.width),2))]\))]
+&UFUN.HASCOMMAND [v(~.)]=[t(iter(lattr(%0),if(strmatch(get(%0/[itext(0)]),$*),1)))]
+&UFUN.HEADER [v(~.)]=%b[ansi(%qb,repeat(_,setr(l,add(4,strlen(v(data.name) [v(~.version)])))))]%r[ansi(%qb,\()][space(2)][ansi(bh,v(data.name) [v(~.version)])][space(2)][ansi(%qb,\\[repeat(_,sub(v(conf.width),add(3,%ql)))])]%r [ansi(%qb,\))]
+&UFUN.HEADER_X [v(~.)]=%b[setq(l,add(4,strlen(setr(h,switch(%0,mudname(),mudname(),[rjust(type(%0),11)]: [u(ufun.ansi.name_x_l,%0,sub(v(conf.width),lmath(add,14 [strlen(flags(%0))] [strlen(%0)])))] [u(ufun.ansi.dbref_x,%0)] [u(ufun.ansi.flags_x,%0)])))))][ansi(%qb,repeat(_,%ql))]%r[ansi(%qb,\()] %b%qh%b [ansi(%qb,\\[repeat(_,sub(v(conf.width),add(3,%ql)))])][setq(j,0)][u(ufun.just)]
+&UFUN.HELP.HEADER [v(~.)]=u(ufun.header)%r[ansi(%qb,\(____)]
+&UFUN.HELP.FOOTER [v(~.)]=%r[ansi(%qb,[repeat(_,dec(v(conf.width)))]\))]
+&UFUN.HELP_X [v(~.)]=[tagwrap(SAMP,u(ufun.help.header)[u(help.%0)][u(ufun.help.footer)])]
+&UFUN.HINDENT_01234 [v(~.)]=[@@(%0=string; %1=first line width; %2=rest line width; %3=first line indent; %4=rest line indent)][iter(wrap(%0,%1,%2,%qc),if(dec(inum(0)),space(%4),space(%3))[itext(0)],setr(c,last(v(list.safe.8859-1))),%r)]
+&UFUN.INDENT [v(~.)]=[ansi(%qb,\(____)]
+&UFUN.INDENT.FANCY [v(~.)]=%b[ansi(%qb,\))]%r[u(ufun.indent)]
+&UFUN.INPUT [v(~.)]=switch(%0,me,%#,here,%l,if(isdbref(%0),%0,if(isdbref(setr(d,locate(%#,%0,*))),%qd,pmatch(%0))))
+&UFUN.IS_ANSI [v(~.)]=[setq(0,add(%q0,not(t(member(v(list.ansi.colors) h n f u,%0)))))]
+&UFUN.JUST [v(~.)]=[switch(%qj,<0,u(ufun.footer))]%r[ansi(%qb,if(mod(setr(j,inc(%qj)),2),%b\),\(%b))][setq(j,add(%qj,2))]
+&UFUN.JUST_ [v(~.)]=[switch(%qj,<0,u(ufun.footer))]%r[ansi(%qb,if(mod(setr(j,inc(%qj)),2),%b\),\(%b))][setq(j,add(%qj,2))]
+&UFUN.JUST_X [v(~.)]=[switch(%qj,<0,u(ufun.footer))]%r[ansi(%qb,if(mod(setr(j,inc(%qj)),2),%b\),\())][switch(%0,%b,,if(%qj,space(max(0,sub(add(11,mod(inc(%qj),2)),strlen(%0)))),ansi(%qb,repeat(_,max(0,sub(add(11,mod(inc(%qj),2)),strlen(%0)))))) %0)][setq(j,add(%qj,2))]
+&UFUN.LEXITS_X [v(~.)]=[setq(w,div(sub(v(conf.width),16),2))][iter(lexits(%0),%b[center(setr(n,[if(hasflag(itext(0),dark),ansi(rh,\[))][left(u(ufun.ansi.name_x,itext(0)),%qw)])[setq(r,sub(%qw,inc(strlen(%qn))))][if(words(setr(e,rest(fullname(itext(0)),;))),%b\([first(revwords(munge(ufun.sort,iter(%qe,strlen(itext(0)),;,;),%qe,;),;),;)]\))][if(hasflag(itext(0),dark),ansi(rh,\]))],%qw)] leads to -> [center(left(name(loc(itext(0))),%qw),%qw)],%b,%r)]
+&UFUN.NAME-NUM-FLAGS [v(~.)]=[u(ufun.ansi.name_x,%0)]-[u(ufun.ansi.dbref_x,%0)]-[u(ufun.ansi.flags_x,%0)]
+&UFUN.NNF [v(~.)]=[u(ufun.ansi.name_x,%0)]\([u(ufun.ansi.dbref_x,%0)][u(ufun.ansi.flags_x,%0)]\)
+&UFUN.NUM-FLAGS-NAME [v(~.)]=[u(ufun.ansi.dbref_x,%0)]-[u(ufun.ansi.flags_x,%0)]-[u(ufun.ansi.name_x,%0)]
+&UFUN.RULER [v(~.)]=iter(lnum(1,div(setr(w,v(conf.width)),10)),....[ansi(bh,:)]....[ansi(bh,right(itext(0),1))],%b,)[if(setr(w,mod(%qw,10)),iter(lnum(1,%qw),if(mod(itext(0),5),.,ansi(bh,:)),%b,))]
+&UFUN.SORT [v(~.)]=[s(sort\(%0,\%1,\%1\))]
+&UFUN.SORT.NUM [v(~.)]=[sort(%0,n,%1,%1)]
+&UFUN.SORTBY.IDLE [v(~.)]=switch(1,gt(idle(%0),idle(%1)),1,lt(idle(%0),idle(%1)),-1,0)
+&UFUN.SORTBY.STRLEN_DN [v(~.)]=comp(strlen(%1),strlen(%0))
+&UFUN.SORTBY.STRLEN_UP [v(~.)]=comp(strlen(%0),strlen(%1))
+&UFUN.STRLENS_0 [v(~.)]=[iter(%0,strlen(itext(0)))]
+&UFUN.STRLENS_012 [v(~.)]=[iter(%0,strlen(itext(0)),%1,%2)]
+&UFUN.TABLE.NAMES_X [v(~.)]=%r[localize([setq(c,div(v(conf.width),add(3,setr(n,lmath(max,iter(%0,strlen(name(itext(0)))))))))][iter(%0,%b[ljust(u(ufun.ansi.name_x,itext(0)),%qn)]%b[if(mod(inum(0),%qc),,%r)],%b,)])]
+&UFUN.TABLE.PNAMES.O.I_X [v(~.)]=%r[localize([setq(c,div(v(conf.width),add(11,setr(n,inc(lmath(max,iter(%0,strlen(name(itext(0))))))))))][iter(%0,%b[ljust(u(ufun.ansi.name_x,setr(i,itext(0))),%qn,.)].[rjust(if(member(lwho(),%qi),first(timestring(idle(%qi))),offline),8,.)]%b[if(mod(inum(0),%qc),,%r)],%b,)])]
+&UFUN.TABLE_012 [v(~.)]=[localize([setq(s,u(ufun.find.safe,%0))][setq(w,v(conf.width))][setq(l,iter(%0,%qs[itext(0)]%qs,%1,%1))][setq(c,lmath(max,u(ufun.strlens_012,%ql,%1,%b)))][edit(table(%ql,div(sub(%qw,add(setr(x,div(%qw,inc(%qc))),dec(%qx))),%qx),%qw,%1,%2),%qs,%b)])]
+&UFUN.TKCH [v(~.)]=[setq(1,squish(iter(stripansi(channels(|)),ifelse(member(cwho(itext(0)),%0),itext(0)|,),|)))]%r[switch(%0,%#,You,name(*%0))] [switch(gte(strlen(%q1),1),0,cannot be found on any channels at this time.%r,can be found on the following channels\:%r [iter(trim(%q1,|,r),[switch(mod(inum(0),4),1,%r%b)][ljust(itext(0),18)],|)]%r)]
+&UFUN.TKCONFIG [v(~.)]=%r[switchall([v(conf.config_game)]|[v(conf.config_game_all)]|[v(conf.config_toolkit)]|[v(conf.config_toolkit_all)],yes|yes|*,[u(ufun.break,GAME)]:%r%r[u(ufun.table_012,config(),%b,%b)],*|yes|yes,[u(ufun.break,ToolKit)]:%r%r[u(ufun.table_012,iter(lcstr(lattr(v(data.data)/conf.*)),after(itext(0),conf.)),%b,%b)],no|no|no|no,%bNothing to do. See: tkhelp config)]%r
+&UFUN.TKCONFIG.GAME [v(~.)]=[u(ufun.break,GAME)]:%r%r[if(setr(0,graball(config(),*%0*)),iter(%q0,%b %b[setr(c,itext(0))][setq(w,sub(sub(v(conf.width),6),strlen(%qc)))][switch(strlen(setr(1,config(%qc))),>[sub(%qw,3)],iter(wrap(%q1,%qw,%qw,|),rjust(itext(0),ifelse(dec(inum(0)),add(%qw,strlen(itext(1))),%qw),if(dec(inum(0)),%b,.)),|,%r),rjust(%q1,%qw,.))],%b,%r),%b %bNo match.)]
+&UFUN.TKCONFIG.TK [v(~.)]=[u(ufun.break,ToolKit)]:%r%r[if(setr(l,lcstr(lattr(v(data.data)/conf.*%0*))),iter(%ql,[space(3)][setr(i,after(itext(0),conf.))][rjust(v(itext(0)),sub(sub(v(conf.width),6),strlen(%qi)),.)],%b,%r),%b %bNo match.)]
+&UFUN.TKCONFIG_X [v(~.)]=[u(ufun.tkconfig.game,%0)]%r[u(ufun.tkconfig.tk,%0)]
+&UFUN.INFO.CONNECT_X [v(~.)]=[u(ufun.just_x,if(member(lwho(),%0),if(member(mwho(),%0),Online,ansi(rh,Hidden)),Last on))]: [if(member(lwho(),%0),iter(elements(timestring(conn(%0)),1 2),rjust(itext(0),3)),get(%0/last))][if(member(lwho(),%0),rjust(Idle,5): [iter(elements(timestring(idle(%0)),1 2),rjust(itext(0),3))]
+&UFUN.INFO.DESTINATION_X [v(~.)]=[if(isdbref(setr(d,loc(%0))),[u(ufun.just_x,Destination)]: [u(ufun.num-flags-name,%qd)])]
+&UFUN.INFO.EALIASES_X [v(~.)]=[if(dec(words(setr(f,fullname(%0)),;)),[u(ufun.just_x,Aliases)]: [rest(fullname(%0),;)])]
+&UFUN.INFO.LOCATION_X [v(~.)]=[u(ufun.just_x,Location)]: [if(isdbref(setr(x,loc(%0))),[u(ufun.num-flags-name,%qx)],Unknown.)]
+&UFUN.INFO.OWNER_X [v(~.)]=[u(ufun.just_x,Owner)]: [u(ufun.name-num-flags,owner(%0))]
+&UFUN.INFO.PARENTS_X [v(~.)]=[if(dec(words(setr(p,revwords(lparent(%0))))),[u(ufun.break,Parents)]: [setq(p,iter(%qp,u(ufun.num-flags-name,itext(0)),%b,|))][iter(%qp,[if(dec(inum(0)),[space(add(16,mul(max(0,sub(inum(0),2)),6)))]%b\\==>%b)][itext(0)],|,%r)])]
+&UFUN.INFO.SOURCE_X [v(~.)]=[if(isdbref(setr(d,home(%0))),[u(ufun.just_x,Source)]: [u(ufun.num-flags-name,%qd)])]
+&UFUN.INFO.ZONE_X [v(~.)]=[if(isdbref(setr(x,zone(%0))),[u(ufun.just_x,Zone)]: [u(ufun.num-flags-name,%qx)])]
+&UFUN.INFO_EXIT [v(~.)]=[iter(v(conf.info_exit),u(ufun.info.[itext(0)]_x,%0))]
+&UFUN.INFO_PLAYER [v(~.)]=[iter(v(conf.info_player),u(ufun.info.[itext(0)]_x,%0))]
+&UFUN.INFO_ROOM [v(~.)]=[iter(v(conf.info_room),u(ufun.info.[itext(0)]_x,%0))]
+&UFUN.INFO_THING [v(~.)]=[iter(v(conf.info_thing),u(ufun.info.[itext(0)]_x,%0))]
+&UFUN.INFO_X [v(~.)]=[setq(b,v(conf.ansi_border))][tagwrap(SAMP,iter(header_x info_[type(%0)] footer,u(ufun.[itext(0)],%0)))]
+&UFUN.TKLOOK.CONNECT_X [v(~.)]=[u(ufun.info.connect_x,%0)]
+&UFUN.TKLOOK.CONTENTS_P [v(~.)]=[if(words(setr(l,setinter(setr(p,squish(iter(lcon(%0),if(hastype(itext(0),player),itext(0))))),lwho())[if(lte(words(setr(x,setdiff(%qp,lwho()))),v(conf.tklook_offline_p_max)),%b%qx)])),[u(ufun.break,Players)]:%r[u(ufun.table.pnames.o.i_x,%ql)])][if(gt(setr(x,words(%qx)),v(conf.tklook_offline_p_max)),%r%r[u(ufun.indent)] %qx offline player[switch(%qx,1,,s)])]
+&UFUN.TKLOOK.CONTENTS_T [v(~.)]=[if(words(setr(t,squish(iter(lcon(%0),if(hastype(itext(0),thing),itext(0)))))),[u(ufun.break,Things)]:%r[u(ufun.table.names_x,%qt)])]
+&UFUN.TKLOOK.CONTENTS_X [v(~.)]=[iter(v(conf.tklook_contents),u(ufun.tklook.contents_[left(itext(0),1)],%0))]
+&UFUN.TKLOOK.DESCRIBE_X [v(~.)]=[u(ufun.break,switch(%0,%!,WARPEDcore,Description [if(not(hasflag(%0/describe,visual)),\([ansi(rh,not visual)]\))]))]:%r[switch(%0,%!,[setq(w,add(3,lmath(max,u(ufun.strlens_0,setr(l,lattr(v(data.cmnd)/~.*))))))][iter(%ql,[space(6)][ljust(itext(0),%qw)] %b [v(itext(0))],%b,%r)],%r[setq(d,get(%0/describe))][objeval(num(*guest),s(%qd))])]
+&UFUN.TKLOOK.EALIASES_X [v(~.)]=[u(ufun.info.ealiases_x,%0)]
+&UFUN.TKLOOK.EXITS_X [v(~.)]=[if(isdbref(first(setr(e,lexits(%0)))),[u(ufun.break,Exits)]:%r[u(ufun.lexits_x,%0)])]
+&UFUN.TKLOOK.LOCATION_X [v(~.)]=[u(ufun.info.location_x,%0)]
+&UFUN.TKLOOK.OWNER_X [v(~.)]=[u(ufun.info.owner_x,%0)]
+&UFUN.TKLOOK.PARENTS_X [v(~.)]=[u(ufun.info.parents_x,%0)]
+&UFUN.TKLOOK.SOURCE_X [v(~.)]=[u(ufun.info.source_x,%0)]
+&UFUN.TKLOOK.ZONE_X [v(~.)]=[u(ufun.info.zone_x,%0)]
+&UFUN.TKLOOK_EXIT [v(~.)]=[iter(v(conf.tklook_exit),u(ufun.tklook.[itext(0)]_x,%0))]
+&UFUN.TKLOOK_PLAYER [v(~.)]=[iter(v(conf.tklook_player),u(ufun.tklook.[itext(0)]_x,%0))]
+&UFUN.TKLOOK_ROOM [v(~.)]=[iter(v(conf.tklook_room),u(ufun.tklook.[itext(0)]_x,%0))]
+&UFUN.TKLOOK_THING [v(~.)]=[iter(v(conf.tklook_thing),u(ufun.tklook.[itext(0)]_x,%0))]
+&UFUN.TKLOOK_X [v(~.)]=[tagwrap(SAMP,iter(header_x tklook_[type(%0)] footer,u(ufun.[itext(0)],%0)))]
+&UFUN.TKLS.$ [v(~.)]=[setq(s,first(v(list.safe.8859-1)))][u(ufun.header_x,setr(o,before(%0,/)))] / [ansi(h,after(%0,/))][u(ufun.just)][iter(sort(lattr(%0)),[switch(get(%qo/[itext(0)]),$*:*,[setq(9,%q9 [itext(0)])])],%b,)][if(%q9,%r[edit(u(ufun.table_012,iter(%q9,[rjust(setr(8,strlen(get(%qo/[itext(0)]))),4,%qs)]:[ljust(inc(div(%q8, v(conf.width))),2,%qs)]%qs[itext(0)]),%b,%b),%qs,%b)], -- No Match.)][setq(j,1)][u(ufun.footer)]
+&UFUN.TKLS.A [v(~.)]=[u(ufun.header_x,setr(o,before(%0,/)))] / [ansi(h,setr(a,switch(after(%0,/),,*?,after(%0,/))))][if(setr(a,lattr(%qo/%qa)),[setq(0,)][setq(1,)][setq(2,)][setq(w,v(conf.width))][iter(%qa,setq(0,strlen(setr(i,itext(0))) %q0)[setq(1,strlen(setr(x,strlen(get(%qo/%qi)))) %q1)][setq(2,strlen(div(%qx,%qw)) %q2)],%b,)][setq(1,lmath(max,%q1))][setq(2,lmath(max,3 %q2))][setq(0,min(sub(%qw,add(4,%q1,3)),lmath(max,%q0)))][setq(c,div(sub(%qw,3),add(7,%q0,%q1)))][u(ufun.just)][iter(%qa,[switch(mod(inum(0),%qc),1,u(ufun.just))]%b[rjust(setr(9,strlen(get(%qo/[itext(0)]))),%q1)]:[ljust(inc(div(%q9,%qw)),%q2)][ljust(left(itext(0),%q0),%q0)]%b)], -- No match.)][u(ufun.footer)]
+&UFUN.TKLS.C.P [v(~.)]=[if(words(%0),[u(ufun.break_,Players)]:[setq(j,0)][u(ufun.just)][setq(1,setinter(lwho(),%0))][setq(0,setdiff(%0,%q1))][setq(l,%q1[if(lte(words(%q0),v(conf.tklook_offline_p_max)),%b%q0)])][setq(n,0)][setq(d,0)][set(f,0)][iter(%ql,[setq(n,strlen(name(setr(i,itext(0)))) %qn)][setq(d,strlen(%qi) %qd)][setq(f,strlen(flags(%qi)) %qf)],%b,)][setq(d,lmath(max,6 %qd))][setq(f,lmath(max,5 %qf))][setq(n,min(sub(v(conf.width),add(5,%qf,%qd)),lmath(max,4 %qn)))][setq(c,div(sub(v(conf.width),3),add(15,%qn,%qd,%qf)))][u(ufun.just)][repeat(%b[ansi(r,|)][ljust(#dbref,%qd)] [ljust(Flags,%qf)] [ljust(Name,%qn)] [rjust(Con,4)] Idl%b %b,min(%qc,words(%ql)))][u(ufun.just)][repeat(%b[ansi(r,+[repeat(-,%qd)] [repeat(-,%qf)] [repeat(-,%qn)] %b--- ---)]%b %b,min(%qc,words(%ql)))][iter(%ql,[switch(mod(inum(0),%qc),1,u(ufun.just))]%b[ansi(r,|)][ljust(u(ufun.ansi.dbref_x,setr(i,itext(0))),%qd)] [ljust(u(ufun.ansi.flags_x,%qi),%qf)] [ljust(u(ufun.ansi.name_x,%qi),%qn)] [if(member(lwho(),%qi),[rjust(first(timestring(conn(%qi))),4)][rjust(first(timestring(idle(%qi))),4)],rjust(offline,8))] %b)][if(gt(words(%q0),v(conf.tklook_offline_p_max)),u(ufun.just)[u(ufun.just)] [words(%q0)] offline players.)])]
+&UFUN.TKLS.C.T [v(~.)]=[if(words(%0),[u(ufun.break_,Things)]:[setq(j,0)][u(ufun.just)][setq(n,0)][setq(f,0)][setq(d,0)][iter(%0,[setq(n,strlen(name(setr(i,itext(0)))) %qn)][setq(d,strlen(%qi) %qd)][setq(f,strlen(flags(%qi)) %qf)],%b,)][setq(d,lmath(max,6 %qd))][setq(f,lmath(max,5 %qf))][setq(n,min(sub(v(conf.width),add(3,%qf,%qd)),lmath(max,%qn)))][setq(c,div(sub(v(conf.width),3),add(5,%qn,%qd,%qf)))][u(ufun.just)][repeat(%b[ansi(r,|)][ljust(#dbref,%qd)] [ljust(Flags,%qf)] [ljust(Name,%qn)]%b,min(%qc,words(%0)))][u(ufun.just)][repeat(%b[ansi(r,+[repeat(-,%qd)] [repeat(-,%qf)] [repeat(-,%qn)])]%b,min(%qc,words(%0)))][iter(%0,[switch(mod(inum(0),%qc),1,u(ufun.just))]%b[ansi(r,|)][ljust(u(ufun.ansi.dbref_x,setr(i,itext(0))),%qd)] [ljust(u(ufun.ansi.flags_x,%qi),%qf)] [ljust(u(ufun.ansi.name_x,%qi),%qn)]%b,%b,)])]
+&UFUN.TKLS.C [v(~.)]=[tagwrap(SAMP,[u(ufun.header_x,%0)][ifelse(hastype(%0,EXIT),%r[center(Exits cannot have contents.,77)],[iter(lcon(%0),[setq(n,strlen(name(setr(i,itext(0)))) %qn)][setq(d,strlen(%qi) %qd)][setq(f,strlen(flags(%qi)) %qf)],%b,)][setq(d,lmath(max,%qd))][setq(f,lmath(max,%qf))][setq(n,min(sub(v(conf.width),3),lmath(max,%qn)))][setq(c,div(sub(v(conf.width),3),add(9,%qn,%qd,%qf)))][iter(lcon(%0),[switch(mod(inum(0),%qc),1,u(ufun.just))]%b %b[rjust(u(ufun.ansi.dbref_x,setr(i,itext(0))),%qd)] [ljust(u(ufun.ansi.flags_x,%qi),%qf)] [ljust(u(ufun.ansi.name_x,itext(0)),%qn)]%b %b,%b,)])][u(ufun.footer)])]
+&UFUN.TKLS.C [v(~.)]=[tagwrap(SAMP,[u(ufun.header_x,%0)][ifelse(hastype(%0,EXIT),[u(ufun.just)]%b Exits cannot have contents.,[u(ufun.info.owner_x,%0)][u(ufun.tkls.c.p,setr(p,squish(iter(lcon(%0),if(hastype(itext(0),PLAYER),itext(0))))))][u(ufun.tkls.c.t,setdiff(lcon(%0),%qp))])][u(ufun.footer)])]
+&UFUN.TKLS.D [v(~.)]=[u(ufun.header)][setq(0,lattr(%0))][setq(1,lattr(%1))][setq(2,setdiff(%q0,%q1))][setq(3,setdiff(%q1,%q0))][setq(4,setinter(%q0,%q1))][switch(%q2,,,%r[u(ufun.indent)] Attribs on [u(ufun.nnf,%0)] but not [u(ufun.nnf,%1)]%r%r[table(%q2,lmath(max,u(ufun.strlens_0,%q2)),v(conf.width))][setq(j,-1)])][switch(%q3,,,[u(ufun.break_,Attribs on [u(ufun.nnf,%1)] but not [u(ufun.nnf,%0)])]%r%r[table(%q3,lmath(max,u(ufun.strlens_0,%q3)),v(conf.width))][setq(j,-1)])][if(%q4,[u(ufun.break_,Individual attribute differences.)]%r[iter(%q4,switch([flags(%0/[itext(0)])][xget(%0,itext(0))],[flags(%1/[itext(0)])][xget(%1,itext(0))],,%r[itext(0)][if(setr(f,u(ufun.ansi.atrflags_x,%0/[itext(0)])),\[%qf\])] on [u(ufun.nnf,%0)]: [xget(%0,itext(0))]%r[itext(0)][if(setr(f,u(ufun.ansi.atrflags_x,%1/[itext(0)])),\[%qf\])] on [u(ufun.nnf,%1)]: [xget(%1,itext(0))]%r),%b,)])][u(ufun.footer)]
+&UFUN.TKLS.E [v(~.)]=[u(ufun.header_x,%0)][if(hastype(%0,ROOM),if(setr(e,lexits(%0)),[setq(w,div(sub(v(conf.width),11),2))][iter(%qe,[u(ufun.just)] [ljust([left(u(ufun.ansi.name_x,setr(i,itext(0))),sub(%qw,add(strlen(flags(%qi)),strlen(%qi))))]\([u(ufun.ansi.dbref_x,%qi)][u(ufun.ansi.flags_x,%qi)]\),%qw)]------>[rjust([left(u(ufun.ansi.name_x,setr(d,loc(%qi))),sub(%qw,add(strlen(flags(%qd)),strlen(%qd))))]\([u(ufun.ansi.dbref_x,%qd)][u(ufun.ansi.flags_x,%qd)]\),%qw)],%b,)],%rNo exits viewable from this location.),[center([capstr(lcstr(type(%0)))]s cannot have exits.,v(conf.width))])][set(j,1)][u(ufun.footer)]
+&UFUN.TKLS.F [v(~.)]=[u(ufun.header_x,setr(0,before(%0,/)))][u(ufun.just)]%b $vicmRCwS+:ATTRIBUTE[u(ufun.just)][if(words(setr(3,lattr(%0))),[setq(a,)][setq(f,)][iter(%q3,[setq(a,strlen(setr(i,itext(0))) %qa)][setq(f,strlen(flags(%q0/%qi)) %qf)],%b,)][setq(a,min(sub(v(conf.width),3),lmath(max,%qa)))][setq(f,lmath(max,%qf))][setq(c,div(sub(v(conf.width),3),add(4,%qa,%qf)))][iter(%q3,[switch(mod(inum(0),%qc),1,u(ufun.just))]%b[rjust(flags(%q0/[setr(2,itext(0))]),%qf)] [ljust(%q2,%qa)]%b,%b,)],[u(ufun.just)][center(No attributes found.,77)])][setq(c,div(sub(v(conf.width),3),20))][u(ufun.just)][iter(v(list.atrflags)[setq(f,v(list.atrflag.names))],[switch(mod(inum(0),%qc),1,u(ufun.just))]%b[rjust(itext(0),3)] = [ljust(elements(%qf,inum(0)),13)]%b,%b,)][setq(j,1)][u(ufun.footer)]
+&UFUN.TKLS.L [v(~.)]=[iter(%0,[u(ufun.header_x,itext(0))]%r[iter(sort(lattr([itext(0)])),[switch(get([itext(1)]/[itext(0)]),^*:*,[setq(9,%q9 [itext(0)])])])][iter(%q9,[switch(mod(inum(0),3),1,%r)][rjust(setr(8,strlen(get([itext(2)]/[itext(0)]))),4)]:[ljust(inc(div(%q8, 70)),2)] [ljust(ifelse(lte(strlen(itext(0)),17),left(itext(0),17),left(itext(0),15)..),17)])],%b,%r)][setq(j,1)][u(ufun.footer)]
+&UFUN.TKLS.S [v(~.)]=[switch(%0,*/*,[setq(0,before(%0,/))][setq(1,after(%0,/))],[setq(0,%0)][setq(1,*?)])][iter(%q0,setq(2,%q2 [ifelse(isdbref(itext(0)),itext(0),locate(%#,itext(0),*))]/%q1))][map(ufun.tkls.s.map,%q2)]
+&UFUN.TKLS.S.MAP [v(~.)]=[ulocal(ufun.header_x,before(%0,/))]%r[ifelse(setr(0,lattr(%0)),[tagwrap(SAMP,iter(reverse(sort(reverse(lattr(%0)))),[switch(mod(inum(0),3),1,%r)][rjust(setr(9,strlen(get([before(%0,/)]/[itext(0)]))),4)]:[ljust(inc(div(%q9,70)),2)] [ljust(ifelse(lte(strlen(itext(0)),17),left(itext(0),17),left(itext(0),15)..),17)]))],%r[center(ifelse(words(%q0),%q0,No attributes found.),77)]%r)][setq(j,1)][u(ufun.footer)]
+&UFUN.TKSHARE_WITH [v(~.)]=[switch(%0,%#,,%r[name(%#)] shares these instructions with you...%r)]%rTo create your own [v(data.name)]%, do the following:%r%r@create [v(data.name)]%r@lock [v(data.name)]=me%r@lock/use [v(data.name)]=me%r@link [v(data.name)]=me%r@set [v(data.name)]=inherit \(optional\)%r@set [v(data.name)]=!halt%r@set [v(data.name)]=!no_command%r@parent [v(data.name)]=[v(data.cmnd)]%r%rThen 'look' at it.%r
+@@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@
+@@ Section 7: data
+@@
+@pemit/silent me=WcWizard \([timestring(sub(secs(),v(~~.)))]\): Installing data.
+@set me=~.:[parent(v(~.))]
+@set [v(~.)] = STICKY
+@set [v(~.)] = VISUAL
+@set [v(~.)] = NO_COMMAND
+@describe [v(~.)]=TooKit data (default configs and other such drivel)
+@set [v(~.)]/DESCRIBE=no_command visual
+&CONF.ANSI_BORDER [v(~.)]=bh
+&CONF.ANSI_BRACES [v(~.)]=gh
+&CONF.ANSI_BRACKETS [v(~.)]=bh
+&CONF.ANSI_ATRFLAGS [v(~.)]=$ rh, v yh, i yh, m rh, c yh, w yh
+&CONF.ANSI_FLAGS_EXIT [v(~.)]=V yh, h rh, W yh, r yh, D rh 
+&CONF.ANSI_FLAGS_PLAYER [v(~.)]=V yh, h rh, W yh, r yh, D rh
+&CONF.ANSI_FLAGS_ROOM [v(~.)]=V yh, h rh, W yh, r yh, n rh, D rh
+&CONF.ANSI_FLAGS_THING [v(~.)]=V yh, h rh, W yh, r yh, n rh, D rh
+&CONF.ANSI_DBREF [v(~.)]=n
+&CONF.ANSI_FEMALE [v(~.)]=mh
+&CONF.ANSI_MALE [v(~.)]=bh
+&CONF.ANSI_NEUTER [v(~.)]=n
+&CONF.ANSI_PLURAL [v(~.)]=h
+&CONF.ANSI_PARENS [v(~.)]=rh
+&CONF.ANSI_PUNCTUATION [v(~.)]=yh
+&CONF.ANSI_TEXT [v(~.)]=n
+&CONF.CONFIG_GAME [v(~.)]=yes
+&CONF.CONFIG_GAME_ALL [v(~.)]=no
+&CONF.CONFIG_TOOLKIT [v(~.)]=yes
+&CONF.CONFIG_TOOLKIT_ALL [v(~.)]=yes
+&CONF.INFO_EXIT [v(~.)]=owner ealiases zone source destination parents
+&CONF.INFO_PLAYER [v(~.)]=zone connect location
+&CONF.INFO_ROOM [v(~.)]=owner zone parents
+&CONF.INFO_THING [v(~.)]=owner zone location parents
+&CONF.TKLOOK_EXIT [v(~.)]=owner ealiases zone source destination parents describe
+&CONF.TKLOOK_PLAYER [v(~.)]=zone connect location describe contents
+&CONF.TKLOOK_ROOM [v(~.)]=owner zone parents describe contents exits
+&CONF.TKLOOK_THING [v(~.)]=owner zone location parents describe contents
+&CONF.TKLOOK_CONTENTS [v(~.)]=players things
+&CONF.TKLOOK_OFFLINE_P_MAX [v(~.)]=10
+&CONF.WIDTH [v(~.)]=77
+&DATA.EP.0 [v(~.)]=pmatch(get(%0/lastpaged))
+&DATA.MP.0 [v(~.)]=[iter(get(%0/lastmpaged),pmatch(itext(0)))]
+&DATA.NAME [v(~.)]=ToolKit
+&DATA.SAFECHAR [v(~.)]=|
+&DATA.WIDTH [v(~.)]=77
+&LIST.ALPHABET [v(~.)]=a b c d e f g h i j k l m n o p q r s t u v w x y z
+&LIST.ANSI.COLORS [v(~.)]=w m b c g y r x
+&LIST.ATRFLAGS [v(~.)]=$ v i c m R C w S +
+&LIST.ATRFLAG.NAMES [v(~.)]=no_command visual no_inherit no_clone mortal_dark regexp case wizard safe lock
+&LIST.HELP.CATEGORIES [v(~.)]=communication softcode miscellaneous other
+&LIST.HELP.COMMUNICATION [v(~.)]=chan ep mp
+&LIST.HELP.SOFTCODE [v(~.)]=aex atrwhere cemu grep mset tkls tkscan tksearch
+&LIST.HELP.MISCELLANEOUS [v(~.)]=info iwho math palette ruler tklook tkshare tkspawn
+&LIST.HELP.OTHER [v(~.)]=admin config credits notes problems
+&LIST.POWERS [v(~.)]=announce boot builder cemit chat_privs functions guest halt hide idle login long_fingers no_pay no_quota open_anywhere pemit_all poll player_create queue quota search see_all see_queue tport_anything tport_anywhere unkillable
+@set [v(~.)]=list.safe.8859-1:[if(member(functions(),CHR),iter(176 185 178 179 169 174 215 247 177 186,chr(itext(0))),` @ = $ ^ & ' < > +)]
+@@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@
+@@ Section 8: help files
+@@
+@pemit/silent me=WcWizard \([timestring(sub(secs(),v(~~.)))]\): Installing help files.
+@set me=~.:[parent(v(~.))]
+@set [v(~.)] = STICKY
+@set [v(~.)] = VISUAL
+@set [v(~.)] = NO_COMMAND
+@describe [v(~.)]=ToolKit help files
+@set [v(~.)]/DESCRIBE=no_command visual
+&HELP.ADMIN [v(~.)]=[ansi(mh,1%))] If you are a Wizard%, an Admin%, or a player with chat_privs%, and you wish to reap full benefit from the [ansi(bh,seech)] command %(for all channels%)%, you can add the following custom attribute to your local object:%r%r[space(5)][ansi(yh,&LIST.CHANNELS <object>%=Admin|)][ansi(bh,other|channels|like|this)][ansi(yh,%[|Wizard%])]%r%r[u(ufun.indent)][ansi(mh,2%))] This local attribute replaces the one on the master parent%,%r[space(4)]therefore it MUST:%r%r[space(5)][ansi(mh,a%))] be named 'LIST.CHANNELS' (no misspellings)%, and...%r[space(5)][ansi(mh,b%))] contain every channel you wish to include in [ansi(bh,seech)] %(for all channels%)%r%r[u(ufun.indent)][ansi(mh,3%))] The above attribute is not necessary for the [ansi(bh,seech <channel>)] command to work. This command is based on the [ansi(rh,cwho%(%))] function and will accept any valid channel as input.%r
+&HELP.AEX [v(~.)]=%bThis command is intended as a suppliment to Talek's 'pcheck' command or other 'pairs-like' tools. The syntax is:%r%r [ansi(bh,aex%[/switch%] <object>/<attrib>)]%r%r[space(5)]'aex' is short for 'ansi examine'. This command works similar to the 'examine' command, but it only applies to attributes (i.e., not for the 'brief' part). It returns the 'examination' hilighted in user-definable ways. Specifically, parens, brackets, and braces are colored and hilited for counting and matching.%r[space(5)]Available switches are: /parens, /brackets, or /braces (for selecting [ansi(h,only)] that particular enclosure for identification). And, it may be shortened to 'aex'.%r%rFor info on setting color definitions, see: tkh aex2%r
+&HELP.AEX2 [v(~.)]=%bColor assignments are configurable via the tk/config command (see: tkh config) by assigning the desired ansi code\(s) to the following config options (defaults shown):%r%r [ljust(For parentheses,30)]: tk/config ansi_parens=rh%r [ljust(For square brackets,30)]: tk/config ansi_brackets=bh%r [ljust(For curly braces,30)]: tk/config ansi_braces=gh%r [ljust(For punctuation \( \, \; and \: \),30)]: tk/config ansi_punctuation=yh%r [ljust(For all other text,30)]: tk/config ansi_text=n%r%rFor no color in any one or more of the above, use the ansi 'n' code \(like in the ansi_text default).%r
+&HELP.ATRWHERE [v(~.)]=%r%r [ansi(bh,atrwhere <object>/<atrpattern>)]%r%rThis command attempts to locate all attributes matching <atrpattern> on <object> and all of its parents. It is helpful for locating attribute duplication on parent sequences. %r%rFor example: you're editing an attribute on one object in a parent sequence and your changes are not taking effect on your lowest child. This command can help you locate possible attributes on objects earlier in the parent sequence than the one on which you are making changes.
+&HELP.CEMU [v(~.)]=%bYet another useful tool for finding those elusive mismatched enclosures (parens, brackets, braces) in heavily nested functions.%r%r [ansi(bh,cemu <obj>/<attr>)]%r%rThis will display the contents of the specified <obj>/<attr>, in a sort of supplimented 'C'-style indentation.%r%rFor an example, see: tkh cemu2%r
+&HELP.CEMU2 [v(~.)]=%b Example:%r%r [ansi(bh,cemu [setr(o,v(data.proc))]/[setr(a,ufun.is_ansi)])] %b <-- This command returns the following...%r[u(ufun.cemu.setup,%qo,%qa)][foreach(ufun.cemu,edit(edit(edit(get(%qo/%qa),\)\],%xa),\)\,,%xb),\(,%xc))]%r%rNOTE: This command does not work well on attributes which have commas, parens, or brackets in literal strings.
+&HELP.MATH [v(~.)]=%bThere are four commands. The syntax is as follows:%r%r[ansi(bh,add <number>+<number>%[+<number>%]etc.)]%r[ansi(bh,sub <number>-<number>%[-<number>%]etc.)]%r[ansi(bh,mul <number>*<number>%[*<number>%]etc.)]%r[ansi(bh,div <number>/<number>%[/<number>%]etc.)]%r%rThe above commands cannot be combined, but CAN operate on a successive list... like%r%r[ansi(bh,add 1+3+5+7+11+13+17)]%r
+&HELP.CHAN [v(~.)]=%bCommands available for channel manipulation are:%r%r[ljust(ansi(bh,chan/who <channel>),24)]Lists all connected players on <channel>.%r[ljust(ansi(bh,chan/who),24)]Lists all players on all channels.%r%r[ljust(ansi(bh,chan/on <channel)[ansi(yh,\[s\])][ansi(bh,>)],24)]Turns on \(joins you to\) the specified channel\(s\).%r[ljust(ansi(bh,chan/off <channel)[ansi(yh,\[s\])][ansi(bh,>)],24)]Turns off \(leaves you from\) the specified channel\(s\).%r%r[ljust(ansi(bh,chan/off),24)]Turns off all channels you are connected to.%r[ljust(ansi(bh,chan/on),24)]Resumes all channels which were turned off by [ansi(bh,chan/off)].%r%r[ljust(ansi(bh,chan/gag <channel)[ansi(yh,\[s\])][ansi(bh,>)],24)]Gags the specified channel\(s\).%r[ljust(ansi(bh,chan/ungag <channel)[ansi(yh,\[s\])][ansi(bh,>)],24)]Ungags the specified channel\(s\).%r%r[ljust(ansi(bh,chan/gag),24)]Gags all channels.%r[ljust(ansi(bh,chan/ungag),24)]Ungags all channels previously gagged.%r%rSee also: [ansi(bh,tkhelp notes)]%r
+&HELP.CONFIG [v(~.)]=%bCommands for setting toolkit configurations and for viewing both game and toolkit configs.%r%r[setq(w,sub(v(conf.width),30))][ljust(ansi(bh,tk/config <option>=<value>),30)][u(ufun.hindent_01234,This sets <option> to <value>. If <value> is "default"\, then <option> is returned to the default value\(s\).,%qw,%qw,0,30)]%r%r[ljust(ansi(bh,tkconfig <pattern>),30)][u(ufun.hindent_01234,This displays the values for both game and toolkit configs which match <pattern>.,%qw,%qw,0,30)]%r%r[ljust(ansi(bh,tkconfig),30)][u(ufun.hindent_01234,Displays all available config options \(no values\) for the ToolKit in a tabled format \(optionally\, you can have this display all of the game configs as well\, by setting 'config_game_all=yes'\).,%qw,%qw,0,30)]%r%r %b See also: config2%r
+&HELP.CONFIG2 [v(~.)]=%bToolKit commands can now be disabled and/or re-enabled, individually or in groups, via the following commands:%r%r[ljust(ansi(bh,tk/disable cmnd.<pattern>),30)][u(ufun.hindent_01234,This disables all command attributes matching cmnd.<pattern>. <Pattern> must be a minimum of two \(2\) characters and may contain the wildcards ? and *. -- cmnd.disable and cmnd.enable are\, of course\, protected.,setr(w,sub(v(conf.width),30)),%qw,0,30)]%r[ljust(ansi(bh,tk/enable cmnd.<pattern>),30)][u(ufun.hindent_01234,This enables all command attributes matching cmnd.<pattern> which were previously disabled.,%qw,%qw,0,30)]
+&HELP.CREDITS [v(~.)]=%bThis is just a note to those of you who think you /deserve/ credit. This toolkit isn't about fame and glory and recognition. It's about making MUSHing easier for the user. The only people who deserve credit are those who use it. So, you folks who think you deserve some kind of recognition for something you contributed, all I can say is%r%r[center(BYTE ME,setr(w,v(conf.width)))]%r[rjust(\(,setr(w,dec(%qw)))]%r[center(If you wanna see the old credits screen\, you'll have to dig for it.,%qw)]\)%r[rjust(\(,%qw)]
+&HELP.CREDITS2 [v(~.)]=%bAlthough this object has grown considerably since I first began (with a whopping TWO COMMANDS *smirk*), I could not have made it the object it is without the assistance of the following players: Caleb of PrairieMUSH, Garthorn of CDI, CJ of PrairieMUSH, Rhyanna of CDI, Kimmi of CDI, Shae of Guardians, Nysil of CDI, Cerestais of CDI, Octavian of CDI/M*U*S*H, Talek of M*U*S*H, Raevnos of M*U*S*H, Javelin of M*U*S*H, and 'mom'.%r[space(5)]These players have provided debugging and revision assistance in one form or another, be it coding assistance, challenges to do more, or just enthusiastic interest. They all have my gratitude.%r%r[space(5)]Lastly, but most significantly, I wish to express a personal 'thanks' to Tamsin of IEC, Nig of IEC/CDI, Nylream of CDI, and Arathorn of CDI. I will never forget the kind support and motivation you have given me.%r
+&HELP.GREP [v(~.)]=%bThis is simply a user-command version of the 'grepi\()' fuction. It performs a case-insensitive search for a <string> within a user-defined set of attributes on an object list.%r%rSyntax:%r%r[space(5)][ansi(bh,grep <object list>/<attrib-pattern list>=<string>)]%r%r[space(5)]This is only guaranteed to function as expected when <object list> is a list of #dbrefs. Note, however, that <attrib-pattern> may contain the wildcards * and ?, to extend your search to a group of attributes (yes, 'grep <obj>/*=<string>' searches all attributes on <obj> for <string>).%r[space(5)]When combined with 'info', 'tkls', 'aex', and the MUSH's built-in user commands (@edit, @mvattr, etc.), this command can be a very handy, if not powerful, tool. Have fun with it. %r%r[ansi(r,*)][ansi(rh,CAUTION)][ansi(r,*)]: This is a raw grep. Dangerous characters \( [ansi(rh,\{ \} \[ \] \( \) \; \, \% \\)] \) are NOT escaped out, so be careful when using such characters in <string>.%r%r[space(5)]See '[ansi(bh,tkhelp grep2)]' for more on the grep command.%r
+&HELP.GREP2 [v(~.)]=%bThis command supports space separated lists of objects and attributes, however, the lists can only be input in one of two ways:%r%r[space(5)][ansi(rh,1%))] Manually enter lists: [ansi(bh,grep #2 #4 #6/<list of attrib-patterns>=<string>)]%ror...%r[space(5)][ansi(rh,2%))] Use [ansi(bh,\[get\(\)\])] or [ansi(bh,\[xget\(\)\])] to input a list of #dbrefs from an attribute on an object: %r%r[space(8)][ansi(bh,grep \[get\(<obj>/<attr>\)\]/<list of attrib-patterns>=<string>)]%r%r[space(5)]The only thing which makes this command justifiable (as MUSHes have @grep) is its ability to process lists of both objects and attribute-patterns (and, of course, its output neatness).%r
+&HELP.INFO [v(~.)]=%bMultiMU*ers and builders might find this command useful. I got the idea from the 'lastpaged' feature of MUSH paging (i.e., 'p' by itself to remember whom you last paged).%r%r [ansi(bh,info \[<object list>\])]%r%rWithout any <object> input, it returns general information about the MUSH. Otherwise, it gives information about the object\(s\).%r%rSpecifying a #dbref may be necessary for remote objects.%r
+&HELP.IWHO [v(~.)]=%bSimulating the DOING command, but sorted by idle time.%r%r [ansi(bh,iwho)]%r%rPretty tough one, eh? Not much else to say here.
+&HELP.MSET [v(~.)]=%bMulti-Set. Set's multiple flags on multiple objects. Most useful for *unsetting* multiple flags.%r%r [ansi(bh,mset <object list>=<flag list>)]%r%rAlthough it doesn't yet support attribute patterns (for setting flags on attributes), that is on my list of things to do.
+&HELP.NOTES [v(~.)]=%bNote: In order for the chan/<on|off|gag|ungag> commands (with or without arguments) to work: %r%r1a\) the object must be TRUST,%r - and - %rb\) you cannot be TRUST%r%r -- or --%r%r2a) you must be set TRUST%r - and -%r2b) the object cannot be TRUST. %r%rNormally, group 1 is the best approach to using TRUST, as it grants privileges on a per object basis.%r%rTo achieve this, do:%r%r[ansi(bh,@set <object>=inherit)]%r[ansi(bh,@set me=!inherit)]%r%rAlso note: Where an argument <channel> is possible, you need only supply enough of the channel name to distinguish it from other channels \(in most cases the first letter or two is sufficient\), not the whole channel name. Also, where multiple arguments are possible, they must be space-separated. Examples:%r%rchan/off pub[space(20)]Turns off the <Public> channel.%rchan/on p s w[space(17)]Turns on the <[if(setr(c,grab(channels(|),p*,|)),%qc,Public)]>, <[if(setr(c,grab(channels(|),s*,|)),%qc,Softcode)]>, and <[if(setr(c,grab(channels(|),w*,|)),%qc,Wisdom)]> channels.%r%r[space(5)]See also: [ansi(bh,tkhelp notes2)]%r
+&HELP.NOTES2 [v(~.)]=%bIf you wish to transport this code to some other MU*, I only ask the following [ansi(h,courtesies)].%r%rIf you modify the code, do not expect me to provide debugging support for those modifications. Thus, modification is discourage, except as necessary for conversion to other MU* softwares (i.e, TinyMUSH, MUX, Rhost, etc.).%r%rDo not change the text of the help files for credits, credits2, notes, notes2, or problems.%r%rAnd, above all, maintain part b of the 'problems' help screen so that YOU are responsible for the object's upkeep (I have coded this screen to refer to the owner of the object containing the cmnd.* attributes. Unless your specific MU-design requires elsewise, you should leave this in tact.). Thus, YOU, if you port or install this code onto another server or game, become its caretaker for that particular installation. Please be responsible with it.%r%rFinally, any information you can provide me in the form of specific modifications (apart from the removal of side-effect functions) which would make the PennMUSH distribution more compatible with other servers would be appreciated.%r%r[space(5)]Now that I've given you my requests for transporting this code, I wish to also impress upon you my own sincere willingness to cooperate in it's net-wide maintenance. Therefore, please... feel free to check in with me from time to time to make certain your code is current - Note the version number on the copy at M*U*S*H (which is where I do most of my updating). If your copy has a different version number, it might be a good idea to check with me regarding recent changes.%r%r[space(5)]Thanks. (:%r
+&HELP.EP [v(~.)]=%bNew to the [v(data.name)] is the extended pager system. The new system utilizes syntax similar to that of Penn's abbreviated paging syntax \(for multipaging\, see: tkh mp\)\, allowing for up to 36 separate individual conversations.%r%r[ansi(bh,ep<1-9|a-z> <player>=<message>%rep<1-9|a-z> <message>%rep<1-9|a-z|?>)]%r%rThe first form begins paging to <player>, assigning the respective, single alphanumeric character to this conversation.%r%rThe second form continues paging to whomever was assigned the respective single alphanumeric character.%r%rThe third form tells you who is assigned to the respective alphanumeric character. Or, in the case of the special character '?' (question mark), lists all assigned alphanumeric characters and the player to whom they are assigned (in a nice neat table).%r%r[ansi(bh,ep)] only works for individual players.%r%rFor examples, see: tkh ep2
+&HELP.MP [v(~.)]=%bNew to the [v(data.name)] the extended pager system. The new system utilizes syntax similar to that of PennMUSH's abbreviated mpage syntax, allowing for up to 36 separate multipage conversations.%r%r[ansi(bh,mp<1-9|a-z> <player list>=<message>%rmp<1-9|a-z> <message>%rmp<1-9|a-z|?>)]%r%rThe first form begins paging to <player list>, assigning the respective, single alphanumeric character to this conversation.%r%rThe second form continues paging to whomever was assigned the respective single alphanumeric character.%r%rThe third form tells you who is assigned to the respective alphanumeric character. Or, in the case of the special character '?' (question mark), lists all assigned alphanumeric characters and the players to whom they are assigned (in a nice neat table).%r%rSee: tkh mp2 for examples
+&HELP.EP2 [v(~.)]=%bExtended Pager examples%r%r[ljust(ansi(bh,epj Javelin=Hi.),20)]Starts paging Javelin, assigning him the letter 'j'%r[ljust(ansi(bh,epj This is cool.),20)]Continues paging Javelin until 'j' is reassigned.%r[ljust(ansi(bh,epj),20)]Shows you who was last paged via 'pj'.%r[ljust(ansi(bh,ep?),20)]Lists all assigned page registers and assignees.%r
+&HELP.MP2 [v(~.)]=%b\(Extended\) MultiPage examples:%r%r[ljust(ansi(bh,mp1 Jav T=woohoo!),20)]Starts multipaging Javelin and Trispis, assigning '1'%r[ljust(ansi(bh,mp1 most worthy),20)]Continues paging Jav and T, until '1' is reassigned.%r[ljust(ansi(bh,mp1),20)]Shows who was last multipaged with 'mp1'%r[ljust(ansi(bh,mp?),20)]Lists all assigned multipage registers and assignees.%r
+&HELP.PALETTE [v(~.)]=%bThis command displays an extensive color palette which shows the result of ansi%(%) color codes. The syntax is:%r%r[space(5)][ansi(bh,palette)]%r%rPretty tough, eh?%r%rIt includes all possible combinations of foreground and background colors, both standard and hilited. It is displayed in a progressive format. And, you must have all of the following:%r%r[space(5)][ansi(rh,a%))] a color monitor (you can get one at a computer store)%r[space(5)][ansi(rh,b%))] a color client (you can get one from the WWW)%r[space(5)][ansi(rh,c%))] the ANSI flag set on your player %(@set me=ANSI%)%r[space(5)][ansi(rh,d%))] the COLOR flag set on your player %(@set me=COLOR).%r%rOtherwise, you'll just see a bunch of letters.%r%rNOTE: The color combinations you can't read... you probably shouldn't use. (;%r
+&HELP.PROBLEMS [v(~.)]=%bIf you can't get some of your commands to work, please read the following file:%r%r[space(5)][ansi(bh,tkhelp notes)]%r%r[space(5)]To report problems which are not covered in the online help, do one of the following:%r%r[space(5)][ansi(rh,a%))] Contact an Admin%ror...%r[space(5)][ansi(rh,b%))] Send @mail to [name(owner(v(data.cmnd)))] explaining the problem. Please state the command used, the circumstance, and the resulting malfunction.%r%r[space(5)]I %([ansi(bh,[name(owner(v(data.cmnd)))] of [mudname()])]%) make every attempt to keep my machines operational and up to date with the MUSH %(both the World and the software versions and patchlevels%). Your cooperation is appreciated.%R
+&HELP.RULER [v(~.)]=%bIt's just a ruler, similar to those in word processors.%r%rThe syntax is:%r%r[space(5)][ansi(bh,ruler)]%r%rPretty tough. Eh?%r%rWidth adjusts to the width config option (tk/config width=value). Note, however, that the width config option adjusts the widths of all ToolKit displays, not just the ruler.
+&HELP.TKLOOK [v(~.)]=%bThe idea behind this command is that of a 'standardize viewer' -- so that, when looking at stuff \(players, things, rooms, exits\), the layout is consistent from one to the next.%r%r [ansi(bh,tklook \[<object>\])]%r%rNumerous config options are available \(see: tkh config\)
+&HELP.TKLS [v(~.)]=%bThis command lists stuff.%r%r Syntax:%r%r[space(5)][ansi(bh,tkls)]%r[space(5)][ansi(bh,tkls <object\[s\]>\[/<attr pattrn>\])]%r[space(5)][ansi(bh,tkls/<switch> <object>\[/<attr pattrn>\])]%r%r tkhelp%r[center(file,8)] [center(switch,8)] %b Quick Info%r[center(tkls2,8)] [center(a,8)] %b attribute list%r[center(tkls7,8)] [center(c,8)] %b contents list%r[center(tkls6,8)] [center(d,8)] %b diff list%r[center(tkls7,8)] [center(e,8)] %b exit list%r[center(tkls3,8)] [center(f,8)] %b attrib list with attrib flags%r[center(tkls4,8)] [center(s,8)] %b not perfect\, but tries to suffix-sort attribs%r[center(tkls5,8)] [center($,8)] %b lists attributes containing $commands%r[center(tkls5,8)] [center(^,8)] %b lists attributes containing ^listen patterns%r%rDefault switch is: a%rDefault object is: here%r%rSee: tkhelp tlks<2-7>
+&HELP.TKLS2 [v(~.)]=%bReturns a default sorted (alphabetically) attribute list for <object>.%r%rSyntax:%r%r[space(5)][ansi(bh,tkls\[/a\] <object>%[%/<attrib-pattern>%])]%r[space(5)][ansi(bh,tkls\[/a\] <object-list>\[/<attrib-pattern>\])]%r%rThe first form lists either: a) all attribs on <object>, or b) if the optional <attrib-pattern> is supplied, only attributes containing a specified attribute pattern. (eg., 'tkls #54321/f*r' might return FAR FOR and FUBAR.)%r%rThe second form accepts a space separated object-list and performs the attribute list for each object. Use of one of the following formats is recommended:%r%r[space(5)]%b Manual entry: [ansi(bh,tkls/a #123 #456 #789\[/<attr-pattrn>\])]%r[space(5)]Use a function: [ansi(bh,tkls \[lcon\(#1234\)\]\[/<attr-pattrn>\])]%r%rAlthough it tries to be smart, this command works best when <object> is a #dbref or list of #dbrefs.%r%r[space(5)][ansi(bh,tkls/a [lparent(me)])]%r%r... will display all of the attributes on the parents of this object.%rNOTE: Because the /a switch is the default, using it is optional.%r
+&HELP.TKLS7 [v(~.)]=%bThese switches list (according to your privs or your toolkit's privs) either: %r %b /c %b an object's contents and each object's flags%r or %r %b /e %b a room's exits and corresponding destinations.%r%rSyntax:%r%r[space(5)][ansi(bh,tkls/c <object>)]%r[space(5)][ansi(bh,tkls/e <room>)]%r%r
+&HELP.TKLS5 [v(~.)]=%bThese switches list either%r%r %b /$ %b all attributes containing $command patterns%r or%r %b /^ %b all attributes containing ^listen patterns.%r%rOften useful (in conjunction with grep) for finding out what object is triggering that annoying emit when you walk in the room or what command on that new gadget is absorbing your inputs.
+&HELP.TKLS6 [v(~.)]=%bThis switch attempts to provide a 'diff' of two objects. Still quite beta.%r%rSyntax:%r%r[ansi(bh,tkls/d <obj1> <obj2>
+&HELP.TKLS3 [v(~.)]=%bNearly identical to '/a', the /f switch lists attributes (default sorted) with each attribute's flags next to the attribute.%r%rThe syntax is:%r%r[space(5)][ansi(bh,tkls/f <object>\[/<attrib-pattern>\])]%r%rIt can be useful for reminding you about that ever-elusive no_command flag you put on some specific attribute which makes the command now seem broken. (;%r%rNOTE: This command does not accept lists of objects (like 'tkls/a' does).%r
+&HELP.TKLS4 [v(~.)]=%bThe /s switch returns a reverse-default sorted (reverse-alphabetically) attribute list for <object>.%r%rSyntax:%r%r[space(5)][ansi(bh,tkls/s <object>\[/<attrib-pattern>\])]%r[space(5)][ansi(bh,tkls/s <object-list>\[/<attrib-pattern>\])]%r%rThis command works identically to [ansi(bh,tkls/a)] except that it reverse-sorts (and yes, that's a literal 'reverse\()' function wrapped around the lattr\() so that it sorts from last letter of the attribute names to the first). This isn't a perfect solution to using attribute suffixes, but it's here if it helps.
+&HELP.TKSCAN [v(~.)]=%bThis command scans an object and all of it's parents for a particular command pattern.%r%r [ansi(bh,tkscan <object>=<pattern>)]%r%rIn one way, this command is not as good as @scan, because it does NOT look all over the place (globals, contents, etc.).%r%rBut in another way it is better, because it will actually locate duplicate command patterns in a parent sequence, whereas @scan will just report the child has having a command that matches.
+&HELP.TKSHARE [v(~.)]=%bThis command allows you to share this toolkit with your fellow players.%r%r [ansi(bh,tkshare with <player>)]%r%rIt will pemit all the necessary instructions for creating, parenting, locking, etc. to <player>.
+&HELP.TKSEARCH [v(~.)]=%bOne of the most useful commands for new softcoders. This command performs a keyword search on the MUSH help files and returns a list of help files which matched for each keyword, and a relevance sort of the top 10 most relevant returns.%r%r [ansi(bh,tksearch/f <up to ten keywords>)]%r%rAt present, it only searches help files for functions (the /f switch), but hopefully it will eventually work for other categories as well.
+&HELP.TKSPAWN [v(~.)]=%bThis command allows you to automatically generate a new child object parented to some other parentable object.%r%r [ansi(bh,tkspawn <name of new child>=<#dbref of parent>)]%r%rIt saves you some of the hassles of having to use @create, @parent, @link, @lock, etc., by performing these actions for you. It does the following:%r%r 1\) create <name of new child>%r 2\) parent <new child> to <parent #dbref>%r 3\) link <child> to you (sets you as its home)%r 4\) sets <child> STICKY (helping keep it in your inventory)%r 5\) locks <child> to you%r 6\) uselocks <child> to you%r 7\) sets <child> !NO_COMMAND%r%rAlthough not perfect for all parenting situations, it is useful for a great number of them.
+&HELP.TOPICS [v(~.)]=%r[space(12)]Help is available on the following topics:%r[setq(r,lmath(max,iter(v(list.help.categories),words(v(list.help.[itext(0)])))))][setq(c,div(v(conf.width),4))]%r[iter(lnum(inc(%qr)),iter(v(list.help.categories),center(if(itext(1),elements(v(list.help.[itext(0)]),itext(1)),ansi(bh,ucstr(itext(0)))),%qc))[if(itext(0),,%r)],%b,%r)]%r%r[center(Do: [ansi(bh,tkh\[elp\] <t\[opic\]>)],v(conf.width))]
+@@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@
+@@ Section 9: Cleanup
+@@
+@pemit/silent me=WcWizard \([timestring(sub(secs(),v(~~.)))]\): Cleaning up.
+@switch [get(v(~.)/quietstatus)]=0,@set me=!quiet
+@@
+&quietstatus [v(~.)]
+&~. me
+@switch [hasattr(me,tktildedot)]=0,,@mvattr me/tktilde=me/~.
+@pemit/silent me=WcWizard \([timestring(sub(secs(),v(~~.)))]\)[wipe(me/~~.)]: Done at [ansi(h,time())].
+@@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@
+@@ The End.
+
+

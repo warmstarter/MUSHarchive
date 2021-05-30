@@ -1,0 +1,89 @@
+From: u9228616@athmail1.causeway.qub.ac.uk
+Message-Id: <9303310800.AA00658@bot17>
+Subject: Re: Works but doesn't work....
+Date: Wed, 31 Mar 93 09:00:39 BST
+
+
+Dont know why that didn't work for you Ken. It could be to do with
+the way that I formatted the code. Anyway here it is again. If you
+
+
+--------------------------------------------------------------------
+
+@create Bulletin Board<bb>=10
+@Desc Bulletin Board<bb>=%rThis is a Bulletin board where you can post
+notes for others to see. It will display notes in chronological order,
+are:%r%r%tnote <header>=<message>%r%theaders%r%tview <note
+number>%r%tremove <note number>%r%treset notes%r%rFor help on any of
+these commands type:%r%r%tbhelp <command> eg. bhelp note%r%rTo get an
+overview of the commands type 'bhelp'.%r
+&PUT_NOTE Bulletin Board<bb>=$note *=*:@switch
+[time()]>;&NOTE[v(num_notes)] me=[%1];&NUM_NOTES
+me=add(1,v(num_notes));@pemit num(*%N)=You have just lodged a note on
+the Bulletin Board.},{@pemit num(*%N)=The header for this note is too long!}
+&SCAN_HEADERS Bulletin Board<bb>=$headers:@pemit num(*%N)=The following
+headers have been posted on the bulletin board:%r;@dolist
+reverse(edit(lnum(v(num_notes)),0 1 2,1 2))=@switch
+[v(note[##])]=>"",{@pemit num(*%N)=## [v(HEADER[##])]}
+&READ_NOTE Bulletin Board<bb>=$view *:@switch
+%0=<[v(num_notes)],{@switch %0=>0,{@switch [v(note[%0])]=>"",{@pemit
+num(*%N)=Header: [v(HEADER[%0])]%r[v(NOTE[%0])]},{@pemit num(*%N)=Sorry
+there is no note of that number on the board!}},{@pemit num(*%N)=Sorry
+there is no note of that number on the board!}},@pemit num(*%N)=Sorry
+there is no note of that number on the board!
+&REMOVE_NOTE Bulletin Board<bb>=$remove *:@switch
+[get(me/note[%0])]=>"",{&HEADER[%0] me;&NOTE[%0] me;@pemit num(*%N)=You
+have just removed Note [%0] from the bulletin board!},@pemit
+num(*%N)=Sorry but there is no note of that number.
+&RESET_NOTES Bulletin Board<bb>=$reset notes:&NUM_NOTES me=1;@pemit
+num(*%N)=You have just reset the number of notes to zero!
+&NUM_NOTES Bulletin Board<bb>=1
+&BHELP_NOTE Bulletin Board<bb>=$bhelp note:@pemit num(*%N)=%b%bCommand:
+note <header>=<message>%r%b%bThis command is used to put a note on the
+board. The header should%r%b%bnot be longer than 50 characters and your
+name and time of note will%r%b%bstored along with it. The note can be
+as long as your terminal will allow.%r%r%b%beg. note Hi there=Just
+thought I would try out this board%r%r%b%bSee also: headers, view.
+&BHELP_HEADERS Bulletin Board<bb>=$bhelp headers:@pemit
+num(*%N)=%B%BCommand: headers%r%b%bThis command will display the
+headers of all the current notes on the board.%r%b%bIt will display the
+number of the note, the header of the note, the writer%r%b%bof the note
+and what time it was written at.%r%r%b%bSee also: view
+&BHELP_VIEW Bulletin Board<bb>=$bhelp view:@pemit num(*%N)=%b%bCommand:
+view <note number>%r%b%bThis will display the header and content of the
+note of the given number.%r%b%bIt will also give the writer and time at
+which the note was written.%r%r%b%bSee also: headers
+&BHELP_REMOVE Bulletin Board<bb>=$bhelp remove:@pemit
+num(*%N)=%b%bCommand: remove <note number>%r%b%bThis command will
+remove a note from the board. It would be a good idea%r%b%bfor the
+person running this board to either uselock this command
+to%r%b%bthemselves or to move this command to another of their
+objects.%r%r%b%bSee also: reset notes
+&BHELP_RESET Bulletin Board<bb>=$bhelp reset*:@pemit
+num(*%N)=%b%bCommand: reset notes%r%b%bThis command is used when you
+want to reset the number of notes to zero.%r%b%bBefore using this you
+must remove all the notes using the 'remove' command.%r%b%bIt would be
+a good idea for the person running this board to either
+uselock%r%b%bthis command to themselves or to move this command to
+another of their%r%b%bobjects.%r%r%b%bSee also: remove
+&BHELP Bulletin Board<bb>=$bhelp:@pemit num(*%N)=%b%bThe following
+commands are available:%r%r%tnote%t%t- place a note on the
+board%r%theaders%t%t- display the headers of all the notes on the
+board.%r%tview%t%t- view a note on the board%r%tremove%t%t- remove a
+note from the board%r%treset notes%t- reset the number of notes to
+zero%r%r%tFor help on any of these commands type:%r%r%t%tbhelp
+<command> eg. bhelp note%r
+
+--------------------------------------------------------------------
+
+Forget about the ctrl-M characters at the end of each line. I dont
+know how they got in there. Anyway there it is!
+
+Anyway till next time!
+
+Hangover the Alcoholic Beer monster.
+UK_MUSH         - 134.83.128.247   4201
+FUBARmush       - 137.148.20.7     7719
+
+Drink and be merry!
+8-)

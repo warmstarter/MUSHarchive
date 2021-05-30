@@ -1,0 +1,33 @@
+@create Holodeck Computer
+@link Holodeck Computer=#0
+@set Holodeck Computer=!NO_COMMAND
+@set Holodeck Computer=OPAQUE
+@set Holodeck Computer=LINK_OK
+@set Holodeck Computer=WIZARD
+&PROGRAM_TEST Holodeck Computer=
+&STATUS_TEST Holodeck Computer=Active
+&CREATOR_TEST Holodeck Computer=
+&PROGRAMS Holodeck Computer=
+&VIEW_SUGGESTIONS Holodeck Computer=$computer, view suggestions:@swi [match(v(allow),%#,|)]=0,{@pe %#=Permission Denied.},{@pe %#=This is what's been suggested:%r[u(suggestions)]}
+&COMP_SUGGEST Holodeck Computer=$computer, suggest *:@pe %#=You suggest to Tari'Vor '%0';&suggestions me=[v(suggestions)] %N Suggested %0 on [time()];@pe *t=[u(comp)] %N Suggested '%0'%r%b[u(end_comp)]
+&HOLO_HELP Holodeck Computer=%b[ljust({Computer, list Programs},13)] -%bGives all existing Programs andmore.%r%b[ljust({Computer, create Program <Name>},13)] -%bCreates a Program called <Name>%r%b[ljust({Computer, Write Program <Name>=<Program Text>},25)] -%bWrites <Text> down in Program Name.%r%b[ljust({Computer, view Program <Name>},13)] -%bViews a Program's Text.%r%b[ljust({Computer, del Program <Name>},13)] -%bDeletes a Program <Name>%r%b[ljust({Computer, show Program},13)] -%bShows what Program is loaded.%r%b[ljust({Computer, load Program <Name>},13)] -%bLoads Program <Name>%r%b[ljust({Computer, end Program <Name>},13)] -%bEnds the Program <Name>.
+&COMP_ATHELP Holodeck Computer=$computer, athelp:@pe %#=[ansi(c,repeat(-,28))][ansi(hb,%[)][ansi(hw,Holodeck Attributes)][ansi(hb,%])][ansi(c,repeat(-,29))]%r%b&Holodeck <Holodeck Computer>%b=<DB# of Holodeck>%r%b&old_desc <Holodeck Computer>%b=<&desc or @desc of Holodeck before the use%r%b of the Computer.>%r[u(footer)]
+&END_PROGRAM Holodeck Computer=$computer, end program *:@swi [match(v(programs),%0)]=0,{@pe %#=[u(comp)] File Seems not to Exist.%r%b[u(end_copm)]},{@switch [u(status_%0)]=Inactive,{@pe %#=[u(comp)] Program is already Inactive.%r%b[u(end_comp)]},Active,{@pe %#=[u(comp)] You end Program %0.%r%b[u(end_comp)];&loaded_program me=None;&status_%0 me=Inactive;&desc_store [u(holodeck)]=[u(old_desc)]}
+&SHOW_LOADED_PROGRAM Holodeck Computer=$computer, show program:@pe %#=[u(comp)] The Program loaded is [u(loaded_program)].%r%b[u(end_comp)]
+&HOLODECK Holodeck Computer=#1624
+&LOADED_PROGRAM Holodeck Computer=test
+&START_PROGRAM Holodeck Computer=$computer, load program *:@swi [match(V(programs),%0)]=0,{@pe %#=[u(comp)] File Seems not to Exist.%r%b[u(end_comp)]},{@switch [u(status_%0)]=Active,{@pe %#=[u(comp)] Program is already Active.%r%b[u(end_comp)]},Inactive,{@pe %#=[u(comp)] You load Program %0.%r%b[u(end_comp)];&loaded_program me=%0;&status_%0 me=Active;@force [owner(me)]=&desc_store [u(holodeck)]=[u(program_%0)];@pe %#=You hear the Computer humm and work it's magic[repeat(.,15)];@wait 4=@pe %#=The Computer loads the %0 Program.}
+&VIEW_PROGRAMS Holodeck Computer=$Computer, view program *:@swit [match(v(programs),%0)]=0,{@pe %#=[u(comp)] File Doesn't seem to Exist.%r%b[u(End_comp)]},{@pe %#=[ansi(c,repeat(-,28))][ansi(hb,%[)][ansi(hw,Holodeck Computer)][ansi(hb,%])][ansi(c,repeat(-,31))]%r[ljust(Program: [extract(v(programs),match(v(programs),%0),1)],25)] Size: [words(v(program_%0))]B%r[ljust(Creator: [u(Creator_%0)],25)] Status: [u(status_%0)]%r[ansi(c,repeat(-,78))]%r[space(5)][v(program_%0)]%r[u(footer)]
+&DELETE_PROGRAM Holodeck Computer=$computer, del program *:@swi [match(v(programs),%0)]=0,{@pe %#=[u(comp)] File Doesn't Seem to Exist.%r%b[u(end_comp)]},{&creator_%0 me=;&program_%0 me=;&programs me=[remove(v(programs),extract(v(programs),match(v(programs),%0),1))];&status_ %0 me=;@pe %#=[u(comp)] File now Deleted.%r%b[u(end_comp)]}
+&WRITE_PROGRAM Holodeck Computer=$computer, write program *=*:@swi [match(v(programs),%0)]=0,{@pe %#=[u(comp)] File Doesn't Exist.%r%b[u(end_comp)]},{&program_%0 me=%1;@pe %#=[u(comp)] Program now has written text.%r%b[u(end_comp)]}
+&END_COMP Holodeck Computer=[ansi(c,repeat(-,8))]
+&COMP Holodeck Computer=%b[ansi(c,repeat(_,8))]%r[ansi(hb,|)][ansi(hw,Computer)][ansi(hb,|%>)]
+&COMPUTER_CP Holodeck Computer=$computer, create program *:@swi [match(ucstr(v(programs)),ucstr(%0))]=0,{&programs me=[v(programs)] %0;@pe %#=[u(comp)] Program [v(0)] Created.%r%b[u(end_comp)];&creator_%0 me=%N;&status_%0 me=Inactive},{@pe %#=[u(comp)] Program Exists at this Moment.%r%b[u(end_comp)]}
+&LIST_PROGRAMS Holodeck Computer=$computer, list programs:@pe %#=[ansi(c,repeat(-,29))][ansi(hb,%[)][ansi(hw,Holodeck Programs)][ansi(hb,%])][ansi(c,repeat(-,30))]%r[space(6)][ansi(hb,|)]Key: Program # - Program Name = Size - Creator = Program Status[ansi(hb,|)]%r[space(7)][ansi(c,repeat(-,63))]%r[iter(v(programs),%r[lju st(match(v(programs),##),3)]- [##] = [words(v(program_[##]))] - [u(creator_[##])] = [u(status_[##])])]%r%r[u(footer)]
+@DESCRIBE Holodeck Computer=[ansi(c,repeat(-,27))][ansi(hb,%[)][ansi(hw,Holodeck Description)][ansi(hb,%])][ansi(c,repeat(-,30))]%r%tYou see a Holodeck Computer. On the Computer it has many options and wires hanging out of it. The Computer controls the entire room it is in. Computer is medium size not to small and you press commands while looking at it. Type [ansi(hy,'Computer, athelp'.)] for Attributes to set on your computer. Type [ansi(ch,'Computer, help'.)] for commands the Computer offers. If you have any comments or suggestions Type [ansi(r,'Computer, Suggest <Suggestion>')]%r[u(footer)]
+&1HALF Holodeck Computer=[ansi(c,repeat(-,24))]
+&2HALF Holodeck Computer=[ansi(c,repeat(-,30))]
+&CREATION_DATE Holodeck Computer=Oct. 11, 1996
+&FOOTER Holodeck Computer=[ansi(c,---)][ansi(hb,%[)][ansi(hw,Tari'Vor Product)][ansi(hb,%])][ansi(c,repeat(-,30))][ansi(hb,%[)][ansi(hw,Created: [u(creation_date)])][ansi(hb,%])][ansi(c,repeat(-,3))]
+&CENTER_PEICE Holodeck Computer=[ansi(hb,%[)][ansi(hw,Holodeck Computer Help)][ansi(hb,%])]
+&COMP_SHOWHELP Holodeck Computer=$computer, help:@pe %#=[u(1half)][u(center_peice)][u(2half)]%r[u(holo_help)]%r[u(footer)]

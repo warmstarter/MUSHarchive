@@ -1,0 +1,855 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" dir="ltr">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta http-equiv="Content-Style-Type" content="text/css" />
+		<meta name="generator" content="MediaWiki 1.15.3" />
+		<meta name="keywords" content="/Note,Galvin&#039;s Virtual Array" />
+		<link rel="shortcut icon" href="/favicon.ico" />
+		<link rel="search" type="application/opensearchdescription+xml" href="/wiki/opensearch_desc.php" title="GwenWiki (en)" />
+		<link rel="alternate" type="application/rss+xml" title="GwenWiki RSS Feed" href="/wiki/index.php?title=Special:RecentChanges&amp;feed=rss" />
+		<link rel="alternate" type="application/atom+xml" title="GwenWiki Atom Feed" href="/wiki/index.php?title=Special:RecentChanges&amp;feed=atom" />
+		<title>/Note - GwenWiki</title>
+		<link rel="stylesheet" href="/wiki/skins/common/shared.css?207" type="text/css" media="screen" />
+		<link rel="stylesheet" href="/wiki/skins/common/commonPrint.css?207" type="text/css" media="print" />
+		<link rel="stylesheet" href="/wiki/skins/monobook/main.css?207" type="text/css" media="screen" />
+		<!--[if lt IE 5.5000]><link rel="stylesheet" href="/wiki/skins/monobook/IE50Fixes.css?207" type="text/css" media="screen" /><![endif]-->
+		<!--[if IE 5.5000]><link rel="stylesheet" href="/wiki/skins/monobook/IE55Fixes.css?207" type="text/css" media="screen" /><![endif]-->
+		<!--[if IE 6]><link rel="stylesheet" href="/wiki/skins/monobook/IE60Fixes.css?207" type="text/css" media="screen" /><![endif]-->
+		<!--[if IE 7]><link rel="stylesheet" href="/wiki/skins/monobook/IE70Fixes.css?207" type="text/css" media="screen" /><![endif]-->
+		<link rel="stylesheet" href="/wiki/index.php?title=MediaWiki:Common.css&amp;usemsgcache=yes&amp;ctype=text%2Fcss&amp;smaxage=18000&amp;action=raw&amp;maxage=18000" type="text/css" />
+		<link rel="stylesheet" href="/wiki/index.php?title=MediaWiki:Print.css&amp;usemsgcache=yes&amp;ctype=text%2Fcss&amp;smaxage=18000&amp;action=raw&amp;maxage=18000" type="text/css" media="print" />
+		<link rel="stylesheet" href="/wiki/index.php?title=MediaWiki:Monobook.css&amp;usemsgcache=yes&amp;ctype=text%2Fcss&amp;smaxage=18000&amp;action=raw&amp;maxage=18000" type="text/css" />
+		<link rel="stylesheet" href="/wiki/index.php?title=-&amp;action=raw&amp;maxage=18000&amp;gen=css" type="text/css" />
+		<!--[if lt IE 7]><script type="text/javascript" src="/wiki/skins/common/IEFixes.js?207"></script>
+		<meta http-equiv="imagetoolbar" content="no" /><![endif]-->
+
+		<script type= "text/javascript">/*<![CDATA[*/
+		var skin = "monobook";
+		var stylepath = "/wiki/skins";
+		var wgArticlePath = "/wiki/index.php/$1";
+		var wgScriptPath = "/wiki";
+		var wgScript = "/wiki/index.php";
+		var wgVariantArticlePath = false;
+		var wgActionPaths = {};
+		var wgServer = "http://www.gwen-morse.com";
+		var wgCanonicalNamespace = "";
+		var wgCanonicalSpecialPageName = false;
+		var wgNamespaceNumber = 0;
+		var wgPageName = "/Note";
+		var wgTitle = "/Note";
+		var wgAction = "view";
+		var wgArticleId = "7";
+		var wgIsArticle = true;
+		var wgUserName = null;
+		var wgUserGroups = null;
+		var wgUserLanguage = "en";
+		var wgContentLanguage = "en";
+		var wgBreakFrames = false;
+		var wgCurRevisionId = 919;
+		var wgVersion = "1.15.3";
+		var wgEnableAPI = true;
+		var wgEnableWriteAPI = true;
+		var wgSeparatorTransformTable = ["", ""];
+		var wgDigitTransformTable = ["", ""];
+		var wgRestrictionEdit = [];
+		var wgRestrictionMove = [];
+		/*]]>*/</script>
+
+		<script type="text/javascript" src="/wiki/skins/common/wikibits.js?207"><!-- wikibits js --></script>
+		<!-- Head Scripts -->
+		<script type="text/javascript" src="/wiki/skins/common/ajax.js?207"></script>
+		<script type="text/javascript" src="/wiki/index.php?title=-&amp;action=raw&amp;gen=js&amp;useskin=monobook"><!-- site js --></script>
+	</head>
+<body class="mediawiki ltr ns-0 ns-subject page-_Note skin-monobook">
+	<div id="globalWrapper">
+		<div id="column-content">
+	<div id="content">
+		<a name="top" id="top"></a>
+				<h1 id="firstHeading" class="firstHeading">/Note</h1>
+		<div id="bodyContent">
+			<h3 id="siteSub">From GwenWiki</h3>
+			<div id="contentSub"></div>
+									<div id="jump-to-nav">Jump to: <a href="#column-one">navigation</a>, <a href="#searchInput">search</a></div>			<!-- start content -->
+			<p>One of the many macros of mine that depends on <a href="/wiki/index.php/Galvin%27s_Virtual_Array" title="Galvin&#39;s Virtual Array">Galvin's Virtual Array</a>.
+</p>
+<pre>
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Automated Cutter Note package (assembled by Gwen Morse)
+;;;
+;;; How this works...
+;;; Needs: the Array Lists of Octave Scales (below)
+;;; Also Needs: the VEINSCALE global variable macro (below)
+;;; Also Needs: The Virtual Array macro package by Galvin, and Michael Hunger (above)
+
+;;; Type '/note &lt;note&gt;' (where &lt;note&gt; is do, re, mi, fa, la, so, ti, dx).
+;;; This will set the cutter to the appropriate note, based on the scale of the vein
+;;; you're presently in. This saves &quot;book-keeping&quot; in that you don't have to keep track
+;;; of these settings for each octave scale.
+;;; If you want to set it manually to a specific note, /note will still accept the standard
+;;; A-G [sharp/flat] options as well.
+
+;;; /note by Phil.Pennock (Phil Pennock at globnix dot org) and Gwen Morse
+;;; (gwen dot morse at gmail dot com). Debugging help from David Moore.
+;;; You can use the existing array macros unmodified if you use the scale name as
+;;; the name of the array.
+
+
+/help_add /help_note set the cutter to the appropriate note
+/def -i help_note=\
+	/echo -aB Note help%;\
+	/echo /note &lt;note&gt;			This will set your cutter to &lt;note&gt;&nbsp;%;\
+	/echo (where &lt;note&gt; is do, re, mi, fa, la, so, ti, dx)%;\
+	/echo (or &lt;note&gt; is A B C D E F G sharp/flat)
+
+/def -T&quot;tiny.mush.cm&quot; note = \
+  /if ({*} =/ &quot;{do|re|mi|fa|la|so|ti|dx}&quot;) \
+       /get_array&nbsp;%{VEINSCALE}&nbsp;%1&nbsp;%;\
+       /let note=%?&nbsp;%;\
+       /_echo&nbsp;%;/send -w pose tunes a &quot;%1&quot; note.&nbsp;%;\
+       /send -w set cutter to&nbsp;%{note}&nbsp;%;\
+       /send -w sing&nbsp;%{note}&nbsp;%;\
+       /send -w cutter temp&nbsp;%;\
+  /else \
+       /send -w set cutter to&nbsp;%*&nbsp;%;\
+       /send -w sing&nbsp;%*&nbsp;%;\
+       /send -w cutter temp&nbsp;%;\
+  /endif
+
+;;; return the scale that the vein was in (when you forget if its major/minor cuts)
+
+/def -T&quot;tiny.mush.cm.sing&quot; scale = \
+ /if ({*} =/ &quot;{A|B|C|D|E|F|G|As|Bs|Cs|Ds|Es|Fs|Gs|Ab|Bb|Cb|Db|Eb|Fb|Gb}&quot;) \
+       /get_array&nbsp;%1 scale&nbsp;%;\
+       /let scale=%?&nbsp;%;\
+       /_echo&nbsp;%;/send -w pose is using the &quot;%{scale}&quot; scale.&nbsp;%;\
+ /elseif ({*}=~&quot;show&quot;) \
+       /let scale=/test get_array_count('%{VEINSCALE}', 9)&nbsp;%;\
+       /_echo&nbsp;%; /send -w pose is using the &quot;$[get_array('%{VEINSCALE}', 9)]&quot; scale.&nbsp;%;\
+ /else \
+       /send -w think&nbsp;%{scale} is not a valid scale.&nbsp;%;\
+ /endif
+
+
+;;; CrystalMUSH Vein emits
+;;; Written by Gwen Morse (gwen dot morse at gmail dot com)
+;;; matches based on specific leading strings and highlights/beeps to show there's a vein in the room.
+;;; Also calls 'vein stats' so that you can know if you spotted the vein, or, found another Singer's discard.
+;;; (I always want to know this because I keep track of all claims and whether I set the color)
+
+;;; set AUTOSTAKE to something other than &quot;true&quot; if you don't want to automatically stake the claim.
+;;;
+
+/set AUTOSTAKE=true
+
+/def -F -T&quot;tiny.mush.cm&quot; -abCmagenta -mregexp -t&quot;(glint|Flickers|flicker|glimmer|flash|gleam) of (light|crystal) (that|catches|dance|momentarily|captures)&quot; cm_vein = \
+   /send look vein%;\
+   /send vein stats%;\
+   /if (%{AUTOSTAKE} =/ &quot;true&quot;)\
+     /send stake claim%;\
+   /endif%;\
+   /repeat -1 -w 1 /ordermatch
+
+/def -F -T&quot;tiny.mush.cm&quot; -abCmagenta -mregexp -t&quot;(this must be the place|there is a vein close by|the symbiont pinches right behind|sweet pull of crystal|hair on your arm stands straight up)&quot; cm_vein2 = \
+   /send look vein%;\
+   /send vein stats%;\
+   /if (%{AUTOSTAKE} =/ &quot;true&quot;)\
+     /send stake claim%;\
+   /endif%;\
+   /repeat -1 -w 1 /ordermatch
+
+/def -F -T&quot;tiny.mush.cm&quot; -abCmagenta -mregexp -t&quot;(something about this spot|symbiont is telling you that crystal|Crystal must be near)&quot; cm_vein3 = \
+   /send look vein%;\
+   /send vein stats%;\
+   /if (%{AUTOSTAKE} =/ &quot;true&quot;)\
+     /send stake claim%;\
+   /endif%;\
+   /repeat -1 -w 1 /ordermatch
+
+/def -F -T&quot;tiny.mush.cm&quot; -abCmagenta -mregexp -t&quot;(musical vibration rings with your footsteps|crystal song sings softly in your ear|Pleasant shivers go up and down your spine)&quot; cm_vein4 = \
+   /send look vein%;\
+   /send vein stats%;\
+   /if (%{AUTOSTAKE} =/ &quot;true&quot;)\
+     /send stake claim%;\
+   /endif%;\
+   /repeat -1 -w 1 /ordermatch
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Array list of octave scales at CrystalMUSH
+;;; Written by Gwen Morse (gwen dot morse at gmail dot com)
+
+;;; As per Wolfgang@CrystalMUSH, it's always best to cut major scales. Then if you're left with a
+;;; group of flawed crystals for the 'so', 'ti', and 'dx' notes, you can make a 3 chord.
+;;; Minor scales do not allow that additional 3 chord grouping.
+
+;; mx and fx notes added for CrystalDREAMS support
+;; ignore if you're on CrystalMUSH they won't hurt anything
+
+/put_array Amin do A
+/put_array Amin re B
+/put_array Amin mi C
+/put_array Amin fa D
+/put_array Amin so E
+/put_array Amin la F
+/put_array Amin ti G
+/put_array Amin dx A
+/put_array Amin mx C
+/put_array Amin fx D
+/put_array Amin scale Amin
+
+/put_array A do A
+/put_array A re B
+/put_array A mi Cs
+/put_array A fa D
+/put_array A so E
+/put_array A la Fs
+/put_array A ti Gs
+/put_array A dx A
+/put_array A mx D
+/put_array A fx Ds
+/put_array A scale Amaj
+
+/put_array Bmin do B
+/put_array Bmin re Cs
+/put_array Bmin mi D
+/put_array Bmin fa E
+/put_array Bmin so Fs
+/put_array Bmin la G
+/put_array Bmin ti A
+/put_array Bmin dx B
+/put_array Bmin mx D
+/put_array Bmin fx E
+/put_array Bmin scale Bmin
+
+/put_array B do B
+/put_array B re Cs
+/put_array B mi Ds
+/put_array B fa E
+/put_array B so Fs
+/put_array B la Gs
+/put_array B ti As
+/put_array B dx B
+/put_array B mx Ds
+/put_array B fx E
+/put_array B scale Bmaj
+
+/put_array C do C
+/put_array C re D
+/put_array C mi E
+/put_array C fa F
+/put_array C so G
+/put_array C la A
+/put_array C ti B
+/put_array C dx C
+/put_array C scale Cmaj
+
+/put_array Cmin do C
+/put_array Cmin re D
+/put_array Cmin mi Ds
+/put_array Cmin fa F
+/put_array Cmin so G
+/put_array Cmin la Gs
+/put_array Cmin ti As
+/put_array Cmin dx C
+/put_array Cmin scale Cmin
+
+/put_array Dmin do D
+/put_array Dmin re E
+/put_array Dmin mi F
+/put_array Dmin fa G
+/put_array Dmin so A
+/put_array Dmin la As
+/put_array Dmin ti C
+/put_array Dmin dx D
+/put_array Dmin mx F
+/put_array Dmin fx G
+/put_array Dmin scale Dmin
+
+/put_array D do D
+/put_array D re E
+/put_array D mi Fs
+/put_array D fa G
+/put_array D so A
+/put_array D la B
+/put_array D ti Cs
+/put_array D dx D
+/put_array D mx Fs
+/put_array D fx G
+/put_array D scale Dmaj
+
+/put_array Emin do E
+/put_array Emin re Fs
+/put_array Emin mi G
+/put_array Emin fa A
+/put_array Emin so B
+/put_array Emin la C
+/put_array Emin ti D
+/put_array Emin dx E
+/put_array Emin mx G
+/put_array Emin fx A
+/put_array Emin scale Emin
+
+/put_array E do E
+/put_array E re Fs
+/put_array E mi Gs
+/put_array E fa A
+/put_array E so B
+/put_array E la Cs
+/put_array E ti Ds
+/put_array E dx E
+/put_array E mx Gs
+/put_array E fx A
+/put_array E scale Emaj
+
+/put_array F do F
+/put_array F re G
+/put_array F mi A
+/put_array F fa As
+/put_array F so C
+/put_array F la D
+/put_array F ti E
+/put_array F dx F
+/put_array F mx A
+/put_array F fx As
+/put_array F scale Fmaj
+
+/put_array Fmin do F
+/put_array Fmin re G
+/put_array Fmin mi Gs
+/put_array Fmin fa As
+/put_array Fmin so C
+/put_array Fmin la Cs
+/put_array Fmin ti Ds
+/put_array Fmin dx F
+/put_array Fmin mx Gs
+/put_array Fmin fx As
+/put_array Fmin scale Fmin
+
+/put_array G do G
+/put_array G re A
+/put_array G mi B
+/put_array G fa C
+/put_array G so D
+/put_array G la E
+/put_array G ti Fs
+/put_array G dx G
+/put_array G mx B
+/put_array G fx C
+/put_array G scale Gmaj
+
+/put_array Gmin do G
+/put_array Gmin re A
+/put_array Gmin mi As
+/put_array Gmin fa C
+/put_array Gmin so D
+/put_array Gmin la Ds
+/put_array Gmin ti F
+/put_array Gmin dx G
+/put_array Gmin mx As
+/put_array Gmin fx C
+/put_array Gmin scale Gmin
+
+/put_array As do As
+/put_array As re C
+/put_array As mi D
+/put_array As fa Ds
+/put_array As so F
+/put_array As la G
+/put_array As ti A
+/put_array As dx As
+/put_array As mx D
+/put_array As fx Ds
+/put_array As scale Ashmaj
+
+/put_array Asmin do As
+/put_array Asmin re C
+/put_array Asmin mi Cs
+/put_array Asmin fa Ds
+/put_array Asmin so F
+/put_array Asmin la Fs
+/put_array Asmin ti Gs
+/put_array Asmin dx As
+/put_array Asmin mx Cs
+/put_array Asmin fx Ds
+/put_array Asmin scale Ashmin
+
+/put_array Bs do Bs
+/put_array Bs re D
+/put_array Bs mi E
+/put_array Bs fa F
+/put_array Bs so G
+/put_array Bs la A
+/put_array Bs ti B
+/put_array Bs dx Bs
+/put_array Bs mx E
+/put_array Bs fx F
+/put_array Bs scale Bshmaj
+
+/put_array Bsmin do Bs
+/put_array Bsmin re D
+/put_array Bsmin mi Ds
+/put_array Bsmin fa F
+/put_array Bsmin so G
+/put_array Bsmin la Gs
+/put_array Bsmin ti As
+/put_array Bsmin dx Bs
+/put_array Bsmin mx Ds
+/put_array Bsmin fx F
+/put_array Bsmin scale Bshmin
+
+/put_array Csmin do Cs
+/put_array Csmin re Ds
+/put_array Csmin mi E
+/put_array Csmin fa Fs
+/put_array Csmin so Gs
+/put_array Csmin la A
+/put_array Csmin ti B
+/put_array Csmin dx Cs
+/put_array Csmin mx E
+/put_array Csmin fx Fs
+/put_array Csmin scale Cshmin
+
+/put_array Cs do Cs
+/put_array Cs re Ds
+/put_array Cs mi F
+/put_array Cs fa Fs
+/put_array Cs so Gs
+/put_array Cs la As
+/put_array Cs ti C
+/put_array Cs dx Cs
+/put_array Cs mx F
+/put_array Cs fx Fs
+/put_array Cs scale Cshmaj
+
+/put_array Ds do Ds
+/put_array Ds re F
+/put_array Ds mi G
+/put_array Ds fa Gs
+/put_array Ds so As
+/put_array Ds la C
+/put_array Ds ti D
+/put_array Ds dx Ds
+/put_array Ds mx G
+/put_array Ds fx Gs
+/put_array Ds scale Dshmaj
+
+/put_array Dsmin do Ds
+/put_array Dsmin re F
+/put_array Dsmin mi Fs
+/put_array Dsmin fa Gs
+/put_array Dsmin so As
+/put_array Dsmin la B
+/put_array Dsmin ti Cs
+/put_array Dsmin dx Ds
+/put_array Dsmin mx Fs
+/put_array Dsmin fx Gs
+/put_array Dsmin scale Dshmin
+
+/put_array Es do Es
+/put_array Es re G
+/put_array Es mi A
+/put_array Es fa As
+/put_array Es so C
+/put_array Es la D
+/put_array Es ti E
+/put_array Es dx Es
+/put_array Es mx A
+/put_array Es fx As
+/put_array Es scale Eshmaj
+
+/put_array Esmin do Es
+/put_array Esmin re G
+/put_array Esmin mi Gs
+/put_array Esmin fa As
+/put_array Esmin so C
+/put_array Esmin la Cs
+/put_array Esmin ti Ds
+/put_array Esmin dx Es
+/put_array Esmin mx Gs
+/put_array Esmin fx As
+/put_array Esmin scale Eshmin
+
+/put_array Fsmin do Fs
+/put_array Fsmin re Gs
+/put_array Fsmin mi A
+/put_array Fsmin fa B
+/put_array Fsmin so Cs
+/put_array Fsmin la D
+/put_array Fsmin ti E
+/put_array Fsmin dx Fs
+/put_array Fsmin mx A
+/put_array Fsmin fx B
+/put_array Fsmin scale Fshmin
+
+/put_array Fs do Fs
+/put_array Fs re Gs
+/put_array Fs mi As
+/put_array Fs fa B
+/put_array Fs so Cs
+/put_array Fs la Ds
+/put_array Fs ti F
+/put_array Fs dx Fs
+/put_array Fs mx As
+/put_array Fs fx B
+/put_array Fs scale Fshmaj
+
+/put_array Gs do Gs
+/put_array Gs re As
+/put_array Gs mi C
+/put_array Gs fa Cs
+/put_array Gs so Ds
+/put_array Gs la F
+/put_array Gs ti G
+/put_array Gs dx Gs
+/put_array Gs mx C
+/put_array Gs fx Cs
+/put_array Gs scale Gshmaj
+
+/put_array Gsmin do Gs
+/put_array Gsmin re As
+/put_array Gsmin mi B
+/put_array Gsmin fa Cs
+/put_array Gsmin so Ds
+/put_array Gsmin la E
+/put_array Gsmin ti Fs
+/put_array Gsmin dx Gs
+/put_array Gsmin mx B
+/put_array Gsmin fx Cs
+/put_array Gsmin scale Gshmin
+
+/put_array Ab do Af
+/put_array Ab re Bf
+/put_array Ab mi C
+/put_array Ab fa Df
+/put_array Ab so Ef
+/put_array Ab la F
+/put_array Ab ti G
+/put_array Ab dx Af
+/put_array Ab mx C
+/put_array Ab fx Df
+/put_array Ab scale Abmaj
+
+/put_array Abmin do Af
+/put_array Abmin re Bf
+/put_array Abmin mi B
+/put_array Abmin fa Df
+/put_array Abmin so Ef
+/put_array Abmin la E
+/put_array Abmin ti Gf
+/put_array Abmin dx Af
+/put_array Abmin mx B
+/put_array Abmin fx Df
+/put_array Abmin scale Abmin
+
+/put_array Bbmin do Bf
+/put_array Bbmin re C
+/put_array Bbmin mi Df
+/put_array Bbmin fa Ef
+/put_array Bbmin so F
+/put_array Bbmin la Gf
+/put_array Bbmin ti Af
+/put_array Bbmin dx Bf
+/put_array Bbmin mx Df
+/put_array Bbmin fx Ef
+/put_array Bbmin scale Bbmin
+
+/put_array Bb do Bf
+/put_array Bb re C
+/put_array Bb mi D
+/put_array Bb fa Ef
+/put_array Bb so F
+/put_array Bb la G
+/put_array Bb ti A
+/put_array Bb dx Bf
+/put_array Bb mx D
+/put_array Bb fx Ef
+/put_array Bb scale Bbmaj
+
+/put_array Cb do Cf
+/put_array Cb re Df
+/put_array Cb mi Ef
+/put_array Cb fa E
+/put_array Cb so Gf
+/put_array Cb la Af
+/put_array Cb ti Bf
+/put_array Cb dx Cf
+/put_array Cb mx Ef
+/put_array Cb fx E
+/put_array Cb scale Cbmaj
+
+/put_array Cbmin do Cf
+/put_array Cbmin re Df
+/put_array Cbmin mi D
+/put_array Cbmin fa E
+/put_array Cbmin so Gf
+/put_array Cbmin la G
+/put_array Cbmin ti A
+/put_array Cbmin dx Cf
+/put_array Cbmin mx D
+/put_array Cbmin fx E
+/put_array Cbmin scale Cbmin
+
+/put_array Dbmin do Df
+/put_array Dbmin re Ef
+/put_array Dbmin mi E
+/put_array Dbmin fa Gf
+/put_array Dbmin so Af
+/put_array Dbmin la A
+/put_array Dbmin ti B
+/put_array Dbmin dx Df
+/put_array Dbmin mx E
+/put_array Dbmin fx Gf
+/put_array Dbmin scale Dbmin
+
+/put_array Db do Df
+/put_array Db re Ef
+/put_array Db mi F
+/put_array Db fa Gf
+/put_array Db so Af
+/put_array Db la Bf
+/put_array Db ti C
+/put_array Db dx Df
+/put_array Db mx F
+/put_array Db fx Gf
+/put_array Db scale Dbmaj
+
+/put_array Eb do Ef
+/put_array Eb re F
+/put_array Eb mi G
+/put_array Eb fa Af
+/put_array Eb so Bf
+/put_array Eb la C
+/put_array Eb ti D
+/put_array Eb dx Ef
+/put_array Eb mx G
+/put_array Eb fx Af
+/put_array Eb scale Ebmaj
+
+/put_array Ebmin do Ef
+/put_array Ebmin re F
+/put_array Ebmin mi Gf
+/put_array Ebmin fa Af
+/put_array Ebmin so Bf
+/put_array Ebmin la B
+/put_array Ebmin ti Df
+/put_array Ebmin dx Ef
+/put_array Ebmin mx Gf
+/put_array Ebmin fx Af
+/put_array Ebmin scale Ebmin
+
+/put_array Fbmin do Ff
+/put_array Fbmin re Gf
+/put_array Fbmin mi G
+/put_array Fbmin fa A
+/put_array Fbmin so B
+/put_array Fbmin la C
+/put_array Fbmin ti D
+/put_array Fbmin dx Ff
+/put_array Fbmin mx G
+/put_array Fbmin fx A
+/put_array Fbmin scale Fbmin
+
+/put_array Fb do Ff
+/put_array Fb re Gf
+/put_array Fb mi Af
+/put_array Fb fa A
+/put_array Fb so B
+/put_array Fb la Df
+/put_array Fb ti Ef
+/put_array Fb dx Ff
+/put_array Fb mx Af
+/put_array Fb fx A
+/put_array Fb scale Fbmaj
+
+/put_array Gbmin do Gf
+/put_array Gbmin re Af
+/put_array Gbmin mi A
+/put_array Gbmin fa B
+/put_array Gbmin so Df
+/put_array Gbmin la D
+/put_array Gbmin ti E
+/put_array Gbmin dx Gf
+/put_array Gbmin mx A
+/put_array Gbmin fx B
+/put_array Gbmin scale Gbmin
+
+/put_array Gb do Gf
+/put_array Gb re Af
+/put_array Gb mi Bf
+/put_array Gb fa B
+/put_array Gb so Df
+/put_array Gb la Ef
+/put_array Gb ti F
+/put_array Gb dx Gf
+/put_array Gb mx Bf
+/put_array Gb fx B
+/put_array Gb scale Gbmaj
+
+; VEINSCALE Global Variable Macro
+
+;;; Written by Gwen Morse (gwen dot morse at gmail dot com)
+
+;;; This works with the octave array code above. Grabs the scale of the vein that you've last 'looked' at.
+;;; This sets the scale of the vein in the global {VEINSCALE} variable.
+
+/def -T&quot;tiny.mush.cm&quot; -p50 -F -mregexp -t&quot;The vein subtly sings to you in a scale of ([A-Za-z]+( [A-Za-z]+)?).&quot; vein_scale = \
+  /if ({P1}=~&quot;A flat&quot;) \
+    /set VEINSCALE=Ab&nbsp;%;\
+  /elseif ({P1}=~&quot;B flat&quot;) \
+    /set VEINSCALE=Bb&nbsp;%;\
+  /elseif ({P1}=~&quot;C flat&quot;) \
+    /set VEINSCALE=Cb&nbsp;%;\
+  /elseif ({P1}=~&quot;D flat&quot;) \
+    /set VEINSCALE=Db&nbsp;%;\
+  /elseif ({P1}=~&quot;E flat&quot;) \
+    /set VEINSCALE=Eb&nbsp;%;\
+  /elseif ({P1}=~&quot;F flat&quot;) \
+    /set VEINSCALE=Fb&nbsp;%;\
+  /elseif ({P1}=~&quot;G flat&quot;) \
+    /set VEINSCALE=Gb&nbsp;%;\
+  /elseif ({P1}=~&quot;A sharp&quot;) \
+    /set VEINSCALE=As&nbsp;%;\
+  /elseif ({P1}=~&quot;B sharp&quot;) \
+    /set VEINSCALE=Bs&nbsp;%;\
+  /elseif ({P1}=~&quot;C sharp&quot;) \
+    /set VEINSCALE=Cs&nbsp;%;\
+  /elseif ({P1}=~&quot;D sharp&quot;) \
+    /set VEINSCALE=Ds&nbsp;%;\
+  /elseif ({P1}=~&quot;E sharp&quot;) \
+    /set VEINSCALE=Es&nbsp;%;\
+  /elseif ({P1}=~&quot;F sharp&quot;) \
+    /set VEINSCALE=Fs&nbsp;%;\
+  /elseif ({P1}=~&quot;G sharp&quot;) \
+    /set VEINSCALE=Gs&nbsp;%;\
+  /else \
+    /set VEINSCALE=%P1&nbsp;%;\
+/endif
+
+;;; Set the color and shade of the vein.
+;;; highlight the vein the color of the crystal found within.
+/def -T&quot;tiny.mush.cm&quot; -F -mregexp -t&quot;You catch a sparkling glimmer of (very pale|pale|light|medium|deep|rich deep|pure) (rose|blue|green|yellow|black|white|amethyst)&quot; vein_color = \
+  /set VEIN_SHADE=%P1%;\
+  /set VEIN_COLOR=%P2%;\
+  /if ({VEIN_COLOR} =/ &quot;rose&quot;) \
+    /test substitute(decode_attr(strcat(&quot;@{Cred}&quot;,{*})))%;\
+  /elseif ({VEIN_COLOR} =/ &quot;blue&quot;) \
+    /test substitute(decode_attr(strcat(&quot;@{Cblue}&quot;,{*})))%;\
+  /elseif ({VEIN_COLOR} =/ &quot;green&quot;) \
+    /test substitute(decode_attr(strcat(&quot;@{Cgreen}&quot;,{*})))%;\
+  /elseif ({VEIN_COLOR} =/ &quot;amethyst&quot;) \
+    /test substitute(decode_attr(strcat(&quot;@{Cmagenta}&quot;,{*})))%;\
+  /elseif ({VEIN_COLOR} =/ &quot;yellow&quot;) \
+    /test substitute(decode_attr(strcat(&quot;@{Cyellow}&quot;,{*})))%;\
+  /elseif ({VEIN_COLOR} =/ &quot;white&quot;) \
+    /test substitute(decode_attr(strcat(&quot;@{BCwhite}&quot;,{*})))%;\
+  /endif%;\
+
+;;; Vein Size Doesn't Do Anything Yet.
+/def -T&quot;tiny.mush.cm&quot; -F -mregexp -t&quot;You get a sense that this is a (very large|large|pretty large|medium|medium small|very small) vein&quot; vein_size = \
+  /set VEIN_SIZE=%P1
+
+</pre>
+
+<!-- 
+NewPP limit report
+Preprocessor node count: 4/1000000
+Post-expand include size: 0/2097152 bytes
+Template argument size: 0/2097152 bytes
+Expensive parser function count: 0/100
+-->
+
+<!-- Saved in parser cache with key homesitewiki-mw_:pcache:idhash:7-0!1!0!!en!2!edit=0 and timestamp 20110912005625 -->
+<div class="printfooter">
+Retrieved from "<a href="http://www.gwen-morse.com/wiki/index.php//Note">http://www.gwen-morse.com/wiki/index.php//Note</a>"</div>
+			<div id='catlinks' class='catlinks'><div id="mw-normal-catlinks"><a href="/wiki/index.php/Special:Categories" title="Special:Categories">Category</a>:&#32;<span dir='ltr'><a href="/wiki/index.php?title=Category:Tinyfugue&amp;action=edit&amp;redlink=1" class="new" title="Category:Tinyfugue (page does not exist)">Tinyfugue</a></span></div></div>			<!-- end content -->
+						<div class="visualClear"></div>
+		</div>
+	</div>
+		</div>
+		<div id="column-one">
+	<div id="p-cactions" class="portlet">
+		<h5>Views</h5>
+		<div class="pBody">
+			<ul>
+	
+				 <li id="ca-nstab-main" class="selected"><a href="/wiki/index.php//Note" title="View the content page [c]" accesskey="c">Page</a></li>
+				 <li id="ca-talk" class="new"><a href="/wiki/index.php?title=Talk:/Note&amp;action=edit&amp;redlink=1" title="Discussion about the content page [t]" accesskey="t">Discussion</a></li>
+				 <li id="ca-viewsource"><a href="/wiki/index.php?title=/Note&amp;action=edit" title="This page is protected.&#10;You can view its source [e]" accesskey="e">View source</a></li>
+				 <li id="ca-history"><a href="/wiki/index.php?title=/Note&amp;action=history" title="Past revisions of this page [h]" accesskey="h">History</a></li>			</ul>
+		</div>
+	</div>
+	<div class="portlet" id="p-personal">
+		<h5>Personal tools</h5>
+		<div class="pBody">
+			<ul>
+				<li id="pt-login"><a href="/wiki/index.php?title=Special:UserLogin&amp;returnto=/Note" title="You are encouraged to log in; however, it is not mandatory [o]" accesskey="o">Log in / create account</a></li>
+			</ul>
+		</div>
+	</div>
+	<div class="portlet" id="p-logo">
+		<a style="background-image: url(/home/public/wiki/guestbook.jpg);" href="/wiki/index.php/Main_Page" title="Visit the main page [z]" accesskey="z"></a>
+	</div>
+	<script type="text/javascript"> if (window.isMSIE55) fixalpha(); </script>
+	<div class='generated-sidebar portlet' id='p-navigation'>
+		<h5>Navigation</h5>
+		<div class='pBody'>
+			<ul>
+				<li id="n-mainpage-description"><a href="/wiki/index.php/Main_Page">Main Page</a></li>
+				<li id="n-MUSHCode"><a href="/wiki/index.php/MUSHcode">MUSHCode</a></li>
+				<li id="n-Tinyfugue"><a href="/wiki/index.php/Tinyfugue">Tinyfugue</a></li>
+				<li id="n-Roleplay"><a href="/wiki/index.php/Roleplay">Roleplay</a></li>
+				<li id="n-Sims"><a href="/wiki/index.php/Sims">Sims</a></li>
+				<li id="n-Linux"><a href="/wiki/index.php/Linux">Linux</a></li>
+			</ul>
+		</div>
+	</div>
+	<div class='generated-sidebar portlet' id='p-Wiki_Help'>
+		<h5>Wiki Help</h5>
+		<div class='pBody'>
+			<ul>
+				<li id="n-portal"><a href="/wiki/index.php/GwenWiki:Community_Portal" title="About the project, what you can do, where to find things">Community portal</a></li>
+				<li id="n-currentevents"><a href="/wiki/index.php/GwenWiki:Current_events" title="Find background information on current events">Current events</a></li>
+				<li id="n-recentchanges"><a href="/wiki/index.php/Special:RecentChanges" title="The list of recent changes in the wiki [r]" accesskey="r">Recent changes</a></li>
+				<li id="n-randompage"><a href="/wiki/index.php/Special:Random" title="Load a random page [x]" accesskey="x">Random page</a></li>
+				<li id="n-help"><a href="/wiki/index.php/Help:Contents" title="The place to find out">Help</a></li>
+			</ul>
+		</div>
+	</div>
+	<div id="p-search" class="portlet">
+		<h5><label for="searchInput">Search</label></h5>
+		<div id="searchBody" class="pBody">
+			<form action="/wiki/index.php" id="searchform"><div>
+				<input type='hidden' name="title" value="Special:Search"/>
+				<input id="searchInput" name="search" type="text" title="Search GwenWiki [f]" accesskey="f" value="" />
+				<input type='submit' name="go" class="searchButton" id="searchGoButton"	value="Go" title="Go to a page with this exact name if exists" />&nbsp;
+				<input type='submit' name="fulltext" class="searchButton" id="mw-searchButton" value="Search" title="Search the pages for this text" />
+			</div></form>
+		</div>
+	</div>
+	<div class="portlet" id="p-tb">
+		<h5>Toolbox</h5>
+		<div class="pBody">
+			<ul>
+				<li id="t-whatlinkshere"><a href="/wiki/index.php/Special:WhatLinksHere//Note" title="List of all wiki pages that link here [j]" accesskey="j">What links here</a></li>
+				<li id="t-recentchangeslinked"><a href="/wiki/index.php/Special:RecentChangesLinked//Note" title="Recent changes in pages linked from this page [k]" accesskey="k">Related changes</a></li>
+<li id="t-specialpages"><a href="/wiki/index.php/Special:SpecialPages" title="List of all special pages [q]" accesskey="q">Special pages</a></li>
+				<li id="t-print"><a href="/wiki/index.php?title=/Note&amp;printable=yes" rel="alternate" title="Printable version of this page [p]" accesskey="p">Printable version</a></li>				<li id="t-permalink"><a href="/wiki/index.php?title=/Note&amp;oldid=919" title="Permanent link to this revision of the page">Permanent link</a></li>			</ul>
+		</div>
+	</div>
+		</div><!-- end of the left (by default at least) column -->
+			<div class="visualClear"></div>
+			<div id="footer">
+				<div id="f-poweredbyico"><a href="http://www.mediawiki.org/"><img src="/wiki/skins/common/images/poweredby_mediawiki_88x31.png" alt="Powered by MediaWiki" /></a></div>
+			<ul id="f-list">
+					<li id="lastmod"> This page was last modified on 7 September 2011, at 18:18.</li>
+					<li id="viewcount">This page has been accessed 72 times.</li>
+					<li id="privacy"><a href="/wiki/index.php/GwenWiki:Privacy_policy" title="GwenWiki:Privacy policy">Privacy policy</a></li>
+					<li id="about"><a href="/wiki/index.php/GwenWiki:About" title="GwenWiki:About">About GwenWiki</a></li>
+					<li id="disclaimer"><a href="/wiki/index.php/GwenWiki:General_disclaimer" title="GwenWiki:General disclaimer">Disclaimers</a></li>
+			</ul>
+		</div>
+</div>
+
+		<script type="text/javascript">if (window.runOnloadHook) runOnloadHook();</script>
+<!-- Served in 0.532 secs. --></body></html>

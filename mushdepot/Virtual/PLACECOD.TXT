@@ -1,0 +1,181 @@
+Adrian's Place Code(#546!HLVXn)
+Type: Thing Flags: COMBAT_OK HAVEN LINK_OK VISUAL SAFE NO_COMMAND
+Owner: Game Wizard  Zone: *NOTHING*  OOC Credits: 1
+Parent: *NOTHING*
+Powers:
+Warnings checked: none
+Created: Fri Aug 11 21:00:16 1995
+Last Modification: Fri Sep 29 19:58:15 1995
+DESCRIBE [#1$v]: A generic parent for PLACES code. You can use it to install
+whatever%Rplaces into a room of your MUSH (known form TABLES and the like)%R%R
+@Parent your object to this parent, make sure it is @set !no_command%Rand then
+type:%R%RPINSTALL THING \{NO\}EXAMPLE%R%Twhen you want to install the places on
+an object which is%R%Tplaced inside the room you want to have the places in.
+%Ror%R%RPINSTALL ROOM \{NO\}EXAMPLE%R%Twhen you parented the room directly to
+this parent.%R%RIf you add the word 'EXAMPLE' after the INSTALL command, then
+an example%Rplace will be downloaded onto your place object automatically.
+Highly%Rrecommended when you install the places for the first time. If not, add
+the word 'NOEXAMPLE'. You should put a hint on the places and the command%R
+'PLACE HELP' in the @desc of your room.%R%RType 'PATTRIBUTES' when you want to
+see the list of attributes which is%Rnecessary when you want to set up a place
+manually.%R%R%T%TCredits and flames to: [v(creator)]
+TXT_PATTRIBUTES [#1]: [u(FUN_HEADER,[name(v(DISPLAY))]: PLACE ATTRIBUTES)]%RThe
+following attribute will setup a place in a room:%R[ansi(h,&PLACENAME)]=
+overall place name for all places in the room.%R[ansi(h,&PLACE_NAME_<name>)]=
+<short desc>%R[ansi(h,&PLACE_DESC_<name>)] = longer desc (for plook and penter)
+%R[ansi(h,&PLACE_PREFIX_<name>)] = Prefix for 'PTALK' command.%R[ansi(h,
+&PLACE_\{O|OX|A\}ENTER_<name>)] ...the usual messages%R[ansi(h,&PLACE_\{O|OX|
+A\}LEAVE_<name>)]%R[ansi(h,&PLACE_LOCK_<name>)] list of db-refs of people with
+a key or the single%R%Tword 'ANYBODY'%R[ansi(h,PLACE_FLAGS_<name>)] either:
+LOCKED, DARK[ansi(h,&CLEARERS)] = space separated list of db-refs of people who
+can PCLEAR.%R%RPersonal pronouns in enter/leave messages can be gotten via poss
+(%0) since%R%0 is the db-ref of the enactor.%R%RAutomatically set when using
+place commands are:%R[ansi(h,&PLACE_PEOPLE_<name>)] who is at <name>?%R[ansi(h,
+&PLACE_<dbref>=<placename>)] where is player <dbref>?%R[u(FUN_TRAILER)]
+TXT_PLACEHELP [#1]: [u(FUN_HEADER,[name(v(DISPLAY))]: HELP PAGE)]%R[ljust(ansi
+(h,PLACE HELP),35)]show this menu.%R[ljust(ansi(h,PLACES),35)]scan the list of
+places.%R[ljust(ansi(h,PENTER <place>),35)]enter <place>.%R[ljust(ansi
+(h,PLEAVE),35)]leave <place>.%R[ljust(ansi(h,PJOIN <player>),35)]join <player>
+at his/her place.%R[ljust(ansi(h,PLOOK),35)]look at your place.%R[ljust(ansi(h,
+PLOOK <place>),35)]look over at <place>.%R[ljust(ansi(h,P\[UN\]LOCK),35)]\
+[un\]lock your place.%R[ljust(ansi(h,P\[UN\]LOCK <place>),35)]\[un\]lock place
+<place>.%R[ljust(ansi(h,PT\[ALK\] \[:|\;\] <message>),35)]talk/pose at your
+place.%R[ljust(ansi(h,PCLEAR),35)]clear the places if something's FOO.%R[u
+(FUN_TRAILER)]
+COM_PATTRIBUTS [#1]: $pattributes:@pem %#=eval(me,TXT_PATTRIBUTES)
+COM_PHELP [#1]: $place help:@pem %#=eval(me,TXT_PLACEHELP)
+COM_PCLEAR [#1]: $pclear:@switch match(v(clearers),%#)=>0,{@dol lattr(me/
+PLACE_PEOPLE_*)=&## me;@dol lattr(me/PLACE_#*)=&## me;@remit v(DISPLAY)=The
+places in this room have been reset due to some major mess.%RPlease enter your
+place again.},@pem %#=You do not have the authority to do so.
+COM_PLOOK_PLACE [#1]: $plook *:@switch [u(FUN_HASATTR,PLACE_NAME_[ucstr(edit
+(%0,%b,_))])][lt(match(v(PLACE_FLAGS_[ucstr(edit(%0,%b,_))]),DARK),1)]=0?,{@pem
+%#=What do you want to look at?},?0,{@pem %#=You cannot get a view inside.},11,
+{@pem %#=u(FUN_PLACEDESC,ucstr(edit(%0,%b,_)))}
+COM_PLOOK [#1]: $plook:@switch [u(FUN_HASATTR,PLACE_%#)]=1,{@pem %#=u
+(FUN_PLACEDESC,v(PLACE_%#))},{@pem %#=What do you want to look at?}
+COM_PTALK [#1]: $pt* *:@switch [u(FUN_HASATTR,PLACE_%#)]=1,{@pem/list v
+(PLACE_PEOPLE_[v(PLACE_%#)])=[v(PLACE_PREFIX_[v(PLACE_%#)])] [u
+(FUN_TALK_RESULT,%N,%1)]},{@pem %#=Who do you want to talk to?}
+DO_PLEAVE [#1]: @pem %0=[eval(me,PLACE_LEAVE_%1)];@pem/list setdiff(v
+(PLACE_PEOPLE_%1),%0)=[name(%0)] [eval(me,PLACE_OLEAVE_%1)];@pem/list setdiff
+(lcon(v(display)),setunion(v(PLACE_PEOPLE_%1),%0))=[name(%0)] [eval(me,
+PLACE_OXLEAVE_%1)];&PLACE_PEOPLE_%1 me=setdiff(v(PLACE_PEOPLE_%1),%0);
+&PLACE_%0 me;@tr me/PLACE_ALEAVE_%1=%0,%1
+COM_PLEAVE [#1]: $pleave:@select [u(FUN_HASATTR,PLACE_%#)][lt(match(v
+(PLACE_FLAGS_[v(PLACE_%#)]),LOCKED),1)]=0?,{@pemit %#=You do not have joined a
+place yet.},?0,{@pemit %#=Sorry, the place is locked.},{@tr me/do_pleave=%#,v
+(PLACE_%#)}
+DO_PENTER [#1]: @pem %0=[eval(me,PLACE_ENTER_%1)];@pem/list v(PLACE_PEOPLE_%1)=
+[name(%0)] [eval(me,PLACE_OENTER_%1)];@pem %0=u(FUN_PLACEDESC,%1);@pem/list
+setdiff(lcon(v(display)),setunion(v(PLACE_PEOPLE_%1),%0))=[name(%0)] [eval(me,
+PLACE_OXENTER_%1)];&PLACE_PEOPLE_%1 me=setunion(v(PLACE_PEOPLE_%1),%0);
+&PLACE_%0 me=%1;@tr me/PLACE_AENTER_%1=%0,%1
+COM_PENTER [#1]: $PENTER *:@select [u(FUN_HASATTR,PLACE_NAME_[ucstr(edit(%0,%b,
+_))])][not(u(FUN_HASATTR,PLACE_%#))][lt(match(v(PLACE_FLAGS_[ucstr(edit(%0,%b,
+_))]),LOCKED),1)]=0??,{@pemit %#=That place does not exist.},?0?,{@pemit %#=You
+are already at a place. Leave first.},??0,{@pemit %#=Sorry, that place is
+locked.},{@tr me/DO_PENTER=%#,ucstr(edit(%0,%b,_))}
+COM_PJOIN [#1]: $pjoin *:@select [not(u(FUN_HASATTR,PLACE_%#))][not(not(member
+(lcon(v(display)),pmatch(%0))))][u(FUN_HASATTR,PLACE_[pmatch(%0)])][lt(match(v
+(PLACE_FLAGS_[v(PLACE_[pmatch(%0)])]),LOCKED),1)]=0???,{@pemit %#=You are
+already at a place. Leave first.},?0??,{@oemit v(display)/%#=%N scans the [v
+(PLACENAME)].;@pemit %#=You can't find [capstr(lcstr(%0))] the room.},??0?,
+{@oemit v(display)/%#=%N scans the [v(PLACENAME)].;@pemit %#=[name(%0)] is not
+to be found at any place here.},???0,{@pemit %#=Sorry, that place is locked.},
+{@tr me/DO_PENTER=%#,v(PLACE_[pmatch(%0)])}
+COM_PLACES [#1]: $places:@pemit %#=[u(FUN_HEADER,[name(v(display))]: [v
+(PLACENAME)])][iter(sort(lattr(me/PLACE_NAME_*)),%r%r[u(FUN_PLACEWHO,mid(##,11,
+strlen(##)))])]%R[u(FUN_TRAILER)]
+FUN_TALK_RESULT [#1]: [switch(mid(%1,0,1),:,{%0 [mid(%1,1,strlen(%1))]},;,{%0
+[mid(%1,1,strlen(%1))]},{%0 says, "%1"})]
+FUN_PLACEDESC [#1]: [ansi(h,edit(%0,_,%b))]%R[eval(me,PLACE_DESC_%0)]%R
+Occupied:[iter(get(me/PLACE_PEOPLE_%0),%R[name(##)])]
+FUN_PLACEWHO [#1]: [ansi(h,ljust(edit(mid(ucstr(%0),0,20),_,%b),20))] - [mid(v
+(PLACE_NAME_%0),0,55)]%r[ljust(Occupied:,20)][switch(match(v(PLACE_FLAGS_%0),
+DARK),>0,switch(gt(words(v(PLACE_PEOPLE_%0)),0),1,* Occupied *,* Empty *),
+switch(strlen(v(PLACE_PEOPLE_%0)),>0,iter(v(PLACE_PEOPLE_%0),name(##)),* Empty
+*))]
+FUN_TRAILER [#1]: [repeat(-=,39)]-
+FUN_HEADER [#1]: [repeat(-=,39)]-%R[ansi(h,center(%0,75))]%R[repeat(-%B,39)]-
+FUN_HASATTR [#1]: [switch(v(%0),,0,1)]
+EX_PLACE_ALEAVE_SMALL_BENCH [#1]: @remit v(display)=The bench sighs in relief.
+EX_PLACE_OLEAVE_SMALL_BENCH [#1]: does not longer share your company on the
+small bench.
+EX_PLACE_OXLEAVE_SMALL_BENCH [#1]: stands up from the small bench.
+EX_PLACE_LEAVE_SMALL_BENCH [#1]: You stand up from the small bench.
+EX_PLACE_AENTER_SMALL_BENCH [#1]: @remit v(display)=The bench grunts, "Uff!"
+EX_PLACE_OXENTER_SMALL_BENCH [#1]: sits down on the small bench.
+EX_PLACE_OENTER_SMALL_BENCH [#1]: joins you on the small bench.
+EX_PLACE_ENTER_SMALL_BENCH [#1]: You sit on the small bench.
+EX_PLACE_PREFIX_SMALL_BENCH [#1]: On the bench,
+EX_PLACE_DESC_SMALL_BENCH [#1]: A small green bench is sitting next to the next
+of a house's wall inmidst%Ba small foregarden. Plants of every color form a sea
+around you, a piece%Bof lawn can be seen between them every once in a while.
+The form of the%Bbench confortably fits human bodies, though other races might
+find sore%Bplaces at their bodies every once in a while.%B
+EX_PLACE_NAME_SMALL_BENCH [#1]: A small green bench at the wall of a house.
+EX_PLACENAME [#1]: benches
+INSTALL_END [#1]: &INSTALL_PLACES_THING me=prohibited;&INSTALL_PLACES_ROOM me=
+prohibited;&INSTALL_MESSAGE me={$pinstall *:@pemit \%#=Installation completed.
+wipe out allINSTALL_... registers before reinstallation.};@pem %0=+++ Place
+code installation completed. +++%RNow type in a space seperated list of DB-refs
+of those people who%Rshould be able to clear the places if something gets
+messed up:%RFor example: &CLEARERS [num(me)]=%0 #.... #....%RReport any bugs or
+errors to: [v(creator)]
+INSTALL_EXAMPLE [#1]: @pem %0=Installing example place...;@dol lattr(parent
+(me)/EX_*)={&[mid(##,3,strlen(##))] me=[v(##)]};@tr me/INSTALL_END=%0
+INSTALL_LISTENS [#1]: @pem %0=Installing listen patterns...;@dol lattr([parent
+(me)]/DIST_*)={&[mid(##,5,strlen(##))] me=[v(##)]};@set me=listener;@switch
+match(%1,EXAMPLE)=1,{@tr me/INSTALL_EXAMPLE=%0},{@tr me/INSTALL_END=%0}
+INSTALL_BEGIN [#1]: @pem %0=+++ PLACES Installation procedure started. +++%R
+Installing into object '[name(me)]([num(me)][flags(me)])'...%RInstalling places
+[switch(match(%2,example),1,with,without)] example place...%R;&DISPLAY me=%1;
+@pem %0=Redirecting output to room '[name(v(display))]([num(v(display))][flags
+(v(display))])'...;@switch %1=me,{@cpattr [parent(me)]/ROOM_ALEAVE=me/ALEAVE};
+@tr me/INSTALL_LISTENS=%0,%2
+INSTALL_PLACES_ROOM [#1]: $pinstall room *:@tr me/INSTALL_BEGIN=%#,me,[switch
+(match(%0,example),1,EXAMPLE,NOEXAMPLE)]
+INSTALL_PLACES_THING [#1]: $pinstall thing *:@tr me/INSTALL_BEGIN=%#,here,
+[switch(match(%0,example),1,EXAMPLE,NOEXAMPLE)]
+ROOM_ALEAVE [#1]: @select [u(FUN_HASATTR,PLACE_%#)]=1,{&PLACE_PEOPLE_[v
+(PLACE_%#)] me=[setdiff(v(PLACE_PEOPLE_[v(PLACE_%#)]),%#)];&PLACE_%# me}
+DIST_HASDISCONNECTED [#1]: ^*has disconnected.:@select [u(FUN_HASATTR,
+PLACE_%#)]=1,{&PLACE_PEOPLE_[v(PLACE_%#)] me=[setdiff(v(PLACE_PEOPLE_[v
+(PLACE_%#)]),%#)];&PLACE_%# me}
+DIST_HASLEFT [#1]: ^*has left.:@select [u(FUN_HASATTR,PLACE_%#)]=1,
+{&PLACE_PEOPLE_[v(PLACE_%#)] me=[setdiff(v(PLACE_PEOPLE_[v(PLACE_%#)]),%#)];
+&PLACE_%# me}
+CREATOR [#1]: Adrian
+EX_PLACE_LOCK_SMALL_BENCH [#1]: ANYBODY
+EX_PLACE_FLAGS_SMALL_BENCH [#1]: DARK LOCKED
+COM_PLOCK [#1]: $plock:@select [u(FUN_HASATTR,PLACE_%#)][or(gt(match(v
+(PLACE_LOCK_[v(PLACE_%#)]),%#),0),match(v(PLACE_LOCK_[v(PLACE_%#)]),ANYBODY))]=
+0?,{@pem %#=What do you want to lock?},?0,{@pem %#=Sorry, you don't have a
+key.},{@pem %#=You lock the [ucstr(edit(v(PLACE_%#),_,%b))].;&PLACE_FLAGS_[v
+(PLACE_%#)] me=setunion(v(PLACE_FLAGS_[v(PLACE_%#)]),LOCKED)}
+COM_PLOCK_PLACE [#1]: $plock *:@select [u(FUN_HASATTR,PLACE_NAME_[ucstr(edit
+(%0,%b,_))])][or(gt(match(v(PLACE_LOCK_[ucstr(edit(%0,%b,_))]),%#),0),match(v
+(PLACE_LOCK_[ucstr(edit(%0,%b,_))]),ANYBODY))]=0?,{@pem %#=What do you want to
+lock?},?0,{@pem %#=Sorry, you don't have a key.},{@pem %#=You lock the [ucstr
+(%0)].;&PLACE_FLAGS_[ucstr(edit(%0,%b,_))] me=setunion(v(PLACE_FLAGS_[ucstr
+(edit(%0,%b,_))]),LOCKED)}
+COM_PUNLOCK [#1]: $punlock:@select [u(FUN_HASATTR,PLACE_%#)][or(gt(match(v
+(PLACE_LOCK_[v(PLACE_%#)]),%#),0),match(v(PLACE_LOCK_[v(PLACE_%#)]),ANYBODY))]=
+0?,{@pem %#=What do you want to unlock?},?0,{@pem %#=Sorry, you don't have a
+key.},{@pem %#=You unlock the [ucstr(edit(v(PLACE_%#),_,%b))].;&PLACE_FLAGS_[v
+(PLACE_%#)] me=setdiff(v(PLACE_FLAGS_[v(PLACE_%#)]),LOCKED)}
+COM_PUNLOCK_PLACE [#1]: $punlock *:@select [u(FUN_HASATTR,PLACE_NAME_[ucstr
+(edit(%0,%b,_))])][or(gt(match(v(PLACE_LOCK_[ucstr(edit(%0,%b,_))]),%#),0),
+match(v(PLACE_LOCK_[ucstr(edit(%0,%b,_))]),ANYBODY))]=0?,{@pem %#=What do you
+want to unlock?},?0,{@pem %#=Sorry, you don't have a key.},{@pem %#=You unlock
+the [ucstr(%0)].;&PLACE_FLAGS_[ucstr(edit(%0,%b,_))] me=setdiff(v(PLACE_FLAGS_
+[ucstr(edit(%0,%b,_))]),LOCKED)}
+HASDISCONNECTED [#6]: ^*has disconnected.:@select [u(FUN_HASATTR,PLACE_%#)]=1,
+{&PLACE_PEOPLE_[v(PLACE_%#)] me=[setdiff(v(PLACE_PEOPLE_[v(PLACE_%#)]),%#)];
+&PLACE_%# me}
+HASLEFT [#6]: ^*has left.:@select [u(FUN_HASATTR,PLACE_%#)]=1,{&PLACE_PEOPLE_
+[v(PLACE_%#)] me=[setdiff(v(PLACE_PEOPLE_[v(PLACE_%#)]),%#)];&PLACE_%# me}
+Home: Coding Parent Room
+Location: Coding Parent Room
+_______________________________________________________________________________

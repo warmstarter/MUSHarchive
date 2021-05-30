@@ -1,0 +1,188 @@
+@@ WcWizard: Copyright, Chuc McGuire, 2002
+@@ Using this installer:
+@@
+@@ a) Edit SECTION 0 to contain appropriate information for your code.
+@@
+@@ b) Change <Primary> to the appropriate name for your package in
+@@    SECTIONs 2 and 3.
+@@
+@@ b) Edit SECTION 4-7 to contain appropriate information for your package.
+@@
+@@ c) Appropriately append your code.
+@@
+@@ d) Append the wcw-foot.txt.
+@@
+@@ e) Remove this section (the line of @@;'s and everything above it)
+@@
+@@ Variables
+@@ ~. == Current working #dbref.
+@@ ~t == Script start time in secs().
+@@ ~m == Script method (0 = update, [1] = install).
+@@ ~q == QUIET status (0 = noisy, [1] = quiet).
+@@ ~<0-9> == other variables 0-9
+@@
+@@;@@;@@;@@;@@;@@;@@;@@;@@;@@;@@;@@;@@;@@;@@;@@;@@;@@;@@;@@;@@;@@;@@;@@;@@;
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@ WcWizard: Copyright, Chuc McGuire, 2002
+@@
+@@ SECTION 0: README.
+@@
+@@ Name of code: <Change>
+@@ Version: <Change>
+@@ Date of release: <Change>
+@@
+@@ Description of the code: <Add>
+@@
+@@ SECTION 0: README -- First is the README section (this section). This,
+@@ and only this section, may be removed (to increase the quote speed, if
+@@ you're in a hurry). It contains general information about the package,
+@@ including system requirements.
+@@
+@@ SECTION 1: Script initiation section. DO NOT TOUCH.
+@@
+@@ SECTION 2: Reminders. (READ IT)
+@@
+@@ SECTION 3: Install method (for 'new' or 'from scratch' installs)
+@@
+@@ SECTION 4: Update method (<details?>).
+@@
+@@ SECTION 5: Quiet Mode (do you want all the 'attribute set' msgs?)
+@@
+@@ SECTION 6: Universal (WARPEDcore info: author, version #, etc.)
+@@
+@@ <OTHER SECTIONS>
+@@
+@@ SECTION <N>: Cleanup (basically that. post-script cleanup)
+@@
+@@ Number of objects: <Change>
+@@
+@@ Functions and purposes: <Change>
+@@
+@@ $commands it defines: <Change>
+@@
+@@ Code Author: <Change>
+@@ Email Address: <Change>
+@@
+@@ "As used on" this MUSH: <Change>
+@@
+@@ Server required: <Change>
+@@
+@@ Server version required/tested on: <Change>
+@@
+@@ Configs required: <Change> 
+@@
+@@ Privileges required: <Change>
+@@
+@@ Other requirements: <Change>
+@@
+@@ Terms of code use: <Change>
+@@
+@@ Support policy: <Change>
+@@
+@@ Installation instructions: Read and follow the instructions in
+@@ SECTIONs 3-5, then quote the resulting file into your game.
+@@
+@@ Help instructions: <Change>
+@@
+@@ 1 second script runtime: <Change>
+@@
+@@ Everything above this line may be removed. Do not remove anything else.
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@ WcWizard: Copyright, Chuc McGuire, 2002
+@pemit/silent me=WcWizard: Starting script. Please wait.
+@@
+@@ SECTION 1: Script initiation section. DO NOT TOUCH.
+@@
+@@ Tampering with anything in this section will break this script.
+@@
+@dol . [lnum(10)]={@switch [hasattr(me,~##)]=0,,@mvattr me/~##=me/~wc##}
+@pemit/silent me=WcWizard: Started at [ansi(h,time())][set(me,~t:[secs()])]
+@@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@ WcWizard: Copyright, Chuc McGuire, 2002
+@@
+@@ SECTION 2: Reminders
+@@
+@@ Reminder1: Requires <Primary> version <version> or newer to run as an update.
+@@            See the instructions in SECTIONS 2&3
+@@
+@@ Reminder2: This script, and the objects created by it, REQUIRE
+@@            side-effect functions to be ENABLED on your MUSH. If your
+@@            game does not have side-effects ENABLED, then DO NOT USE THIS
+@@            SCRIPT.  (You have been warned!)
+@@
+@pemit/silent me=WcWizard \([timestring(sub(secs(),get(me/~t)))]\): Configuring for Selections. Please wait..
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@ WcWizard: Copyright, Chuc McGuire, 2002
+@@
+@@ SECTION 3: Method Selection. (default: New Installation)
+@@
+@@ New Installation: If this is a new installation, leave this section
+@@ as it is, and proceed directly to 'SECTION 4'
+@@
+@@ Updating an existing installation: If this is an update to an existing
+@@ installation, make the following two changes:
+@@
+@@ First: In the following line, change "#dbref" so that it is the dbref
+@@ of your <Primary>.
+@@
+&~. me=#dbref
+@@
+@@ Second: In the following line, change 1 to 0.
+@@
+&~m me=1
+@@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@ WcWizard: Copyright, Chuc McGuire, 2002
+@@
+@@ SECTION 4: Quiet Mode.
+@@
+@@ If you do not want to see all of the spam from the installation, you
+@@ do not need to make any further changes to this script.
+@@
+@@ However, if you actually prefer to see all of the spam, then change the
+@@ 1 to a 0 in the following line.
+@@
+&~q me=1
+@@
+@@ There are no further changes required for this script.
+@@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@ WcWizard: Copyright, Chuc McGuire, 2002
+@@
+@@ SECTION 5: Processing of Selections
+@@
+@@ Processing: Quiet Mode
+@@
+@pemit/silent me=[setq(f,get(me/~q))][set(me,~q:[hasflag(me,quiet)])]WcWizard \([timestring(sub(secs(),get(me/~t)))]\): Proceeding [if(%qf,set(me,quiet)muted,noisy)].
+@@
+@@ Processing: Method Selection
+@@
+@pemit/silent me=WcWizard \([timestring(sub(secs(),get(me/~t)))]\): Method Selected: [ifelse(get(me/~m),New Installation,Update)].
+@switch [get(me/~m)]=0,,@set me=~.:[create(<Primary>,10)]
+@switch [get(me/~m)]=0,,@set [get(me/~.)]=~.ctime:[time()]
+@pemit/silent me=WcWizard \([timestring(sub(secs(),get(me/~t)))]\): [ifelse(get(me/~m),Install,Updat)]ing [name(get(me/~.))].
+@@ 
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@ WcWizard: Copyright, Chuc McGuire, 2002
+@@
+@@ SECTION 6: Universal
+@@
+@pemit/silent me=WcWizard \([timestring(sub(secs(),get(me/~t)))]\): Setting WARPEDcore information.
+@@
+&~ [get(me/~.)]=~http://www.elsemu.net/~nemo/warpedcore/
+&~.author [get(me/~.)]=Trispis @ M*U*S*H
+&~.author.email [get(me/~.)]=trispis@mush.pennmush.org
+&~.copyright [get(me/~.)]=Copyright 2002 Chuc McGuire
+&~.license [get(me/~.)]=WcSDL (WARPEDcore Softcode and Documentation License)
+&~.license.url [get(me/~.)]=http://www.elsemu.net/~nemo/warpedcore/license.html
+&~.url [get(me/~.)]=http://www.elsemu.net/~nemo/softcode/
+&~.version [get(me/~.)]=<Change>
+&~.wcwizard.version [get(me/~.)]=0.8.2
+@wait 0=@set [get(me/~.)]=~.update:[time()]
+@@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@
+@@ SECTION 7:
+@@
+@pemit/silent me=WcWizard \([timestring(sub(secs(),get(me/~t)))]\): Installing <Change>.

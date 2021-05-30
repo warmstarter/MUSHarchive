@@ -1,0 +1,71 @@
+Tables Parent Object(#228MVYhs)
+Type: THING Flags: MONITOR VISUAL PARENT_OK HALTED SAFE
+Commands:%R%RSit at #<num>%RStand%Rtt <message>%RTables%R
+Owner: Nefara's Toadie  Key: Free Code Store(#349RF) Plocks: 1
+Zone: *NOTHING*
+Powers:
+JOINTABLE1: $sit at #*:@switch 0=[not(member(iter(rest(lnum(add(v(maxtables),
+1))),[v(table##names)]),%#))],{@pemit %#=I think you should 'stand' up first.},
+[lte(%0,v(maxtables))],{@pemit %#=You dont see that many tables.},[gt(v
+(maxseats%0), words(v(table%0names)))],{@pemit %#=There aren't any extra seats
+for you.},{@oemit %#=%N takes a chair at [v(table%0)].;@pemit %#=You sit at
+[v(table%0)].;@dolist [v(table%0names)]=@pemit ##=%N sits down at your table.;
+&table%0 names me=[v(table%0names)] %#}
+STANDTABLE: $stand:@switch [member(iter(rest(lnum(add(v(maxtables),1))),[v
+(table##names)]),%#)]=0,{@pemit %#=You are already standing up.},{[setq(0,
+[extract(s(iter(rest(lnum(add(v(maxtables),1))),[switch(words(v(table##names)),
+0,,[repeat(%b##,words(v(table##names)))])])),member(iter(s(rest(lnum(add(v
+(maxtables),1)))),[v(table##names)]),%#),1)])];&table[r(0)]names me=[remove(v
+(table[r(0)]names),%#)];@pemit %#=You stand up.;@dolist [v(table[r(0)]names)]=
+@pemit ##=%N stands up from a table.}
+TALK: $tt *:@switch [member(iter(rest(lnum(add(v(maxtables),1))),[v(table##
+names)]),%#)]=0,{@pemit %#=Try sitting down first.},{@dolist [v(table[extract
+(iter(rest(lnum(add(v(maxtables),1))),[switch(words(v(table##names)),0,,[repeat
+(%b##,words(v(table##names)))])]),member(iter(rest(lnum(add(v(maxtables),1))),
+[v(table##names)]),%#),1)]names)]={@pemit ##=At the table, %N[switch(mid(%0,0,
+1),:,%b[delete(%0,0,1)],;,[delete(%0,0,1)], %bsays "%0")]}}
+TABLE_CMD: $tables:@dolist [rest(lnum(add(v(maxtables),1)))]=@pemit %#=[capstr
+(v(table##))]({#}##) has [switch(sub(v(maxseats##), words(v(table##names))),0,
+no,[sub(v(maxseats##),words(v(table##names)))])] empty [switch(sub(v(maxseats
+##), words(v(table##names))),1,seat,seats)].[switch(words(v(table##names)),0,
+,1,%RSeated: %b[name(v(tables##names))].,%RSeated: %b[u(#228/table_look, v
+(table##names))])]
+CLEANUPSEATSA: ^* has left.:@switch member(iter(rest(lnum(add(v(maxtables),
+1))),[v(table##names)]),%#)=>0,{[setq(0,[extract(iter(rest(lnum(add(v
+(maxtables),1))),[switch(words(v(table##names)),0,,[repeat(%b##,words(v(table##
+names)))])]),member(iter(rest(lnum(add(v(maxtables),1))),[v(table##names)]),
+%#),1)])];&table[r(0)]names me=[remove(v(table[r(0)]names),%#)];@dolist [v
+(table[r(0)]names)]={@pemit ##=%N stands up, leaving your table.};@pemit %#=You
+stand up, leaving the table.}
+CLEANUPSEATSB: ^* has disconnected.:@switch member(iter(rest(lnum(add(v
+(maxtables),1))),[v(table##names)]),%#)=>0,{[setq(0,[extract(iter(rest(lnum(add
+(v(maxtables),1))),[switch(words(v(table##names)),0,,[repeat(%b##,words(v(table
+##names)))])]),member(iter(rest(lnum(add(v(maxtables),1))),[v(table##names)]),
+%#),1)])];&table[r(0)]names me=[remove(v(table[r(0)]names),%#)];@dolist [v
+(table[r(0)]names)]={@pemit ##=%N stands up, leaving your table.};&table[r(0)]
+names me=[remove(v(table[r(0)]names), %#)]}
+MAXTABLES: 9
+MAXSEATS1: 9
+TABLE1: row of barstools
+MAXSEATS2: 4
+TABLE2: small table
+MAXSEATS3: 3
+TABLE3: small rounded table near the front
+MAXSEATS4: 5
+TABLE4: table near the window
+MAXSEATS5: 9
+TABLE5: long table in the center
+MAXSEATS6: 2
+TABLE6: small private table off to the side
+MAXSEATS7: 6
+TABLE7: large rounded table near the back
+MAXSEATS8: 4
+TABLE8: table in the back corner
+MAXSEATS9: 15
+TABLE9: banquet table
+TABLE_LOOK: [iter(%0[setq(8,words(%0))],[setq(9,add(%q9,1))][switch([SUB(%q8,
+%q9)],0, and [name(##)],{[name(##)],})])]
+No exits.
+Home: Free Code Store(#349RF)
+Location: Free Code Store(#349RF)
+_______________________________________________________________________________

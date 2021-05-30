@@ -1,0 +1,127 @@
+	# Commands for the market (@instock, @stock and @basecost)
+
+# @INSTOCK <currency>
+#
+# Tells the players whether an item in the market is above or below 1000
+# in the accounts
+#
+
+&CMD-INSTOCK #26=$@instock *:
+  @remit #100=%n asks a merchant about %0.; 
+  think [setq(0, iscurrency(%0))][setq(1, [getaccount(#26, %0)])];
+  @remit #100=[u(message-instock-[get(%#/social-status)]-%q0-
+                 [and(%q0,[gt(%q1,1000)])],%0)]
+-
+&MESSAGE-INSTOCK-1-0-0 #26=
+  A merchant mutters, "We don't even sell %0 here.  Now go!"
+-
+&MESSAGE-INSTOCK-2-0-0 #26=
+  A merchant thinks about that, "No, I've never heard of %0."
+-
+&MESSAGE-INSTOCK-3-0-0 #26=
+  A merchant thinks about that, "What's that again?  %0. Where can I get them?"
+-
+&MESSAGE-INSTOCK-4-0-0 #26=
+  A merchant pales a bit and whispers, 
+  "I'm afraid we don't have any %0 at all."
+-
+&MESSAGE-INSTOCK-5-0-0 #26=
+  A merchant falls to his knees and agonises, 
+  "I've never had any %0 to sell you!"
+-
+&MESSAGE-INSTOCK-1-1-0 #26=
+  A merchant mutters, "Well maybe I have some %0 and maybe I don't!"
+-
+&MESSAGE-INSTOCK-2-1-0 #26=
+  A merchant mutters, "I hope you don't expect me to have lots of %0."
+-
+&MESSAGE-INSTOCK-3-1-0 #26=
+  A merchant confides in you, "I hope we get more %0 soon."
+-
+&MESSAGE-INSTOCK-4-1-0 #26=
+  A merchant asserts, "We don't have many %0 but I'll try to save them 
+  for you."
+-
+&MESSAGE-INSTOCK-5-1-0 #26=
+  A merchant looks nervous, "I hope I have enough %0 for you, Your Honor."
+-
+&MESSAGE-INSTOCK-1-1-1 #26=
+  A merchant makes a face and concedes, "Oh, we have enough %0."
+-
+&MESSAGE-INSTOCK-2-1-1 #26=
+  A merchant smiles, friendly-like, "We've got plenty of %0!"
+-
+&MESSAGE-INSTOCK-3-1-1 #26=
+  A merchant nods, grinning, "Lots of %0 just waiting for me to sell to you!"
+-
+&MESSAGE-INSTOCK-4-1-1 #26=
+  A merchant smiles, "Yes, noble one, we have enough %0 to handle almost any 
+  request of yours."
+-
+&MESSAGE-INSTOCK-5-1-1 #26=
+  A merchant bows, "I have many %0, enough to handle almost any request!"
+-
+&MESSAGE-INSTOCK-1-0-1 #26=This should not happen.
+-
+&MESSAGE-INSTOCK-2-0-1 #26=This should not happen.
+-
+&MESSAGE-INSTOCK-3-0-1 #26=This should not happen.
+-
+&MESSAGE-INSTOCK-4-0-1 #26=This should not happen.
+-
+&MESSAGE-iNSTOCK-5-0-1 #26=This should not happen.
+-
+
+# @STOCK <amount> <currency>
+# # Adds <amount> units of the product <currency> to the market, creating the 
+# account if necessary.
+# 
+&CMD-STOCK #5 = $@stock *: 
+  think setq(0, first(%0)); 
+  think setq(1, rest(%0)); 
+  think setq(9, 
+    [iscurrency(%q1)]
+    [isnum(%q0)]
+  ); 
+
+  @select %q9 =
+  11, {
+    think switch(hasaccount(#26, %q1), 0, ac_create(#26, %q1, 0)); 
+    think ac_adjust(#26, %q1, %q0); 
+    @pemit %# = Added %q0 %q1 to the market.
+  }, 
+  0?, {@pemit %# = Invalid currency type: %q1.}, 
+  ?0, {@pemit %# = Not a number: %q0.}, 
+  *,  {@pemit %# = Logical error in code: %q9.}
+-
+
+
+# @basecost <currency> = <amount>
+#
+# Sets the base cost of an item <currency> to <amount>.
+# Properly resynchs the market and stuff, too.
+# 
+&CMD-BASECOST #5 = $@basecost *=*: 
+  think setq(0, paccount(%0)); 
+  think setq(9, 
+    [t(iscurrency(%0))]
+    [isdbref(%q0)]
+    [isnum(%1)]
+  ); 
+  @select %q9 = 
+  111, {
+    @power %q0=!immutable;
+    &base-cost %q0=%1; 
+    @setcost %0; 
+    @power %q0=immutable;
+    @switch [hasaccount(#26,%0)]=1,{@@},{@account/create #26/%0 = 1};
+    @tr #99/cron_job_pricelist; 
+    @pemit %# = Base cost for %0 ([name(%q0)]) set to %1.; 
+    @wait 5 = {@pemit %# = Price of %0 is now [price(%0)].}
+  }, 
+  0??, { @pemit %# = Invalid currency type: %0. }, 
+  ?0?, { @pemit %# = Could not find a parent object for currency: %0. }, 
+  ??0, { @pemit %# = Not a number: % }, 
+  *,   { @pemit %# = Logic error in code: %q9. }
+-
+

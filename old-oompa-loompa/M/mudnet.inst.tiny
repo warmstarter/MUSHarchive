@@ -1,0 +1,334 @@
+@@ $Id: mudnet.inst.tiny,v 1.15 2001/06/18 04:35:56 rmg Exp $
+@@ This installs mudnet softcode on a TinyMUX or maybe a TinyMUSH.
+
+@name me=MudNet
+
+&version me=4.0.3a
+
+@set me=!HALTED
+@set me=NO_COMMAND
+@set me=NOCOMMAND
+@set me=!COMMANDS
+@set me=SAFE
+@set me=ANSI
+@set me=ANSICOLOR
+@set me=FREE
+@toggle me=brandy_mail
+@Sex me=Robot
+
+@@ Try to keep people from bothering the bot.
+
+allcom off
+delcom pub
+&mnlock me=0
+
+@@ Contact info. hopefully this will set something used by some system
+@@ on your mush; if you decide to remove some of these, please leave
+@@ one copy of the email address and one copy of the URL on the bot.
+
+@Aconnect me=@doing See `mnhelp' and www.mudnet.org
+&email me=mudnet@mudnet.org
+@email me=mudnet@mudnet.org
+&www me=http://www.mudnet.org/
+&webpage me=http://www.mudnet.org/
+&http me=http://www.mudnet.org/
+&url me=http://www.mudnet.org/
+@url me=http://www.mudnet.org/
+&homepage me=http://www.mudnet.org/
+
+@@ TOP-LEVEL TRIGGER
+@@
+@@ We send everything directly from the bot thru this trigger, since
+@@ @trigger does not eval its arguments.
+@@
+@@ @trigger me/tr=realtrigger,args,...
+@@
+@@ retriggers the tr_realtrigger attribute, with the args evalled.
+
+&TR me=@trigger me/tr_[s(%0)]=s(%1),s(%2),s(%3),s(%4),s(%5),s(%6),s(%7),s(%8),s(%9)
+
+@@ TRIGGERS FOR INTERNAL USE
+@@
+@@ These are called by the bot during the connection process.
+@@
+@@ @trigger me/tr_sync=hostkey
+@@
+@@ should store the hostkey in the VK attribute of MudNet and
+@@ MudNet Globals, then return a sync acknowledgement. The bot
+@@ will disconnect if acknowledgement is not returned in 30 seconds
+@@ or so after connection.
+
+&TR_SYNC me=@vk me=%0;@vk [v(globals)]=%0;@pemit me=%0%1
+
+@@ @trigger me/tr_csync
+@@
+@@ should send the list of subscribed channels to the bot.
+
+&TR_CSYNC me=mncsync
+
+@@ RETURNED COMMAND API
+@@
+@@ When people on your world query mudnet for some information,
+@@ the bot will return the info to them thru a handful of @triggers:
+@@
+@@ in general these triggers should send a message to the given dbref;
+@@ if the dbref is not usable, they should try the given name instead,
+@@ and if that fails, the owner dbref. This behavior is encapsulated in
+@@ the U_PMATCH function (args are owner dbref, dbref, and name).
+@@
+@@ Note that anything after a space in a dbref argument is reserved.
+
+&U_PMATCH *MudNet=switch(num(first(%1)),#-*,switch(num(*%2),#-*,num(first(%0)),num(*%2)),num(first(%1)))
+
+@@ @trigger me/tr_noworld=owdbref,dbref,name,world
+@@   this should send a message to the recipient identified by dbref and name
+@@   explaining that the requested world wasn't found by mudnet.
+
+&TR_NOWORLD me=@pemit [u(u_pmatch,%0,%1,%2)]=MudNet pages: Sorry, I can't find a world named '%3'.
+
+@@ @trigger me/tr_nochan=owdbref,dbref,name,chan
+@@   this should send a message to the recipient identified by dbref and name
+@@   explaining that the requested channel is invalid.
+
+&TR_NOCHAN me=@pemit [u(u_pmatch,%0,%1,%2)]=MudNet pages: Sorry, '%3' is not a valid channel name.
+
+@@ @trigger me/tr_notconn=owdbref,dbref,name,world
+@@   this should send a message to the recipient identified by dbref and name
+@@   explaining that the requested world was found but not connected.
+
+&TR_NOTCONN me=@pemit [u(u_pmatch,%0,%1,%2)]=MudNet pages: Sorry, I'm not connected to %3 right now.
+
+@@ @trigger me/tr_timeout=owdbref,dbref,name,world
+@@   this should send something to the recipient to indicate that their
+@@   request has timed out, for whatever reason.
+
+&TR_TIMEOUT me=@pemit [u(u_pmatch,%0,%1,%2)]=MudNet pages: Sorry, either %3 is lagging or it didn't understand that.
+
+@@ @trigger me/tr_header=owdbref,dbref,name,world
+@@   this should send something to the recipient to indicate the beginning
+@@   of a relayed response from a specified mudnet world.
+
+&TR_HEADER me=@pemit [u(u_pmatch,%0,%1,%2)]=center(> From %3 <,78,-)
+
+@@ @trigger me/tr_response=owdbref,dbref,name,message
+@@   this should just send the included message to the recipient; it'll
+@@   be used by mnsearch and mncwho all, and in conjunction with tr_header
+@@   and tr_footer for relay commands such as mnwho.
+
+&TR_RESPONSE me=@pemit [u(u_pmatch,%0,%1,%2)]=%3
+
+@@ @trigger me/tr_footer=owdbref,dbref,name,world
+@@   this should send something to the recipient to indicate the end
+@@   of a relayed response from a specified mudnet world.
+
+&TR_FOOTER me=@pemit [u(u_pmatch,%0,%1,%2)]=center(> Done <,78,-)
+
+@@ @trigger me/tr_wheader=owdbref,dbref,name,type
+@@   this should send the recipient the header for an mnworld(s) listing.
+@@   type can be world or worlds, depending on which mncommand was invoked.
+
+&TR_WHEADER me=@pemit [u(u_pmatch,%0,%1,%2)]=center(%bMudNet Version [v(version)]%b,78,switch(%3,world,-,%b))[switch(%3,worlds,%r[repeat(-,78)])]%r[ljust(World,13)] [ljust(Address,31)] [ljust(Status,24)][switch(%3,worlds,%r[repeat(-,78)])]
+
+@@ @trigger me/tr_wchunk=owdbref,dbref,name,type,chunkdata
+@@   this should send the recipient a chunk of an mnworld(s) listing.
+@@   chunkdata is a space-delimited list of pipe-delimited 7-element lists:
+@@   world|type|host|ip|port|status|csecs ...
+@@   if a world is private, its host will be "private", and ip and port
+@@     will be blank.
+@@   if a world is disabled, its status will be DISA.
+
+&TR_WCHUNK me=@pemit [u(u_pmatch,%0,%1,%2)]=after(iter(s(%4),%r[ljust(elements(##,1,|),9)] <[elements(##,2,|)]> [switch(1,match(setr(3,elements(##,3,|)),private),center(PRIVATE,31,-),lt(strlen(r(3)),26),ljust(r(3) [elements(##,5,|)],31),ljust(elements(##,4,|) [elements(##,5,|)],31))] [ljust(elements(##,6,|),5)] for [u(u_csecs,elements(##,7,|))]),%r)
+
+&U_CSECS me=[Switch(And(Isnum(%0),Gte(%0,0)),1,[Setq(6,[Div(%0,29030400)]y)][Setq(5,[Mod(Div(%0,2419200),12)]m)][Setq(0,[Mod(Div(%0,604800),4)]w)][Setq(1,[Mod(Div(%0,86400),7)]d)][Setq(2,Mod(Div(%0,3600),24))][Setq(3,Mod(Div(%0,60),60))][Setq(4,Mod(%0,60))][S(Iter([r(6)] [r(5)] [r(0)] [r(1)],Switch(##,0*,,##)))] [rjust(r(2),2,0)]:[rjust(r(3),2,0)]:[rjust(r(4),2,0)],-1)]
+
+@@ @trigger me/tr_wfooter=owdbref,dbref,name,type,footerdata
+@@   this should send the recipient the footer for an mnworld(s) listing.
+@@   the data includes the number of worlds, number of connected worlds,
+@@   and a count of each type of MU* server:
+@@   total_worlds connected_worlds LongType|type|count ...
+@@   no footerdata is provided by mnworld yet.
+
+&TR_WFOOTER me=@pemit [u(u_pmatch,%0,%1,%2)]=switch(%3,world,repeat(-,78),%r[ljust(Total Worlds: [elements(%4,1)],26)][ljust(Connected Worlds: [elements(%4,2)],26)]%r[repeat(-,78)][iter(setq(0,0)[rest(rest(%4))],[switch(mod(r(0),4),0,%r)][center(elements(##,2,|) - [elements(##,1,|)] %([elements(##,3,|)]%),19)][setq(0,add(1,r(0)))])])
+
+@@ @trigger me/tr_list=owdbref,dbref,name,badtokens,listdata
+@@   this should format the space-separated list of world names returned by
+@@   mnlist, and send it on to the recipient.
+@@   badtokens is a space-separated list of unrecognized items found in the
+@@   mnlist request.
+
+&TR_LIST me=@pemit [u(u_pmatch,%0,%1,%2)]=center(%bMudNet Version [v(version)]%b,78,-)[iter(s(%3),%rUnrecognized token: ##)][iter(setq(0,0)[s(%4)],switch(mod(r(0),7),0,%r)[ljust(##,10)][setq(0,add(1,r(0)))])]%r[switch(words(s(%4)),0,No matching worlds,1,1 matching world,words(s(%4)) matching worlds)] found.%r[repeat(-,78)]
+
+@@ RELAYED COMMAND API
+@@
+@@ When people on other mushes use relayed commands such as mnwho to
+@@ query your world, the query will arrive in the form of an @trigger:
+@@
+@@ @trigger me/tr_request=pid,command,owdbref,odbref,oname,oworld,args
+@@
+@@ pid -- a random number which must be used to send back the results
+@@ command -- one of the following, indicating what the person is trying
+@@   to do: info, pwho, staff, who, chan, cwho, cwhoall, finger, search,
+@@   who2, mail, page
+@@ owdbref, odbref, oname, oworld -- identity of the person making the request
+@@ args -- any additional comma-delimited arguments used by a particular
+@@   command
+@@
+@@ tr_request should do the following:
+@@   check me/mnlock_world to see if the command is blocked by admins
+@@   if it's a command with an iname arg, check the target's mnlock
+@@     if the target does not exist, return an error message
+@@   return a 'permission denied' message if applicable
+@@   trigger me/trh_<command> with the appropriate arguments
+@@     we use trh_ to indicate that it's a relaying command handler
+@@     rather than an ordinary trigger.
+
+&TR_REQUEST me=@trigger me/trh_[switch(0,hasattr(me,trh_%1),noattr,u(mnlock_world,%0,%1,%2,%3,%4,%5,%6,%7,%8),noperm,member(finger search who2 mail page,%1),%1,not(strmatch(setr(6,u(u_pmatch2,%6)),#-*)),notarg,u(r(6)/mnlock,%0,%1,%2,%3,%4,%5,%6,%7,%8),noperm,%1)]=%0,%1,%2,%3,%4,%5,%6,%7,%8
+
+@@ When one of the arguments on an incoming command is a victim's name or
+@@ dbref, we'll use U_PMATCH2 to resolve that into a valid dbref.
+
+&U_PMATCH2 me=switch(num(*%0),#-*,num(%0),num(*%0))
+
+@@ These are some handlers for basic error conditions:
+
+&TRH_NOPERM me=@pemit me=%vkRANSWERrequest|%0|#-1 MudNet Permission Denied
+&TRH_NOATTR me=@pemit me=%vkRANSWERrequest|%0|#-1 MudNet Handler Not Implemented %(%1%)
+&TRH_NOTARG me=@pemit me=%vkRANSWERrequest|%0|#-1 MudNet Target Not Found %(%6%)
+
+@@ some commands don't use relaying:
+@@   mnlist, mnworld, mnworlds
+
+@@ some commands don't have args:
+@@   mninfo, mnpwho, mnstaff, mnwho (the player arg is optional)
+
+&MNINFO me=Please put information about your mush here.
+
+&TRH_INFO me=@pemit me=%vkRSTARTrequest|%0%r[u(mninfo)]%r%vkRENDrequest|%0
+
+&TRH_PWHO me=@pemit me=%vkRSTARTrequest|%0;+who;@wait 2=@pemit me=%vkRENDrequest|%0
+
+&TRH_STAFF me=@pemit me=%vkRSTARTrequest|%0;+staff;@wait 2=@pemit me=%vkRENDrequest|%0
+
+&TRH_WHO me=@pemit me=%vkRSTARTrequest|%0;DOING;@pemit me=%vkRENDrequest|%0
+
+@@ some commands have args, but no iname arg:
+@@   mnchan (chan,firstletter,restofmessage), mncwho (chan), mncwhoall (chan)
+
+&U_CWHO_FILTER me=iter(get(%vc/on_%6),switch(0,u(##/mnlock,%0,%1,%2,%3,%4,%5,%6,%7,%8),,##))
+
+&TRH_CHAN me=@pemit/list [u(u_cwho_filter,%0,%1,%2,%3,%4,%5,%6,%7,%8)]=[udefault(%vc/hd_%6,%[MudNet:%6%]%b)][switch(%7,:,%4%(%3%)@%5 %8,%;,%4%(%3%)@%5%8,",%4%(%3%)@%5 says%, "%8",%4%(%3%)@%5 says%, "%7%8")]
+
+&TRH_CWHO me=@pemit me=switch(words(setr(0,iter(u(u_cwho_filter,%0,%1,%2,%3,%4,%5,%6),%r[name(##)]%(## [flags(##)]%)))),0,%vkRANSWERrequest|%0|No one on channel %6,%vkRSTARTrequest|%0[r(0)]%r%vkRENDrequest|%0)
+
+&TRH_CWHOALL me=@pemit me=switch(words(setr(0,iter(u(u_cwho_filter,%0,%1,%2,%3,%4,%5,%6),name(##)%b))),0,,%vkRANSWERrequest|%0|On channel %6: [r(0)])
+
+@@ some commands have only an iname arg:
+@@   mnfinger, mnsearch, mnwho (optional)
+
+&TRH_FINGER me=@pemit me=%vkRSTARTrequest|%0;+finger %6;@wait 2=@pemit me=%vkRENDrequest|%0
+
+&TRH_SEARCH me=@pemit me=%vkRANSWERrequest|%0|[setq(6,u(u_pmatch2,%6))][name(r(6))]%([r(6)] [flags(r(6))]%)
+
+&TRH_WHO2 me=@pemit me=%vkRSTARTrequest|%0;DOING %6;@pemit me=%vkRENDrequest|%0
+
+@@ some commands have an iname arg, plus one more arg and a message:
+@@   mnmail (iname,subject,message), mnpage (iname,firstchar,restofmessage)
+
+&TRH_MAIL me=@pemit me=%vkRSTARTrequest|%0;@mail %6=MudNet Mail: %7;-From %4%(%3%)@%5%r%r%8%r%r** reply using `mnmail'. See `mnhelp' for help. **;--;@wait 2=@pemit me=%vkRENDrequest|%0
+
+@edit [switch(first(version()),Rhost*,me/TRH_MAIL,#-1)]=@mail,mail
+
+&TRH_PAGE *MudNet=@pemit [setr(6,u(u_pmatch2,%6))]=switch(%7,:,From afar%, %4%(%3%)@%5 %8,%;,From afar%, %4%(%3%)@%5%8,",%4%(%3%)@%5 pages: %8,%4%(%3%)@%5 pages: %7%8);@pemit me=%vkRANSWERrequest|%0|[switch(%7,:,Long distance to [name(r(6))]: "%4 %8".,%;,Long distance to [name(r(6))]: "%4%8".,",You paged [name(r(6))] with "%8".,You paged [name(r(6))] with "%7%8".)]
+
+@@ ----------------------------------------------------------------------------
+@create MudNet Globals
+@fo me=&globals me=[num(MudNet Globals)]
+@set MudNet Globals=!NO_COMMAND
+@set MudNet Globals=COMMANDS
+@set MudNet Globals=INHERIT
+@lock MudNet Globals==me
+
+@Desc MudNet Globals=Globals used with the MudNet robot. Do NOT give this object any special privileges, and keep it owned by the MudNet character.
+
+&DO_MNWORLDS MudNet Globals=$mnworlds:@pemit *MudNet=%vkRWORLDSrequest|[owner(%#)]|%#|%n
+
+&DO_MNWORLD MudNet Globals=$mnworld *:@pemit *MudNet=%vkRWORLDrequest|[owner(%#)]|%#|%n|%0
+
+&DO_MNWORLDS2 MudNet Globals=$mnworlds *:@pemit *MudNet=%vkRWORLDrequest|[owner(%#)]|%#|%n|%0
+
+&DO_MNLIST MudNet Globals=$mnlist *:@pemit *MudNet=%vkRWLISTrequest|[owner(%#)]|%#|%n|%0
+
+&DO_MNLIST2 MudNet Globals=$mnlist:@pemit *MudNet=%vkRWLISTrequest|[owner(%#)]|%#|%n|-all
+
+&DO_MNSTAFF MudNet Globals=$mnstaff *:@pemit *MudNet=%vkRSTAFFrequest|[owner(%#)]|%#|%n|%0
+
+&DO_MNSEARCH MudNet Globals=$mnsearch *:@pemit *MudNet=%vkRSEARCHrequest|[owner(%#)]|%#|%n|%0
+
+&DO_MNFINGER MudNet Globals=$mnfinger *@*:@pemit *MudNet=%vkRFINGERrequest|[owner(%#)]|%#|%n|%0|%1
+
+&DO_MNINFO MudNet Globals=$mninfo *:@pemit *MudNet=%vkRINFOrequest|[owner(%#)]|%#|%n|%0
+
+&DO_MNWHO MudNet Globals=$mnwho *:@pemit *MudNet=%vkRWHOrequest|[owner(%#)]|%#|%n|%0
+
+&DO_MNPWHO MudNet Globals=$mnpwho *:@pemit *MudNet=%vkRPWHOrequest|[owner(%#)]|%#|%n|%0
+
+&DO_MNMAIL MudNet Globals=$mnmail *@*=*:@pemit *MudNet=%vkRMAILrequest|[owner(%#)]|%#|%n|%0|%1|%2
+
+&DO_MNPAGE MudNet Globals=$mnpage *@*=*:@pemit *MudNet=%vkRPAGErequest|[owner(%#)]|%#|%n|%0|%1|%2;&lastpage_%# %vl=%0|%1
+
+&DO_MNPAGE2 MudNet Globals=$mnp *@*=*:@pemit *MudNet=%vkRPAGErequest|[owner(%#)]|%#|%n|%0|%1|%2;&lastpage_%# %vl=%0|%1
+
+&DO_MNREPAGE MudNet Globals=$mnpage *:@pemit [switch([hasattr(%vl,lastpage_%#)]/%0,?/*@*=*,#-1,0/*,%#,*MudNet)]=[switch([hasattr(%vl,lastpage_%#)],0,You haven't mnpaged anyone yet.,%vkRPAGErequest|[owner(%#)]|%#|%n|[get(%vl/lastpage_%#)]|%0)]
+
+&DO_MNREPAGE2 MudNet Globals=$mnp *:@pemit [switch([hasattr(%vl,lastpage_%#)]/%0,?/*@*=*,#-1,0/*,%#,*MudNet)]=[switch([hasattr(%vl,lastpage_%#)],0,You haven't mnpaged anyone yet.,%vkRPAGErequest|[owner(%#)]|%#|%n|[get(%vl/lastpage_%#)]|%0)]
+
+&DO_MNJOIN MudNet Globals=$mnjoin *:&on_%0 %vc=setunion(%#,setr(0,get(%vc/on_%0)));@pemit %#=switch(0,member(r(0),%#),,You're already on that channel.);@pemit *MudNet=switch(0,not(member(r(0),%#)),,udefault(%vc/an_%0,1),,%vkRCHANrequest|[owner(%#)]|%#|%n|%0|:has joined this channel.);&lc_%# %vc=%0
+
+&DO_MNLEAVE MudNet Globals=$mnleave *:&on_%0 %vc=setdiff(setr(0,get(%vc/on_%0)),%#);@pemit %#=switch(0,member(r(0),%#),You're not on that channel.,You have left channel %0.);@pemit *MudNet=switch(r(0),%#,%vkRLEAVErequest|%0);@pemit *MudNet=switch(0,member(r(0),%#),,udefault(%vc/an_%0,1),,%vkRCHANrequest|[owner(%#)]|%#|%n|%0|:has left this channel.)
+
+&DO_MNCLIST MudNet Globals=$mnclist:@pemit %#=switch(0,words(setr(0,squish(iter(lcstr(lattr(%vc/on_*)),switch(member(get(%vc/##),%#),0,,after(##,on_)))))),You are not on any Mudnet channels.,You are on these Mudnet channels: [r(0)])%rYour default channel is: [default(%vc/lc_%#,0)]
+
+&DO_MNCSYNC MudNet Globals=$mncsync:@pemit *MudNet=switch(or(strmatch(num(*MudNet),%#),hasflag(%#,wizard)),0,,%vkRCSYNCrequest|[owner(%#)]|%#|%n|[iter(lcstr(lattr(%vc/on_*)),after(##,on_))])
+
+&DO_MNCHAN MudNet Globals=$mnchan *=*:@pemit %#=switch(0,setr(0,member(get(%vc/on_%0),%#)),You're not on that channel.);@pemit *MudNet=switch(0,r(0),,%vkRCHANrequest|[owner(%#)]|%#|%n|%0|%1);&lc_%# [switch(0,r(0),#-1,%vc)]=%0
+
+&DO_MN MudNet Globals=$mn * *:@pemit %#=switch(0,setr(0,member(get(%vc/on_%0),%#)),You're not on that channel.);@pemit *MudNet=switch(0,r(0),,%vkRCHANrequest|[owner(%#)]|%#|%n|%0|%1);&lc_%# [switch(0,r(0),#-1,%vc)]=%0
+
+&DO_MNC MudNet Globals=$mnc *:@pemit %#=switch(0,setr(0,member(get(%vc/on_[setr(1,default(%vc/lc_%#,0))]),%#)),You're not on channel [r(1)].);@pemit *MudNet=switch(0,r(0),,%vkRCHANrequest|[owner(%#)]|%#|%n|[r(1)]|%0)
+
+&DO_MNCWHO MudNet Globals=$mncwho*:@pemit *MudNet=%vkRCWHOrequest|[owner(%#)]|%#|%n|[switch(%0,%b*=*,trim(before(%0,=)),%b*,trim(%0),all)]|[switch(%0,%b*=*,after(%0,=),all *,rest(%0),default(%vc/lc_%#,0))]
+
+&DO_MNUPDATE [get(*mudnet/globals)]=$mnupdate*:@pemit *MudNet=switch(hasflag(%#,wizard),0,,%vkRUPDrequest|[owner(%#)]|%#|%n|[get(*mudnet/version)])|%0
+
+&DO_MNCREDITS MudNet Globals=$mncredits:@pemit %#=[repeat(=*,38)]%r[center(MudNet Credits \(Version [get(*MudNet/VERSION)]\),76)]%r[repeat(-,76)]%rMudNet version 4 is Alierak@ChaoticMUX's second major revision of the robot (this time for consistency and customization, the first was for speed). For more information on the history of MudNet, please visit http://www.mudnet.org/about-credits.php%r%tMudNet is currently maintained by Alierak, Bobby, hellspawn, sTiLe, and Zenty at ChaoticMUX. We'd like to thank the following people who have helped with testing and improving MudNet 4 since its release: Ashen-Shugar, Errant@SG-1, Felix@Century, Javelin, Meglos, Melinda Bellemore, and RedWolf@Fallout.%r%tIf you would like MudNet on your MUSH, please visit http://www.mudnet.org/%r[repeat(=*,38)]
+
+&HELP_MUDNET MudNet Globals=$mnhelp:@pemit %#=MudNet is a robot, meaning a computer program that logs in to a player. It links several MU*'s together and allows players on all of them to do WHO, page, @mail, and +finger commands across all the connected MU*'s. %r%rCommands:%r%bmnworlds - list of MU*'s that MudNet is connected to.%r%bmnworld <wo> - mnworlds status display for worlds starting with <wo>%r%bmnlist %[<expr>%] - short list of just world names, see `mnhelp mnlist'%r%bmninfo <world> - a brief description of <world>%r%bmnwho <world> - shows you the WHO listing from <world>%r%bmnpwho <world> - shows you the +who listing from <world>%r%bmnstaff <world> - shows you a +staff or +admin listing from <world>%r%bmnsearch <name> - lists worlds where a player exists%r%bmnfinger <name>@<world> - shows you <name>'s +finger%r%bmnpage %[<name>@<world>=%]<message> - pages <message> to that person%r%bmnmail <name>@<world>=%[<subject>/%]<message> - sends <name> a mail message%r%bmncredits - shows you the credits for MudNet :)%r%rSee also `mnhelp mnlist', `mnhelp comsys', `mnhelp mnlock',%r%band http://www.mudnet.org/
+
+&HELP_COMSYS [get(*mudnet/globals)]=$mnhelp comsys:@pemit %#=MudNet now includes a softcoded comsys with support for multiple channels. To "create" a channel, you can simply join it, get other people to join it, and start sending messages. Channel messages are sent only to worlds where someone is listening on the channel. We've purposely provided no way to get a list of all channels that currently exist%; this means you can set up a private channel just by picking an obscure name. For general public conversations, we suggest using channel 0 for starters.%r%rCommands:%r%bmnjoin <chan> - subscribes you to a MudNet channel (alphanumeric only)%r%bmnleave <chan> - unsubscribes you from a channel%r%bmnclist - lists the MudNet channels you're on%r%bmncwho <world>%[=<chan>%] - shows you who is on the MudNet channel for <world>%r%bmncwhoall %[<chan>%] - returns a cwho list for all worlds%r%bmnchan <chan>=<message> - sends a message to everyone on <chan>%r%bmn <chan> <message> - equivalent to mnchan%r%bmnc <message> - sends a message on the last channel used
+
+&HELP_MNLIST MudNet Globals=$mnhelp mnlist:@pemit %#=%b%b%bThe mnlist command can be used to filter the list of worlds according to several criteria, such as up/down status, mush type, etc., as well as world name. The accepted keywords are:%r%t-all (all worlds)%r%t-up, -down, -pause (connection status)%r%t-disabled, -enabled (whether to try reconnecting)%r%t-public, -private (address shown or not)%r%t-pennmush, -mux, -tinymux, -tinymush, -alloymush, -rhostmush, -mure,%r%t%b%b%b-muse, -daemonmush, -darkzone, -coldcore (MU* server types)%r%b%b%bA keyword that does not begin with a dash will be interpreted as the beginning of a world name. Most keywords may be abbreviated somewhat. !<keyword> matches all worlds that don't match <keyword>. You can form rudimentary boolean expressions using a space for AND and a comma for OR. For example:%r%t'mnlist tf -up' lists connected worlds that begin with 'tf'.%r%t'mnlist !-penn !-mux -up, -mux -private' lists worlds which are either%r%t%b%b%bnon-pennmush, non-tinymux and connected, OR private and tinymux.
+
+&HELP_MNLOCK MudNet Globals=$mnhelp mnlock:@pemit %#=In MudNet 4, you can block some commands by placing some code in your mnlock attribute. Depending on the server configuration, you may also need to do '@set me/mnlock=visual' so that MudNet can evaluate it as a u-function. If your mnlock returns 0, it will block a command.%r%rParameters:%r%t%%0 - pid%r%t%%1 - command (chan, cwho, cwhoall, finger, search, who2, mail, page)%r%t%%2 - invoker's owner dbref%r%t%%3 - invoker's dbref%r%t%%4 - invoker's name%r%t%%5 - name of invoker's MU*%r%rAdditional arguments depend on the type of command. See `mnhelp mnlock2' for more.
+
+&HELP_MNLOCK2 MudNet Globals=$mnhelp mnlock2:@pemit %#=Command-specific parameters:%r%rchan, cwho, cwhoall%r%t%%6 - channel name%r%t%%7 - first character of message (chan only)%r%t%%8 - rest of message (chan only)%rfinger, search, who2%r%t%%6 - victim's name%rmail%r%t%%6 - recipient's name%r%t%%7 - subject%r%t%%8 - message body%rpage%r%t%%6 - recipient's name%r%t%%7 - first character of message%r%t%%8 - rest of message%r%rSee `mnhelp mnlock3' for examples.
+
+&HELP_MNLOCK3 MudNet Globals=$mnhelp mnlock3:@pemit %#=Examples:%r%rTo block everything:%r%t&mnlock me=0%r%rTo block mnpages from everything that belongs to #37@SpamMUSH:%r%t&mnlock me=not(strmatch(%%1-%%2-%%5,page-#37-SpamMUSH))%r%rJavelin suggests keeping a list of patterns for commands you'd allow, and patterns for commands you'd deny, for example:%r%t&mnlock me=or(squish(iter(v(mn_allow),strmatch(%%1-%%2-%%5,##))),%r%t[space(14)]not(squish(iter(v(mn_deny),strmatch(%%1-%%2-%%5,##)))))%r%t&mn_allow me=*-*-NiceMUSH page-*-OkayMUSH cwho*-*-*%r%t&mn_deny me=page-*-* chan-*-SpamMUSH *-*-EvilMUSH%r%rWizards may also set mnlock_world on MudNet to override individual mnlocks or to block commands that don't have a particular victim.%r%rSee also: http://www.mudnet.org/help-locking.php
+
+@@ ----------------------------------------------------------------------------
+@create MudNet Lastpaged DB
+@fo me=@vl MudNet Globals=[num(MudNet Lastpaged DB)]
+@set MudNet Lastpaged DB=no_command
+@set MudNet Lastpaged DB=!commands
+@set MudNet Lastpaged DB=halt
+@tel MudNet Lastpaged DB=MudNet Globals
+
+@@ ----------------------------------------------------------------------------
+@create MudNet Channel DB
+@fo me=@vc MudNet Globals=[num(MudNet Channel DB)]
+@fo me=@vc me=[num(MudNet Channel DB)]
+@set MudNet Channel DB=no_command
+@set MudNet Channel DB=!commands
+@set MudNet Channel DB=halt
+@tel MudNet Channel DB=MudNet Globals
+
+@wait 1={@pemit me=Done Uploading MudNet Softcode; @set me=quiet}

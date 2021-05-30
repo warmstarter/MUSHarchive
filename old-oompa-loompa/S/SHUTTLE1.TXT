@@ -1,0 +1,56 @@
+@create Shuttle Stealer
+@link Shuttle Stealer=#772
+@lock Shuttle Stealer==*[owner(me)]
+@set Shuttle Stealer=INHERIT
+@set Shuttle Stealer=SAFE
+@set Shuttle Stealer=ROYALTY
+@set Shuttle Stealer=WIZARD
+@set Shuttle Stealer=ENTER_OK
+&DESTINATION Shuttle Stealer=[switch(v(dest),None,None,name(v(dest)))]
+&SETUP Shuttle Stealer=$setup:@set me=enter_ok;@lock me=me;@lock/use me=Inside/1|Me/1;@cpattr #778/lalias=me/lalias;@cpattr #778/ealias=me/ealias;@cpattr #778/oxleave=me/oxleave;@cpattr #778/oxenter=me/oxenter;@cpattr #778/oenter=me/oenter;@cpattr #778/oleave=me/oleave;@pemit %#=[name(me)] has been set up.
+&ME Shuttle Stealer=[switch(%#,%!,1,0)]
+&INSIDE Shuttle Stealer=[t(member(lcon(me),%#))]
+&DEST Shuttle Stealer=None
+&RESET Shuttle Stealer=@halt me={&ismoving me=0;@unlock/enter me;@unlock/leave me;home}
+&ISMOVING Shuttle Stealer=0
+&ALREADYTHERE Shuttle Stealer=@pemit %0=The shuttle is already located at that destination.
+@OFAILURE Shuttle Stealer=attempts to pick up [name(me)] but it is too heavy.
+@FAILURE Shuttle Stealer=It is too heavy.
+&TAKEOFF Shuttle Stealer=&dest me=[rest(grab(v(dests),%1 *,|))];&ismoving me=1;@pemit %0=You press the engage button.;@oemit %0=[name(%0)] presses the engage button.;:takes off into space.;@remit me=The shuttle lurches as it takes off into space.;@lock/leave me=#0;@lock/enter me=#0;@remit me=<Computer> Current destination: [ansi(h,name(v(dest)))];@remit me=<Computer> Please do not attempt to leave the shuttle while it is in flight.;@tel me=[v(space)];@wait 15=@remit me=<Computer> We are halfway at the destination.;@wait 30={@tel me=[v(dest)];:comes to a smooth landing on a nearby landing pad.;@remit me=The shuttle gently touches down on the landing pad.;@remit me=<Computer> We have arrived at the destination. You may disembark.;&ismoving me=0;@unlock/leave me;@unlock/enter me;&dest me=None}
+&INVALIDDEST Shuttle Stealer=@pemit %0=Invalid destination. Type 'DESTS' for a list.
+&MOVING Shuttle Stealer=@pemit %#=The shuttle is already in space. Please wait until the shuttle has arrived at its destination before selecting another.
+@VC Shuttle Stealer=$engage *:@tr me/[switch(v(ismoving),1,moving,switch([setq(0,grab(v(dests),%0 *,|))][r(0)],,invaliddest,switch(rest(%q0),loc(me),alreadythere,takeoff)))]=%#,%0
+&SHOWDESTS Shuttle Stealer=[ljust(ansi(h,%0),20)] : [indent(23,56,{[name(%1)]})]
+@VB Shuttle Stealer=$DESTS:@pemit %#=[u(line)]%r[center({Destinations for [name(me)], a Transport-class Shuttle:},79)]%r[u(line)]%r[iter(v(dests),%r[u(showdests,first(##),rest(##))],|)]%r[u(line)]
+&SPACE Shuttle Stealer=#631
+&LINE Shuttle Stealer=[repeat(=,79)]
+&SHELP Shuttle Stealer=[ljust(%0,20)] - [indent(23,56,{%1})]
+@VA Shuttle Stealer=$shelp:@pemit %#=[u(line)]%r[center({Commands for [name(me)], a Transport-class Shuttle:},79)]%r[u(line)]%r%r[u(shelp,SHELP,{This help screen.})]%r[u(shelp,DESTS,{Displays a list of all available destinations.})]%r[u(shelp,ENGAGE <destination>,{Sets course for <destination> and engages.})]%r[u(line)]
+@IDESCRIBE Shuttle Stealer=You are inside a Transport-class Shuttle. The seating here is luxurious. At the front of the room is a semi-automated Control Panel.%rCurrent location: [ansi(h,name(here))]%rCurrent destination: [ansi(h,u(destination))]%rType `shelp' for information on how to operate this shuttle.%rType `leave' to disembark from the shuttle.
+@OLEAVE Shuttle Stealer=disembarks from the shuttle.
+@OENTER Shuttle Stealer=embarks the shuttle.
+@OXLEAVE Shuttle Stealer=disembarks from [name(me)].
+@OXENTER Shuttle Stealer=embarks [name(me)].
+@DESCRIBE Shuttle Stealer=A large Transport-class Shuttle. The words "[name(me)]" are painted on the side of it.%rType `enter [name(me)]' to embark the shuttle.
+&ADD_DEST Shuttle Stealer=$dest add *:&dests me=[v(dests)]|%0;@pe %#=Destination Added.
+@LALIAS Shuttle Stealer=o;ou;out;leave;exit;disembark
+@EALIAS Shuttle Stealer=enter me;board;embark
+
+@create Remote Shuttle Controller
+@link Remote Shuttle Controller=me
+@lock Remote Shuttle Controller==*[owner(me)]
+@set Remote Shuttle Controller=OPAQUE
+@set Remote Shuttle Controller=SAFE
+@set Remote Shuttle Controller=INHERIT
+@set Remote Shuttle Controller=WIZARD
+@VD Remote Shuttle Controller=$recall *:@switch [u(isshuttle,%0)][u(status,%0)]=0*, {@pemit %#=Invalid shuttle number. Type 'shuttles' for a list.}, 1In Space, {@pemit %#=[name(%0)] is currently in space. Try again later.}, {@pemit %#=You recall [name(%0)].;@oemit %#=%n recalls [name(%0)].;@remit %0=Shuttle recalled by %n.;@fo %0=engage [first(grab(get(%0/dests),* [loc(me)],|))]};@tel %0=[loc(%#)]
+&ISSHUTTLE Remote Shuttle Controller=[t(member(v(shuttles),%0))]
+&STATUSFIELD Remote Shuttle Controller=[ansi(h,ljust(%0,20))]: [ansi(h,%1)]
+@VC Remote Shuttle Controller=$status *:@switch [u(isshuttle,%0)]=0, {@pemit %#=Invalid shuttle number. Type 'shuttles' for a list.}, {@pemit %#=[u(line)]%r[center([name(%0)] Status Report,79)]%r[u(line)]%r%r[u(statusfield,Status,u(status,%0))]%r[u(statusfield,Location,name(loc(%0)))]%r[u(statusfield,Destination,u(%0/destination))]%r%r[ansi(h,Contents:)][iter(lcon(%0),%r[name(##)](##[flags(##)]))]%r[u(line)]
+&THINLINE Remote Shuttle Controller=[repeat(-,79)]
+&STATUS Remote Shuttle Controller=[switch(get(%0/ismoving),1,In Space,switch(lcon(%0),,Unoccupied,Occupied))]
+@VB Remote Shuttle Controller=$shuttles:@pemit %#=[u(line)]%r[ansi(h,center(Shuttle List,79))]%r[ansi(h,ljust(Num,6))]%b%b%b[ansi(h,ljust(Name,50))]%b%b[ansi(h,Status)]%r[u(thinline)][iter(v(shuttles),%r[ljust(##,6)] %b [ljust(name(##),50)]%b%b[u(status,##)])]%r[u(line)]
+&LINE Remote Shuttle Controller=[repeat(=,79)]
+@VA Remote Shuttle Controller=$chelp:@pemit %#=[u(line)]%r[center({Commands for [name(me)]},79)]%r[u(line)]%r%r[u(chelp,CHELP,{This help screen.})]%r[u(chelp,SHUTTLES,{Displays a list of shuttles and their status.})]%r[u(chelp,STATUS <#>,{Gives status report for shuttle <#>.})]%r[u(chelp,RECALL <#>,{Recalls shuttle <#>.})]%r[u(line)]
+&CHELP Remote Shuttle Controller=[ljust(%0,20)] - [indent(23,56,{%1})]
+@DESCRIBE Remote Shuttle Controller=A Shuttle Control Console. Type `chelp' for help.

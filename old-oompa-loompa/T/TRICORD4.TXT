@@ -1,0 +1,19 @@
+@create Jesse's Tricorder
+@link Jesse's Tricorder=[owner(me)]
+@set Jesse's Tricorder=DARK
+@set Jesse's Tricorder=WIZARD
+@set Jesse's Tricorder=SAFE
+&ISWIZ2 Jesse's Tricorder=[switch([hastype([v(0)],PLAYER)][hasflag([v(0)],WIZARD)][hasflag([v(0)],DARK)],111,Someone,011,Something,[ansi(rh,[name([v(0)])])]%b[ifelse2([hastype([v(0)],PLAYER)],<Player>%b,<Object>%b)][ifelse2([hasflag([v(0)],CONNECTED)],<Connected>%b,,)][ifelse2([hasflag([v(0)],DARK)],<Hidden>%b,,)][ifelse2([hasflag([v(0)],WEAPON)],<Weapon>%b,,)])]
+&MSCAN Jesse's Tricorder=$MSCAN *:@swi [ufun(ishere,[v(0)])]=#-2,{@pemit %#=I don't know which one!},#-1,{@pemit %#=I don't see that here.},{@remit [loc(here)]=%n scans [name([ufun(ishere,[v(0)])])].;@pemit %#=Your Scans of [name([ufun(ishere,[v(0)])])] show the following info about them:%r[ansi(hb,[repeat(-,60)])]%rMedical Info:%r%tRace:%b[get([ufun(ishere,[v(0)])]/Race)]%r%tSex:%b[get([ufun(ishere,[v(0)])]/Sex)]%rDatabase Info:%r%tFull Name:%b[ifelse2([match([get([ufun(ishere,[v(0)])]/FULLNAME)],)],Not Avaliable.,[get([ufun(ishere,[v(0)])]/FULLNAME)])]%r%tClass:%b[class([ufun(ishere,[v(0)])])]%r%tEmpire:%b[empire(ufun(ishere,%0))]%r%tOrganization:%b[get([ufun(ishere,[v(0)])]/division)]%rxxx}
+&OLDISWIZ Jesse's Tricorder=[switch([hastype([v(0)],PLAYER)][hasflag([v(0)],WIZARD)][hasflag([v(0)],DARK)],111,Someone,011,Something,[ansi(rh,[name([v(0)])])]%b[ifelse2([hasflag([v(0)0)])])]%b[ifelse2([hasflag([v(0)],WIZARD)],<Wizard>%b,[ifelse2([hasflag([v(0)],ROYALTY)],<Royalty>%b,,)])][ifelse2([hastype([v(0)],PLAYER)],<Player>%b,<Object>%b)][ifelse2([hasflag([v(0)],CONNECTED)],<Connected>%b,,)][ifelse2([hasflag([v(0)],DARK)],<Hidden>%b,,)][ifelse2([hasflag([v(0)],WEAPON)],<Weapon>%b,,)])]
+&ISWIZ Jesse's Tricorder=[switch([hastype([v(0)],PLAYER)][hasflag([v(0)],WIZARD)][hasflag([v(0)],DARK)],111,Someone,011,Something,[ansi(rh,[name([v(0)])])]%b[ifelse2([hastype([v(0)],PLAYER)],<Player>%b,<Object>%b)][ifelse2([hasflag([v(0)],CONNECTED)],<Connected>%b,,)][ifelse2([hasflag([v(0)],DARK)],<Hidden>%b,,)][ifelse2([hasflag([v(0)],WEAPON)],<Weapon>%b,,)])]
+@DESCRIBE Jesse's Tricorder=Type `TRIHELP' for a list of commands.
+&RSCAN2 Jesse's Tricorder=[iter([lcon([loc([v(0)])])],%t[ufun(iswiz,[##])], ,%r)]
+&RSCAN Jesse's Tricorder=$RSCAN:@remit [loc(here)]=%n performs a Short Range scan of the adjacent rooms.;@pemit %#=[iter([lexits([loc(here)])],[ansi(hb,[name([##])])]%r[ufun(RSCAN2,[##])], ,%r)]
+&ISHERE Jesse's Tricorder=[locate([loc(here)],[v(0)],Pi)]
+&TSCAN Jesse's Tricorder=$TSCAN *:@swi [ufun(ishere,[v(0)])]=#-2,{@pemit %#=I don't know which one!},#-1,{@pemit %#=I don't see that here.},{@remit [loc(here)]=%n scans [name([ufun(ishere,[v(0)])])].;@pemit %#=Upon scanning [name([ufun(ishere,[v(0)])])], you reveal [name([ufun(ishere,[v(0)])])] is holding the following Items:%r[ansi(hb,[repeat(-,60)])]%r[iter([lcon([ufun(ishere,[v(0)])])],%t[ufun(iswiz,[##])], ,%r)]%r[ansi(hb,[repeat(-,60)])]}
+&WSCAN3 Jesse's Tricorder=[iter([lcon([loc([v(0)])])],%t%t[ufun(iswiz,[##])], ,%r)]
+&WSCAN2 Jesse's Tricorder=[iter([lexits([loc([v(0)])])],[ifelse2([match([loc([##])],[loc(here)])],%t[ansi(hg,[name([##])])]%r%t%t<Here>,%t[ansi(hg,[name([##])])]%r[ufun(wscan3,[##])])], ,%r)]
+&WSCAN Jesse's Tricorder=$WSCAN:@remit [loc(here)]=%n performs a Long Range Scan of the adjacent rooms.;@pemit %#=[iter([lexits([loc(here)])],[ansi(fb,[name([##])])]%r[ufun(wscan2,[##])], ,%r)]
+&HSCAN Jesse's Tricorder=$HSCAN:@remit [loc(here)]=%n scans [name([loc(here)])].;@pemit %#=You scan the room and reveal it contains the Following things:%r[ansi(hb,[repeat(-,50)]%r[iter([lcon([loc(here)])],%t[ufun(iswiz,[##])], ,%r)]%r[ansi(hb,[repeat(-,50)])]
+&HELP Jesse's Tricorder=$TRIHELP:@pemit %#=Tricorder Commands:%r[ansi(hb,[repeat(-,60)])]%rTSCAN <Object>%t-Scan <Object>%rWSCAN%t%t-Like RSCAN, but does a web 2 rooms out.%rRSCAN%t%t-Scans the Adjacent Rooms.%rHSCAN%t%t-Scans the Current Room.%r[ansi(hb,[repeat(-,60)])]

@@ -1,0 +1,80 @@
+Hello folks...
+I had coded a gun a while back and thought I would throw it on here.
+
+--------Clip <>------------------Clip<>---------------------Clip<>--------
+@create Gun=10
+&SHOOT Gun=$*shoot *:@swi [or(strmatch(name(me),%0),strmatch(get(me/G_ALIAS),
+%0))]=1,{@swi [get(me/LOCATION)]=CONCEALED,{@pemit %#=Maybe you should
+unconceal it first.},DRAWN,{@swi [gt(v(ammo_left), 0)]=1,{@emit/room %N takes a
+shot at %1 with %p [name(me)];&AMMO_LEFT me=[sub(v(ammo_left), 1)]},0,{@emit/
+room %N squeezes the trigger and *CLICK*! No ammo.}}},0,{@pemit %#=I don't see
+that gun here.}
+&G_ALIAS Gun=g
+&DRAW Gun=$*draw:@swi [or(strmatch(name(me),%0),strmatch(get(me/G_ALIAS),
+%0))]=1,{@swi [get(me/CONCEALABLE)]=NO,{@pemit %#=This gun dose not need to be
+drawn.},YES,{@swi [get(me/location )]=CONCEALED,{@emit/room %N draws %p [name
+(me)].;&LOCATION me=drawn;@set me=!dark},DRAWN,{@pemit %#=It is already
+drawn.}}},{@pemit %#=I don't see that gun here.}
+&LOCATION Gun=drawn
+&CONCEAL Gun=$*conceal:@swi [or(strmatch(name(me),%0),strmatch(get(me/G_ALIAS),
+%0))]=1,{@swi [get(me/CONCEALABLE)]=NO,{@pemit %#=You cannot conceal this
+gun.},YES,{@swi [get(me/location)]=CONCEALED,{@pemit %#=It is already
+concealed.},DRAWN,{@emit/room %N quickly conceals %p [name(me)].;&LOCATION me=
+CONCEALED;@set me=dark}}},{@pemit %#=I don't see that gun here.}
+&MK_ALIAS Gun=$*alias *:@swi [or(strmatch(name(me),%0),strmatch(get(me/
+G_ALIAS),%0))]=1,{@pemit %#=Alias for [name(me)] set to '%1'.;&G_ALIAS me=
+[v(1)]},0,{@pemit %#=I don't see that gun here.}
+&AIM Gun=$*aim *:@swi [or(strmatch(name(me),%0),strmatch(get(me/G_ALIAS),%0))]=
+1,{@swi [get(me/location)]=DRAWN,{@emit/room %N aims %p [name(me)] at %1.},
+CONCEALED,{@pemit %#=You might want to unconceal it first.}},{@pemit %#=I don't
+see that gun here.}
+&LOCK Gun=$lock *:@swi [or(strmatch(name(me),%0),strmatch(get(me/G_ALIAS),
+%0))]=1,{@pemit %#=This weapon is locked to you against theft.;&WEAPON_OWNER
+me=%#;@lock me=%#;@lock/use me=%#},0,{@pemit %#=I don't see that gun here.}
+&UNLOCK Gun=$unlock *:@swi [or(strmatch(name(me),%0),strmatch(get(me/G_ALIAS),
+%0))]=1,{@pemit %#=This weapon is unlocked from you.;&WEAPON_OWNER me;@unlock
+me;@unlock/use me},0,{@pemit %#=I don't see that gun here.}
+&SPRAY Gun=$*spray *:@swi [or(strmatch(name(me),%0),strmatch(get(me/G_ALIAS),
+%0))]=1,{@swi [get(me/AUTO)]=NO,{@pemit %#=Sorry, this is not an automatic
+gun.},YES,{@swi [get(me/LOCATION)]=CONCEALED,{@pemit %#=Maybe you should
+unconceal it first.},DRAWN,{@swi [gt(v(ammo_left), 0)]=1,{@emit/room %N ejects
+a spray of bullets toward %1 with %p [name(me)];&AMMO_LEFT me=0},0,{@emit/room
+%N tightly squeezes the trigger and *CLICK*! No ammo.}}}},{@pemit %#=I don't
+see that gun here.}
+&AMMO_LEFT Gun=0
+&AUTO Gun=YES
+&CONCEALABLE Gun=YES
+&LOAD Gun=$*load:@swi [or(strmatch(name(me),%0),strmatch(get(me/G_ALIAS),
+%0))]=1,{@swi [gt(v(CLIPS_LEFT), 0)]=1,{@emit/room %N slams another [v
+(CLIP_TYPE)] into %p [name(me)].;&CLIPS_LEFT me=[sub(v(CLIPS_LEFT), 1)];
+&AMMO_LEFT me=[v(AFTER_CLIP)]},0,{@pemit %#=You have no more clips left.}},0,
+{@pemit %#=I don't see that gun here.}
+&CLIP_TYPE Gun=9mm clip
+&CLIPS_LEFT Gun=8
+&AFTER_CLIP Gun=10
+@Desc Gun=[get(me/LOOK)]%rThe gun's alias is: '[get(me/G_ALIAS)]'%rFor help:
+'Info \[gun name or alias\]'
+&LOOK Gun=Thy Master Gun.
+&HELP Gun=$Info *:@swi [or(strmatch(name(me),%0),strmatch(get(me/G_ALIAS),
+%0))]=1,{@pemit %#=[center(INFORMATION: [name(me)],78,=)]%r|%b%b\[alias\]draw
+[space(15)]-- Draws your weapon.%r|%B%b\[alias\]conceal[space(12)]-- Conceals
+you weapon.%r|%B%Block \[alias\][space(14)]-- Locks your weapon OOC.%r|%B%B
+unlock \[alias\][space(12)]-- Unlocks your weapon OOC.%r|%B%B\[alias\]shoot
+[person|thing] -- Shoots at [person|thing]%R|%B%B\[alias\]spray [person|thing]
+-- Sprays at [person|thing]%R|%B%B\[alias\]load[space(15)]-- Loads your weapon.
+%r|%B%B\[alias\]stats[space(14)]-- Lists the stats of your weapon.%r|%r|%B%B<*>
+Note: \[alias\] Can be the alias or the name of the weapon.%r|%B%B<*> Note:
+Draw, Conceal, and Spray are not compatible with all weapons.%r|%B%B<*> Note:
+`Credits' will tell you who coded and helped with these%r|%B%B[space(10)]
+weapons.%r[center(INFORMATION: [name(me)],78,=)]},{@pemit %#=I don't see that
+gun here.}
+&STATS Gun=$*stats:@swi [or(strmatch(name(me),%0),strmatch(get(me/G_ALIAS),
+%0))]=1,{@pemit %#=[center(STATS: [name(me)],78,=)]%rStill Pending. I have no
+idea with stats.%r[center(STATS: [name(me)],78,=)]},0,{@pemit %#=I don't see
+that gun here.}
+&CREDITS Gun=$Credits:@pemit %#=[center(CREDITS: [name(me)],78,=)]%r|%b%bCoded
+by Abraxis @ Cajun%r|%B%BHelp from DrugMaster @ ShadowRun%r|%B%BIdea from the
+original Masquerade.%r|%B%BHelp for the --'s *grin* from Celaxis @ Cajun%r|%r|
+%B%BENJOY!%r|%b%b--Thanks, Abraxis%r[center(CREDITS: [name(me)],78,=)]
+-------Clip<>---------------------Clip<>-------------------Clip<>---------
+_______________________________________________________________________________

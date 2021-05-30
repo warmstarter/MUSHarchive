@@ -1,0 +1,253 @@
+@create Bank Database
+@link Bank Database = #193
+@set Bank Database = NO_COMMAND
+&INTEREST Bank Database=0.15
+@VA Bank Database=1
+&CALCTIME Bank Database=0
+&CALC Bank Database=&calctime me= [convtime(Mon [extract(time(),2,1)] [add(1,[Extract(time(),3,1)])] 00:00:00 [extract(time(),5,1)])];@dol [lattr(me/account*)]=&## me=[add([v(##)],[mul(%va,[mul([v(##)],[v(interest)])])])]
+&CHECKTIME Bank Database=@va me=[div([sub(secs(),[v(calctime)])],86400)];@tr me/[ifelse([gt([v(va)],0)],calc, )]
+
+@create PARENT: Bank Computer
+@link PARENT: Bank Computer = #193
+@set PARENT: Bank Computer = HALT
+@set PARENT: Bank Computer = NO_COMMAND
+&CREDITS PARENT: Bank Computer=Coded by Andrew@TrekWars(andrew@trekwars.ml.org or orabbottjr@skn.net)
+@DESCRIBE PARENT: Bank Computer=$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$%RBank Commands:%ROpen account=<password>%RCheck Account%Rdeposit <amount>=<password>%Rwithdraw <amount>=<password>
+@set PARENT: Bank Computer/DESCRIBE=no_command visual
+&BANK_WITHDRAW_NOTPLAYER PARENT: Bank Computer=@pemit %0=Only players may use bank computers.
+&BANK_WITHDRAW_HIGHER0 PARENT: Bank Computer=@pemit %0=You can not deposit negitive amounts
+&BANK_WITHDRAW_NOTENUF PARENT: Bank Computer=You don't have that much in your account
+&BANK_WITHDRAW_NOTPWORD PARENT: Bank Computer=@pemit %0=Invalid Password. Please try again.
+&BANK_WITHDRAW_GOOD PARENT: Bank Computer=&money %0=[add([econs(%#)],%1)];&account%0 [v(db)]=[sub([u(account,%0)],%1)];@pemit %0=You withdraw %1 credits from the bank.
+&WITHDRAW PARENT: Bank Computer=$withdraw *=*:@tr me/bank_withdraw_[ifelse([hastype(%#,PLAYER)],[ifelse([gt(%1,0)],[ifelse([lte(%1,[u(account,%#)])],[ifelse([u(ispword,%#,%1)],GOOD,NOTPWORD)],NOTENUF)],HIGHER0)],NOTPLAYER)] = %#,%0
+&BANK_DEPOSIT_NOTPLAYER PARENT: Bank Computer=@pemit %0=Only players may use bank computers.
+&BANK_DEPOSIT_HIGHER0 PARENT: Bank Computer=@pemit %0=You can not deposit negitive amounts
+&BANK_DEPOSIT_NOTENUF PARENT: Bank Computer=You don't have that much in your account
+&BANK_DEPOSIT_NOTPWORD PARENT: Bank Computer=@pemit %0=Invalid Password. Please try again.
+&BANK_DEPOSIT_GOOD PARENT: Bank Computer=&money %0=[sub([econs(%#)],%1)];&account%0 [v(db)]=[add(%1,[u(account,%0)])];@pemit %0=You deposit %1 credits into the bank.
+&ISPWORD PARENT: Bank Computer=[match(%1,[get([v(db)]/pword%0)])]
+&DEPOSIT PARENT: Bank Computer=$deposit *=*:@tr me/bank_deposit_[ifelse([hastype(%#,PLAYER)],[ifelse([gt(%1,0)],[ifelse([u(ispword,%#,%1)],GOOD,NOTPWORD)],HIGHER0)],NOTPLAYER)] = %#,%0
+&EGIVE PARENT: Bank Computer=
+&DB PARENT: Bank Computer=#6680
+&ACCOUNT PARENT: Bank Computer=[get([v(db)]/account%0)]
+&HASACCOUNT PARENT: Bank Computer=[isnum([pos([ucstr(account%0)],[lattr([v(db)]/account*)])])]
+&COMMAND_CHECKACCOUNT PARENT: Bank Computer=$check account:@pemit %#=[ifelse([U(hasaccount,%#)],You have [u(account,%#)] credits in the bank.,You don't have an account with us. Use open account.)];@tr [v(db)]/checktime
+&BANK_OPEN_GOOD PARENT: Bank Computer=&pword%0 [v(db)]=%1;&account%0 [v(db)]=2000;@pemit %0=You open a new account with 2000 Credits in it.
+&BANK_OPEN_BADPASS PARENT: Bank Computer=@pemit %0=You must specify a password.
+&BANK_OPEN_BADACCOUNT PARENT: Bank Computer=@pemit %0=You already have an account.
+&BANK_OPEN_BADPLAYER PARENT: Bank Computer=@pemit %0=Only Players may have bank accounts.
+&BADACCOUNT PARENT: Bank Computer=@pemit %0=You already have an account.
+&BADPASS PARENT: Bank Computer=@pemit %0=You must specify a password.
+&BADPLAYER PARENT: Bank Computer=@pemit %0=Only Players may have bank accounts.
+&COMMAND_OPENACCOUNT PARENT: Bank Computer=$open account*=*:@tr me/bank_open_[ifelse([isplayer(%#)],[ifelse(%1,[ifelse([u(hasaccount,%#)],BADACCOUNT,GOOD)],BADPASS)],BADPLAYER)]=%#,%1
+&BHELP PARENT: Bank Computer=$+bhelp:@pemit %#=[u(commands)]
+
+@create PARENT: Company Console
+@link PARENT: Company Console = #193
+@set PARENT: Company Console = VISUAL
+@set PARENT: Company Console = HALT
+@set PARENT: Company Console = NO_COMMAND
+&CREDITS PARENT: Company Console=Coded by Andrew@TrekWars(andrew@trekwars.ml.org or orabbottjr@skn.net)
+&CALC_COMMOD PARENT: Company Console=[ifelse([gt([v(commod_[v(%0prod)])],0)],[add([mul(%va,[mul([add([v(%0bonus)],[v(%0point)])],[u(prod_[v(%0prod)])])])],[v(commod_[v(%0prod)])])],[mul(%va,[mul([add([v(%0bonus)],[v(%0point)])],[u(prod_[v(%0prod)])])])])]
+&ECON_BAD PARENT: Company Console=@pemit %0=The workers haven't had enough time to finsih.
+&ECON_RECALL PARENT: Company Console=&[ifelse([u(iscash,agri)],cash,commod_[v(agriprod)])] me=[u(calc_commod,agri)];&[ifelse([u(iscash,mine)],cash,commod_[v(mineprod)])] me=[u(calc_commod,mine)];&[ifelse([u(iscash,indu)],cash,commod_[v(induprod)])] me=[u(calc_commod,indu)];@emit The workers bring in their products.;&calctime me=[convtime(Mon [extract(time(),2,1)] [add(1,[Extract(time(),3,1)])] 00:00:00 [extract(time(),5,1)]
+&COMMMAND_WORKERS PARENT: Company Console=$recall workers:@va me=[div([sub(secs(),[v(calctime)])],86400)];@tr me/ECON_[ifelse([gt([v(va)],0)],RECALL,BAD)]=%#
+&PROD_TRANSPARENT_ALUMINIUM PARENT: Company Console=5
+&PROD_DURANIMUM PARENT: Company Console=1
+&PROD_TRITANIUM PARENT: Company Console=1
+@DESCRIBE PARENT: Company Console=%B%B___________________________________________________________________________%R%B/ Planetary Console: [v(Planet)] [v(Empire)] -:- Credits: [v(Cash)]%R%B|--------%R%B| Points Free: [v(Freepoints)]%R%B| Industral Data: [v(indupoint)][lit( Agricultural Data: )][v(agriPoint)][lit( Mining Data: )[v(minePoint)]%R%B|--------%R%B| [ljust(Industral Product:,25)][ljust(Agricultural Product:,25)][ljust(Mine Product:,35)]%R%B%| [ljust([v(induprod)] [v(prod_[v(induprod)])],25)] [ljust([v(agriprod)] [v(prod_[v(agriprod)])],25)][ljust([v(mineprod)] [v(prod_[v(mineprod)])],25)]%R%B|--------%R%B| Commodities:%R%B[ifelse([lattr(me/commod_*)],[u(commods)],| There are no products in the warehouses.%R)]%b| %R%B%\_____________________________________________________________________________
+@set PARENT: Company Console/DESCRIBE=no_command visual
+&ADD_INDU PARENT: Company Console=@swi [ifelse([gt([v(freepoints)],0)],[ifelse([hastype(%0,Player)],GOOD,BADP)],BADENUF)]={BADENUF}, {@pemit %0=There aren't enough allocation units to add one to industrial.}, {BADP}, {@pemit %0=Only players may use Planetary Consoles.}, {&freepoints me=[sub([v(freepoints)],1)];&indupoint me=[add([v(indupoint)],1)];@pemit %0=You add a point to industry.
+&ADD_AGRI PARENT: Company Console=@swi [ifelse([gt([v(freepoints)],0)],[ifelse([hastype(%0,Player)],GOOD,BADP)],BADENUF)]={BADENUF}, {@pemit %0=There aren't enough allocation units to add one to agriculture.}, {BADP}, {@pemit %0=Only players may use Planetary Consoles.}, {&freepoints me=[sub([v(freepoints)],1)];&agripoint me=[add([v(agripoint)],1)];@pemit %0=You add a point to agriculture.
+&ADD_MINE PARENT: Company Console=@swi [ifelse([gt([v(freepoints)],0)],[ifelse([hastype(%0,Player)],GOOD,BADP)],BADENUF)]={BADENUF}, {@pemit %0=There aren't enough allocation units to add one to mine.}, {BADP}, {@pemit %0=Only players may use Planetary Consoles.}, {&freepoints me=[sub([v(freepoints)],1)];&minepoint me=[add([v(minepoint)],1)];@pemit %0=You add a production point to mining.
+&ADD_ERROR PARENT: Company Console=@pemit %0=Bad production type. You can add: agriculture, industry, or mining.
+&ADDPOINT PARENT: Company Console=$add *:@tr me/add_[switch(%0,agriculture,agri,industry,indu,mining,mine,error)]=%#
+&FREEPOINTS PARENT: Company Console=5
+&PRODUCE PARENT: Company Console=&commod_[v(agriprod)] me=[mul([v(agripoint)],[u(prod_[v(agriprod)])])];&commod_[v(mineprod)] me=[mul([v(minepoint)],[u(prod_[v(mineprod)])])];&commod_[v(induprod)] me=[mul([v(indupoint)],[u(prod_[v(induprod)])])];@emit The workers bring in yesterday's profits.;&calctime me=[add([v(calctime)],86400)]
+&CALCTIME PARENT: Company Console=867016800
+&REMPOINT PARENT: Company Console=$remove *:@tr me/add_[switch(%0,agriculture,agri,industry,indu,mining,mine,error)]=%#
+&REM_ERROR PARENT: Company Console=@pemit %0=Bad production type. You can add: agriculture, industry, or mining.
+&REM_MINE PARENT: Company Console=@swi [ifelse([gt([v(minepoint)],0)],[ifelse([hastype(%0,Player)],GOOD,BADP)],BADENUF)]={BADENUF}, {@pemit %0=There aren't enough allocation units to add one to mine.}, {BADP}, {@pemit %0=Only players may use Planetary Consoles.}, {&freepoints me=[add([v(freepoints)],1)];&minepoint me=[sub([v(minepoint)],1)];@pemit %0=You remove a point from mining.
+&REM_AGRI PARENT: Company Console=@swi [ifelse([gt([v(agripoint)],0)],[ifelse([hastype(%0,Player)],GOOD,BADP)],BADENUF)]={BADENUF}, {@pemit %0=There aren't enough allocation units to add one to agriculture.}, {BADP}, {@pemit %0=Only players may use Planetary Consoles.}, {&freepoints me=[add([v(freepoints)],1)];&agripoint me=[sub([v(agripoint)],1)];@pemit %0=You remove a point from agriculture.
+&REM_INDU PARENT: Company Console=@swi [ifelse([gt([v(indupoint)],0)],[ifelse([hastype(%0,Player)],GOOD,BADP)],BADENUF)]={BADENUF}, {@pemit %0=There aren't enough allocation units to add one to industrial.}, {BADP}, {@pemit %0=Only players may use Planetary Consoles.}, {&freepoints me=[add([v(freepoints)],1)];&indupoint me=[sub([v(indupoint)],1)];@pemit %0=You remove a point from industry.
+&COMMAND_SETPROD PARENT: Company Console=$set * production to *=*:@swi [ifelse([isplayer(%#)],[ifelse([u(goodtype,%0)],[ifelse([match(%2,[v(access)])],[ifelse([u(iscommod,%1,%0)],GOOD,4)],3)],2)],1)]={1}, {@pemit %#=Only players may use economy consoles.}, {2}, {@pemit %#=That is not a valid type of production.}, {3}, {@pemit %#=Invalid access code.}, {4}, {@pemit %#=That is not a valid commodity for [switch(%0,mine*,mine,agri*,agriculture,indu*,industrial)].}, {&[switch(%0,mine*,mine,agri*,agri,indu*,indu)]prod me=%1;@pemit %#=You set the [switch(%0,mine*,mine,agri*,agriculture,indu*,industrial)] production to %1}
+&IFPROD PARENT: Company Console=[islayer(%0)][u(goodtype,%1)][match(%3,[v(access)])][u(iscommod,%3,%0)]
+&GOODTYPE PARENT: Company Console=[switch(%0,mine*,1,agri*,1,indu*,1,0)]
+&ISCOMMOD PARENT: Company Console=[isnum([pos([ucstr(%0)],[ucstr([v([switch(%1,mine*,mine,agri*,agri,indu*,indu)]_commods)])])])]
+&PROD_DILITHUUM PARENT: Company Console=0.2
+&PROD_GOLD_PLATINMUM PARENT: Company Console=5
+&PROD_WARP_CORES PARENT: Company Console=0.2
+&PROD_ENGINE_COMPONENTS PARENT: Company Console=5
+&PROD_WEAPON_COMPONETS PARENT: Company Console=5
+&PROD_FOOD PARENT: Company Console=10
+&PROD_PHASER_BANKS PARENT: Company Console=5
+&PROD_TITANIUM_ALLOY PARENT: Company Console=5
+&PROD_METALS PARENT: Company Console=5
+&PROD_NARCOTICS PARENT: Company Console=3
+&PROD_SLAVES PARENT: Company Console=1
+&PROD_IRON PARENT: Company Console=20
+&PROD_COMPUTER_EQUIPMENT PARENT: Company Console=5
+&PROD_MEDICAL_EQUIPMENT PARENT: Company Console=5
+&PROD_MEDICAL_SUPPLIES PARENT: Company Console=10
+&PROD_MACHINERY PARENT: Company Console=5
+&PROD_LIVESTOCK PARENT: Company Console=20
+&INDU_COMMODS PARENT: Company Console=transparent_aluminum computer_Equipment medical_equipment medical_supplies machinery narcotics phaser_banks titanium_alloy warp_cores engine_components weapon_components gold_platinmum cash
+&AGRI_COMMODS PARENT: Company Console=livestock slaves food cash
+&MINE_COMMODS PARENT: Company Console=tritanium duranimum dilithium metals iron cash
+&COMMOD_ PARENT: Company Console=#-1 ARGUMENTS MUST BE NUMBERS
+&COMMODS PARENT: Company Console=[iter([lattr(me/commod_*)],[squish(| [capstr([lcstr([after(##,COMMOD_)])])] - [v(##)]%R)])]
+&INDUPOINT PARENT: Company Console=0
+&MINEPOINT PARENT: Company Console=0
+&AGRIPOINT PARENT: Company Console=0
+&INDUPROD PARENT: Company Console=None
+&AGRIPROD PARENT: Company Console=None
+&MINEPROD PARENT: Company Console=None
+&PROD_NONE PARENT: Company Console=0
+&SETUP PARENT: Company Console=&setup me= ;&calctime me=[convtime(Mon [extract(time(),2,1)] [sub([Extract(time(),3,1)],1)] 00:00:00 [extract(time(),5,1)])]
+&LISTPROD PARENT: Company Console=$list *:@switch [u(goodtype,%0)]={1}, {@pemit %#=Products:%R%B[iter([v([switch(%0,mine*,mine,agri*,agri,indu*,indu)]_commods)],[capstr([lcstr([edit(##,_,%b)])])] - [v(prod_##)]%R)]},{0}, {@pemit %#=Invalid type: Use Mine, Agri, or Industrial.}
+&PROD_TRANSPARENT_ALUMINUM PARENT: Company Console=5
+&AGRIBONUS PARENT: Company Console=0
+&MINEBONUS PARENT: Company Console=0
+&INDUBONUS PARENT: Company Console=0
+&ISCASH PARENT: Company Console=[match([ucstr([v(%0prod)])],CASH)]
+&PROD_CASH PARENT: Company Console=1000
+&COMMAND_TRANSFERCASH PARENT: Company Console=$dump * from console=*:@swi [ifelse(isplayer(%#),[ifelse([match(%1,[v(access)])],[ifelse([gt(%0,0)],[ifelse(lte(%0,[v(cash)]),GOOD,4)],3)],2)],1)]={1}, {@pemit %#=Only players may use Economy Consoles},{2},{@pemit %#=Invalid Access Code.},{3},{@pemit %#=You can not take negitave amounts of money.},{4},{@pemit %#=You can only take the amount that is in the console.},{@tr me/edump=%#,%0}
+&EDUMP PARENT: Company Console=&money %0=[add([econs(%0)],%1)];&cash me=[sub([v(cash)],%1)];@pemit %0=You take %1 credits from the console.
+&ACCESS PARENT: Company Console=0000
+&TRANSFER PARENT: Company Console=$ptransfer * of * to *=*:@tr %!/CARGO_[ifelse([pos([num(%2)],[lcon(here)])],[ifelse([match(%3,[v(access)])],[ifelse(hastype(%#,player)],[ifelse([u(iscontainer,%2)],[ifelse([hasattr(me,commod_%1)],[ifelse([gt(%0,0)],[ifelse([lte(%0,[v(commod_%1)])],TRANSFER,NOTENUFCOMMOD)],NEG)],NOTCOMMOD)],NOtCONTAINER)],NOTPLAYER)],NOTACCESS)],NOTHERE)]=%#, %0, %1, [num(%2)]
+&CARGO_NEG PARENT: Company Console=@pemit %0=You may not transfer negitive amounts.
+&CARGO_NOTENUFCOMMOD PARENT: Company Console=@pemit %0=Your container doesn't have that much.
+&CARGO_NOTCOMMOD PARENT: Company Console=@pemit %0=Your container doesn't have that Commodity.
+&CARGO_NOTHERE PARENT: Company Console=@pemit %0=I can't see that here.
+&CARGO_NOTACCESS PARENT: Company Console=@pemit %0=Invalid Access Code.
+&CARGO_NOTPLAYER PARENT: Company Console=@pemit %0=Only players may transfer cargo.
+&CARGO_NOTCONTAINER PARENT: Company Console=@pemit %0=You can only transfer to other cargo containers.
+&CARGO_TRANSFER PARENT: Company Console=&commod_%2 %3=[ifelse([get(%3/commod_%2)],[add([get(%3/commod_%2)],%1)],%1)];&commod_%2 me=[sub([v(commod_%2)],%1)];@pemit %0=You transfer %1 of %2 to Cargo Container [num(%3)]
+&ISCONTAINER PARENT: Company Console=[get(%0/container)]
+&ISACCESS PARENT: Company Console=[switch(%3,[v(access)],1,0)]
+&PROD_DILITHIUM PARENT: Company Console=0.2
+&CHANGEACCESS PARENT: Company Console=$set access *=*:@swi [match(%0,[v(access)]={0}, {@pemit %#=Invalid Access Code.}, {1}, {&access me=%1;@pemit %#=You set the access code to %1.}
+&CHELP PARENT: Company Console=$+chelp:@pemit %#=[u(commands)]
+&COMMANDS PARENT: Company Console=Valid commands:%R+chelp - This screen%RRecall workers - collects products from workers.%Radd <type> - adds a production point to <type>%Rremove <type> - removes a production point from <type>%rset <type> production to <product>=<access code>%Rlist <type> - lists the products of <type>%Rdump <amount> from console - removes money from console.%Rptransfer <amount> of <type> to <cargo>=<access> - Transfers <amount> of <type> to a cargo container.%Rset access <current access>=<new access> - changes the access code to <new access>%R%RValid Types: mine agricultural industry
+
+@create PARENT: Planetary Console
+@link PARENT: Planetary Console = #193
+@set PARENT: Planetary Console = VISUAL
+@set PARENT: Planetary Console = HALT
+@set PARENT: Planetary Console = NO_COMMAND
+&CREDITS PARENT: Planetary Console=Coded by Andrew@TrekWars(andrew@trekwars.ml.org or orabbottjr@skn.net)
+&ISACCESS PARENT: Planetary Console=[switch(%3,[v(access)],1,0)]
+&ISCONTAINER PARENT: Planetary Console=[get(%0/container)]
+&CARGO_TRANSFER PARENT: Planetary Console=&commod_%2 %3=[ifelse([get(%3/commod_%2)],[add([get(%3/commod_%2)],%1)],%1)];&commod_%2 me=[sub([v(commod_%2)],%1)];@pemit %0=You transfer %1 of %2 to Cargo Container [num(%3)]
+&CARGO_NOTCONTAINER PARENT: Planetary Console=@pemit %0=You can only transfer to other cargo containers.
+&CARGO_NOTPLAYER PARENT: Planetary Console=@pemit %0=Only players may transfer cargo.
+&CARGO_NOTACCESS PARENT: Planetary Console=@pemit %0=Invalid Access Code.
+&CARGO_NOTHERE PARENT: Planetary Console=@pemit %0=I can't see that here.
+&CARGO_NOTCOMMOD PARENT: Planetary Console=@pemit %0=Your container doesn't have that Commodity.
+&CARGO_NOTENUFCOMMOD PARENT: Planetary Console=@pemit %0=Your container doesn't have that much.
+&CARGO_NEG PARENT: Planetary Console=@pemit %0=You may not transfer negitive amounts.
+&TRANSFER PARENT: Planetary Console=$ptransfer * of * to *=*:@tr %!/CARGO_[ifelse([pos([num(%2)],[lcon(here)])],[ifelse([match(%3,[v(access)])],[ifelse(hastype(%#,player)],[ifelse([u(iscontainer,%2)],[ifelse([hasattr(me,commod_%1)],[ifelse([gt(%0,0)],[ifelse([lte(%0,[v(commod_%1)])],TRANSFER,NOTENUFCOMMOD)],NEG)],NOTCOMMOD)],NOtCONTAINER)],NOTPLAYER)],NOTACCESS)],NOTHERE)]=%#, %0, %1, [num(%2)]
+&ACCESS PARENT: Planetary Console=0000
+&EDUMP PARENT: Planetary Console=&money %0=[add([econs(%0)],%1)];&cash me=[sub([v(cash)],%1)];@pemit %0=You take %1 credits from the console.
+&COMMAND_TRANSFERCASH PARENT: Planetary Console=$dump * from console=*:@swi [ifelse(isplayer(%#),[ifelse([match(%1,[v(access)])],[ifelse([gt(%0,0)],[ifelse(lte(%0,[v(cash)]),GOOD,4)],3)],2)],1)]={1}, {@pemit %#=Only players may use Economy Consoles},{2},{@pemit %#=Invalid Access Code.},{3},{@pemit %#=You can not take negitave amounts of money.},{4},{@pemit %#=You can only take the amount that is in the console.},{@tr me/edump=%#,%0}
+&PROD_CASH PARENT: Planetary Console=5000
+&ISCASH PARENT: Planetary Console=[match([ucstr([v(%0prod)])],CASH)]
+&INDUBONUS PARENT: Planetary Console=0
+&MINEBONUS PARENT: Planetary Console=0
+&AGRIBONUS PARENT: Planetary Console=0
+&PROD_TRANSPARENT_ALUMINUM PARENT: Planetary Console=5
+&LISTPROD PARENT: Planetary Console=$list *:@switch [u(goodtype,%0)]={1}, {@pemit %#=Products:%R%B[iter([v([switch(%0,mine*,mine,agri*,agri,indu*,indu)]_commods)],[capstr([lcstr([edit(##,_,%b)])])] - [v(prod_##)]%R)]},{0}, {@pemit %#=Invalid type: Use Mine, Agri, or Industrial.}
+&SETUP PARENT: Planetary Console=&setup me= ;&calctime me=[convtime(Mon [extract(time(),2,1)] [sub([Extract(time(),3,1)],1)] 00:00:00 [extract(time(),5,1)])]
+&PROD_NONE PARENT: Planetary Console=0
+&MINEPROD PARENT: Planetary Console=None
+&AGRIPROD PARENT: Planetary Console=None
+&INDUPROD PARENT: Planetary Console=None
+&AGRIPOINT PARENT: Planetary Console=0
+&MINEPOINT PARENT: Planetary Console=0
+&INDUPOINT PARENT: Planetary Console=0
+&COMMODS PARENT: Planetary Console=[iter([lattr(me/commod_*)],[squish(| [capstr([lcstr([after(##,COMMOD_)])])] - [v(##)]%R)])]
+&MINE_COMMODS PARENT: Planetary Console=tritanium duranimum dilithium metals iron cash
+&AGRI_COMMODS PARENT: Planetary Console=livestock slaves food cash
+&INDU_COMMODS PARENT: Planetary Console=transparent_aluminum computer_Equipment medical_equipment medical_supplies machinery narcotics phaser_banks titanium_alloy warp_cores engine_components weapon_components gold_platinmum cash
+&PROD_LIVESTOCK PARENT: Planetary Console=20
+&PROD_MACHINERY PARENT: Planetary Console=5
+&PROD_MEDICAL_SUPPLIES PARENT: Planetary Console=10
+&PROD_MEDICAL_EQUIPMENT PARENT: Planetary Console=5
+&PROD_COMPUTER_EQUIPMENT PARENT: Planetary Console=5
+&PROD_IRON PARENT: Planetary Console=20
+&PROD_SLAVES PARENT: Planetary Console=1
+&PROD_NARCOTICS PARENT: Planetary Console=3
+&PROD_METALS PARENT: Planetary Console=5
+&PROD_TITANIUM_ALLOY PARENT: Planetary Console=5
+&PROD_PHASER_BANKS PARENT: Planetary Console=5
+&PROD_FOOD PARENT: Planetary Console=10
+&PROD_ENGINE_COMPONENTS PARENT: Planetary Console=5
+&PROD_WARP_CORES PARENT: Planetary Console=0.2
+&PROD_GOLD_PLATINMUM PARENT: Planetary Console=5
+&PROD_DILITHUUM PARENT: Planetary Console=0.2
+&ISCOMMOD PARENT: Planetary Console=[isnum([pos([ucstr(%0)],[ucstr([v([switch(%1,mine*,mine,agri*,agri,indu*,indu)]_commods)])])])]
+&GOODTYPE PARENT: Planetary Console=[switch(%0,mine*,1,agri*,1,indu*,1,0)]
+&IFPROD PARENT: Planetary Console=[islayer(%0)][u(goodtype,%1)][match(%3,[v(access)])][u(iscommod,%3,%0)]
+&COMMAND_SETPROD PARENT: Planetary Console=$set * production to *=*:@swi [ifelse([isplayer(%#)],[ifelse([u(goodtype,%0)],[ifelse([match(%2,[v(access)])],[ifelse([u(iscommod,%1,%0)],GOOD,4)],3)],2)],1)]={1}, {@pemit %#=Only players may use economy consoles.}, {2}, {@pemit %#=That is not a valid type of production.}, {3}, {@pemit %#=Invalid access code.}, {4}, {@pemit %#=That is not a valid commodity for [switch(%0,mine*,mine,agri*,agriculture,indu*,industrial)].}, {&[switch(%0,mine*,mine,agri*,agri,indu*,indu)]prod me=%1;@pemit %#=You set the [switch(%0,mine*,mine,agri*,agriculture,indu*,industrial)] production to %1}
+&REM_INDU PARENT: Planetary Console=@swi [ifelse([gt([v(indupoint)],0)],[ifelse([hastype(%0,Player)],GOOD,BADP)],BADENUF)]={BADENUF}, {@pemit %0=There aren't enough allocation units to add one to industrial.}, {BADP}, {@pemit %0=Only players may use Planetary Consoles.}, {&freepoints me=[add([v(freepoints)],1)];&indupoint me=[sub([v(indupoint)],1)];@pemit %0=You remove a point from industry.
+&REM_AGRI PARENT: Planetary Console=@swi [ifelse([gt([v(agripoint)],0)],[ifelse([hastype(%0,Player)],GOOD,BADP)],BADENUF)]={BADENUF}, {@pemit %0=There aren't enough allocation units to add one to agriculture.}, {BADP}, {@pemit %0=Only players may use Planetary Consoles.}, {&freepoints me=[add([v(freepoints)],1)];&agripoint me=[sub([v(agripoint)],1)];@pemit %0=You remove a point from agriculture.
+&REM_MINE PARENT: Planetary Console=@swi [ifelse([gt([v(minepoint)],0)],[ifelse([hastype(%0,Player)],GOOD,BADP)],BADENUF)]={BADENUF}, {@pemit %0=There aren't enough allocation units to add one to mine.}, {BADP}, {@pemit %0=Only players may use Planetary Consoles.}, {&freepoints me=[add([v(freepoints)],1)];&minepoint me=[sub([v(minepoint)],1)];@pemit %0=You remove a point from mining.
+&REM_ERROR PARENT: Planetary Console=@pemit %0=Bad production type. You can add: agriculture, industry, or mining.
+&REMPOINT PARENT: Planetary Console=$remove *:@tr me/add_[switch(%0,agriculture,agri,industry,indu,mining,mine,error)]=%#
+&CALCTIME PARENT: Planetary Console=867016800
+@ADESCRIBE PARENT: Planetary Console=
+@set PARENT: Planetary Console/ADESCRIBE=no_command
+&PRODUCE PARENT: Planetary Console=&commod_[v(agriprod)] me=[mul([v(agripoint)],[u(prod_[v(agriprod)])])];&commod_[v(mineprod)] me=[mul([v(minepoint)],[u(prod_[v(mineprod)])])];&commod_[v(induprod)] me=[mul([v(indupoint)],[u(prod_[v(induprod)])])];@emit The workers bring in yesterday's profits.;&calctime me=[add([v(calctime)],86400)]
+&FREEPOINTS PARENT: Planetary Console=9
+&ADDPOINT PARENT: Planetary Console=$add *:@tr me/add_[switch(%0,agriculture,agri,industry,indu,mining,mine,error)]=%#
+&ADD_ERROR PARENT: Planetary Console=@pemit %0=Bad production type. You can add: agriculture, industry, or mining.
+&ADD_MINE PARENT: Planetary Console=@swi [ifelse([gt([v(freepoints)],0)],[ifelse([hastype(%0,Player)],GOOD,BADP)],BADENUF)]={BADENUF}, {@pemit %0=There aren't enough allocation units to add one to mine.}, {BADP}, {@pemit %0=Only players may use Planetary Consoles.}, {&freepoints me=[sub([v(freepoints)],1)];&minepoint me=[add([v(minepoint)],1)];@pemit %0=You add a production point to mining.
+&ADD_AGRI PARENT: Planetary Console=@swi [ifelse([gt([v(freepoints)],0)],[ifelse([hastype(%0,Player)],GOOD,BADP)],BADENUF)]={BADENUF}, {@pemit %0=There aren't enough allocation units to add one to agriculture.}, {BADP}, {@pemit %0=Only players may use Planetary Consoles.}, {&freepoints me=[sub([v(freepoints)],1)];&agripoint me=[add([v(agripoint)],1)];@pemit %0=You add a point to agriculture.
+&ADD_INDU PARENT: Planetary Console=@swi [ifelse([gt([v(freepoints)],0)],[ifelse([hastype(%0,Player)],GOOD,BADP)],BADENUF)]={BADENUF}, {@pemit %0=There aren't enough allocation units to add one to industrial.}, {BADP}, {@pemit %0=Only players may use Planetary Consoles.}, {&freepoints me=[sub([v(freepoints)],1)];&indupoint me=[add([v(indupoint)],1)];@pemit %0=You add a point to industry.
+@DESCRIBE PARENT: Planetary Console=%B%B___________________________________________________________________________%R%B/ Planetary Console: [v(Planet)] [v(Empire)] -:- Credits: [v(Cash)]%R%B|--------%R%B| Points Free: [v(Freepoints)]%R%B| Industral Data: [v(indupoint)][lit( Agricultural Data: )][v(agriPoint)][lit( Mining Data: )[v(minePoint)]%R%B|--------%R%B| [ljust(Industral Product:,25)][ljust(Agricultural Product:,25)][ljust(Mine Product:,35)]%R%B%| [ljust([v(induprod)] [v(prod_[v(induprod)])],25)] [ljust([v(agriprod)] [v(prod_[v(agriprod)])],25)][ljust([v(mineprod)] [v(prod_[v(mineprod)])],25)]%R%B|--------%R%B| Commodities:%R%B[ifelse([lattr(me/commod_*)],[u(commods)],| There are no products in the warehouses.%R)]%b| %R%B%\_____________________________________________________________________________
+@set PARENT: Planetary Console/DESCRIBE=no_command visual
+&PROD_TRITANIUM PARENT: Planetary Console=1
+&PROD_DURANIMUM PARENT: Planetary Console=1
+&PROD_TRANSPARENT_ALUMINIUM PARENT: Planetary Console=5
+&COMMMAND_WORKERS PARENT: Planetary Console=$recall workers:@va me=[div([sub(secs(),[v(calctime)])],86400)];@tr me/ECON_[ifelse([gt([v(va)],0)],RECALL,BAD)]=%#
+&ECON_RECALL PARENT: Planetary Console=&[ifelse([u(iscash,agri)],cash,commod_[v(agriprod)])] me=[u(calc_commod,agri)];&[ifelse([u(iscash,mine)],cash,commod_[v(mineprod)])] me=[u(calc_commod,mine)];&[ifelse([u(iscash,indu)],cash,commod_[v(induprod)])] me=[u(calc_commod,indu)];@emit The workers bring in their products.;&calctime me=[convtime(Mon [extract(time(),2,1)] [add(1,[Extract(time(),3,1)])] 00:00:00 [extract(time(),5,1)]
+&ECON_BAD PARENT: Planetary Console=@pemit %0=The workers haven't had enough time to finsih.
+&CALC_COMMOD PARENT: Planetary Console=[ifelse([gt([v(commod_[v(%0prod)])],0)],[add([mul(%va,[mul([add([v(%0bonus)],[v(%0point)])],[u(prod_[v(%0prod)])])])],[v(commod_[v(%0prod)])])],[mul(%va,[mul([add([v(%0bonus)],[v(%0point)])],[u(prod_[v(%0prod)])])])])]
+&PROD_WEAPON_COMPONENTS PARENT: Planetary Console=5
+&PROD_DILITHIUM PARENT: Planetary Console=0.2
+&CHANGEACCESS PARENT: Planetary Console=$set access *=*:@swi [match(%0,[v(access)]={0}, {@pemit %#=Invalid Access Code.}, {1}, {&access me=%1;@pemit %#=You set the access code to %1.}
+&PHELP PARENT: Planetary Console=$+phelp:@pemit %#=[u(commands)]
+&CHELP PARENT: Planetary Console=
+&COMMANDS PARENT: Planetary Console=Valid commands:%R+phelp - This screen%RRecall workers - collects products from workers.%Radd <type> - adds a production point to <type>%Rremove <type> - removes a production point from <type>%rset <type> production to <product>=<access code>%Rlist <type> - lists the products of <type>%Rdump <amount> from console - removes money from console.%Rptransfer <amount> of <type> to <cargo>=<access> - Transfers <amount> of <type> to a cargo container.%Rset access <current access>=<new access> - changes the access code to <new access>%R%RValid Types: mine agricultural industry
+&PROD_SHUTTLE PARENT: Planetary Console=0.02
+
+@create PARENT: Cargo Container
+@link PARENT: Cargo Container = #193
+@set PARENT: Cargo Container = VISUAL
+@set PARENT: Cargo Container = HALT
+@set PARENT: Cargo Container = NO_COMMAND
+&CREDITS PARENT: Cargo Container=Coded by Andrew@TrekWars(andrew@trekwars.ml.org or orabbottjr@skn.net)
+&CARGO_NOTHERE PARENT: Cargo Container=@pemit %0=I can't see that here.
+&CARGO_NOTCOMMOD PARENT: Cargo Container=@pemit %0=Your container doesn't have that Commodity.
+&CARGO_NOTENUFCOMMOD PARENT: Cargo Container=@pemit %0=Your container doesn't have that much.
+&CARGO_NEG PARENT: Cargo Container=@pemit %0=You may not transfer negitive amounts.
+&ACCESS PARENT: Cargo Container=0000
+&HEADER PARENT: Cargo Container=[lit( /-------------------------------------------< )]Container ID: [num(me)][lit( >-------)]%R | StarDate: [stardate()]%R | Cargo Container Console
+&LISTCOMMODS PARENT: Cargo Container=$list:@pemit %#=[ifelse([lattr(me/commod_*)],%B[u(header)]%R%B[u(commods)]%B[u(footer)],This Cargo Container has no Commodities in it.)]
+&COMODS PARENT: Cargo Container=
+&COMMODS PARENT: Cargo Container=[iter([lattr(me/commod_*)],[squish(%B| [capstr([lcstr([after(##,COMMOD_)])])] - [v(##)]%R)])]
+&COMOD PARENT: Cargo Container=
+&FOOTER PARENT: Cargo Container=[lit( \__________________________________________________________________________)]
+&CONTAINER PARENT: Cargo Container=1
+&TRANSFER PARENT: Cargo Container=$transfer * of * to *=*:@tr %!/CARGO_[ifelse([pos([num(%2)],[lcon(here)])],[ifelse([match(%3,[v(access)])],[ifelse(hastype(%#,player)],[ifelse([u(iscontainer,%2)],[ifelse([hasattr(me,commod_%1)],[ifelse([gt(%0,0)],[ifelse([lte(%0,[v(commod_%1)])],TRANSFER,NOTENUFCOMMOD)],NEG)],NOTCOMMOD)],NOtCONTAINER)],NOTPLAYER)],NOTACCESS)],NOTHERE)]=%#, %0, %1, [num(%2)]
+&CARGO_NOTACCESS PARENT: Cargo Container=@pemit %0=Invalid Access Code.
+&CARGO_NOTPLAYER PARENT: Cargo Container=@pemit %0=Only players may transfer cargo.
+&CARGO_NOTCONTAINER PARENT: Cargo Container=@pemit %0=You can only transfer to other cargo containers.
+&CARGO_TRANSFER PARENT: Cargo Container=&commod_%2 %3=[ifelse([get(%3/commod_%2)],[add([get(%3/commod_%2)],%1)],%1)];&commod_%2 me=[sub([v(commod_%2)],%1)];@pemit %0=You transfer %1 of %2 to Cargo Container [num(%3)]
+&ISCONTAINER PARENT: Cargo Container=[get(%0/container)]
+&ISACCESS PARENT: Cargo Container=[switch(%3,[v(access)],1,0)]
+@DESCRIBE PARENT: Cargo Container=[u(header)]%R%B[ifelse([lattr(me/commod_*)],[u(commods)],This Cargo Container has no Commodities in it.)][u(footer)]
+@set PARENT: Cargo Container/DESCRIBE=no_command visual
+&CHANGEACCESS PARENT: Cargo Container=$set access *=*:@swi [match(%0,[v(access)]={0}, {@pemit %#=Invalid Access Code.}, {1}, {&access me=%1;@pemit %#=You set the access code to %1.}
+&CHELP PARENT: Cargo Container=$+chelp:@pemit %#=[u(commands)]
+&COMMANDS PARENT: Cargo Container=Valid Commands:%Rlist - shows amount of products in container.%Rtransfer <amount> of <type> to <cargo container>=<access> - transfers <type> to another container.%Rset access <old access>=<new access> - sets access code to <new access>

@@ -1,0 +1,46 @@
+@@ Security Camera version 1.01
+@@ 29 Apr 94 by Prince_Persia @ ToonMUSH II / Freud @ NowhereMUSH
+@@ Monitors a certain location and can do one or all of the following:
+@@
+@@          Page you
+@@          @Tel the visitor through a certain exit or to another room
+@@             (that you control or is jump_ok)
+@@          Record the visit in memory
+@@
+@@ Questions/comments/Pentiums go to ... stevem@comtch.iea.com
+
+@create Security Camera=10
+
+@set Security Camera=QUIET
+@Desc Security Camera=A Security Camera. Type 'sec help' for help.%rThis camera is currently set up to:%r%r[switch(v(telout),1,Teleport visitors out the exit '[v(exitname)]'%r)][switch(v(pageowner),1,Page [name(owner(me))] when a visitor comes in%r)][switch(v(record),1,Record visits in memory)]
+&PAGEOWNER Security Camera=1
+&RECORD Security Camera=1
+@VA Security Camera=$sec help:@pemit %#=[center(---Security Camera Help---,70)]%r%r[switch(%#,owner(me),u(help),{Sorry, but only my owner has access to these commands.})]
+&HELP Security Camera=SEC ON - Turns the camera on.%rSEC OFF - Turns the camera off.%rTEL ON - Turns the teleporting of visitors though an exit on.%rTEL OFF - Turns teleporting off.%rPAGING ON - Sets the camers to page you when you have a visitor.%rPAGING OFF - Sets the machine to _not_ page you.%rREC ON - Turns visit recording on.%rREC OFF - Turns visit recording off.%rEXITNAME - Specifies the name of the exit to teleport visitors through. May be an exit name or a Db#. Defaults to "Out"%rSHOW VISITS - Shows the visits, if any, that have been recorded.%rCLEAR VISITS - Clears the visits log.
+&EXITNAME Security Camera=Out
+@Listen Security Camera=* has arrived.
+@Ahear Security Camera=@switch v(status)=1,{@switch [v(telout)]/[v(pageowner)]/[v(record)]=1/*/*,{@switch %#=owner(me),,@tel %#=[v(exitname)]},*/1/*,{@switch %#=owner(me),,p owner(me)=%n entered your house[switch(v(telout),1,%band was teleported out.,.)]},*/*/1,&visit%# me=time()}
+@VB Security Camera=$sec on:@switch %#=owner(me),{&status me=1;@pemit %#=The camera is now turned on.}
+@VC Security Camera=$sec off:@switch %#=owner(me),{&status me=0;@pemit %#=The camera is now turned off.}
+@VD Security Camera=$tel on:@switch %#=owner(me),{&telout me=1;@pemit %#=The camera will now teleport visitors through the exit [v(exitname)].}
+@VE Security Camera=$tel off:@switch %#=owner(me),{&telout me=1;@pemit %#=The camera will not teleport visitors.}
+@VF Security Camera=$paging on:@switch %#=owner(me),{&pageowner me=1;@pemit %#=The camera will now page you when a visitor enters.}
+@VG Security Camera=$paging off:@switch %#=owner(me),{&pageowner me=0;@pemit %#=The camera will _not_ page you.}
+@VH Security Camera=$rec on:@switch %#=owner(me),{&record me=1;@pemit %#=The camera will record visits.}
+@VI Security Camera=$rec off:@switch %#=owner(me),{&record me=0;@pemit %#=The camera will _not_ record visits.}
+@VJ Security Camera=$exitname *:@switch %#=owner(me),{&exitname me={%0};@pemit %#=The camera will now teleport visitors [switch(isdbref(%0),1,to the location [name(%0)] (%0).,through the exit %0.)]}
+@VK Security Camera=$show visits:@switch %#=owner(me),@pemit %#=[center(---Recorded Visits---,70)]%r[switch(lattr(me/visit*)!,!,%rYou have had no visits.,iter(lattr(me/visit*),%r[name(after(##,VISIT))] was here at [v(##)].))]
+&COPYRIGHT Security Camera=Security Camera v1.01 by PP@Toon. 4/29/94 rev.
+&TELOUT Security Camera=0
+&STATUS Security Camera=1
+@VL Security Camera=$clear visits:@switch %#=owner(me),{@dolist [lattr(me/visit*)]=&## me;@pemit %#=Visit log cleared.}
+@Succ Security Camera=You pick up [name(me)].
+@Osucc Security Camera=picks up [name(me)].
+@Drop Security Camera=You drop [name(me)].
+@Odrop Security Camera=drops [name(me)].
+@set Security Camera=SAFE
+
+@pemit me=%rSecurity Camera
+@pemit me=by Prince_Persia @ ToonMush II
+@pemit me=%rRevised 29 Apr 94.
+@set Security Camera=!QUIET

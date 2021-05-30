@@ -1,0 +1,604 @@
+#############################################################################
+# DAMAGE-DB.MUX
+#############################################################################
+
+@@ --------------------------------------------------------------------
+This object contains messages, data, and triggerable code snippets 
+for the Damage System, including the main trigger routines for shock 
+and death.
+
+-
+
+@@  Combat Lite: Damage Database -- a combat system for FiranMUX
+    Copyright (C) 1998 Adam Dray <adam@legendary.org>
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+-
+
+
+
+#14 is the Damage System object
+#15 is the Damage Database object
+
+think damage-db.mux
+-
+# config-banking-code is where the banking code is.
+
+&CONFIG-BANKING-CODE #14=#6982
+-
+&CONFIG-BANKING-CODE #15=#6982
+-
+# config-banking-data is where the banking data is.
+
+&CONFIG-BANKING-DATA #14=#6983
+-
+&CONFIG-BANKING-DATA #15=#6983
+-
+
+# ASHOCK
+#
+# %0 = dbref of player in shock
+# %1 = bodyloc
+# %2 = points of damage caused by last damage
+# %3 = number of successes/botches
+# %4 = success level (BOTCH, FAILURE, SUCCESS, BONUS)
+# 
+&AShock #15 = 
+   think settag(%0, shock); 
+
+# let the room know the player is in shock
+  @remit loc(%0) = 
+    [goodname(%0)] collapses on the ground, becoming motionless.; 
+
+# restrict the player from moving or speaking
+  think res_request(damage, immobile, %0); 
+  think res_request(damage, gagged, %0); 
+
+# make the player stop following anyone if they are following someone
+  @unfollow %0;
+
+# switch the player to a very vunerable style
+  @style %0 = passive;
+
+# tell the player how to proceed
+  @pemit %0 = 
+    %ch%cm
+    Due to the damage to your [u(u-bodyloc-description, %1)], 
+    and other accumulated damage, you have gone into shock.  
+    You should not attempt to communicate with other players about 
+    in-character topics.
+    %cn; 
+
+# (if the player is type=Player or the object is tagged NPC)
+  think setq(0, ifelse(or(hastype(%0, player), hastag(%0, npc)), %0, #-1)); 
+
+# (if the player is not tagged MuteAgony)
+  think setq(0, ifelse(hastag(%0, MuteAgony), #-1, %q0)); 
+
+  @pemit/list [ifelse(%q0, #-1, #-1, u(u-staff-online))] = 
+    %ch%cm
+    HELP: [goodname(%0)] (%0) has gone into shock in 
+          [name(loc(%0))] ([loc(%0)]).  Your assistance may be needed. 
+          If this is an accident, you may use '@revive %0' to bring them 
+          back to full health.%cn; 
+      
+  @disengage %0; 
+
+
+#  @body %0 as "Unconscious [name(%0)]" at [loc(%0)] to [v(dream-world)]; 
+
+  think setq(0, last(name(%0))); 
+  &realname %0 = [default(%0/realname, %q0)]; 
+  @name %0 = Unconscious [last(name(%0))]; 
+  @alias %0 = %q0; 
+  @pemit %0 = ansi(hg, You have been aliased to %q0 for ease of login.); 
+
+-
+
+# ADEATH
+# 
+# %0 = dbref of dying player
+# %1 = number of successes/botches
+# %2 = success level (BOTCH, FAILURE, SUCCESS, BONUS)
+# %3 = dbref of attacker
+# 
+&ADeath #15 = 
+  think settag(%0, dead); 
+
+  @select 1 = 
+  hastag(%0, immortal), {
+    think settag(%0, !dead); 
+    @pemit %0 = You'd have died, but you're immortal. Cool!
+  }, 
+
+  hastag(%0, invulnerable), {
+    think settag(%0, !dead); 
+    @pemit %0 = You'd have died, but you're invulnerable. Awesome!
+  }, 
+
+# ELSE
+  {
+#   Adding banking code to let us find dead accounts.
+    &inactive-bank-accs [parent(%0)] =
+      [u([v(config-banking-code)]/u-accounts-controllable, %0,
+         [v(config-banking-data)])];
+
+#   announce the death to the room
+    @remit loc(%0) = [name(%0)] twitches one last time, then is still.; 
+
+#   and to the player
+
+    @pemit %0 = 
+      %ch%cr
+      OOC: 
+      I am sorry, but your character has died.  Your soul will now be 
+      commended into the god Unot's hands.  Do not despair, for if it is not 
+      yet your time, he will return your soul to your body to continue life 
+      among the living.  If it *is* your time, your soul may be reincarnated 
+      and merged with the soul of another, some time in the future...
+      %cn; 
+
+#   (if the player is type=Player or the object is tagged NPC)
+    think setq(0, ifelse(or(hastype(%0, player), hastag(%0, npc)), %0, #-1)); 
+
+#   (if the player is not tagged MuteAgony)
+    think setq(0, ifelse(hastag(%0, MuteAgony), #-1, %q0)); 
+
+    @pemit/list [switch(%q0, #-1, #-1, u(u-staff-online))] = 
+      %ch%cr
+      HELP: 
+        [goodname(%0)] (%0) has been killed in [name(loc(%0))] ([loc(%0)]). 
+        If necessary, please talk to them about our death policy and their 
+        situation. If this is an accident, please @revive them.;
+
+    &killed-[secs()] %0 = [ictime()] ([time()] RL) -- by [name(%3)] (%3) in 
+                          [name(loc(%0))] (%0); 
+#   Informs Unot of player's death
+    @switch [hastype(%0,Player)]=1,
+        {@qmail Unot/Death Notification=[goodname(%0)] (%0) has been killed 
+            in [name(loc(%0))] ([loc(%0)]) by [name(%3)] (%3)};
+#   restrict the player from moving or speaking
+    think res_request(damage, immobile, %0); 
+    think res_request(damage, gagged, %0); 
+    @unfollow %0;
+
+    @disengage %0; 
+
+#  @body %0 as "Corpse of [name(%0)]" at [loc(%0)] to [v(lost-city-of-souls)]; 
+    
+    think setq(0, last(name(%0))); 
+    &realname %0 = [default(%0/realname, %q0)]; 
+    @name %0  = Corpse of %q0; 
+
+    @select 1= [hasflag(%0, player)], {
+      @tag %0   = no_destroy;
+      @set %0   = SAFE;
+    };
+
+    @alias %0 = %q0; 
+    @pemit %0 = ansi(hg, You have been aliased to %q0 for ease of login.); 
+  }
+-
+
+
+# ADAMAGED
+# 
+# %0 = dbref of player who was damaged
+# %1 = bodyloc
+# %2 = points of damage caused by last hit
+# %3 = total points of damage to character (all bodylocs)
+# 
+&ADamaged #15 = 
+  @remit loc(%0) = [name(%0)] is looking [u(u-damage-status, %3, %0)].; 
+  @pemit %0 = switch(hastag(%0, combatstatus), 1, combatstatus(%0)); 
+  @heal/register %0; 
+  @switch [hastag(%0, pregnant)]
+       [lt(successes(add(attribute(%0,health),skill(%0,child rearing)),
+                  add(5,div(%2,10))),0)]=
+  11, {@miscarriage %0}, @@
+-
+
+
+# u(u-damage-status, total damage points, dbref of player)
+# 
+&u-damage-status #15 = 
+  switch(1, 
+    lte(%0,  0), just fine, 
+    lte(%0,  2), somewhat under par, 
+    lte(%0,  4), a little raggled, 
+    lte(%0,  6), not great, 
+    lte(%0, 10), not good, 
+    lte(%0, 14), bad, 
+    lte(%0, 18), terrible, 
+    lte(%0, 22), seriously bad, 
+    lte(%0, 26), critically messed up, 
+    lte(%0, 30), majorly screwed up, 
+    lte(%0, 40), like [subj(%1)] is on [poss(%1)] last limb, 
+    lte(%0, 50), like death warmed over,
+    lte(%0, 60), like [subj(%1)] is going to be crippled for good,
+                 like the walking dead    
+  )
+-
+
+#====================================================================#
+#              WOUND TYPES					     #
+#====================================================================#
+
+
+# ADAMAGED-<woundtype>
+# 
+# %0 = dbref of player who was damaged
+# %1 = bodyloc
+# %2 = points of damage caused by last hit
+# %3 = total points of damage to character for that bodyloc
+# 
+
+
+&adamaged-lung_trauma #15=
+  @pemit %0=
+   [setq(0, u(u-size, %2))]
+   You feel a gasping choking sensation in your lungs!
+-
+&adamaged-nerve_damage #15=
+  @pemit %0=
+    [setq(0, u(u-size, %2))]
+    You get [art(%q0)] %q0 tingling sensation in your 
+    [u(u-bodyloc-description, %1)], and can't feel anything else there.
+-
+
+&adamaged-broken #15=
+  @pemit %0=
+    [setq(0, u(u-size, %2))]
+    You feel [art(%q0)] %q0 cracking feeling in your 
+    [u(u-bodyloc-description, %1)].  You think you broke something.
+-
+
+&adamaged-sprain #15=
+  @pemit %0=
+    [setq(0, u(u-size, %2))]
+    You get [art(%q0)] %q0 sprain or pulled muscle in your 
+    [u(u-bodyloc-description, %1)].
+-
+ 
+&adamaged-stabbing_pain #15=
+  @pemit %0=
+    [setq(0, u(u-size, %2))]
+    You get [art(%q0)] stabbing pain in your [u(u-bodyloc-description, %1)].
+-
+
+
+&adamaged-nausea #15=
+  @pemit %0=
+    [setq(0, u(u-size, %2))]
+    [capstr(art(%q0))] %q0 wave of nausea passes over you!
+-
+
+&adamaged-laceration #15 = 
+  @pemit %0 =
+    [setq(0, u(u-size, %2))]
+    You get [art(%q0)] %q0 cut on your [u(u-bodyloc-description, %1)].
+-
+&adamaged-dizziness #15 = 
+  @pemit %0 = 
+    [setq(0, u(u-size, %2))]
+    You get [art(%q0)] %q0 a strange feeling in your 
+    [u(u-bodyloc-description, %1)], making you really dizzy.
+-
+&adamaged-headache #15 = 
+  @pemit %0 = 
+    [setq(0, u(u-size, %2))]
+    You get [art(%q0)] %q0 weird feeling in your 
+    [u(u-bodyloc-description, %1)], giving you a headache to think about it.
+-
+&adamaged-silliness #15 = 
+  @pemit %0 = 
+    [setq(0, u(u-size, %2))]
+    You get [art(%q0)] %q0 feeling of silliness in your 
+    [u(u-bodyloc-description, %1)], making you almost giggle.
+-
+&adamaged-bruised_ego #15 = 
+  @pemit %0 = 
+    [setq(0, u(u-size, %2))]
+    You get [art(%q0)] %q0 blemish in your [u(u-bodyloc-description, %1)], 
+    making you feel inferior for just a moment.
+-
+&adamage-burn #15 =
+ @pemit %0 =
+  [setq(0, u(u-size,%2))]
+  You get [art(%q0)] %q0 burn on your [u(u-bodyloc-description,
+%1)],making you cringe in pain as it reddens and blisters.
+
+-
+&adamage-scorch #15 =
+ @pemit %0 =
+  [setq(0, u(u-size,%2))]
+  You get [art(%q0)] %q0 blast by the heat all over your 
+    [u(u-bodyloc-description, %1)], 
+  making your skin blister in second degree burns.
+-
+&adamage-singe #15 =
+ @pemit %0 =
+  [setq(0, u(u-size,%2))]
+  You get [art(%q0)] %q0 area of your skin singed on your
+[u(u-bodyloc-description, %1)], making all of the hair fried, and adding a
+stench of burnt flesh to the air. 
+-
+&adamage-sear #15 =
+ @pemit %0 =
+   [setq(0, u(u-size,%2))]
+   You get [art(%q0)] %q0 portion of your skin seared by the flames over
+your [u(u-bodyloc-description, %1)],causing the skin to blister over and
+causes intense pain to you.
+-
+
+
+
+
+# size descriptions for points of damage
+#
+&u-size #15 = 
+  switch(1, 
+    lte(%0, 0), almost unnoticeable, 
+    lte(%0, 1), tiny, 
+    lte(%0, 2), little, 
+    lte(%0, 3), small, 
+    lte(%0, 4), medium, 
+    lte(%0, 5), fairly large, 
+    lte(%0, 8), *large*, 
+    lte(%0, 10), *very large*, 
+    lte(%0, 15), HUGE, 
+    lte(%0, 20), ENORMOUS, 
+    lte(%0, 30), GARGANTUAN, 
+    lte(%0, 50), GODLIKE, 
+    lte(%0, 100), EPIC, 
+                 *INDESCRIBABLY HUGE*
+  )
+-
+
+
+
+# bodyloc descriptions for bodylocs that aren't exactly English
+# 
+&u-bodyloc-description #15 = 
+  trim(
+    switch(lcstr(%0), 
+
+# Kept in just in case some crop up.
+      leftfoot, left foot, 
+      rightfoot, right foot, 
+      leftleg, left leg, 
+      rightleg, right leg, 
+      leftarm, left arm, 
+      rightarm, right arm, 
+      lefthand, left hand, 
+      righthand, right hand, 
+
+#back feet head waist chest stomach neck
+
+# the default. Put lcstr() in here in case input isn't
+      edit(edit(edit(edit(lcstr(%0), l_, left_), 
+                     r_, right_), 
+# added to correct for lower backs and the like.
+                eright_, er_), 
+           _, %b)
+    )
+  )
+-
+
+
+# returns a choose distribution for default hit locations
+#
+# %0 = victim
+# %1 = attacker
+# %2 = weapon
+# %3 = #successes
+# %4 = success level
+# 
+
+&u-hit-locations #14 = 
+
+# HEAD (10% total = 100 points)
+    skull:40 
+    forehead:10 
+    nose:8 
+    chin:10 
+    l_cheek:5   r_cheek:5 
+    l_ear:5     r_ear:5 
+    l_eyebrow:3 r_eyebrow:3 
+    lower_lip:2 upper_lip:2 
+    l_eyelid:1  r_eyelid:1 
+
+# BACK (10% total = 100 points)
+    butt:20 
+    upper_back:45 
+    lower_back:35 
+
+# TORSO (30% total = 300 points)
+    neck:20 
+    chest:180 
+    l_shoulder:50 
+    r_shoulder:50 
+
+# ABDOMEN (20% total = 200 points)
+    belly:100 
+    waist:50 
+    hips:30 
+    groin:20 
+
+# ARMS (20% total = 200 points)
+    l_bicep:30 
+    l_forearm:55 
+    l_wrist:6 
+    l_palm:4 
+    l_thumb:1 
+    l_index_finger:1 
+    l_middle_finger:1 
+    l_ring_finger:1 
+    l_little_finger:1 
+
+    r_bicep:30 
+    r_forearm:55 
+    r_wrist:6 
+    r_palm:4 
+    r_thumb:1 
+    r_index_finger:1 
+    r_middle_finger:1 
+    r_ring_finger:1 
+    r_little_finger:1 
+
+# LEGS (10% total = 100 points)
+    l_thigh:45 
+    l_knee:5 
+    l_shin:20 
+    l_calf:15 
+    l_ankle:10 
+    l_heel:3 
+    l_toes:2 
+
+    r_thigh:45 
+    r_knee:5 
+    r_shin:20 
+    r_calf:15 
+    r_ankle:10 
+    r_heel:3 
+    r_toes:2 
+-
+
+&cmd-hitloc #12 = $hitloc: 
+  @pemit %# = ulocal(ul-hit-location, %#, %#)
+-
+&cmd-hitlocs #12 = $hitlocs: 
+  @pemit %# = Hit Location Probabilities; 
+  @pemit %# = [ljust(BODY LOC, 16)] %b [rjust(CHANCE, 6)]; 
+  @dolist u(#14/u-hit-locations) = {
+    @pemit %# = [ljust(first(##,:), 16)] - [rjust(fdiv(last(##,:), 10), 5)]%%
+  }; 
+  @wait 0 = @pemit %# = --
+-
+
+# Return all online Wizards, Royals, and Staff
+# 
+&u-staff-online #15 = 
+  filter(filter-staff, lwho())
+-
+&filter-staff #15 = 
+  orflags(%0, WZ)
+-
+
+
+#############################################################################
+# DAMAGE-CLASS TO WOUND-TYPE TABLES
+#############################################################################
+
+# all of these will be called via a u()-type call, passing in:
+#    %0 = bodyloc
+#    %1 = dbref of damaged character
+#    %2 = points of damage for specific wound
+# 
+# * the ufuns may or may not use this information
+# * the values for the choose need not add up to 100, but doing so makes
+#   it easier to compare the different entries
+
+&u-wounds-default #15 = 
+  bruise:25 gash:20 laceration:25 puncture:20 stabbing_pain:10
+-
+&wounds-chopping #15 = 
+  bruise:13 gash:50 laceration:20 puncture:2 broken:15
+-
+&wounds-slashing #15 = 
+  bruise:10 gash:40 laceration:40 puncture:10
+-
+&wounds-bashing #15 = 
+  bruise:65 gash:10 laceration:10 puncture:10 broken:5
+-
+&wounds-breaking #15=
+  broken:80 bruise:10 stabbing_pain:10
+-
+&wounds-punching #15 = 
+  broken:5 bruise:95
+-
+&wounds-piercing #15 = 
+  bruise:0 gash:5 laceration:5 puncture:70 stabbing_pain:20
+-
+&wounds-poofing #15 = 
+  bruised_ego:25 silliness:25 headache:25 dizziness:25
+-
+&wounds-gash_only #15 = 
+  gash:1
+-
+&wounds-bruise_only #15 = 
+  bruise:1
+-
+&wounds-laceration_only #15 = 
+  laceration:1
+-
+&wounds-puncture_only #15 = 
+  puncture:1
+-
+&wounds-broken_only #15 = 
+  broken:1
+-
+
+&wounds-flu #15=
+    nausea:50 headache:25 stabbing_pain:25
+-
+&wounds-burning #15=
+  burn:25 scorch:25 sear:25 singe:25 
+-
+
+&wounds-poison1 #15=
+  stabbing_pain:25 nausea:25 dizziness:25 headache:25
+-
+
+&wounds-wolfsbane #15=
+  nerve_damage:100
+-
+&wounds-drowning #15=
+  lung_trauma:90 stabbing_pain:10
+-
+
+&damage-types #15 = 
+  bashing punching slashing chopping piercing poofing flu poison1 
+  wolfsbane burning breaking drowning 
+  bruise_only gash_only laceration_only puncture_only broken_only 
+-
+
+&lost-city-of-souls #15 = #1946
+-
+&dream-world #15 = #3210
+-
+
+
+### Aliases (slash --> slashing, etc.)
+
+&wounds-slash #15=
+  u(wounds-slashing)
+-
+&wounds-bash #15=
+  u(wounds-bashing)
+-
+&wounds-burn #15=
+  u(wounds-burning)
+-
+&wounds-chop #15=
+  u(wounds-chopping)
+-
+&wounds-pierce #15=
+  u(wounds-piercing)
+-
+&wounds-break #15=
+  u(wounds-breaking)
+-
+

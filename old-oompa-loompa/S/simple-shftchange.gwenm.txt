@@ -1,0 +1,28 @@
+@@ This is a simple form of a puppet that changes identity based on the time of day.
+@@ The shiftchange triggers when someone walks into the room. If you have an alternate way of triggering
+@@ the base code will still work with very little modification.
+@@
+@@ I worked this out because I got a bit tired of the "see the same puppet-worker 24/7"
+@@ system in most games. I figured if PC's get "time off", so should the "puppet labor" :)
+@@ The concept ballooned from there (I have an alternate form of the code that allows for 
+@@ multiple workers PER shift).
+@@ You shouldn't have to edit anything, except maybe the descs (which should be in the format of 'D<name>'
+@@ where <name> represents one of the puppet identities.
+
+@create Tristan the Puppet=10
+@Desc Tristan the Puppet=%r[space(5)][u(D[v(worker)])]%r
+&CREDITS Tristan the Puppet=My three-in-one puppet was coded completely by yours truely, Gwen Morse (www.geocities.com/goldmooneachna/mush.html). The idea came from Kendall's Hellwaiter 2.0, many moons ago.
+@VA Tristan the Puppet=^* has arrived.: @wait 1=@switch [gte(mid(vtime(),11,2),7)]+[gte(mid(vtime(),11,2),15)]+[or(gte(mid(vtime(),11, 2),23),lt(mid(vtime(),11,2),7))]=1+0+0, {@switch v(timez)=day,,{@trigger me/SHIFTCHANGE=[first(name(me))],Triskelle; &worker me=Triskelle}},1+1+0,{@switch v(timez)=swing,,{@trigger me/SHIFTCHANGE=[first(name(me))],Trisha; &worker me=Trisha}},{@switch v(timez)=graveyard,,{@trigger me/SHIFTCHANGE=[name(me)],Tristan; &worker me=Tristan}}
+@VB Tristan the Puppet=$tris *:@fo me=%0
+&DTRISHA Tristan the Puppet=Trisha is a pretty redheaded young woman with fine-boned, Celtic-looking features and very white skin.
+&DTRISTAN Tristan the Puppet=Tristan is a hansome man who looks boyish at first glance, but is probably at least thirty (or older) upon closer examination. 
+&DTRISKELLE Tristan the Puppet=Triskelle is a pretty brunette woman with fine-boned, Celtic-looking features and very white skin. 
+&SHIFTCHANGE Tristan the Puppet=@remit loc(me)={%1 enters from the upstairs. %0 heads out and up the stairs.};@switch %1=Tristan,{@name me = Tristan the Puppet; @sex me = male; &timez me = graveyard; &worker me = Tristan},Trisha,{@name me = Trisha the Puppet; @sex me = female; &timez me = swing; &worker me=Trisha},Triskelle,{@name me = Triskelle the Puppet; @sex me = female; &timez me = day; &worker me=Triskelle}
+@Startup Tristan the Puppet=@set me=MONITOR; @name me=Tristan the Puppet; &worker me=Tristan; &timez me=graveyard; @sex me = male
+&WORKER Tristan the Puppet=Tristan
+&TIMEZ Tristan the Puppet=graveyard
+@Sex Tristan the Puppet=male
+@set Tristan the Puppet=MONITOR
+@set Tristan the Puppet=SAFE
+@set Tristan the Puppet=COMMANDS
+

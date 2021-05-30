@@ -1,0 +1,18 @@
+@create Speech Recorder
+@link Speech Recorder=[owner(me)]
+@set Speech Recorder=INHERIT
+@set Speech Recorder=OPAQUE
+@set Speech Recorder=!NO_COMMAND
+@set Speech Recorder=QUIET
+@set Speech Recorder=WIZARD
+@set Speech Recorder=SAFE
+&NUMS Speech Recorder=0
+&CREDITS Speech Recorder=Coded by Jesse@TrekMUSH: Legacy
+@DESCRIBE Speech Recorder=Testing a Speech Recorder.
+&STOP-1 Speech Recorder=$stop:@switch [flags(me)]=*M*, {@pemit %#=You press the STOP button on the [name(me)] and it stops recording.;@oemit %#=%N presses the STOP button on the [name(me)] and it stops recording.;@set me=!monitor}, {@pemit %#=The [name(me)] is already stopped.}
+&DATE Speech Recorder=Tue Dec 17 14:17:41 1996
+&RECORDER Speech Recorder=Jesse
+&LOCATION Speech Recorder=Control Room -- <WSVM TV Station>
+&RECORD-1 Speech Recorder=$record:@switch [flags(me)]=*M*, {@pemit %#=The [name(me)] is already recording.}, {@pemit %#=You press the RECORD button on the [name(me)] and it starts recording.;@oemit %#=%N presses the RECORD button on the [name(me)] and it starts recording.;@set me=monitor;&date me=[time()];&location me=[name(here)];&recorder me=%N}
+&SPEECH-1 Speech Recorder=^*:&log-[add(v(nums),1)] me=[get(me/log-[add(v(nums),1)])]%0;&nums me=[add(v(nums),1)]
+&LINE Speech Recorder=[repeat(=,79)]

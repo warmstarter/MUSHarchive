@@ -1,0 +1,849 @@
+#############################################################################
+# HEALING.MUX
+#############################################################################
+
+# Routines to make boo boos better
+
+#16 is the Healing Code object
+#63 is the cron/cronic job timer
+
+&RCS #16 = @@ 
+  $Header: /usr/local/cvsroot/softcode/combat/healing.mux,v 1.38 2000/10/23 00:40:56 theo Exp $ 
+-
+
+&is-wizard #16 = 
+  [hasflag(%#, wizard)]
+-
+
+@lock/use #16 = IS-WIZARD/1
+-
+
+
+#----------------------------------------
+# CRONIC JOB AND TRIGGER
+#
+# Once every so often, heal all characters registered with the
+# healing system.
+# 
+#----------------------------------------
+&cronic_time_healing #63 = 
+#   <month>|<date>|<day of week>|<hour>|<minute>|<args>
+    |||06|00|@@ heal every morning at 0600 (6:00 AM)
+-
+&cronic_job_healing #63 = 
+  @trigger #16/trigger-daily-healing
+-
+
+#----------------------------------------
+# DAILY TRIGGER HEALING
+# 
+# Contains the code that actually does the natural healing of players.
+# 
+#----------------------------------------
+&trigger-daily-healing #16 = 
+#----------------------------------------
+  @dolist v(wounded-list) = {
+    @heal/daily ##; 
+  }
+-
+
+
+
+#----------------------------------------
+# @HEAL/DAILY player
+#
+# If the player (or object) has wounds, the code will attempt to heal
+# them (but not get rid of them).  This is done by removing some points
+# from some wounds, and removing the wound if its points are <= 0.
+#
+#----------------------------------------
+&cmd-heal/daily #16 = $@heal/daily *: 
+#----------------------------------------
+  think setq(0, locate(%#, %0, *P)); 
+
+  @select 0 = 
+
+# can't locate player
+  isdbref(%q0), {
+    @error %# = locate %q0; 
+  }, 
+
+# Is the player dead?
+  not(hastag(%q0, dead)), {
+    @heal/unregister %q0
+  }, 
+
+# NOMINAL CASE -- heal player
+  not(u(u-is-wounded, %q0)), {
+#   dig up all the damage-*-* attributes (all wounds we can find)
+    think setq(1, lattr(%q0/damage-*-*)); 
+
+#   heal only some of the wounds, depending on their Health
+    think setq(1, extract(shuffle(%q1), 1, attribute(%q0, Health))); 
+
+    @dolist %q1 = {
+#     figure out how many to heal
+      think setq(2, u(u-heal-how-many, %q0, ##)); 
+      &## %q0 = sub(get(%q0/##), %q2); 
+
+#     spit out appropriate messages
+      @pemit %q0 = 
+        The [u(u-wound-description, last(##, -))] on your 
+        [u(#15/u-bodyloc-description, extract(##, 2, 1, -))] is 
+        [ifelse(lte(get(%q0/##), 0), 
+          all healed!, 
+#       else
+          feeling [u(u-healing-size-qualifier, %q2)] better.
+        )]; 
+
+#     remove the attribute if the damage value <= 0
+      think setq(0, ifelse(lte(get(%q0/##), 0), %q0, #-1)); 
+      @wipe %q0/##; 
+
+    }; 
+
+#   unregister all who have no wounds left
+    @wait 0 = {
+#     dig up all the damage-*-* attributes (all wounds we can find)
+      think setq(1, lattr(%q0/damage-*-*)); 
+
+      @switch words(%q1) = 0, {@heal/unregister %q0}; 
+    }; 
+
+#   resynch the other damage levels on the player
+    @wait 0 = @heal/resynch %q0; 
+  }, 
+
+  u(u-is-wounded, %q0), {
+    @heal/unregister %q0; 
+    @pemit %q0 = You are feeling all healed up.
+  }, 
+
+# ERROR
+  {
+    @pemit %# = ERROR: illegal switch condition in #16/cmd-heal/daily!
+  }
+-
+
+#----------------------------------------
+# @HEAL/WAKE player
+#
+# Roll for the player.  If they succeed, they wake up from their
+# unconsciousness.  If they fail, they sleep more.
+#
+#----------------------------------------
+&cmd-heal/wake #16 = $@heal/wake *: 
+#----------------------------------------
+  think setq(0, locate(%#, %0, *P)); 
+
+  think setq(9, 
+    [isdbref(%q0)]
+    [hastag(%q0, shock)]
+    [hastag(%q0, dead)]
+  ); 
+
+  @select %q9 = 
+    110, {
+      @switch u(#14/u-shocksurvival-success-level, 
+              ulocal(#14/ul-shocksurvival-successes, 
+                        %q0, default(%q0/damage, 0))) =
+        SUCCESS, {
+          @pemit %q0 = %ch%cmFinally you snap out of your unconscious state!; 
+          @pemit %# = You wake up [name(%q0)] (%q0).; 
+          @revive/shock %q0
+        }, {
+          @pemit %q0 = %ch%cmYou fail to snap out of your unconscious state.; 
+          @pemit %# = You try to wake up [name(%q0)] (%q0), but 
+                      [subj(%q0)] fails [poss(%q0)] roll.
+        }
+    }, 
+
+    0??, {@error %# = locate %q0}, 
+    ?00, {@pemit %# = You can't wake up [name(%q0)] (%q0) because 
+                      [subj(%q0)] isn't unconscious.}, 
+    ??1, {@pemit %# = You can't wake up [name(%q0)] (%q0) because 
+                      [subj(%q0)]'s dead!}, 
+    *,   {@pemit %# = Logic error in #16/cmd-heal/wake: %q9.}
+-
+
+
+#----------------------------------------
+# CRON JOB FOR SHOCK ROLLS
+#----------------------------------------
+# Every 30 minutes, check all unconscious players to see if they
+# wake up.
+# 
+&cron_time_shock #63 = ||||20 50|@@ every 30 minutes (XX:20 and XX:50) @@
+-
+&cron_job_shock #63 = 
+  @dolist get(#16/wounded-list) = {
+    @switch hastag(##, shock) = @heal/wake ##
+  }
+-
+
+
+
+
+#----------------------------------------
+# @HEAL/REGISTER dbref
+# 
+# Add dbref to the registry of objects that need to be healed on a
+# daily basis.
+# 
+#----------------------------------------
+&cmd-heal/register #16 =$@heal/register *: 
+#----------------------------------------
+  @switch isdbref(%0) = 1, {
+    &wounded-list me = setunion(v(wounded-list), %0); 
+    @pemit %# = Registered [name(%0)] (%0) to be healed.; 
+  }, {
+    @pemit %# = @heal/register: Argument must be a dbref, not a name.
+  }
+-
+
+
+#----------------------------------------
+# @HEAL/UNREGISTER dbref
+# 
+# Remove dbref to the registry of objects that need to be healed on a
+# daily basis.
+# 
+#----------------------------------------
+&cmd-heal/unregister #16 =$@heal/unregister *: 
+#----------------------------------------
+  @switch isdbref(%0) = 1, {
+    &wounded-list me = setdiff(v(wounded-list), %0); 
+    @pemit %# = Unegistered [name(%0)] (%0) from healing list.
+  }, {
+    @pemit %# = @heal/unregister: Argument must be a dbref, not a name.
+  }
+-
+
+
+#----------------------------------------
+# @HEAL/RESYNCH dbref
+#----------------------------------------
+# 
+# Retotal a player's damage subtotals and total.
+# 
+# 
+#----------------------------------------
+&cmd-heal/resynch #16 = $@heal/resynch *: 
+  think setq(0, locate(%#, %0, *TP)); 
+
+  @switch isdbref(%q0) = 1, {
+    @pemit %# = Resynchronized [goodname(%q0)]'s damage totals.
+  }, {
+    @error %# = locate %q0
+  }; 
+
+# erase old attributes
+  think setq(3, setdiff(lattr(%q0/damage*), lattr(%q0/damage-*-*))); 
+  think setq(4, iter(%q3, set(%q0, ##:))); 
+
+# store the total amount of damage for the bodylocs
+  think setq(3, setdiff(iter(lattr(%q0/damage-*-*), 
+                        extract(##, 1, 2, -)), $)); 
+  think setq(9, 
+    iter(%q3, 
+      [setq(4, u(#14/u-attr-sum, %q0, ##-*))]
+      [set(%q0, ##:[switch(gt(%q4, 0), %q4)])]
+    )
+  ); 
+
+# re-total the total damage of the character and 
+  think setq(4, u(#14/u-attr-sum, %q0, damage-*-*)); 
+  &damage %q0 = switch(gt(%q4, 0), %q4);
+  @wait 2={&bandaged %q0=
+    [setinter(lcstr(get(%q0/bandaged)), lcstr(iter(
+       setdiff(lattr(%q0/damage*),lattr(%q0/damage-*-*)),rest(##,-))))]}
+
+-
+
+
+
+#====================================================================#
+#   @HEAL <PLAYER>/<BODYLOC>=<WOUND TYPE>/<NUMBER TO HEAL IT BY>     #
+#                                                                    #
+# example: @heal #119/head=bruise/1                                  #
+#                                                                    #
+# The example above will remove one point of damage from the         #
+# bruises on #119's head.  If there aren't any bruises on #119's     #
+# head, it will do nothing.  This is a tool for other code to use.   #
+#                                                                    #
+# Added by: Stephanie Dray                                           #
+#====================================================================#
+
+&cmd-heal-bodyloc #16=$@heal */*=*/*:
+
+#--------------------------------------------------------------------
+# %q0 = dbref of the player
+# %q1 = body location
+# %q2 = wound type
+# %q3 = number of damage points to remove from it
+# %q4 = the attribute to heal on the target
+#--------------------------------------------------------------------
+  think setq(0, locate(%#, %0, *));
+  think setq(1, edit(edit(edit(lcstr(%1),right,r),
+    left,l),%b,_));
+  think setq(2, %2);
+  think setq(3, %3);
+  think setq(4, lcstr(lattr(%q0/damage-*-*)));
+  think setq(4, graball(%q4, *%q1*));
+  think setq(4, graball(%q4, *%q2*));
+
+
+# Error checking: 
+#  a) Did we find the target
+#      b) is %1 a valid body location -- [we no longer care -- AD]
+#      c) is %2 a valid wound type    -- [we no longer care -- AD]
+#  d) is %3 a number
+#  e) is target damaged in that location with that wound type?
+ 
+  think setq(9, [isdbref(%q0)]
+##                [or(t(match(hitlocs(), %q1)), t(match(wearlocs(), %q1)))]
+##                [t(match(v(wound-types), %q2))]
+                [and(isnum(%q3), gt(%q3, 0))]
+                [gt(words(%q4), 0)]
+                [not(strmatch(trim(get(%q0/cfg-lasthealbreak-%q1)),
+                     trim(elements(ictime(),6 7 8))))]
+                [not(comp(trim(%q2),broken))]);
+
+  @switch/first %q9=
+
+    11101, {@pemit %q0=You feel a tingling on your  
+             [u(#15/u-bodyloc-description, %q1)] but nothing more.},
+    11111, {&cfg-lasthealbreak-%q1 %q0=[trim(elements(ictime(),6 7 8))];
+            think setq(3, 1);
+            think setq(5, sub(get(%q0/%q4), %q3));
+            &%q4 %q0=[switch(gt(%q5, 0), 1, %q5)];
+
+            @pemit %q0 = 
+                   The [u(u-wound-description, %q2)] on your 
+                   [u(#15/u-bodyloc-description, %q1)] is 
+                   feeling [u(u-healing-size-qualifier, %q3)] better.; 
+
+            @heal/resynch %q0},
+
+#           subtract the damage from that body location/wound type
+    111??,   {think setq(5, sub(get(%q0/%q4), %q3));
+            &%q4 %q0=[switch(gt(%q5, 0), 1, %q5)];
+
+#           spit out appropriate messages
+            @pemit %q0 = 
+                   The [u(u-wound-description, %q2)] on your 
+                   [u(#15/u-bodyloc-description, %q1)] is 
+                   feeling [u(u-healing-size-qualifier, %q3)] better.; 
+ 
+            @heal/resynch %q0},
+    0????, {@error %#=locate %q0},
+##    ?0???, {@pemit %#=Invalid hitloc/bodyloc specified.},
+##    ??0??, {@pemit %#=Invalid wound type specified.},
+    ?0???, {@pemit %#=A number of damage points to heal must be specified.},
+    ??0??, {@pemit %#=No damage on that body location of that wound 
+                      type. Nothing to heal.},
+            {@pemit %#=Error: Admin notified.;
+             @qmail steph/bug - @heal body loc=
+                    Unexpected Condition when %# ran @heal %0/%1=%2/%3: 
+                    %q9}
+-
+
+#=================================================================#
+#  Command: heal <player>'s <body loc> with <medicine/bandage>    #
+#                                                                 #
+#  Added by Stephanie Dray                                        #
+#=================================================================#
+
+#8 is Player IC Objects -- moved from #16 to #8 by Adam
+
+&cmd-heal-with #8=$heal *'s * with *:
+
+#------------------------------------------------------------------#
+# %q0 = dbref of person to be healed
+# %q1 = bodylocation
+# %q2 = dbref of medical supply
+# %q3 = all damage attributes for that body location
+# %q4 = total energy of the healer
+# %q5 = how much will it cost to heal the player
+# %q7 = dbref of the parent medical supply
+#----------------------------------------------------------
+
+  think setq(0, locate(%#, %0, ni));
+  think setq(1, edit(edit(edit(lcstr(%1),right,r),
+    left,l),%b,_));
+  think setq(2, locate(%#, %2, ni));
+  think setq(3, lattr(%q0/damage-*));
+  think setq(3, graball(%q3, *%q1*));
+  think setq(4, add(getaccount(%#, energy), getaccount(%#, energy reserves)));
+  think setq(5, ulocal(#16/ul-cost-heal, %#, %q0));
+  think setq(7, paccount(get(%q2/currency)));
+
+# Error checking
+#   a) Did we locate the target
+#   b) Is %1 a valid body location
+#   c) Did we find the medicine
+#   d) Does the healer have enough energy?
+#   e) Is that body location damaged?
+#   f) is the medicine medicine?
+#   g) can the player be healed anymore today?
+
+  think setq(9, [isdbref(%q0)]
+                [t(member(hitlocs(), %q1))]
+                [isdbref(%q2)]
+                [gte(%q4, %q5)]
+                [gt(skill(%#, ifelse(or(hastype(%q0,Player), hastag(%q0,NPC)), 
+                                     healing, farrier)), 0)]
+                [gt(words(%q3), 0)]
+                [hastag(%q2, medicinal)]
+                [u(u-can-be-healed, %q0)] );
+  
+  @switch/first %q9=
+
+
+    11111111, {think setq(6, u(#16/u-success-heal, %#, %q0));
+               @fpose %#=tends to [name(%q0)]'s 
+               [u(#15/u-bodyloc-description,%q1)].;
+               think take_energy(%#, %q5, both, e);
+               &last-healed %q0=[secs()];
+              @pemit %#=You use %q5 energy points.;
+              @switch %q6=
+               <0, {@pemit %#=%ch%cmYou botched!%cn;
+                    @fpose %#=does more harm than good!;
+                    @damage/direct %q0/%q1 = 1 x bashing by %#;
+                    @tr %q7/ause=%q0, %q1, %q6, %#, %q2 },
+                 0, {@pemit %#=%ch%cmYou failed!%cn;
+                     @tr %q7/ause=%q0, %q1, %q6, %#, %q2 },
+                >3, {@pemit %#=%ch%cmYou succeeded spectacularly!%cn;
+                     @fpose %#=does an expert job with [name(%q0)]'s 
+                     [u(#15/u-bodyloc-description,%q1)].;
+                     @tr %q7/ause=%q0, %q1, %q6, %#, %q2 },
+                >0, {@pemit %#=%ch%cmYou succeeded.%cn;
+                     @tr %q7/ause=%q0, %q1, %q6, %#, %q2 }},
+
+    0???????, {@pemit %#=I don't see %0 here.},
+    ?0??????, {@pemit %#=That's not a valid body location.  You can 
+                  choose from any of these: [iter(hitlocs(),
+                  u(#15/u-bodyloc-description,##), %b, %,%b)]},
+    ??0?????, {@pemit %#=I don't see %2 here.},
+    ???0????, {@pemit %#=You don't have enough energy to heal [name(%q0)].},
+    ????0???, {@pemit %#=You don't have the first idea on how to 
+                    heal [ifelse(or(hastype(%q0,Player), hastag(%q0,NPC)),
+                    someone,an animal)], but you try anyhow.  You fail.;
+             think take_energy(%#, %q5, both, e)},            
+    ?????0??, {@pemit %#=[name(%q0)] doesn't appear to be injured there.},
+    ??????0?, {@pemit %#=[name(%q2)] is not medicine!},
+    ???????0, {@remit %L=%N tries to tend to [name(%q0)] but 
+                      nothing more can be done for [name(%q0)] at 
+                      this time.  Maybe in another hour or so.},
+
+            {@pemit %#=Error:  Admin have been alerted.;
+             @qmail steph/bug-heal-with=
+                  &cmd-heal-with on [num(me)]. 
+                  Unexpected Condition produced by [name(%#)] (%#) 
+                  who typed 'heal %0's %1 with %2': %q9.}
+-
+# %0 = dbref of player
+&u-can-be-healed #8=
+ [gte(sub(secs(), default(%0/last-healed, 0)), mul(60,60))]
+-
+
+
+# Example Ause on #5025 Generic Comfrey Ointment
+
+&ause #5025=
+
+# Where 
+#  %0 = player to be healed
+#  %1 = body location to be healed
+#  %2 = number of successes the healer had
+#  %3 = dbref of the healer
+#  %4 = dbref of the child ointment being used
+ 
+ @switch %2=
+   >0, {think setq(0, lattr(%0/damage-%1-*));
+        think setq(0, iter(%q0, last(##, -)));
+        think setq(0, setinter(%q0, GASH));
+
+        @switch gt(words(%q0), 0)=
+          0, {@pemit %3=%ch%cmUnfortunately, you seem to have 
+                     forgotten that comfrey ointment is only good 
+                     for gashes.%cn},
+             {@heal %0/%1=[first(shuffle(%q0))]/
+                          [mul(get(%4/quality), %2)];
+              @heal/resynch %0 }},
+        {@@ do nothing, the player did not succeed. @@};
+  think setq(2, [sub(getaccount(%4, comfrey ointments), 1)]);
+  @switch %q2=
+     >0, {@extract %q2/comfrey ointments=
+                   %4/[paccount(comfrey ointments)]=[loc(%4)];
+          @zap %4},
+          {@zap %4}
+
+
+-
+
+
+#=================================================================#
+#    SET UP FOR: The temple of Unot the healer                    #
+#                                                                 #
+# Where the temple dbref is #348                                  #
+# Be sure that the instructions are added to the desc of the      #
+# room.                                                           #
+#=================================================================#
+
+@set #348=wizard
+-
+@power #348=builder
+-
+# Syntax: heal my <body loc>
+
+&cmd-heal-me #348=$heal my *:
+  @fpose %#=requests medical attention from the priests of Unot.;
+
+  think setq(0, edit(edit(edit(lcstr(%0),right,r),left,l),%b,_));
+  think setq(1, lattr(%#/damage-%q0-*));
+  think setq(2, getaccount(#348, stenis));
+  think setq(3, u(u-cost-heal-here));
+  think setq(4, first(shuffle(setdiff(%q1,
+    ifelse(strmatch(trim(get(%#/cfg-lasthealbreak-[trim(%q0)])),
+                    trim(elements(ictime(),6 7 8))), 
+                        graball(%q1,*broken*),)))));
+  think setq(4, lcstr(last(%q4, -)));
+  think setq(5, getaccount(%#, stenis));
+  think setq(6, add(default(%#/last-healed, 0),43200));
+
+           
+
+# has player requested a valid body location
+# is that body location damaged
+# is the player a worshipper of unot
+# do the priests here have enough money
+# does the player have enough money
+# has the player been healed in the last day?
+
+  think setq(9, [t(member(hitlocs(), %q0))]
+                [t(words(%q1))]
+                [gte(%q2, %q3)]
+		[gte(%q5, %q3)]
+		[lte(%q6,secs())]
+                [t(words(%q4))]);
+  
+  @switch/first %q9=
+     0?????, {@remit %L=The priests of Unot look puzzled by 
+                   [name(%#)]'s request.;
+            @pemit %#=That is not a valid body location.  Choose 
+                   one of the following: [iter(hitlocs(),
+                   u(#15/u-bodyloc-description,##), %b, %,%b)]},
+     ?0????, {@remit %L=The priests of Unot look at [name(%#)]'s 
+                   %0, but can't find anything wrong with it.},
+     ??0???, {@switch [strmatch(get(%#/patron-deity), unot)]=
+             1, {@remit %L=The priests explain that although they 
+                        are short on medical supplies, they would 
+                        rather go into debt than allow a 
+                        worshipper of Unot to suffer, and thus, 
+                        they do what they can for %N.;
+                 @heal %#/%q0=%q4/10;
+		 &last-healed %#=[secs()];
+                 @money/transfer [u(u-cost-heal-here)] from %L 
+                                 to #26;
+                 @heal/resynch %# },
+             0, {@remit %L=The priests explain that they are 
+                        short on medical supplies and suggest that 
+                        a substantial donation might help.}},
+     ???0??, {@switch [strmatch(get(%#/patron-deity), unot)]=
+	     1, {@remit %L=The priests explain that although %N can't 
+			afford to be healed, they would rather pay for the 
+			healing themselves, then allow a fellow worshipper 
+			of Unot to suffer, and thus, they do what they can 
+                        for %N.;
+		@heal %#/%q0=%q4/10;
+		@money/transfer [u(cost-heal-here)] from %L to #26;
+		&last-healed %#=[secs()];
+		@heal/resynch %#},
+	     0, {@remit %L=The priests explain that they can't afford to 
+			heal for free, and %N doesn't have enough money 
+			to pay them.}},
+     ????0?, {@remit %L=The priests of Unot  explain that %N needs to wait 
+			longer before they can heal %o. (OOC: You must 
+			wait 24 hours between NPC healing, and 1 hour 
+			between PC healing.)}, 
+     ?????0, {@remit %L=The priests of Unot explain that they've done 
+                        all they can do for the break for now. (OOC: 
+                        1 point of healing on a break per 24 hours IC.)},
+     111111, {@remit %L=The priests of Unot do what they can for 
+                  %N's %0.;
+           @heal %#/%q0=%q4/[switch(strmatch(get(%#/patron-deity), unot),
+                                    1, 10, 5)];
+           @heal/resynch %#;
+	   &last-healed %#=[secs()];
+           @money/transfer 10 from %# to %L;
+           @money/transfer [u(u-cost-heal-here)] from %L to 
+                           #26;
+           @fo %#=pose pays the priests 10 stenis for their trouble. }
+                
+
+-
+
+&u-cost-heal-here #348=
+  price(comfrey ointments)
+
+-
+
+# u(u-success-heal, <player dbref>, <dbref of being healed>)
+#
+# Since the syntax is changed to inclued the object, 
+#   defaults to healing if no <dbref> is entered.
+# Modification for animal use by Theo
+
+&u-success-heal #16=
+  successes(add(skill(%0, ifelse(or(not(%1), hastype(%1,Player), 
+                                    hastag(%1,NPC)), 
+                                 healing, farrier)), 
+                attribute(%0, memory)), 
+            sub(10, attribute(%0, intuition)))
+-
+&wound-types #16=puncture bruise gash laceration bruised-ego 
+silliness headache dizziness nausea stabbing-pain nerve-damage
+
+-
+# ulocal(ul-cost-heal, <player dbref>, <dbref being healed>)
+#
+# Since the syntax is changed to inclued the object,
+#   defaults to healing if no <being healed> is entered.
+# Modification for animal use by Theo
+
+&ul-cost-heal #16=
+
+ [setq(0, skill(%0, ifelse(or(not(%1), hastype(%1,Player),
+                              hastag(%1,NPC)),
+                           healing, farrier)))]
+ [switch(1, gt(%q0, 5), .5,
+            gt(%q0, 4), 1,
+            gt(%q0, 3), 1.5,
+            gt(%q0, 2), 2,
+            gt(%q0, 1), 3,
+            4)]
+
+-
+
+ 
+#############################################################################
+# UFUNCTIONS
+#############################################################################
+
+#----------------------------------------
+# U(U-WOUND-DESCRIPTION, wound)
+# 
+# Returns the proper name for the wound type.
+# If nothing is set up in the &wound-* attribute on the Damage DB, 
+# then it just returns what you handed it.
+# 
+#----------------------------------------
+&u-wound-description #16 = 
+#----------------------------------------
+  lcstr(default(#15/wound-%0, %0))
+-
+
+
+#----------------------------------------
+# U(U-HEALING-SIZE-QUALIFIER, points of damage healed)
+# 
+# Returns a descriptive adverbial phrase to describe "<how much> better" 
+# the character feels after healing.
+# 
+#----------------------------------------
+&u-healing-size-qualifier #16 = 
+#----------------------------------------
+  switch(1, 
+    lte(%0,  1), a tiny bit, 
+    lte(%0,  3), a little bit, 
+    lte(%0,  5), somewhat, 
+    lte(%0, 10), quite a bit, 
+    lte(%0, 15), a lot, 
+                 much
+  )
+-
+   
+
+#----------------------------------------
+# U(U-IS-WOUNDED, player dbref)
+# 
+# Returns 1 if the player has wounds.  0, if not.
+# 
+#----------------------------------------
+&u-is-wounded #16 = 
+#----------------------------------------
+  t(lattr(%0/damage-*))
+-
+
+
+#----------------------------------------
+# U(U-HEAL-HOW-MANY, player dbref, damage-wound attribute)
+# 
+# Returns a small integer representing the number of points to 
+# heal on the character
+# 
+#----------------------------------------
+&u-heal-how-many #16 = 
+#----------------------------------------
+  [switch(match(get(%q0/bandaged),first(rest(%1,-),-)),0,1,3)]
+-
+
+
+#=================================================================#
+#  Command: diagnose <player>                                     #
+#=================================================================#
+ 
+&CMD-Diagnose #8=$diagnose *:
+
+#------------------------------------------------------------------#
+# %q0 = dbref of person to be diagnosed
+# %q1 = 1 if it's a 'person', 0 otherwise.
+# %q2 = skill level of pertinent skill (healing for people, 
+#            farrier for anything else
+# %q3 = all damage attributes for that body location
+# %q4 = total energy of the healer
+# %q5 = how much will it cost to diagnose the player
+# %q7 = total damage of player
+# %q8 = 1 if person needs energy taken from them (command 
+#            successfully executed
+# %q9 = 1 if the person has the skill/needs a pemit of information.
+#------------------------------------------------------------------#
+ 
+think setq(0, locate(%#, %0, ni));
+think setq(1, or(hastype(%q0,Player), hastag(%q0,NPC)));
+think setq(2, skill(%#, ifelse(%q1, healing, farrier)));
+think setq(3, setdiff(lattr(%q0/damage-*), lattr(%q0/damage-*-*)));
+think setq(3, iter(%q3, lcstr(trim(edit(##, DAMAGE-,)))));
+think setq(4, add(getaccount(%#, energy), getaccount(%#, energy reserves))); 
+think setq(5, ulocal(#16/ul-cost-diagnose, %#));
+think setq(6, u(#16/u-success-diagnose, %#));
+think setq(7,default(%q0/damage, 0));
+think setq(8, 0);
+think setq(9, 0);
+
+#---------------------------------------- 
+# Pemit error message or beginning of injury listing
+# Pemit that energy is being taken if it is.
+#
+# Spec succ gets total damage #,
+#    Everyone else gets damage description (same as when look at them)
+#---------------------------------------- 
+
+@pemit %#=switch(0,
+   isdbref(%q0), I don't see %0 here.,
+   gte(%q4, %q5), You don't have enough energy to diagnose [name(%q0)].,
+   gt(%q2, 0), setq(8, 1)You don't have the first idea how to diagnose
+        [ifelse(%q1,someone,an animal)] but you try anyway. You fail.
+        %r%cmDeducting %q5 energy.%cn,
+   not(isnum(%q6)), setq(8, setr(9, 1))%cmDeducting %q5 energy.%cn%r
+        [ifelse(gte(%q6, 3), %cr%chTOTAL DAMAGE SUFFERED:%cn %q7,
+            damagedesc(%q0))]
+        [ifelse(and(t(%q6),%q7),%r%cr%chINJURIES:%cn,)],
+   There seems to be a problem with diagnose. Please contact an admin. Tell them
+        you typed: 'diagnose %0'.);
+
+#---------------------------------------- 
+# Pemit injury listing if they didn't fail.
+#---------------------------------------- 
+
+@dolist ifelse(and(neq(%q6, 0), %q9), %q3, )=
+  {@pemit %#=%ch[u(#15/u-bodyloc-description,##)]:%cn %r
+     [switch(1,
+#---------------------------------------- 
+# Spec succ get specific injury #s
+#---------------------------------------- 
+        gte(%q6, 3),
+            u(#8/u-iter-spec-injuries, ##, %q0 ),
+#---------------------------------------- 
+# Regular succ get approximate injury descriptions
+#---------------------------------------- 
+        gt(%q6, 0),
+            u(u-iter-gen-injuries, ##, %q0 ),
+#---------------------------------------- 
+# Botches get random approximate injury descriptions
+#---------------------------------------- 
+        lt(%q6, 0),
+            u(u-iter-false-injuries, ##, %q0 ))]};
+
+#---------------------------------------- 
+# Take energy from player
+#---------------------------------------- 
+think ifelse(%q8,take_energy(%#, %q5, both, e),)
+
+-
+
+#---------------------------------------- 
+# Calculates the number of successes.
+#    Skill + Perception at (10 - reason)
+#---------------------------------------- 
+# %0 is expected to be person testing for
+# %q2 is expected to be person's skill level (healing/farrier)
+#---------------------------------------- 
+
+&u-success-diagnose #16=successes(add(%q2, attribute(%0, perception)),
+                           sub(10, attribute(%0, reason)))
+-
+
+&ul-cost-diagnose #16=3
+-
+
+#---------------------------------------- 
+# Returns all the injuries for a specific damage location.
+#     Injuries are specified with the number of points of damage.
+#---------------------------------------- 
+# %q0 is the person who you're looking for damage on
+# %0 is the damage location (like belly) that you're looking for damage
+#---------------------------------------- 
+
+&u-iter-spec-injuries #8=
+ columns([iter(lattr(%1/damage-%0*), 
+                   [clip(clip(##))]:%b%b[get(%1/##)], %b, |)],
+                   [div(75, 4)] , |)
+-
+
+#---------------------------------------- 
+# Returns all the injuries for a specific damage location.
+#     Injuries are specified with a generic description/approximation 
+#     of damage.
+#---------------------------------------- 
+# %q0 is the person who you're looking for damage on
+# %0 is the damage location (like belly) that you're looking for damage
+#---------------------------------------- 
+
+&u-iter-gen-injuries #8=
+ columns([iter(lattr(%1/damage-%0*), [clip(clip(##))]:%b%b
+            [u(u-get-inj-desc,get(%1/##))], %b, |)],
+                   [div(75, 4)] , |)
+-
+
+#---------------------------------------- 
+# Returns all the injuries for a specific damage location.
+#     Injuries are specified with a random generic description/
+#     approximation of damage.
+#---------------------------------------- 
+# %q0 is the person who you're looking for damage on
+# %0 is the damage location (like belly) that you're looking for damage
+#---------------------------------------- 
+
+&u-iter-false-injuries #8=
+ columns([iter(lattr(%1/damage-%0*), [clip(clip(##))]:%b%b
+            [first(shuffle(v(injury-gen-desc)))], %b, |)],
+                   [div(75, 4)] , |)
+-
+
+# Sent level of damage of wound
+
+&u-get-inj-desc #8=
+ extract(v(injury-gen-desc),
+   match(iter(v(injury-gen-level), lt(##, %0)), 0), 1)
+-
+
+# To be at the 'level' it's at it has to be LESS than the # listed
+
+&injury-gen-level #8=2 5 10 18 200
+-
+
+&injury-gen-desc #8=tiny small average big huge
+-
+

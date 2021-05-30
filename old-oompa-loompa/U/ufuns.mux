@@ -1,0 +1,407 @@
+# Checks to see if there's any speech in the string, based on the presence
+#  (or absense) of ".
+# Syntax: u(#2541/U-HAS-SPEECH,<text to test>)
+# Returns: 1 (true) or 0 (false) depending on whether there is speech.
+
+&U-HAS-SPEECH #2541=
+
+  strmatch(%0, *"*)
+
+-
+
+# Takes the success identifier gotten previously in the code 
+#  (Bonus, Pass, Fail, or Botch), and returns the status of the
+#  speech to be tacked on to the end of a pose. This also makes 
+#  sure that someone with the skill of 0 in the language will just
+#  see 'Unknown Language', and not be evaluated otherwise.
+# Syntax: u(#2541/U-SPEAK-STATUS,<language name>,<success id>,
+#  <speaker's skill>)
+# Returns: Can be read easily in the code.
+
+&U-SPEAK-STATUS #2541=
+
+  ifelse(eq(%2, 0),
+
+# 1,
+
+  	Unknown Language, 
+
+# 0, 
+
+  	switch(%1,
+
+	Bonus, Excellent %0,
+	Pass, %0,
+	Fail, Faltering %0,
+	Botch, Awful %0
+	)
+  )
+
+-
+
+&UL-LISTEN-SKILL #2541=
+
+# This ufunction alters the skill at which the listener understands what is
+#  said, based on the success. It only applies to listeners with at least a 1
+#  in the skill of the language originally.
+# Syntax: ulocal(#2541/UL-LISTEN-SKILL,<listener's dbref>,<language name>,
+#  <success id>)
+# Returns: The skill at which to process how much the listener understands,
+#  which often will be the original skill. This is resolved according to the
+#  rules for success states. (See comments at beginning of file)
+
+  [setq(0, skill(%0, language/%1))]
+
+  [ifelse(eq(%q0,0),
+
+# 1,
+	%q0,
+# 0, 	
+	switch(%2,
+		Bonus, add(%q0, 1),
+		Pass, %q0,
+		Fail, sub(%q0, 1),
+		Botch, 1))]
+
+-
+
+# Evaluates a string based on the listener's level, garbling what they
+#  don't understand. This works by passing the message and the percentage
+#  of words to be understood to UL-GARBLE-POSE.
+# Syntax: ulocal(#2541/UL-LISTEN-POSE,<string>,<skill to evaluate by>)
+# Returns: The message, garbled appropriately.
+
+&UL-LISTEN-POSE #2541=
+
+  [setq(0, u(me/U-SKILL-PERCENTAGES, %1))]
+  [ulocal(me/UL-GARBLE-POSE,%0, %q0)]
+
+-
+
+# Takes a string and garbles parts of it. In an ideal situation, this would
+#  be related to the percentage passed to it by UL-LISTEN-POSE. 
+# Syntax: ulocal(#2541/UL-GARBLE-POSE,<string>,<percentage to garble>)
+# Returns: The message, garbled appropriately. UL-LISTEN-POSE stole what
+#  it returns from this guy, who does all the real work.
+
+&UL-GARBLE-POSE #2541=
+  [iter(v(testsay), ifelse(mod(#@,2), ##, u(garble-string,##)), ")]
+#  squish(iter(lnum(words(%0,")),
+#	[setq(0, add(##, 1))]
+#	[ifelse(mod(%q0, 2),
+#		elements(%0,%q0,"),
+#		"[garble-string(elements(%0,%q0,"),%1)]")]))
+#
+-
+
+# The checks for the language command to make sure the player can
+# speak.
+# Syntax: u(#2541/U-LANGUAGE-CHECKS,%#,%L,<language name>,<skill>)
+# Returns: 4 numbers, reflecting what's true and what isn't. 0000 means 
+#  there is nothing to stop the speaker from speaking.
+
+&U-LANGUAGE-CHECKS #2541=
+
+  [hasflag(%0, GAGGED)]
+  [and(hastag(%1, quiet), not(hasflag(%0,wizard)), not(hastag(%0,speaker)))]
+  [strmatch(%2,#-1)]
+  [eq(%3,0)]
+
+-
+
+# Find out what objects are listening to a message. Listeners are any
+#  objects that have any of the flags Player, Puppet or Monitor.
+# Syntax: ulocal(#2541/UL-LISTENERS-LIST,<location>,<listeners/all>,
+#  [<who to exclude from the list>])
+# Returns: If %1 is all, it returns all listeners in the speaker's 
+#  location. If %1 is a list of listeners, it returns only those in the 
+#  list who are actually listeners according to the code. Anyone listed
+#  in %2 will not be eligibile as listeners, even if they normally would
+#  be.
+
+&UL-LISTENERS-LIST #2541=
+
+  [setq(0, 
+	ifelse(u(me/U-IS-ROOMWIDE, %1),
+		lcon(%0),
+		%1))]
+  
+  [iter(%2, setq(0,remove(%q0,##)))]
+  [setq(1,filter(me/FILTER-LISTENERS-LIST, %q0))]
+  [ifelse(gt(words(%q1),0),
+	%q1,
+	None)]
+
+
+-
+
+&FILTER-LISTENERS-LIST #2541=
+
+  [or(orflags(%0,pM),andflags(%0,Pc))]
+-
+
+# This ufunction, U-LANG-SUCCESSES, is used as successes(), specially
+#  configured for use in the language code. It takes the speaker's
+#  dbref and the language to check as well. It is used in exactly the same
+#  way as normal successes(), except for the syntax and the fact that it
+#  automatically uses the following information:
+#
+# Number of Dice: The attribute "Memory" added to the skill for the language
+# Difficulty: The difficulty of the language given
+#
+# Syntax: u(#2541/U-LANG-SUCCESSES,<Player's dbref>,<language>)
+# Returns: The successes
+
+&UL-LANG-SUCCESSES #2541=
+
+  [setq(0, 
+  	successes(add
+		(attribute(%0, memory), 
+		 skill(%0, language/%1)), 
+	get(#1771/LANGUAGE-%1-DIFFICULTY)
+	)
+  )]
+
+# Fail-protection: If the roll failed AND the speaker is at least skill 5,
+# then return the status of Pass (1). Otherwise, pass what was gotten
+# normally.
+  
+  [ifelse(
+	and(
+		lte(%q0,0),
+		gte(skill(%0, language/%1), 5)
+	),
+
+# No fluent speakers are allowed to fail!
+
+	1,
+	
+# Everyone else, eh, we don't care what happens to them. Just return
+# whatever old number the ufunction got normally.		
+
+	%q0
+  )]
+
+-
+
+# The ufunction U-SUCCESS-STATUS is used primarily with U-LANG-SUCCESSES.
+# It takes a number generated by that ufunction and converts it to a word
+# reflecting the status of the success (Bonus/Pass/Fail/Botch).
+#
+# KEY:
+# Bonus: Over 6
+# Pass: 1-6
+# Fail: 0
+# Botch: Less than 0
+
+&U-SUCCESS-STATUS #2541=
+
+  switch(1,
+	gt(%0,0), ifelse(gt(%0,6),
+		Bonus,
+		Pass),
+	lte(%0,0), ifelse(lte(%0,-1),
+		Botch,
+		Fail))
+-
+
+# A ufun to determine what percentage of a string is understood. Used for both
+# language and literacy code.
+# Syntax: u(#2541/U-SKILL-PERCENTAGES,<skill>)
+# Returns: The percentage of a string to be understood.
+
+&U-SKILL-PERCENTAGES #2541=
+
+  switch(%0,
+	0, 0,
+	1, 50,
+	2, 80,
+	3, 90,
+	4, 95,
+	100)
+
+-
+
+# Determines what language to use when the speaker doesn't specify. Used in
+#  commands such as 'say *', as opposed to 'say/* *'. It will call on
+#  the speaker's NATIVE-LANGUAGE, which is set at chargen, unless they have
+#  set a CURRENT-LANGUAGE through the 'speak' command.
+# Syntax: u(#2541/U-LANGUAGE-USED, <dbref of speaker>)
+# Returns: The name of the language to use.
+
+&U-LANGUAGE-USED #2541=
+
+  default(%0/CURRENT-LANGUAGE,default(%0/NATIVE-LANGUAGE,Firan))
+-
+
+# Checks to see if the specified player is speaking OOCly, which can happen
+#  in two ways. One is if they are in an OOC room, the other is if they are
+#  tagged 'oocsay', which is to be used only by admin.
+# Syntax: u(#2541/U-IS-OOC,<dbref of speaker>)
+# Returns: 0 if false, 1 if true.
+
+&U-IS-OOC #2541=
+
+  or
+	(hastag(loc(%0),ooc),
+	 hastag(%0,oocsay))
+
+-
+
+# Pemits to the speaker what they see when they are languified.
+# Syntax: u(#2541/U-SPEAKER-HEARS, <speaker's dbref>, <listeners/all>,
+#  <message>,  <language>, <speaker's skill>, <success id>
+#  [, <prefix for speaker>])
+# Returns: Nothing, it's a side-effect function that performs the task
+#  of a piece of languify.
+
+&U-SPEAKER-HEARS #2541=
+
+# Figure out if this is roomwide or whisper-type...
+
+   ifelse(u(me/U-IS-ROOMWIDE, %1),
+
+# 1,
+ 
+	pemit(%0,[name(%0)]%2 
+
+# The status of the language...
+
+		[u(me/U-SPEAK-STATUS-TEXT, %2, %3, %4, %5)]
+	),
+
+# 0,
+
+	pemit(%0,%6"%2" 
+
+# The status of the language...
+
+		[u(me/U-SPEAK-STATUS-TEXT, "%2", %3, %4, %5)]
+	)
+   )
+
+-
+
+# If there's speech in the string, it gives the speech status, as in, 
+#  Awful, Faltering, normal or Excellent speech.
+# Syntax: u(#2541/U-SPEAK-STATUS-TEXT, <message>, <language>, <listener's
+#  skill>, <success id>
+# Returns: Either nothing if there's no speech, or the speech status if
+#  there is.
+
+&U-SPEAK-STATUS-TEXT #2541=
+
+   ifelse(u(me/U-POSE-HAS-TEXT, %0),
+	%{[u(me/U-SPEAK-STATUS, %1, %3, %2)]%},)
+
+-
+
+# Tests to see if the languify call is to be roomwide or not. It's very
+#  simply now the presence of 'all' instead of dbrefs.
+# Syntax: u(#2541/U-IS-ROOMWIDE,<listeners/all>)
+# Returns: 1 for true, 0 for false
+
+&U-IS-ROOMWIDE #2541=
+
+   strmatch(%0, all)
+
+-
+
+# Handles language when in an OOC situation, whether it's a roomwide pose
+#  or a whisper.
+# Syntax: u(#2541/U-SPEAK-OOCLY, <speaker's dbref>, <listeners/all>,
+#  <message>, <speaker's name>[, <prefix for speaker>,
+#  <prefix for listeners>])
+# Returns: Inapplicable. Part of languify.
+
+&U-SPEAK-OOCLY #2541=
+
+# Figure out if this is roomwide or whisper-type...
+
+  ifelse(u(me/U-IS-ROOMWIDE, %1),
+
+# 1, 
+	list(ulocal(me/UL-LISTENERS-LIST, loc(%0), all),
+		pemit(##, %3%2)),
+
+# 0,
+
+	[pemit(%0, %4"%2")]
+	[list(ulocal(me/UL-LISTENERS-LIST, loc(%0), %1),
+		pemit(##, %3%5"%2"))]
+   )
+
+-
+
+# Handles the broadcasting of messages to listeners and uninvolveds. The
+#  special case here is %0, the speaker/location. Languify will give it a
+#  speaker, while the audible rooms ufun will give it the location.
+# Syntax: ulocal(#2541/UL-MESSAGE-BROADCAST, <speaker/location>, 
+#  <listeners/all>, <text>, <language>, <success id>, <speaker's name>,
+#  <word: speaker/location>[, <prefix for listeners>, 
+#  <message for uninvolveds>])
+# Returns: Inapplicable. Part of languify.
+
+&UL-BROADCAST-MESSAGE #2541= 
+
+# First figure out what it'll be sending on to u-listeners-list... depending
+#  on %0.
+
+   [setq(1, ifelse(strmatch(%6, speaker), loc(%0), %0))]
+
+# Figure out if this is roomwide or whisper-type...
+
+   [ifelse(u(me/U-IS-ROOMWIDE, %1),
+
+# 1,
+
+	list(ulocal(me/UL-LISTENERS-LIST,%q1,all,%0),
+		[setq(0, ulocal(me/UL-LISTEN-SKILL, ##, %3, %4))]
+		[pemit(##, %5[ulocal(me/UL-LISTEN-POSE, %2, %q0)] 
+			[u(me/U-SPEAK-STATUS-TEXT, %2, %3, %q0, %4)]
+		)]
+	),
+
+# 0, 
+
+# First to the listeners...
+
+	[list(ulocal(me/UL-LISTENERS-LIST,%q1,%1),
+		[setq(0, ulocal(me/UL-LISTEN-SKILL, ##, %3, %4))]
+ 		[pemit(##, %5%7[ulocal(me/UL-LISTEN-POSE,"%2",%q0)] 
+			[u(me/U-SPEAK-STATUS-TEXT, "%2", %3, %q0, %4)]
+		)]
+	)]
+
+# And then to the uninvolveds...
+
+	[list(ulocal(me/UL-LISTENERS-LIST,%q1,all,%0 %1),
+		[pemit(##,%5%8)]
+	)]
+   )]
+
+-
+
+# Handles the broadcasting of messages to audible rooms.
+# Syntax: u(#2541/U-BROADCAST-AUDIBLE-ROOMS, <speaker>, <listeners/all>,
+#  <text>, <language>, <success id>, <speaker's name>[, <prefix for
+#  listeners>, <message for uninvolveds>])
+# Returns: Inapplicable. Part of languify.
+
+&U-BROADCAST-AUDIBLE-ROOMS #2541=
+
+   list(u(me/U-LIST-AUDIBLE-ROOMS, loc(%0)),
+	ulocal(me/UL-BROADCAST-MESSAGE, ##, %1, %2, %3, %4, 
+	  <From [name(loc(%0))]> %5, location, %6, %7))
+
+-
+
+# Gets the list of audible rooms from a location.
+# Syntax: u(#2541/U-LIST-AUDIBLE-ROOMS, <location>)
+# Returns: The list of audible rooms.
+
+&U-LIST-AUDIBLE-ROOMS #2541=
+
+   default(%0/AUDIBLE-ROOMS, None)
+
+-

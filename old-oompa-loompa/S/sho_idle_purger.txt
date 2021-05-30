@@ -1,0 +1,35 @@
+@@ Author: Shofari (shofari@mushgamers.org)
+@@ Codebase: PennMUSH v1.7.4
+@@ Description: This object allows one to manage the userbase more effectively, by purging
+@@ inactive players from the database. You can configure how many days a player can be idle.
+@@ You can also protect certain players (such as feature characters) from being purged. You
+@@ can also remove a player from the purge queue (if they are on vacation, or other RL
+@@ committments). There is an effective help command (+idle/help) that will instruct you
+@@ on how to use the object.
+
+
+@create Purger
+
+@set Purger = WIZARD
+
+@set Purger = !no_command
+
+&CMD-+IDLE-CONFIG-IDLETIME Purger=$+idle/config idletime=*:think [switch([isnum(%0)],0,[pemit(%#,You must enter a -number- of days.)],[set(me,idletime:[mul(86400,%0)])][pemit(%#,You set the idle-timeout for player characters to be [ansi(hy,%0)] days)])]
+
+&CMD-+IDLE-HELP Purger=$+idle/help:@pemit %#=[center([ansi(hy,Shofari's Idle-Purger)],78)]%r[ansi(h,[repeat(-,78)])]%r%r[ansi(h,+idle/config idletime=)] - Use this command to set the default idle time-out.  It takes a numeric parameter, for number of days.  The default is set to 90 days.%r%r[ansi(h,+idle/start)] - Starts the process of the idle-purge.  This gathers a list of people who have been idle for the time specified in the config.%r%r[ansi(h,+idle/protect )] - Permanently protects a given character from idlepurges.  Useful for wizard or builder characters, who, if @nuked, would adversely affect the MUSH.%r%r[ansi(h,+idle/unprotect )] - Removes the specified character from the protected list.%r%r[ansi(h,+idle/plist)] - Review the list of protected characters.%r%r[ansi(h,+idle/queue)] - Shows the people currently in the list to be idle-purged.%r%r[ansi(h,+idle/remove )] - removes the specified character from the list to be idle-purged.%r%r[ansi(hw,+idle/purge)] - Nukes the characters in the current queue of people to be purged.  [ansi(hr,BE VERY CAREFUL WHEN YOU DO THIS!  THIS IS PERMANENT!)]  -Always-, check +idle/queue before performing this command, and +idle/remove those people you do -not- wish to @nuke.
+
+&CMD-+IDLE-PLIST Purger=$+idle/plist:[iter([get(me/idleprotect)],[pemit(%#,[ljust(##,7)] - [name(##)])])]
+
+&CMD-+IDLE-PROTECT Purger=$+idle/protect *:think [setq(0,[pmatch(%0)])][switch([strmatch(%0,[name(%q0)])],0,[pemit(%#,That is not a valid player)],[set(me,idleprotect:[get(me/idleprotect)]%q0%b)][pemit(%#,You have added [name(%q0)] to the protected list.  Please run +idle/start again to ensure they don't get @nuked)])]
+
+&CMD-+IDLE-PURGE Purger=$+idle/purge:@dolist [get(me/idlequeue)]={@set ##=!safe;@force %#=@nuke ##;@force %#=@nuke ##;};@wipe me/idlequeue
+
+&CMD-+IDLE-QUEUE Purger=$+idle/queue:think [iter([get(me/idlequeue)],[pemit(%#,[ljust(##,7)] - [ljust([name(##)],20)][ljust([left([get(##/vacation)],45)],45)])])]
+
+&CMD-+IDLE-REMOVE Purger=$+idle/remove *: think [setq(0,[pmatch(%0)])][set(me,idletemp:[get(me/idlequeue)])][wipe(me/idlequeue )][switch([strmatch(%0,[name(%q0)])],0,[pemit(%#,That is not a valid player.)],[iter([get(me/idletemp)],[switch([strmatch(%q0,##)],0,[set(me,idlequ eue:[get(me/idlequeue)]##%b)],)])][pemit(%#,[name(%q0)] has been removed from the idle queue)],)]
+
+&CMD-+IDLE-START Purger=$+idle/start:think [wipe(me/idlequeue)][setq(0,[convtime([time()])])] [setq(1,0)][iter([lsearch(all,type,players)],[switch([gte([sub(%q0,[convtime([ get(##/last)])])],[get(me/idletime)])],1,[switch([strmatch([get(me/idleprotect )],*## *)],0,[set(me,idlequeue:[get(me/idlequeue)]##%b)][pemit(%#,[ljust(##,7)] - [ljust([name(##)],20)][ljust([left([get(##/vacation)],45)],45)])],)])],)])]
+
+&CMD-+IDLE-UNPROTECT Purger=$+idle/unprotect *:think [setq(0,[pmatch(%0)])] [set(me,idletemp:[get(me/idleprotect)])][switch([strmatch(%0,[name(%q0)])],0,[ pemit(%#,That is not a valid player)],[wipe(me/idleprotect)][iter([get(me/idletemp)],[switch([strmatch(%q0, ##)],0,[set(me,idleprotect:[get(me/idleprotect)]##%b)],)])][pemit(%#,[name(%q0 )] has been removed from the protected list)])]
+
+&IDLETIME Purger=7776000

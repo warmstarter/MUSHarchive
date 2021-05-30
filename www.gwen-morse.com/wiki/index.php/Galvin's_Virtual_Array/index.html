@@ -1,0 +1,596 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" dir="ltr">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta http-equiv="Content-Style-Type" content="text/css" />
+		<meta name="generator" content="MediaWiki 1.15.3" />
+		<meta name="keywords" content="Galvin&#039;s Virtual Array,Utilities (used to be &quot;Mylib.tf&quot;)" />
+		<link rel="shortcut icon" href="/favicon.ico" />
+		<link rel="search" type="application/opensearchdescription+xml" href="/wiki/opensearch_desc.php" title="GwenWiki (en)" />
+		<link rel="alternate" type="application/rss+xml" title="GwenWiki RSS Feed" href="/wiki/index.php?title=Special:RecentChanges&amp;feed=rss" />
+		<link rel="alternate" type="application/atom+xml" title="GwenWiki Atom Feed" href="/wiki/index.php?title=Special:RecentChanges&amp;feed=atom" />
+		<title>Galvin's Virtual Array - GwenWiki</title>
+		<link rel="stylesheet" href="/wiki/skins/common/shared.css?207" type="text/css" media="screen" />
+		<link rel="stylesheet" href="/wiki/skins/common/commonPrint.css?207" type="text/css" media="print" />
+		<link rel="stylesheet" href="/wiki/skins/monobook/main.css?207" type="text/css" media="screen" />
+		<!--[if lt IE 5.5000]><link rel="stylesheet" href="/wiki/skins/monobook/IE50Fixes.css?207" type="text/css" media="screen" /><![endif]-->
+		<!--[if IE 5.5000]><link rel="stylesheet" href="/wiki/skins/monobook/IE55Fixes.css?207" type="text/css" media="screen" /><![endif]-->
+		<!--[if IE 6]><link rel="stylesheet" href="/wiki/skins/monobook/IE60Fixes.css?207" type="text/css" media="screen" /><![endif]-->
+		<!--[if IE 7]><link rel="stylesheet" href="/wiki/skins/monobook/IE70Fixes.css?207" type="text/css" media="screen" /><![endif]-->
+		<link rel="stylesheet" href="/wiki/index.php?title=MediaWiki:Common.css&amp;usemsgcache=yes&amp;ctype=text%2Fcss&amp;smaxage=18000&amp;action=raw&amp;maxage=18000" type="text/css" />
+		<link rel="stylesheet" href="/wiki/index.php?title=MediaWiki:Print.css&amp;usemsgcache=yes&amp;ctype=text%2Fcss&amp;smaxage=18000&amp;action=raw&amp;maxage=18000" type="text/css" media="print" />
+		<link rel="stylesheet" href="/wiki/index.php?title=MediaWiki:Monobook.css&amp;usemsgcache=yes&amp;ctype=text%2Fcss&amp;smaxage=18000&amp;action=raw&amp;maxage=18000" type="text/css" />
+		<link rel="stylesheet" href="/wiki/index.php?title=-&amp;action=raw&amp;maxage=18000&amp;gen=css" type="text/css" />
+		<!--[if lt IE 7]><script type="text/javascript" src="/wiki/skins/common/IEFixes.js?207"></script>
+		<meta http-equiv="imagetoolbar" content="no" /><![endif]-->
+
+		<script type= "text/javascript">/*<![CDATA[*/
+		var skin = "monobook";
+		var stylepath = "/wiki/skins";
+		var wgArticlePath = "/wiki/index.php/$1";
+		var wgScriptPath = "/wiki";
+		var wgScript = "/wiki/index.php";
+		var wgVariantArticlePath = false;
+		var wgActionPaths = {};
+		var wgServer = "http://www.gwen-morse.com";
+		var wgCanonicalNamespace = "";
+		var wgCanonicalSpecialPageName = false;
+		var wgNamespaceNumber = 0;
+		var wgPageName = "Galvin\'s_Virtual_Array";
+		var wgTitle = "Galvin\'s Virtual Array";
+		var wgAction = "view";
+		var wgArticleId = "6";
+		var wgIsArticle = true;
+		var wgUserName = null;
+		var wgUserGroups = null;
+		var wgUserLanguage = "en";
+		var wgContentLanguage = "en";
+		var wgBreakFrames = false;
+		var wgCurRevisionId = 721;
+		var wgVersion = "1.15.3";
+		var wgEnableAPI = true;
+		var wgEnableWriteAPI = true;
+		var wgSeparatorTransformTable = ["", ""];
+		var wgDigitTransformTable = ["", ""];
+		var wgRestrictionEdit = [];
+		var wgRestrictionMove = [];
+		/*]]>*/</script>
+
+		<script type="text/javascript" src="/wiki/skins/common/wikibits.js?207"><!-- wikibits js --></script>
+		<!-- Head Scripts -->
+		<script type="text/javascript" src="/wiki/skins/common/ajax.js?207"></script>
+		<script type="text/javascript" src="/wiki/index.php?title=-&amp;action=raw&amp;gen=js&amp;useskin=monobook"><!-- site js --></script>
+	</head>
+<body class="mediawiki ltr ns-0 ns-subject page-Galvin_s_Virtual_Array skin-monobook">
+	<div id="globalWrapper">
+		<div id="column-content">
+	<div id="content">
+		<a name="top" id="top"></a>
+				<h1 id="firstHeading" class="firstHeading">Galvin's Virtual Array</h1>
+		<div id="bodyContent">
+			<h3 id="siteSub">From GwenWiki</h3>
+			<div id="contentSub"></div>
+									<div id="jump-to-nav">Jump to: <a href="#column-one">navigation</a>, <a href="#searchInput">search</a></div>			<!-- start content -->
+			<p>Tinyfugue doesn't have any sort of built-in array functions. However, "Galvin" very kindly assembled this package. This array code is duplicated in <a href="/wiki/index.php/Utilities_(used_to_be_%22Mylib.tf%22)" title="Utilities (used to be &quot;Mylib.tf&quot;)">Utilities (used to be "Mylib.tf")</a>.
+</p>
+<pre>
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Virtual Array
+;;;
+;;; Originally submitted to the Tinyfugue mailing list by Galvin &lt;kairo at mediaone dot net&gt;
+;;; Modfied by Michael Hunger &lt;mh14 at inf.tu-dresden dot de&gt;
+;;; Modified by Regan @ Many MU's
+;;; Possibly modified by other members of the Tinyfugue mailing list.
+;;;
+;;; NOTES FROM GALVIN:
+;;;
+;;; You may store anything to be abbreviated in these lists, e.g. weapons,
+;;; friends, npcs, scores etc.
+;;;
+;;; If you use text not containing other characters than letters, numbers and _
+;;; you may also use this as an simple key-value hash list
+;;; e.g. /set_array weapon s1 sword_with_a_very_long_id
+;;;
+;;; /def wield = /get_array weapon&nbsp;%1%;wield&nbsp;%?
+;;;
+;;; Usage:
+;;; instead of: wield sword_with_a_very_long_id
+;;; just use: /wield s1
+;;;
+;;; Some Examples:
+;;; /test put_array('test_array', 1, 367382)
+;;; /test put_array('test_array', 2, 'a string')
+;;; /test echo(get_array('test_array', 1))
+;;; /test echo(get_array('test_array', 2))
+;;;
+;;; You should see 367382 and a string echoed to your screen.
+;;;
+;;; Passing an array to a function
+;;;
+;;; /def function_array = \
+;;; /test array1&nbsp;:= get_array({*}, 1)&nbsp;%;\
+;;; /test array2&nbsp;:= get_array({*}, 2)&nbsp;%;\
+;;; /test echo(strcat(array1, ':', array2))
+;;;
+;;; /test function_array('test_array')
+;;;
+;;; What I wrote here was just some stuff off the top of my head real quick.  Hope it helps.
+;;; Oh and /listarray is a real good debuging tool, I use this as well. SO /listarray test_array should return:
+;;; test_array[1]:=367382
+;;; test_array[2]:=a string
+;;; test_array[3]:=
+;;;
+;;; /listarray only lists up till a blank entry, I thought about using entry 0 as the # of elements but decided
+;;; that some people may want to start arrays from 0 and not 1.
+;;;
+;;; Some get_array_count examples:
+;
+; /test put_array('halloween', 1, 'skeleton')
+; /test put_array('halloween', 2, 'owls')
+; /test put_array('halloween', 3, 'boo!')
+;
+; /test echo(get_array_count('halloween', 1))
+; returns 3
+; /test echo(get_array_count('halloween', 2))
+; returns 2
+;
+; /test put_2array('double', 1, 1 , 'hmm')
+; /test put_2array('double, 1, 2, 'burp!')
+; /test put_2array('double, 1, 3, 'damn')
+; /test echo(get_2array_count('double', 1, 1)
+
+;------------------------------------------------------------------------
+;Get array / get 2array&nbsp;: A virtual array function to similate a real array
+;usage:
+;get_array(&quot;Array name here&quot;, I) &amp; get_2array(&quot;array name&quot;, I, I2)
+;example get_array(&quot;Dir_Array&quot;, 43) returns the 43rd element from &quot;Dir_Stack&quot;
+;
+;------------------------------------------------------------------------
+/def get_array = \
+ /return _array_%1_%2
+
+/def get_2array = \
+ /return _array_%1_%2_%3
+
+;------------------------------------------------------------------------
+;PUT array / put 2array: A virtual array function to similate a real array
+;usage:
+;put_array(&quot;Array name here&quot;, I, st) &amp; put_2array(&quot;array name&quot;, I, I2, st)
+;example put_array(&quot;Dir_Array&quot;, 43, &quot;sw&quot;) puts &quot;sw&quot; at element 43 in
+;&quot;Dir_Array&quot;
+;------------------------------------------------------------------------
+/def put_array = \
+ /IF (strlen({3}) &gt; 0) \
+   /set _array_%1_%2=%3%;\
+ /ELSE \
+   /unset _array_%1_%2%;\
+ /ENDIF%;\
+
+/def put_2array = \
+ /IF (strlen({4}) &gt; 0) \
+   /set _array_%1_%2_%3=%4%;\
+ /ELSE \
+   /unset _array_%1_%2_%3%;\
+ /ENDIF%;\
+
+;------------------------------------------------------------------------
+;PURGE array&nbsp;: Purges a virtual array made by get_array &amp; put_array
+;usage:
+;purge_array(&quot;Array name here&quot;)
+;example purge_array(&quot;Dir_Array&quot;), deletes the whole array from memory
+;NOTE: Purge array starts from element 0
+;NOTE: this can also purge double dimensioned arrays too.
+;------------------------------------------------------------------------
+/def purge_array = \
+ /quote -S /unset `/listvar -s _array_%1_*
+
+;--------------------------------------------------------------------------
+;listarray / list2array
+;USAGE:
+;/listarray array_name &lt;num&gt; &amp; /list2array array_name &lt;num&gt; &lt;num2&gt;
+;Will list the whole array of array_name starting from element &lt;num&gt;
+;/list2array only lists the second dimension from &lt;start&gt;
+;--------------------------------------------------------------------------
+/def listarray = \
+ /test LA_Count&nbsp;:=&nbsp;%2 - 1%;\
+ /test LA_Element&nbsp;:= &quot; &quot;%;\
+ /while (strlen(LA_Element) &gt; 0) \
+   /test ++LA_Count%;\
+   /test LA_Element&nbsp;:= get_array({1}, LA_Count)%;\
+   /test echo(strcat({1}, &quot;[&quot;, LA_Count, &quot;]:=&quot;, LA_Element))%;\
+ /DONE
+
+/def list2array = \
+ /test LA2_Count&nbsp;:= -1%;\
+ /test LA2_Element&nbsp;:= &quot; &quot;%;\
+ /while (LA2_Count &lt; 255) \
+   /test ++LA2_Count%;\
+   /test LA2_Element&nbsp;:= get_2array({1}, {2}, LA2_Count)%;\
+   /IF (strlen(LA2_Element) &gt; 0) \
+     /test echo(strcat({1}, &quot;[&quot;, {2}, &quot;][&quot;, LA2_Count, &quot;]:=&quot;, LA2_Element))%;\
+   /ENDIF%;\
+ /DONE
+;--------------------------------------------------------------------------
+;GET array count / GET 2array count
+; Written by: Ian Leisk who may actually be &quot;Galvin&quot;, but, may not (kairo at attbi dot com)!
+;usage:
+;get_array_count(&quot;Array name here&quot;, start)
+;get_2array_count(&quot;Array name here&quot;, index, start)
+;
+;NOTE:
+;These will count the number of elements starting at &quot;start&quot; till the first
+;empty element.
+;Get_array2_count will count the number of elements starting at index
+;from &quot;start&quot;
+;--------------------------------------------------------------------------
+
+/def get_array_count = \
+  /test GA_Name&nbsp;:= {1}&nbsp;%;\
+  /test GA_Count&nbsp;:= {2} - 1&nbsp;%;\
+  /test GA_Element&nbsp;:= &quot; &quot;&nbsp;%;\
+  /while (strlen(GA_Element) &gt; 0) \
+    /test ++GA_Count&nbsp;%;\
+    /test GA_Element&nbsp;:= get_array(GA_Name, GA_Count)&nbsp;%;\
+  /DONE&nbsp;%;\
+  /return GA_Count - 1
+
+/def get_2array_count = \
+  /test GA2_Name&nbsp;:= {1}&nbsp;%;\
+  /test GA2_Index&nbsp;:= {2}&nbsp;%;\
+  /test GA2_Count&nbsp;:= {3} -1&nbsp;%;\
+  /test GA2_Element&nbsp;:= &quot; &quot;&nbsp;%;\
+  /while (strlen(GA2_Element) &gt; 0) \
+     /test ++GA2_Count&nbsp;%;\
+     /test GA2_Element&nbsp;:= get_2array(GA2_Name, GA2_Index, GA2_Count)&nbsp;%;\
+  /DONE&nbsp;%;\
+  /return GA2_Count - 1
+
+;========================================================================
+; tfwrite_array() / tfwrite_2array()
+;
+; Writes a virtual array to a disk file.
+; USAGE:
+; tfwrite_array(file_variable, &quot;array_name&quot;, start_index, size)
+; tfwrite_2array(file_variable, &quot;array_name&quot;, index, start_index, size)
+;
+; file_variable&nbsp;: File variable of a tfopened file.
+; &quot;array_name&quot; &nbsp;: Name of the array.
+; start_index  &nbsp;: The element you want to start writing from.
+; index        &nbsp;: Start_index of index [first dimension] (tfwrite_2array only)
+; Size         &nbsp;: Number of elements to write.
+;
+; NOTES: tfwrite_2array() can't write the whole array to disk.  You must
+;        write each dimension at a time.
+;========================================================================
+/def tfwrite_array = \
+  /let file_&nbsp;%{1}&nbsp;%;\
+  /let array_&nbsp;%{2}&nbsp;%;\
+  /let start_&nbsp;%{3}&nbsp;%;\
+  /let size_&nbsp;%{4}&nbsp;%;\
+  /let count_ 0&nbsp;%;\
+  /WHILE (++count_ &lt;= size_) \
+    /test tfwrite(file_, get_array(array_, start_))&nbsp;%;\
+    /test ++start_&nbsp;%;\
+  /DONE
+
+/def tfwrite_2array = \
+  /let file_&nbsp;%{1}&nbsp;%;\
+  /let array_&nbsp;%{2}&nbsp;%;\
+  /let index_&nbsp;%{3}&nbsp;%;\
+  /let start_&nbsp;%{4}&nbsp;%;\
+  /let size_&nbsp;%{5}&nbsp;%;\
+  /let count_ 0&nbsp;%;\
+  /WHILE (++count_ &lt;= size_) \
+    /test tfwrite(file_, get_2array(array_, index_, start_))&nbsp;%;\
+    /test ++start_&nbsp;%;\
+  /DONE
+
+;========================================================================
+; tfread_array() / tfread_2array()
+;
+; reads an array file from disk
+; USAGE:
+; x&nbsp;:= tfread_array(file_variable, &quot;array_name&quot;, start_index, size)
+; x&nbsp;:= tfread_2array(file_variable, &quot;array_name&quot;, index, start_index, size)
+;
+; x            &nbsp;: Number of records read.
+; file_variable&nbsp;: File variable of a tfopened file.
+; &quot;array_name&quot; &nbsp;: Name of the array.
+; start_index  &nbsp;: Starting element you want to read into.
+; index        &nbsp;: Start_index of index [first dimension] (tfread_2array only)
+; size         &nbsp;: Number of elements to read.
+;========================================================================
+/def tfread_array = \
+  /let file_&nbsp;%{1}&nbsp;%;\
+  /let array_&nbsp;%{2}&nbsp;%;\
+  /let start_&nbsp;%{3}&nbsp;%;\
+  /let size_&nbsp;%{4}&nbsp;%;\
+  /let count_ 0&nbsp;%;\
+  /let done_ 0&nbsp;%;\
+  /let err_ 0&nbsp;%;\
+  /let st_ 0&nbsp;%;\
+  /test st_&nbsp;:= ''&nbsp;%;\
+  /WHILE (!done_) \
+    /test err_&nbsp;:= tfread(file_, st_)&nbsp;%;\
+    /IF ( (err_&nbsp;!= -1) &amp; (count_ &lt; size_) ) \
+      /test put_array(array_, start_, st_)&nbsp;%;\
+      /test ++count_&nbsp;%;\
+      /test ++start_&nbsp;%;\
+    /ELSE \
+      /test done_&nbsp;:= 1&nbsp;%;\
+    /ENDIF&nbsp;%;\
+  /DONE&nbsp;%;\
+  /RETURN count_
+
+/def tfread_2array = \
+  /let file_&nbsp;%{1}&nbsp;%;\
+  /let array_&nbsp;%{2}&nbsp;%;\
+  /let index_&nbsp;%{3}&nbsp;%;\
+  /let start_&nbsp;%{4}&nbsp;%;\
+  /let size_&nbsp;%{5}&nbsp;%;\
+  /let count_ 0&nbsp;%;\
+  /let done_ 0&nbsp;%;\
+  /let err_ 0&nbsp;%;\
+  /let st_ 0&nbsp;%;\
+  /test st_&nbsp;:= ''&nbsp;%;\
+  /WHILE (!done_) \
+    /test err_&nbsp;:= tfread(file_, st_)&nbsp;%;\
+    /IF ( (err_&nbsp;!= -1) &amp; (count_ &lt; size_) ) \
+      /test put_2array(array_, index_, start_, st_)&nbsp;%;\
+      /test ++count_&nbsp;%;\
+      /test ++start_&nbsp;%;\
+    /ELSE \
+      /test done_&nbsp;:= 1&nbsp;%;\
+    /ENDIF&nbsp;%;\
+  /DONE&nbsp;%;\
+  /RETURN count_
+
+;========================================================================
+; strstr_array() / strstr_2array()
+;
+; Searches for a value in a virtual array and returns what element its found in.
+; USAGE:
+; x&nbsp;:= strstr_array(&quot;array_name&quot;, start_index, size, value)
+; x&nbsp;:= strstr_2array(&quot;array_name&quot;, index, start_index, size, value)
+;
+; x            &nbsp;: Element of &quot;array_name&quot; that value was found in.
+;                 -1 is returned if value was not found.
+; &quot;array_name&quot; &nbsp;: Name of the array.
+; start_index  &nbsp;: Element to start searching at
+; index        &nbsp;: Start_index of index [first dimension] (strstr_2arrat only).
+; size         &nbsp;: Number of elements to search.
+; value        &nbsp;: The item your searching for.
+;
+; NOTES: Strstr_2array can't search all dimensions, you must search each dimension
+;        at a time.
+;        If value = &quot;&quot; then it will return the first element that is blank.
+;========================================================================
+/def strstr_array = \
+  /let array_&nbsp;%{1}&nbsp;%;\
+  /let start_&nbsp;%{2}&nbsp;%;\
+  /let size_&nbsp;%{3}&nbsp;%;\
+  /let value_ 0&nbsp;%;\
+  /test value_&nbsp;:= {4}&nbsp;%;\
+  /let count_ 0&nbsp;%;\
+  /let pos_ 0&nbsp;%;\
+  /let st_ 0&nbsp;%;\
+  /test st_&nbsp;:= ''&nbsp;%;\
+  /let element_ -1&nbsp;%;\
+  /WHILE ( (++count_ &lt;= size_) &amp; (element_ = -1) ) \
+    /test st_&nbsp;:= get_array(array_, start_)&nbsp;%;\
+    /IF (value_ =~ '') \
+      /IF (st_ =~ '') \
+        /test element_&nbsp;:= start_&nbsp;%;\
+      /ENDIF&nbsp;%;\
+    /ELSE \
+      /test pos_&nbsp;:= strstr(st_, value_)&nbsp;%;\
+      /IF (pos_ &gt; -1) \
+        /test element_&nbsp;:= start_&nbsp;%;\
+      /ENDIF&nbsp;%;\
+    /ENDIF&nbsp;%;\
+    /test ++start_&nbsp;%;\
+  /DONE&nbsp;%;\
+  /RETURN element_
+
+/def strstr_2array = \
+  /let array_&nbsp;%{1}&nbsp;%;\
+  /let index_&nbsp;%{2}&nbsp;%;\
+  /let start_&nbsp;%{3}&nbsp;%;\
+  /let size_&nbsp;%{4}&nbsp;%;\
+  /let value_ 0&nbsp;%;\
+  /test value_&nbsp;:= {5}&nbsp;%;\
+  /let count_ 0&nbsp;%;\
+  /let pos_ 0&nbsp;%;\
+  /let st_ 0&nbsp;%;\
+  /let element_ -1&nbsp;%;\
+  /test st_&nbsp;:= ''&nbsp;%;\
+  /WHILE ( (++count_ &lt;= size_) &amp; (element_ = -1) ) \
+    /test st_&nbsp;:= get_2array(array_, index_, start_)&nbsp;%;\
+    /IF (value_ =~ '') \
+      /IF (st_ =~ '') \
+        /test element_&nbsp;:= start_&nbsp;%;\
+      /ENDIF&nbsp;%;\
+    /ELSE \
+      /test pos_&nbsp;:= strstr(st_, value_)&nbsp;%;\
+      /IF (pos_ &gt; -1) \
+        /test element_&nbsp;:= start_&nbsp;%;\
+      /ENDIF&nbsp;%;\
+    /ENDIF&nbsp;%;\
+    /test ++start_&nbsp;%;\
+  /DONE&nbsp;%;\
+  /RETURN element_
+
+;========================================================================
+; searchstr_2array()
+;
+; Searches for a value in all dimensions of a virtual array and returns
+; each element its found in. Multiple matches are put into a space-delimited
+; list
+; Modified by Regan @ Many MU's
+;
+; USAGE:
+; x&nbsp;:= searchstr_2array(&quot;array_name&quot;, index, start_index, size, value)
+;
+; x            &nbsp;: Element of &quot;array_name&quot; that value was found in.
+;                 -1 is returned if value was not found.
+; &quot;array_name&quot; &nbsp;: Name of the array.
+; start_index  &nbsp;: Element to start searching at
+; index        &nbsp;: Start_index of index [first dimension] (strstr_2arrat only).
+; size         &nbsp;: Number of elements to search.
+; value        &nbsp;: The item your searching for.
+;
+;        If value = &quot;&quot; then it will return the first element that is blank.
+;========================================================================
+
+/def searchstr_2array = \
+  /let array_&nbsp;%{1}&nbsp;%;\
+  /let index_&nbsp;%{2}&nbsp;%;\
+  /let start_&nbsp;%{3}&nbsp;%;\
+  /let size_&nbsp;%{4}&nbsp;%;\
+  /let value_ 0&nbsp;%;\
+  /test value_&nbsp;:= {5}&nbsp;%;\
+  /let count_ 0&nbsp;%;\
+  /let pos_ 0&nbsp;%;\
+  /let st_ 0&nbsp;%;\
+  /let element_ -1&nbsp;%;\
+  /test blank_&nbsp;:= ' '&nbsp;%;\
+  /test list_&nbsp;:= ''&nbsp;%;\
+  /test st_&nbsp;:= ''&nbsp;%;\
+  /WHILE (++count_ &lt;= size_) \
+    /test st_&nbsp;:= get_2array(array_, start_, index_)&nbsp;%;\
+    /IF (value_ =~ '') \
+      /IF (st_ =~ '') \
+        /test element_&nbsp;:= start_&nbsp;%;\
+        /IF (list_ =~ '') \
+          /test list_&nbsp;:= element_&nbsp;%;\
+        /ELSE \
+          /test temp_&nbsp;:= strcat(list_, blank_)&nbsp;%:\
+          /test list_&nbsp;:= strcat(temp_, element_)&nbsp;%;\
+        /ENDIF&nbsp;%;\
+      /ENDIF&nbsp;%;\
+    /ELSE \
+      /test pos_&nbsp;:= strstr(st_, value_)&nbsp;%;\
+      /IF (pos_ &gt; -1) \
+        /test element_&nbsp;:= start_&nbsp;%;\
+        /IF (list_ =~ '') \
+          /test list_&nbsp;:= element_&nbsp;%;\
+        /ELSE \
+          /test temp_&nbsp;:= strcat(list_, blank_)&nbsp;%;\
+          /test list_&nbsp;:= strcat(temp_, element_)&nbsp;%;\
+        /ENDIF&nbsp;%;\
+      /ENDIF&nbsp;%;\
+    /ENDIF&nbsp;%;\
+    /test ++start_&nbsp;%;\
+  /DONE&nbsp;%;\
+  /RETURN list_
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+</pre>
+
+<!-- 
+NewPP limit report
+Preprocessor node count: 4/1000000
+Post-expand include size: 0/2097152 bytes
+Template argument size: 0/2097152 bytes
+Expensive parser function count: 0/100
+-->
+
+<!-- Saved in parser cache with key homesitewiki-mw_:pcache:idhash:6-0!1!0!!en!2!edit=0 and timestamp 20120407063744 -->
+<div class="printfooter">
+Retrieved from "<a href="http://www.gwen-morse.com/wiki/index.php/Galvin%27s_Virtual_Array">http://www.gwen-morse.com/wiki/index.php/Galvin%27s_Virtual_Array</a>"</div>
+			<div id='catlinks' class='catlinks'><div id="mw-normal-catlinks"><a href="/wiki/index.php/Special:Categories" title="Special:Categories">Category</a>:&#32;<span dir='ltr'><a href="/wiki/index.php?title=Category:Tinyfugue&amp;action=edit&amp;redlink=1" class="new" title="Category:Tinyfugue (page does not exist)">Tinyfugue</a></span></div></div>			<!-- end content -->
+						<div class="visualClear"></div>
+		</div>
+	</div>
+		</div>
+		<div id="column-one">
+	<div id="p-cactions" class="portlet">
+		<h5>Views</h5>
+		<div class="pBody">
+			<ul>
+	
+				 <li id="ca-nstab-main" class="selected"><a href="/wiki/index.php/Galvin%27s_Virtual_Array" title="View the content page [c]" accesskey="c">Page</a></li>
+				 <li id="ca-talk" class="new"><a href="/wiki/index.php?title=Talk:Galvin%27s_Virtual_Array&amp;action=edit&amp;redlink=1" title="Discussion about the content page [t]" accesskey="t">Discussion</a></li>
+				 <li id="ca-viewsource"><a href="/wiki/index.php?title=Galvin%27s_Virtual_Array&amp;action=edit" title="This page is protected.&#10;You can view its source [e]" accesskey="e">View source</a></li>
+				 <li id="ca-history"><a href="/wiki/index.php?title=Galvin%27s_Virtual_Array&amp;action=history" title="Past revisions of this page [h]" accesskey="h">History</a></li>			</ul>
+		</div>
+	</div>
+	<div class="portlet" id="p-personal">
+		<h5>Personal tools</h5>
+		<div class="pBody">
+			<ul>
+				<li id="pt-login"><a href="/wiki/index.php?title=Special:UserLogin&amp;returnto=Galvin%27s_Virtual_Array" title="You are encouraged to log in; however, it is not mandatory [o]" accesskey="o">Log in</a></li>
+			</ul>
+		</div>
+	</div>
+	<div class="portlet" id="p-logo">
+		<a style="background-image: url(/home/public/wiki/guestbook.jpg);" href="/wiki/index.php/Main_Page" title="Visit the main page [z]" accesskey="z"></a>
+	</div>
+	<script type="text/javascript"> if (window.isMSIE55) fixalpha(); </script>
+	<div class='generated-sidebar portlet' id='p-navigation'>
+		<h5>Navigation</h5>
+		<div class='pBody'>
+			<ul>
+				<li id="n-mainpage-description"><a href="/wiki/index.php/Main_Page">Main Page</a></li>
+				<li id="n-MUSH-Code"><a href="/wiki/index.php/MUSHcode">MUSH Code</a></li>
+				<li id="n-Tinyfugue-Client"><a href="/wiki/index.php/Tinyfugue">Tinyfugue Client</a></li>
+				<li id="n-Muby-Client"><a href="/wiki/index.php/Muby">Muby Client</a></li>
+				<li id="n-Roleplay"><a href="/wiki/index.php/Roleplay">Roleplay</a></li>
+				<li id="n-Realms-of-Despair"><a href="/wiki/index.php/Realms_of_Despair">Realms of Despair</a></li>
+				<li id="n-Sims"><a href="/wiki/index.php/Sims">Sims</a></li>
+				<li id="n-Linux"><a href="/wiki/index.php/Linux">Linux</a></li>
+				<li id="n-Health-and-Beauty"><a href="/wiki/index.php/HABA">Health and Beauty</a></li>
+			</ul>
+		</div>
+	</div>
+	<div class='generated-sidebar portlet' id='p-Wiki_Help'>
+		<h5>Wiki Help</h5>
+		<div class='pBody'>
+			<ul>
+				<li id="n-portal"><a href="/wiki/index.php/GwenWiki:Community_Portal" title="About the project, what you can do, where to find things">Community portal</a></li>
+				<li id="n-currentevents"><a href="/wiki/index.php/GwenWiki:Current_events" title="Find background information on current events">Current events</a></li>
+				<li id="n-recentchanges"><a href="/wiki/index.php/Special:RecentChanges" title="The list of recent changes in the wiki [r]" accesskey="r">Recent changes</a></li>
+				<li id="n-randompage"><a href="/wiki/index.php/Special:Random" title="Load a random page [x]" accesskey="x">Random page</a></li>
+				<li id="n-help"><a href="/wiki/index.php/Help:Contents" title="The place to find out">Help</a></li>
+			</ul>
+		</div>
+	</div>
+	<div id="p-search" class="portlet">
+		<h5><label for="searchInput">Search</label></h5>
+		<div id="searchBody" class="pBody">
+			<form action="/wiki/index.php" id="searchform"><div>
+				<input type='hidden' name="title" value="Special:Search"/>
+				<input id="searchInput" name="search" type="text" title="Search GwenWiki [f]" accesskey="f" value="" />
+				<input type='submit' name="go" class="searchButton" id="searchGoButton"	value="Go" title="Go to a page with this exact name if exists" />&nbsp;
+				<input type='submit' name="fulltext" class="searchButton" id="mw-searchButton" value="Search" title="Search the pages for this text" />
+			</div></form>
+		</div>
+	</div>
+	<div class="portlet" id="p-tb">
+		<h5>Toolbox</h5>
+		<div class="pBody">
+			<ul>
+				<li id="t-whatlinkshere"><a href="/wiki/index.php/Special:WhatLinksHere/Galvin%27s_Virtual_Array" title="List of all wiki pages that link here [j]" accesskey="j">What links here</a></li>
+				<li id="t-recentchangeslinked"><a href="/wiki/index.php/Special:RecentChangesLinked/Galvin%27s_Virtual_Array" title="Recent changes in pages linked from this page [k]" accesskey="k">Related changes</a></li>
+<li id="t-specialpages"><a href="/wiki/index.php/Special:SpecialPages" title="List of all special pages [q]" accesskey="q">Special pages</a></li>
+				<li id="t-print"><a href="/wiki/index.php?title=Galvin%27s_Virtual_Array&amp;printable=yes" rel="alternate" title="Printable version of this page [p]" accesskey="p">Printable version</a></li>				<li id="t-permalink"><a href="/wiki/index.php?title=Galvin%27s_Virtual_Array&amp;oldid=721" title="Permanent link to this revision of the page">Permanent link</a></li>			</ul>
+		</div>
+	</div>
+		</div><!-- end of the left (by default at least) column -->
+			<div class="visualClear"></div>
+			<div id="footer">
+				<div id="f-poweredbyico"><a href="http://www.mediawiki.org/"><img src="/wiki/skins/common/images/poweredby_mediawiki_88x31.png" alt="Powered by MediaWiki" /></a></div>
+			<ul id="f-list">
+					<li id="lastmod"> This page was last modified on 26 February 2011, at 21:24.</li>
+					<li id="viewcount">This page has been accessed 612 times.</li>
+					<li id="privacy"><a href="/wiki/index.php/GwenWiki:Privacy_policy" title="GwenWiki:Privacy policy">Privacy policy</a></li>
+					<li id="about"><a href="/wiki/index.php/GwenWiki:About" title="GwenWiki:About">About GwenWiki</a></li>
+					<li id="disclaimer"><a href="/wiki/index.php/GwenWiki:General_disclaimer" title="GwenWiki:General disclaimer">Disclaimers</a></li>
+			</ul>
+		</div>
+</div>
+
+		<script type="text/javascript">if (window.runOnloadHook) runOnloadHook();</script>
+<!-- Served in 0.444 secs. --></body></html>

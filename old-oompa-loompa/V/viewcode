@@ -1,0 +1,83 @@
+@@ view code
+@@ Author: Naomi Novik after Ralph Melton
+@@ Released: 3/23/97
+@@ UNSUPPORTED
+
+@@ OVERVIEW
+@@ This is a pretty basic version of view code. It allows you to set 'views'
+@@ on rooms, people, and objects to provide more detailed descriptions of 
+@@ parts of them or the things they contain without resorting to adding objects
+@@ to the db. 
+@@
+@@ Features:
+@@ 	- partial view name matching
+@@	- nice display of views, including ansi highlight & 
+@@	  capitalization of view name 
+@@	- views() global function for use in room/person descs or @succ msgs
+@@	- see +help for more help
+@@
+
+@@ INSTALLATION
+@@ Master Object - The main globals object. Must be in the Master Room and
+@@			have see_all power.
+@@ Global Functions Object -	The object on which you store code for your 
+@@				global functions (defined with @function).
+@@ +Help Storage - The object you keep your +help commands or text stored on.
+@@		NOTE: The default +help included with this is for use with
+@@		the NiftyHelp system.
+@@
+@@ To install, just read through all the comments, substitute the appropriate
+@@ DBREF numbers for the objects involved, and /quote or cut & paste this in.
+@@ I strongly recommend reading through the code enough to understand it. 
+@@ I don't put backdoors or nasty things in my code, but you only have my word
+@@ for that, so don't put in code you can't understand. :)
+@@
+@@ You are free to modify and use this code in any way you like. If you come up 
+@@ with a good modification/addition, by all means make it public and send it
+@@ to me. :)
+@@
+
+@@ 
+@@ view commands
+@@
+
+&VIEW-ROOM-CONTENTS Master Object=$views: @pemit %#=switch(views(%L),, There's nothing here to view., You can view the following:%r [views(%L)])
+
+&VIEW-THING-ITEM-LIST Master Object=$views *: @pemit %# = [setq(0, locate(%#, %0, *))][switch(%q0, #-1, There's nothing here named %0., { switch(views(%q0),, There's nothing to view on [name(%q0)]., You can view the following on [name(%q0)]:%r [views(%q0)]) }
+
+&VIEW-ROOM-ITEM Master Object=$view *: @sel %0=* on *,,@pemit %#= [setq(1,lattr(%L/view_*[edit(%0, %b, ~)]*))][switch(words(%q1),0,There's no view named %0 here.%RAvailable views: [views(%L)], 1, [ansi(hb,iter(lcstr(edit(after(%q1,VIEW_), ~, %B)),capstr(##)))]%R[u(%L/%q1)], {That view name is ambiguous. Please be more specific in the view name.})]
+
+&VIEW-THING-ITEM Master Object=$view * on *: @pemit %# = [setq(0, locate(%#, %1, *))][switch(%q0, #-1, There's nothing here named %1., { [setq(1,lattr(%q0/view_*[edit(%0, %b, ~)]*))][switch(words(%q1),0,There's no view named %0 on [name(%q0)].%RAvailable views: [views(%q0)], 1, [ansi(hb,iter(lcstr(edit(after(%q1,VIEW_), ~, %B)),capstr(##)))]%R[u(%q0/%q1)], {That view name is ambiguous. Please be more specific in the view name.})]})]
+
+@@
+@@ global function 'views()'
+@@
+@@ You will have to define the views() function using @function, like this:
+@@
+@@ @function views=<Global Functions Object Dbref>,views
+@@
+@@ Capitalize does NOT need to be defined as an @function. You can if
+@@ you want to and then change it to a function instead of a u-fun. :)
+@@
+
+&VIEWS Global Functions Object = iter(lattr(%0/VIEW_*),[u(CAPITALIZE,edit(after(##,VIEW_), ~,%B))]%B%B) 
+
+&CAPITALIZE Global Functions Object=iter(lcstr(%0),capstr(##))
+
+@@ 
+@@ To use with the NiftyHelp +help system, leave as is. To use with a more 
+@@ standard +help object, uncomment the two lines below and comment out 
+@@ the four lines afterwards.
+@@
+
+@@ &HELP_VIEW +Help Storage=$+help view:@pemit %#=COMMANDS%R%B[ljust(views,27)] -- lists the views in your current room%R%B[ljust(views <object>,27)] -- views on that object%R%B[ljust(view <name of view in room>,27)]  -- look at that view in current room%R%B[ljust(view <view> on <object>,27)] -- look at that view on the object%R%B[ljust(\views\(<object/room dbref>\),27)] -- a function that returns the list of views%R%RThese commands allow you to create and look at detailed descriptions of various objects that would otherwise have to be represented with props.%R%RPlease see +help view2 for information on how to create views and for the credits.
+
+@@ &HELP_VIEW2 +Help Storage=$+help view2:@pemit %#=To create a view on any object, simply set an attribute starting with &VIEW_ on the object:%R%R&VIEW_NAME~OF~VIEW <object>=<description of view>%R%RUse '~' whereever you would have a space if you want to have spaces in the name of the view.%R%RCREDITS: This view code was originally written by Ralph Melton (Rhyanna@Castle D'Image) and modified heavily by Naomi Novik (DV@SWISH).
+
+addhelp view=foo
+addhelp view2=foo
+
+&HELP_VIEW +Help Storage=COMMANDS%R%B[ljust(views,27)] -- lists the views in your current room%R%B[ljust(views <object>,27)] -- views on that object%R%B[ljust(view <name of view in room>,27)]  -- look at that view in current room%R%B[ljust(view <view> on <object>,27)] -- look at that view on the object%R%B[ljust(\views\(<object/room dbref>\),27)] -- a function that returns the list of views%R%RThese commands allow you to create and look at detailed descriptions of various objects that would otherwise have to be represented with props.%R%RPlease see +help view2 for information on how to create views and for the credits.
+
+&HELP_VIEW2 +Help Storage=To create a view on any object, simply set an attribute starting with &VIEW_ on the object:%R%R&VIEW_NAME~OF~VIEW <object>=<description of view>%R%RUse '~' whereever you would have a space if you want to have spaces in the name of the view.%R%RCREDITS: This view code was originally written by Ralph Melton (Rhyanna@Castle D'Image) and modified heavily by Naomi Novik (DV@SWISH).
+

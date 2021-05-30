@@ -1,0 +1,47 @@
+AltStation is #28323 (your dbref will vary) and it should be located in the master room. IP Functions is #28322 (your dbref will vary) and it should be located inside AltStation.
+
+You will need to @create 50 objects and replace DB_IPTOREF with their dbrefs, and you will need to @create 50 objects and replace DB_REFTOIP with their dbrefs.
+
+If you don't want 50, then change DB_REFTOIP_N and DB_IPTOREF_N to be something else. A larger number allows you to track more alts.
+
+You need two additional 'hooks' into your game to get it working. You need an @aconnect in the master room that @triggers TR_ADDREF=<ip>,<dbref>, and you need a hook from your player-nuking softcode to trigger TR_DESTREF=<ip>.
+
+@create AltStation=10
+@lock AltStation=CANUSE/1
+&CMD_CHECKIP AltStation=$+checkip *:@pemit %#=Alts for %0: [iter(u(#28322/fniptorefs,%0),u(#28322/fnfmtname,itext()))]
+&CANUSE AltStation=andflags(%#,W)
+&CMD_CHECKALT AltStation=$+checkalt *:@pemit %#=[setq(1,objeval(%#,pmatch(%0)))]%rPossible Alts for [u(#28322/fnfmtname,%q1)]:%r[iter(u(#28322/fnalts,%q1),u(#28322/fnfmtname,itext()))]
+&CMD_CHECKREF AltStation=$+checkref *:@pemit %#=[setq(0,objeval(%#,pmatch(%0)))]IP Addresses for [u(#28322/fnfmtname,%q0)]: [iter(u(#28322/fnreftoips,%q0),itext())]
+@lock/UseLock AltStation=CANUSE/1
+@Desc AltStation=%r[space(5)]There are three commands on this object for querying alts. +checkip <ip> will reveal all dbrefs that have ever been associated with that particular <ip> address. +checkref <dbref> will reveal all IP addresses that have ever been associated witih that particular <dbref>. The most useful command however, is +checkalt <dbref or name>. The latter command reveals possible alt by looking at all the assocated ip addresses this player has used and then for each one, looking up all the other players that have every been associated with any of those IP addresses.%r
+&CMD_CHECKALT_FULL AltStation=$+checkalt/full *:@pemit %#=[setq(1,objeval(%#,pmatch(%0)))]%rPossible Alts for [u(#28322/fnfmtname,%q1)]:;@dolist u(#28322/fnreftoips,%q1)={@pemit %#=Alts from ##: [iter(u(#28322/fniptorefs,##),u(#28322/fnfmtname,itext()))]}
+@set AltStation=INHERIT
+@set AltStation=OPAQUE
+@set AltStation=QUIET
+@set AltStation=SAFE
+@set AltStation=UNFINDABLE
+
+@create IP Functions=10
+&RADIX_TERM IP Functions=iadd(imul(256,%0),%1)
+&FNIPTON IP Functions=fold(radix_term,%0,,.)
+&FNNTOIP IP Functions=setq(0,unpack(%0,36))[idiv(%q0,16777216)][setq(0,mod(%q0,16777216))].[idiv(%q0,65536)][setq(0,mod(%q0,65536))].[idiv(%q0,256)][setq(0,mod(%q0,256))].%q0
+&TR_ADDREF IP Functions=@if not(haspower(%1,guest))={&[setr(1,IP_[pack(setr(0,u(fnipton,%0)),36)])] [setr(2,u(fnippage,%q0))]=[setunion(get(%q2/%q1),%1)];&[setr(1,DB_%1)] [setr(2,u(fndbpage,after(%1,#)))]=[setunion(get(%q2/%q1),pack(%q0,36))]}
+&DB_IPTOREF_N IP Functions=50
+&DB_IPTOREF IP Functions=#13969 #14486 #14489 #14491 #14552 #14584 #27214 #33613 #33614 #33615 #33616 #33617 #33618 #33619 #33620 #33621 #33622 #33623 #33624 #33625 #33626 #33627 #33628 #33629 #33630 #33631 #33632 #33633 #33634 #33635 #33636 #33637 #33638 #33639 #33640 #33641 #33642 #33643 #33644 #33645 #33646 #33647 #33648 #33649 #33650 #33651 #33652 #33653 #33654 #33655
+&DB_REFTOIP IP Functions=#33656 #33657 #33658 #33659 #33660 #33661 #33662 #33663 #33664 #33665 #33666 #33667 #33668 #33669 #33670 #33671 #33672 #33673 #33674 #33675 #33676 #33677 #33678 #33679 #33680 #33681 #33682 #33683 #33684 #33685 #33686 #33687 #33688 #33689 #33690 #33691 #33692 #33693 #33694 #33695 #33696 #33697 #33698 #33699 #33700 #33701 #33702 #33703 #33704 #33705
+&DB_REFTOIP_N IP Functions=50
+&FNIPPAGE IP Functions=extract(v(DB_IPTOREF),inc(mod(%0,v(DB_IPTOREF_N))),1)
+&FNDBPAGE IP Functions=extract(v(DB_REFTOIP),inc(mod(%0,v(DB_REFTOIP_N))),1)
+@Desc IP Functions=%r[space(5)]Two databases (a mapping of IP# to DBREF and a mapping of DBREF to IP#) are defined with DB_REFTOIP* and DB_IPTOREF* along with the functions to decoded and encode the keys.%r%r[space(5)]From the outside, this function needs a global @aconnect to @trigger TR_ADDREF=<ip>,<dbref> at player connect time. To remove a particular association, @trigger TR_REMREF=<ip>,<dbref>. To remove -all- associations with a dbref, @Trigger TR_DESTREF=<dbref>. This latter @Trigger should be driven by any player destruction softcode.%r%r[space(5)]Use u(#28322/FNALTS,<dbref>) to get a list dbrefs of possible alts.%r
+&TR_REMREF IP Functions=&[setr(1,IP_[pack(setr(0,u(fnipton,%0)),36)])] [setr(2,u(fnippage,%q0))]=[setdiff(get(%q2/%q1),%1)];&[setr(1,DB_%1)] [setr(2,u(fndbpage,after(%1,#)))]=[setdiff(get(%q2/%q1),pack(%q0,36))]
+&TR_DESTREF IP Functions=@dolist u(fnreftoips,%0)={@trig #28322/tr_remref=##,%0}
+&FNALTS IP Functions=localize(if(isdebref(%0),sort(setunion(iter(u(fnreftoips,%0),u(fniptorefs,itext())),),d)))
+&FNIPTOREFS IP Functions=localize(setq(0,u(fnipton,%0))[get(u(fnippage,%q0)/IP_[pack(%q0,36)])])
+&FNFMTNAME IP Functions=if(gte(conn(%0),0),%xh[name(%0)],name(%0))(%0[flags(%0)])
+&FNREFTOIPS IP Functions=localize(iter(setq(0,after(%0,#))[get(u(fndbpage,%q0)/DB_%0)],u(fnntoip,itext())))
+@set IP Functions=NO_COMMAND
+@set IP Functions=OPAQUE
+@set IP Functions=QUIET
+@set IP Functions=SAFE
+@set IP Functions=UNFINDABLE 
+

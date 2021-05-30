@@ -1,0 +1,1074 @@
+############################################################################
+# Function Library (#50)
+#############################################################################
+
+#50 
+@@ @create Function Library
+-
+@@ @wipe #50
+-
+
+@set #50 = WIZARD
+-
+@power #50 = Builder
+-
+
+&RCS #50 = 
+  $Id: functions.mux,v 1.109 2000/03/14 13:02:22 dan Exp $
+-
+
+#############################################################################
+				   
+# Stephanie Dray
+# take_energy(<target>, <amount to deduct>, 
+              <energy/energy reserves/both>, <preference of order>)
+#
+# If only the target is specified, the function will default to 
+# taking energy from either energy account, and will default to
+# preferring energy reserves over energy
+# 
+# preference of order should be specified as e = energy, r = reserves
+# This function assumes that the player has, in fact, enough energy
+
+&function-take_energy #50=
+
+# %q0 = dbref of the player to be adjusted
+# %q1 = whether to take from energy, energy reserves, or both
+# %q2 = if both, do we prefer energy or reserves
+# %q3 = how much energy the player has
+# %q4 = how many energy reserve points the player has
+# %q5 = maximum amount that can be taken from energy
+# %q6 = maximum amount that can be taken from energy reserves
+
+  [setq(0, locate(%#, %0, *))]
+  [setq(1, switch(%2, energy, energy, 
+                      energy reserves, energy reserves, both))]
+  [setq(2, switch(%3, e, e, r, r, r ))]
+  [setq(3, getaccountd(%q0, energy))]
+  [setq(4, getaccountd(%q0, energy reserves))]
+  [setq(5, switch(lt(%q3, %1), 1,  %q3, %1))]
+  [setq(6, switch(lt(%q4, %1), 1, %q4, %1))]
+
+# %q0 = dbref of the player to be adjusted
+# %q1 = whether to take from energy, energy reserves, or both
+# %q2 = if both, do we prefer energy or reserves
+# %q3 = how much energy the player has
+# %q4 = how many energy reserve points the player has
+# %q5 = maximum amount that can be taken from energy
+# %q6 = maximum amount that can be taken from energy reserves
+
+
+  [switch(isdbref(%q0), 0, #-1 Invalid Target,
+   switch(%q1, energy, ac_adjust(%q0, energy, -%1),
+               energy reserves, ac_adjust(%q0, energy reserves, -%1)
+               both, 
+               switch(%q2, e, 
+               switch(lt(%q5, %1), 1,  
+                 [ac_adjust(%0, energy, -%q5)]
+                 [ac_adjust(%0, energy reserves, -[sub(%1,%q5)])],
+                 [ac_adjust(%0, energy, -%q5)]),
+                   
+          switch(lt(%q6, %1), 1, 
+                 [ac_adjust(%0, energy reserves, -%q6)]
+                 [ac_adjust(%0, energy, -[sub(%1, %q6)])],
+                 [ac_adjust(%0, energy reserves, -%q6)]))))]
+-
+
+
+
+# Jane Catherine August Function ;)
+# box()
+
+&function-box #50=[u(#50/function-complexbox,%0,%1,%2,%3,%3,1,1)]
+-
+
+# Jane Catherine August Function 
+# complexbox()
+
+&function-complexbox #50=
+[format([%4][repeat(%3,sub(%1,2))][%4],%1,[repeat(%b,%2)],)]%r
+[format(%0,[sub(%1,add(2,add(%5,%6)))],[repeat(%b,%2)]%3[repeat(%b,%5)],
+[repeat(%b,%6)]%3)]%r[format(%4[repeat(%3,sub(%1,2))]%4,%1,[repeat(%b,%2)],)]
+
+-
+# clothingdesc()
+# returns a line describing what the target is wearing
+
+# Old code
+#&function-clothingdesc #50=
+#  [setq(9, locate(%#, %0, *))]
+#  [setq(0, iter(lattrp(%q9/wear-*), first(get(%q9/##),|)))]
+
+#  [name(%q9)] is wearing: [u(#52/u-commafy-expanded, %q0)]
+
+# New code
+&function-clothingdesc #50=
+    [setq(9, locate(%#, %0, *))]
+    [ifelse(hastag(%q9,body),[setq(9,parent(%q9))],)]
+    [setq(0, clothinglist(%q9))]
+    [name(%q9)] is wearing: 
+    [u(#52/u-commafy-expanded, %q0)]
+
+-
+
+# pregnantdesc()
+# returns a line describing the state of the player's pregnancey.
+
+&function-pregnantdesc #50=  
+  [ifelse(hastag(%0,pregnant),
+         [u(%0/desc-pregnancy-[u(u-month-diff,
+                                      [extract([get(%0/conceived)],7,1)],
+                                      [extract([ictime()],7,1)])])],)]
+-
+&u-month-diff #50=
+  [setq(0,[switch(%0,Jan,1,Feb,2,Mar,3,Apr,4,May,5,Jun,6,Jul,7,Aug,8,
+          Sep,9,Oct,10,Nov,11,Dec,12)])]
+  [setq(1,[switch(%1,Jan,1,Feb,2,Mar,3,Apr,4,May,5,Jun,6,Jul,7,Aug,8,
+          Sep,9,Oct,10,Nov,11,Dec,12)])]
+  [ifelse(gte([setr(2,[mod([add(12,[sub(%q1,%q0)])],12)])],9),9,%q2)]
+
+-
+
+&U-COMMAFY-EXPANDED #52 = 
+  switch(words(%0), 
+    0, nothing, 
+    1, u(u-name, %0), 
+    2, u(u-name, first(%0)) and [u(u-name, rest(%0))], 
+       map(me/map-comma-expanded, extract(%0, 1, dec(words(%0)))) and 
+       [u(u-name, last(%0))]
+  )
+-
+
+&MAP-COMMA-EXPANDED #52 = 
+  [u(u-name, %0)],
+-
+
+&U-NAME #52 =
+ ulocal(ul-name, name(%0), get(%0/color))
+-
+&UL-NAME #52 = 
+# %q0 will be the articled name
+# %q1 will be the unmodified name
+# %q2 will be the ansi-stripped (testable) name
+
+  [setq(2, stripansi(name(%0)))]
+  [setq(0, [art(%q2)] %0)]
+
+# colorize the name if a @color is set
+  [switch(words(%1), 0, 
+    [setq(0, %q0)]
+    [setq(1, %0)], 
+# else
+    [setq(0, ansi(%1, %q0))]
+    [setq(1, ansi(%1, %0))]
+  )]
+
+  [switch(%q2, 
+      a *,       %q1, 
+      an *,      %q1, 
+      the *,     %q1, 
+      pair of *, %q0, 
+      * with *s, %q0, 
+      *s,        %q1, 
+#   else
+      ifelse(isnum(first(%0)), %q1, %q0)
+  )]
+-
+
+@@  old function-clothingdesc
+
+        [setq(0, iter(%q0, get(%q9/##), %b,%,))]
+        [setq(0, iter(%q0, first(##,|), %,, %b))]
+        [name(%q9)] is wearing: 
+        [iter(%q0, 
+          [setq(1, switch(isnum(first(name(##))), 
+                          1,trim(after(name(##), first(name(##)))), 
+                            name(##)))]
+          [art(%q1)]%b[ansi([default(##/color, n)], %q1)], %b, %,%b)])]
+-
+
+
+
+# taste(<currency>) or taste(<dbref>)
+# 
+# Returns the quality of the food currency or object
+# Returns a #-1 INVALID CURRENCY OR DBREF if there is no such currency
+# Returns a #-2 NOT FOOD
+# Returns a #-3 NO PARENT SET FOR CURRENCY
+
+&function-taste #50=
+ [setq(0, isdbref(%0))]
+ [setq(1, iscurrency(%0))]
+ 
+ [switch(1, not(or(%q0, %q1)), #-1 INVALID CURRENCY OR DBREF,
+            %q0, switch(1, hastag(%0, food), get(%0/quality), #-2 NOT FOOD),
+            %q1, switch(0, isdbref(paccount(%0)), 
+                           #-3 NO PARENT SET FOR CURRENCY,
+                           hastag(paccount(%0), food), 
+                           #-2 NOT FOOD,
+                           get(paccount(%0)/quality)))]
+
+
+-
+
+# nutrition(<currency>) or nutrition(<dbref>)
+# 
+# Returns the nutrition the currency or object yeilds per unit
+# Returns: #-1 INVALID CURRENCY OR DBREF
+# Returns: #-2 NOT FOOD
+# Returns: #-3 NO PARENT SET FOR CURRENCY
+
+&function-nutrition #50=
+ [setq(0, isdbref(%0))]
+ [setq(1, iscurrency(%0))]
+ [switch(1, not(or(%q0, %q1)), #-1 INVALID CURRENCY OR DBREF,
+            %q0, switch(1, hastag(%0, food), get(%0/nutrition), #-2 NOT FOOD),
+            %q1, switch(0, isdbref(paccount(%0)), 
+                           #-3 NO PARENT SET FOR CURRENCY,
+                           hastag(paccount(%0), food), 
+                           #-2 NOT FOOD,
+                           get(paccount(%0)/quality)))]
+-
+
+# isfood(<currency>) or isfood(<dbref>)
+#
+# Returns a 1 if the dbref of the currency is food, and a 0 if not
+# Returns #-1 INVALID CURRENCY OR DBREF
+# Returns #-3 NO PARENT SET FOR CURRENCY
+
+&function-isfood #50=
+ [setq(0, isdbref(%0))]
+ [setq(1, iscurrency(%0))]
+ [switch(1, not(or(%q0, %q1)), #-1 INVALID CURRENCY OR DBREF,
+            %q0, hastag(%0, food),
+            %q1, switch(0, isdbref(paccount(%0)), 
+                           #-3 NO PARENT SET FOR CURRENCY,
+                           hastag(paccount(%0), food)))]
+-
+# israw(<currency>) or israw(<dbref>)
+#
+# Returns a 1 if the dbref of the currency is raw, and a 0 if not
+# Returns a #-1 INVALID CURRENCY OR DBREF if there is no such currency
+# Returns a #-2 NOT FOOD
+# Returns a #-3 NO PARENT SET FOR CURRENCY
+
+&function-israw #50=
+ [setq(0, isdbref(%0))]
+ [setq(1, iscurrency(%0))]
+ [switch(1, not(or(%q0, %q1)), #-1 INVALID CURRENCY OR DBREF,
+            %q0, switch(1, hastag(%0, food), hastag(%0, raw), #-2 NOT FOOD),
+            %q1, switch(0, isdbref(paccount(%0)), 
+                           #-3 NO PARENT SET FOR CURRENCY,
+                           hastag(paccount(%0), food), 
+                           #-2 NOT FOOD,
+                           hastag(%0, raw)))] 
+-
+# ispoison(<currency>) or ispoison(<dbref>)
+#
+# Returns a 1 if the dbref of the currency is poison, and a 0 if not
+
+
+&function-ispoison #50=
+ [setq(0, isdbref(%0))]
+ [setq(1, iscurrency(%0))]
+ [switch(1, not(or(%q0, %q1)), #-1 INVALID CURRENCY OR DBREF,
+            %q0, switch(1, hastag(%0, poison), 1, 0),
+            %q1, switch(0, isdbref(paccount(%0)), 
+                           #-3 NO PARENT SET FOR CURRENCY,
+                           hastag(paccount(%0), poison)))] 
+
+-
+# 
+# paccount(<currency>)
+# 
+# Returns the dbref (if any) of the currency type
+# Will return #-1 NO PARENT 4 CURRENCY if there's no parent
+# Will return #-2 CAN'T LOC PARENT 4 CURRENCY if there's no parent set.
+# Will return #-3 NOT CURRENCY if the currency isn't valid
+
+&function-paccount #50=
+  [setq(0, iscurrency(%0))]
+  [setq(1, get(#56/PNT-[makeattr(%0)]))]
+  [switch(%q0, 0, #-3 NOT CURRENCY, 
+          switch(1, strmatch(%q1, none), #-1 NO PARENT 4 CURRENCY, 
+                    isdbref(%q1), %q1,
+                    #-2 CAN'T LOC PARENT 4 CURRENCY))]
+-
+
+# 
+# crowd(<where>)
+#
+# Returns the number of players + figments + NPCs in a room/object.
+#
+# 11-JUN-98  Kevin  Modified crowd so that disconnected players aren't
+#               included in the 'crowd' count.
+# 
+# %q0 = the place to search for a crowd
+# %q1 = number of players or npc's in the crowd
+# %q2 = number of figments in the room
+# %q3 = number of figments stored on puppets or npcs (angry mobs)
+
+&function-crowd #50 = 
+  [setq(0, locate(%#, %0, *) )]
+  [setq(1, filter(#50/filter-crowd, lcon(%q0)))]
+  [setq(2, getaccount(%q0, figments))]
+  [setq(3, fold(#50/fold-add-nums, iter(%q1, getaccount(##, figments))))]
+
+  [fold(#50/fold-add-nums, [words(%q1)] %q2 %q3)] 
+
+-
+&filter-crowd #50 = 
+  [or(and(hastype(%0, player), 
+          gte(conn(%0),0)),
+      hastag(%0, NPC))]
+-
+
+
+
+#
+# accountname(<name>)
+# 
+# Returns the number of the account name
+#
+# by Stephanie H. A. Dray
+
+&function-accountname #50 =  
+[setq(0, lattr(#56/AC-[edit(trim(%0),space(), _)]))]
+[setq(0, switch(words(%q0), 1, %q0, 
+                lattr(#56/AC-[edit(trim(%0),space(), _)]*)))]
+[switch(words(%q0), 1, %q0, 0, #-1, #-2)]
+-
+
+#-----------------------------------------------------------------------
+# wearlocs()
+#
+# This provides a list of valid wear locations.
+#-----------------------------------------------------------------------
+# Commented out because it's function is supplanted by the wearlocs()
+#function in the new code
+
+#&function-wearlocs #50=
+#body back shoulders feet rightthumb leftthumb rightfinger2 
+#leftfinger2 rightfinger3 leftfinger3 rightpinkie leftpinkie 
+#head leftwrist_jewelry rightwrist_jewelry leftwrist rightwrist 
+#righthand lefthand rightarm leftarm neck_jewelry rightear 
+#leftear rightleg leftleg legs rightfoot leftfoot waist 
+#rightankle leftankle chest stomach neck patch insignia medal
+
+
+#-
+
+#----------------------------------------------------------------------------
+#
+# lhasaccount(<looker>, <account>, <flags>)
+#
+# Returns a list of dbrefs of objects which have the account defined on them.
+# The objects search are specified by the flag list.
+# 
+# If there are none, #-1 is returned.
+# If the <looker> cannot be found, #-2 PERMISSION DENIED is returned.
+# If <account> isn't a valid currency type, #-2 NO SUCH CURRENCY is returned.
+# 
+# Valid flags are m ('me'--the looker), 
+#                 h ('here'--the location of the looker), 
+#                 i (inventory of the looker), 
+#                 n (neighbors of the looker), and * (same as inmh). 
+# 
+# @function/privileged/preserve lhasaccount = #50/function-lhasaccount
+#
+#-------------------------------------------------------------------------
+
+&FUNCTION-LHASACCOUNT #50 = 
+  [setq(0, locate(%#, %0, *))]
+  [switch(
+    [isdbref(%q0)][iscurrency(%1)], 
+
+  0?, #-2 PERMISSION DENIED, 
+  ?0, #-3 NO SUCH CURRENCY, 
+
+  11, 
+    switch(words(setr(1, ulocal(ul-has-account, %q0, %1, %2))), 0, #-1, %q1)
+  )]
+-
+
+
+# FOR: lHasAccount()
+# 
+# ulocal(ul-has-account, <looker>, <account to look for>, <flags>)
+#
+
+&UL-HAS-ACCOUNT #50 = 
+  [setq(0, %1)]
+  [filter(#50/filter-has-account, 
+    ulocal(ul-account-locate-list, %0, %2)
+  )]
+-
+
+# FOR: lHasAccount()
+# 
+&FILTER-HAS-ACCOUNT #50 = 
+  hasaccount(%0, %q0)
+-
+
+# FOR: lHasAccount()
+# 
+&UL-ACCOUNT-LOCATE-LIST #50 = 
+  [setq(0, 
+    ifelse(match(pos(%1, *), #-1), 
+         %1, inmh)
+  )]
+
+  [setdiff(
+    [switch(%q0, *i*, lcon(%0))] 
+    [switch(%q0, *n*, setdiff(lcon(loc(%0)), %0))] 
+    [switch(%q0, *h*, loc(%0))] 
+    [switch(%q0, *m*, %0)], 
+
+    REMOVE_DUPLICATES
+  )]
+-
+#----------------------------------------------------------------------------
+
+#
+# dig(<name>)
+#
+# Side-effect function which creates a new Room called <name> and 
+# returns its #dbref.
+#
+# @function dig = #50/function-dig
+#
+&function-dig #50 = 
+  create(%0,10,r)
+-
+
+# fashion(<currency or object>)
+# 
+# Returns the fashion rank of the item
+# Returns: #-1 INVALID CURRENCY OR DBREF
+# Returns: #-2 NOT CLOTHING
+# Returns: #-3 NO PARENT SET FOR CURRENCY
+
+&function-fashion #50=
+ [setq(0, isdbref(%0))]
+ [setq(1, iscurrency(%0))]
+ [switch(1, not(or(%q0, %q1)), #-1 INVALID CURRENCY OR DBREF,
+            %q0, switch(1, hastag(%0, clothing), default(%0/fashion-rank, 11),
+                           #-2 NOT CLOTHING),
+            %q1, switch(0, isdbref(paccount(%0)), 
+                           #-3 NO PARENT SET FOR CURRENCY,
+                           hastag(paccount(%0), clothing), 
+                           #-2 NOT CLOTHING,
+                           default(paccount(%0)/fashion-rank, 11)))]
+-
+
+# open(<name>)
+#
+# Side-effect function which creates a new Exit called <name> and 
+# returns its #dbref.
+#
+# @function open = #50/function-open
+#
+&function-open #50 = 
+  create(%0,10,e)
+-
+
+
+#
+# hastag(<object>, <tag>)
+#
+# Returns 1 if the object has the listed tag; otherwise, returns 0.
+# The parent chain of the object is searched, as well.
+#
+# @function/preserve/privileged hastag = #50/function-hastag
+#
+# Examples:
+# 	Obj		Parent(Obj)	Parent(Parent(Obj))
+#       ---------	-----------	-------------------
+# 1	Outside
+# 2					Outside
+# 3	!Outside			Outside
+# 4	Outside		!Outside
+# 5	!Outside
+#
+# 1 	hastag(Obj, Outside) = 1
+# 2	hastag(Obj, Outside) = 1
+# 3	hastag(Obj, Outside) = 0
+# 4	hastag(Obj, Outside) = 1
+# 5	hastag(Obj, Outside) = 0
+#
+&function-hastag #50 = 
+  [setq( 1, 0)]
+  [setq( 2, iter(lparent(locate(%#, %0, *)), get(##/tags)) )]
+  [setq( 0, 
+    iter(revwords(%q2), 
+      switch(##,
+      %1, 
+        setq(1,1), 
+      !%1, 
+        setq(1,0)
+      )
+    ) 
+  )]
+
+  %q1
+-
+
+
+# ltags(<object>)
+# 
+# Returns a list of tags on an object, including all tags inherited from
+# its parents.  Remember that !tag means that the object and its children
+# do not inherit the tag, regardless of the object's parents.
+#
+# @function/preserve ltags=#50/function-ltags
+#
+&function-ltags #50 = 
+  [setq( 0, iter(lparent(locate(%#, %0, *)), get(##/tags)) )]
+
+# have to clear %q2, since we'll add to it below and the value of 
+# the calling function's %q2 will be readable!
+    [setq(2,)]
+
+  [setq( 1, 
+    iter(revwords(%q0),
+      setq( 2, 
+        switch(##, !*, 
+          setdiff(%q2, mid(##, 1, strlen(##))), 
+          setunion(%q2, ##)
+	)
+      )
+    )
+  )]
+  %q2
+-
+
+
+# ortags(<object>, <tag list>)
+#
+# Returns 1 if the object has any of the tags in the list; otherwise, 
+# returns 0.
+#
+# @function/preserve ortags=#50/function-ortags
+#
+&function-ortags #50 = 
+  [switch(%1, *!*, #-1 TAGS CANNOT CONTAIN EXCLAMATION POINTS,
+    neq(0, words(setinter(ltags(locate(%#, %0, *)), %1)))
+  )]
+-
+
+
+# andtags(<object>, <tag list>)
+#
+# Returns 1 if the object has ALL of the tags in the list; otherwise, 
+# returns 0.
+#
+# @function/preserve andtags=#50/function-andtags
+#
+&function-andtags #50 = 
+  [switch(%1, *!*, #-1 TAGS CANNOT CONTAIN EXCLAMATION POINTS,
+    not(words(setdiff(%1, ltags(locate(%#, %0, *)))))
+  )]
+-
+
+
+# left(<string>, <numchars>)
+#
+# Returns the leftmost <numchars> characters from the string.
+#
+# @function left=#50/function-left
+#
+&function-left #50 = 
+  strtrunc(%0, %1)
+-
+
+
+# right(<string>, <numchars>)
+#
+# Returns the rightmost <numchars> characters from the string.
+#
+# @function right=#50/function-right
+#
+&function-right #50 = 
+  mid(%0, sub(strlen(%0), %1), %1)
+-
+
+# t(<expression>)
+#
+# If the expression evaluates to 0 or #-*, or is null (''), t() returns 0.
+# All other values return 1.
+#
+&function-t #50 = 
+  not(or(
+    and(isnum(%0), eq(%0,0)),
+    strmatch(%0,#-*),
+    not(strlen(%0))
+  ))
+-
+
+# lgods()
+#
+# Returns a list of IC gods
+# 
+&function-lgods #50 = 
+  Zutiv Soli Srenna Zin Firanos Uf Eesha Drik Kamnestra Unot Elik
+-
+
+
+# isbuilder(<object>)
+#
+# Returns 1 if the user has the builder power or wizard or royalty flags.
+# Else, 0.
+#
+&function-isbuilder #50 = 
+  or(haspower(%0, builder), orflags(%0, WZ))
+-
+
+
+# lequip(<object>, <body location>)
+#
+# Returns a list of dbrefs of equipment worn (or held) at the specified
+# body location, if it exists. If the body location does not exist, it 
+# returns #-1.  All body locations are prefixed with 'body-'.
+#
+&function-lequip #50 = 
+  default(%0/body-%1, #-1)
+-
+
+# goodname(<object>)
+#
+# Objects may have a &goodname attribute which contains a more full 
+# name for the purposes of coding things. For example, an object
+# named 'longsword' may have a goodname of 'silver longsword'.
+# By default, it uses the name of the object, unless it is an exit, in 
+# which case it pulls the last exit alias out of the fullname.
+#
+&function-goodname #50 = 
+  default(%0/goodname, 
+    ifelse(hastype(%0, exit), last(fullname(%0),;), name(%0))
+  )
+-
+
+# graball(<list>, <pattern>)
+#
+# Works like grab(), but returns ALL matches, not just the first.
+# See 'help grab()' and 'help matchall()'.
+#
+# @function graball = #50/function-graball
+#
+&function-graball #50 = 
+  iter(matchall(%0, %1), 
+    extract(%0, ##, 1)
+  )
+-
+
+# clip(<ATTRIBUTE-NAME>)
+#
+# Returns a prettier version of an attribute name, lower case, everything
+# after the first '-', and all underscores edited to spaces.
+#  Useful for converting things like 'SKILL-ACCOUNTING' to just 'accounting'.
+#
+# @function clip = #50/function-clip
+#
+&function-clip #50 = 
+  lcstr(edit(switch(%0, *-*, after(%0,-), %0), _, %b))
+-
+
+# makeattr(<word or phrase>)
+#
+# Returns a good attribute name based on the word or phrase given.
+# Gets rid of 'naughty' characters like []{}\,; and replaces spaces with
+# underscores.
+#
+# @function makeattr = #50/function-makeattr
+#
+&function-makeattr #50 = 
+  edit(squish(trim(secure(%0))), space(), _)
+-
+
+# comma(<integer>)
+#
+# Returns a number with commas inserted every three digits.
+# For example:  comma(1234567) = 1,234,567
+#
+# @function comma = #50/function-comma
+#
+&function-comma #50 = 
+  ifelse(isnum(%0), 
+    [u(#50/u-comma, before(trim(%0), .))]
+    [switch(%0, *.*, .[after(trim(%0), .)])], 
+# else
+    #-1 FUNCTION COMMA EXPECTS A NUMBER
+  )
+-
+
+
+# successes(dice int, difficulty int)
+# 
+# Parameters:
+#   %0 = number of dice to roll.
+#   %1 = threshold success value (on a d10) (aka. difficulty)
+#
+# Returns:
+#   Number of successes. (Number of dice that meet or exceed the
+#    threshold value less the number of failures (1).)
+#
+# Notes:
+#   I might have used fold, but I didn't want to spend another
+#   attribute on this rather simple function.
+#
+# @function/preserve successes=#50/function-successes
+#
+# Quick and Simple Code written on 27 March 1997
+# By Jane Catherine August (Lanya) @ FiranMux.
+# Modified by Stephanie Dray on 14 February 1999 to eliminate the 
+# more dice, more botch problem.
+
+&function-successes #50 = 
+  [setq(0,0)]
+  [iter(lnum(%0),
+    setq(0,
+      add(
+        %q0, 
+        [setq(1, die(1, 10))]
+        ifelse(eq(%q1, 1), -1, gte(%q1, %1))
+      )
+    )
+  )]
+
+# Check to see if it's a botch convert to success if the player 
+# has more dice than the difficulty.
+
+  [ifelse(and(lt(%q0, 0), gt(%0, %1)), 1, trim(%q0))]
+
+-
+
+&u-comma #50 = 
+  switch(1, 
+  gt(strlen(%0), 3), 
+    [u(u-comma, left(%0, sub(strlen(%0), 3)))]\,[right(%0, 3)], 
+  neq(strlen(%0), 0), 
+    %0
+  )
+-
+
+# lattrp(<object>[/<pattern>])
+#
+# Returns a list of attributes which match the pattern (or all attributes if
+# no pattern is specified) on the object or any of the object's parents
+#
+&function-lattrp #50 = 
+  [setq(8, before(%0, /))]
+  [setq(9, after(%0, /))]
+  [setq(0, locate(%#, %q8, *))]
+
+  [trim(
+    ifelse(t(%q0), 
+      fold(#50/fold-lattrp, lparentpriv(%q0), ), 
+#   else
+      #-1 NO MATCH
+    )
+  )]
+-
+
+&fold-lattrp #50 = 
+  setunion(%0, lattr(%1[switch(gt(strlen(%q9), 0), 1, /%q9)]) )
+-
+
+# For internal use only
+#
+&function-lparentpriv #50 = 
+  lparent(locate(%#, %0, *))
+-
+
+# dspace_destination(<dspace room dbref>, <dbref of exit>)
+#
+# Returns the x.y.z coordinates of the dspace room on the other side
+# of an exit. If the destination isn't dspace or any other error occurs, 
+# it returns #-1.
+#
+# @function/preserve/privileged #50/dspace_destination = 
+#          function-dspace_destination
+#
+&function-dspace_destination #50 = 
+  switch(0, 
+    isdbref(%0),  #-1, 
+    isdbref(%1),  #-1, 
+    isdspace(%0), #-1, 
+    
+    [setq(0, objeval(%1, 
+      [u(DXNEW, u(XNEW, %0))].[u(DYNEW, u(YNEW, %0))].[u(DZNEW, u(ZNEW, %0))]
+    ))]
+    [switch(%q0, 
+      .*,    #-1, 
+      *.,    #-1, 
+      *..*,  #-1, 
+             %q0
+    )]
+  )
+-
+
+
+# isdspace(<object>)
+#
+# Returns 1 if the object is a dynamic space room; otherwise, returns 0.
+#
+# Note: #101 is the Dynamic Parent Room, to which all dspace rooms are 
+# parented, directly or indirectly.
+#
+&function-isdspace #50 = 
+  neq(0, member(lparent(%0), #101))
+-
+
+
+# ltime()
+#
+# Identical to time(), but takes the timezone of the calling object into 
+# account, which should be set on the TZ attribute as an integer for the number
+# of hours difference from GMT.
+
+&function-ltime #50=
+
+  convsecs(
+    add(
+      mul(
+        add(
+          default(%#/tz,u(#63/servertz))
+        ,u(#63/servertz))
+      ,3600)
+    ,secs())
+  )
+-
+
+# icsecs()
+# 
+# Like secs(), but it returns the seconds timestamp in in-character
+# time.
+# 
+&function-icsecs #50 =  
+  add(mul(add(secs(), -1744676800), 
+          u(#63/ic-time-ratio)), 
+      u(#63/ic-time-offset))
+-
+
+# ictime()
+#
+# Used in a similar way to time(), returns slightly different formatting.
+# Picks up value for time from #63/function-ictime. 
+#
+&function-ictime #50=
+  [setq(0,convsecs(icsecs()))]
+  [setq(1,mid(%q0,11,2))]
+
+  Firan time: 
+  [switch(gt(%q1,12)|[gt(%q1,21)],1|1,[sub(%q1,12)],1|0,0[sub(%q1,12)],%q1)]:
+  [mid(%q0,14,5)] [switch(gte(%q1,12),0,AM,PM)] on [strtrunc(%q0,10)], 
+  in the year [sub(right(%q0,4),1900)] A.U.
+
+-
+
+# ictime24()
+#
+# Identical to ictime(), only it uses a 24-hour format.
+#
+&function-ictime24 #50=
+  [setq(0,convsecs(icsecs()))]
+
+  Firan time: 
+  [mid(%q0,11,5)] on [strtrunc(%q0,10)], 
+  in the year [sub(right(%q0,4),1900)] A.U.
+
+-
+
+# time12(time)
+# 
+# Takes either a standard time() or ltime() output and converts it to a 12
+# hour format. Will also take a secs() return and convert it. Consequently, 
+# any number will return a valid value, and any string will convert to 0 then
+# be evaluated, returning GMT midnight, Jan 1st 1970.
+# 
+
+&function-time12 #50=
+
+ switch(%0|,
+     |,#-1 FUNCTION TIME12() EXPECTS 1 ARGUMENT,
+     [setq(0,convsecs(switch(isnum(%0),
+         0,convtime(%0),
+         %0)))]
+     [setq(1,mid(%q0,11,2))]
+     [strtrunc(%q0,11)]
+     [switch(gt(%q1,12)|[gt(%q1,21)]|[gt(%q1,0)],
+         0|0|0,12,
+         1|1|1,[sub(%q1,12)],
+         1|0|1,0[sub(%q1,12)],
+         [%q1])]
+     [mid(%q0,13,7)]
+     [switch(gt(%q1,11),0,AM,PM)] 
+     [mid(%q0,20,4)])
+-
+
+# garble(string)
+# 
+# Takes a string of text and returns a 'garbled' version of it. Will
+# maintain punctuation characters, returning them ungarbled. Note that
+# spaces are not maintained, and will be garbled producing a usually
+# undesired effect. Also note that it is used for letters only, and 
+# although it will accept numeric characters will never return any.
+#
+# This is not for regular use, and is normally only used with the language
+# system and literacy code. Written by Jonathan Evans (Jon).
+
+&function-garble #50=
+
+[foreach(#50/garble-foreach,%0)]
+
+-
+
+# Second part of garble() code above
+
+&garble-foreach #50=
+
+[switch(%0,
+\\\\?,?,
+.,.,
+!,!,
+{,},{,},
+:,:,
+;,;,
+elements(a b c d e f g h i j k l m n o p q r s t u v w x y z,
+	add(rand(26),1)))]
+-
+
+&function-garble-string #50=
+
+[setq(9, %1)]
+[map(MAP-GARBLE-STRING,%0)]
+
+-
+
+# Continuation of garble-string function above.
+
+&map-garble-string #50=
+
+[switch(lte(add(1, rand(100)), %q9), 
+0, [garble(%0)],
+1, %0)]
+
+-
+
+&fold-add-nums #50=
+ [add(%0, %1)]
+-
+# aware()
+# aware() takes one argument (a player dbref) and returns a 1 only if 
+# that player is not asleep, not in shock, and not dead. While the checks 
+# for these are easy to put in code on thier own, it is easyer to use one
+# simple function
+&function-aware #50=
+  [and(
+    not(hastag(%0,dead)),
+    not(hastag(%0,shock)),
+    not(hastag(%0,asleep)),
+    not(hastag(loc(%0),dreamworld))
+  )]
+-
+# rank()
+# rank() takes two arguments (a player dbref and a rank) and returns a 1
+# only if that player has that wizrank or higher.
+&function-rank #50=
+  [setq(0,u(wiz-ranks))]
+  [setq(1,first(default(%0/rank,Player)))]
+  [gte(
+    [match(%q0,*%q1*,|)],
+    [match(%q0,*%1*,|)]
+  )]  
+-
+&wiz-ranks #50=
+Player|Helper|Ex-Staff|Honorary|Trainee|Junior|Wizard|Senior|Chief 
+-
+#############################################################################
+#
+# functions-list and functions-preserve-list may include
+# some functions which are not in this file, but are stored
+# on the Function Library (#50) object.
+#
+#############################################################################
+
+&functions #50 = 
+  left right t dig open lgods isbuilder lequip goodname graball isdspace 
+  clip makeattr comma ltime time12  
+  attribute skill 
+  areas hasarea hasarea_attr area 
+  demand supply cost price 
+  meats-dairy grains vegetables fruits dishes foods  
+  clothing weapons mined fishes hitlocs wearlocs 
+  garble 
+  combatstatus 
+  clothinglocs clothinglist 
+  aware 
+  route name2xy 
+-
+&functions-preserve #50 =
+  ac_create ac_destroy ac_adjust ac_transfer ac_parent 
+  ce_engage ce_begin ce_reset 
+  attrname skillname traitname lattrp 
+  accountname 
+  uniqueareas crowd paccount ispoison excess worth needed fashion 
+  take_energy settag objextract resynch 
+
+-
+&functions-privileged #50 = 
+  iscurrency getaccount getaccountd lparentpriv iswhole desc trait 
+  box complexbox exittwin combatdesc pregnantdesc age
+-
+
+&functions-preserve-privileged #50 =
+  hastag ltags ortags andtags registry registryname dspace_destination 
+  lhasaccount nutrition taste israw isfood isclothing isweaponry 
+  separate laccounts hasaccount desc clothingdesc damagedesc generic islocked 
+  icsecs ictime ictime24 ictimediff 
+  res_request res_return combatdesc 
+  garble-string resynch contentsdesc rank
+-
+
+
+&STARTUP-FUNCTIONS #50 = 
+  @dolist get(#50/functions) = {
+    @function ## = v(functions)/function-##
+  }; 
+
+  @dolist get(#50/functions-preserve) = {
+    @function/preserve ## = v(functions)/function-##
+  }; 
+
+  @dolist get(#50/functions-privileged) = {
+    @function/privileged ## = v(functions)/function-##
+  }; 
+
+  @wipe #50/wrapper-*; 
+
+  @dolist get(#50/functions-preserve-privileged) = {
+    &wrapper-## #50 = ulocal\(#50/function-##, %%0, %%1, %%2, %%3, %%4, %%5, %%6, %%7, %%8, %%9\); 
+    @function/privileged ## = v(functions)/wrapper-##
+  }
+-
+
+@switch %# = #1, {
+  @tr #1/startup-functions
+}, {
+  @switch hasflag(%#, wizard) = 1, {
+#    @wall/pose reloads the functions...; 
+#    @restart;
+@@     @wall/pose would have reloaded the functions except that last
+                time we did this, the database broke, 
+                so we're temporarily banned from doing so.
+
+
+  }, {
+    @pemit %# = You need to have a wizard do a @restart to load the functions.
+  }
+}  
+-
+&function-age #50=[get(%0/age)]
+-
+@trigger #50/startup-functions
+-

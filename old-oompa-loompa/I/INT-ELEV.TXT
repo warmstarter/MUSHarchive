@@ -1,0 +1,79 @@
+@@ The Integrated Elevator System is a compilation and (hopefully)
+@@ simplification of some old elevator objects I found.
+
+@@ How to set up an elevator system:
+@@ 1. @Dig a room
+@@ 2. @Create a panel and @lock it to the room
+@@ 3. @Open an exit in the room
+@@ 4. Go to each room of your building where you'd like access to the
+@@    elevator and @open an exit in that room.
+@@ 5. @Parent the room, exit out, exits in, and panel to the Elevator System.
+@@ 6. Change the attributes on the elevator system object to match the correct
+@@    database numbers. (Read over the file and change some numbers, it'll say
+@@    where)
+
+@@ If you like (or don't like) the Integrated Elevator System please feel free
+@@ To drop me a line at siradrw@citilink.com
+@@ I'd love to hear any comments/questions/bug reports you have.
+
+@create Integrated Elevator System
+
+@desc Elevator=This [lcstr(type(me))] is @parented to [name(parent(me))].
+
+@succ Elevator=[switch([type(me)],exit,{You walk into the [lcstr([v(TYPE_DAT)])].},room,{Quiet, but drab, music fills the [lcstr([v(TYPE_DAT)])].},thing,{You pick up [name(me)].})]
+
+@osucc Elevator=[switch([type(me)],exit,{walks into the [lcstr([v(TYPE_DAT)])]},thing,{picks up [name(me)].})]
+
+@odrop Elevator=[switch([type(me)],exit,{walks in from [v(CURRENT_FLOOR_NAME_VAR)].},thing,{sets [name(me)] down.})]
+
+@fail Elevator=[u(This stops the normal 'You can't go that way' message)]
+
+@afail Elevator=@switch [type(me)]=THING,{@pemit %#=You cannot take that.},EXIT,{@switch [strmatch([num(me)],[v(EXIT_OUT_DAT)])]=1,{@remit [v(ELEVATOR_ROOM_DAT)]=%N tries to leave but the [lcstr([v(TYPE_DAT)])] doors are still closed.},{@switch [v(WORKING_VAR)]=YES,{@pemit %#=You press the call button but you see that the [lcstr([v(TYPE_DAT)])] is already busy;@oemit %#=%N presses the [lcstr([v(TYPE_DAT)])] call button, but the [lcstr([v(TYPE_DAT)])] is already busy.},NO,{@pemit %#=You press the [lcstr([v(TYPE_DAT)])] call button.;@oemit %#=%N presses the [lcstr([v(TYPE_DAT)])] call button.;&WORKING_VAR [parent(me)]=YES;@unlink [v(EXIT_OUT_DAT)];@unlink [v(CURRENT_EXIT_VAR)];@remit [v(ELEVATOR_ROOM_DAT)]=The [lcstr([v(TYPE_DAT)])] doors close and the [lcstr([v(TYPE_DAT)])] begins to move.;@remit [v(CURRENT_FLOOR_VAR)]=The [lcstr([v(TYPE_DAT)])] doors slide shut.;&FUTURE_VAR [parent(me)]=[name(%l)]|%l|%!;@wait [v(CALL_TIME_DAT)]={&CURRENT_FLOOR_NAME_VAR [parent(me)]=[first([v(FUTURE_VAR)],|)];&CURRENT_FLOOR_VAR [parent(me)]=[index([v(FUTURE_VAR)],|,2,1)];&CURRENT_EXIT_VAR [parent(me)]=[last([v(FUTURE_VAR)],|)];@remit [v(ELEVATOR_ROOM_DAT)]=The [lcstr([v(TYPE_DAT)])] stops and the doors slide open.;@remit [v(CURRENT_FLOOR_VAR)]=There is a ping as the [lcstr([v(TYPE_DAT)])] doors slide open.;@link [v(EXIT_OUT_DAT)]=[v(CURRENT_FLOOR_VAR)];@link [v(CURRENT_EXIT_VAR)]=[v(ELEVATOR_ROOM_DAT)];&WORKING_VAR [parent(me)]=NO}}}}
+
+&DESTS_CMD Elevator=$dests:@switch [type(me)]=THING,{@pemit %#=%r[capstr([v(TYPE_DAT)])] Destinations:;@dolist/delimit | [v(DESTS_LIST)]=@pemit %#=%b%b[index(##,:,2,1)] -- [index(##,:,1,1)]}
+
+&DEST_CMD Elevator=$dest *:@switch [type(me)]=THING,{@switch [strmatch([v(DESTS_LIST)],*:%0:*)]=0,{@pemit %#=That isn't a valid destination.},1,{&WORKING_VAR [parent(me)]=YES;&FUTURE_VAR [parent(me)]=[name([where([last([extract([v(DESTS_LIST)],[match([v(DESTS_LIST)],*:%0:*,|)],1,|)],:)])])]|[where([last([extract([v(DESTS_LIST)],[match([v(DESTS_LIST)],*:%0:*,|)],1,|)],:)])]|[last([extract([v(DESTS_LIST)],[match([v(DESTS_LIST)],*:%0:*,|)],1,|)],:)];@unlink [v(EXIT_OUT_DAT)];@unlink [v(CURRENT_EXIT_VAR)];@remit [v(CURRENT_FLOOR_VAR)]=The [lcstr([v(TYPE_DAT)])] doors slide shut.;@pemit %#=You press the button marked [ucstr(%0)] and the [lcstr([v(TYPE_DAT)])] doors slide shut.;@oemit %#=%N presses a button and the [lcstr([v(TYPE_DAT)])] doors slide shut.;@remit [v(ELEVATOR_ROOM_DAT)]=The [lcstr([v(TYPE_DAT)])] begins to move...;@wait [div([v(DEST_TIME_DAT)],2)]=@remit [v(ELEVATOR_ROOM_DAT)]=The [lcstr([v(TYPE_DAT)])] continues to move.;@wait [v(DEST_TIME_DAT)]={&CURRENT_FLOOR_NAME_VAR [parent(me)]=[first([v(FUTURE_VAR)],|)];&CURRENT_FLOOR_VAR [parent(me)]=[index([v(FUTURE_VAR)],|,2,1)];&CURRENT_EXIT_VAR [parent(me)]=[last([v(FUTURE_VAR)],|)];@remit [v(CURRENT_FLOOR_VAR)]=There is a ping as the [lcstr([v(TYPE_DAT)])] doors slide open.;@remit [v(ELEVATOR_ROOM_DAT)]=The [lcstr([v(TYPE_DAT)])] slows to a stop and the doors slide open at [u(CURRENT_FLOOR_NAME_VAR)].;@link [v(EXIT_OUT_DAT)]=[v(CURRENT_FLOOR_VAR)];@link [v(CURRENT_EXIT_VAR)]=[v(ELEVATOR_ROOM_DAT)];&WORKING_VAR [parent(me)]=NO}}}
+
+@@ Here's all of the variable attributes...
+
+@@ Put the # of seconds to wait after a call button has been pushed here.
+&CALL_TIME_DAT Elevator=4
+
+@@ Put the # of seconds to wait after a DESTS has been done here.
+&DEST_TIME_DAT Elevator=8
+
+@@ Use the order 'Floor Name:Floor Abbr:Exit In' for DESTS_LIST
+&DESTS_LIST Elevator=Model's Room:L1:#13300|Staff Area:L2:#13299|Code Testing Room:L3:#13331|Master Objects Room:L4:#13320
+
+@@ Put the DB# of current exit into elevator here.
+&CURRENT_EXIT_VAR Elevator=#13300
+
+@@ Put the DB# of current floor that CURRENT_EXIT_VAR is on here.
+&CURRENT_FLOOR_VAR Elevator=#13298
+
+@@ Put the name of current floor in CURRENT_FLOOR_VAR here.
+&CURRENT_FLOOR_NAME_VAR Elevator=Model's Room
+
+@@ Put the DB# of exit in elevator room leading out here.
+&EXIT_OUT_DAT Elevator=#13336
+
+@@ Put the DB# of room being used as the elevator here.
+&ELEVATOR_ROOM_DAT Elevator=#13338
+
+@@ Put what type of system this is (Elevator, Turbolift, etc.) here.
+&TYPE_DAT Elevator=Executive Elevator Car
+
+@@ Put the DB# of panel in elevator here.
+&PANEL_DBREF_DAT Elevator=#13337
+
+@@ DB#s for elevator use. You don't need to edit.
+&FUTURE_VAR Elevator=Production Level|#6234|#600
+
+@@ Keep track of elevator running or not. You don't need to edit.
+&WORKING_VAR Elevator=No
+
+&CREDIT Elevator=Adapted from the original code by Justice/Palatinus on the Star Wars MUSH -- darkside.stanford.edu 4402. Redone 7/1/96 by Sir Andrew/Model (siradrw@citilink.com) on Shadowrun MUSH -- shadowrun.dnaco.net 4201
+
+@set Elevator=Safe
+
+@set Elevator=Halt

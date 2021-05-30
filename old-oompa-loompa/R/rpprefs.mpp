@@ -1,0 +1,130 @@
+@@
+@@ +rpprefs system, version 1.0, from Rio: Manha de Carnval MUSH
+@@   by Javelin, 2002. Released under the Gnu Public License v2.
+@@
+@@ A system for players to register the kinds of RP they like and dislike,
+@@ to view those preferences on others, and to find others whose preferences
+@@ best match theirs. Intended to reside in the Master Room on a PennMUSH
+@@ of version 1.7.4 or later.
+@@
+@@ Your players should have a wizard-only RPPREFS attribute.
+@@
+@@ Usage (suitable for a help file):
+@@ 
+@@ +rpprefs [<player>]
+@@ +rpprefs <preference>=<value>
+@@ +rpprefs/matchall
+@@ 
+@@ The +rpprefs displays and sets RP preferences. RP preferences range
+@@ from -5 to 5 in a number of pre-set categories. In addition, each player
+@@ may set a preference for one unique category of their own choice.  
+@@
+@@ In the command's first form, you can display another player's RP
+@@ preferences, or, by leaving out <player>, your own. The second form
+@@ is used to set your RP preferences. The third form shows you the other
+@@ players whose preferences are closest to yours. 
+@@
+
+@@ USER CONFIGURABLE STUFF:
+@@   The categories attribute below should list, |-delimited, all the
+@@   preference categories. Each player also gets to pick an unlisted
+@@   category of their own.
+
+@create RPPrefs System
+
+&CATEGORIES RPPrefs System=
+  CONFLICT|CONVERSATION|CRIME|DEATH|PUZZLES|ROMANCE|STAFF PLOTS|TINYSEX|VIOLENCE
+
+@DESCRIBE RPPrefs System=The code for RPPRefs by Javelin, version 1.0!
+
+&DO_CATEGORY_LIST RPPrefs System=
+  $+rpprefs/list:
+    @pe/s %#=
+      Valid +RPPREF Categories:[iter([v(CATEGORIES)],%r
+      %b%b%b##,|)]%r
+      Plus ONE user-defined category.
+
+&DO_PREFS_CHECK RPPrefs System=
+  $^\+RPPREFS\s+([^=]+)$:
+    @pe/s %#=
+      [switch([strmatch(PLAYER,type(*%1))],1,[switch([hasattrval(*%1,RPPREFS)],1,[u(U_PREF_DISPLAY,num(*%1))],0,[name(*%1)] is not registered to use +RPPREFS.)],0,That doesn't seem to be a valid player.)]
+
+@set RPPrefs System/DO_PREFS_CHECK=regexp
+
+&DO_PREF_SET RPPrefs System=
+  $^\+rpprefs ([\w\s]+)=(-?\d+)$: 
+    @select 0=
+      [and(gte(%2,-5),lte(%2,5))], 
+        {
+          @pemit %#=Values must be between -5 and 5.
+        },
+      [setr(0,member(v(CATEGORIES),ucstr(%1),|))], 
+        {
+           &RPPREFS %#=[extract(get(%#/RPPREFS),1,9,|)]|[ucstr(%1)]:%2;
+          @pemit %#=You set your preference for [ucstr(%1)] to %2.
+        },
+      
+        {
+           &RPPREFS %#=[replace(get(%#/RPPREFS),%q0,[ucstr(%1)]:%2,|)];
+          @pemit %#=You set your preference for [ucstr(%1)] to %2.
+        }
+
+@set RPPrefs System/DO_PREF_SET=regexp
+
+&DO_PREFS_MATCHALL RPPrefs System=
+  $+rpprefs/matchall: 
+    @pemit %#=
+      Your RP preferences are most compatible with these players:%r
+      [ljust(Name,30)] Compatibility score%r
+      [setq(s,u(U_MATCH,%#,%#))]
+      [setq(0,setdiff(lsearch(all,eplayer,\[hasattrval(##,rpprefs)\]),%#))]
+      [setq(1,iter(%q0,u(U_MATCH,%#,##)))]
+      [setq(2,munge(sort_match,%q1,%q0))]
+      [setq(3,squish(iter(revwords(sort(%q1,n)),switch(##,>0,##))))]
+      [iter(%q3,[ljust(name(extract(%q2,#@,1)),30)] [round(mul(100,fdiv(##,%qs)),0)],%b,%r
+      )]%r
+      The highest possible compatibility value is 100.
+
+&DO_PREFS_SELF RPPrefs System=
+  $+RPPREFS:
+    @pe/s %#=
+      [switch([hasattrval(%#,RPPREFS)],1,[u(U_PREF_DISPLAY,%#)],0,You are not registered to use +RPPREFS.
+
+&FIL_NEGPREFS RPPrefs System=[lt(after(%0,:),0)]
+
+&FIL_POSPREFS RPPrefs System=[gt(after(%0,:),0)]
+
+&PREFSORT RPPrefs System=[sub(abs(after(%1,:)),abs(after(%0,:)))]
+
+&SORT_MATCH RPPrefs System=[revwords(sort(%0,n))]
+
+&U_DOTS RPPrefs System=[repeat(*,abs(after(%0,:)))]
+
+&U_MATCH RPPrefs System=
+  lmath(add,vmul(iter(extract(get(%0/rpprefs),1,9,|),after(itext(0),:),|),iter(extract(get(%1/rpprefs),1,9,|),after(itext(0),:),|)))
+
+&U_ONEPREF_DISPLAY RPPrefs System=
+  [space(4)]
+  [ljust([before(%0,:)],15)]
+  [if([gt([after(%0,:)],0)],+)]
+  [if([eq([after(%0,:)],0)],%b)]
+  [after(%0,:)]
+
+&U_PREF_DISPLAY RPPrefs System=
+  [setq(0,get(%0/RPPREFS))]
+  [setq(p,sortby(PREFSORT,filter(FIL_POSPREFS,%q0,|),|))]
+  [setq(n,sortby(PREFSORT,filter(FIL_NEGPREFS,%q0,|),|))]
+  [setq(z,setdiff(setdiff(%q0,%qp,|),%qn,|))]%r
+  [ljust([name(%0)] enjoys:,40)]
+  [name(%0) dislikes:%r
+  [iter(lnum(1,max(words(%qp,|),words(%qn,|))),[space(4)]
+  [setq(t,extract(%qp,#@,1,|))]
+  [ansi(switch(abs(after(%qt,:)),<4,g,hg),[rjust(u(U_DOTS,%qt),5)] [ljust(before(%qt,:),15)])]
+  [setq(t,extract(%qn,#@,1,|))]
+  [ansi(switch(abs(after(%qt,:)),<4,r,hr),[rjust(before(%qt,:),30)] [u(U_DOTS,%qt)])],%b,%r
+  )]%r
+  [name(%0)] has no preference about:%r
+  [table(regeditall(%qz,:\\d+,),18,78,|)]
+
+@set RPPrefs System = OPAQUE
+@set RPPrefs System = WIZARD

@@ -1,0 +1,234 @@
+@@
+@@ Sanctions - an administrative system for sanctioning problem players
+@@
+@@ By Trispis@M*U*S*H
+@@ All statements below reflect only Trispis's positions and should
+@@ not be construed as reflecting the positions of M*U*S*H or
+@@ its other administrators.
+@@
+@@ INTRODUCTION
+@@
+@@ This code is very much alpha.
+@@ What does this mean?
+@@
+@@ It means: don't harass me about the pathetic code it contains.
+@@
+@@ It means: If you can improve the code, please do.
+@@
+@@ When I wrote this, I did so specifically for functionality on M*U*S*H.
+@@ I am well aware that the code is bloated in a few places; I simply made
+@@ it work, and walked away. I have never taken a second look at it.
+@@ 
+@@ PHILOSOPHY
+@@ The specific purpose of this code is to provide consistency across the
+@@ ranks of your admin team. If you've ever had a player complain about
+@@ the unfairness of some punishment, when compared to the punishment a 
+@@ different admin gave to a different player in a different, but similar, 
+@@ situation... then you should have an appreciation for what this code is
+@@ intended to do.
+@@
+@@ If one or more of your admin are considered to be meaner/nicer or
+@@ more/less agressive than others, this system provides total anonymity
+@@ for applying punishments.
+@@ 
+@@ Furthermore, it is highly recommended that you spend a few 
+@@ minutes/days/weeks, depending on your game's needs, acquainting yourself
+@@ and your staff with this system's capabilities and, MOST IMPORTANTLY,
+@@ creating a concensus on how this system is, and is not, to be used.
+@@
+@@ Some specific recommendations I make to anyone who decides to implement
+@@ this system are:
+@@
+@@ Unless the sanctity of your game's db or server is at stake, make every
+@@ attempt to apply these sanctions in a *consistent* order, by *always*
+@@ giving every player *at least* ONE +sanction1 (all of your players, new
+@@ or old, need to know that you have policies, where they are, and that
+@@ you intend to enforce them via this +sanction system) before proceeding
+@@ to higher sanctions. Do not *ever* "skip" to a higher sanction unless
+@@ your game is actually in some sort of technical or physical jeopardy.
+@@ And, always use the sanction system *in place of* twink-negotiation
+@@ (i.e., don't allow your admins to attempt to interpret or justify your
+@@ AUP -- simply apply the sanctions and let your game's head wiz be the
+@@ final arbiter). Finally, always log any incidents which result in
+@@ sanctions, and make a bulletin board post to your admin's bulletin
+@@ board group explaining the circumstances and the reasons for your use
+@@ of your chosen sanction.
+@@
+@@ When Judge Roy Bean, aka The Hanging Judge, was asked if the extremely
+@@ low crime rate in his jurisdiction was due to the severity of his
+@@ punishments, he replied (paraphrase) "It's not the severity of the
+@@ punishment that deters crime, it's the certainty of it."
+@@
+@@ Simple Example:
+@@
+@@ Joe_Newbie logs in, creates a Sherman Tank, and begins killing everyone
+@@ he sees, friend or foe.
+@@
+@@ Jane_Admin witnesses this event.
+@@ Jane_Admin uses +sanction1 on Joe_Newbie. 
+@@ Joe settles down. 
+@@ Jane logs and posts her account of the event.
+@@
+@@ A week later, Joe_Newbie returns and begins harassing players verbally
+@@ because they're not helping him code his new bazooka.
+@@
+@@ Bill_Admin witnesses this event.
+@@ Bill_Admin reviews Joe's sanctions with +sfinger. 
+@@ Bill, at this time, should use +sanction2. 
+@@
+@@ (Joe has had a chance to review your policies. It's no one's fault but
+@@ his, if he didn't.)
+@@ 
+@@ If Joe's repeat offenses tend to be mild, it is acceptible to give
+@@ extra +sanction2's. Especially if his behavior is showing improvement.
+@@ (You're actually making a better player of him.)
+@@
+@@ If, OTOH, Joe shows no sign of relenting in his disruptive behavior,
+@@ progression to higher level sanctions... even @sitelock... may be
+@@ necessary.
+@@
+@@ DEPENDENCIES
+@@ This code, as it is presently written, is dependent upon a few other
+@@ pennmush/M*U*S*H things. You will likely need to either redesign this
+@@ code to apply to your game's theme and/or features, or add the following
+@@ pieces to your game.
+@@
+@@ 1. NO_CHAT flag (prevent players from using any of your chat system).
+@@    This is available as a user-contributed patch in ftp.pennmush.org
+@@    (/pub/PennMUSH/Source/contrib/no_chat<something>).
+@@ 2. A common channel lock, to which your "highly public channels" are
+@@    locked.
+@@ 3. &CRON_HOURLY needs to be triggered hourly, without fail.
+@@
+@@ INSTALLATION
+@@
+@@ #2 is assumed to be your Master Room.
+@@
+@@ &IS_WIZ (for the uselock) is assumed to include WIZARD and ROYALTY
+@@ players.
+@@
+@@ When the installation is completed, the object should be owned by your
+@@ game's head wiz. The purpose for this is to make sure that any admin
+@@ name displayed in its @mail messages will be that of your head wiz, and
+@@ only your head wiz. Thus, all sanctions appear to come from your head
+@@ wiz, preventing players from knowing which admin applied the sanction.
+@@ 
+@@ #100 is assumed to be your headwiz
+@@
+@@ #200 is assumed to be your "public channels" lock object, and
+@@ GAGGED.PLAYERS is assumed to be the attribute thereon which contains
+@@ #dbrefs of players who are prevented from using those channels.
+@@
+@@ You will need to create a restricted attribute named SANCTIONS, via the
+@@ @attrib command. It should be mortal_dark, wizard-only, non-inheritable,
+@@ nocommand, non-cloneable.
+@@
+@@ LICENSE
+@@ My preference would be a combination of GPL and Artistic License, for
+@@ the simple reason that I'd like to have quality patches, rewrites, or
+@@ other improvements responsibly submitted to me. Nonetheless, I'm
+@@ releasing this to Public Domain, because I believe it can provide a
+@@ means by which games can implement player environment controls in a
+@@ manner which is both: a) consistent across your admin population,
+@@ considering their distinct styles and personalities, and b) an extremely
+@@ fair system, if applied with consistency.
+@@
+@@ WARRANTY
+@@ No such animal. Use at your own risk.
+@@
+@@ SUPPORT
+@@ No such animal. Use at your own risk.
+@@
+@create Sanctions
+
+@link Sanctions = #2
+
+@lock/Use Sanctions=IS_WIZ/1
+&IS_WIZ Sanctions=[orflags(%#,Wr)]
+@set Sanctions/IS_WIZ=no_command
+
+@set Sanctions = WIZARD
+@set Sanctions = SAFE
+@set Sanctions = !NO_COMMAND
+
+&2.TR.IMPLEMENT.SANCTION Sanctions=@@ 9=%0, 8=recip-list, 7=mailmsg, 6=secs, 5=reason, 4=duration, 3=level, 2=type, 1=admin 0=player @@;@dol [setr(8,[setr(0,first(setr(9,escape(%0)),:))] [setr(1,elements(%q9,2,:))] [remove(#100,%q1)])][cemit(admin,SANCTION: [name(%q1)] has sanctioned [name(%q0)]: [switch([setr(2,elements(%q9,4,:))][setq(3,right(%q9,1))][setq(4,elements(%q9,5,:))],w,Warning,[switch(%q2,c,ChanGag,n,NO_CHAT,GAGGED)][switch(%q3,2,%bfor %q4 hours,%bindefinitely)])])][setq(5,elements(%q9,lnum(6,dec(words(%q9,:)))))][setq(6,elements(%q9,3,:))][set(%q0,sanctions:[if(hasattrval(%q0,sanctions),[xget(%q0,sanctions)]|)][rest(%q9,:)])][switch(%q2,c,[set(#200,gagged.players:[get(#200/gagged.players)] %q0)],n,[set(%q0,NO_CHAT)],g,[set(%q0,GAGGED)])][if(gt(%q3,1),set(%q0,suspect))][switch(%q3,2,set(me,list.sanction2:[v(list.sanction2)] %q0:[words(get(%q0/sanctions),|)]))]=@mail ##=Automated Sanction/[setr(7,[u(msg.sanction.%q3.[ifelse(strmatch(##,%q0),player,admin)],%q0,%q5,%q2,%q4,%q6)])][if(t(member(#100,##)),%r\%q9 == \escape\(\%0\) == %q9 %r\%q8 == %q8 %r\%q7 == %q7 %r\%q6 == %q6 %r\%q5 == %q5 %r\%q4 == %q4 %r\%q3 == %q3 %r\%q2 == %q2 %r\%q1 == %q1 %r\%q0 == %q0)][pemit(##,%r%r%q7%r%r[switch(##:%q2:%q3,%q0:g:2,Note: You have received a copy of this in @mail\, which you may read at the expiration of your %q4 hours.%r)])]
+@set Sanctions/2.TR.IMPLEMENT.SANCTION=no_command
+
+&CMD.SANCTION Sanctions=$+sanction *:@@ Unfinished. Need to doublecheck element grabbing. @@;@pemit %#=[switch(setr(0,pmatch(%0)),#-1,No such player as '%0'.,#-2,I don't know which '%0' you mean.,[setq(1,last(get(%q0/sanctions),|))]%r[switch(words(%q1),0,[name(%q0)] has no sanctions on record.%r%rRecommendation: +sanction1 <player>=<reason>%r,Player: [name(%q0)]%rLatest Sanction Level: [setr(2,right(%q1,1))]%rLatest Sanction Type: [elements(%q1,3,:)] [switch(%q2,2,\(Duration: [elements(%q1,4,:)] hours\))]%rLatest Sanction Reason: [elements(%q1,lnum(5,dec(words(%q1,:))),:)]%r%rRecommendation: +sanction[ifelse(eq(%q2,4),4,inc(%q2))][switch(%q2,1,/<chan|nochat|gag>,2,/<chan|nochat|gag>)] [name(%q0)][switch(%q2,1,\[/24-72\])]=<reason>%r[if(gte(%q2,3),%r... and be prepared to @sitelock [name(%q0)]'s &lastsite.)][switch(%q2,4,%r%rSee Also: ANEWS SANCTIONS5)])])]
+
+&CMD.SANCTION1 Sanctions=$+sanction1 *=*:@switch [setq(0,[setr(2,pmatch(%0))]:%#:[secs()]:[setr(1,w)]:[setr(3,0)]:[setr(4,ifelse(gte(words(%1),2),%1,#-reason))]:1)][strmatch(%q0,*#-*)]=1,{@@return errors & suggestions@@;@pemit %#=%rCorrect syntax: +sanction1 <player>=<reason>%r%rInvalid input: +sanction1 [switch(%q2,#-*,<[ansi(h,ERROR)]>,%0)]=[switch(%q4,*#-*,<[ansi(h,ERROR)]>,%q4)]%r%r[iter(graball(%q0,*#-*,:),[switch(##,#-1*,Invalid player: [u(me/msg.pmatch1,%0)],#-2*,Invalid player: [u(me/msg.pmatch2,%0)],Invalid reason: Minimum 2 words. Can't contain "#-".)],:,%r)]%r%rRecommendation: +sanction1 [switch(%q2,#-*,<[ansi(h,Name)]>,[name(%q2)])]=[switch(%q4,*#-*,<[ansi(h,Min. 2 words\, no "#-")]>,%q4)]%rNo action performed.[switch(%#,#100,%r%q0)]},{@@do action@@;@tr me/tr.implement.sanction=%q0}
+
+&CMD.SANCTION2 Sanctions=$+sanction2/* *=*:@switch [setq(0,[setr(2,pmatch(before(%1,/)))]:%#:[secs()]:[setr(1,ifelse(t(words(graball(changag channel nochat no_chat gagged,%0*))),left(%0,1),#-type))]:[setr(3,switch(after(%1,/),*d,mul(24,ifelse(trunc(#$),trunc(#$),1)),*h,ifelse(trunc(#$),trunc(#$),24),ifelse(isnum(#$),ifelse(gt(#$,0),#$,24),#-time)))]:[setr(4,ifelse(gte(words(%2),2),%2,#-reason))]:2)][strmatch(first(%q0),*#-*)]=1,{@@return errors & suggestions@@;@pemit %#=%rCorrect syntax: +sanction2/<type> <player>\[/<time>\]=<reason>%r%rInvalid input: +sanction2/[switch(%q1,#-*,<[ansi(h,ERROR)]>,%0)] [switch(%q2,#-*,<[ansi(h,ERROR)]>,before(%1,/))][switch(%1,*/*,/[switch(%q3,#-*,<[ansi(h,ERROR)]>,%q3)])]=[switch(%q4,*#-*,<[ansi(h,ERROR)]>,%q4)]%r%r[iter(graball(%q0,#-*,:),[switch(##,#-type,Invalid type: Must be one of: channel nochat gagged,#-1*,Invalid player: [u(me/msg.pmatch1,before(%1,/))],#-2*,Invalid player: [u(me/msg.pmatch2,before(%1,/))],#-time,Invalid time: Must be a time stated in hours (h) or days (d). Default: h,Invalid reason: Minimum 2 words. Can't contain "#-".)],:,%r)]%r%rRecommendation: +sanction2/[switch(%q1,c,chan,n,nochat,g,gag,[ansi(h,nochat)])] [switch(%q2,#-*,<[ansi(h,Name)]>,[name(%q2)])][switch(%1,*/*,/[switch(%q3,#-*,[ansi(h,24h)],after(%1,/))])]=[switch(%q4,*#-*,<[ansi(h,Min. 2 words\, no "#-")]>,%q4)]%rNo action performed.[switch(%#,#100,%r%q0)]},{@@do action@@;@tr me/tr.implement.sanction=%q0}
+
+&CMD.SANCTION3 Sanctions=$+sanction3/* *=*:@switch [setq(0,[setr(2,pmatch(%1))]:%#:[secs()]:[setr(1,ifelse(t(words(graball(changag channel nochat no_chat gagged,%0*))),left(%0,1),#-type))]:[setr(3,0)]:[setr(4,ifelse(gte(words(%2),2),%2,#-reason))]:3)][strmatch(%q0,*#-*)]=1,{@@return errors & suggestions@@;@pemit %#=%rInvalid input: +sanction3/[switch(%q1,#-*,<[ansi(h,ERROR)]>,%0)] [switch(%q2,#-*,<[ansi(h,ERROR)]>,%1)]=[switch(%q4,*#-*,<[ansi(h,ERROR)]>,%q4)]%r%r[iter(graball(%q0,*#-*,:),[switch(##,#-type,Invalid type: Must be one of: channel nochat gagged,#-1*,Invalid player: [u(me/msg.pmatch1,%1)],#-2*,Invalid player: [u(me/msg.pmatch2,%1)],Invalid reason: Minimum 2 words. Can't contain "#-".)],:,%r)]%r%rRecommendation: +sanction3/[switch(%q1,c,chan,n,nochat,g,gag,[ansi(h,nochat)])] [switch(%q2,#-*,<[ansi(h,Name)]>,[name(%q2)])]=[switch(%q4,*#-*,<[ansi(h,Min. 2 words\, no "#-")]>,%q4)]%rNo action performed.[switch(t(member(#100,%#)),1,%r%q0)]},{@@do action@@;@tr me/tr.implement.sanction=%q0}
+
+&CMD.SANCTION4 Sanctions=$+sanction4 *=*:@switch [setq(0,[setr(2,pmatch(%0))]:%#:[secs()]:[setr(1,g)]:[setr(3,0)]:[setr(4,ifelse(gte(words(%1),2),%1,#-reason))]:4)][strmatch(%q0,*#-*)]=1,{@@return errors & suggestions@@;@pemit %#=%rInvalid input: +sanction4 [switch(%q2,#-*,<[ansi(h,ERROR)]>,%0)]=[switch(%q4,*#-*,<[ansi(h,ERROR)]>,%q4)]%r%r[iter(graball(%q0,*#-*,:),[switch(##,#-1*,Invalid player: [u(me/msg.pmatch1,%0)],#-2*,Invalid player: [u(me/msg.pmatch2,%0)],Invalid reason: Minimum 2 words. Can't contain "#-".)],:,%r)]%r%rRecommendation: +sanction4 [switch(%q2,#-*,<[ansi(h,Name)]>,[name(%q2)])]=[switch(%q4,*#-*,<[ansi(h,Min. 2 words\, no "#-")]>,%q4)]%rNo action performed.[switch(t(member(#100,%#)),1,%r%q0)]},{@@do action@@;@tr me/tr.implement.sanction=%q0}
+
+&CMD.SFINGER Sanctions=$+sfinger *:@pemit %#=[switch(pmatch(%0),#-1*,u(me/msg.pmatch1,%0),#-2*,u(memsg.pmatch2,%0),[tag(samp)][setq(9,graball(get(me/list.sanction2),#$:*))]%r[center([name(#$)]'s Sanction History,77)]%r%r [ljust(Date and Time,25)][ljust(Admin,16)][ljust(level/type,11)][ljust(\[duration\],11)]%r Reason%r[iter(get(#$/sanctions),%r [setq(0,trim(escape(##),\\,l))][ljust(convsecs(elements(%q0,2,:)),25)][ljust(name(first(%q0,:)),16)][ljust([s([right(%q0,1)]/[switch(elements(%q0,3,:),w,Warning,c,ChanGag,n,NO_CHAT,GAGGED)])],11)][switch(elements(%q0,4,:),0,,[switch(setr(8,grab(%q9,*:#@)),,,[elements(timestring(sub(add(elements(%q0,2,:),mul(3600,elements(%q0,4,:))),secs())),lnum(1,3))]%b/%b)][elements(%q0,4,:)][switch(%q8,,%bhours \[expired\],h)])]%r Reason: [elements(%q0,lnum(5,dec(words(%q0,:))),:)]%r,|)][endtag(samp)])]
+
+
+&CRON_HOURLY Sanctions=@switch words(setr(0,v(list.sanction2)))=0,,@dol %q0=@tr me/tr.sanction2.check=##
+@set Sanctions/CRON_HOURLY=no_command
+
+@DESCRIBE Sanctions=SemiAutomated Sanctions
+
+&HELP_SANCTION Sanctions=%r +sanction1 <player>=<reason>%r +sanction2/<chan|nochat|gag> <player>\[/<time>\]=<reason>%r +sanction3/<chan|nochat|gag> <player>=<reason>%r +sanction4 <player>%r +sanction5 <player>%r%r
+@set Sanctions/HELP_SANCTION=no_command
+
+&LIST.SANCTION2 Sanctions=
+@set Sanctions/LIST.SANCTION2=no_command
+
+&MSG.PMATCH1 Sanctions=No such player as '%0'.
+@set Sanctions/MSG.PMATCH1=no_command
+
+&MSG.PMATCH2 Sanctions=I don't know which '%0' you mean.
+@set Sanctions/MSG.PMATCH2=no_command
+
+&MSG.SANCTION.1.ADMIN Sanctions=[name(%0)] has received an official automated warning via both pemit and @mail, for %1.%rPlease make sure you have:%r a) made a bbpost to the Sanctions bboard group.%r b) logged this incident.
+@set Sanctions/MSG.SANCTION.1.ADMIN=no_command
+
+&MSG.SANCTION.1.PLAYER Sanctions=Automated warning: You are deemed in violation of NEWS POLICY AUP for %1. This is your one and only warning. This offense and warning have been documented and recorded on your character. Any further offense will subject you to subsequent measures as explained in NEWS POLICY SANCTIONS.
+@set Sanctions/MSG.SANCTION.1.PLAYER=no_command
+
+&MSG.SANCTION.2.2.ADMIN Sanctions=[name(%0)] has received notification via pemit and @mail that they may now [switch(%1,c,use +public and associated channels,n,use the chat system,speak)].
+@set Sanctions/MSG.SANCTION.2.2.ADMIN=no_command
+
+&MSG.SANCTION.2.2.PLAYER Sanctions=Your %0 hour period has ended, and you may once again [switch(%1,c,use +public and associated channels,n,use the chat system,speak)].
+@set Sanctions/MSG.SANCTION.2.2.PLAYER=no_command
+
+&MSG.SANCTION.2.ADMIN Sanctions=[name(%0)] has received notification via pemit and @mail that they cannot [switch(%2,c,use +public and associated channels,n,use the chat system,speak)] for %3 hours, beginning at [convsecs(%4)] server time, for %1.
+@set Sanctions/MSG.SANCTION.2.ADMIN=no_command
+
+&MSG.SANCTION.2.PLAYER Sanctions=Automated warning: You are deemed in violation of NEWS POLICY AUP, for %1, after having received previous warnings and/or sanctions. Accordingly, you may not [switch(%2,c,use +public and associated channels,n,use the chat system, speak)] for %3 hours, beginning at [convsecs(%4)] server time. It is the hope of the administration that you will use this time to re-acquaint yourself with the MUSH policies.
+@set Sanctions/MSG.SANCTION.2.PLAYER=no_command
+
+&MSG.SANCTION.3.ADMIN Sanctions=[name(%0)] has been notified via pemit and @mail that they may no longer [switch(%2,c,use +public and associated channels,n,use the chat system,speak)] for %1, and that they must contact [name(owner(me))] via email to appeal this sanction.
+@set Sanctions/MSG.SANCTION.3.ADMIN=no_command
+
+&MSG.SANCTION.3.PLAYER Sanctions=Automated warning: You are deemed in violation of NEWS POLICY AUP, for %1, after having already been disciplined for a previous violation. Accordingly, you may not [switch(%2,c,use +public and associated channels,n,use the chat system, speak)] any more. To regain this privilege, you MUST appeal to [name(owner(me))], and ONLY to [name(owner(me))][switch(%2,g,%bby email)]. Attempts to circumvent this restriction will result in your immediate banning.
+@set Sanctions/MSG.SANCTION.3.PLAYER=no_command
+
+&MSG.SANCTION.4.ADMIN Sanctions=[name(%0)] has been notified via pemit and @mail that they may no longer speak for %1, and that they must contact [name(owner(me))] via email to appeal this sanction.
+@set Sanctions/MSG.SANCTION.4.ADMIN=no_command
+
+&MSG.SANCTION.4.PLAYER Sanctions=Automated warning: You are deemed in violation of NEWS POLICY AUP, for %1, after having already been disciplined for a previous violation. Accordingly, you may not speak any more. To regain this privilege, you MUST appeal to [name(owner(me))], and ONLY to [name(owner(me))] by email. Attempts to circumvent this restriction will result in your immediate banning.
+@set Sanctions/MSG.SANCTION.4.PLAYER=no_command
+
+&PLAYER.SANCTIONS Sanctions=Here's what each @sanction entry will hold: %r%r<#admin>:<\[secs\()\] of occurence>:<first letter of type: c\[changag\] n\[ochat\] g\[agged\] w\[arning\]>:<duration in hours, else 0 for warnings or indefinite>:<reason>:<level of this sanction>. %r%rExample: #100:934294834:g:72:gratuitous abusiveness:2%r%rAn example of a repeat offender might look like the following:%r%r#101:934104834:w:0:profanity on +pub:1|#100:934255531:c:48:profanity on +pub:2|#102:935004824:g:0:gratuitous profanity:3%r%rNote: \[right\(get\(player/sanctions),1)\] or \[last\(get\(player/sanctions),:)\] should return the most recently applied sanction level.
+@set Sanctions/PLAYER.SANCTIONS=no_command
+
+
+&TR.IMPLEMENT.SANCTION Sanctions=@@ 9=%0, 8=recip-list, 7=mailmsg, 6=secs, 5=reason, 4=duration, 3=level, 2=type, 1=admin 0=player @@;@dol [setr(8,[setr(0,first(setr(9,trim(escape(%0),\\,l)),:))] [setr(1,elements(%q9,2,:))] [remove(#100,%q1)])][cemit(admin,SANCTION: [name(%q1)] has sanctioned [name(%q0)]: [switch([setr(2,elements(%q9,4,:))][setq(3,right(%q9,1))][setq(4,elements(%q9,5,:))],w,Warning,[switch(%q2,c,ChanGag,n,NO_CHAT,GAGGED)][switch(%q3,2,%bfor %q4 hours,%bindefinitely)])])][setq(5,elements(%q9,lnum(6,dec(words(%q9,:))),:))][setq(6,elements(%q9,3,:))][set(%q0,sanctions:[if(hasattrval(%q0,sanctions),[xget(%q0,sanctions)]|)][rest(%q9,:)])][switch(%q2,c,[set(#200,gagged.players:[setunion([get(#200/gagged.players)],%q0)])],n,[set(%q0,NO_CHAT)],g,[set(%q0,GAGGED)])][if(gt(%q3,1),set(%q0,suspect))][switch(%q3,2,set(me,list.sanction2:[v(list.sanction2)] %q0:[words(get(%q0/sanctions),|)]))]=@mail ##=Automated Sanction/[setr(7,[u(msg.sanction.%q3.[ifelse(strmatch(##,%q0),player,admin)],%q0,%q5,%q2,%q4,%q6)])][if(t(member(#100,##)),%r\%q9 == \escape\(\%0\) == %q9 %r\%q8 == %q8 %r\%q7 == %q7 %r\%q6 == %q6 %r\%q5 == %q5 %r\%q4 == %q4 %r\%q3 == %q3 %r\%q2 == %q2 %r\%q1 == %q1 %r\%q0 == %q0)][pemit(##,[switch(##,%q0,%r)]%r%q7%r[switch(##,%q0,%r)][switch(##:%q2:%q3,%q0:g:2,Note: You have received a copy of this in @mail\, which you may read at the expiration of your %q4 hours.%r)])]
+@set Sanctions/TR.IMPLEMENT.SANCTION=no_command
+
+&TR.SANCTION2.CHECK Sanctions=@@ This is triggered by cron_hourly. @@;@switch [setq(0,secs())][setq(2,elements(setr(1,elements(get([before(%0,:)]/sanctions),after(%0,:),|)),2,:))][setq(3,elements(%q1,4,:))][setr(4,sub(add(%q2,mul(3600,%q3)),%q0))]=>3540,{@@ Next Hourly Cron @@},<0,{@tr me/tr.sanction2.check2=%0},{@wait %q4=@tr me/tr.sanction2.check2=%0}
+@set Sanctions/TR.SANCTION2.CHECK=no_command
+
+&TR.SANCTION2.CHECK2 Sanctions=@switch [words(graball(elements(setr(0,get([before(%0,:)]/sanctions)),lnum(inc(after(%0,:)),25),|),*:[elements(elements(%q0,after(%0,:),|),3,:)]:*,|))]=0,{@@ if no other sanctions of same type then @@;@tr me/tr.terminate.sanction2=%0},{@tr me/tr.sanction2.conflict=[before(%0,:)],[after(%0,:)]}
+@set Sanctions/TR.SANCTION2.CHECK2=no_command
+
+&TR.SANCTION2.CONFLICT Sanctions=@mail #100=[set(me,list.sanction2:[remove(get(me/list.sanction2),%0:%1)])]=Sanction Conflict/A conflict occurred in attempting to resolve [name(%0)]\(%0[flags(%0)]\)'s sanction element #%1, a timed sanction. This sanction has been removed from the cron without termination. Please investigate and confirm.
+@set Sanctions/TR.SANCTION2.CONFLICT=no_command
+
+&TR.TERMINATE.SANCTION2 Sanctions=@@ This will be triggered by a &tr.sanction2.check. @@;@dolist [setr(0,before(%0,:))] [setr(1,first(setr(9,elements(get(%q0/sanctions),after(%0,:),|)),:))] [remove(#100,%q1)][set(me,list.sanction2:[remove(get(me/list.sanction2),%0)])][switch(setr(5,elements(%q9,3,:)),c,[set(#200,gagged.players:[remove(get(#200/gagged.players),%q0)])],[set(%q0,![switch(%q5,n,NO_CHAT,GAGGED)])])]=@mail ##=Automated Notification/[setr(2,switch(##,%q0,[u(msg.sanction.2.2.player,elements(%q9,4,:),%q5)],[u(msg.sanction.2.2.admin,%q0,%q5)][if(t(member(#100,##)),%r\%0 == %0%r\%q0 == %q0%r\%q9 == %q9%r\%q5 == %q5%r)]))][pemit(##,%q2)]
+@set Sanctions/TR.TERMINATE.SANCTION2=no_command

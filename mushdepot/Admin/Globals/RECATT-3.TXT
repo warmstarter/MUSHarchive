@@ -1,0 +1,68 @@
+@create AutoDefense
+@link AutoDefense=[owner(me)]
+@lock/Basic AutoDefense=[owner(me)]
+@set AutoDefense=ROYALTY
+@set AutoDefense=SAFE
+@set AutoDefense=!NO_COMMAND
+@set AutoDefense=SAFE
+@set AutoDefense=VERBOSE
+@set AutoDefense=PUPPET
+&SPECPS2 AutoDefense=OK;&opt me=80;&helm me=600;&nav me=1640;&warp me=0;&kind me=start reactor;&phasers me=360;&torps me=240;&shields me=1640
+&SPECPS1 AutoDefense=OK;&opt me=82;&helm me=400;&nav me=1568;&warp me=0;&kind me=start reactor;&phasers me=200;&torps me=200;&shields me=1568
+@WI AutoDefense=^* says, "List specs.":\Computer:  [ansi(b,The available specs are:  SpecPS1, SpecPS2, and SpecPS10.  To changes the current specs say `Change specs to <SPEC>.' or specify your own specs by saying `Change specs.')]
+@WH AutoDefense=^* says, "Change specs to *.":@switch [get(me/%1)]=OK*,{@wait 1=\Computer:  [ansi(b,Specs changed to %1.)];@trig me/%1},\Computer:  [ansi(b,[capstr(%1)] is not a valid spec file.)]
+@WG AutoDefense=^* says, "List commands.":\Computer:  [ansi(b,Available voice commands are:  Engineering report, Helm report, Navigation report, Damage report, Sensor report, Scan contact <CONTACT #>, Activate full status reports, Deactivate full status reports, List specs, and Change specs.  Available typed commands are:  Autoreset, Autostart, and Autoshutdown.)]
+@WF AutoDefense=^* says, "Navigation report.":@listen me=*;\Computer:  [ansi(b,Retrieving navigation report...)];@wait 1=ns;@wait 2=@switch [get(me/listencheck)]=YES,think Checking...,NO,@listen me=
+@WE AutoDefense=^* says, "Helm report.":@listen me=*;\Computer:  [ansi(b,Retrieving helm report...)];@wait 1=hs;@wait 2=@switch [get(me/listencheck)]=YES,think Checking...,NO,@listen me=
+@WD AutoDefense=^* says, "Engineering report.":@listen me=*;\Computer:  [ansi(b,Retrieving engineering report...)];@wait 1=es;@wait 2=@switch [get(me/listencheck)]=YES,think Checking...,NO,@listen me=
+@WC AutoDefense=^* says, "Damage report.":@listen me=*;\Computer:  [ansi(b,Retrieving damage report...)];@wait 1=system status;@wait 2=@switch [get(me/listencheck)]=YES,think Checking...,NO,@listen me=
+@ATPORT AutoDefense=home
+@WB AutoDefense=^Incoming * from [*]*:@switch [get(me/locked)]=%1,think No relock,{@trig me/va;@wait 2=&locked me=%1;@wait 1=lock %1}
+@WA AutoDefense=^Enemy * fired by [*]*:@switch [get(me/locked)]=%1,think No relock,{@trig me/va;@wait 2=&locked me=%1;@wait 1=lock %1}
+@VZ AutoDefense=^Lock achieved.:\Computer:  [ansi(b,Lock Achieved.)];fga;fpa;taa;@wait 1=taa
+@VW AutoDefense=^***** Contact [*]* DESTROYED. *****:@wait 1=\Computer:  [ansi(b,Contact number :%5%6 has been terminated.)]
+@VP AutoDefense=^* says, "shields=*, nav=*, helm=*, torps=*, phasers=*, opt=*, warp=*, kind=*.":@wait 1=\Computer:  [ansi(b,Specs changed.)];&shields me=%1;&nav me=%2;&helm me=%3;&torps me=%4;&phasers me=%5;&opt me=%6;&warp me=%7;&kind me=%8
+@VO AutoDefense=^* says, "Change specs.":\[ansi(y,Shields=Amount to shields%rNav=Amount to navigation%rHelm=Amount to helm%rTorps=Amount to torpedos%rPhasers=Amount to phasers%rOpt=Optimal reactor setting%rWarp=Amount to warp%rKind=Start reactor or undock)];@wait 1=\Computer:  [ansi(b,To change specs for ship say the following:  %n says, "shields=#, nav=#, helm=#, torps=#, phasers=#, opt=#, warp=#, kind=start reactor or undock.")]
+@VN AutoDefense=^* has been broken.:&lockcheck me=NO
+@VM AutoDefense=$autoreset:\Computer:  [ansi(y,Resetting autodefense...)];@halt me=@wait 1=@set me=!halt;@wait 5=@trig me/startup;@wait 10=\Computer:  [ansi(y,Autodefense Reset.)]
+@AHEAR AutoDefense=@switch %0={* says, "*"},think No emit,\[ansi(c,%0)]
+@VB AutoDefense=^Warning! * [*]*:@switch %1=[get(me/locked)],@emit Computer:  [ansi(r,Weapons lock holding.)],{lock %1;@emit Computer:  [ansi(r,Locking Weapons on contact %1.)]}
+@VA AutoDefense=^Warning! * [*]*:@wait 1=&locked me=%1;\Computer:  [ansi(b,Raising Shields)];rs;&lockcheck me=YES;fga
+&SHIELDS AutoDefense=1834
+&NAV AutoDefense=1834
+&HELM AutoDefense=966
+&TORPS AutoDefense=300
+&PHASERS AutoDefense=666
+@DESCRIBE AutoDefense=An autodefense computer.  Say 'List commands.' for help.
+@VC AutoDefense=^* shield reduced * - down to *:\Computer:  [ansi(r,%0 shield reduced %1 - down to %2!)]
+@STARTUP AutoDefense=\Computer:  [ansi(y,Initializing startup sequence...)];@trig me/shipcheck;&shipdestroyed me=NO;&listencheck me=NO;@listen me;@set me=monitor;&locked me;&lockcheck me=NO;man;@wait 3=repair;@wait 5=[get(me/kind)];@wait 7=esr [get(me/opt)];@wait 7=ea [get(me/helm)] [get(me/nav)] 0;@wait 7=qa [get(me/warp)] [get(me/shields)];@wait 7=ha [get(me/phasers)] [get(me/torps)];@wait 9=@trig me/autoturn;@wait 7=@dolist [lnum(6)]=g+ ##
+&KIND AutoDefense=start reactor
+&OPT AutoDefense=70
+@VD AutoDefense=^* says, "Activate full status reports.":@emit Computer:  [ansi(b,Full status reports activated.)];@listen me=*;&listencheck me=YES
+@VE AutoDefense=^* says, "Deactivate full status reports.":@emit Computer:  [ansi(b,Full status reports deactivated.)];@listen me=;&listencheck me=NO
+@VF AutoDefense=^* says, "Scan contact *.":@listen me=*;\Computer:  [ansi(b,Scanning contact %1...)];@wait 1=scan %1;@wait 2=@switch [get(me/listencheck)]=YES,think Checking...,NO,@listen me=
+&LISTENCHECK AutoDefense=NO
+@VG AutoDefense=^* says, "Activate autodefense.":man;\Computer:  [ansi(y,Autodefense activated.)]
+@VH AutoDefense=^* says, "Deactivate autodefense.":unman;\Computer:  [ansi(y,Autodefense deactivated.)]
+@VI AutoDefense=^* shield failed!:@emit Computer:  [ansi(r,%0 shield failed!)]
+@VJ AutoDefense=^Hull damaged * -- integrity now at *:@dolist [lnum(6)]=tf ## hull;\Computer:  [ansi(r,Repairing Hull.)]
+@VK AutoDefense=^* shield damaged.:\Computer:  [ansi(r,%0 shield damaged!)]
+@VL AutoDefense=^Direct hit to *:\Computer:  [ansi(r,Direct hit to %0!)]
+&LOCKCHECK AutoDefense=NO
+@VQ AutoDefense=^* * reloaded.:p+ 0;p+ 1;p+ 2;p+ 3;p+ 4;p+ 5;p+ 6;p+ 7;p+ 8
+@VR AutoDefense=^* launched.:\Computer:  [ansi(m,Firing %0.)]
+@VS AutoDefense=^* fired.  Hit for * yield.:\Computer:  [ansi(m,%0 fired with %1 yield.)]
+@VT AutoDefense=^* * fully charged.:fg %1
+&AUTOTURN AutoDefense=sh 0+;@wait 15=sh 90+;@wait 30=sh 180+;@wait 45=sh 270+;@wait 60=@trig me/autoturn
+@VU AutoDefense=^* shield fully charged.:\Computer:  [ansi(b,%0 shield fully charged.)]
+@VV AutoDefense=^* * armed.:fpa
+@VX AutoDefense=$autoshutdown:\Computer:  [ansi(y,Shutting down AutoDefense...)];@set me=!monitor;@listen me;&listencheck me=NO;unman;@wait 1=@halt me=@wait 2=@set me=!halt
+@VY AutoDefense=^* says, "Sensor report.":@listen me=*;\Computer:  [ansi(b,Retrieving Sensor report...)];@wait 1=ssr;@wait 2=@switch [get(me/listencheck)]=YES,think Checking...,NO,@listen me=
+@WJ AutoDefense=$autostart:\Computer:  [ansi(y,Starting up autodefense...)];@set me=monitor;@wait 1=\Computer:  [ansi(y,Autodefense restarted.)]
+@WK AutoDefense=^NEW CONTACT - designated number *:\Computer:  [ansi(b,New contact designated number %0.)]
+@WL AutoDefense=^CONTACT [*] LOST*:\Computer:  [ansi(b,Contact number %0 lost.)]
+&SPECPS10 AutoDefense=OK;&opt me=70;&helm me=966;&nav me=1834;&warp me=0;&kind me=start reactor;&phasers me=666;&torps me=300;&shields me=1834
+&WARP AutoDefense=0
+@WM AutoDefense=^Hull has failed*:&shipdestroyed me=YES
+&SHIPCHECK AutoDefense=@switch [get(me/shipdestroyed)]=NO,think No autoreset,YES,@trig me/vm;@wait 60=@trig me/shipcheck
+&SHIPDESTROYED AutoDefense=NO

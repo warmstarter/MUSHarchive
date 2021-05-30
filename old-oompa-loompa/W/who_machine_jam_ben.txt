@@ -1,0 +1,7 @@
+@create WHO Machine v2.0
+@lock WHO Machine v2.0 == me
+&CREDITS WHO Machine v2.0=Coded by Jamie@FCMush and Benwin@FCMush
+@set WHO Machine v2.0/CREDITS=visual
+@DESCRIBE WHO Machine v2.0=who
+@set WHO Machine v2.0/DESCRIBE=no_command visual
+&DO-WHO WHO Machine v2.0=$+who:[pemit(%#,[ansi(hm,[repeat(=,75)])]%R[ansi(hc,Today's Poll:)]%r%t[ansi(hc,[xget(me,poll)])]%r[ansi(hm,[repeat(=,75)])]%r[ansi(hb,[center(Connected Players - [mudname()],75)])]%R[ansi(hb,[repeat(=,75)])]%R[ansi(c,Name[space(9)]Alias Conn Idle Sta [switch([v(who_poll)], ,Doing,[mid([v(who_poll)],0,35)])]%R[ansi(hb,[repeat(-,75)])])])] [iter([lwho()],[switch([hasflag(##,dark)],0,[pemit(%#,[ansi(hc,[ljust([name(##)],13)][ljust([mid([get(##/alias)],0,3)],3)][rjust([mid([timestring([conn(##)])],0,3)],6)] [rjust([mid([timestring([idle(##)])],0,3)],5)] [ljust([mid([get(##/sta)],0,3)],3)]%B[switch([orflags(%#,WrT)],0,[get(##/+doing)],1,[get(##/lastsite)])])])])])][pemit(%#,[ansi(hb,[repeat(-,75)])]%R[ansi(hc,There [switch([words([lwho()])],1,is,are)] [words([lwho()])] [switch([words([lwho()])],1,player,players)] connected.)]%R[ansi(hm,[repeat(=,75)])])]

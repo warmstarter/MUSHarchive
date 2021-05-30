@@ -1,0 +1,1001 @@
+Proposal:
+Virtual Reality and the Internet:
+OpalMOO as a Bi-Co Tool
+
+
+
+
+     November 19, 1993
+
+     Kathaleen E. Amende
+          kamende@cc.brynmawr.edu
+     Seth I. Rich
+          sir@po.cwru.edu
+=================================================================
+
+Table of Contents
+
+
+     Introduction
+
+     The OpalMOO Difference
+
+     VR Interface Proposal
+
+     Advantages to the VR Interface
+
+     Technical Requirements
+
+     Appendix A: Sample Sessions
+          Sample IRC Session
+          Sample Gopher Session
+
+     Appendix B: Additional Usage Notes for OpalMOO
+
+     Appendix C: Further Information on OpalMOO
+          The OpalMOO History
+          Theme Requirements and Rules for OpalMOO
+
+
+=================================================================
+
+Introduction
+
+This proposal intends to introduce a Virtual Reality (VR) interface for various network tools commonly used by Bryn Mawr students.  We anticipate that, by introducing user-friendly interfaces to Internet services, Bryn Mawr students will grow more acquainted with the Internet services available (with special emphasis on using those services for research) and grow more comfortable and experienced with using those services.
+
+As the move is made to reduce interactive sessions on cc.brynmawr.edu, there must be a parallel move to provide the same functionality through client-server software.  Unfortunately, because of the software available, this will more than likely entail a separate client program for each desired service for each machine (Macintosh or PC) available.  This puts an unnecessary burden on the user to learn many different client programs if she wants to be an experienced user.
+
+Virtual Reality is perhaps the "hippest" area in software today.  While this often refers to the grand video-aural-tactile experience some hope for, there is a large history of text-based virtual realities, ranging from the Zork and Adventure games to the early MUD software.  Anyone who wants to work with computers in the future will need to be at least superficially acquainted with VR, and the deeper the relationship the better.
+
+For this reason, we propose that the primary interface to Internet services be via a VR service (specifically, OpalMOO).  This text-based virtual reality will allow for virtual interfaces (as well as more straightforward ones for experienced users) which will make these Internet services accessible and, perhaps more importantly, fun.
+=================================================================
+
+The OpalMOO Difference
+
+Having a VR interface to Internet services will make them more appealing to the non-technical user.  Before delving into the details of the proposed OpalMOO project, an introduction to OpalMOO would seem to be in order.
+
+OpalMOO, running on port 7777 of cc.brynmawr.edu, is a text-based, multi-user, interactive virtual reality that is accessible over the Internet by anyone with access to telnet.  Many Bryn Mawr students presently enjoy a number of the pre-existing MOOs, such as LambdaMOO, running out of Xerox Corporation in California.  OpalMOO, running at Bryn Mawr College, is one of the more popular ones because of its innovative programming style and theme.
+
+The embodiment of people in OpalMOO is the "player" or "character" -- the virtual equivalent of the person walking around the real world.  In order to get an OpalMOO character, a user must register an email address; the randomly-assigned password is mailed to the registered address to verify the user's identity.  After logging in to OpalMOO, players may configure their characters in a number of ways.  A user may change her name (within certain technical limits) or set her description and gender[1].  Because OpalMOO is an object-oriented, programmable society, a user can obtain a "programmer bit" which enables her to create things such as rooms, pets, jewelry, vehicles, and more complex programming projects such as player classes or informational databases.
+
+Players have four common ways of communicating with other players.  These are say, emote, whisper, and page.  When a player says something, it is the equivalent of talking.  Any connected player (or interested object) who is in the same room as the speaker can hear what is said.  For example, suppose a player named Blackbriar types:
+     say Hiya everyone.
+Then anyone who is in the same room as Blackbriar will see:
+     Blackbriar says, "Hiya everyone."
+
+The second common method of communication is the emote command.  Emotes are used to express actions and emotions. For example, if Blackbriar types:
+     emote hugs Opal.
+Everyone in the room will see:
+     Blackbriar hugs Opal.
+Players often use emote to make their statements convey more emotion as well, or perhaps to convey a facial gesture.  For example, 
+     Opal smiles happily and says, "Thank you!"
+would have been typed as:
+     emote smiles happily and says, "Thank you!"
+
+For convenience, since say and emote are perhaps the most commonly-used communication commands, there are built-in abbreviations for them.  A double-quotes (") may be used as an abbreviation for say, and a colon (:) may be used as an abbreviation for emote.  Thus,
+     say Hello, Opal.
+may be abbreviated as
+     "Hello, Opal.
+Similarly,
+     emote smiles at Opal.
+may be abbreviated as
+     :smiles at Opal.
+
+For more private comments, one may whisper; this is used to say something to another player in the room without anyone else hearing what it is you have said.  If Blackbriar types:
+     whisper "I need to talk to you." to Opal
+then Opal will see:
+     Blackbriar whispers, "I need to talk to you."
+No-one else in the room will even know that the interaction took place.  Slightly less-VR is the page command; paging encompasses the same idea as whispering, except that you use page to talk to someone who is in another room.  It is, in a way, analogous to talking on the phone, except that no-one in either room can hear the conversation.
+
+There are four main categories of players on OpalMOO[2].  These are players, builders, programmers, and wizards.  Each class encompasses the previous ones; programmers, for example, have all the abilities of players and builders, with programming abilities which players and builders lack.  Players are characters who can communicate and interact with other characters, but who do not have the ability to expand their world by creating objects or programming.  Builders can do only limited creating on the MOO, and no programming.  (The distinction is that, for example, a builder can create a dog which sits and looks pretty, but a programmer can create a dog which can walk on its own, bark, or interact with other players.)  Because of the design of the OpalMOO system, programmers are perhaps the most powerful people on the MOO.  Wizards, lastly, are administrative programmers with additional abilities, including the ability to create new characters, to read and modify any code in the database, and to administrativ
+ely ban certain players or sites from connecting to the MOO.
+
+Further information about OpalMOO, including policy statements on acceptable behavior and the granting of builder/programmer/quota privileges, will be placed in Appendix C at the end of this document.
+
+=================================================================
+
+VR Interface Proposal
+
+Having presented detailed background information on OpalMOO, the proposed technical considerations should now be mentioned.
+
+Some users find a program like the UNIX-based trn unwieldy.  While permitting an amazing amount of personalization and different ways of reading the USENET news, it also confounds the user who does not wish to spend hours learning how to configure her system.
+
+On the other hand, many users find the virtual world fun.  USENET news may be more interesting to read if, for example, it were presented as a set of magazines in a library, with posts as articles within the magazine.  Gopher searches may be easier if the user gets a real feel that she is moving from topic to topic.  IRC access might be less dry if the user feels that she is sitting at a table talking with people from around the world.
+
+There are several Internet services we can provide within OpalMOO.  Several of these are illustrated with sample sessions in Appendix A.
+          USENET: both reading and posting
+          Canaday Library, for example, could easily serve as the home for the virtual USENET.  Each group (e.g. sci.math) would exist as a periodical in the periodical room; users would be able to flip through their pages and decide whether they wanted to "subscribe" to the particular newsgroup.  In addition, by using gopher, students could access Tripod and on-line research sources throughout the world.
+          Sending Internet (SMTP) mail
+          At the virtual post office in the virtual Campus Center, students could pick up aerogrammes (for it is always air mail from the virtual world to the real one) which they could address, write on, and mail.
+          IRC
+          The VR interface for IRC[3] simulates a caf (specifically, The Cafe in the Campus Center).  IRC channels are tables around which people sit and hold discussions.  The caf environment also lends itself to entertaining potential; users could sip virtual cappucino and munch on virtual french fries while discussing politics with users from around the world.  (A sample IRC session exists in Appendix A.)
+          Gopher
+          The fascinating thing about gophering is its potential for discovery.  For this reason, we liken a gopher server to a system of twisted, unmapped, mysterious passageways.  The virtual representation we've selected for the gopher searches is that of the steam tunnels under the college.  (A sample gopher search exists in Appendix A.)
+          Finger
+          Fingering users is an easy task; the idea of typing finger user@host is not very difficult.  But this has interesting potential: Perhaps one could get information about users at other sites by asking the seedy man in the trenchcoat in the alley.  Or more simply, users could look up the information in a "phone book" of sorts.
+
+Other possible offerings (these have not yet been attempted by us) could include:
+          FTP
+          Because ftp is more linear and more exact than Gopher, the analogue of the steam tunnels, while similar, is not sufficiently precise, nor is its functionality (that of getting something as opposed to looking for something) close enough.  We liken ftp to walking through a building, looking through rooms, in dresser drawers, and so forth.  (Other implementations might include grocery shopping or, perhaps, looking through the library files for specific information.)
+          Archie
+          We stay in the library for our archie equivalence.  The reference librarian would be the archie interface; by asking her for specific information, she could go into the back room and return with a list of responses from her search.  It would, then, be a small jump to move to the ftp area and actually get the desired information.
+          Receiving Internet (SMTP) mail
+          This is a more difficult project; it may not even be technically feasible at this time.  It would, however, be very desirable; having elm warn you of fourteen new mail messages is not as much fun as walking to the Campus Center and coming back with arms full.
+
+In addition, there are various Bi-College-specific possibilities.  Aside from accessing Tripod from within OpalMOO, various Bi-Co documents could be made available by the creation of a small gopher server for their storage.  The Bi-College News and/or College News could be made available, for example.  With assistance from the administration, course listings could be made available (perhaps with an interface that lets students search for classes meeting various criteria to fit their schedules).  SGA minutes could be distributed in this method.
+
+More ambitious projects would include maintaining a database of professor's office hours, or an electronic Finding List (available, of course, only to Bryn Mawr users).
+=================================================================
+
+Advantages to the VR Interface
+
+When we began writing this proposal, we were forced to admit that, in all reality, what we are suggesting is not the most efficient wan to handle Internet services.  However, after looking at all available options, we do believe that the VR interface has benefits which clearly make up for a small lack of efficiency.
+
+There are few software packages which take English-language commands and which are documented in a readable English style.  By having commands in an English-like form and understandable help screens, this software will be more accessable.  In addition, the designers of the software will also be users, available and dedicated to maintaining the system.
+
+Bryn Mawr College is not a college known for its high technology.  The technology we propose would, however, make Bryn Mawr the center of attention for user-friendly software.[4]  Bryn Mawr would be, to our knowledge, the first college to have Internet services tied together in a consistent and usable form.
+
+Many college students, especially (unfortunately) women, feel intimidated by computers and the computer world.[5]  By installing services in a non-threatening, non-technical way, we are more likely to reach more users who would normally not even attempt to use said services.
+=================================================================
+
+Technical Requirements
+
+We propose to design and implement a virtual interface for handling common wants in an enjoyable way.  The extent to which this is possible depends on technical support.
+
+Technical requirements could vary.  Details will, thus, be presented for several different methods.
+
+Method 1: Leaving OpalMOO on cc.brynmawr.edu
+
+OpalMOO's current home is cc.brynmawr.edu, the machine most often used by Bryn Mawr students.  Because of its heavy use by students, the available disk space is at a premium, and OpalMOO is constantly having to scrap stored information and compress what's remaining.  In addition, the machine is quite often overloaded by sheer amounts of access.  (Ironically, a substantial part of cc.brynmawr.edu's overhead is taken up by Bryn Mawr students who connect to it to access OpalMOO, thus effectively doubling their CPU usage.)
+
+If the OpalMOO project stays in its current home, the offerings it can make will be minimal.  CPU and disk limits will prevent significant offerings, and the load on the system will often make these projects too slow in response time for them to be useful.
+
+Method 2: Installation on a machine besides cc.brynmawr.edu
+
+This project could, conceivably, be run on another Bryn Mawr machine, perhaps one with more available disk or fewer regular users.  This would allow, perhaps, quicker response and greater offerings, but functionally it will share about the same limitations as leaving it on cc.brynmawr.edu.
+
+Method 3: Dedicated UNIX Machine: OpalMOO.brynmawr.edu
+
+By far, this would be the most efficient way to manage resources.  A dedicated machine would not have to compete for CPU cycles with other processes, allowing the OpalMOO interfaces to run more quickly.
+
+In addition, a dedicated machine would make maintenance simpler and permit greater functionality.  The OpalMOO machine, for example, could also run its own gopher server, for local information that isn't needed on other machines.  It could receive SMTP mail, which would be nearly impossible to do securely on another machine.  An anonymous ftp service could be established to allow easy access to documentation.
+=================================================================
+
+     Appendix A: Sample Sessions
+
+In the examples given below, text in italics represent commands typed by the user.  These examples are, of course, hypothetical; the actual commands may end up varying slightly.  These are given for illustrative purposes.
+
+Sample IRC Session
+
+look
+
+     Street Outside Campus Center
+     You see, before you, the Campus Center (CC).  Steps lead past benches and ashtrays into this social hub.  The Public Safety offices, inside Merion, are to your right, and Radner is to your left.  Below you, a small iron grating seems to lead into the steam tunnels.
+
+cc
+
+     Inside the Campus Center
+     The Campus Center is, as always, filled with activity.  The Comment Board, slightly off to your left, seems filled with conversations.  Ahead of you, the mailboxes beckon.  To your left, the Cafe looks like it's open.
+
+cafe
+
+     The Internet Relay Cafe (IRC Cafe)
+     The IRC Cafe is booming with business tonight.  Approximately four hundred people are sitting at what looks like one hundred twenty tables of varying sizes.
+     You are not presently seated at a table; have a seat with your favorite group of pals, and order some espresso!
+     You see many people sitting at many tables and irc help here.
+
+look help
+
+     The irc help document contains information on the IRC system and how to talk with other users.  For starters, try "help channels" and "help communication".
+
+help channels
+
+     Channels in the IRC Cafe
+
+     Communication in the IRC takes place in one of two ways: publically or privately.  Public conversation takes place in "channels" -- embodied here as tables.
+
+     To see what tables are available, use the command "list tables" ("list channels" will work just as well).  If a table is not listed, it may be hidden or it may simply not exist.  A table which does not exist will exist when you join it.  (Be forewarned, however: this information will more than likely be very long.)
+
+     To sit at a table, the command "sit at <table>" will suffice.  (Alternately, "join <table>" will also work.)
+
+help communication
+
+     Communication in the IRC Cafe
+
+     To talk at a table, once you're seated, you may use the "say" and "emote" verbs you're used to.
+
+     To send private messages, use the "whisper" command.  (No variants on the "whisper" command will function in the IRC Cafe.)
+
+     For information on tables, see "help channels".
+
+list tables
+
+     <much information deleted>
+     The "unix" table has seven people discussing "Users who get on our nerves.".
+     <much information deleted>
+
+look unix
+
+     You see Shayde, Mikey, John, and Toro sitting at the unix table.  The topic is "Users who get on our nerves."
+
+sit at unix
+
+     You can't sit there without an invitation.  Shayde, Mikey and/or John can give you an invitation.
+
+whisper "Can you invite me?" to Shayde
+
+     You whisper, "Can you invite me?" to Shayde.
+
+     Shayde invites you to join the unix table.
+
+sit at unix
+
+     You sit down at the unix table.
+     You see Shayde, Mikey, John, and Toro here.  The topic is "Users who get on our nerves."
+
+look
+
+     The Internet Relay Cafe (IRC Cafe)
+     The IRC Cafe is booming with business tonight.  Approximately four hundred people are sitting at what looks like one hundred seventeen tables of varying sizes.
+     You are sitting at the unix table, along with Shayde, Mikey, John, and Toro.  The topic at your table is "Users who get on our nerves."
+     You see many people sitting at many tables and irc help here.
+
+     Mikey says, "Hello, Opal."
+     Shayde whispers, "I'm sorry I haven't written recently; I've been very busy with classes."
+     Tamlin leans across from another table and whispers, "Is that you, Kathy?"
+
+say Hey there folks!
+
+     You say, "Hey there folks."
+     Mikey grins.
+
+whisper "Yes, Tamlin, it's me.  Shhhh.  This is a demonstration script." to tamlin
+
+     You lean across to another table and whisper, "Yes, Tamlin, it's me.  Shhhh.  This is a demonstration script." to Tamlin.
+
+     Toro mutters something about programs not working.
+     Toro says, "Does anyone here know bourne shell?"
+=================================================================
+
+Sample Gopher Session
+
+look
+
+        Street Outside the Campus Center
+        You see, before you, the Campus Center (CC).  Steps lead past benches and ashtrays into this social hub.  The Public Safety offices, inside Merion, are to your right, and Radnor is to your left.  Below you, a small iron grating seems to lead into the steam tunnels.
+        You see comment board here.
+
+look down
+
+        The grating covers an opening leading down into the steam tunnels.
+
+down
+
+        You reach down and yank off the grate, climbing down into the Steam Tunnels and slipping the grate back into place behind you.
+
+        Steam Tunnel Entry Point
+        The Steam Tunnels weave under the College in a seemingly endless network.  Cold cement walls are lit dimly by a single recessed lightbulb protected by a wire cage.  A rickety ladder leads up to a small iron grating in the ceiling.
+        Another ladder leads down to marvel.loc.gov.
+
+look up
+
+        The leader leads up to a grating in the ceiling.  Bits of sky are visible through the grating.
+
+down
+
+        You climb down the ladder, heading deeper into the tunnels.
+
+        Inside the Steam Tunnels
+        Deep inside the Steam Tunnels below the College, tunnels branch away in a myriad of directions.  A faint sense of claustrophobia causes you to seriously consider climbing the ladder leading back up.
+        East of here is a tunnel leading to About LC MARVEL (Please Read First).
+        A tunnel to the west leads to Library of Congress: Facilities, Activities, and Services.
+        Research and Reference is down the tunnel to the northeast.
+        Southeast of here is a tunnel leading to Library of Congress Online Systems.
+        A tunnel to the northwest leads to The U.S. Congress.
+        Federal Government Information is down the tunnel to the southwest.
+        This tunnel continues to the south.
+
+look south
+
+        The tunnel continues to the south.
+
+south
+
+        You head down the tunnel to the south.
+
+        Inside the Steam Tunnels
+        Deep inside the Steam Tunnels below the College, tunnels branch away in a myriad of directions.  A faint sense of claustrophobia causes you to seriously consider climbing the ladder leading back up.
+        The eastern tunnel leads to Services to Libraries and Publishers.
+        A tunnel to the west leads to Copyright.
+        The northeastern tunnel leads to Employee Information.
+        A tunnel to the southeast leads to The Global Electronic Library (by Subject).
+        Internet Resources is down the tunnel to the northwest.
+        What's New on LC MARVEL is down the tunnel to the southwest.
+        This tunnel continues north and south.
+
+se
+
+        You walk down the southeastern tunnel to Economics and Business which ends in a ladder leading even further down.
+
+        Inside the Steam Tunnels
+        Deep inside the Steam Tunnels below the College, tunnels branch away in a myriad of directions.  A faint sense of claustrophobia causes you to seriously consider climbing the ladder leading back up.
+        Graffiti on the east wall is titled, "About this menu".
+        West of here is a tunnel leading to Reference.
+        Northeast of here is a tunnel leading to Library Science.
+        A tunnel to the southeast leads to Philosophy and Religion.
+        Back to the northwest, a tunnel leads back towards the surface.
+        Southwest of here is a tunnel leading to Language and Literature.
+        This tunnel continues to the south.
+
+look east
+
+             The Global Electronic Library menu provides access to a
+        large selection of resources available through the Internet.
+        Educational institutions and organizations throughout the world
+        supply a wealth of free network services, including texts,
+        searchable databases, information services, and electronic
+        journals.  Locating these resources is the key to making
+        effective use of electronic communications.  Our intent is to
+        make these resources accessible using subject headings as
+        familiar as those found in the local library.
+
+             We have attempted to give accurate information about the
+        sources, and, when appropriate, to point to whole directories,
+        including "readme" files.
+
+             This section is constantly developing. If you have suggestions
+        for improving or adding to this menu, please contact the LC MARVEL
+        Design Team at the Internet address: marvel@seq1.loc.gov
+
+        Thank you for your interest.               [Last update 7/26/93 sah]
+
+
+west
+
+        You walk down the western tunnel to News and Weather which ends in a ladder leading even further down.
+
+        Inside the Steam Tunnels
+        Deep inside the Steam Tunnels below the College, tunnels branch away in a myriad of directions.  A faint sense of claustrophobia causes you to seriously consider climbing the ladder leading back up.
+open it.  Enter a search line or @abort:
+
+history
+
+        You search for "history".
+        You walk down the southeastern tunnel to Webster's Dictionary which ends in a ladder leading even further down.
+
+        Inside the Steam Tunnels
+        Deep inside the Steam Tunnels below the College, tunnels branch away in a myriad of directions.  A faint sense of claustrophobia causes you to seriously consider climbing the ladder leading back up.
+        The title "history" is written above graffiti on the east wall.
+        Back to the northwest, a tunnel leads back towards the surface.
+
+look history
+
+        his.to.ry \'his-t(*-)re-\ n [L historia, fr. Gk, inquiry, history, fr.
+           histo-r, isto-r] knowing, learned; akin to Gk eidenai to know - more at WIT
+           1: TALE, STORY  2a: a chronological record of significant events (as
+           affecting a nation, in stitution) usu. including an explanation of their
+           causes 2b: a treatise presenting systematically related natural phenomena
+           2c: an account of a sick person's medical background  3: a branch of
+           knowledge that records and explains past events  4a: events that form the
+           subject matter of a history  4b: past events  4c: previous treatment,
+           handling, or experience (as of a metal)
+
+=================================================================
+
+Appendix B: Additional Usage Notes for OpalMOO
+
+The text earlier in this paper gives brief information about the communication abilities of OpalMOO.  This section, in the form of an interactive session, will detail some of the additional abilities of the MOO.  As before, text in italics represents commands typed by the user.
+
+The user connects to OpalMOO and sees the "welcome" banner:
+
+               Welcome to OpalMOO: The Last of the OrbitMOOs.
+
+There's a pair of handcuffs by the bed. They're surrounded by empty Chinese food cartons, an empty bottle of wine, and two wine glasses. One of the glasses has fallen over, leaving a red stain on the carpet which slowly creeps towards the handcuffs.
+
+The alarm clock went off an hour ago, but the room's inhabitants have shut it off, preferring the warmth of their shared bed to the cold of the real world.
+
+     This is OpalMOO.  Welcome to it.
+     Wizards: Baby Briar, Opal, and Whazzat Kangaroo
+
+     connect <player> <password>
+     connect Guest
+
+     To register a character, log in as a guest and type: help @request
+
+connect Merkin mypassword
+
+*** Connected ***
+Merkin's Room
+A mostly empty room, filled with typical cat-like things. A litter box in one corner, a scratching post for venting frustrations, and a big cardboard box with a comfy blanket in it in another corner. Merkin just does typical cat things. He sleeps, eats, sleeps, eats, prowls, and builds stuff on OpalMOO.
+You see Whiteboard here.
+Last connected Mon Nov 22 14:49:19 1993 from cc.brynmawr.edu
+Don't forget to take a look at the newspaper.  Type 'news' to see it.
+You have new mail (2 messages).
+
+news
+
+You see a rolled-up copy of the local newspaper, left here by a delivery boy who didn't want to dawdle. Although it's already too dusty to touch, you see that it's dated Tue Nov 16, 1993.
+
+WELCOME TO OPALMOO!
+     by BabyBriar (#2) on Tuesday, November 16, 1993
+
+OpalMOO is a quiet, sociable place, for friends and associated to build and explore and experiment. Do, please, enjoy. It's not only for Opal. It's for you as well.
+
+All OpalMOO inhabitants are encouraged to subscribe to *Theme-Issues and to read the help information on the Theme of OpalMOO ("help theme").
+
+OPALMOO IS NOT A GAME
+     by BabyBriar (#2) on Tuesday, November 16, 1993
+
+OpalMOO is not a MUD. OpalMOO is inhabited by real people. It is neither nice nor particularly welcome to play mind games with the OpalMOO inhabitants. Please don't feed the animals. For those interested in on-line games, please check the USENET groups under "rec.games.mud" and look for any number of games.
+
+POLICY STATEMENTS
+     by Opal (#72) on Tuesday, November 16, 1993
+
+See "help policies" for information regarding OpalMOO policy.
+See "help manners" for newly-updated manners expectations.
+
+@next
+
+Message 1:
+Date:          Mon Nov 22 14:18:44 1993 EST
+From:          Blackbriar (#110)
+To:                Merkin (#104)
+Subject:     About the projects board...
+
+I've been thinking that, perhaps, what we need is to promote projects on *Theme-Issues and encourage people to take projects as their own.  We can offer quota as incentive to do good work.
+
+We've been having a great bit of growth here and we don't need to necessarily push things.
+
+Blackbriar
+
+@reply 1
+
+When sending mail, you enter the "Mail Room" - a special room with editing functions related to mail.  When finished sending mail, you return to the room you started from.
+          
+Mail Room
+
+Do a 'look' to get the list of commands, or 'help' for assistance.
+
+Composing a letter to Blackbriar (#110) entitled "Re: About the projects board..."
+
+In the editors, the say and emote commands have special functionality; they modify the text being edited (in this case, a mail message).
+
+          "You're probably right.  I'll leave it up to you, anyway; it's your project.
+Line 1 added.
+
+Our mail is interrupted with a page (a private message from a player in another room).  We read it and respond.  (Note that we can use certain abbreviations for player's names.)
+
+          From a burst of static, you hear Blackbriar's voice...
+He pages, "Hey, guy! What's up?"
+page bb I'm sending you mail now.  I'll join you in a second.
+Messages travel like radio waves... yours has been received!
+
+send
+
+.#110
+Mail actually sent to Blackbriar (#110)
+Merkin's Room
+A mostly empty room, filled with typical cat-like things. A litter box in one corner, a scratching post for venting frustrations, and a big cardboard box with a comfy blanket in it in another corner. Merkin just does typical cat things. He sleeps, eats, sleeps, eats, prowls, and builds stuff on OpalMOO.
+You see Whiteboard here.
+
+@next
+
+Message 2:
+Date:           Mon Nov 22 14:19:03 1993 EST
+From:          Stephanie (#1113)
+To:               Merkin (#104)
+Subject:     Hey, sweetie.
+
+Been thinking of you.  Come back sometime.
+Steph
+
+inventory
+You are carrying:
+(#1623) a stack of dossiers
+(#2038) dictionary
+
+look at dossiers
+
+An unobtrusive stack of manilla file folders. Wrinkled sheets of paper peek out of the folders - they appear to have information about the various inhabitants of OpalMOO. Perhaps you could find a specific person if you looked eir up.
+
+examine dossiers
+
+a stack of dossiers (aka #1623, a stack of dossiers, stack, and dossiers)
+Owned by Profane.
+An unobtrusive stack of manilla file folders. Wrinkled sheets of paper peek out of the folders - they appear to have information about the various inhabitants of OpalMOO. Perhaps you could find a specific person if you looked eir up.
+Obvious verbs:
+     find/lookup <anything> in dossiers
+     d*rop/th*row dossiers
+     gi*ve/ha*nd dossiers to <anything>
+
+lookup stephanie in dossiers
+
+You rummage through the dossiers and come up with a file. . .
+Stephanie (#1113) is female.
+She uses the aliases: Steph. (Total 1)
+Her home is The Hallway (#11),
+     but she is currently in The Drunk Tank (#17).
+She last connected Mon Nov 22 14:18:47 1993 EST,
+     and was on for 17 seconds.
+She is a Programmer.
+She uses 6 feature objects.
+She owns 1 objects, has defined no verbs on herself, and has a total personal size of 2584 bytes.
+Her objects consist of: 1 generic players.
+She has an entry in the OpalMOO Address Book (#1147).
+
+@reply 2
+
+Mail Room
+
+Do a 'look' to get the list of commands, or 'help' for assistance.
+
+Composing a letter to Stephanie (#1113) entitled "Re: Hey, sweetie."
+"Aw... I'm going to be more around these days, now that my class load has gotten lighter.
+Line 1 added.
+"When are you logging on these days?  Geez, seven seconds connect time?  Social butterfly... <grin>
+Line 2 added.
+"Merkin
+Line 3 added.
+send
+.#1113
+Mail actually sent to Stephanie (#1113)
+
+Merkin's Room
+A mostly empty room, filled with typical cat-like things. A litter box in one corner, a scratching post for venting frustrations, and a big cardboard box with a comfy blanket in it in another corner. Merkin just does typical cat things. He sleeps, eats, sleeps, eats, prowls, and builds stuff on OpalMOO.
+You see Whiteboard here.
+
+parties
+The Hallway --- 0 seconds idle, 6 players:
+     Networker, Lambda, AcidHorse, Amethyst, Blackbriar, Opal
+1 party found.
+
+out
+
+Hotel
+A smoky haze fills the lobby of this once beautiful, but now run down Grand Hotel. The magnificent crystal chandelier is covered with dust and broken in places. The fountain in the center of the room has long been turned off and now sits empty, the copper of the statue turning green on the edges. The carpet, once plush grey velour, is now ripped and stained. No bell hops wait to take your bags, no moviestars rush by you on their ways to clubs and parties, and the desk is unattended. The couches in the lobby are sagging, and the coffee table is worn and full of water spots. However, despite the conditions of the room, a faint sense of nostalgia and sensuality fills the room. To the east lies the Black Opal Bar, once a jazz club, but now a bar which offers the main source of income for the hotel's owners. If you'd like a room, press check-in on desk.
+You see Front Desk, Cockatoo, and notice to all hotel guests here.
+
+out
+
+You step into the street...
+Main Street (South)
+The street in which you're standing is dingy and dark. The wind whips around you as you survey your options, unappealing at best. To your left, you see an apartment house, painted white some time ago, but with nearly all the paint stripped away by harsh winters. A light in the upper window hints to you that life does still exist there. To your right, though, a hotel still retains some of its glory, although quite well past its prime. You hear music, vaguely, from inside. 
+The road continues north and southeast; buildings lie to the west, east, and south of you (the apartment house, hotel, and YMCA building, respectively).
+There is a manhole in the ground here, its cover apparently missing.
+You see a statue of cheshire and Blue Ribbon here.
+
+apartment
+
+You head into the apartment building...
+The Hallway
+You're standing in the hallway of what looks to be a run-down apartment building. The hall is illuminated by a small forty-watt bulb which threatens to end its young life at any minute. As you survey your surroundings, you see a cockroach scurry from your view and disappear in some crack in the stairwell. In front of you (to the north), a door has a small paper with the number Twelve written on it. Behind you (to the south), a door labelled Eleven stands closed. Steps, rickety but functional, lead back down as well. There is a ladder here, leading up into what appears to be the attic. You also know, though, that you can go out to the street. 
+The apartment mailboxes are battered and recessed into the wall, but still lock.
+You see the OpalMOO Theme, the OpalMOO Rules, and a newspaper here.
+Amethyst, AcidHorse (daydreaming), Opal, Blackbriar (distracted), Lambda, and Networker are here.
+:waves.
+Merkin waves.
+Dirk_Gently's probability bubble collapses, leaving him here.
+Blackbriar waves Merkin.
+Opal wavles to Merkin.
+"What's up?
+You purr, "What's up?"[6]
+Opal says, "Not too much, how's it going?"
+Ox's probability bubble collapses, leaving him here.
+look lambda
+Lambda[7]
+Lambda is a humanoid of average size and normal appearance except for the small white cloud that sits where his head should be.  One might say that Lambda has his head in the clouds...
+He is awake and looks alert.
+Opal [to Ox]: Hiya.
+AcidHorse blinksblinks, waveswaveswaves Merkin and Ox
+:is logging this conversation for use in a proposal... anyone mind?
+Merkin is logging this conversation for use in a proposal... anyone mind?
+Ox whuglz Opal.
+Opal doesn't mind.
+Ox doesn't mind.
+Lambda says, "So what's this proposal about, eh?"
+AcidHorse doesn't...
+Lambda wonders where his ` command got to...
+Blackbriar points Lambda at #480.
+Lust steps in from the street.
+Lambda [to Blackbriar]: Thanks.
+Lust grins - just looking around
+Opal [to Merkin]: Explain the proposal. :)
+Lust leaves the apartment building for the street below.
+:and Opal are proposing that Bryn Mawr use OpalMOO as a VR interface to Internet services.  For example, rather than using the IRC, you'd go to the Cafe and chat at a table.  Gopher is hunting through the steam tunnels under the college.  And so forth.
+Merkin and Opal are proposing that Bryn Mawr use OpalMOO as a VR interface to Internet services.  For example, rather than using the IRC, you'd go to the Cafe and chat at a table.  Gopher is hunting through the steam tunnels under the college.  And so forth.
+Amethyst says, "OX!!!"
+:is logging this conversation to demonstrate various types of commands.
+Merkin is logging this conversation to demonstrate various types of commands.
+Lambda ahs.
+Networker cools for this.
+Ox [to Merkin]: Sounds cool.
+AcidHorse likes the steam tunnel idea...
+yduJ materializes out of thin air.
+Lambda says, "Well, you might want to take a look at <http://brando.ipac.caltech.edu:8888> in your favorite WWW browser..."
+yduJ says, "Boing."
+yduJ has to be working, really.
+Dirk_Gently thinks MOO is a nice way to interact with the net.
+"What's that, Lambda?
+You purr, "What's that, Lambda?"
+Ox nods yduJ
+yduJ idles and fills her scrollback.
+Amethyst says, "Well,everyone, ihave to go now.  Have fun!"
+Blackbriar waves to Amethyst.
+Amethyst waves to everyone
+Opal waves to Amethyst.
+:purrs goodbye to Amethyst.
+Merkin purrs goodbye to Amethyst.
+Dirk_Gently waves to ameth.
+Lambda says, "Kilik has created a working WorldWide Web server *inside* Astro-VR..."
+Networker . o O ( Really! )
+Amethyst blows kisses to everyone
+Blackbriar hms.
+Baby Briar shakes her rattle at Lambda, and you realize that Lambda is now a programmer![8]
+Dirk_Gently wows.
+Amethyst says, "ooh."
+Amethyst says, "Bye, bye!"
+You hear a quiet popping sound; Amethyst has disconnected.[9]
+Blackbriar says, "Well, you know, professional courtesy and all."
+Dirk_Gently grins at Blackbriar.
+Lambda says, "It's a bit funky just now, because he has to use the normal port for his connections, but that will be fixed up when he can create in-MOO servers listening on ports, in 1.8.0."
+Blackbriar nods -- we were trying to do something like that back when $services were the hip OpalMOO project.
+Dirk_Gently forgets which server he's running.
+@version
+The MOO is currently running version 1.7.6 of the LambdaMOO server code.
+Molly steps in from the street.
+Molly waves!
+Ox waveswaveswaves.
+Molly says, "What's up folks?"
+Lambda [to AcidHorse]: Talk to Kilik about it.  There's some very cute pages there.
+Blackbriar says, "We had pretty decent stuff worked up, but it was as secure as a sieve.  So we disabled it and forgot it existed, really."
+`molly I'm logging this discussion for use in a proposal.
+Merkin [to Molly]: I'm logging this discussion for use in a proposal.
+Ox hrms.
+You sense that Molly is looking for you in The Hallway.
+She pages, "What are you logging for? :)"
+Ox grins Opal.
+Molly Hmmms. "Are we talking about gopher and stuff from within the MOO? Internet connections and so forth?"
+whisper "I'm logging this conversation to use in a proposal.  We're proposing to incorporate various Internet services into OpalMOO as virtual interfaces to the real things." to molly
+You whisper, "I'm logging this conversation to use in a proposal.  We're proposing to incorporate various Internet services into OpalMOO as virtual interfaces to the real things." to Molly.
+Dirk_Gently nods.
+:purrs yes to Molly.
+Merkin purrs yes to Molly.
+Lambda has, in the Jupiter project, finally gotten a reasonable way to work from home.  "What with MOO-controlled windows and audio, I can stay reasonably well in touch and still get work done from home.
+>From the bell tower, you hear: BONG BONG BONG[10]
+Dirk_Gently says, "Using the MOO as a way to interact with the Internet as well as other people at the same time, in a VR fashion."
+Molly ahhhs. "Won't that take up a heck of a lot of space? I thought OpalMOO was restricted in db size..."
+Blackbriar chuckles.  It must be far more fun idling at home than at work.
+Lambda nods to Bb.
+:nods, Molly.  "Part of the proposal includes asking for more resources."
+Merkin nods, Molly.  "Part of the proposal includes asking for more resources."
+:*dreams* for his own machine to curl up on top of and sleep.
+Merkin *dreams* for his own machine to curl up on top of and sleep.
+Ox says, "Hopefully, you will get more resources."
+Blackbriar says, "Actually, rumor has it OpalMOO's changing machines shortly."
+Ox whoas.
+Blackbriar dunno what that'll mean for resources, but.
+Molly wows.  A whole machine for OpalMOO.  That would be fantastic!  The one thing that would do for -me- at least is give me a little more leeway with how much programming and stuff I do. I feel somewhat restricted because of the restrictions and such.
+:wells, Molly, restrictions often restrict.
+Merkin wells, Molly, restrictions often restrict.
+Molly scritches Merkin. He purrs.
+:wraps himself around yduJ's feet and hopes for a scritch.
+Merkin wraps himself around yduJ's feet and hopes for a scritch.
+Molly doesn't hang out on other MOOs, just this one.  Is actually pretty impressed with the stuff here.  Lots of changes in the LambdaCore.  LambdaCore was the original core right?
+Blackbriar nods to Molly.  We started with LambdaCore.
+Lambda nods to Dirk.
+Molly says, "I like the changes you've made though, Bb and opal.  (No offense, Lambda)"
+Grandpa steps in from the street.
+Grandpa says, "Well we made a promise, we swore we'd always remember, no retreat baby, no surrender."[11]
+:purrs at Grandpa.
+Merkin purrs at Grandpa.
+look grandpa
+Grandpa wears a frayed flannel bathrobe and walks with an air of utter confusion.  In one hand, he holds a copy of THE NEW YORK TIMES; in the other, a half-eaten donut.
+Lambda shrugs to mol
+Grandpa leaves the apartment building for the street below.
+Molly says, "I feel like things here are more streamlined.  More efficient.  And I like the atmosohere because it's not as social and fluffy as some of the places on Lambda, but it's more open and friendly than other MOOs..."
+Ox has disconnected.
+Chocolate-Challenge has connected.[12]
+Blackbriar waves Chocolate-Challenge.
+Keelah's probability bubble collapses, leaving him here.
+AcidHorse waveswaveswaves Chocolate-Challenge
+Keelah waves.
+Opal wavles Keelah.
+Networker also.
+Chocolate-Challenge blinks.  My descriptions' kind of random, isn't it?
+l chocolate
+Chocolate-Challenge
+By definition, guests appear nondescript. This Guest, however reminds you: If there are only seven deadly sins, Denny's knows numbers eight, nine, and ten.
+It is carrying: Map of OpalMOO.
+It is awake and looks alert.
+Blackbriar [to Chocolate-Challenge]: Our Guests are the seven deadly sins.  Denny's placemats have 8, 9, and 10.  So we made three more Guests.
+Chocolate-Challenge chuckles.
+Molly giggles.  "Denny's sins?"
+Lambda groans at Bb.
+Dirk_Gently laughs!
+Blackbriar holds his hands up.  "Don't blame me, I only eat there!"
+Molly laughs.
+:purrs.
+Merkin purrs.
+Opal thought the chocolate challenge actually looked quite tasty. :)
+Chocolate-Challenge says, "So what does a chocolate sundae need to do to get a character around here?"
+Lambda has a hard time believing that Opal only knows what the C-C *looks* like...
+Opal [to Chocolate-Challenge]: Use the @request command. It will guide you through it.
+Blackbriar [to Lambda]: We're always broke.
+Lambda ahs.
+Opal [to Lambda]: Hey!  I don't like chocolate THAT much.  In fact, hardly at all.
+Chocolate-Challenge types: @request and gets: I don't understand that.  Try this instead: @request for
+Blackbriar [to Chocolate-Challenge]: Try 'help @request'
+Lambda . o O ( Too broke for chocolate?  Hard to imagine.  Give up everything else... )
+Blackbriar [to Chocolate-Challenge]: Or @request <desired character name> for <your email address>
+Opal hangs her head in shame. She gives up chocolate for cigarettes, sorry Lambda. :)
+Lambda blinks at Opal.  "How barbaric and uncivilized!"
+Chocolate-Challenge eeeee -- help @request is HUGE
+Chocolate-Challenge does it anyway.
+Chocolate-Challenge requests a character.
+Dirk_Gently makes his goodbyes.  "Gotta run."
+Dirk_Gently has disconnected.
+Opal wavles Dirk_Gently.
+Opal loses.
+Lambda must get back to work, too, from home though it may be...
+Chocolate-Challenge comes back from requesting a character.
+Chocolate-Challenge waves.
+Opal whuglz Lambda bye.
+AcidHorse waveswaveswaves lambda!
+Lambda whuglz back and leaves.
+Molly waves to Lambda. "Take it easy."
+:purrs byebye to Lambda.
+Merkin purrs byebye to Lambda.
+You hear a quiet popping sound; Lambda has disconnected.
+Blackbriar [to Chocolate-Challenge]: You're in the cryogenic freezer now.
+Chocolate-Challenge um
+Molly eyes Blackbriar warily.
+Blackbriar points at "look #2700"
+look #2700
+cryogenic freezer
+You see a cryogenic freezer in which the unborn OpalMOO embryos are kept until they are thawed and let loose upon the world!  Bwahahaha.
+ 1: Mon Nov 22 15:14:28 1993 EST   Persephone 
+`chocolate You're going to be Persephone?
+Merkin [to Chocolate-Challenge]: You're going to be Persephone?
+Chocolate-Challenge is!
+Blackbriar smiles.  Cool.
+look dictionary
+An old abridged Webster's dictionary. It's kinda musty and some of the pages are kinda sticky. To use it, just type: lookup <word> in dictionary.[13]
+lookup persephone in dictionary
+You look up "persephone" in dictionary.
+You open dictionary and see:
+Per.seph.o.ne \p*r-'sef-*-ne-\ n [L, fr. Gk Persephone-] : a daughter of Zeus and Demeter abducted by Pluto and made his wife and queen.
+Chocolate-Challenge should be off now -- I'll see you all later, I suspect!
+You hear a quiet popping sound; Chocolate-Challenge has disconnected.
+look yduj
+yduJ
+The spitting image of yduJ on LambdaMOO. Funny thing, that.
+She is carrying: Generic Interior Room and MOO Pig.
+She is awake, but has been staring off into space for 23 minutes.
+She is in perfect health.
+:rubs himself around yduJ's idling legs in the feeble home of a scritch.
+Merkin rubs himself around yduJ's idling legs in the feeble home of a scritch.
+
+@who
+Player name     Connected     Idle time     Location
+Merkin (#104)     32 minutes     0 seconds     The Hallway
+Molly (#1458)     24 minutes     a second     The Hallway
+Blackbriar (#110)     54 minutes     6 seconds     The Hallway
+Lust (#96)     39 minutes     13 seconds     Harleystore
+Opal (#72)     an hour     23 seconds     The Hallway
+AcidHorse (#2922)     48 minutes     49 seconds     The Hallway
+Keelah (#2060)     12 minutes     59 seconds     The Hallway
+Networker (#138)     33 minutes     2 minutes     The Hallway
+BabyBriar (#2)     54 minutes     5 minutes     Executive Division
+Polo (#2667)     3 hours     7 minutes     Packet
+yduJ (#68)     27 minutes     26 minutes     The Hallway
+
+Total: 13 players, 10 of whom have been active recently.
+"I think I have enough logged text for now.
+You purr, "I think I have enough logged text for now."
+You hear a quiet popping sound; Chris has disconnected.
+:waves.
+Merkin waves.
+home
+You click your heels three times.
+Merkin's Room
+A mostly empty room, filled with typical cat-like things. A litter box in one corner, a scratching post for venting frustrations, and a big cardboard box with a comfy blanket in it in another corner. Merkin just does typical cat things. He sleeps, eats, sleeps, eats, prowls, and builds stuff on OpalMOO.
+You see Whiteboard here.
+@quit
+*** Disconnected ***
+=================================================================
+
+Appendix C: Further Information on OpalMOO
+
+The OpalMOO History
+
+OpalMOO itself was started on November 7, 1992.  Since its inception, it's been central in innovative MOO programming.  OpalMOO is the first and only MOO to implement a shared ownership protocol; experiments in improved command-line parsing and interfaces between MOO and Internet services have been among additional projects of ours.  In a reflection on OpalMOO's history, one of the wizards wrote, in May (shortly after the installation of the third Wizard):
+
+          At approximately one a.m. on November ninth, OpalMOO was started for the first time. It was a mad frenzy of random building and topologically absurd undescribed rooms all linked together off of what is now The Hallway (#11).  Opal and Triptych and I wandered around this empty place and tried to think what it would be like once it started to become really groovy. We hadn't expected things would grow so large; OpalMOO was started as a place for Opal and me, some sort of weird romantic gift, but we couldn't let it go without inviting people to it, and... you know how these things go.
+
+Hell, we didn't even know if it would get to be really groovy. Until November 23, when we got the official OK to let it run "as long as system resources permit." By this time, we had approximately twenty-five players on the MOO, and we were approaching object #400. [...]
+
+And now, we're sitting here with a constantly evolving core (a core, by the way, which proves to me what I'd suspected: if programmers are given an environment which encourages them to be innovative, amazing and wonderful things will come of it) and a brand new wizard.
+
+OpalMOO was even mentioned in a recent Newsday article on virtual realities entitled "Far Out: Welcome to their World Built of MUD" (Sunday, November 7, 1993).  Present OpalMOO projects include experimentation in shifting our linear inheritance system to a multiple inheritance one and designing a UNIX simulator for instructional purposes.
+=================================================================
+
+Theme Requirements and Rules for OpalMOO
+
+The decision was made, when OpalMOO was first created, that in order to conserve limited resources it would be necessary to establish a Theme and to require building and programming to meld with that Theme.  (This was to prevent a common MOO problem, that of uncontrolled building and database bloat.)  The details on the Theme, as given on the MOO, are:
+
+          The Theme of OpalMOO
+
+The Theme of OpalMOO is not easy to put into one or two cute little nifty phrases, but if it were, the phrase would probably be, "Gritty and Sensual." We are trying to keep up a "running on the backstreets" image. Things like abandoned warehouses and movie theatres are great. Things like Space Ports and shiny new office buildings are not.
+
+You are more than welcome to build here (see help building) until you've used up your quota (see help quota), but you will not be able to connect your areas to the rest of the MOO unless it fits with the rest of the Theme. (This is a Bad Thing[tm] because it is not possible to teleport into the vast majority of OpalMOO's rooms. Walking is your friend.)
+
+Perhaps the best way to keep up on news on the MOO is to read the newspaper (with the news command) and to subscribe to the *Theme-Issues mailing list (see help mail for some basic information on mail; @subscribe *Theme-Issues will subscribe you to the list).
+
+The requirements for meeting the Theme are fairly minimal.  Players who do not conform to the Theme are not given additional privileges (such as programmer bits or additional quota).  The specific policies for granting these privileges are included in this section.
+
+One addition to this rule needs to be mentioned: innovative programming projects are always Themely (except for projects which are explicitly counter to the Theme, such as space ports).  This allows the Wizards to promote personal or experimental projects that aren't necessarily "Gritty and Sensual."
+=================================================================
+
+In addition, it was felt that at least a small set of rules were necessary.  They have evolved over time (the initial set of rules were quite sketchy); the current set of rules is as follows:
+
+          OpalMOO Manners
+
+The following statements are policy statements (see help policies) from the wizards of OpalMOO.  They are, in essence, the rules OpalMOO players are expected to follow.
+
+NOTE: As a general rule, these rules take precedence over the OpalMOO Theme.  Thus, while bugging rooms, for example, may be Themely, it is not permitted because these rules prohibit it.
+
+Minimal Manners Expectation
+The OpalMOO players come from all around the world (surprisingly enough) and may well have different understandings of what is societally correct and what is societally improper. The wizards expect all players to be reasonably conscientious in avoiding offending other players.
+
+This expectation is not intended to limit free expression. If it were to be put in a shorter form, it would read "Anyone who is a deliberate asshole gets toaded."  In slightly more detail, OpalMOO characters have no reason to tolerate harassment of any flavor.  The theme of this MOO is not intended to promote netsex or sexual conversation, and it should not be assumed that players are interested in this.
+
+It is important to keep in mind that OpalMOO players are, as a general rule, not here to seek relationships. If you believe there is a mutual interest between you and another player, it is your responsibility to ask before taking action which would, in Real Life, be considered inappropriate among acquaintances. (Abbreviated form: "The OpalMOO wizards will tolerate no sexual harassment.")
+
+It is also important to keep in mind that being a clever programmer is not an excuse for abusing other players.  In particular, moving players around without permission, bugging their rooms, or spamming them with text so they cannot enjoy the MOO are not allowed.
+
+If OpalMOO players respect other players and their rights, life will go much more pleasantly here on OpalMOO.
+
+OpalMOO is Themed
+All builders (see help builder-policy) have a certain amount of quota, with which they may choose to build.  (Programmers, similarly, may program.)  The wizards will allow any player to use eir quota as e pleases[14].  Quota increases will not be given to players who do not build within the OpalMOO Theme.  (See help quota-policy and help theme for more information.)
+
+Non-thematic areas will not be linked to the main city.  They will, thus, either exist in limbo, or be build off a player's hotel room.  (Note that the lack of teleportation will make this a significant drawback.)  The wizards ask that you respect the Theme.
+
+System Security
+This rule will be put briefly: Any OpalMOO player found to be attempting to crack the system obtain other user's passwords, or otherwise compromise the system will be @toaded [removed from the database] and, most likely, site-locked [prevented from connecting as a Guest or as another character].
+
+Please don't spam the system.  Please don't spam for "cool" object numbers.
+
+A further note: You are responsible for your character, regardless of whether you or your friend, roommate, significant other, deity, etc. are the one sitting at the keyboard.
+
+Spoofing
+The OpalMOO wizards do not want to try and implement any policy prohibiting spoofing or limiting spoofing, because that's technologically difficult and it opens up worlds of discussion.  However, the only difficult spoof-related area is when a spoof contains misleading information; please avoid these, as they tend to cause more interpersonal problems than we'd like to deal with.  
+
+To allow for convenient spoofing, see help ! -- this is a "polite" spoof verb.
+
+OpalMOO is NOT a Democracy
+OpalMOO is a benign oligarchy.  The wizards have the best interest of the MOO at heart, but will not be bound, at this time or at any time in the future, to democratic rule, petitions or ballots, or any other such popular voting method.  The wizards do, however, take suggestions seriously, and are more than likely to implement anything reasonable requested.
+
+For players who find democratic rule important, we recommend LambdaMOO (lambda.parc.xerox.com 8888) or MediaMOO (shhhhh it's a secret).
+
+Lastly, and most importantly, please don't feed the wizards.
+
+The relative freedom of the rules have allowed the wizards to maintain a friendly atmosphere on OpalMOO without unduly repressing the right to free expression.
+=================================================================
+
+As OpalMOO grew, resources dwindled.  The need existed for policies on who may be given builder's privileges, who may be given programmer's privileges, and who may receive additional building quota.  Those policies follow:
+
+          Acquiring Builder Status on OpalMOO
+
+Being a builder entails a certain amount of responsibility.  Builders may expand the MOO by creating objects, rooms, exits which connect rooms, and by creating an environment in which OpalMOO users may enjoy themselves.  On the other hand, the creations themselves use up OpalMOO's limited resources, and thus the granting of these permissions must be limited.
+
+To become a builder, the following qualifications must be met, regardless of who is asking to become a builder:
+
+     1)     The player must have a description.  Use of @gender and @describe are too basic not to understand.
+
+Do not interpret (1) to mean that a neuter player will be denied builder permissions; if your character is intended to be neuter, by all means make it so.  However, if your character's description contains gender-specific pronouns, we expect to see your gender set appropriately.
+
+Along the same lines, while we do not expect literary greatness from descriptions, we also do not expect them to be shoddy.  (If you can't describe yourself, we don't expect you'll do any better with the objects you build.)
+
+     2)     The player must know how to use the mail system.  This can be shown by mailing to *Wizard-List to actually ask for builder status.
+
+No, we are not requiring that users be Mail Power Users[tm].  We merely require that you be familiar enough with the mail system that you can send and receive mail.  (Hint: If your request for builder's permissions comes on the Subject: line of your mail, you won't get it.)
+
+     3)     The player must understand some basic MOO commands.  This includes @messages, message-setting, movement, and look.
+
+     4)     The player must know how to access help documentation.
+
+     5)     The player must have a firm grasp on help manners.
+
+     6)     The player must be willing to follow theme, and has to understand our "linking" policy.  In other words, when something will be linked to the topography of OpalMOO, and when it won't.
+
+Unthemely building will result in no additional quota being granted.
+
+     7)     The player may become a builder with no extra quota if the player already has another character with quota registered to the same address.  No exceptions.
+
+This rule only applies to people with multiple characters.
+
+Acquiring a Programmer Bit on OpalMOO
+
+Being a programmer is far more serious than being a mere builder for a number of reasons.  The nature of MOO makes programmers able to change nearly everything about their surroundings, which makes a malicious individual terribly powerful.  For this reason, we have a fairly small set of requirements before granting a programmer bit to an individual.
+
+NOTE: OpalMOO does support new programmers.  Inexperience is not a disqualification.  However, a prospective programmer is expected to be familiar with the player and builder commands, as well as some rudimentary understanding of what MOO programming means.
+
+     1)     The player must meet all requirements for builder status.
+
+See help builder-policy for more details on this.
+
+     2)     The player must already be a builder.
+
+     3)     The player must understand some basic building commands and understanding of how commands work.  This includes @messages and message-setting, describing objects, $exit manipulation, and parent-child relationships (@chparent and inheritance).
+
+     4)     The player should make at least an attempt to read the Programmer's Manual available by anonymous FTP from parcftp.xerox.com in /pub/MOO.  If you don't know how to FTP, it's best to ask your local sysadmin for help since FTP protocol often varies from site to site.
+
+Most of the Programmer's Manual is available on-line in various forms.  There are, in addition, several tutorial areas -- look in the MOOse Lodge.
+
+     5)     No extra quota will be given simply for becoming a programmer.
+
+As with obtaining builder status, requests for programmer bits should be mailed to *Wizard-List.
+
+Acquiring Additional Quota
+
+Builders on OpalMOO begin with four quota points.  When you run out of quota you can either recycle objects you're willing to part with or apply for more quota.  Since quota is our only way of keeping growth from getting out of control, we have a fairly simple policy concerning the acquirement of additional quota.
+
+     1)     Build within Theme.  Anything out of theme better be extremely clever and not too unreasonably out of theme.
+
+     2)     Be creative.  Same-old, same-old ain't worth bloating the DB with.
+
+     3)     Don't build TinyScenery.  A certain amount of plain areas are sometimes necessary for topology and transitional areas but there must be more to an area than just that.  This rule is not limited to rooms.  If you build a radio which is just a $thing with a description, we'll want to know why it doesn't play songs or something.  The key is interaction.  Building interactive rooms and objects makes your work more interesting.
+
+     4)     Don't bloat the DB unreasonably.  We expect you to make responsible use of your quota.  While A Clockwork Orange may be a book that relates to the theme of OpalMOO, downloading the entire text of the book to OpalMOO is not acceptable.
+
+     5)     Don't violate help manners.  Don't create objects that harass, spoof, or abuse other players.  You should follow this rule whether you want more quota or not.  See help manners for details.
+
+     6)     Finish projects you start.  If you decide to abandon a project, do so completely, reusing the objects committed to that project.  Unfinished driftwood bloats the DB unnecessarily.
+
+Keep in mind that our only indication of how well you will use your quota is in looking at how you've used your quota so far, so much of our decision is based on looking at the objects you currently own.
+
+If you feel you meet all the above requirements, mail a request for additional quota to *Wizard-List.  Don't page the Wizards to ask for quota.  Send your request to *Wizard-List.
+
+Be sure to say how much additional quota you want.  Here's a few guidelines when requesting different amounts of quota.
+
+5 quota or less - Just ask.  We'll still take a look at previous OpalMOO building you've done but it isn't required for you to detail any plans.
+
+6 to 15 quota - You must give us some indication of what you plan to do with the quota.  We have to keep reins on quota here because we just don't have the DB-space that LambdaMOO has.
+
+16 to 30 - That's a lot of quota.  You'll need to include a detailed outline explaining what you plan to do with each quota point.
+
+More than 30 quota - Forget it.  We're not going to be giving out this much quota in one go except in very exceptional cases.  Satisfy yourself with smaller amounts first.
+
+Keep in mind that you are not limited to just one quota increase.  Don't request more than you need.  We'll be happy to consider additional increases later.
+=================================================================
+
+Footnotes
+
+[1]  On the MOO, names, descriptions, and genders are entirely arbitrary.  One may, in a sense, be whomever one wishes to be.  For a fascinating discussion of gender and how it relates to interactions in the virtual world, see "Conversational Structure and Personality Correlates of Electronic Communication," the bachelors thesis of Jill Serpentelli (Haverford College) and "Mudding: Social Phenomena in Text-Based Virtual Realities," written by Pavel Curtis for submission to the 1992 conference on Directions and Implications of Advanced Computing, sponsored by Computer Professionals for Social Responsibility.  A version of this paper was also published in the small-press magazine Intertek.
+
+[2]  A fifth class, that of Guests, is that of characters who do not have long-term abilities; they may describe themselves, for example, but their descriptions revert to a default description when they disconnect.  On OpalMOO, Guest characters are encouraged to use the @request command to request full-fledged characters.
+
+[3]  Assistance with the virtual interface for IRC comes from Dave Shevett of Unipress.
+
+[4]  Corporate America is growing more and more interested in the virtual world as a tool for doing business.  For more information, see "MUDs Grow Up: Social Virtual Reality in the Real World," written by Pavel Curtis and David Nichols, both of Xerox PARC, for presentation at the Third International Conference on Cyberspace, held in May, 1993.
+	Steve Jackson Games, for example, has a pay MOO service; his MOO, however, lacks many of OpalMOO s improvements.  Xerox PARC is investigating the possibility of a "Virtual Office" in which individuals at separate sites share common whiteboards, files, and interact in real-time (this project, however, includes audio-visual support).  World Benders (of Nashua, NH) has "Meeting Space," offering what claims to be another variant of the virtual office.
+
+[5]  For a larger discussion of the problems facing women in the virtual world, a research project on LambdaMOO led to "Better Living Through Language: The Communicative Implications of a Text-Only Virtual Environment" (Eva-Lise Carlstrom, Grinnell College).
+
+[6]  Merkin has a modified say verb because he is a cat.  When he uses the say command, he purrs instead of talking.
+
+[7]  This Lambda is, in fact, the Lambda after whom LambdaMOO was named; Pavel Curtis, who wrote the LambdaMOO server.  (Several of his papers have been referenced elsewhere in this document.)
+
+[8]  This whimsical message accompanies the formal granting of a programmer's bit to Lambda.
+
+[9]  The "has disconnected" message is displayed when a character disconnects from the MOO.
+
+[10] The OpalMOO Clock Tower chimes the hour, according to Eastern Standard Time.
+
+[11] Grandpa is not actually a player.  He is an automaton who wanders the streets of OpalMOO, randomly giving people advice or spouting song lyrics at them.
+
+[12] Chocolate-Challenge is one of the OpalMOO Guest characters.  The "has connected" message is displayed when a player logs on to the MOO.
+
+[13] The dictionary uses gopher to connect to an Internet-accessable dictionary.  It's an example of the sort of virtual interfaces we propose to implement.
+
+[14] Within the MOO community, the desire for a gender-neutral set of pronouns led to the fairly common adoption of the "Spivak" pronouns, of which "eir" and "e" are examples.

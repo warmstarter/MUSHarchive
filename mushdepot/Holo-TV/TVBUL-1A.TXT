@@ -1,0 +1,22 @@
+@create TV Bulletin Board
+@lock TV Bulletin Board=*Research_Inc
+@Desc TV Bulletin Board=Get your note poted on TV! This bulletin board transmits on channel 'bb'. Just 'give [name(me)]=5'.
+@Cost TV Bulletin Board=5
+@Pay TV Bulletin Board=Now, type `post <message>' to get you message posted.
+@Apay TV Bulletin Board=&payed me=yes
+&PAYED TV Bulletin Board=no
+&POST TV Bulletin Board=$post *:@switch [u(payed)]=yes,{&nnum me=[add(v(nnum),1)];&m_[u(nnum)] me=%0;@switch [gt(u(nnum),u(top))]=1,{&top me=[u(nnum)]};&payed me=no;@pemit %#=Note posted.},no,@pemit %#=Try paying first.
+&DO TV Bulletin Board=@pemit/list [v(tvlist)]=+[u(channel)]=[u(m_[rand(add(u(top),1))])] ; @tr me/do2
+&CHANNEL TV Bulletin Board=bb
+@Adesc TV Bulletin Board=@@
+&NNUM TV Bulletin Board=3
+&M_1 TV Bulletin Board=The following channels are now transmitting, [u(chanlist)].
+&M_2 TV Bulletin Board=If you would like to run your own TV station @tel #40 and follow instructions there.
+&TOP TV Bulletin Board=3
+&M_0 TV Bulletin Board=Your watching channel 'bb' the Bulletin Board 
+channel.
+@Startup TV Bulletin Board=@tr me/do
+&CHANLIST TV Bulletin Board=0,bb
+&M_3 TV Bulletin Board=If you would like you message posted on this channel, go to the news room off the Town Square and look at out tv bulletin board.
+&DO2 TV Bulletin Board=@wait 20=@tr me/do
+

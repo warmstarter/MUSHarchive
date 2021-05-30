@@ -1,0 +1,11 @@
+@create Econ Control
+@link Econ Control = #455
+@set Econ Control = WIZARD
+&VERSION Econ Control=2.1
+@set Econ Control/VERSION=no_command
+&DAILY Econ Control=@switch [gte(86400,[sub([secs()],[v(lastdaily)])])]=1,{@wait [sub(86400,[sub([secs()],[v(lastdaily)])])]={@dol lsearch(econ-bc,type,obj)=@trigger ##/daily;&lastdaily me=[secs()]}},0,{@dol lsearch(econ-bc,type,obj)=@trigger ##/daily;&lastdaily me=[secs()]
+&LASTDAILY Econ Control=933977113
+&LASTPROD Econ Control=934001777
+&SWEEP Econ Control=@switch [gte(3600,[sub([secs()],[get(me/lastprod)])])]=1,{@wait [sub(3600,[sub([secs()],[get(me/lastprod)])])]={@dol lsearch(econ-bc,type,obj)=@trigger ##/sweep;&lastprod me=[secs()]}},0,{@dol lsearch(econ-bc,type,obj)=@trigger ##/sweep;&lastprod me=[secs()]}
+@STARTUP Econ Control=@tr me/daily;@tr me/sweep;@attr/access/retroactive cargocan=wiz mortal_dark
+@set Econ Control/STARTUP=no_command

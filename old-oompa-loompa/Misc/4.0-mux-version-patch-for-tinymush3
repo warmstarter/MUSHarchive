@@ -1,0 +1,42 @@
+This is a patch that will make the MUX version 4.0 of the 
+Weather and Time Code work with Tinymush 3.0. The MUX version
+is more capable than the TinyMUSH 2.2 version.
+
+The patch is necessary because TinyMUSH 3.0 can't handle
+32-character attribute names. If you install the MUX version
+new on TinyMUSH 3.0, or if you have used a conversion script
+on a MUX database, you'll find that the moon won't work
+because of it.
+
+As of this writing the latest TinyMUSH 3.0 release, b20,
+has memory leaks. If you're going to install the Weather
+and Time code on TM3, @restart your server periodically.
+Once a day is good.
+
+For a new TM3 installation, install the MUX version as normal,
+ignore all the 'I don't understand that flag' errors, and
+then make the following changes.
+
+#31 - Keran's Box of Weather and Time Stuff, with Notes
+@set Keran's Box of Weather and Time Stuff, with Notes=COMMANDS
+
+#113 - Wizard Weather and Time Commands
+@set Wizard Weather and Time Commands=COMMANDS
+
+#115 - Clock
+@set Clock=COMMANDS
+
+#175 - Global Command Object
+@set Global Command Object=COMMANDS
+
+#550 - Storm Maker
+@set Storm Maker=COMMANDS
+
+#7 - Time Functions
+&SECS-ELAPSED-THIS-CALENDAR-MONT Time Functions
+&SECS-ELAPSED-THIS-CAL-MONTH Time Functions=[mod(sub(secs(), u(time-begins)), u(secs-per-calendar-month))]
+
+#555 - Moon and Tide Functions
+&MIDNIGHT-BEFORE-MERIDIAN-TRANSI Moon and Tide Functions
+&MIDNIGHT-ERE-MERIDIAN-TRANSIT Moon and Tide Functions= [switch(gt(sub(u(#555/meridian-transit), u(#7/last-midnight)), u(#7/secs-per-day)), 1, u(#7/next-midnight), [switch(lt(sub(u(#555/meridian-transit), u(#7/last-midnight)), 0), 1, u(#7/midnight-before-last), u(#7/last-midnight))])]
+@edit Moon and Tide Functions/*=midnight-before-meridian-transit,midnight-ere-meridian-transit

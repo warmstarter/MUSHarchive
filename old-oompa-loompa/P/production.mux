@@ -1,0 +1,483 @@
+
+###################################################################
+#		     PRODUCTION SYSTEM                            #
+#                                                                 #
+# This code is intended to interact with the rest of the econ     #
+# system, and allows the representatives to produce their         #
+# goods and wares.                                                #
+#                                                                 #
+###################################################################
+#                                                                 #
+# Plan:                                                           #
+#	a) Have the representative organize his list of products  #
+#          in order of price (most expensive first) so that he    #
+#          or she can get the most money.                         #
+#       b) Take the first product in the list and find out if     #
+#          the rep has the ingredients to make the product        #
+#       c) Have the rep produce as much of the product as s/he    #
+#          can                                                    #
+#       d) use up the supplies used to make the product           #
+#                                                                 #
+###################################################################
+
+
+#=================================================================#
+#                            SETTINGS                             #
+#                                                                 #
+# Where #161 is the generic object and the rep-* attributes       #
+# will be evaulated in the code as u functions using the          #
+# udefault() call with 'none' as the default.                     #
+#                                                                 #
+#=================================================================#
+
+&rep-ingredients #161=[edit(default(me/ingredients, none), heat, wood)]
+-
+&rep-tools #161=[default(me/tools, none)]
+-
+&rep-accounts-required #161=[default(me/accounts-required, none)]
+-
+&rep-containers #161=[default(me/containers, none)]
+-
+
+#=====================  TRIG-MAKE-PRODUCTS =========================#
+#                                                                   #
+# This trigger checks to see if the rep has any more products       #
+# to try to make, or not.  If he does, it triggers the next step.   #
+# If he doesn't, the code stops.                                    #
+#                                                                   #
+# %0 = dbref of the representative                                  #
+# %1 = list of products that the rep sells delimited by a | and     #
+#      sorted by price with most expensive first                    #
+#                                                                   #
+# %q1 = first product to try to make                                #
+# %q2 = remaining list of products to make                          #
+#                                                                   #
+#===================================================================#
+
+&trig-make-products #99=
+  
+
+  think setq(1, first(%1, |));
+  think setq(2, rest(%1, |));
+
+  @switch [gt(words(%q1), 0)]=
+    0, {@@ No more products to make @@;
+        @fpose %0=has no more products to make. },
+    1, {@fpose %0=tries to make or find some %q1.;
+        @tr #99/trig-production = %0, %q2, %q1}
+
+-
+
+#========================= TRIG-PRODUCTION ========================#
+#                                                                  #
+# This trigger's purpose is to determine just how many of a given  #
+# product the rep can make given his supplies, energy level, and   #
+# tools.                                                           #
+#                                                                  #
+# The Plan:                                                        #
+#     a) Find out what ingredients the rep needs, if any           #
+#     b) Find out what tools the rep needs, if any                 #
+#     c) Find out what containers or accounts the rep needs, if    #
+#        any                                                       #
+#     d) Find out how much energy the rep would need to make the   #
+#        product                                                   #
+#                                                                  #
+# %0 = representative dbref                                        #
+# %1 = list of remaining products that the rep can make delimited  #
+#      by | and arranged in order of price with most expensive     #
+#      first                                                       #
+# %2 = product to be made now                                      #
+#==================================================================#
+
+&trig-production #99=
+
+#-------------------------------------------------------------------
+# Set the registers:
+#   %q0 = the parent object for the product
+#   %q1 = the ingredient list to make that product formatted thusly:
+#         <ingredient>=<amount>|<ingredient>=<amount>
+#--------------------------------------------------------------------
+
+  think setq(0, paccount(%2));
+  think setq(1, udefault(%q0/rep-ingredients, none));
+
+#---------------------------------------------------------------------
+# Given these ingredients, how many of the product can the rep make
+#
+# Using ulocal(#99/ul-product-qnty-ingredients, 
+#               <numbers of the ingredients the rep has>,
+#               <corresponding list of number of ingredient needed>,
+#               <how many the recipe yeilds (for now use one)>,
+#               <efficiency (.5 (fifty percent success rate))>)
+#
+# This function will return the number of products that the rep can 
+# make with the required ingredients.
+#               
+# %q3 = the amount of the product that the rep can make
+#---------------------------------------------------------------------
+
+  @switch [strmatch(%q1, none)]=
+    1, {@@ do nothing @@;
+        @fpose %0 = doesn't need any special ingredients to make %2.;
+        @tr #99/trig-production-toolcheck= %0, %1, %2, %q0, %q1 },
+
+    0, {think setq(3, 
+               ulocal(ul-product-qnty-ingredients, 
+                  [iter(%q1, getaccountd(%0, first(##, =)), |, %b)],
+                  [iter(%q1, after(##, =), |, %b)],
+                  1,
+                  1));
+        think setq(3, trim(%q3));
+        &can-make-[makeattr(%2)] %0=%q3;
+
+
+         @fpose %0=has enough ingredients to make 
+                [default(%0/can-make-[makeattr(%2)], 0)] %2.;
+        @tr #99/trig-production-toolcheck= %0, %1, %2, %q0, %q1}
+-
+
+&ul-product-qnty-ingredients #99=
+
+[setq(0,1000000)]
+[iter(lnum(vdim(%0)),[setq(0,[min(%q0,[div(extract(%0,
+inc(##), 1), extract(%1, inc(##), 1))])])])][mul(r(0),%2,%3)]
+
+
+-
+
+#===================== TRIG-PRODUCTION-TOOLCHECK ==================#
+#                                                                  #
+# This trigger checks to see how much of a given product can       #
+# be produced with the given tools.                                #
+#                                                                  #
+# %0 = representative dbref                                        #
+# %1 = list of remaining products that the rep can make delimited  #
+#      by | and arranged in order of price with most expensive     #
+#      first                                                       #
+# %2 = product to be made now                                      #
+# %3 & %q0 = the parent object for the product                     #
+# %4 & %q1 = the ingredient list to make that product formatted    #
+#            thusly:                                               #
+#         <ingredient>=<amount>|<ingredient>=<amount>              #
+#==================================================================#
+ 
+&trig-production-toolcheck #99=
+
+   think setq(0, %3);
+   think setq(1, %4);
+
+#-------------------------------------------------------------------
+#  Figure out which tools, if any, the rep needs per product and 
+#  given how many of these tools the rep has, determine how many of
+#  the product the rep can make.  Make sure to wait one queue cycle
+#  for the previous ingredient searching to do
+#
+#  %q4 = which tool, if any, are required per product
+#  %q5 = the number of uses in an average tool
+#  %q3 = the amount of the product that the rep can make with the
+#  number of tools that the rep has.  (Remember that you may be using
+#  up all the uses of a tool in this production so you'll want to
+#  break or get rid of the tools at the end of the process)
+# 
+#  Using ulocal(ul-products-qnty-tools, 
+#                <number of the tool that the rep has>,
+#                <number of uses the tool has on average/quality>,
+#                <number of times that a tool us used per recipe>,
+#                <the yeild of a single batch/recipe 
+#                  (for now, always use 1)>,
+#                <efficiency 1=100%>)
+#--------------------------------------------------------------------
+
+  
+  think setq(4, udefault(%q0/rep-tools, none));
+  think setq(5, default(paccount(%q4)/quality, 100));
+
+   @switch [strmatch(%q4, none)]=
+    1, {@@ do nothing @@;
+        @fpose %0 = doesn't need any tools to make %2.;
+        @tr #99/trig-production-accounts= %0, %1, %2, %q0, %q1 },
+    0, {@fpose %0 = needs %q4.;
+        @fpose %0 = has [getaccountd(%0, %q4)] %q4.;
+        think setq(3, ulocal(ul-products-qnty-tools, 
+                             getaccountd(%0, %q4),
+                             %q5,
+                              1, 
+                              1,
+                              1));
+        &can-make-[makeattr(%2)] %0=
+            [switch(1, lte(%q3, get(%0/can-make-[makeattr(%2)])), %q3, 
+                                get(%0/can-make-[makeattr(%2)]))];
+
+         @fpose %0=has enough tools and ingredients to make 
+                [get(%0/can-make-[makeattr(%2)])] %2.;
+         @tr #99/trig-production-accounts= %0, %1, %2, %q0, %q1 }
+-
+
+&ul-products-qnty-tools #99=
+[setq(0,1000000)]
+[iter(lnum(vdim(%0)),[setq(0,[min(%q0, 
+[div(mul(extract(%0,inc(##),1),extract(%1,inc(##),1)),extract(%2,inc(##),1))])]
+)])]
+[mul(r(0),%3,%4)]
+
+
+-
+#======================== TRIG-PRODUCTION-ACCOUNTS ==================#
+#                                                                    #
+# This trigger determines how many of a given product can be made    #
+# given the current number of accounts present.                      #
+#                                                                    #
+# %0 = representative dbref                                          #
+# %1 = list of remaining products that the rep can make delimited    #
+#      by | and arranged in order of price with most expensive       #
+#      first                                                         #
+# %2 = product to be made now                                        #
+# %3 & %q0 = the parent object for the product                       #
+# %4 & %q1 = the ingredient list to make that product formatted      #
+#            thusly:                                                 #
+#         <ingredient>=<amount>|<ingredient>=<amount>                #
+#                                                                    #
+#====================================================================#
+
+&trig-production-accounts #99=
+
+  think setq(0, %3);
+  think setq(1, %4);
+
+#-----------------------------------------------------------------------
+#  Figure out how many accounts present, if any, the rep needs per 
+#  product and given that number, determine how many of the product 
+#  the rep can make.  
+#
+#  %q4 = list of <account>=<quantity> required to be present for each product
+#  %q3 = the amount of the product that the rep can make
+#------------------------------------------------------------------------
+
+  think setq(4, udefault(%q0/rep-accounts-required, none));
+
+  @switch [strmatch(%q4, none)]=
+    1, {@@ do nothing @@;
+        @fpose %0 = doesn't need any accounts to make %2.;
+        @tr #99/trig-products-containers = %0, %1, %2, %q0, %q1 },
+    0, {@fpose %0 = requires %q4;
+        @fpose %0 = has [iter(%q4, [getaccountd(%0, first(##, =))]%b
+                        [after(##, =)], |, |)];
+        think iter(%q4, 
+               [setq(3, getaccountd(%0, first(##, =)))]
+               [setq(3, switch(1, lte(%q3, 0), 0, fdiv(%q3, after(##,=))))]
+               [set(%0, can-make-[makeattr(%2)]:
+                        [switch(1, gt(%q3,
+                                   default(%0/can-make-[makeattr(%2)],0)),
+                                   default(%0/can-make-[makeattr(%2)],0),
+                                   %q3)])]);
+
+         @fpose %0=has enough ingredients, tools and accounts to make 
+                [default(%0/can-make-[makeattr(%2)], 0)] %2.;
+        @tr #99/trig-products-containers = %0, %1, %2, %q0, %q1 }
+-
+
+#====================== TRIG-PRODUCTS-CONTAINERS ==================#
+#                                                                  #
+# This trigger checks to see if the rep needs containers to make   #
+# the given product, and if so, whether the rep has enough.        #
+#                                                                  #
+# %0 = representative dbref                                        #
+# %1 = list of remaining products that the rep can make delimited  #
+#      by | and arranged in order of price with most expensive     #
+#      first                                                       #
+# %2 = product to be made now                                      #
+# %3 & %q0 = the parent object for the product                     #
+# %4 & %q1 = the ingredient list to make that product formatted    #
+#            thusly:                                               #
+#         <ingredient>=<amount>|<ingredient>=<amount>              #
+#                                                                  #
+#==================================================================#
+
+&trig-products-containers #99=
+
+  think setq(0, %3);
+  think setq(1, %4);
+
+#-----------------------------------------------------------------------
+#  Figure out how many containers present, if any, the rep needs per 
+#  product and given that number, determine how many of the product the rep 
+#  can make.  Wait 3 queue cycles for the previous code to run.
+#
+#  %q4 = list of <container>=<quantity> required to be present for
+#  each product (if more than one type will suffice, choose one at random)
+#  %q6 = list of the containers to be passed on
+#  %q3 = the amount of the product that the rep can make
+#------------------------------------------------------------------------
+
+   think setq(4, udefault(%q0/rep-containers, none));	
+   think setq(4, switch(1, strmatch(%q4, none), none,
+                          gt(words(%q4,|),1), first(shuffle(%q4,|),|),
+                          %q4));
+   think setq(6, %q4);
+
+   @switch [strmatch(%q4, none)]=
+    1, {@@ do nothing @@;
+        @fpose %0 = doesn't need any containers to make %2.;
+        @tr #99/trig-products-energy = %0, %1, %2, %q0, %q1, %q6 },
+    0, {think iter(%q4, 
+               [setq(3, getaccountd(%0, first(##, =)))]
+               [setq(3, switch(1, lte(%q3, 0), 0, fdiv(%q3, after(##,=))))]
+               [set(%0, can-make-[makeattr(%2)]:
+                        [switch(1, gt(%q3,
+                                   default(%0/can-make-[makeattr(%2)],0)),
+                                   default(%0/can-make-[makeattr(%2)],0),
+                                   %q3)])]);
+
+         @fpose %0=has enough ingredients, tools, accounts 
+                and containers to make 
+                [default(%0/can-make-[makeattr(%2)], 0)] %2.;
+        @tr #99/trig-products-energy = %0, %1, %2, %q0, %q1, %q6 }
+-
+
+#======================== TRIG-PRODUCTS-ENERGY ====================#
+#                                                                  #
+# This trigger checks to see how many products can be made given   #
+# the reps energy level.                                           #
+#                                                                  #
+# %0 = representative dbref                                        #
+# %1 = list of remaining products that the rep can make delimited  #
+#      by | and arranged in order of price with most expensive     #
+#      first                                                       #
+# %2 = product to be made now                                      #
+# %3 & %q0 = the parent object for the product                     #
+# %4 & %q1 = the ingredient list to make that product formatted    #
+#            thusly:                                               #
+#         <ingredient>=<amount>|<ingredient>=<amount>              #
+# %5 = list of containers to be passed along                       #
+#                                                                  #
+#==================================================================#
+
+&trig-products-energy #99=
+
+  think setq(0, %3);
+  think setq(1, %4);
+
+#-------------------------------------------------------------------#
+# Find out how much energy it takes to make one of the products     
+# 
+# %q4 = amount of energy it takes to make one of the product
+# %q5 = the amount of energy the rep has
+# %q3 = the number of the product that the rep can make given the 
+#       number of energy points that the rep has
+#-------------------------------------------------------------------#
+                        
+   think setq(4, default(%q0/labor-make, 1));
+   @fpose %0 = needs %q4 energy to make %2.;
+   think setq(5, getaccountd(%0, energy));
+   @fpose %0 = has %q5 energy.;
+   think setq(3, switch(1, lte(%q5, 0), 0, fdiv(%q5, %q4)));
+   &can-make-[makeattr(%2)] %0=
+      [switch(1, lte(%q3, get(%0/can-make-[makeattr(%2)])), %q3,
+                          get(%0/can-make-[makeattr(%2)]))];
+
+   @fpose %0=has enough energy to make 
+                [get(%0/can-make-[makeattr(%2)])] %2.;
+
+#-------------------------------------------------------------------------
+# Now that the number of products that the rep can make has been 
+# determined, trigger the actual production.  Wait 5 queue cycles so
+# that the number is finally set.
+#-------------------------------------------------------------------------
+
+         @tr #99/trig-do-the-work = %0, %1, %2, %q1, %5
+-
+
+
+#========================= TRIG-DO-THE-WORK ========================#
+#                                                                   # 
+# The purpose of this trigger is to do the actual production.  At   #
+# this stage, the ingredients of the product are used up in the     #
+# process of making the new items for the rep to sell.              #
+#                                                                   #
+# %0 = representative dbref                                         #
+# %1 = list of remaining products that the rep can make delimited   #
+#      by | and arranged in order of price with most expensive      #
+#      first                                                        #
+# %2 = product to be made now                                       #
+# %3 = list of the ingredients                                      #
+# %4 = list of the containers needed to use                         #
+#                                                                   #
+# %q0 = the parent dbref of the product                             #
+# %q1 = the number of the product that the rep can make             #
+# %q2 = the required tools for the product                          #
+# %q3 = the required energy for the product                         #
+#                                                                   #
+#===================================================================#
+
+&trig-do-the-work #99=
+
+
+  think setq(1, get(%0/can-make-[makeattr(%2)]));
+
+  @switch [gt(%q1 , 0)]=
+
+    0, {@@ rep doesn't have enough supplies to make product @@;
+        @fpose %0=doesn't have enough supplies to make even one %2.;
+        @@ try to make the next product on the list @@;
+        &can-make-[makeattr(%2)] %0;
+        @tr #99/trig-make-products=%0, %1},
+
+    1, {@@ rep can make the product -- decrement accounts @@;
+        think setq(0, paccount(%2));
+
+        @@ use up the ingredients (list of ingredients is %3) @@;
+        @dolist/delimit | %3=
+         think ac_adjust(%0, 
+                         first(##, =), 
+                        -[round(mul(after(##, =),%q1), 1)]);
+
+        @@ use up the right portion of tools @@;
+        think setq(2, udefault(%q0/rep-tools, none));
+        think setq(3, get(%q0/quality));
+        think ac_adjust(%0, %q2, -[round(fdiv(%q1, %q3), 1)]);
+
+        @@ use up containers (%4 is the list of containers) @@;
+        think ac_adjust(%0, 
+                        [first(%4, =)], 
+                       -[round(mul(after(##, =),%q1), 1)]);
+
+        @@ use up the requisite energy @@;
+        think setq(4, default(%q0/labor-make, 1));
+        think ac_adjust(%0, energy, -[round(mul(%q4, %q1), 1)]);
+
+        @@ create the proper number of the product @@;
+         think setq(5, udefault(%q0/rep-accounts-produced, %2=1));
+         think setq(5, after(%q5, =));
+         think setq(5, round	(mul(%q5, %q1), 1));
+
+         think switch(hasaccount(%0, %2), 1, ac_adjust(%0, %2, %q5),
+                                             ac_create(%0, %2, %q5));
+
+          @fpose %0=creates %q5 %2.;
+
+#-------------------------------------------------------------------
+#                   
+#               Finally, clear out the can-make attribute for next
+#               times calculations
+#--------------------------------------------------------------------
+
+                &can-make-[makeattr(%2)] %0}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

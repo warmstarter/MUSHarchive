@@ -1,0 +1,25 @@
+@create Who Thing
+@link Who Thing=#2
+@lock Who Thing=me
+@set Who Thing=INHERIT
+@set Who Thing=WIZARD
+@VB Who Thing=$ewho:@pemit %#=[u(EHeader)][iter(filter(Empire_Filter,lwho()),switch(u(Can_See,%#,##),1,%r[u(EEntry,##)]))]%r[ansi(m,There are [words(filter(Empire_Filter,lwho()))] players in Empire [get(%#/Empire)] connected.)]
+&SECONDS Who Thing=[mod(%0,60)]
+@VA Who Thing=$who:@pemit %#=[u(Header)][iter(lwho(),switch(u(Can_See,%#,##),1,%r[u(Entry,##)]))]%r[ansi(hm,There are [words(lwho())] players connected.)]
+&DISPLAY Who Thing=[setq(0, switch(grab(v(lengths),%0 *,|),,1,rest(#$)))][switch(gt(strlen(%1),r(0)),1,left(%1,r(0)),ljust(%1,r(0)))]
+&LENGTHS Who Thing=sex 3|name 15|alias 7|onfor 9|idle 4|class 15|empire 11|org 19
+@SEX Who Thing=[switch(poss(%0),his,M,her,F,its,O)]
+&ONFOR Who Thing=[switch(gt(conn(name(%0)),86400),1,[u(days,conn(name(%0)))]d)] [u(hours,conn(name(%0)))]:[u(minutes,conn(name(%0)))]
+&HOURS Who Thing=[switch(lt(div(mod(%0,86400),3600),10),1,0[div(mod(%0,86400),3600)],div(mod(%0,86400),3600))]
+&MINUTES Who Thing=[switch(lt(div(mod(%0,3600),60),10),1,0[div(mod(%0,3600),60)],div(mod(%0,3600),60))]
+&DAYS Who Thing=[div(%0,86400)]
+&CAN_SEE Who Thing=[or(u(see_all,%0),not(hidden(%1)))]
+@IDLE Who Thing=[switch([setq(0,idle(name(%0)))][u(idlescale,r(0))],seconds,[r(0)]s,minutes,[div(r(0),60)]m,hours,[div(r(0),3600)]h,days,[div(r(0),86400)]d)]
+&IDLESCALE Who Thing=[switch(lt(%0,60),1,seconds,switch(lt(%0,3600),1,minutes,switch(lt(%0,86400),1,hours,days)))]
+&RDISPLAY Who Thing=[setq(0, switch(grab(v(lengths),%0 *,|),,1,rest(#$)))][switch(gt(strlen(%1),r(0)),1,right(%1,r(0)),rjust(%1,r(0)))]
+&SEE_ALL Who Thing=[or(or(hasflag(%0,wizard),hasflag(%0,royalty)),haspower(%0,see_all))]
+&HEADER Who Thing=[ansi(hg,Sex Name%b%b%b%b%b%b%b%b%b%b%b%bAlias%b%b%b%b%b%bOn For Idle Class%b%b%b%b%b%b%b%b%b%b%bEmpire)]
+&ENTRY Who Thing=[switch(ucstr(get(%0/Sex)),M*,ansi(hb,M),F*,ansi(hm,F),ansi(hx,O))]%b%b [ansi(c,ltjust(Name(%0),15))] [ansi(y,ltjust(get(%0/Alias),7))] [ansi(r,rjust(u(Onfor,%0),9))] [ansi(m,rjust(u(Idle,%0),4))] [ansi(hr,ltjust(get(%0/Class),15))] [ansi(g,ltjust(get(%0/Empire),11))]
+&EHEADER Who Thing=[ansi(g,Sex Name%b%b%b%b%b%b%b%b%b%b%b%bAlias%b%b%b%b%b%bOn For Idle Class%b%b%b%b%b%b%b%b%b%b%bOrganization)]
+&EENTRY Who Thing=[ltjust(u(Sex,%0),3)] [ansi(c,ltjust(Name(%0),15))] [ltjust(get(%0/Alias),7)] [rjust(u(Onfor,%0),9)] [rjust(u(Idle,%0),4)] [ansi(hr,ltjust(get(%0/Class),15))] [ansi(y,ltjust(get(%0/Organization),19))]
+&EMPIRE_FILTER Who Thing=[switch(get(%0/Empire),get(%#/Empire),1,0)]

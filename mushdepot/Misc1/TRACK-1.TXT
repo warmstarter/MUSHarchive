@@ -1,0 +1,28 @@
+Guard Tracking Station(#5311VYh)
+Type: THING Flags: VISUAL PARENT_OK HALTED
+This object tracks the Armaggedon Guard Corps' status.%rCommands:%r%t[ljust
+(list,35)]: display status for guards%r%t[ljust(status <guard> <status>,35)]:
+updates <guard>'s status%r%t[ljust(location <guard> <location>,35)]: updates
+<guard>'s location%r%t[ljust(equipment <guard> <equipment>,35)]: update's
+<guard>'s equipment%r%t[space(35)]: and sets it's status%r%t[ljust(add guard
+<number>,35)]: add <number> to the guard list%r%t[ljust(equip <number>,35)]:
+display guard <number>'s equipment
+Owner: Daric  Key: *UNLOCKED* Loonies: 1
+LIST_CMD:$list:@pemit %#=[ljust(##,4)][ljust(Status,15)][ljust(Location,30)]
+[iter(v(guards),%r[ljust(##,4)][ljust(v(status-##),15)][ljust(v(location-##),
+30)])]
+GUARDS:00 01 01
+LOCATION-00:Armageddon OOC Nexus
+STATUS-00:On Duty
+EQUIPMENT-00:.44 Auto (1 mag)
+STATUS_CMD:$status *=*:&status-%0 me=%1;@pemit %#=Done. Status updated.
+LOCATION_CMD:$location *=*:&location-%0 me=%1;@pemit %#=Done. Location updated.
+EQUIPMENT_CMD:$equipment *=*:&equipment-%0 me=%1;@pemit %#=Done. Equipment
+updated.
+EQUIP_CMD:$equip *:@pemit %#=Equipment for guard %0:%r[v(equipment-%0)]
+ADDGUARD_CMD:$add guard *:&guards me=[v(guards)] %0;@pemit %#=Done.  Guard
+added.
+No exits.
+Home: Garden of Eden (OOC)(#1625RAJL)
+Location: Free Code Room (Armageddon)
+_______________________________________________________________________________

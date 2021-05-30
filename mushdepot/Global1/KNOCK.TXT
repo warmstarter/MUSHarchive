@@ -1,0 +1,18 @@
+@@   Global Knock Code                                  @@
+@@	This code will allow you to 'knock' on virtual     @@
+@@	doors.                                             @@
+@@   The 'HELP_KNOCK' attribue is to place on your      @@
+@@   Global Help Text file. Reformat however you like,  @@
+@@   but keep the credit at the end, please.            @@
+@@                                                      @@
+@@   Forever King @ TalesMUSH (tales.net 6666)          @@
+@@        fk@tales.net                                  @@
+
+
+@create Knocker Object=10
+@set Knocker Object=Safe
+@set Knocker Object=Inherit
+@set Knocker Object=Commands
+&KNOCK_CMD Knocker Object=$knock *:@switch [setq(0,objeval(%#,num(%0)))][type(%q0)]=ROOM,{@pemit %#=You need to choose a door to knock on, not the room.},THING,{@pemit %#=You can only knock on a door, not an object.},PLAYER,{@pemit %#=That player probably isn't going to like being knocked on. Perhaps you should rethink this plan...},EXIT,{@switch [hasattr(%q0,door)]=0,{@pemit %#=That is not a door, so cannot be knocked on.},1,{@pemit %#=[get_eval(%q0/ksucc)];@pemit/list [setdiff([lcon(loc(%#))],%#)]=[name(%#)] [u(%q0/kosucc,%#)];@pemit/contents [loc(%q0)]=[u(%q0/kinside,%#)]}}
+
+&HELP_KNOCK Global Help Text=%r%tCommand:%b knock <door>%r%r%tThis command will knock upon a door, causing a message to be displayed to the room on the other side. Four seperate attributes must be set on the exit for it to be able to be knocked on.%r%t&door <exit>=anything (You may set any text in this attribute. It%r%t%b%bsimply must have this attribure for it to be knockable.)%r%t&ksucc <exit>=Message shown to player knocking.%r%t&kosucc <exit>=Message shown to all others in the same room as the%r%t%b%bplayer knocking, prefixed by the player's name.%r%t&kinside <exit>=Message displayed to the occupents of the room on the%r%t%b%bother side of the door.%r%t( For both KOSUCC and KINSIDE, %%0 resolves to the #DBref of the%r%t%b%bplayer knocking. )%r%r%tCoded by Forever King @ TalesMUSH. (fk@tales.net)

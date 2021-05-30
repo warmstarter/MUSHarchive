@@ -1,0 +1,78 @@
+@create Master Ship Zone
+@link Master Ship Zone #0
+@lock/Zone Master Ship Zone==[owner(me)]
+&NEW_ACONNECT Master Ship Zone=%b[ansi(c,repeat(_,7))][space(17)][ansi(c,repeat(_,53))]%r[ansi(c,%()][ansi(c,repeat(_,7))][ansi(c,|)] [ansi(hw,Intrepid MOTD)] [ansi(c,|)][ansi(c,repeat(_,53))][ansi(c,%))][space(5)][u(smotd)]%r%b[ansi(c,repeat(_,5))][space(9)][ansi(c,repeat(_,49))][space(9)][ansi(c,repeat(_,5))]%r[ansi(c,%()][ansi(c,repeat(_,5))][ansi(c,|)] [ansi(hw,Roger)] [ansi(c,|)][ansi(c,repeat(_,49))][ansi(c,|)] [ansi(hw,[rand(9)][rand(9)][rand(9)][rand(9)][rand(9)])] [ansi(c,|)][ansi(c,repeat(_,5))][ansi(c,%))]
+&LOCATE Master Ship Zone=$locate *:@pe %#=[ansi(c,[capstr(%0)])] is Currently at: [name(loc(*%0))]([loc(*%0)])
+&RST- Master Ship Zone=$shp rst- *:@switch [v(command)]=*%#*,{@oemit %#=%N uses the Computer Termianl.;&rst [u(znum)]=[edit(v(rst),[num(*%0)],)];&pos_[num(*%0)] [u(znum)]=;@wait 3=@pe %#=Remove '%0' from the Ship Roster.},@pe %#=[u(ad)]
+&RST+ Master Ship Zone=$shp rst+ *=*:@swi [v(command)]=*%#*,{@oemit %#=%N uses the Computer Termianl.;&rst [u(znum)]=[edit(v(rst),[num(*%0)],)];@wait 1=&rst [u(znum)]=[v(rst)] [num(*%0)];&pos_[num(*%0)] [u(znum)]=%1;@wait 4=@pe %#=You add '%0' to Position '%1'},@pe %#=[u(ad)]
+&SHIP_ROSTER Master Ship Zone=$shp roster:@oemit %#/%N=%N uses the Computer Terminal.;@pe %#=%r<>==-- [ansi(hw,[v(shipname)])] --==<>%r%r[ljust(Crew Members:,25)][ljust(Position:,25)][iter([v(rst)],%r[ljust([class(##)] [name(##)],25)][v(pos_[##])])]%r%r%t%bThere Are Currently: [words([v(rst)])]%r%t[space(6)]Crew Members.
+&LIST_ROS Master Ship Zone=$+roster:@pemit %#=[repeat(=,60)]%r[center([ansi(wh,[v(shipname)] Crew Roster)],60)]%r[repeat(=,60)]%r[squish([iter([v(roster_nums)],[extract([v(pos_##)],1,1,|)][repeat(.,[sub(4,[strlen([extract([v(pos_##)],1,1,|)])])])][extract([v(pos_##)],2,1,|)][repeat(.,[sub(30,[strlen([extract([v(pos_##)],2,1,|)])])])][extract([v(pos_##)],3,1,|)]%r)])]%r[repeat(=,60)]
+&ADDROS Master Ship Zone=$addros *=*:@swi [or([match([v(command)],%#)],[match([v(builder)],%#)])]=0,@pe %#=You don't have access to that.,&pos_%0 [u(znum)]=[replace([v(pos_%0)],3,[class(*%1)] [name(*%1)],|)];@pe %#=[ansi(hc,<COMPUTER>:)] [class(*%1)] [name(*%1)] has been added to roster as [extract([v(pos_%0)],2,1,|)].
+&DELROS Master Ship Zone=$delros *:[setq(0,secure(%0))];@switch [or([match([v(command)],%#)],[match([v(builder)],%#)])]=0,@pemit %#=You do not have access to that command.,@pemit %#=[ansi(hc,<COMPUTER>:)] Deleting [extract([v(pos_%q0)],3,1,|)] from roster.;@wait 1=&pos_%q0 me=[replace([v(pos_%q0)],3,<NONE>,|)]
+&ZWHO Master Ship Zone=$zwho:@pe %#=[repeat(-,65)]%r[center([ansi(hb,[v(shipname)] Who List <OOC>)],65)]%r[repeat(-,65)]%rNAME[space(12)]IDLE[space(6)]DIVISION[space(10)]CLASS%r[repeat(-,65)]%r[squish([iter([lwho()],[switch([match([zone([loc(##)])],[zone(%l)])],1,[switch([match([get(##/empire)],[v(emp)])],1,[name(##)][repeat(.,[sub(16,[strlen([name(##)])])])][idle(##)][repeat(.,[sub(10,[strlen([idle(##)])])])][get(##/[repeat(.,[sub(18,[strlen([get(##/division)])])])][class(##)]%r)])])][repeat(-,65)]
+&ZNUM Master Ship Zone=#2112
+&POS_01 Master Ship Zone=01.|Commanding Officer|<NONE>
+&POS_02 Master Ship Zone=02.|First Officer|<NONE>
+&POS_03 Master Ship Zone=03.|Second Officer|<NONE>
+&POS_04 Master Ship Zone=04.|Chief Medical Officer|<NONE>
+&POS_05 Master Ship Zone=05.|Chief Engineering Officer|<NONE>
+&POS_06 Master Ship Zone=06.|Chief Security Officer|<NONE>
+&POS_07 Master Ship Zone=07.|Chief Operations Officer|<NONE>
+&POS_08 Master Ship Zone=08.|Counselor|<NONE>
+&POS_09 Master Ship Zone=09.|Helm|<NONE>
+&POS_10 Master Ship Zone=10.|Operations|<NONE>
+&POS_11 Master Ship Zone=11.|Engineering|<NONE>
+&POS_12 Master Ship Zone=12.|Science|<NONE>
+&POS_13 Master Ship Zone=13.|Security|<NONE>
+&POS_14 Master Ship Zone=14.|Medical|<NONE>
+&ROSTER_NUMS Master Ship Zone=01 02 03 04 05 06 07 08 09 10 11 12 13 14
+&EMP Master Ship Zone=DeltaMUSH
+&BIO Master Ship Zone=$bio:@pe %#=[u(bline)] [ansi(hb,v(shipname))] [u(bline)]%r%r[ljust(Bio TRacking:,25)]%rLocation [iter(iter(u(page),lcon(##)),[switch(type(##),PLAYER,##)]),%r[switch(not(not(match(v(recognize),##))),1,[ljust([class(##)] [name(##)],25)][name(loc(##))],0,[ljust([xget(##,sec)] [name(##)],25)][name(loc(##))])])]870 to 3780870 to 3780686886856854858 to 56868686686886856854858 to 56868686
+&ADD Master Ship Zone=$add *:&bio ship=[v(bio)]%0
+&BLINE Master Ship Zone=[ansi(hw,repeat(-,12))]
+&LOCKDOWN Master Ship Zone=$+lockdown:@swi [v(lockdown_status)]=off,{@swi [t(member(v(Command),%#))]=1,{@wait 2=&lockdown_by [u(znum)]=%#;@wait 2=@force *[owner(me)]=&lockdown_status [u(znum)]=on;@wait 2=@dolist [iter(v(room_list),lexits(##))]={&old_lock ##=[lock(##)];@lock ##=##;@remit [home(##)]=[name(##)] locks with a click.}},@pe %#=[ansi(hr,<COMPUTER>: Access Denied)]},on,@pe %#=[ansi(hc,<COMPUTER>:)] Lockdown already active.
+&LOCKDOWN_STATUS Master Ship Zone=on
+&LOCKDOWN_BY Master Ship Zone=#245
+&COMMAND Master Ship Zone=#245 #3 #2619 #2712 #1712 #2616
+&BIO- Master Ship Zone=$bio- *:@swi [v(command)]=*%#*,{@remit me=%N uses the computer Termianl.;&recognize [v(znum)]=[edit(v(recognize),[num(*%0)],)];@pe %#=[u(comp)] [name(%0)] Deleted from Bio List.},@pe %#=[u(ad)]
+&COMP Master Ship Zone=[ansi(hc,<COMPUTER>:)]
+&AD Master Ship Zone=[ansi(hr,<COMPUTER>:)] Access Denied
+&BIO+ Master Ship Zone=$bio+ *:@swi [v(command)]=*%#*,{@remit me=%N uses the computer terminal.;&recognize [v(znum)]=[edit(v(recognize),[num(*%0)],)];@wait 1=&recognize [v(znum)]=[v(recognize)] [num(*%0)];@pe %#=[u(comp)] [name(%0)] Added to Bio List.},@pe %#=[u(ad)]
+&RECOGNIZE Master Ship Zone= 
+@SUCCESS Master Ship Zone=[switch([v(light_type)],alertlights,[eval(me,alert_lights)],torchlight,[eval(me,torchlight)],streetlights,[eval(me,street_lights)],buildinglights,[eval(me,Building_Lights)],lamplights,[eval(me,Lamp_Lights)],roomlights,[eval(me,Room_Lights)],daylight,[eval(me,Sun_Light)],hall-light,[eval(me,Hall_Light)],windowlight,[eval(me,Windows)],default,[eval(me,defaultlights)])]
+&CLOCK Master Ship Zone=on
+&ALERT_STATUS Master Ship Zone=[ansi(hg,Green)]
+@DESCRIBE Master Ship Zone=[ansi(hc,----)] [edit(name(zone(me)),Zone,)][ansi(hc,[repeat(-,[sub(73,[sub([strlen(name(zone(me)))],5)])])])]%r[ansi(hw,[eval(me,desc_store)])]%r%r[ansi(hb,-)] [ansi(hc,People)] [ansi(hb,-)] [squish([iter(lcon(me),switch(type(##),PLAYER,switch(idle(##),-1,,switch(hasflag(##,Dark),0,edit(name(##),Console,) [switch(hasflag(##,IC),1,(IC))] [switch(hasattr(##,CAPTION),1,{Brandishing: [get(##/CAPTION)]})] [ansi(hb,-)]))))])]%r[ansi(hb,-)] [ansi(hc,Objects)] [ansi(hb,-)] [squish([iter(lcon(me),switch(type(##),THING,switch(hasflag(##,Dark),0,edit(name(##),Console,) [switch(hasflag(##,IC),1,(IC))] [switch(hasattr(##,CAPTION),1,{Brandishing: [get(##/CAPTION)]})] [ansi(hb,-)])))])][iter(v(Installed),[s(%r)][ansi(hc,There is a)] [ansi(b,edit(##,_,space(1)))] [ansi(hc,here.)])]%r[ansi(hb,-)] [ansi(hc,Alert)] [ansi(hb,-)] [u(alert_status)]%r[ansi(hb,-)] [ansi(hc,Clock)] [ansi(hb,-)] [u(tx)]
+&DESC_STORE Master Ship Zone=There is no currect Description set. Remember to Store the room description in &DESC_STORE, @set here=dark, and set all the exits light. 
+&UNLOCK_EXIT Master Ship Zone=$+unlock *:@swi [v(Command)]=*%#*,{@swi [v(lockdown_status)]=off,{@remit me=%n uses the Computer Terminal.;@wait 2=@dolist [num(%0)] [iter(lexits(loc(num(%0))),switch(home(%0),loc(##),##))]={@switch [xget(##,old_lock)]=*UNLOCKED*,@lock ##=,@lock ##=[xget(##,old_lock)];@remit [home(##)]]=[name(##] unlocks with a click.}},{@pe %#=[u(comp)] Ship Lock down is active.},@pe %#=[u(ad)]
+&LOCK_EXIT Master Ship Zone=$+lock *:@swi [v(command)]=*%#*,{@swi [v(lockdown_status)]=off,{@remit me=%N uses the Computer Terminal.;@wait 2=@dolist [num(%0)] [iter(lexits(loc(num(%0))),switch(home(%0),loc(##),##))]={&old_lock ##=[lock(##)];@lock ##=[owner(##)];@remit [home(##)]=[name(##)] locks with a click.}},@pe %#=[u(comp)] Ship Lock Down is active.},@pe %#=[u(Ad)]
+&UNLOCKDOWN Master Ship Zone=$+unlockdown:@swi [v(lockdown_status)]=on,{@swi [v(command)]=*%#*,{@remit me=%n uses the Computer Terminal.;@wait 2=&lockdown_status [u(znum)]=off;@wait 2=@dolist [iter(v(room_list),lexits(##))]={@switch [xget(##,old_lock)]=*UNLOCKED*,@lock ##=,@lock ##=[xget(##,old_lock)];@remit [home(##)]=[name(##)] unlocks with a click.}},@pe %#=[u(ad)]},off,@pe %#=[u(comp)] Lockdown is already De-activated.
+&RL Master Ship Zone=$+room list:@pe %#=The following are valid room numbers:[iter(u(page),%r[ljust(match(u(page),##),3)] [name(##)])]%r--- End ---
+&ROOM_LIST Master Ship Zone=#246 #1624 #2114 #2117 #2121 #2124
+&CLCH Master Ship Zone=$clock *:@swi [v(command)]=*%#*,{@switch %0=on,{&clock [u(znum)]=on;@pe %#=[u(comp)] Clock turned On.},off,{&clock [u(znum)]=off;@pe %#=[u(comp)] Clock turned Off.}
+&TX Master Ship Zone=[extract(time(),4,1)]
+&POST_MOTD Master Ship Zone=$+smotd *:@swi [v(command)]=*%#*,{&smotd [u(znum)]=%0;&posted [u(znum)]=%N;@pe %#=New Ship MOTD '%0';@remit %l=%N uses the Computer Terminal.},{@pe %#=[u(ad)]
+&SMOTD Master Ship Zone=Place Ship MOTD HERE!
+&POSTED Master Ship Zone=Tari'Vor on Tue Oct 01 17:27:06 1996
+&SHOW_MOTD Master Ship Zone=$+motd:@pe %#=[u(new_aconnect)]
+&INT_TALK Master Ship Zone=$int *:@zemit [u(znum)]=[ansi(c,<[u(shipname)]> [ansi(hb,[class(%#)] [name(%#)])][ansi(ch,switch(left(%0,1),:,%b[delete(%0,0,1)],;,[delete(%0,0,1)],{%bsays, "%0"}))]
+&ADD_ROSTER Master Ship Zone=$add * access for *:@switch [match(xget(v(znum),command),%#)]=0,@pe %#=[u(ad)],{@switch %0=guest,{&guest me=[squish([edit([v(guest)],#-1,)])] [num(*%1)];@remit %l=[u(comp)] Guest Access Granted for [name(num(*%1))].},crew,{&crew me=[squish([edit([v(crew)],#-1,)])] [num(*%1)];@remit %l=[u(comp)] rew Access Granted for [name(num(*%1))].},command,{&command me=[squish([edit(xget(v(znum),command),#-1,)])] [num(*%1)];@remit %l=[u(comp)] ommand Access Granted for [name(num(*%1))]},{@remit %l=[u(comp)] No such Access Level.}}
+&ENTIRE_ROSTER Master Ship Zone=[xget(v(znum),command)][xget(v(znum),guest)][xget(v(znum),crew)]
+&GUEST Master Ship Zone= #249
+&CREW_MAIL Master Ship Zone=$cmail *=*/*:@switch [match(xget(v(znum),entire_roster),%#)]=0,@pe %#=[u(ad)],{@switch [match(xget(v(znum),entire_roster),%#)]=0,{@pe %#=[name(%0)] isn't Aboard this Ship.},{@dolist [v(entire_roster)]=@mail [name(##)]=Time: [time()]%rSubject: %3%r%rMessage:%r%t%1%r%r[[v(shipname)]-%0%];@pe %#=You Send a Mail message to [name(%0)] with '%2}}
+&BROADCAST Master Ship Zone=$sbrd *:@zemit [u(znum)]=Shipwide Announcment from [class(%#)] %N: "%0"
+&SECURITY Master Ship Zone=1
+&SECURITY_ON Master Ship Zone=$security on:@swi [v(security)]=0,{@switch [t(member(v(rst),%#))]=1,{@pe %#=[u(comp)] You turn the Security System on.;&security [u(znum)]=1;@oemit %#/%#=%N uses the Computer Terminal.;&security_by [u(znum)]=%#},@pe %#=[u(ad)]},1,@pe %#=[u(comp)] Security already active.
+&SECURITY_BY Master Ship Zone=#245
+&SECURITY_OFF Master Ship Zone=$security off:@swi [v(security)]=1,{@switch [t(member(v(command),%#))]=1,{@pe %#=[u(comp)] You turn the Security System Off.;&security me=0;@oemit %#/%#=%N uses the Computer Termianl.;&security_by [u(znum)]=%#},@pe %#=[u(ad)]},0,@pe %#=[u(comp)] Security System already deactivated.
+&RULE Master Ship Zone=[ansi(%0,[repeat(<*>*,19)]<*>)]
+&LINE Master Ship Zone=[ansi(%0,[repeat(~,79)])]
+&CREW Master Ship Zone=#275 #272
+&DEL_ROSTER Master Ship Zone=$del * access for *:@swi [match(xget(v(znum),command),%#)]=0,@pe %#=[u(ad)],{@switch %0=guest,{&guest [u(znum)=[squish(edit({[remove(v(guest),[num(*%1)])]},#-1,))];@remit %l=[u(comp)] Guest Access revoked for [name(num(*%1))].},crew,{&crew [u(znum)=[squish(edit({[remove(v(crew),[num(*%1)])]},#-1,))];@remit %l=[u(comp)] Crew Access Revoked for [name(num(*%1)]},command,{&command [u(znum)]=[squish(edit({[remove(v(command),num(*%1)])]},#-1,))];@remit %l=[u(comp)] Command Access revoked for [name(num(*%1))]},{@remit %l=[u(comp)] There is no such Access level as '%0', %n.}}
+&INT_SPEAK Master Ship Zone=$2int *=*:@switch [isnum(%0)]=0,{@pe %#=[u(comp)] That is not a Valid Room.},{@remit [extract([u(page)],%0,1)]=[ansi(ch,<COMPUTER INTERCOM>)]: [class(%#)] [name(%#)] says: %1;@remit [loc(%#)]=[class(%#)] [name(%#)] says "%1" to the Intercom from [name(loc(%#))].
+&ENT_RST Master Ship Zone=[or(hasflag(%#,Wizard),member(v(rst),%#))]
+&DOCK_STATUS Master Ship Zone=$dock status:@pe %#=[ansi(c,<Dock Status>:)] Ship is Currently Docked at: [iter([get(#3699/docked_At)], [edit(name(##),Ship Object,)]
+&RED_ALERT Master Ship Zone=$Red Alert:@switch [member(v(command),%#)]=0,{@pe %#=Access Denied.},{@switch [u(alert_status)]=%[ansi%(hr,RED%)%]},{@pe %#=[u(comp)] We're at Red Alert already.},{@zemit [u(znum)]=[ansi(hr,*** RED ALERT *** RED ALERT *** RED ALERT ***)]%rRed Alert has been initiated by %N.%rAll hands to battlestations!;&alert_status [u(znum)]=%[ansi%(hr,RED%)%]}
+&BLUE_ALERT Master Ship Zone=$Blue Alert:@switch [member(v(command),%#)]=0,{@pe %#=Access Denied.},{@switch [u(alert_status)]=%[ansi%(hb,BLUE%)%]},{@pe %#=[u(comp)] We're at Blue Alert already.},{@zemit [u(znum)]=[ansi(hb,--- BLUE ALERT --- BLUE ALERT --- BLUE ALERT ---)]%rBlue Alert has been initiated by %N.%rAll hands prepare for docking.;&alert_status [u(znum)]=%[ansi%(hb,BLUE%)%]}
+&YELLOW_ALERT Master Ship Zone=$yellow alert:@switch [member(v(command),%#)]=0,{@pe %#=Access Denied.},{@switch [u(alert_status)]=%[ansi%(hy,YELLOW%)%]},{@pe %#=[u(comp)] We're at Yellow Alert already.},{@zemit [u(znum)]=[ansi(hy,+++ YELLOW ALERT +++ YELLOW ALERT +++ YELLOW ALERT +++)]%rYellow Alert has been initiated by %N.%rSuspisoin of Attack with Ship.;&alert_status [u(znum)]=%[ansi%(hy,YELLOW%)%]}
+&GREEN_ALERT Master Ship Zone=$GREEN alert:@switch [member(v(command),%#)]=0,{@pe %#=Access Denied.},{@switch [u(alert_status)]=%[ansi%(hg,GREEN%)%]},{@pe %#=[u(comp)] We're at GREEN Alert already.},{@zemit [u(znum)]=[ansi(hg,=== GREEN ALERT === GREEN ALERT === GREEN ALERT ===)]%rGREEN Alert has been initiated by %N.%rStepping down from past alerts.;&alert_status [u(znum)]=%[ansi%(hg,GREEN%)%]}

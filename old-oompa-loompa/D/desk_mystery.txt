@@ -1,0 +1,53 @@
+@create PARENT: Desk
+@set PARENT: Desk = LINK_OK
+@set PARENT: Desk = SAFE
+@set PARENT: Desk = NO_COMMAND
+@set PARENT: Desk = MONITOR
+@set PARENT: Desk = LISTEN_PARENT
+&AUTHOR PARENT: Desk=Mystery8@Sci-Fi Chat
+&CMD_COMMANDS PARENT: Desk=$commands desk:@pemit [num(%N)]=[ljust(ansi(c,sit at big chair),22)]You sit down on the desk's main chair.%r[ljust(ansi(c,sit at chair 1),22)]Sit down on the first chair.%r[ljust(ansi(c,sit at chair 2),22)]Sit down on the second chair.%r[ljust(ansi(c,kick off <person>),22)]Kicks someout out of the chair.%r[ljust(ansi(c,stand up),22)]Stand up from the desk%r[ljust(ansi(c,work),22)]Random Poses for working at the desk%r[ljust(ansi(c,invite <person> 1),22)]Invites <person> to sit down in the first chair.%r[ljust(ansi(c,invite <person> 2),22)]Invites <person> to sit down in the second chair.%r[ljust(ansi(c,desk setup),22)]Setup Instructions%r[ljust(ansi(c,desk credits),22)]Credits
+&CMD_DESK-CREDITS PARENT: Desk=$desk credits:think pemit(%#,[ansi(hb,/[repeat(=,50)]\\%r|)][ansi(hg,center(Desk Credits,50))][ansi(hb,|%r|[repeat(=,50)]|%r|)]%b[ljust(ansi(g,AUTHOR:),13)][ljust(Mystery8@Sci-Fi Chat,36)][ansi(hb,|%r|)]%b[ljust(ansi(g,EMAIL:),13)][ljust(dsnyder66@enter.net,36)][ansi(hb,|%r|)]%b[ljust(ansi(g,VERSION:),13)][ljust(v(VERSION),36)][ansi(hb,|%r|)]%b[ljust(ansi(g,CREATED:),13)][ljust(August 1999,36)][ansi(hb,|%r|)]%b[ljust(ansi(g,LAST CHANGE:),13)][ljust(v(LASTCHANGE),36)][ansi(hb,|%r\\[repeat(=,50)]/)])
+&CMD_DESK-SETUP PARENT: Desk=$desk setup:think pemit(%#,[ansi(hg,Desk Parent [v(VERSION)] Setup Help:)]%r%r@create a Desk, @parent it to [parent(me)], set it !NO_COMMAND, drop it in whatever room you want it in. Then, type: [ansi(c,SETUP DESK)].%rYou can also set the color of the desk by putting an ANSI color code in the &C_DESK attribute on the desk. For more information regarding ANSI, refer to [ansi(c,help ansi())].)
+&CMD_INVITE PARENT: Desk=$invite * *:think switch(match(%n,v(CHAIR_0)),0,pemit(%#,You're not sitting in the big chair.),1,remit(here,%n invites %0 to sit down on the [switch(%0,2,second,first)] chair in front of the desk.))
+&CMD_KICK-OFF PARENT: Desk=$kick off *:think switch(%0,v(CHAIR_0),[remit(here,%n walks over to the big chair and flips it over, knocking [v(CHAIR_0)] out.)][wipe(me/CHAIR_0)],v(CHAIR_1),[remit(here,%n walks over to the first desk chair and flips it over, knocking [v(CHAIR_1)] out.)][wipe(me/CHAIR_1)],v(CHAIR_2),[remit(here,%n walks over to the second desk chair and flips it over, knocking [v(CHAIR_2)] out.)][wipe(me/CHAIR_2)],pemit(%#,%0 is not at the desk.))
+&CMD_SETUP-DESK PARENT: Desk=$setup desk:think switch(match(%#,owner(me)),0,pemit(%#,Permission Denied, [name(owner(me))] must do this.),1,[set(me,SAFE)][set(me,STICKY)][set(me,LISTEN_PARENT)][set(me,MONITOR)][lock(me,me)][link(%!,here)][pemit(%#,[ansi(g,Desk Setup Completed.)]%rNOTE: You should have received a message similar to [ansi(c,[name(me)] is now listening)]. This is normal behavior. The desk listens for when people leave the room and checks to see if they're at the desk or not. If they are, it removes them. )])
+&CMD_SIT-AT-BIG-CHAIR PARENT: Desk=$sit at big chair:think switch(u(FN_ISATDESK,%n),1,pemit(%#,You're already sitting at the desk.),0,switch(hasattr(me,CHAIR_0),1,[pemit(%#,[v(CHAIR_0)] is currently sitting in the big chair.)][remit(here,%n moves to sit in the big chair but sees [v(CHAIR_0)] already there.)],0,[set(me,CHAIR_0:%n)][remit(here,%n moves behind the desk and sits in the big chair.)]))
+&CMD_SIT-AT-CHAIR-1 PARENT: Desk=$sit at chair 1:think switch(u(FN_ISATDESK,%n),1,pemit(%#,You're already sitting at the desk.),0,switch(hasattr(me,CHAIR_1),1,[pemit(%#,[v(CHAIR_1)] is currently sitting in the chair.)][remit(here,%n moves to sit in chair 1 but sees [v(CHAIR_1)] already there.)],0,[set(me,CHAIR_1:%n)][remit(here,%n moves behind the desk and sits in the chair.)]))
+&CMD_SIT-AT-CHAIR-2 PARENT: Desk=$sit at chair 2:think switch(u(FN_ISATDESK,%n),1,pemit(%#,You're already sitting at the desk.),0,switch(hasattr(me,CHAIR_2),1,[pemit(%#,[v(CHAIR_2)] is currently sitting in the chair.)][remit(here,%n moves to sit in chair 2 but sees [v(CHAIR_2)] already there.)],0,[set(me,CHAIR_2:%n)][remit(here,%n moves behind the desk and sits in the chair.)]))
+&CMD_STAND-UP PARENT: Desk=$stand up:think switch(%n,v(CHAIR_0),[remit(here,%n stands up and moves away from the desk's big chair.)][wipe(me/CHAIR_0)],v(CHAIR_1),[remit(here,%n stands up and moves away from the desk.)][wipe(me/CHAIR_1)],v(CHAIR_2),[remit(here,%n stands up and moves away from the desk.)][wipe(me/CHAIR_2)],pemit(%#,You are not sitting at the desk.))
+&CMD_WORK PARENT: Desk=$work:think switch(match(%n,v(CHAIR_0)),0,pemit(%#,You're not sitting in the big chair.),1,remit(here,%n%b[u(WORK[rand(13)])]))
+&COMMANDS PARENT: Desk=[ljust(ansi(c,sit at big chair),22)]You sit down on the desk's main chair.%r[ljust(ansi(c,sit at chair 1),22)]Sit down on the first chair.%r[ljust(ansi(c,sit at chair 2),22)]Sit down on the second chair.%r[ljust(ansi(c,kick off <person>),22)]Kicks someout out of the chair.%r[ljust(ansi(c,stand up),22)]Stand up from the desk%r[ljust(ansi(c,work),22)]Random Poses for working at the desk%r[ljust(ansi(c,invite <person> 1),22)]Invites <person> to sit down in the first chair.%r[ljust(ansi(c,invite <person> 2),22)]Invites <person> to sit down in the second chair.%r[ljust(ansi(c,desk setup),22)]Setup Instructions%r[ljust(ansi(c,desk credits),22)]Credits
+&CREDITS PARENT: Desk=Mystery8@Sci-Fi Chat
+&C_DESK PARENT: Desk=hr
+@DESCRIBE PARENT: Desk=%r[ljust(%b%b[ansi(hc,Chair 1:)],16)][ljust(%b%b[ansi(hc,Chair 2:)],16)]%r[ljust(%b%b[switch(hasattr(me,CHAIR_1),0,ansi(y,Empty Seat),1,[ansi(hw,[mid(v(CHAIR_1),0,10)])])],16)][ljust(%b%b[switch(hasattr(me,CHAIR_2),0,ansi(y,Empty Seat),1,[ansi(hw,[mid(v(CHAIR_2),0,10)])])],16)]%r%r[ansi(v(C_DESK),/[repeat(=,30)]\\%r|[space(30)]|%r|[space(30)]|%r|[space(30)]|%r|[space(30)]|%r|[space(30)]|%r\\[repeat(=,30)]/)]%r%r[center([ansi(hc,Big Chair:)],32)]%r[center([switch(hasattr(me,CHAIR_0),0,ansi(y,Empty Seat),1,[ansi(hw,v(CHAIR_0))])],32)]%r%r%rType: [ansi(c,commands [name(me)])] for help.
+@set PARENT: Desk/DESCRIBE=no_command visual
+@FAILURE PARENT: Desk=You try to lift the desk but fails.
+@set PARENT: Desk/FAILURE=no_command
+&FN_ISATDESK PARENT: Desk=strmatch([v(CHAIR_0)][v(CHAIR_1)][v(CHAIR_2)],*%0*)
+&LASTCHANGE PARENT: Desk=July 14, 2001
+&LN_PCONNECT PARENT: Desk=^* has connected.:think switch(u(FN_ISATDESK,%0),1,remit(here,%0 wakes up at the desk.))
+&LN_PDISCONNECT PARENT: Desk=^* has disconnected.:think switch(u(FN_ISATDESK,%0),1,remit(here,%0 falls asleep at the desk.))
+&LN_PLEAVE PARENT: Desk=^* has left.:think switch(u(FN_ISATDESK,%0),1,[remit(here,%0 stands up and leaves.)][switch(%0,v(CHAIR_0),wipe(me/CHAIR_0),v(CHAIR_1),wipe(me/CHAIR_1),v(CHAIR_2),wipe(me/CHAIR_2))])
+@OFAILURE PARENT: Desk=tries to lift the desk but fails.
+@set PARENT: Desk/OFAILURE=no_command
+@OSUCCESS PARENT: Desk=reaches and picks the desk up.
+@set PARENT: Desk/OSUCCESS=no_command
+&PDESC PARENT: Desk=A small desk with a main chair and 2 guest chairs. Set the Desk !NO_COMMAND and type DESK SETUP for instructions.
+@QUEUE PARENT: Desk=
+@set PARENT: Desk/QUEUE=no_inherit no_clone wizard mortal_dark
+@SUCCESS PARENT: Desk=You lift the desk up.
+@set PARENT: Desk/SUCCESS=no_command
+&VERSION PARENT: Desk=3.05
+&WORK0 PARENT: Desk=relaxes and leans back in the chair.
+&WORK1 PARENT: Desk=shuffles the papers on the desk a bit.
+&WORK10 PARENT: Desk=organizes some papers on the desk.
+&WORK11 PARENT: Desk=stares and ponders something.
+&WORK12 PARENT: Desk=stands up briefly to stretch and sits back down.
+&WORK2 PARENT: Desk=stretches a bit and gets back to work.
+&WORK3 PARENT: Desk=looks around the room.
+&WORK4 PARENT: Desk=spins the chair around so its back faces the desk.
+&WORK5 PARENT: Desk=begins writing on some papers.
+&WORK6 PARENT: Desk=opens a desk drawer and begins looking for something in it.
+&WORK7 PARENT: Desk=looks at a paper and suddenly becomes very tense at what %s sees on a document.
+&WORK8 PARENT: Desk=yawns and stretches %p legs a bit.
+&WORK9 PARENT: Desk=pulls out some cleaner and cleans the surface of the desk.

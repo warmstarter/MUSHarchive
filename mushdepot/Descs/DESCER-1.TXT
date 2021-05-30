@@ -1,0 +1,13 @@
+@create Multi-Descer
+@set Multi-Descer=!NO_COMMAND
+@set Multi-Descer=OPAQUE
+@set Multi-Descer=QUIET
+@set Multi-Descer=UNFINDABLE
+@set Multi-Descer=SAFE
+@set Multi-Descer=LINK_OK
+&DELETE-1 Multi-Descer=$ddel *:@wipe me/desc_%0;@pemit/silent %#=Description %0 has been deleted.
+&DCOPY-1 Multi-Descer=$dcopy *:&[u(me/p-desc)] [loc(loc(me))]=[u(me/desc_%0)];@pemit/silent %#=Room Described as a %0.
+&DSTORE-1 Multi-Descer=$dstore *:&desc_%0 me=[get([loc(loc(me))]/[u(me/p-desc)])];@pemit/silent %#=Description %0 stored.
+&DLIST-1 Multi-Descer=$descs list:@pemit/silent %#=lattr(me/desc_*)%r
+&P-DESC Multi-Descer=rdesc
+@DESCRIBE Multi-Descer=This is the multi-descer.%r%rTo delete a description: ddel <desc>%rTo add a description: dstore <name of desc>%rTo use desc: dcopy <desc>%rTo list descriptions: descs list

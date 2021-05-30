@@ -1,0 +1,8 @@
+@create Digital Clock
+@link Digital Clock = #0
+@lock/Basic Digital Clock==#6
+@set Digital Clock = VISUAL
+@set Digital Clock = SAFE
+@DESCRIBE Digital Clock=%b[ansi(hx,repeat(_,41))]%r[ansi(hx,|)][setq(1,u(time))][ansi(Rx,iter(lnum(strlen(r(1))),[u(digit,mid(r(1),##,1),1)])%b%b)][ansi(hx,||)]%r[ansi(hx,|)][ansi(Rx,iter(lnum(strlen(r(1))),u(digit,mid(r(1),##,1),2))%b%b)][ansi(hx,||)]%r[ansi(hx,|)][ansi(Rx,iter(lnum(strlen(r(1))),u(digit,mid(r(1),##,1),3))%b%b)][ansi(hx,||)]%r[ansi(hx,|)][ansi(Rx,space(41))][ansi(hx,||\\)]%r%b[ansi(hx,repeat(~,44))]
+&TIME Digital Clock=[setq(0,delete(extract(time(),4,1),5,3))][switch(mod(before(r(0),:),12),0,12,rjust(#$,2,0))]:[after(r(0),:)] [switch(div(before(r(0),:),12),0,A,P)]M
+&DIGIT Digital Clock=[setq(0,pos(ucstr(v(0)),0123456789:APM%b))][edit(switch(v(1),1,extract(=__= ==== =__= =__= ==== =__= =__= =__= =__= =__= ==== =__= =__= ==== ====,r(0),1),2,extract(|==| ===| =__| =__| |__| |__= |__= ===| |__| |__| =<>= |__| |__| |\\/| ====,r(0),1),3,extract(|__| ===| |__= =__| ===| =__| |__| ===| |__| ===| =<>= |==| |=== |==| ====,r(0),1)),=,%b)]

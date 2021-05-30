@@ -1,0 +1,38 @@
+@create USS Maryland
+@lock/Use USS Maryland==[owner(me)]
+@lock USS Maryland==[num(me)]
+@set USS Maryland=INHERIT
+@set USS Maryland=OPAQUE
+@set USS Maryland=QUIET
+@set USS Maryland=SAFE
+@set USS Maryland=ROYALTY
+@set USS Maryland=WIZARD
+@DESC USS Maryland=This is [name(me)]. It is meant for him to transport to other places where he is needed.
+@IDESC USS Maryland=This is the interior of [name(me)]. It has a Pilot and Co-Pilot seats in the front of the shuttle, and about 8 couches in the back.
+@EALIAS USS Maryland=shu;shuttle;enter shuttle
+@LALIAS USS Maryland=o;ou;out;leave;exit;disembark
+&SPEAKER-1 USS Maryland=$spk *:@emit [ansi(r,%[)][ansi(hw,[name(me)])][ansi(r,%])] [switch(mid(%0,0,1),:,[ansi(hg,%N)]%b[ansi(hr,[mid(%0,1,strlen(%0))])],;,[ansi(hg,%N)][ansi(hr,[mid(%0,1,strlen(%0))])],{[ansi(hg,%N)] [ansi(r,says ")][ansi(hr,%0)][ansi(r,")]})]
+&CLOAK-1 USS Maryland=$cloak:@remit here=[name(me)] cloaks, and shimmers from view.;@set [num(me)]=dark
+&DECLOAK-1 USS Maryland=$decloak:@set me=!dark;@remit here=[name(me)] decloaks, and shimmers into existence.
+&MOVEMENT-1 USS Maryland=$fly *:@emit [name(me)] goes to warp.;@wait 1=@tel %0;@wait 2=@emit [name(me)] drops out of warp.
+&MOVEMENT-2 USS Maryland=$imp *:@emit [name(me)] ignites its impulse engine(s).;@wait 1=@force [num(me)]=go %0;@wait 2=@emit [name(me)]'s impulse engine(s) go out.
+&RECALL USS Maryland=$rec *:@switch [get(me/%0)]=,@pemit %n=I don't recall that one.,@pemit %n=%0 is [get(me/%0)].
+&BRING USS Maryland=$bring *:@switch [get(me/%0)]=,@pemit %n=I don't recall that one.,@force [num(me)]=@tel [get(me/%0)]=here
+&TELE-1 USS Maryland=$tel *:@switch [get(me/%0)]=,@pemit %n=I don't recall that one.,@force [num(me)]=@tel [get(me/%0)]
+&REMEMBER USS Maryland=$rem *:@set [num(me)]=[first(v(0))]:[rest(v(0))];@pemit %n=Shuttle Destination remembered.
+&TIME USS Maryland=$time:@remit [num(me)]=The Current MUSH Time is: [time()]
+&KICK-1 USS Maryland=$kick:@dolist lcon([num(me)])=drop ##
+&BOOT-1 USS Maryland=$boot *:@force [num(me)]=drop %0
+&PEEP-1 USS Maryland=$peep:look
+&PEEP-2 USS Maryland=$+l:look
+&MISC-1 USS Maryland=$do *:@force [num(me)]=%0
+@LISTEN USS Maryland=*
+&HOME USS Maryland=#2970
+&OOC USS Maryland=#0
+&MUSIC USS Maryland=$play *:@remit [num(me)]=The Computer chimes, and you start to hear %n's choice of music, %0, play over [name(me)]'s hidden speakers.
+&UNLOCK USS Maryland=$unlock:@set [num(me)]=enter_ok;@remit [num(me)]=The Shuttle is now UNLOCKED.
+&LOCK USS Maryland=$lock:@set [num(me)]=!enter_ok;@remit [num(me)]=The Shuttle is now LOCKED.
+&TELEPORT USS Maryland=$tele * *:@tel %0=%1
+&LIGHTS USS Maryland=$lights *:@remit [num(me)]=The Computer chimes, and you see the lights in [name(me)] go %0.
+&REPLICATOR USS Maryland=$replicator *:@remit [num(me)]=The Computer chimes, and you see the replicator starting to work. As the sound fades, you see a small door open with %n's %0.
+&ACTIONS USS Maryland=$do *:@force [num(me)]=%0

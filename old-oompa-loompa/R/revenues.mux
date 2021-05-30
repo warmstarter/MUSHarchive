@@ -1,0 +1,94 @@
+###################################################################
+#                    REVENUES.MUX                                 #
+#                                                                 #
+# This system provides a TEMPORARY and SIMULATED income for       #
+# players until the economics system is functional enough to      #
+# otherwise provide income.                                       #
+#                                                                 #
+# Where #63 is Myrddin's cron job code                            #
+# Where #98 is the Tax Command Object                             #
+# Where #97 is the Tax Database Object                            #
+###################################################################
+
+
+#=================================================================#
+#               CRON JOBS                                         #
+#=================================================================#
+
+&cronic_time_taxes #63=|29||03|00|@@ every 29th of each month at 3pm @@
+-
+&cronic_job_taxes #63=
+  @tr #98/cronic_job_taxes
+-
+&cronic_job_taxes #98=
+ @dolist v(clans)=
+   {think setq(0, get(##/population));
+    think setq(1, get(##/tax-rate));
+    think setq(2, get(##/corruption));
+
+    think setq(3, mul(%q0, %q1));
+    think setq(3, mul(%q3, %q2));
+    think setq(4, get(get(##/config-bank)/members-[get(##/bank-account)]));
+
+    think u(#4436/u-account-deposit-pub, 
+           get(##/bank-account), %q3, get(##/config-bank));
+    @tr me/trig-mail=%q0, %q1, %q2, %q3, %q4, [name(##)] }
+   
+-
+
+# %0 = population of the clan
+# %1 = current tax rate per person per month
+# %2 = current corruption rate
+# %3 = number of stenis collected in taxes this month
+# %4 = | separated list of members who should get mail
+# %5 = clan name
+
+&trig-mail #98=
+
+ @dolist/delimit %4=
+   @qmail ##/Taxes for [extract(ictime(), 7, 1)]=
+       [ictime()] %3 stenis were collected in taxes from the %5.%r 
+       The population of %5 is estimated to be approximately %0 persons.%r  
+       The current rate of loss due to corruption, waste, or 
+       other inefficiency is esimated at %2.%r  
+       The current tax rate is set to %1 stenis per person per month.
+-
+
+&cronic_time_landrevenue #63=
+  |10||14|45|@@ every 10th of the month at 2:45 pm
+-
+
+# Where the Master Deed Object is #1480
+
+&cronic_job_landrevenue #63=
+  @tr #98/cronic_job_landrevenue
+-
+&cronic_job_landrevenue #98=
+  think setq(0, lattr(#1480/owner-*));
+  @dolist %q0=
+    {think setq(1, get(#1480/##));
+     think setq(2, skill(%q1, agriculture));
+     think setq(3, skill(%q1, mass organization));
+     think setq(4, skill(%q1, economics));
+
+     think setq(5, u(#1480/u-land-value));
+     think setq(6, mul(min(1, %q2), %q5));
+     think setq(6, mul(min(1, %q3), %q6));
+     think setq(6, mul(min(1, %q4), %q6));
+
+     think ac_adjust(%q1, stenis, %q6);
+     @qmail %q1/Income from [clip(##)]=
+           You collected %q6 stenis in rents, profits, and other 
+           income from your land at coordinates [clip(##)].  You 
+           should deposit this money into the family bank account.  
+           Improvement of your agriculture (%q2), economics (%q4), or 
+           mass organization (%q3) skills may help improve your 
+           income from this land. }
+
+-
+@@ &u-land-value #1480=200
+-
+
+
+
+

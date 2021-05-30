@@ -1,0 +1,57 @@
+@@ This is a simple +help system designed by Valin@PernMUSH (NC) for TinyMUSH 2.2 or higher and PennMUSH 1.6.0 or higher. December 31st, 1996.
+@@ To install, have a wizard /quote this file in with TinyFugue, click and drag it into the command box in Mutt, or otherwise have the client 'run' this file.
+
+@@ Setting yourself quiet so you aren't spammed.
+@set me=quiet
+
+@@ Creating the objects for the commands and the help.
+@create Help System
+@force Help System=@pemit [owner(me)]=Creating Help System and Help Storage Objects.
+@create Help Storage
+
+@@ Resetting flags to enable commands.
+@set Help System=!halt
+
+@@ No_command is PennMUSH, and commands is enabled on some TinyMUSHes. You will probably get at least one 'I don't recognize that flag' at this point, which you can ignore.
+@set Help System=!no_command
+@set Help System=commands
+
+@@ Giving the Help System and Help Storage a description.
+@desc Help System=This is the help system for global commands. To add or remove help topics, you must be a wizard. The syntax of the commands are:%r%taddhelp <topic>=<help>%r%tdelhelp <topic>=<help>%rSpaces in the topic are valid. Use addhelp/n to add a help topic without placing the topic in the +help index. (Useful for subjects with multipled pages.) Please note that the topic names are case sensitive when adding or deleting help.%r[center(Created by Valin@NC dlchan@ls.barrhead.ab.ca,80)]
+@desc Help Storage=This object stores all the help entries for the global help.
+
+@@ Add the commands to the Help System.
+@force Help System=@pemit [owner(me)]=Writing commands.
+&HELP_Noparms Help System=$+help:@pemit %#=[center([mudname()] Global Help,80,-)]%r[switch([strlen([u(#9999/topics)])],0,{%r[center(No help available.,80)]%r},{Type +help <topic> for help on a specific topic.%r[setq(0,[div([words([u(#9999/topics)],|)],5)])][switch([mod([words([u(#9999/topics)],|)],5)],0,,[setq(0,[add([r(0)],1)])])][iter([lnum([r(0)])],%r[u(helprow,[extract([u(#9999/topics)],[add([mul(##,5)],1)],5,|)])])]})]%r[repeat(-,80)]
+&help_add Help System=$addhelp *=*:[setq(0,[edit(%0,%b,_)])];@switch [hasflag(%#,wizard)]=0,@pemit %#=You cannot add to the global help.,1,{@pemit %#=Help on '[capstr([lcstr(%0)])]' added to global help.;&topics #9999=[switch([hasattr(#9999,topics)],0,[rest([setunion([u(#9999/topics)],%0,|)],|)],1,[setunion([u(#9999/topics)],%0,|)])];&help_[r(0)] #9999=%1}
+&help_del Help System=$delhelp *:[setq(0,[edit(%0,%b,_)])];@switch [hasflag(%#,wizard)]=0,@pemit %#=You cannot delete global help topics.,1,{@pemit %#=[switch([hasattr(#9999,help_[r(0)])],0,Topic does not exist.,Help on '[capstr([lcstr(%0)])]' deleted.)];&topics #9999=[setdiff([u(#9999/topics)],%0,|)];&help_[r(0)] #9999}
+&help_add_no_topic Help System=$addhelp/n *=*:[setq(0,[edit(%0,%b,_)])];@switch [hasflag(%#,wizard)]=0,@pemit %#=You cannot add to the global help.,1,{@pemit %#=Help on '[capstr([lcstr(%0)])]' added to global help.;&help_[r(0)] #9999=%1}
+
+@@ This command helps to format the columns.
+&helprow Help System=[iter(%0,[ljust(##,16)],|,)]
+
+@@ Adding the first help topic, help.
+&topics Help Storage=help
+&help_help Help Storage=Syntax:%b+help%r%t+help <topic>%r%rThe first command gets you the index of +help files available on global commands%rand topics, while the second gets you the help file on that topic.%r[center(Created by Valin@NC 12/31/96,80)]
+
+@@ Linking the Help Storage to the Help System, and making it stay there. :)
+@link Help Storage=Help System
+
+@@ Telling you what to do now.
+@force Help System=@pemit [owner(me)]=Type '@edit [num(Help System)]/*=#9999,[num(Help Storage)]' to finish the +help system.
+@force Help System=@pemit [owner(me)]=Reminder: This object should be placed in the Master Room, and should be made to be able to @pemit to anyway, either with the WIZARD flag (@set [num(Help System)]=Wizard) or with the pemit_all power on PennMUSHes (@power [num(Help System)]=pemit_all).
+
+@@ Putting the Help Storage into the Help System so it won't be checked for commands itself.
+@wait 1=give Help System=Help Storage
+
+@@ Taking off the quiet flag set earlier for reducing spam.
+@set me=!quiet
+
+@@ That's it, we're done.
+@force Help System=@pemit [owner(me)]=Help System Complete. <Press ENTER once to make sure everything has gone through.>
+
+@@ Added by MUSHCODE.COM 8/22/02 @@
+
+&help Help System=$+help *:[setq(0,[edit(%0,%b,_)])];@pemit %#=[switch([hasattr(#9999,help_[r(0)])],0,Topic '[capstr([lcstr(%0)])]' not found in +help.,{[center(+help for [capstr([lcstr(%0)])],80,-)]%r[u(#9999/help_[r(0)])]%r[repeat(-,80)]})]
+
+think Type '+help' or '+help topic', and 'addhelp <topic>=<text>' to add a new one.

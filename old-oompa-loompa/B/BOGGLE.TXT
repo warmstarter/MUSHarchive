@@ -1,0 +1,175 @@
+@create boggle
+@force boggle=@create winner
+&lister boggle=switch(words(%0),0,,1,name(%0),[name(first(%0))][iter(rest
+(reverse(rest(reverse(%0)))),{, [name(##)]})] and [name(last(%0))])
+&LETTERS boggle=a a a a a a a a a b b c c d d d d e e e e e e e e e e e e f f g
+g g h h i i i i i i i i i i j k l l l l m m n n n n n n o o o o o o o o p p r r
+r r r r s s s s s s t t t t t t u u u u v v w w x y y z
+&RANDBRD boggle=&brd0 me=[iter(lnum(5),extract(v(letters),add(rand(100),1),
+1))];&brd1 me=[iter(lnum(5),extract(v(letters),add(rand(100),1),1))];&brd2
+me=[iter(lnum(5),extract(v(letters),add(rand(100),1),1))];&brd3 me=[iter(lnum
+(5),extract(v(letters),add(rand(100),1),1))];&brd4 me=[iter(lnum(5),extract(v
+(letters),add(rand(100),1),1))]
+@Desc boggle=It's a boggle game.  Currently the board is:%r[iter(lnum(5),%r%t[v
+(brd##)]%t%t[ucstr(v(brd##))])]%r%rType 'boghelp' for help.  [switch(v
+(game-state),off,No one is currently playing.,on,{The timer is running!  So
+far, })][switch(v(game-state),off,,{[u(me/lister,v(players))] [switch(words(v
+(players)),0,no one has,1,has,have)] entered words.  [name(v(starter))] starte
+the game.})]
+&STARTGAME boggle=$boggle:@switch [v(game-state)]=off,{@switch [words(setinter
+(setinter(lcon(here),v(haters)),lwho()))]=0,{@tr me/cleanup;@tr me/randbrd;@tr
+me/start-timer;&starter me=%#;@wait 1=@tr me/subemit={[name(%#)] picks up the
+boggle game and shakes it up.  Now the letters read [iter(lnum(5),%r%t[v
+(brd##)]%t%t[ucstr(v(brd##))])]%r%r[name(%#)] turns over the 3-minute timer
+and sand begins spilling into the bottom.};&game-state me=on},@pemit %#=The
+boggle machine sputters briefly but then dies.},on,@pemit %#=A game is already
+in progress.  Please wait for it to end.  (type 'boghelp' for help),waiting,
+@pemit %#=We are waiting for [name(v(starter))] to type 'accept'.
+&subemit boggle=@dolist [setinter(lcon(here),v(subscribers))]=@pemit ##=%0
+&bs boggle=$bs *:@pemit/list [setinter(lcon(here),v(subscribers))]=\[bs\] [name
+(%#)] [switch(%0,:*,delete(%0,0,1),says "%0")]
+&subscribe boggle=$bogsub:&subscribers me=[setunion(v(subscribers),%#)];@pemit
+%#=You will now receive boggle output.
+&unsubscribe boggle=$bogunsub:&subscribers me=[setdiff(v(subscribers),%#)];
+@pemit %#=You will no longer receive boggle output.
+&GAME-STATE boggle=off
+&CLEANUP boggle=@tr me/newplayer;@dolist [v(players)]={@set me=words##:;@set
+me=score##:};&duplicate me=
+&START-TIMER boggle=@wait 150=@tr me/subemit=The boggle timer looks about to
+run out.;@wait 170=@tr me/subemit=The last few sands trickle out of the boggle
+timer.;@wait 180=@tr me/endgame;@wait 90=@tr me/subemit=About half the boggle
+timer's sand has drained into the bottom.
+&BOG boggle=$bog *:@switch [v(game-state)]=off,@pemit %#=No one's playing
+boggle right now.,waiting,@pemit %#=Too late!,{&players me=[setunion(%#,[v
+(players)])];&words%# me=[setunion(lcstr(%0),[v(words%#)])];@pemit %#=Your
+word-list: [v(words%#)]%r[iter(lnum(5),%r%t[v(brd##)]%t%t[ucstr(v(brd##))])]}
+&NEWPLAYER boggle=@set me=players:
+&ENDGAME boggle=&game-state me=waiting;@switch [gt(words(v(players)),1)]=1,{@tr
+me/subemit=Final word lists: [iter(v(players),%r[name(##)]: [v(words##)])];@tr
+me/scoring},{@tr me/subemit=Less than 2 players.  Scores are not being
+recorded.%rFinal word lists: [iter(v(players),%r[name(##)]: [v
+(words##)]   score: [u(me/score,##)])];&game-state me=off}
+&scoring boggle=&duplicate me=[fold(me/setfoo,iter(v(players),u(me/others,
+##)))];@wait 0=@tr me/scoput
+&others boggle=fold(me/setfoo,iter(remove(v(players),%0),setinter(v(words##),v
+(words%0))))
+&SETFOO boggle=setunion(%0,%1)
+&SCOPUT boggle=@wait 1=@tr me/subemit={Unique words: [iter(v(players),%r[name
+(##)]: [setdiff(v(words##),v(duplicate))]   score: [u(me/score,##)])]};@tr
+me/subemit={[name(v(starter))] will type `accept' once all the words have been
+verified.  To remove a word from your unique word lists, use the `bad'
+command.};@wait winner/360={&game-state boggle=off;@tr boggle/winnah}
+&inter boggle=$bogscores:@switch [v(game-state)]=on,@pemit %#=This command is
+not active while the game is running.,{@pemit %#=Unique words: [iter(v
+(players),%r[name(##)]: [setdiff(v(words##),v(duplicate))]   score: [u
+(me/score,##)])]}
+&bad boggle=$bad *:@switch [v(game-state)]=waiting,{&words%# me=[setdiff(v
+(words%#),%0)];@wait 1=@tr me/subemit={[name(%#)] removes %0 from %p unique
+word list, which is now: [setdiff(v(words%#),v(duplicate))]   score: [u
+(me/score,%#)]}},on,{&words%# me=[setdiff(v(words%#),%0)];@pemit %#=Your
+word-list: [v(words%#)]},@pemit %#=Bad boggler.  No biscuit!
+&acceptor boggle=$accept:@switch [or(comp(v(game-state),waiting),comp(v
+(starter),%#))]=0,{@notify winner;@tr me/subemit=The game has been recorded.},
+@pemit %#=[switch(v(game-state),waiting,You did not start the game.  Only [name
+(v(starter))] has the magic touch.,on,The timer has not run out yet.,The game
+is over already.)]
+&score boggle=fold(me/addfoo,iter(setdiff(v(words%0),v(duplicate)),switch
+(strlen(##),0,0,1,0,2,0,3,0,4,1,5,2,6,3,7,5,11)))
+&ADDFOO boggle=add(%0,%1)
+&BOGHELP boggle=$boghelp:@pemit %#=You know how to play but if you want a
+reminder, type 'bogrules'.  The commands are:%r%tboggle     %t  start a new
+game%r%tbog <words>%t  record new words that you've found%r%tbog        %t  see
+what the board looks like%r%tbad <words>%t  remove words from your word list%r
+%tspin      %t  get a new perspective of the board%r%tbogsub      %t  subscribe
+to the boggle machine[get_eval(me/boghelptext)]
+
+&boghelptext boggle=%r%tbogunsub    %t  unsubscribe, natch%r%tboghighs      %t
+  see the high score list%r%tbogtop1    %t  see the top 20 scores by points%r
+%tbogtop2      %t  see the top 20 scores by points/games%r%tbogtop3    %t  see
+the top 20 scores by best single game%r%tbogscores  %t  get an update on the
+scoring situation %r%tbs *       %t  Say stuff to boggle-players%r
+%tbsers      %t  See who's subscribed%r%rAt the end of three minutes, the game
+will announce people's word lists and their scores (assuming all their words
+are legitimate).  Cheaters will be eaten.
+&MAXFOO boggle=max(%0,%1)
+&WINNAH boggle=&maxscore me=fold(me/maxfoo,iter(v(players),u(me/score,##)));
+&winnahs me=filter(me/winfoo,v(players));@tr me/subemit={The [switch(gt(words(v
+(winnahs)),1),1,winners are,0,winner is)] [u(me/lister,v(winnahs))]!};@dolist
+[v(players)]=&rec## winner=[max(u(me/score,##),first(get(winner/rec##)))] [add
+(1,first(rest(get(winner/rec##))))] [switch(member(v(winnahs),##),0,[extract
+(get(winner/rec##),3,2)],[add(1,extract(get(winner/rec##),3,1))] [add(sub(words
+(v(players)),words(v(winnahs))),extract(get(winner/rec##),4,1))])]
+&WINFOO boggle=eq(u(me/score,%0),v(maxscore))
+&BOGNOARG boggle=$bog:@pemit %#=[iter(lnum(5),%r%t[v(brd##)]%t%t[ucstr(v
+(brd##))])]
+&RULES boggle=$bogrules:@pemit %#=You have 3 minutes to find as many words as
+you can in the grid.  Your words must be constructed by starting at one letter
+and moving diagonally, horizontally, or vertically to the next letter, without
+using the same instance of a letter twice.  Your score is based on the number
+of words that you find but no one else finds.  You get 1 point for words of 4
+letters, 2 points for 5-letter words, 3 points for 6-letter words, 5 points for
+7-letter words, and 11 points for 8+ letter words.  Any complete word, plural
+of, form of, or tense is acceptable as long as it is in a standard English
+dictionary and with the limitations described below.  Words within words are
+acceptable.  Proper nouns, abbreviations, contractions, hyphenated words, and
+foreign words that are not in an English dictionary are not acceptable.  HOUSE
+RULES: Words that are only found as part of a phrase are not acceptable.  Use
+of electronic references or aids during a game is not allowed.
+&spin boggle=$spin:@pemit %#=You spin the boggle board randomly.  [setq(1,rand
+(2))][iter(switch(0,1,lnum(5),0,revwords(lnum(5))),%r%t[switch(r(1),1,v(brd##),
+0,revwords(v(brd##)))]%t%t[ucstr(switch(r(1),1,v(brd##),0,revwords(v
+(brd##))))])]
+@@ &ROTATE boggle=$rotate:&rot0 me=[iter(revwords(lnum(5)),extract(v(brd##),1,
+1))];&rot1 me=[iter(revwords(lnum(5)),extract(v(brd##),2,1))];&rot2 me=[iter
+(revwords(lnum(5)),extract(v(brd##),3,1))];&rot3 me=[iter(revwords(lnum(5)),
+extract(v(brd##),4,1))];&rot4 me=[iter(revwords(lnum(5)),extract(v(brd##),5,
+1))];@dolist lnum(5)=@set me=brd##:[v(rot##)];@tr me/subemit=[name(%#)] swivels
+the boggle board 90 degrees clockwise.
+@@ &FLIP boggle=$flip:&rot0 me=[iter(lnum(5),extract(v(brd##),1,1))];&rot1 me=
+[iter(lnum(5),extract(v(brd##),2,1))];&rot2 me=[iter(lnum(5),extract(v(brd##),
+3,1))];&rot3 me=[iter(lnum(5),extract(v(brd##),4,1))];&rot4 me=[iter(lnum(5),
+extract(v(brd##),5,1))];@dolist lnum(5)=@set me=brd##:[v(rot##)];@tr me/
+subemit={[name(%#)] flips the boggle board along a diagonal axis, ignoring the
+impossibility of doing this with a real Boggle(tm) board.}
+&highs boggle=$boghighs:@pemit %#=Percentages of games won: [setq(1,sort(iter
+(lattr(winner),[fdiv(pi(),extract(get(winner/rec[mid(##,3,6)]),4,1))]|[mid(##,
+3,6)])))][iter(rest(r(1),|),%r[name(first(##))] has won [mul(100,fdiv(extract
+(get(winner/rec[first(##)]),3,1),extract(get(winner/rec[first(##)]),2,1)))]%%
+of [extract(get(winner/rec[first(##)]),2,1)] games and has [extract(get(winner/
+rec[first(##)]),4,1)] points.,|)]
+&top1 boggle=$bogtop1:@pemit %#=Top Twenty Boggle Players by Points%r[u(me/pad,
+Name,16)][u(me/pad,Games Won,16)][u(me/pad,Games Played,16)]Points%r[setq(1,
+sort(iter(lattr(winner),[fdiv(pi(),extract(get(winner/rec[mid(##,3,6)]),4,1))]
+|[mid(##,3,6)])))][iter(extract(rest(r(1),|),1,20),%r[u(me/pad,name(first(##)),
+16)][u(me/pad,extract(get(winner/rec[first(##)]),3,1),16)][u(me/pad,extract(get
+(winner/rec[first(##)]),2,1),16)][extract(get(winner/rec[first(##)]),4,1)],|)]
+&top2 boggle=$bogtop2:@pemit %#=Top Twenty Boggle Players by Points Per Game%r
+[u(me/pad,Name,16)][u(me/pad,Games Won,16)][u(me/pad,Games Played,16)][u(me/
+pad,Points,16)]Points/Games%r[setq(1,revwords(sort(iter(lattr(winner),[add(fdiv
+(extract(get(winner/rec[mid(##,3,6)]),4,1),extract(get(winner/rec[mid(##,3,
+6)]),2,1)),pi())]|[mid(##,3,6)]))))][setq(2,iter(extract(rest(r(1),|),1,20),
+first(##),|))][iter(r(2),%r[u(me/pad,name(##),16)][u(me/pad,extract(get(winner/
+rec##),3,1),16)][u(me/pad,extract(get(winner/rec##),2,1),16)][u(me/pad,extract(
+get(winner/rec##),4,1),16)][fdiv(div(mul(100,extract(get(winner/rec##),4,1)),
+extract(get(winner/rec##),2,1)),100)]\%)]
+
+&top3 boggle=$bogtop3:@pemit %#=Top Twenty Boggle Players by Best Single Game%r
+[u(me/pad,Name,16)][u(me/pad,Games Won,12)][u(me/pad,Games Played,12)][u(me/
+pad,Points,12)]Best Score%r[setq(1,sort(iter(lattr(winner),[fdiv(pi(),extract(
+get(winner/rec[mid(##,3,6)]),1,1))]|[mid(##,3,6)])))][iter(extract(rest(r(1),
+|),1,20),%r[u(me/pad,name(first(##)),16)][u(me/pad,extract(get(winner/rec[first
+(##)]),3,1),12)][u(me/pad,extract(get(winner/rec[first(##)]),2,1),12)][u(me/
+pad,extract(get(winner/rec[first(##)]),4,1),12)][extract(get(winner/rec[first
+(##)]),1,1)],|)]
+
+&top4 boggle=$bogtop4:@pemit %#=Top Twenty Boggle Players by Most Unrewarded
+Effort%r[u(me/pad,Name,16)][u(me/pad,Games Won,12)][u(me/pad,Games Played,13)]
+[u(me/pad,Points,12)]Best Score%r[setq(1,sort(iter(lattr(winner),[fdiv(add(pi
+(),extract(get(winner/rec[mid(##,3,6)]),3,1)),sub(extract(get(winner/rec[mid
+(##,3,6)]),2,1),extract(get(winner/rec[mid(##,3,6)]),3,1)))]|[mid(##,3,6)])))]
+[iter(extract(rest(r(1),|),1,20),%r[u(me/pad,name(first(##)),16)][u(me/pad,
+extract(get(winner/rec[first(##)]),3,1),12)][u(me/pad,extract(get(winner/rec
+[first(##)]),2,1),13)][u(me/pad,extract(get(winner/rec[first(##)]),4,1),12)]
+[extract(get(winner/rec[first(##)]),1,1)],|)]
+&pad boggle=%0[space(sub(%1,strlen(%0)))]
+_______________________________________________________________________________

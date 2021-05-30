@@ -1,0 +1,35 @@
+@create DOOM Mob Parent
+@link DOOM Mob Parent = #1548
+@lock/Listen DOOM Mob Parent=!DOOM_Cheat:1&!DOOM_Mob:1
+@set DOOM Mob Parent = INHERIT
+@set DOOM Mob Parent = LINK_OK
+@set DOOM Mob Parent = VISUAL
+@set DOOM Mob Parent = HALT
+@set DOOM Mob Parent = MONITOR
+&ATTACK_DELAY DOOM Mob Parent=3
+@OMOVE DOOM Mob Parent=has arrived.
+&PLAYER DOOM Mob Parent=[and(and(switch(type(%0),PLAYER,1,0),hasflag(%0,CONNECTED)),switch(get(%0/DOOM_Cheat),1,0,1))]
+&OLD_INJURY DOOM Mob Parent=[switch(u(Hitpoints_Percent,80),1,is in good condition,switch(u(Hitpoints_Percent,60),1,has some small wounds and bruises,switch(u(Hitpoints_Percent,40),1,is significantly injured,switch(u(Hitpoints_Percent,20),1,is critically injured,switch(u(Hitpoints_Percent,0),is in very bad shape,is mortally wounded)))))]
+@AMOVE DOOM Mob Parent=@dolist iter(lcplayers(here),switch(and(hasflag(##,dark),hasflag(##,wizard)),0,##))={@tr me/Insult_String=[name(##)];@tr me/Attack=##}
+&DOOM_CHEAT DOOM Mob Parent=1
+&DOOM_MOB DOOM Mob Parent=1
+&MAX_HITPOINTS DOOM Mob Parent=10
+&HITPOINTS DOOM Mob Parent=10
+&SETUP DOOM Mob Parent=@va me=[get(me/va)];@set me=monitor
+&POINTS DOOM Mob Parent=100
+&GARBAGE_ROOM DOOM Mob Parent=#859
+&RESPAWN_TIME DOOM Mob Parent=300
+&A_DESTROY DOOM Mob Parent=&points_%0 [zone(loc(%0))]=[add(get(zone(loc(%0))/points_%0),v(points))];@dolist lcon(me)=@switch [get(##/DOOM_powerup)]=1, @tel ##=%0;@tel me=[v(garbage_room)];@wait [v(Respawn_Time)]=@tr me/startup
+&CHOOSE_EXIT DOOM Mob Parent=[first(shuffle(lexits(here)))]
+&WANDER DOOM Mob Parent=go [u(choose_exit)];@wait [rand(v(Wander_Delay))]=@tr me/Wander
+&UNLOCKED_EXITS DOOM Mob Parent=[iter(lexits(here),switch(lock(##),*UNLOCKED*,##))]
+&WANDER_DELAY DOOM Mob Parent=30
+&ATTACK DOOM Mob Parent=@switch [t(get(%0/DOOM_Cheat))]=0,{fire %0;@wait [v(attack_delay)]=@switch [t(member(lcon(here),%0))]=1, @tr me/attack=%0}
+&ENTRY_DELAY DOOM Mob Parent=3
+@VA DOOM Mob Parent=^* has arrived.:@switch [v(insult_string)]=,, @tr me/insult_string=%0;@wait [v(entry_delay)]={@tr me/attack=[num(%0)]}
+&UC_SUBJ DOOM Mob Parent=[switch(subj(me),he,He,she,She,it,It)]
+@STARTUP DOOM Mob Parent=home;&hitpoints me=[v(Max_Hitpoints)];@switch [v(Wandering)]=1, @tr me/Wander;@lock/listen me=!DOOM_Cheat:1
+&HITPOINTS_PERCENT DOOM Mob Parent=[gt(fdiv(v(HitPoints),v(Max_HitPoints)),fdiv(%1,100))]
+&INJURY DOOM Mob Parent=has [v(hitpoints)] out of [v(max_hitpoints)] hitpoints left
+@DESCRIBE DOOM Mob Parent=[switch(v(desc_store),,A [name(me)].,u(desc_store))] [u(uc_subj)] [u(injury)].
+@ADESTROY DOOM Mob Parent=@switch %#=[owner(me)],,{@undestroy me;@mail [name(owner(me))]=%n(%#[flags(%#)])'s attempt at destroying [name(me)](%![flags(me)]) has been foiled.}

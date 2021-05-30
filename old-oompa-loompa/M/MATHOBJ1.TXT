@@ -1,0 +1,12 @@
+@create Math Object
+@link Math Object=[owner(me)]
+@lock Math Object==[owner(me)]
+@DESCRIBE Math Object=A recursive descent math device. Try, `#<expression>'. Use <> as parentheses..... it supports + and *! Woo.
+&FIXSTRING Math Object=[switch(isnum(%0),1,%0,%B%0%B)]
+&LEVEL1 Math Object=[add(u(level2),switch(first(%q9),+,[setq(9,rest(%q9))][u(level1)]))]
+&LEVEL2 Math Object=[mul(u(level3),switch(member(*,first(%q9)),1,[setq(9,rest(%q9))][u(level2)],1))]
+&LEVEL3 Math Object=[switch(member(# $,first(%q9)),1,[setq(9,rest(%q9))][round(power(u(level3),3),2)],2,[setq(9,rest(%q9))][round(power(u(level3),fdiv(1,3)),2)],u(level4))]
+&LEVEL4 Math Object=[u(newpower,u(level5),switch(first(%q9),^,[setq(9,rest(%q9))][u(level4)],1))]
+&LEVEL5 Math Object=[switch(isnum(first(%q9)),1,[first(%q9)][setq(9,rest(%q9))],switch(member(- ~ <,first(%q9)),1,[setq(9,rest(%q9))][mul(-1,u(level5))],2,[setq(9,rest(%q9))][fdiv(1,u(level5))],3,[setq(9,rest(%q9))][u(level1)][switch(member(>,first(%q9)),1,[setq(9,rest(%q9))],pemit(%#,ERROR: Incorrectly terminated parenthesis:%R%q9))],pemit(%#,ERROR: Unknown expression:%R%q9)))]
+&DO Math Object=$#*:@pemit %#=[setq(9,squish(foreach(fixstring,%0)))][u(level1)]
+&NEWPOWER Math Object=[setq(8,mul(%0,switch(%0,<0,-1,1)))][mul(round(exp(mul(%1,ln(%q8))),2),switch(%0,<0,switch(mod(%1,2),0,1,#-1 *,pemit(%#,ERROR: Neg. base raised to the negative power:%R%q9),-1),1))]

@@ -1,0 +1,16 @@
+@create Eratl's Weapons Locker Parent
+@link Eratl's Weapons Locker Parent=*[owner(me)]
+@lock Eratl's Weapons Locker Parent=*[owner(me)]
+@set Eratl's Weapons Locker Parent=INHERIT
+@set Eratl's Weapons Locker Parent=LINK_OK
+@set Eratl's Weapons Locker Parent=VISUAL
+@set Eratl's Weapons Locker Parent=SAFE
+@set Eratl's Weapons Locker Parent=NO_COMMAND
+@DESCRIBE Eratl's Weapons Locker Parent=Eratl's Weapons Locker%rTo create a weapons locker:%r@create Weapons locker%r@parent weapons locker=#237%r@set weapons locker=!no_command%rwlsetup
+&TAKEOUT Eratl's Weapons Locker Parent=$takeout *:@swi [v(status)]=Open,{drop %0},{@pemit %#=The locker is not open.}
+&DO_CLOSE Eratl's Weapons Locker Parent=$close locker:@swi [v(status)]=Open,{@pemit %#=You close the locker.;&status me=Closed},{@pemit %#=The locker is not open.}
+&DO_OPEN Eratl's Weapons Locker Parent=$open locker:@swi [v(combo)]=[v(try)],{@pemit %#=The locker clicks open.;&status me=Open},{@pemit %#=The locker does not open. Maybe you have the wrong combination?
+&DO_COMBO Eratl's Weapons Locker Parent=$combo *-*-*:&try me=%0-%1-%2;@pemit %#=You spin the combination in.
+&DO_SETCOMBO Eratl's Weapons Locker Parent=$setcombo *-*-*:&combo me=%0-%1-%2;@pemit %#=Combination permanently set.;&do_setcombo me=bob
+&DO_SETUP Eratl's Weapons Locker Parent=$wlsetup:@set me=safe;@desc me=A small locker.%r'WLHELP' for help.;@Pemit %#=Setup completed. Now type:%r@set [num(me)]=INHERIT%rsetcombo <N1>-<N2>-<N3>%rFor example, if you wanted to set the combination to 1-2-3, you'd type `setcombo 1-2-3'
+&WLHELP Eratl's Weapons Locker Parent=$wlhelp:@pemit %#=[repeat(-,79)]%r[center([ansi(hc,Eratl's Weapons Locker)],79)]%r[repeat(-,79)]%r[ljust(COMBO <N1>-<N2>-<N3>,20)] - Try combination <N1>-<N2>-<N3>.%r[ljust(OPEN LOCKER,20)] - Open the weapons locker, if the combination is right.%r[ljust(CLOSE LOCKER,20)] - Close Locker%r[LJUST(GIVE LOCKER=<OBJECT>,20)] - Give the locker <object>%r[LJUST(TAKEOUT <OBJECT>,20)] - Take <object> out of the locker%r[repeat(-,79)]

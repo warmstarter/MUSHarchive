@@ -1,0 +1,32 @@
+@create PARENT: Transporter v1.1
+@link PARENT: Transporter v1.1=*[owner(me)]
+@lock PARENT: Transporter v1.1==*[owner(me)]
+&LOCK_ON PARENT: Transporter v1.1=$lock *:@vy me=[v(vy)] [num(*%0)];@pemit %n=Ready to transport %0.;@oemit %n=%N hits a few buttons on the transporter console.
+&SPACE PARENT: Transporter v1.1=#0
+&DUMP PARENT: Transporter v1.1=@pemit [get(me/numper)]=Dumping buffer...;@oemit [get(me/numper)]=%N hits a large flashing button, and a voice says, "Dumping pattern buffer.";@wait 2=@dolist lcon([get(me/buffer)])=@tel ##=[get(me/space)];@wait 4=@pemit [get(me/numper)]=Buffer dumped.
+&DUMPT PARENT: Transporter v1.1=$dump:@fo #21=@wait 3=@set {[num(me)]}=!halt;@fo #21=@wait 3=@tr [num(me)]/dump;@wait 2=@halt me;&numper me=%#
+&ABORTT PARENT: Transporter v1.1=$abort:@fo #21=@wait 3=@set {[num(me)]}=!halt;@fo #21=@wait 3=@tr [num(me)]/abort;@wait 2=@halt me;&numper me=%#
+&INOP PARENT: Transporter v1.1=0
+&ABORT PARENT: Transporter v1.1=@swi [get(me/inop)]=1,{@pemit [get(me/numper)]=Aborting transport.;@oemit [get(me/numper)]=%N frantically hits the controls on the transporter console.;@remit here=You hear the whine of a transporter beam, and [foreach(nameit,v(vy))] start to materialize in the middle of the room.;@wait 3=@dolist [get(me/vy)]=@tel ##=here;@wait 4=@dolist [v(vy)]=@remit here=[name(##)]'s form fades in and out, becoming weaker and stronger at random.;@wait 6=@dolist [v(vy)]=@tel ##=[get(me/buffer)];@wait 3=@dolist [v(vy)]=@swi rand(10)=3,{&nores me=[get(me/nores)] ##},5,{&nores me=[get(me/nores)] ##},8,{&nores me=[get(me/nores)] ##},{&rescue me=[get(me/rescue)] ##};@wait 8=@dolist [get(me/rescue)]=@tel ##=here;@wait 10=@dolist [get(me/rescue)]=@remit here=[name(##)] finally materializes, and the transporter effect vanishes.;@wait 13=@dolist [get(me/nores)]=@tel ##=[v(vz)];@wait 11=@dolist get(me/nores)=@remit [v(vz)]=You hear the whine of a transporter beam, and [foreach(nam eit,v(vy))] start to materialize in the middle of the room.;@wait 6=@dolist get(me/nores)=@remit [v(vz)]=The transporter beam vanishes, and [name(##)] is standing in it's place.;@wait 6=@pemit [get(me/numper)]=Transporter Abort operation complete.;@wait 6=&nores me=;@wait 6=&rescue me=},{@pemit [get(me/numper)]=The Transporter is not currently in use.}
+&BUFFER PARENT: Transporter v1.1=#79
+&HELP PARENT: Transporter v1.1=$TRANSHELP:@pem %#=[space(1)]___[space(20)]____________________________________________________%r(___| Transporter Help |____________________________________________________)%r%r[space(3)]Scan <person>[space(18)]- Get info on <person>%r[space(3)]Status[space(25)]- View Transporter status%r[space(3)]Lock <person>[space(18)]- Lock transporter on <person>%r[space(3)]Coord <location>[space(15)]- Set beamdown target to <location>%r[space(3)]Energize[space(23)]- Energize Transporter%r[space(3)]Abort[space(26)]- Attempt to abort transport%r%r[space(1)]___[space(23)]________________________________________________%r(___| Restricted Commands |________________________________________________)%r%r[space(3)]Dump[space(27)]- Dump contents of buffer%r%r[space(1)]__________________________________________________________[space(13)]___%r(__________________________________________________________| Ver 0.91b |___)
+@Desc PARENT: Transporter v1.1=This is a functioning transporter with console. For help try `TRANSHELP'.
+&SCAN PARENT: Transporter v1.1=$scan *:@swi [type(*%0)]=player,{@pem %#=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-%rSex: [get(*%0/sex)][space(sub(17,strlen(get(*%0/sex))))]Race: [get(*%0/race)]%rCondition: [get(*%0/health)][space(sub(11,strlen(get(*%0/whealth))))]Location: [name(loc(*%0))]([num(loc(*%0))])%r-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-;&lscan me=[name(num(*%0))]},{@pem %#=That is not a valid transport subject.}
+&LSCAN PARENT: Transporter v1.1=Parallax
+&STATUS PARENT: Transporter v1.1=$status:@pemit %#=Transporter Status: -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-%rReady to transport:[space(7)][v(vy)]%rTransporter locked on:[space(4)][name(v(vz))]%rLast scanned:[space(13)][v(lscan)];@pemit %#=;@pemit %#=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+@VB PARENT: Transporter v1.1=$prep:@vy me=[v(vy)] [num(%#)];@pemit %#=Ready to transport %n.;@oemit %#=%N steps up to the transporter pad.
+@VA PARENT: Transporter v1.1=$coord* *:@vz me={[num(%1)]};@wait 1=@pemit %#=Transporter Coordinates set to [name(v(vz))]([num(%1)]).;@oemit %#=%N hits a few buttons on the transporter console.
+@VC PARENT: Transporter v1.1=$energize:@dolist [v(vy)]=@fo ##=@oemit me=[name(##)] is enveloped in the bluish sparkles of a transporter beam.;@dolist [v(vy)]=@pemit ##=You're enveloped in the bluish sparkles of a transporter beam.;@oemit %#=%N slides up the light bars on the transporter console.;@wait 2=&inop me=1;@wait 2=@pemit %#=Transport Initiated.;@wait 2=@dolist [v(vy)]=@tel ##=[get(me/buffer)];@wait 6=&inop me=0;@wait 4=@pemit %#=Transport verified - Completing materialization.;@wait 3=@remit [v(vz)]=You hear the whine of a transporter beam, and [name(foreach(nameit,v(vy)))] starts to materialize in the middle of the room.;@wait 6=@dolist [v(vy)]=@tel ##=[v(vz)];@wait 8=@dolist [v(vy)]=@remit [v(vz)]=The beam vanishes, and [name(##)] is standing in its place.;@wait 7=@dolist [v(vy)]=@swi [num(loc(##))]=[v(vz)],{@pemit %#=Transport Completed Succesfully.},{@pemit %#=ERROR! TRANSPORT UN-SUCCSESSFUL!;@remit [v(vz)]=[name(##)]'s form vanishes suddenly, in a weaker transporter effect.};@wait 14=@vy me=
+&NAMEIT PARENT: Transporter v1.1=%0
+&NUMPER PARENT: Transporter v1.1=#7
+@VZ PARENT: Transporter v1.1=#0
+&CREDITS PARENT: Transporter v1.1=I'm not sure who originally built it, but if you find him/her, thank them for making this code possible.
+&LOCK_ON-2 PARENT: Transporter v1.1=$olock *:@vy me=[v(vy)] [num(%0)];@pemit %n=Ready to transport %0;@oemit %N=%N hits a few buttons on the transporter console.
+@set PARENT: Transporter v1.1=DARK
+@set PARENT: Transporter v1.1=INHERIT
+@set PARENT: Transporter v1.1=MONITOR
+@set PARENT: Transporter v1.1=OPAQUE
+@set PARENT: Transporter v1.1=STICKY
+@set PARENT: Transporter v1.1=ROYALTY
+@set PARENT: Transporter v1.1=SAFE
+@set PARENT: Transporter v1.1=WIZARD

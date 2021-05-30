@@ -1,0 +1,14 @@
+@@
+@@ This is code to allow you to show others your ANSI or FANSI art movies. Same used as used for the movie
+@@ T-PAX on 8bitMUSH.
+@@
+
+@create Movie Projector
+@describe Movie Projector=-- Instructions --%rTo insert frames, place the full code for a frame into attributes named FRAME<SCENE NUMBER>_<FRAME NUMBER>. For instance:%r%r%b%b&FRAME1_1 Movie Projector=scene 1 frame 1 code%r%b%b&FRAME1_2 Movie Projector=scene 1 frame 2 code%r%b%b&FRAME2_1 Movie Projector=scene 2 frame 1 code%r%rTo view the movie, type '[ansi(g,PLAY)]'. To view a scene, type '[ansi(g,@tr Movie Projector/Z_PLAY.SCENE=<SCENE NUMBER>)]'.
+@set Movie Projector=!no_command
+&playing Movie Projector=no
+&Z_PLAY Movie Projector=$PLAY:&playing me=yes;@emit The lights dim in the theatre..;@wait 10=@emit The projector starts to click..;@wait 15=@tr me/Z_PLAY.scene=1
+&CREDIT Movie Projector=Y&Q Enterprises @ 8BitMUSH
+&Z_PLAY.SCENE Movie Projector=@dolist [sort(edit(lattr(me/frame%0_*),FRAME%0_,),n)] END=@wait [mul(#@,1)]=@swi/first ##=END,{@swi/first %0=>11,{@emit The projector stops.;@wait 5=@emit The lights turn back on.;@wait 5=&playing me=no},{@tr me/Z_PLAY.scene=[inc(%0)]}},@emit u(FRAME%0_##)
+
+look movie projector

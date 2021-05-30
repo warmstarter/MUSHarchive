@@ -1,0 +1,71 @@
+@@ -*- mushcode -*- $Id: bbsys.txt 1.3 Sun, 03 Sep 2000 12:34:37 -0700 shawnw $
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ @@
+@@  Raevnos's @mail-compatible BB Sys  @@
+@@                                     @@
+@@ To use, /quote this file to your    @@
+@@  MUSH through a Wizard character    @@
+@@  It is only guaranteed to work on   @@
+@@  PennMUSHes. I do not use, and will @@
+@@  not support TinyMUSH or TinyMUX    @@
+@@  versions.                          @@
+@@ This is a beta version. Please      @@
+@@  send bugs and suggestions my way.  @@
+@@ Thanks, Raevnos                     @@
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  @@     
+
+@create BB Sys
+@link BB Sys = #[config(master_room)]
+@set BB Sys = STICKY
+@set BB Sys = WIZARD
+@set BB Sys = !NO_COMMAND
+&VERSION BB Sys=0.3.3
+@set BB Sys/VERSION = NO_COMMAND
+&CREDITS BB Sys=Raevnos@M*U*S*H (pennmush.org:4201)
+@set BB Sys/CREDITS = NO_COMMAND
+@ADISCONNECT BB Sys=&lastdisconnect %#=[time()];@atrlock %#/lastdisconnect=on; @@ This can be removed if something else already sets the attributes. @@
+&+BBDESTROY_CMD BB Sys=$+bbdestroy *:@switch 0=hasflag(%#, wizard), @pemit %#=You can't do that. Ask a wizard for help.,isdbref(setr(0, u(name2num, %0))), @pemit %#=That's not a bulletin board., {@set %q0=!safe; @force %#=@nuke %q0; @pemit %#=[name(%q0)] will be removed shortly.}
+&+BBCREATE_CMD BB Sys=$+bbcreate *:@switch 0=hasflag(%#, wizard), @pemit %#=You can't do that. Ask a wizard for help., valid(name, %0), @pemit %#=That's not a name you can give a bulletin board., {@pcreate %0=[edit(shuffle(a b c d e f g h i j k l m n o p q r s t u v w x y z 0 1 2 3 4 5 6 7 8 9), %b, )]; think setq(0, pmatch(%0)); @lock/user:ADMIN %q0==%#; @link %q0=[v(bbhome)]; @tel %q0=[v(bbhome)]; @set %q0=safe; @pemit %#=You have created a new bulletin board named '[name(%q0)]'. Please remember to set it's @lock/mail and @lock/user:READ if needed.}
+&BBNAME2 BB Sys=name(%0) [if(elock(%0/read, %#), \([objeval(%0, mail())]\))]
+@set BB Sys/BBNAME2 = NO_COMMAND
+&+BBLIST_ALL_CMD BB Sys=$+bblist/all:@pemit %#=The following bulletin boards exist on [mudname()]:%r[table(sort(map(bbname2, edit(lcon(v(bbhome)), %b, |), |), , |), 19, 80, |)]
+&+BBSAVE_CMD BB Sys=$+bbsave *:@select 0[setq(0, u(name2num, first(%0)))][setq(1, val(rest(%0)))]=isdbref(%q0), @pemit %#=That's not a bulletin board., elock(%q0/read,%#), @pemit %#=You don't have permission to read messages on that board., %q1, @pemit %#=You must specify a message number., and(gt(%q1, 0), lte(%q1 ,objeval(%q0, mail()))), @pemit %#=That message is out of range., {@pemit %#=You save a copy of message [name(%q0)] %q1.;@force %q0=@mail/fwd %q1=%#}
+&BBNAME BB Sys=name(%0) ([objeval(%0, mail())])
+@set BB Sys/BBNAME = NO_COMMAND
+&+BBINFO_CMD BB Sys=$+bbinfo *:@pemit %#=setq(0, u(name2num, %0))[switch(0, isdbref(%q0), That's not a board., elock(%q0/read, %#), You don't have permission to look at that board., Info on the [name(%q0)] board:%rSubject: [default(%q0/subject, A bulletin board.)]%rMessages: [objeval(%q0, mail())]%rPost lock: [lock(%q0/mail)]%rRead lock: [lock(%q0/read)]%rAdmin lock: [lock(%q0/admin)])]
+&+BBDELETE_CMD BB Sys=$+bbdelete *:@select 0[setq(0, u(name2num, first(%0)))][setq(1, val(rest(%0)))]=isdbref(%q0), @pemit %#=That's not a board!, %q1, @pemit %#=You must specify a message number., cand(gt(%q1, 0), lte(%q1, objeval(%q0, mail()))), @pemit %#=That message is out of range., cor(elock(%q0/admin, %#), match(%#, mailfrom(%q0, %q1))), @pemit %#=You don't have permission to delete messages on that board., {@pemit %#=Deleting message [name(%q0)] %q1.; @force %q0=@mail/clear %q1; @force %q0=@mail/purge}
+&+BBLIST_CMD BB Sys=$+bblist:@pemit %#=The following bulletin boards can be read by you:%r[table(sort(map(bbname, edit(filter(canread, lcon(v(bbhome))), %b, |), |), , |), 19, 80, |)]
+&+SKIM_CMD BB Sys=$+skim *:@pemit %#=setq(0, u(name2num, %0))[switch(0, isdbref(%q0), That's not a board!, elock(%q0/read, %#), You don't have permission to read messages on that board., objeval(%q0, mail()), No messages posted., You look over the [name(%q0)] BB:%r[repeat(=, 78)]%r#%b%b%b[ljust(SUBJECT, 30)][ljust(FROM, 18)]DATE%r[repeat(-, 78)]%r[iter(lnum(1, objeval(%q0, mail())), [ljust(##., 4)][ljust(left(mailsubject(%q0, ##), 29), 30)][ljust(name(mailfrom(%q0, ##)), 18)][timefmt($a $B $d\, $H:$M, convtime(mailtime(%q0, ##)))], , %r)]%r[repeat(=, 78)]
+&+READ_CMD BB Sys=$+read *:@pemit %#=setq(0, u(name2num, first(%0)))[setq(1, val(rest(%0)))][switch(0, isdbref(%q0), That's not a board!, elock(%q0/read, %#), You don't have permission to read messages on that board., %q1, You must specify a message number., isint(%q1), You must specify a message number., gt(%q1, 0), That message number is out of range., lte(%q1, objeval(%q0, mail())), That message number is out of range., [repeat(-, 78)]%rFrom: [ljust(name(setr(2, mailfrom(%q0, %q1))), 20)][if(and(andflags(%q2, c!D), not(hidden(%q2))), rjust(\(Conn\), 42))]%rDate: [ljust(mailtime(%q0, %q1), 28)]Board: [ljust(name(%q0), 21)]Message: %q1%rSubject: [mailsubject(%q0, %q1)]%r[repeat(-, 78)]%r[mail(%q0, %q1)]%r[repeat(-, 78)]
+&NAME2NUM BB Sys=locate(v(bbhome), %0, Pi)
+@set BB Sys/NAME2NUM = NO_COMMAND
+&CANREAD BB Sys=elock(%0/read, %#)
+&+BBSCAN_CMD BB Sys=$+bbscan:@pemit %#=The following bulletin boards have had messages posted since [get(%#/lastdisconnect)][setq(0, convtime(get(%#/lastdisconnect)))]:%r[table(sort(map(bbname, edit(filter(recent, filter(canread, lcon(v(bbhome)))), %b, |), |), a, |), 19, 80, |)]
+&RECENT BB Sys=gt(convtime(mailtime(%0, objeval(%0, mail()))), %q0)
+@set BB Sys/RECENT = NO_COMMAND
+&+TOSS_CMD BB Sys=$+toss:@pemit %#=if(hasattrval(%#, mailto), You toss your @mail., You're not currently writing a @mail.); &mailto %#; &mailsub %#; &mailtext %#
+&WRITE_CMD BB Sys=$-*:@select [hasattrval(%#, MAILTO)][comp(%0, -)]=0?, @pemit %#=You're not writing a @mail. Start one first, 10, {@pemit %#=You finish writing your @mail and send it.; @force %#=@mail \{[escape(get(%#/mailto))]\}=\{[escape(get(%#/mailsub))]/[escape(get(%#/mailtext))]\}; &mailtext %#; &mailto %#; &mailsub %#}, {@pemit %#=You continue writing your @mail.; &mailtext %#=[get(%#/mailtext)] %0
+@create BB Help Database
+@set BB Help Database = NO_COMMAND
+&+BBDESTROY BB Help Database=+BBDESTROY <BOARD>%r%rThis Wizard-only command removes the named bulletin board.
+&+BBDELETE BB Help Database=+BBDELETE <BOARD> <#>%r%rThis command deletes message <#> on <BOARD>. It can only be used by game admins, the admins of the bulletin board in question, or the owner of the message in question.
+&+BBCREATE BB Help Database=+BBCREATE <NEW BOARD>%r%rThis Wizard-only command creates a new board named <NEW BOARD>. It starts off readable and postable by all, with the creator as the board's admin. To change these, a wizard can change the mail, user:read and user:admin locks on the player that's created. Also, the &SUBJECT attribute should be set to a brief description of the board's purpose.
+&BBADMIN BB Help Database=These commands are intended for managing the bulletin boards.%r[table(sort(+BBCREATE +BBDELETE +BBDESTROY))]
+&+BBINFO BB Help Database=+BBINFO <BOARD>%rThis command gives you some information about <BOARD>, if you have permission to read it.
+&+BBSAVE BB Help Database=+BBSAVE <BOARD> <#>%r%rThis command forwards message <#> on <BOARD> to you via @mail.
+&+READ BB Help Database=+READ <BOARD> <#>%r%rRead message <#> on <BOARD>.
+&+SKIM BB Help Database=+SKIM <BOARD>%r%rThis command gives you a summary of the messages on <BOARD>, including subjects, authors, and mailing dates.
+&+BBLIST BB Help Database=+BBLIST%r+BBLIST/ALL%r%rThe first form shows you all bulletin boards you can read, and the number of messages posted to each. The second form shows you all boards, with the number of messages of those you can read indicated.
+&+TOSS BB Help Database=+TOSS%r%rThrow away a @mail you're current writing.
+&+WRITE BB Help Database=-<text>%r--%r%he first form adds text to a @mail you'rer writing. The second sends it.
+&+MAIL BB Help Database=+MAIL <address list>=<title>%r%rStarts a new @mail using a very basic editor. See +HELP +WRITE for how to add to the message and send it when you're done.
+&BB BB Help Database=This MUSH features a bulletin board system that's integrated with the builtin @mail system. So, you can send mail to players and boards at the same time, which many people find to be convienent.%r%rHelp exists for the following bulletin board system commands:%r[table(sort(+BBLIST +SKIM +READ +BBSAVE +BBINFO))]%rIn addition, there is help on BBADMIN. Also see HELP @MAIL for details on how to send @mail. Here's the quick and dirty guide: Address a @mail to the name of the board you want to post to: @mail <board>=<subject>/<text>%rWritten by Raevnos@M*U*S*H (mush.pennmush.org:4201)
+@dig/teleport BB Room
+@set here = HAVEN
+@set here =  SAFE
+@set here = NO_COMMAND
+@set here = FLOATING
+@describe here=Hangout for bulletin boards. Please don't leave any objects here that aren't boards, because they will be counted as ones. Very bad.
+@set BB Sys=BBHOME:[num(here)]
+@teleport BB Sys=#[config(master_room)]
+home
+think Congradulations. Your new bulletin board system should be installed. To create a board for use, +BBCREATE <Name>. The attributes on the BB Help Database in your inventory can be added to your local +help system. Please report any bugs or suggestions to Raevnos@M*U*S*H (mush.pennmush.org:4201). Have a nice day!

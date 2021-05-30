@@ -1,0 +1,597 @@
+@set me=quiet
+@switch [isdbref(num(CharGen Parent))]=0,{think [ansi(hm,INSTALL:)] No "CharGen Parent" object found -- creating...;@create CharGen Parent},1,{think [ansi(hm,INSTALL:)] "CharGen Parent" object already exists... skipping creation.}
+think [ansi(hm,INSTALL:)] Setting CharGen Parent Flags...
+@set CharGen Parent = WIZARD
+@set CharGen Parent = SAFE
+@set CharGen Parent = NO_COMMAND
+think [ansi(hm,INSTALL:)] Downloading CharGen Descriptions...
+@DESCRIBE CharGen Parent=[iter(v(FLAG_CharGen),ifelse(match(v(LIST_TYPES),##),ifelse(and(hasattrp(me,DESC_##),words(v(DESC_##))),u(DESC_##),u(DESC_ERROR,##)),u(DESC_ERROR2,##)))][u(TXT_FOOTER)]
+@set CharGen Parent/DESCRIBE=no_command visual
+&DESC_ERROR2 CharGen Parent=[u(DATA_PREFIX.Error)] %0 is not a valid CharGen Room Flag.
+&DESC_FINAL CharGen Parent=Before you complete your Character Generation, be certain to review your choices. Now is the time to go back and change/add to your current selections. If an error occurs in your completion-scan, go back and attempt to fix the problem yourself. If you still have trouble, contact an Administrator.%r%rIf no errors occur in your completion-scan, you will be automatically registered and will NOT be allowed to return to CharGen. Therefore, it is imperative that you ensure your character is setup correctly now.
+&DESC_VANTAGES CharGen Parent=Vantages allow you to fine-tune your character by giving it fairly specific details and peculiarities. The interaction of your vantages with other code will be minimal, so do not be hesitant to make a more realistic character that has both advantages AND disadvantages.
+&DESC_ATTRIBUTES CharGen Parent=Your attributes are the most fundamental statistics of your character. They will play a fairly large role in your interaction with other code on this [v(CNF_MU.Type)]. You will start with [v(DATA_ATTRIBUTE.Start)] in each attribute, and may increase or decrease them as you desire.%r%r*** NOTE: Do -NOT- spend all of your [v(DATA_TOKEN.Name.Plural)] here, as you will need them in future stages of CharGen.
+&DESC_SKILLS CharGen Parent=Your skills focus in on your attributes, and allow you to more clearly specify your strengths and weaknesses. As with your attributes, these are NOT merely cosmetic, and will most likely effect how your character interacts with other code here.
+&DESC_INTRO CharGen Parent=Welcome to [u(DATA_MU.Name)] Character Generation. Your choices in this process will largely dictate who and what your character is -- so choose wisely.  You will start out with [ifelse(v(CNF_STORAGE.Tokens),v(DATA_TOKEN.Combo),[setq(0,0)][iter(v(LIST_TYPES),setq(0,add(%q0,v(DATA_TOKEN.##))))]%q0)] [v(DATA_TOKEN.Name.Plural)], and will spend these throughout the course of your creation.
+&DESC_BASICS CharGen Parent=Even the basic information for your character is important. Some of the information that you will input here can be changed even after you leave the CharGen area.
+&DESC_ERROR CharGen Parent=[u(DATA_PREFIX.Error)] There is no description set for %0. To set one, type:%r[space(5)]&DESC_%0 [parent(me)]=<text>
+think [ansi(hm,INSTALL:)] Downloading CharGen Commands...
+&CMD_CHARGEN.VANTAGE.SPECDEL CharGen Parent=$chargen/vant* *=-*:[switch([u([v(PTR_CharGen.FUN)]/FUN_PLR.Auth,%#)][u([v(PTR_CharGen.FUN)]/FUN_PLR.Setup,%#)][not(not(match(v(FLAG_CharGen),Vantages)))][not(not(match(cat(v(LIST_Advantages),v(LIST_Disadvantages)),[edit(secure(%1),space(1),-)]*)))],0???,u(TRI_ERROR,%#,PLR_!AUTH),10??,u(TRI_ERROR,%#,PLR_!SETUP),110?,u(TRI_ERROR,%#,CMD_BAD_LOC),1110,u(TRI_ERROR,%#,BAD_VANTAGE,secure(%1)),1111,u(TRI_VANTAGE.SpecDel,%#,grab(cat(v(LIST_Advantages),v(LIST_Disadvantages)),[edit(secure(%1),space(1),-)]*),edit(secure(%2),space(1),_)),u(TRI_SYSERR,%#))]
+&CMD_CHARGEN.VANTAGE.SPECADD CharGen Parent=$chargen/vant* *=+*:[switch([u([v(PTR_CharGen.FUN)]/FUN_PLR.Auth,%#)][u([v(PTR_CharGen.FUN)]/FUN_PLR.Setup,%#)][not(not(match(v(FLAG_CharGen),Vantages)))][not(not(match(cat(v(LIST_Advantages),v(LIST_Disadvantages)),[edit(secure(%1),space(1),-)]*)))],0???,u(TRI_ERROR,%#,PLR_!AUTH),10??,u(TRI_ERROR,%#,PLR_!SETUP),110?,u(TRI_ERROR,%#,CMD_BAD_LOC),1110,u(TRI_ERROR,%#,BAD_VANTAGE,secure(%1)),1111,u(TRI_VANTAGE.SpecAdd,%#,grab(cat(v(LIST_Advantages),v(LIST_Disadvantages)),[edit(secure(%1),space(1),-)]*),edit(secure(%2),space(1),_)),u(TRI_SYSERR,%#))]
+&CMD_CHARGEN.SKILL.ADD CharGen Parent=$chargen/sk* +*:[switch([u([v(PTR_CharGen.FUN)]/FUN_PLR.Auth,%#)][u([v(PTR_CharGen.FUN)]/FUN_PLR.Setup,%#)][not(not(match(v(FLAG_CharGen),Skills)))][not(not(match(v(LIST_SKILLS),[edit(secure(%1),space(1),-)]*)))],0???,u(TRI_ERROR,%#,PLR_!AUTH),10??,u(TRI_ERROR,%#,PLR_!SETUP),110?,u(TRI_ERROR,%#,CMD_BAD_LOC),1110,u(TRI_ERROR,%#,BAD_SKILL,secure(%1)),1111,u(TRI_SKILL.ADD,%#,grab(v(LIST_SKILLS),[edit(secure(%1),space(1),-)]*)),u(TRI_SYSERR,%#))]
+&CMD_CHARGEN.VANTAGE.DEL CharGen Parent=$chargen/vant* -*:[switch([u([v(PTR_CharGen.FUN)]/FUN_PLR.Auth,%#)][u([v(PTR_CharGen.FUN)]/FUN_PLR.Setup,%#)][not(not(match(v(FLAG_CharGen),Vantages)))][not(not(match(cat(v(LIST_Advantages),v(LIST_Disadvantages)),[edit(secure(%1),space(1),-)]*)))],0???,u(TRI_ERROR,%#,PLR_!AUTH),10??,u(TRI_ERROR,%#,PLR_!SETUP),110?,u(TRI_ERROR,%#,CMD_BAD_LOC),1110,u(TRI_ERROR,%#,BAD_VANTAGE,secure(%1)),1111,u(TRI_VANTAGE.del,%#,grab(cat(v(LIST_Advantages),v(LIST_Disadvantages)),[edit(secure(%1),space(1),-)]*)),u(TRI_SYSERR,%#))]
+&CMD_CHARGEN.VANTAGE.ADD CharGen Parent=$chargen/vant* +*:[switch([u([v(PTR_CharGen.FUN)]/FUN_PLR.Auth,%#)][u([v(PTR_CharGen.FUN)]/FUN_PLR.Setup,%#)][not(not(match(v(FLAG_CharGen),Vantages)))][not(not(match(cat(v(LIST_Advantages),v(LIST_Disadvantages)),[edit(secure(%1),space(1),-)]*)))],0???,u(TRI_ERROR,%#,PLR_!AUTH),10??,u(TRI_ERROR,%#,PLR_!SETUP),110?,u(TRI_ERROR,%#,CMD_BAD_LOC),1110,u(TRI_ERROR,%#,BAD_VANTAGE,secure(%1)),1111,u(TRI_VANTAGE.add,%#,grab(cat(v(LIST_Advantages),v(LIST_Disadvantages)),[edit(secure(%1),space(1),-)]*)),u(TRI_SYSERR,%#))]
+&CMD_CHARGEN.COMMANDS CharGen Parent=$chargen/command*:[pemit(%#,[u(TXT_TITLE,CharGen Commands)][u(TXT_MOVE)][iter(v(FLAG_CharGen),ifelse(match(v(LIST_TYPES),##),u(CMDS_##),%r[u(CMDS_DEFAULT,##)]))])]
+&CMD_CHARGEN.SETUP CharGen Parent=$chargen/setup:[ifelse(u([v(PTR_CharGen.FUN)]/FUN_PLR.Reg,%#),u(TRI_ERROR,%#,PLR_REG),ifelse(match(v(FLAG_CharGen),Intro),u(TRI_Setup,%#),u(TRI_ERROR,%#,CMD_BAD_LOC)))]
+&CMD_CHARGEN.FEATURE CharGen Parent=$chargen/feature *=*:[switch([u([v(PTR_CharGen.FUN)]/FUN_PLR.Auth,%#)][u([v(PTR_CharGen.FUN)]/FUN_PLR.Setup,%#)][not(not(match(v(FLAG_CharGen),Basics)))][not(not(match(v(LIST_FEATURES),[edit(secure(%0),space(1),-)]*)))],0???,u(TRI_ERROR,%#,PLR_!AUTH),10??,u(TRI_ERROR,%#,PLR_!SETUP),110?,u(TRI_ERROR,%#,CMD_BAD_LOC),1110,u(TRI_ERROR,%#,BAD_FEATURE,secure(%0)),1111,u(TRI_FEATURE.Ok,%#,grab(v(LIST_FEATURES),[edit(secure(%0),space(1),-)]*),secure(%1)),u(TRI_SYSERR,%#))]
+&CMD_COPYRIGHT CharGen Parent=$chargen/copy*:[pemit(%#,Character Generation Code v[v(DATA_Version)] -- Created by: Demonic \(1998\)%rUpdated versions of this code can be found on:%r%b%bhttp://www.mindspring.com/~loparo)]
+&CMD_CHARGEN.INFO CharGen Parent=$chargen/info:[pemit(%#,[u(TXT_TITLE,CharGen Information List)][u(INFO_LIST,iter(v(FLAG_CharGen),ifelse(match(v(LIST_TYPES),##),lattr([v(PTR_CharGen.INFO)]/INFO_##.*),u(INFO_ERROR,##))))][u(TXT_FOOTER.Info)])]
+&CMD_CHARGEN.INFO2 CharGen Parent=$chargen/info *:[pemit(%#,[u(TXT_TITLE,CharGen Information)][iter(v(FLAG_CharGen),ifelse(match(v(LIST_TYPES),##),ifelse(words(xget(v(PTR_CharGen.INFO),INFO_##.[secure(%0)])),u([v(PTR_CharGen.INFO)]/INFO_##.[secure(%0)]),u(INFO_ERROR2,secure(%0),##)),u(INFO_ERROR,##)))][u(TXT_FOOTER.Info)])]
+&CMD_CHARGEN.ATTRIBUTE CharGen Parent=$chargen/attr* *=*:[switch([u([v(PTR_CharGen.FUN)]/FUN_PLR.Auth,%#)][u([v(PTR_CharGen.FUN)]/FUN_PLR.Setup,%#)][not(not(match(v(FLAG_CharGen),Attributes)))][not(not(match(v(LIST_ATTRIBUTES),[edit(secure(%1),space(1),-)]*)))],0???,u(TRI_ERROR,%#,PLR_!AUTH),10??,u(TRI_ERROR,%#,PLR_!SETUP),110?,u(TRI_ERROR,%#,CMD_BAD_LOC),1110,u(TRI_ERROR,%#,BAD_ATTRIBUTE,secure(%1)),1111,u(TRI_ATTRIBUTE.Ok,%#,trunc(secure(%2)),capstr(lcstr(grab(v(LIST_ATTRIBUTES),[edit(secure(%1),space(1),-)]*))),ifelse(v(CNF_STORAGE.Attributes),extract(grab(xget(%#,xget(v(PTR_CharGen.VAR),VAR_ATTRIBUTES)),[grab(v(LIST_ATTRIBUTES),[edit(secure(%1),space(1),-)]*)] *,v(CNF_DELIMETER)),2,1),xget(%#,ATTRIBUTE_[grab(v(LIST_ATTRIBUTES),[edit(secure(%1),space(1),-)]*)]))),u(TRI_SYSERR,%#))]
+&CMD_CHARGEN.SKILL.DEL CharGen Parent=$chargen/sk* -*:[switch([u([v(PTR_CharGen.FUN)]/FUN_PLR.Auth,%#)][u([v(PTR_CharGen.FUN)]/FUN_PLR.Setup,%#)][not(not(match(v(FLAG_CharGen),Skills)))][not(not(match(v(LIST_SKILLS),[edit(secure(%1),space(1),-)]*)))],0???,u(TRI_ERROR,%#,PLR_!AUTH),10??,u(TRI_ERROR,%#,PLR_!SETUP),110?,u(TRI_ERROR,%#,CMD_BAD_LOC),1110,u(TRI_ERROR,%#,BAD_SKILL,secure(%1)),1111,u(TRI_SKILL.DEL,%#,grab(v(LIST_SKILLS),[edit(secure(%1),space(1),-)]*)),u(TRI_SYSERR,%#))]
+&CMD_CHARGEN.SKILL.SPECADD CharGen Parent=$chargen/sk* *=+*:[switch([u([v(PTR_CharGen.FUN)]/FUN_PLR.Auth,%#)][u([v(PTR_CharGen.FUN)]/FUN_PLR.Setup,%#)][not(not(match(v(FLAG_CharGen),Skills)))][not(not(match(v(LIST_SKILLS),[edit(secure(%1),space(1),-)]*)))],0???,u(TRI_ERROR,%#,PLR_!AUTH),10??,u(TRI_ERROR,%#,PLR_!SETUP),110?,u(TRI_ERROR,%#,CMD_BAD_LOC),1110,u(TRI_ERROR,%#,BAD_SKILL,secure(%1)),1111,u(TRI_SKILL.SPECADD,%#,grab(v(LIST_SKILLS),[edit(secure(%1),space(1),-)]*),edit(secure(%2),space(1),-)),u(TRI_SYSERR,%#))]
+&CMD_CHARGEN.SKILL.SPECDEL CharGen Parent=$chargen/sk* *=-*:[switch([u([v(PTR_CharGen.FUN)]/FUN_PLR.Auth,%#)][u([v(PTR_CharGen.FUN)]/FUN_PLR.Setup,%#)][not(not(match(v(FLAG_CharGen),Skills)))][not(not(match(v(LIST_SKILLS),[edit(secure(%1),space(1),-)]*)))],0???,u(TRI_ERROR,%#,PLR_!AUTH),10??,u(TRI_ERROR,%#,PLR_!SETUP),110?,u(TRI_ERROR,%#,CMD_BAD_LOC),1110,u(TRI_ERROR,%#,BAD_SKILL,secure(%1)),1111,u(TRI_SKILL.SPECDEL,%#,grab(v(LIST_SKILLS),[edit(secure(%1),space(1),-)]*),edit(secure(%2),space(1),-)),u(TRI_SYSERR,%#))]
+&CMD_CHARGEN.STATUS CharGen Parent=$chargen/status:[ifelse(u([v(PTR_CharGen.FUN)]/FUN_Plr.Auth,%#),pemit(%#,[u(TXT_TITLE,CharGen Status -- %n)][u(DRAW_Status,%#)]),u(TRI_ERROR,%#,PLR_!AUTH))]
+&CMD_CHARGEN2.STATUS CharGen Parent=$chargen/status *:[ifelse(u([v(PTR_CharGen.FUN)]/FUN_PLR.Auth,%#),ifelse(match(Tokens Attributes Features Vantages Skills,%0*),pemit(%#,[u(TXT_TITLE,Chargen Status -- %n)][u(DRAW_STATUS.[grab(Tokens Attributes Features Vantages Skills,%0*)].[ifelse(v(CNF_STORAGE.[grab(Tokens Attributes Features Vantages Skills,%0*)]),Combo,Split)],%#)]),u(TRI_ERROR,%#,STATUS-TYPE_!VALID)),u(TRI_ERROR,%#,PLR_!VALID))]
+&CMD_CHARGEN.COMPLETE CharGen Parent=$chargen/compl*:[ifelse(u([v(PTR_CharGen.FUN)]/FUN_Plr.Reg,%#),u(TRI_ERROR,%#,PLR_REG),ifelse(match(v(FLAG_CharGen),Final),u(TRI_Complete,%#),pemit(%#,ERROR: You cannot use that command here.)))]
+&CMD_WIZ.STATUS CharGen Parent=$wiz/status *:[ifelse(u([v(PTR_CharGen.FUN)]/FUN_Plr.Wiz,%#),ifelse(not(match(pmatch(%0),#-1)),pemit(%#,[u(TXT_TITLE,CharGen Status - [name(pmatch(%0))])][u(DRAW_Status,pmatch(%0))]),u(TRI_ERROR,%#,VIC_!VALID,secure(%0))),u(TRI_ERROR,%#,PLR_!AUTH))]
+think [ansi(hm,INSTALL:)] Downloading CharGen Information...
+&CMDS_SKILLS CharGen Parent=%r%b%BTo buy or increase a skill:%r[space(5)]chargen/skill +<field>%r%r%b%bTo sell or decrease a skill:%r[space(5)]chargen/skill -<field>%r%r%b%bTo increase or purchase a specialty to a skill:%r[space(5)]chargen/skill <skill>=+<specialty>%r%r%b%bTo sell or decrease a specialty for a skill:%r[space(5)]chargen/skill <skill>=-<specialty>%r%r%b%bTo see a list of skill categories, type:%r[space(5)]chargen/info skills%r
+&CMDS_INTRO CharGen Parent=%r%b%bTo initiate CharGen setup-routine:%r[space(5)]chargen/setup%r%r%b%b* NOTE: Using this command resets ALL of your CharGen attributes.%r
+&CMDS_BASICS CharGen Parent=%r%b%bTo set y	our description:%r[space(5)]@desc me=<text>%r%r%b%bTo set your gender:%r[space(5)]@sex me=<Male/Female>%r%r%b%bTo set other miscellaneous features:%r[space(5)]chargen/feature <field>=<value>%r%r%b%b* NOTE: <field> can be one of the following:%r[u([v(PTR_CharGen.FUN)]/FORMAT_Columns,sort(u(LIST_FEATURES),a),3,20,9)]%r%r%b%bType 'chargen/info <field>' for more information.%r
+&CMDS_DEFAULT CharGen Parent=[u(DATA_PREFIX.Error)] %0 is not a valid CharGen Room Flag.
+&CMDS_ATTRIBUTES CharGen Parent=%r%b%bTo set an attribute:%r[space(5)]chargen/attribute <field>=<value>%r%r%b%b* NOTE: <field> can be any one of the following:%r[space(10)][edit(u(LIST_ATTRIBUTES),space(1),\,[space(1)])]%r
+&CMDS_VANTAGES CharGen Parent=%r%b%bTo add a new vantage:%r[space(5)]chargen/vantage +<field>%r%r%b%bTo delete a vantage:%r[space(5)]chargen/vantage -<field>%r%r%b%bTo add a new specialization:%r[space(5)]chargen/vantage <field>=+<specialization>%r%r%b%bTo delete a specialization:%r[space(5)]chargen/vantage <field>=-<specialization>%r%r%b%b* NOTE: Type 'chargen/info vantages' for a list of valid <fields>.%r%b%b* NOTE: Type 'chargen/info specialization' for further details.%r
+&CMDS_FINAL CharGen Parent=%r%b%bWhen you are done with CharGen, and want to be registered:%r[space(5)]chargen/complete%r
+&INFO_LIST CharGen Parent=The following information topics are available:%r%r%b[iter(%0,ifelse(and(mod(#@,3),not(eq(#@,words(%0)))),%b%b[ljust(capstr(lcstr(after(##,.))),20)],%b%b[capstr(lcstr(after(##,.)))]%r))]%r* Type 'chargen/info <topic>' for more information.
+&INFO_ERROR CharGen Parent=[u(DATA_PREFIX.Error)] %0 is not a valid CharGen Room Flag.
+&INFO_ERROR2 CharGen Parent=%r[u(DATA_PREFIX.Error)] There is no information available on '%1/%0'.
+&SYN_EDIT.COMBO CharGen Parent=Syntax: [u(TRI_EDIT.Combo,PlayerDB#,Category,Type,New-Data,Position)]
+&SYN_SKILL.SPECADD CharGen Parent=%0: PNum# --- %1: Skill --- %2: Spec Name --- %3: Plr Skill Info --- %4: General Skill Data
+think [ansi(hm,INSTALL:)] Downloading CharGen Lists...
+&LIST_DISADVANTAGES CharGen Parent=Space-Sickness Odious-Habit Poor Dead-Broke Albinism Bad-Eyesight Blind Night-Blindness Crippled-Leg Missing-Leg No-Legs Mute One-Arm One-Eye One-Hand Overweight Obese Skinny Stutter Terminally-Ill Amnesia Phobia Bad-Temper Addiction Compulsive-Liar Greed Impulsive Lazy Unlucky Weak-Will Overconfident Allergy Clumsy Color-Blind Bad-Hearing Moral-Issues Uncouth Unattractive Quirk Motion-Sickness Chronic-Pain Absent-Minded Poor-Self-Esteem Gambling Slow-Reflexes G-Intolerance Dependent Hunchback Migraines Paralyzed Sterility Unfit Odd-Feature Confused Flashbacks Nosy On-Edge Heavy-Sleeper Intolerant Physical-Ailment Disowned
+&LIST_ADVANTAGES CharGen Parent=Absolute-Timing Alertness Acute-Hearing Acute-Vision Acute-Taste/Smell Ambidexterity Charisma Fast-Reflexes Danger-Sense Diplomatic-Immunity Double-jointed Pain-Tolerance Disease-Immunity Legal-Powers Luck-Point Night-Vision Strong-Will Wealthy Internal-Compass Acute-Touch Artistic-Talent Musical-Talent Good-Balance Athletic-Ability Technical-Aptitude Toughness Attractive G-Tolerance Steady-Nerves Risk-Taker Heir Low-Sleep Manual-Dexterity Spatial-Sense Very-Fit
+&LIST_FEATURES CharGen Parent=height hair-length hair-color weight hair-style eye-color age skin-color colony hand-choice
+&LIST_SKILLS.PARAMILITARY CharGen Parent=Demolition Camouflage Disguise Escape Forgery Analysis Interrogation Lockpicking Pickpocket Stealth Trap
+&LIST_SKILLS.SOCIAL CharGen Parent=Administration Acting Diplomacy Leadership Politics Performance Strategy Tactics Teaching
+&LIST_SKILLS.SCIENCE CharGen Parent=Agronomy Astrogation Biochemistry Chemistry Botany Computer-Program Engineer-Electronic Engineer-Electric Engineer-Mechanical Engineer-Combat Engineer-Mining Engineer-Starship Genetics Geology Metallurgy Physics Physiology Zoology
+&LIST_SKILLS.SURVIVAL CharGen Parent=Desert-Survival Cold-Survival Jungle-Survival Forest-Survival Marsh-Survival Space-Survival Mountain-Survival
+&LIST_SKILLS.CRAFT CharGen Parent=Metalsmith Woodworking Cooking Jeweler Tanner Mechanic
+&LIST_SKILLS.PROFESSIONAL CharGen Parent=Law Computer-Op Electronics-Op History Mathematics
+&LIST_SKILLS.GENERAL CharGen Parent=Holo-Photography Climbing
+&LIST_SKILLS.ARTISTIC CharGen Parent=Artist Dance Musical-Instrument Poetry Sculpture Singing Writing
+&LIST_SKILLS.COMBAT CharGen Parent=Knife Gun Laser Sword Wrestling Karate Club Pole-Weapons Throwing
+&LIST_SKILLS.MEDICAL CharGen Parent=First-Aid Physician Surgery Diagnosis Psychology
+&LIST_SKILLS.VEHICLE CharGen Parent=Pilot
+&LIST_SKILLS.SPACE CharGen Parent=Starpilot Spacesuit Free-Fall Turret-Gun Ship-Engineer
+&LIST_ATTRIBUTES CharGen Parent=Health Strength Dexterity Intelligence
+&LIST_TYPES CharGen Parent=Intro Basics Attributes Skills Vantages Final
+&LIST_ATTRIBUTES.COST CharGen Parent=0 10 10 10 10 10 10 10 10 10 10 10 10 15 15 20 20 25 25 25
+&LIST_SKILLS CharGen Parent=Knife First-Aid Physician Surgery Accounting Law Artist Dance Musical-Instrument HoloPhotography Gun Laser Projectile Sword Wrestling Karate Club Pole-Weapons Throwing Poetry Sculpture Singing Writing Metalsmith Woodworking Cooking Jeweler Tanner Mechanic Diagnosis Desert-Survival Cold-Survival Jungle-Survival Forest-Survival Marsh-Survival Space-Survival Mountain-Survival Climbing Agrononmy Astrogation Biochemistry Chemistry Botany Computer-Program Computer-Op Electronics-Op Engineer-Electronic Engineer-Electric Engineer-Mechanical Engineer-Combat Engineer-Mining Engineer-Starship Genetics Geology History Mathematics Metallurgy Physics Physiology Psychology Zoology Administration Acting Diplomacy Leadership Politics Performance Strategy Tactics Teaching Demolition Camouflage Disguise Escape Forgery Analysis Interrogation Lockpicking Pickpocket Stealth Trap Pilot Starpilot Spacesuit Free-Fall Turret-Gun Ship-Engineer
+think [ansi(hm,INSTALL:)] Downloading CharGen Messages...
+&TXT_FOOTER CharGen Parent=%r[ansi(v(FONT_FOOTER.Border),repeat(-,35))]%r[ansi(v(FONT_FOOTER.Title),In -ANY- CharGen room you may type:)]%r%b%b%b[ansi(v(FONT_FOOTER.Cmds),chargen/status)]%b%b%b [ansi(v(FONT_FOOTER.Info),- A display of your current CharGen status.)][ifelse(v(FLAG_HELP),%r%b%b%b[ansi(v(FONT_FOOTER.Cmds),chargen/help)]%b%b%b%b%b [ansi(v(FONT_FOOTER.Info),- A basic help-section for the current room/object.)],space(0))]%r%b%b%b[ansi(v(FONT_FOOTER.Cmds),chargen/commands)]%b [ansi(v(FONT_FOOTER.Info),- List of commands for the current room/object.)]%r%b%b%b[ansi(v(FONT_FOOTER.Cmds),chargen/info)]%b%b%b%b%b [ansi(v(FONT_FOOTER.Info),- Lists possible information-topics.)]%r%b%b%b[ansi(v(FONT_FOOTER.Cmds),chargen/copyright)] [ansi(v(FONT_FOOTER.Info),- Returns Copyright information.)]%r[ansi(v(FONT_FOOTER.Border),repeat(-,35))]
+&TXT_TITLE CharGen Parent=[ansi(v(FONT_TITLE.Border),[repeat(-,78)]%r<<<<<)][center(ansi(v(FONT_TITLE.Text),%0),68)][ansi(v(FONT_TITLE.Border),>>>>>%r[repeat(-,78)])]%r
+&TXT_MOVE CharGen Parent=%b%bcontinue - Go to the next step of Character Generation.%r%b%bback[space(4)] - Go to the previous step of Character Generation.%r%b%bexit[space(4)] - Leave Character Generation to the OOC area.%r
+&TXT_FOOTER.INFO CharGen Parent=%r[ansi(v(FONT_FOOTER.Border),repeat(-,78))]
+think [ansi(hm,INSTALL:)] Downloading CharGen ASCII-Art...
+&DRAW_STATUS CharGen Parent=[u(DRAW_STATUS.Tokens.[ifelse(v(CNF_STORAGE.Tokens),Combo,Split)],%0)]%r[u(DRAW_STATUS.Attributes.[ifelse(v(CNF_STORAGE.Attributes),Combo,Split)],%0)]%r[u(DRAW_STATUS.Features.[ifelse(v(CNF_STORAGE.Features),Combo,Split)],%0)]%r[u(DRAW_STATUS.Vantages.[ifelse(v(CNF_STORAGE.Vantages),Combo,Split)],%0)]%r[u(DRAW_STATUS.Skills.[ifelse(v(CNF_STORAGE.Skills),Combo,Split)],%0)]
+&DRAW_STATUS.TOKENS.COMBO CharGen Parent=[ansi(v(FONT_STATUS.Tokens),Remaining [v(DATA_TOKEN.Name.Plural)]: [xget(%0,xget(v(PTR_CharGen.VAR),VAR_TOKENS))])]
+&DRAW_STATUS.ATTRIBUTES.COMBO CharGen Parent=%r[ansi(v(FONT_STATUS.Titles),\[ ATTRIBUTES \])]%r%b[iter(v(LIST_ATTRIBUTES),ljust([ansi(v(FONT_STATUS.Categories),[capstr(lcstr(##))]:)] [ansi(v(FONT_STATUS.Info),last(grab(xget(%0,xget(v(PTR_CharGen.VAR),VAR_ATTRIBUTES)),## *,v(CNF_DELIMETER))))],17))]
+&DRAW_STATUS.FEATURES.COMBO CharGen Parent=%r[ansi(v(FONT_STATUS.Titles),\[ FEATURES \])]%r%b[iter(v(LIST_FEATURES),ifelse(mod(#@,3),ljust([ansi(v(FONT_STATUS.Categories),[capstr(lcstr(##))]:)] [ansi(v(FONT_STATUS.Info),last(grab(xget(%0,xget(v(PTR_CharGen.VAR),VAR_FEATURES)),## *,v(CNF_DELIMETER))))],25),[ansi(v(FONT_STATUS.Categories),[capstr(lcstr(##))]:)] [ansi(v(FONT_STATUS.Info),last(grab(xget(%0,xget(v(PTR_CharGen.VAR),VAR_FEATURES)),## *,v(CNF_DELIMETER))))]%r))]
+&DRAW_STATUS.SKILLS.COMBO CharGen Parent=[ansi(v(FONT_STATUS.Titles),\[ SKILLS \])]%r%b[iter(mid(setr(0,xget(%0,xget(v(PTR_CharGen.VAR),VAR_SKILLS))),0,ifelse(words(%q0),dec(strlen(%q0)),0)),[ansi(v(FONT_STATUS.Categories),<[capstr(lcstr(mid(extract(xget(v(PTR_CharGen.DB),DATA_SKILL.[first(##)]),3,1),0,3)))]>)] [ansi(v(FONT_STATUS.Info),ljust(\([ifelse(gte(setr(1,last(first(##,v(CNF_DELIMETER2)))),0),+%q1,%q1)]\),5))] [ljust(ansi(v(FONT_STATUS.Info),[first(##)]),20)] [ansi(v(FONT_STATUS.Categories),Specials:)] [u(DRAW_SPECS,rest(##,v(CNF_DELIMETER2)))]%r,v(CNF_DELIMETER))]
+&DRAW_STATUS.VANTAGES.COMBO CharGen Parent=%r[ansi(v(FONT_STATUS.Titles),\[ VANTAGES \])]%r%b[iter(mid(setr(0,xget(%0,xget(v(PTR_CharGen.VAR),VAR_VANTAGES))),0,ifelse(words(%q0),dec(strlen(%q0)),0)),[ansi(v(FONT_STATUS.Categories),Vantage:)] [ljust(ansi(v(FONT_STATUS.Info),first(##)),20)] [ansi(v(FONT_STATUS.Categories),Specials:)] [ansi(v(FONT_STATUS.Info),ifelse(match(rest(##),-),-NONE-,edit(edit(rest(##),space(1),\,[space(1)]),_,space(1))))]%r,v(CNF_DELIMETER))]
+&DRAW_SPECS CharGen Parent=[ansi(v(FONT_STATUS.Info),ifelse(words(%0),iter(%0,ifelse(eq(#@,1),[ljust(\([ifelse(gte(rest(##),0),+[rest(##)],rest(##))]\),5)] [edit(first(##),-,space(1))],%r[space(44)][ljust(\([ifelse(gte(rest(##),0),+[rest(##)],rest(##))]\),5)] [edit(first(##),-,space(1))]),v(CNF_DELIMETER2)),-NONE-))]
+&DRAW_STATUS.VANTAGES.SPLIT CharGen Parent=%r[ansi(v(FONT_STATUS.Titles),\[ VANTAGES \])]%r%b[iter(lattr(%0/VANTAGE_*),[ansi(v(FONT_STATUS.Categories),Vantage:)] [ljust(ansi(v(FONT_STATUS.Info),capstr(lcstr(edit(##,VANTAGE_,space(0))))),20)] [ansi(v(FONT_STATUS.Categories),Specials:)] [ansi(v(FONT_STATUS.Info),ifelse(match(xget(%0,##),-),-NONE-,edit(edit(xget(%0,##),space(1),\,[space(1)]),_,space(1))))]%r)]
+&DRAW_STATUS.SKILLS.SPLIT CharGen Parent=[ansi(v(FONT_STATUS.Titles),\[ SKILLS \])]%r%b[iter(lattr(%0/SKILL_*),[ansi(v(FONT_STATUS.Categories),<[capstr(lcstr(mid(extract(xget(v(PTR_CharGen.DB),DATA_SKILL.[edit(##,SKILL_,space(0))]),3,1),0,3)))]>)] [ansi(v(FONT_STATUS.Info),ljust(\([ifelse(gte(setr(1,first(xget(%0,##),v(CNF_DELIMETER2))),0),+%q1,%q1)]\),5))] [ljust(ansi(v(FONT_STATUS.Info),[capstr(lcstr(edit(##,SKILL_,space(0))))]),20)] [ansi(v(FONT_STATUS.Categories),Specials:)] [u(DRAW_SPECS,rest(xget(%0,##),v(CNF_DELIMETER2)))]%r)]
+&DRAW_STATUS.FEATURES.SPLIT CharGen Parent=%r[ansi(v(FONT_STATUS.Titles),\[ FEATURES \])]%r%b[iter(v(LIST_FEATURES),ifelse(mod(#@,3),ljust([ansi(v(FONT_STATUS.Categories),[capstr(lcstr(##))]:)] [ansi(v(FONT_STATUS.Info),xget(%0,FEATURE_##))],25),[ansi(v(FONT_STATUS.Categories),[capstr(lcstr(##))]:)] [ansi(v(FONT_STATUS.Info),xget(%0,FEATURE_##))]%r))]
+&DRAW_STATUS.ATTRIBUTES.SPLIT CharGen Parent=%r[ansi(v(FONT_STATUS.Titles),\[ ATTRIBUTES \])]%r%b[iter(v(LIST_ATTRIBUTES),ljust([ansi(v(FONT_STATUS.Categories),[capstr(lcstr(##))]:)] [ansi(v(FONT_STATUS.Info),xget(%0,ATTRIBUTE_##))],17))]
+&DRAW_STATUS.TOKENS.SPLIT CharGen Parent=[ansi(v(FONT_STATUS.Tokens),Remaining [v(DATA_TOKEN.Name.Plural)]:)] [edit(edit(iter(edit(lattr([v(PTR_CharGen.VAR)]/VAR_TOKENS.*),VAR_TOKENS.,space(0)),[ansi(v(FONT_STATUS.Categories),capstr(lcstr(##)))]_[ansi(v(FONT_STATUS.Tokens),\([xget(%0,xget(v(PTR_CharGen.VAR),VAR_TOKENS.##))]\))]),space(1),[space(1)]...[space(1)]),_,space(1))]
+think [ansi(hm,INSTALL:)] Downloading CharGen Triggers...
+&TRI_SKILL.ADD CharGen Parent=[u(TRI_SKILL.[ifelse(ifelse(v(CNF_STORAGE.Skills),match(xget(%0,xget(v(PTR_CharGen.VAR),VAR_SKILLS)),%1 *,v(CNF_DELIMETER)),and(hasattr(%0,SKILL_%1),words(xget(%0,SKILL_%1)))),INCREASE,PURCHASE)],%0,%1,extract(xget(v(PTR_CharGen.DB),DATA_SKILL.%1),3,1),extract(xget(v(PTR_CharGen.DB),DATA_SKILL.%1),4,1))]
+&TRI_VANTAGE.DEL CharGen Parent=[switch([ifelse(v(CNF_STORAGE.Vantages),not(not(match(xget(%0,xget(v(PTR_CharGen.VAR),VAR_Vantages)),%1 *,v(CNF_DELIMETER)))),and(hasattr(%0,VANTAGE_%1),words(xget(%0,VANTAGE_%1))))][lt(ifelse(v(CNF_STORAGE.Tokens),xget(%0,xget(v(PTR_CharGen.VAR),VAR_TOKENS)),xget(%0,xget(v(PTR_CharGen.VAR),VAR_TOKENS.Vantages))),setr(0,sub(0,trunc(mul(ifelse(gt(setr(6,words(ifelse(v(CNF_STORAGE.Vantages),grab(xget(%0,xget(v(PTR_CharGen.VAR),VAR_VANTAGES)),%1 *,v(CNF_DELIMETER)),xget(%0,VANTAGE_%1)))),2),dec(%q6),1),first(xget(v(PTR_CharGen.DB),DATA_VANTAGE.%1)))))))],0?,u(TRI_ERROR,%0,!HAVE_VANTAGE,%1),11,u(TRI_ERROR,%0,TOKENS_!ENOUGH),10,[u(TRI_EDIT.Tokens,%0,Vantages,sub(0,%q0))][ifelse(v(CNF_STORAGE.Vantages),set(%0,[xget(v(PTR_CharGen.VAR),VAR_VANTAGES)]:[ldelete(xget(%0,xget(v(PTR_CharGen.VAR),VAR_VANTAGES)),match(xget(%0,xget(v(PTR_CharGen.VAR),VAR_VANTAGES)),%1 *,v(CNF_DELIMETER)),v(CNF_DELIMETER))]),ifelse(match(v(CNF_MU.Type),MUSH),wipe(%0/VANTAGE_%1),set(%0,VANTAGE_%1:)))][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_VANTAGE.Set),Vantage '%1' has been deleted.)])][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_VANTAGE.Set),ifelse(lt(%q0,0),You are reimbursed [abs(%q0)] [ifelse(eq(abs(%q0),1),v(DATA_TOKEN.Name.Singular),v(DATA_TOKEN.Name.Plural))].,That cost you [abs(%q0)] [ifelse(eq(abs(%q0),1),v(DATA_TOKEN.Name.Singular),v(DATA_TOKEN.Name.Plural))].))])],u(TRI_SYSERR,%0))]
+&TRI_ERROR CharGen Parent=[pemit(%0,[u(DATA_PREFIX.Error)] [u([v(PTR_CharGen.ERR)]/ERR_%1,%2,%3,%4)])]
+&TRI_SETUP CharGen Parent=[u(TRI_Setup.Start,%0)][u(TRI_Setup.Tokens.[ifelse(v(CNF_STORAGE.Tokens),Combo,Split)],%0)][u(TRI_Setup.Attributes.[ifelse(v(CNF_STORAGE.Attributes),Combo,Split)],%0)][u(TRI_SETUP.Skills.[ifelse(v(CNF_STORAGE.Skills),Combo,Split)],%0)][u(TRI_SETUP.Features.[ifelse(v(CNF_STORAGE.Features),Combo,Split)],%0)][u(TRI_Setup.Vantages.[ifelse(v(CNF_STORAGE.Vantages),Combo,Split)],%0)][set(%0,[xget(v(PTR_Org.DB),VAR_RANK)]:2)][u(TRI_Setup.Finish,%0)]
+&TRI_SYSERR CharGen Parent=[pemit(%0,ansi(fhr,SYSERR: There is a bug in the code. Please report this to an Administrator.))]
+&TRI_FEATURE.VALUE CharGen Parent=[ifelse(or(gt(%2,xget(v(PTR_CharGen.DB),DATA_%1.Max)),lt(%2,xget(v(PTR_CharGen.DB),DATA_%1.Min))),u(TRI_ERROR,%0,FEATURE_!In-Range,lcstr(%1)),[u(TRI_EDIT.[ifelse(v(CNF_STORAGE.Features),Combo,Split)],%0,Features,%1,%2,1)][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_FEATURE.Set),Feature '%1' has been set to %2.)])])]
+&TRI_EDIT.TOKENS CharGen Parent=[ifelse(v(CNF_STORAGE.Tokens),set(%0,[xget(v(PTR_CharGen.VAR),VAR_TOKENS)]:[add(xget(%0,xget(v(PTR_CharGen.VAR),VAR_TOKENS)),%2)]),set(%0,[xget(v(PTR_CharGen.VAR),VAR_TOKENS.%1)]:[add(xget(%0,xget(v(PTR_CharGen.VAR),VAR_TOKENS.%1)),%2)]))]
+&TRI_ATTRIBUTE.OK CharGen Parent=[ifelse(or(gt(%1,xget(v(PTR_CharGen.DB),DATA_%2.Max)),lt(%1,xget(v(PTR_CharGen.DB),DATA_%2.Min))),u(TRI_ERROR,%0,ATTRIBUTE_!VALID,%2),ifelse(lt(trunc(xget(%0,xget(v(PTR_CharGen.VAR),ifelse(v(CNF_STORAGE.Tokens),VAR_TOKENS,VAR_TOKENS.Attributes)))),setr(0,ifelse(xget(v(PTR_CharGen.DB),DATA_%2.Cost),mul(sub(%1,trunc(%3)),v(DATA_%2.Cost)),[setq(6,0)][iter(ifelse(gt(%1,trunc(%3)),extract(v(LIST_Attributes.Cost),inc(trunc(%3)),sub(%1,trunc(%3))),extract(v(LIST_Attributes.Cost),inc(%1),sub(trunc(%3),%1))),setq(6,ifelse(gt(%1,trunc(%3)),add(%q6,##),sub(%q6,##))))]%q6))),u(TRI_ERROR,%0,TOKENS_!ENOUGH),[u(TRI_EDIT.[ifelse(v(CNF_STORAGE.Attributes),Combo,Split)],%0,Attributes,%2,%1,1)][u(TRI_EDIT.Tokens,%0,Attributes,sub(0,%q0))][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_ATTRIBUTE.Set),Your %2 Attribute has been set to %1.)])][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_ATTRIBUTE.Set),ifelse(lt(%q0,0),You are reimbursed [abs(%q0)] [ifelse(eq(abs(%q0),1),v(DATA_TOKEN.Name.Singular),v(DATA_TOKEN.Name.Plural))].,That cost you [abs(%q0)] [ifelse(eq(abs(%q0),1),v(DATA_TOKEN.Name.Singular),v(DATA_TOKEN.Name.Plural))].))])]))]
+&TRI_LIST.VANTAGES CharGen Parent=%r\[ ADVANTAGES \]%r[edit(u([v(PTR_CharGen.FUN)]/FORMAT_Columns,sort(xget(v(PTR_CharGen.MAIN),LIST_Advantages),a),4,19),-,space(1))]%r%r\[ DISADVANTAGES \]%r[edit(u([v(PTR_CharGen.FUN)]/FORMAT_Columns,sort(xget(v(PTR_CharGen.MAIN),LIST_Disadvantages),a),4,19),-,space(1))]%r
+&TRI_SKILL.INCREASE CharGen Parent=[ifelse(lte(setr(0,inc(inc(sub(ifelse(v(CNF_STORAGE.Skills),extract(extract(grab(xget(%0,xget(v(PTR_CharGen.VAR),VAR_SKILLS)),%1 *,v(CNF_DELIMETER)),1,1,v(CNF_DELIMETER2)),2,1),extract(xget(%0,SKILL_%1),1,1,v(CNF_DELIMETER2))),xget(v(PTR_CharGen.DB),DATA_[first(xget(v(PTR_CharGen.DB),DATA_SKILL.%1))].[extract(xget(v(PTR_CharGen.DB),DATA_SKILL.%1),2,1)].BASE))))),words(setr(1,xget(v(PTR_CharGen.DB),LIST_[first(xget(v(PTR_CharGen.DB),DATA_SKILL.%1))].[extract(xget(v(PTR_CharGen.DB),DATA_SKILL.%1),2,1)].COST)))),ifelse(gte(ifelse(v(CNF_STORAGE.Tokens),xget(%0,xget(v(PTR_CharGen.VAR),VAR_TOKENS)),xget(%0,xget(v(PTR_CharGen.VAR),VAR_TOKENS.Skills))),setr(2,extract(%q1,%q0,1))),[ifelse(v(CNF_STORAGE.Skills),set(%0,[xget(v(PTR_CharGen.VAR),VAR_SKILLS)]:[replace(xget(%0,xget(v(PTR_CharGen.VAR),VAR_SKILLS)),match(xget(%0,xget(v(PTR_CharGen.VAR),VAR_SKILLS)),%1 *,v(CNF_DELIMETER)),replace(setr(7,grab(xget(%0,xget(v(PTR_CharGen.VAR),VAR_SKILLS)),%1 *,v(CNF_DELIMETER))),1,%1 [setr(4,inc(extract(extract(%q7,1,1,v(CNF_DELIMETER2)),2,1)))],v(CNF_DELIMETER2)),v(CNF_DELIMETER))]),set(%0,SKILL_%1:[replace(xget(%0,SKILL_%1),1,setr(4,inc(extract(xget(%0,SKILL_%1),1,1,v(CNF_DELIMETER2)))),v(CNF_DELIMETER2))]))][u(TRI_EDIT.Tokens,%0,Skills,sub(0,%q2))][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_SKILL.Set),You have increased your '%1' Skill to %q4.)])][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_SKILL.Set),That cost you %q2 [ifelse(eq(%q2,1),v(DATA_TOKEN.Name.Singular),v(DATA_TOKEN.Name.Plural))].)])],u(TRI_ERROR,%0,TOKENS_!ENOUGH)),u(TRI_ERROR,%0,SKILL_MAXED,%1))]
+&TRI_VANTAGE.ADD CharGen Parent=[switch([ifelse(v(CNF_STORAGE.Vantages),not(not(match(xget(%0,xget(v(PTR_CharGen.VAR),VAR_Vantages)),%1 *,v(CNF_DELIMETER)))),and(hasattr(%0,VANTAGE_%1),words(xget(%0,VANTAGE_%1))))][lt(ifelse(v(CNF_STORAGE.Tokens),xget(%0,xget(v(PTR_CharGen.VAR),VAR_TOKENS)),xget(%0,xget(v(PTR_CharGen.VAR),VAR_TOKENS.Vantages))),setr(0,trunc(first(xget(v(PTR_CharGen.DB),DATA_VANTAGE.%1)))))][not(not(trunc(edit(iter(extract(xget(v(PTR_CharGen.DB),DATA_VANTAGE.%1),4,99),ifelse(v(CNF_STORAGE.Vantages),match(xget(%0,xget(v(PTR_CharGen.VAR),VAR_VANTAGES)),## *,v(CNF_DELIMETER)),and(hasattr(%0,VANTAGE_##),words(xget(%0,VANTAGE_##))))),space(1),space(0)))))],1??,u(TRI_ERROR,%0,HAVE_VANTAGE,%1),01?,u(TRI_ERROR,%0,TOKENS_!ENOUGH),001,u(TRI_ERROR,%0,HAVE_DISQUAL,%1),000,[u(TRI_EDIT.[ifelse(v(CNF_STORAGE.Vantages),Combo,Split)],%0,Vantages,%1,-,1)][u(TRI_EDIT.Tokens,%0,Vantages,sub(0,%q0))][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_VANTAGE.Set),Vantage '%1' has been added.)])][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_VANTAGE.Set),ifelse(lt(%q0,0),You are reimbursed [abs(%q0)] [ifelse(eq(abs(%q0),1),v(DATA_TOKEN.Name.Singular),v(DATA_TOKEN.Name.Plural))].,That cost you [abs(%q0)] [ifelse(eq(abs(%q0),1),v(DATA_TOKEN.Name.Singular),v(DATA_TOKEN.Name.Plural))].))])][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_VANTAGE.Set),ifelse(extract(xget(v(PTR_CharGen.DB),DATA_VANTAGE.%1),2,1),You MUST indicate at least [extract(xget(v(PTR_CharGen.DB),DATA_VANTAGE.%1),2,1)] specializations for this vantage.,ifelse(extract(xget(v(PTR_CharGen.DB),DATA_VANTAGE.%1),3,1),You may indicate a specialization for this vantage.,You may NOT indicate any specializations for this vantage.)))])],u(TRI_SYSERR,%0))]
+&TRI_SKILL.DECREASE CharGen Parent=[u(TRI_EDIT.Tokens,%0,Skills,setr(0,extract(xget(v(PTR_CharGen.DB),LIST_[first(xget(v(PTR_CharGen.DB),DATA_SKILL.%1))].[extract(xget(v(PTR_CharGen.DB),DATA_SKILL.%1),2,1)].Cost),inc(sub(%2,%3)),1)))][ifelse(v(CNF_STORAGE.Skills),set(%0,[xget(v(PTR_CharGen.VAR),VAR_SKILLS)]:[replace(xget(%0,xget(v(PTR_CharGen.VAR),VAR_SKILLS)),match(xget(%0,xget(v(PTR_CharGen.VAR),VAR_SKILLS)),%1 *,v(CNF_DELIMETER)),replace(setr(7,grab(xget(%0,xget(v(PTR_CharGen.VAR),VAR_SKILLS)),%1 *,v(CNF_DELIMETER))),1,%1 [dec(%2)],v(CNF_DELIMETER2)),v(CNF_DELIMETER))]),set(%0,SKILL_%1:[replace(xget(%0,SKILL_%1),1,dec(%2),v(CNF_DELIMETER2))]))][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_SKILL.Set),You have decreased your '%1' skill to [dec(%2)].)])][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_SKILL.Set),You are reimbursed %q0 [ifelse(eq(%q0,1),v(DATA_TOKEN.Name.Singular),v(DATA_TOKEN.Name.Plural))].)])]
+&TRI_SKILL.SPECADD CharGen Parent=[ifelse(ifelse(v(CNF_STORAGE.Skills),match(xget(%0,xget(v(PTR_CharGen.VAR),VAR_SKILLS)),%1 *,v(CNF_DELIMETER)),and(hasattr(%0,SKILL_%1),words(xget(%0,SKILL_%1)))),ifelse(lt(words(ifelse(v(CNF_STORAGE.SKILLS),rest(grab(xget(%0,xget(v(PTR_CharGen.VAR),VAR_SKILLS)),%1 *,v(CNF_DELIMETER)),v(CNF_DELIMETER2)),rest(xget(%0,SKILL_%1),v(CNF_DELIMETER2))),v(CNF_DELIMETER2)),extract(xget(v(PTR_CharGen.DB),DATA_SKILL.%1),7,1)),u(TRI_SPEC.[ifelse(ifelse(v(CNF_STORAGE.Skills),match(grab(xget(%0,xget(v(PTR_CharGen.VAR),VAR_SKILLS)),%1 *,v(CNF_DELIMETER)),%2 *,v(CNF_DELIMETER2)),match(xget(%0,SKILL_%1),%2 *,v(CNF_DELIMETER2))),INCREASE,PURCHASE)],%0,%1,%2,ifelse(v(CNF_STORAGE.Skills),grab(xget(%0,xget(v(PTR_CharGen.VAR),VAR_SKILLS)),%1 *,v(CNF_DELIMETER)),xget(%0,SKILL_%1)),xget(v(PTR_CharGen.DB),DATA_SKILL.%1),ifelse(v(CNF_STORAGE.Skills),extract(grab(grab(xget(%0,xget(v(PTR_CharGen.VAR),VAR_SKILLS)),%1 *,v(CNF_DELIMETER)),%2 *,v(CNF_DELIMETER2)),2,1),extract(grab(xget(%0,SKILL_%1),%2 *,v(CNF_DELIMETER2)),2,1))),u(TRI_ERROR,%0,SPEC2_!In-Range,%1)),u(TRI_ERROR,%0,!HAVE_SKILL,%1))]
+&TRI_SPEC.PURCHASE CharGen Parent=[ifelse(gte(ifelse(v(CNF_STORAGE.Tokens),xget(%0,xget(v(PTR_CharGen.VAR),VAR_TOKENS)),xget(%0,xget(v(PTR_CharGen.VAR),VAR_TOKENS.Skills))),setr(0,first(xget(v(PTR_CharGen.DB),LIST_[first(%4)].[extract(%4,2,1)].COST)))),[ifelse(v(CNF_STORAGE.Skills),set(%0,[xget(v(PTR_CharGen.VAR),VAR_SKILLS)]:[replace(xget(%0,xget(v(PTR_CharGen.VAR),VAR_SKILLS)),match(xget(%0,xget(v(PTR_CharGen.VAR),VAR_SKILLS)),%1 *,v(CNF_DELIMETER)),strcat(%3,[v(CNF_DELIMETER2)]%2 [xget(v(PTR_CharGen.DB),DATA_[first(%4)].[extract(%4,2,1)].BASE)]),v(CNF_DELIMETER))]),set(%0,SKILL_%1:%3[v(CNF_DELIMETER2)]%2 [xget(v(PTR_CharGen.DB),DATA_[first(%4)].[extract(%4,2,1)].BASE)]))][u(TRI_EDIT.Tokens,%0,Skills,sub(0,%q0))][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_SKILL.Set),You have added specialization '%2' to the %1 Skill.)])][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_SKILL.Set),That cost you %q0 [ifelse(eq(%q0,1),v(DATA_TOKEN.Name.Singular),v(DATA_TOKEN.Name.Plural))].)])],u(TRI_ERROR,%0,TOKENS_!ENOUGH))]
+&TRI_SPEC.INCREASE CharGen Parent=[ifelse(lte(setr(0,inc(inc(sub(%5,xget(v(PTR_CharGen.DB),DATA_[first(xget(v(PTR_CharGen.DB),DATA_SKILL.%1))].[extract(xget(v(PTR_CharGen.DB),DATA_SKILL.%1),2,1)].BASE))))),words(setr(1,xget(v(PTR_CharGen.DB),LIST_[first(xget(v(PTR_CharGen.DB),DATA_SKILL.%1))].[extract(xget(v(PTR_CharGen.DB),DATA_SKILL.%1),2,1)].COST)))),ifelse(gte(ifelse(v(CNF_STORAGE.Tokens),xget(%0,xget(v(PTR_CharGen.VAR),VAR_TOKENS)),xget(%0,xget(v(PTR_CharGen.VAR),VAR_TOKENS.Skills))),setr(2,extract(%q1,%q0,1))),[ifelse(v(CNF_STORAGE.Skills),set(%0,[xget(v(PTR_CharGen.VAR),VAR_SKILLS)]:[replace(xget(%0,xget(v(PTR_CharGen.VAR),VAR_SKILLS)),match(xget(%0,xget(v(PTR_CharGen.VAR),VAR_SKILLS)),%1 *,v(CNF_DELIMETER)),replace(setr(7,grab(xget(%0,xget(v(PTR_CharGen.VAR),VAR_SKILLS)),%1 *,v(CNF_DELIMETER))),match(%3,%2 *,v(CNF_DELIMETER2)),%2 [setr(4,inc(%5))],v(CNF_DELIMETER2)),v(CNF_DELIMETER))]),set(%0,SKILL_%1:[replace(xget(%0,SKILL_%1),match(%3,%2 *,v(CNF_DELIMETER2)),setr(4,inc(%5)),v(CNF_DELIMETER2))]))][u(TRI_EDIT.Tokens,%0,Skills,sub(0,%q2))][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_SKILL.Set),You have increased '%2' in Skill %1 to %q4.)])][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_SKILL.Set),That cost you %q2 [ifelse(eq(%q2,1),v(DATA_TOKEN.Name.Singular),v(DATA_TOKEN.Name.Plural))].)])],u(TRI_ERROR,%0,TOKENS_!ENOUGH)),u(TRI_ERROR,%0,SPEC_MAXED,%1,%2))]
+&TRI_SKILL.SPECDEL CharGen Parent=[ifelse(ifelse(v(CNF_STORAGE.Skills),match(grab(xget(%0,xget(v(PTR_CharGen.VAR),VAR_SKILLS)),%1 *,v(CNF_DELIMETER)),%2 *,v(CNF_DELIMETER2)),match(xget(%0,SKILL_%1),%2 *,v(CNF_DELIMETER2))),ifelse(ifelse(v(CNF_STORAGE.Skills),match(xget(%0,xget(v(PTR_CharGen.VAR),VAR_SKILLS)),%1 *,v(CNF_DELIMETER)),and(hasattr(%0,SKILL_%1),words(xget(%0,SKILL_%1)))),u(TRI_SPEC.[ifelse(lte(setr(0,ifelse(v(CNF_STORAGE.Skills),extract(grab(grab(xget(%0,xget(v(PTR_CharGen.VAR),VAR_SKILLS)),%1 *,v(CNF_DELIMETER)),%2 *,v(CNF_DELIMETER2)),2,1),extract(grab(xget(%0,SKILL_%1),%2 *,v(CNF_DELIMETER2)),2,1))),setr(1,xget(v(PTR_CharGen.DB),DATA_[first(xget(v(PTR_CharGen.DB),DATA_SKILL.%1))].[extract(xget(v(PTR_CharGen.DB),DATA_SKILL.%1),2,1)].BASE))),SELL,DECREASE)],%0,%1,%2,ifelse(v(CNF_STORAGE.Skills),grab(xget(%0,xget(v(PTR_CharGen.VAR),VAR_SKILLS)),%1 *,v(CNF_DELIMETER)),xget(%0,SKILL_%1)),xget(v(PTR_CharGen.DB),DATA_SKILL.%1),%q0),u(TRI_ERROR,%0,!HAVE_SKILL,%1)),u(TRI_ERROR,%0,!HAVE_SPEC.SKILL,%1,%2))]
+&TRI_SPEC.SELL CharGen Parent=[u(TRI_EDIT.Tokens,%0,Skills,setr(0,add(first(xget(v(PTR_CharGen.DB),LIST_[first(xget(v(PTR_CharGen.DB),DATA_SKILL.%1))].[extract(xget(v(PTR_CharGen.DB),DATA_SKILL.%1),2,1)].COST)),u([v(PTR_CharGen.FUN)]/FUN_CALC.Total.Cost,%1,%5))))][ifelse(v(CNF_STORAGE.Skills),set(%0,[xget(v(PTR_CharGen.VAR),VAR_SKILLS)]:[replace(xget(%0,xget(v(PTR_CharGen.VAR),VAR_SKILLS)),match(xget(%0,xget(v(PTR_CharGen.VAR),VAR_SKILLS)),%1 *,v(CNF_DELIMETER)),ldelete(%3,match(%3,%2 *,v(CNF_DELIMETER2)),v(CNF_DELIMETER2)),v(CNF_DELIMETER))]),set(%0,SKILL_%1:[ldelete(xget(%0,SKILL_%1),match(xget(%0,SKILL_%1),%2 *,v(CNF_DELIMETER2)),v(CNF_DELIMETER2))]))][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_SKILL.Set),You have deleted '%2' from the %1 Skill.)])][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_SKILL.Set),You have been reimbursed %q0 [ifelse(eq(%q0,1),v(DATA_TOKEN.Name.Singular),v(DATA_TOKEN.Name.Plural))].)])]
+&TRI_SKILL.SELL CharGen Parent=[u(TRI_EDIT.Tokens,%0,Skills,setr(0,add(first(xget(v(PTR_CharGen.DB),LIST_[first(xget(v(PTR_CharGen.DB),DATA_SKILL.%1))].[extract(xget(v(PTR_CharGen.DB),DATA_SKILL.%1),2,1)].COST)),[setq(7,0)][iter(rest(ifelse(v(CNF_STORAGE.Skills),grab(xget(%0,xget(v(PTR_CharGen.VAR),VAR_SKILLS)),%1 *,v(CNF_DELIMETER)),xget(%0,SKILL_%1)),v(CNF_DELIMETER2)),setq(7,add(u([v(PTR_CharGen.FUN)]/FUN_CALC.Total.Cost,%1,rest(##)),%q7)),v(CNF_DELIMETER2))][trunc(%q7)])))][ifelse(v(CNF_STORAGE.Skills),set(%0,[xget(v(PTR_CharGen.VAR),VAR_SKILLS)]:[ldelete(xget(%0,xget(v(PTR_CharGen.VAR),VAR_SKILLS)),match(xget(%0,xget(v(PTR_CharGen.VAR),VAR_SKILLS)),%1 *,v(CNF_DELIMETER)),v(CNF_DELIMETER))]),ifelse(match(v(CNF_MU.Type),MUSH),wipe(%0/SKILL_%1),set(%0,SKILL_%1:)))][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_SKILL.Set),You have deleted the '%1' Skill and all its specialities.)])][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_SKILL.Set),You have been reimbursed %q0 [ifelse(eq(%q0,1),v(DATA_TOKEN.Name.Singular),v(DATA_TOKEN.Name.Plural))].)])]
+&TRI_SPEC.DECREASE CharGen Parent=[ifelse(v(CNF_STORAGE.Skills),set(%0,[xget(v(PTR_CharGen.VAR),VAR_SKILLS)]:[replace(xget(%0,xget(v(PTR_CharGen.VAR),VAR_SKILLS)),match(xget(%0,xget(v(PTR_CharGen.VAR),VAR_SKILLS)),%1 *,v(CNF_DELIMETER)),replace(setr(7,grab(xget(%0,xget(v(PTR_CharGen.VAR),VAR_SKILLS)),%1 *,v(CNF_DELIMETER))),match(%3,%2 *,v(CNF_DELIMETER2)),%2 [setr(4,dec(%5))],v(CNF_DELIMETER2)),v(CNF_DELIMETER))]),set(%0,SKILL_%1:[replace(xget(%0,SKILL_%1),match(%3,%2 *,v(CNF_DELIMETER2)),setr(4,dec(%5)),v(CNF_DELIMETER2))]))][u(TRI_EDIT.Tokens,%0,Skills,setr(0,extract(xget(v(PTR_CharGen.DB),LIST_[first(xget(v(PTR_CharGen.DB),DATA_SKILL.%1))].[extract(xget(v(PTR_CharGen.DB),DATA_SKILL.%1),2,1)].COST),inc(sub(%5,xget(v(PTR_CharGen.DB),DATA_[first(xget(v(PTR_CharGen.DB),DATA_SKILL.%1))].[extract(xget(v(PTR_CharGen.DB),DATA_SKILL.%1),2,1)].BASE))),1)))][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_SKILL.Set),You have decreased '%2' in Skill %1 to %q4.)])][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_SKILL.Set),You are reimbursed %q0 [ifelse(eq(%q0,1),v(DATA_TOKEN.Name.Singular),v(DATA_TOKEN.Name.Plural))].)])]
+&TRI_COMPLETE CharGen Parent=[u(TRI_Complete.Start,%0)][u(TRI_COMPLETE.Basics,%0)][u(TRI_Complete.Tokens.[ifelse(v(CNF_STORAGE.Tokens),Combo,Split)],%0)][u(TRI_Complete.Attributes.[ifelse(v(CNF_STORAGE.Attributes),Combo,Split)],%0)][u(TRI_Complete.Skills.[ifelse(v(CNF_STORAGE.Skills),Combo,Split)],%0)][u(TRI_Complete.Features.[ifelse(v(CNF_STORAGE.Features),Combo,Split)],%0)][u(TRI_Complete.Vantages.[ifelse(v(CNF_STORAGE.Features),Combo,Split)],%0)][u(TRI_Complete.Finish,%0)]
+&TRI_COMPLETE.START CharGen Parent=[setq(0,0)][setq(1,0)][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_COMPLETE.Title),Beginning CharGen Completion Scan...)])]
+&TRI_COMPLETE.TOKENS.COMBO CharGen Parent=[ifelse(gte(xget(%0,xget(v(PTR_CharGen.VAR),VAR_TOKENS)),5),[setq(1,inc(%q1))][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_COMPLETE.Info),- Scanning [lcstr(v(DATA_TOKEN.Name.Plural))]...)]%r[u(DATA_PREFIX.Warn)] [ansi(v(FONT_COMPLETE.Warn),You have some [lcstr(v(DATA_TOKEN.name.Plural))] left.)])],pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_COMPLETE.Info),- Scanning [lcstr(v(DATA_TOKEN.Name.Plural))]...LOOKS GOOD!)]))]
+&TRI_COMPLETE.ATTRIBUTES.COMBO CharGen Parent=[ifelse(match(iter(v(LIST_ATTRIBUTES),match(xget(%0,xget(v(PTR_CharGen.VAR),VAR_ATTRIBUTES)),## *,v(CNF_DELIMETER))),0),[setq(0,inc(%q0))][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_COMPLETE.Info),- Scanning attributes...)]%r[u(DATA_PREFIX.Error)] [ansi(v(FONT_COMPLETE.Error),You have one or more of your ATTRIBUTES missing.)])],pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_COMPLETE.Info),- Scanning attributes...LOOKS GOOD!)]))]
+&TRI_COMPLETE.SKILLS.COMBO CharGen Parent=[ifelse(words(xget(%0,xget(v(PTR_CharGen.VAR),VAR_SKILLS))),ifelse(match(iter(mid(setr(6,xget(%0,xget(v(PTR_CharGen.VAR),VAR_SKILLS))),0,dec(strlen(%q6))),ifelse(gte(dec(words(##,v(CNF_DELIMETER2))),extract(xget(v(PTR_CharGen.DB),DATA_SKILL.[first(##)]),6,1)),1,0[setq(5,cat(%q5,#@))]),v(CNF_DELIMETER)),0),[pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_COMPLETE.Info),- Scanning skills...)])][iter(%q5,[setq(0,inc(%q0))][pemit(%0,[u(DATA_PREFIX.Error)] [ansi(v(FONT_COMPLETE.Error),[first(extract(xget(%0,xget(v(PTR_CharGen.VAR),VAR_SKILLS)),##,1,v(CNF_DELIMETER)))] does not have enough specializations set.)])])],pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_COMPLETE.Info),- Scanning skills...LOOKS GOOD!)])),[setq(1,inc(%q1))][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_COMPLETE.Info),- Scanning skills...)]%r[u(DATA_PREFIX.Warn)] [ansi(v(FONT_COMPLETE.Warn),You have no skills set.)])])]
+&TRI_COMPLETE.FEATURES.COMBO CharGen Parent=[ifelse(match(iter(v(LIST_FEATURES),match(xget(%0,xget(v(PTR_CharGen.VAR),VAR_FEATURES)),## *,v(CNF_DELIMETER))),0),[setq(0,inc(%q0))][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_COMPLETE.Info),- Scanning features...)]%r[u(DATA_PREFIX.Error)] [ansi(v(FONT_COMPLETE.Error),You have one or more of your FEATURES missing.)])],pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_COMPLETE.Info),- Scanning features...LOOKS GOOD!)]))]
+&TRI_COMPLETE.VANTAGES.COMBO CharGen Parent=[ifelse(words(xget(%0,xget(v(PTR_CharGen.VAR),VAR_VANTAGES))),ifelse(match(iter(mid(setr(4,xget(%0,xget(v(PTR_CharGen.VAR),VAR_VANTAGES))),0,dec(strlen(%q4))),ifelse(gte(dec(words(remove(##,-))),extract(xget(v(PTR_CharGen.DB),DATA_VANTAGE.[first(##)]),2,1)),1,0[setq(3,cat(%q3,#@))]),v(CNF_DELIMETER)),0),[pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_COMPLETE.Info),- Scanning vantages...)])][iter(%q3,[setq(0,inc(%q0))][pemit(%0,[u(DATA_PREFIX.Error)] [ansi(v(FONT_COMPLETE.Error),[first(extract(xget(%0,xget(v(PTR_CharGen.VAR),VAR_VANTAGES)),##,1,v(CNF_DELIMETER)))] does not have enough specializations set.)])])],pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_COMPLETE.Info),- Scanning vantages...LOOKS GOOD!)])),[setq(1,inc(%q1))][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_COMPLETE.Info),- Scanning vantages...)]%r[u(DATA_PREFIX.Warn)] [ansi(v(FONT_COMPLETE.Warn),You have no vantages set.)])])]
+&TRI_COMPLETE.FINISH CharGen Parent=[pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_COMPLETE.Title),CharGen Completion Scan FINISHED!)]%r%r[ansi(v(FONT_COMPLETE.Error),Errors detected: %q0)] ... [ansi(v(FONT_COMPLETE.Warn),Warnings detected: %q1)])][ifelse(gte(%q0,1),pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_COMPLETE.Title),Registration failure due to error-detection.)]),u(TRI_Register,%0))]
+&TRI_REGISTER CharGen Parent=[pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_COMPLETE.Registered),You are now officially REGISTERED!)])][set(%0,!unregistered)][set(%0,[xget(v(PTR_Org.DB),VAR_RANK)]:3)]
+&TRI_COMPLETE.BASICS CharGen Parent=[ifelse(words(xget(%0,DESC)),pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_COMPLETE.Info),- Scanning description...LOOKS GOOD!)]),[setq(0,inc(%q0))][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_COMPLETE.Info),- Scanning description...)]%r[u(DATA_PREFIX.Error)] [ansi(v(FONT_COMPLETE.Error),You have no description set.)])])][ifelse(words(xget(%0,SEX)),pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_COMPLETE.Info),- Scanning gender-type...LOOKS GOOD!)]),[setq(0,inc(%q0))][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_COMPLETE.Info),- Scanning gender-type...)]%r[u(DATA_PREFIX.Error)] [ansi(v(FONT_COMPLETE.Error),You have an invalid gender set.)])])][ifelse(member(org(%0),xget(v(PTR_Org.DB),DATA_ORG.Generic)),pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_COMPLETE.Info),- Scanning Organization...LOOKS GOOD!)]),[setq(0,inc(%q0))][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_COMPLETE.Info),- Scanning Organization...)]%r[u(DATA_PREFIX.Error)] [ansi(v(FONT_COMPLETE.Error),You have an improper Organization set.)])])][ifelse(and(words(setr(7,xget(%0,REGISTERED_EMAIL))),and(and(eq(words(%q7,@),2),gte(words(after(%q7,@),.),2)),eq(words(before(%q7,@)),1))),pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_COMPLETE.Info),- Scanning E-Mail...LOOKS GOOD!)]),[setq(0,inc(%q0))][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_COMPLETE.Info),- Scanning E-mail...)]%r[u(DATA_PREFIX.Error)] [ansi(v(FONT_COMPLETE.Error),You have an invalid E-mail set.)])])]
+&TRI_VANTAGE.SPECDEL CharGen Parent=[switch([ifelse(v(CNF_STORAGE.Vantages),not(not(match(xget(%0,xget(v(PTR_CharGen.VAR),VAR_Vantages)),%1 *,v(CNF_DELIMETER)))),and(hasattr(%0,VANTAGE_%1),words(xget(%0,VANTAGE_%1))))][lt(ifelse(v(CNF_STORAGE.Tokens),xget(%0,xget(v(PTR_CharGen.VAR),VAR_TOKENS)),xget(%0,xget(v(PTR_CharGen.VAR),VAR_TOKENS.Vantages))),setr(0,sub(0,ifelse(eq(words(setr(5,trim(squish(edit(rest(ifelse(v(CNF_STORAGE.Vantages),grab(xget(%0,xget(v(PTR_CharGen.VAR),VAR_Vantages)),%1 *,v(CNF_DELIMETER)),xget(%0,VANTAGE_%1))),-,space(0)))))),1),0,trunc(first(xget(v(PTR_CharGen.DB),DATA_VANTAGE.%1)))))))][not(not(match(%q5,%2)))],0??,u(TRI_ERROR,%0,!HAVE_VANTAGE,%1),11?,u(TRI_ERROR,%0,TOKENS_!ENOUGH),100,u(TRI_ERROR,%0,!HAVE_SPEC,%1,%2),101,[set(%0,[ifelse(v(CNF_STORAGE.Vantages),xget(v(PTR_CharGen.VAR),VAR_VANTAGES),VANTAGE_%1)]:[ifelse(v(CNF_STORAGE.Vantages),replace(xget(%0,xget(v(PTR_CharGen.VAR),VAR_VANTAGES)),match(xget(%0,xget(v(PTR_CharGen.VAR),VAR_VANTAGES)),%1 *,v(CNF_DELIMETER)),trim(squish(cat(%1,ifelse(eq(words(%q5),1),-,ldelete(%q5,match(%q5,%2)))))),v(CNF_DELIMETER)),ifelse(eq(words(%q5),1),-,ldelete(%q5,match(%q5,2))))])][u(TRI_EDIT.Tokens,%0,Vantages,sub(0,%q0))][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_SPEC.Set),Specialization '%2' has been deleted from %1.)])][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_SPEC.Set),ifelse(lt(%q0,0),You are reimbursed [abs(%q0)] [v(DATA_TOKEN.Name.Plural)].,That cost you [abs(%q0)] [ifelse(eq(%q0,1),v(DATA_TOKEN.Name.Singular),v(DATA_TOKEN.Name.Plural))].))])],u(TRI_SYSERR,%0))]
+&TRI_VANTAGE.SPECADD CharGen Parent=[switch([ifelse(v(CNF_STORAGE.Vantages),not(not(match(xget(%0,xget(v(PTR_CharGen.VAR),VAR_Vantages)),%1 *,v(CNF_DELIMETER)))),and(hasattr(%0,VANTAGE_%1),words(xget(%0,VANTAGE_%1))))][and(gte(inc(words(setr(5,trim(squish(edit(rest(ifelse(v(CNF_STORAGE.Vantages),grab(xget(%0,xget(v(PTR_CharGen.VAR),VAR_Vantages)),%1 *,v(CNF_DELIMETER)),xget(%0,VANTAGE_%1))),-,space(0))))))),extract(xget(v(PTR_CharGen.DB),DATA_VANTAGE.%1),2,1)),lte(inc(words(%q5)),extract(xget(v(PTR_CharGen.DB),DATA_VANTAGE.%1),3,1)))][lt(ifelse(v(CNF_STORAGE.Tokens),xget(%0,xget(v(PTR_CharGen.VAR),VAR_TOKENS)),xget(%0,xget(v(PTR_CharGen.VAR),VAR_TOKENS.Vantages))),setr(0,ifelse(not(words(%q5)),0,trunc(first(xget(v(PTR_CharGen.DB),DATA_VANTAGE.%1))))))][not(not(match(%q5,%2)))],0???,u(TRI_ERROR,%0,!HAVE_VANTAGE,%1),10??,u(TRI_ERROR,%0,SPEC_!In-Range,%1),111?,u(TRI_ERROR,%0,TOKENS_!ENOUGH),1101,u(TRI_ERROR,%0,HAVE_SPEC,%1,%2),1100,[ifelse(v(CNF_STORAGE.Vantages),set(%0,[xget(v(PTR_CharGen.VAR),VAR_VANTAGES)]:[replace(setr(8,xget(%0,xget(v(PTR_CharGen.VAR),VAR_VANTAGES))),match(%q8,%1 *,v(CNF_DELIMETER)),remove(cat(grab(%q8,%1 *,v(CNF_DELIMETER)),%2),-),v(CNF_DELIMETER))]),set(%0,VANTAGE_%1:[remove(cat(xget(%0,VANTAGE_%1),%2),-)]))][u(TRI_EDIT.Tokens,%0,Vantages,sub(0,%q0))][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_SPEC.Set),Specialization '%2' has been added to %1.)])][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_SPEC.Set),ifelse(lt(%q0,0),You are reimbursed [abs(%q0)] [ifelse(eq(abs(%q0),1),v(DATA_TOKEN.Name.Singular),v(DATA_TOKEN.Name.Plural))].,That cost you [abs(%q0)] [ifelse(eq(%q0,1),v(DATA_TOKEN.Name.Singular),v(DATA_TOKEN.Name.Plural))].))])],u(TRI_SYSERR,%0))]
+&TRI_FEATURE.OK CharGen Parent=[ifelse(hasattr(v(PTR_CharGen.DB),LIST_%1),u(TRI_FEATURE.List,%0,%1,%2),ifelse(and(hasattr(v(PTR_CharGen.DB),DATA_%1.Max),hasattr(v(PTR_CharGen.DB),DATA_%1.Min)),u(TRI_FEATURE.Value,%0,%1,ifelse(isnum(%2),round(%2,v(CNF_FEATURE.Round)),0)),u(TRI_SYSERR,%0)))]
+&TRI_EDIT.COMBO CharGen Parent=[set(%0,[xget(v(PTR_CharGen.VAR),VAR_%1)]:[ifelse(match(xget(%0,xget(v(PTR_CharGen.VAR),VAR_%1)),%2 *,v(CNF_DELIMETER)),replace(xget(%0,xget(v(PTR_CharGen.VAR),VAR_%1)),match(xget(%0,xget(v(PTR_CharGen.VAR),VAR_%1)),%2 *,v(CNF_DELIMETER)),ifelse(lt(dec(words(setr(3,grab(xget(%0,xget(v(PTR_CharGen.VAR),VAR_%1)),%2 *,v(CNF_DELIMETER))))),%4),trim(squish(cat(cat(%q3,repeat(-,sub(%4,words(%q3)))),%3))),replace(grab(xget(%0,xget(v(PTR_CharGen.VAR),VAR_%1)),%2 *,v(CNF_DELIMETER)),inc(%4),%3)),v(CNF_DELIMETER)),trim(squish(strcat(xget(%0,xget(v(PTR_CharGen.VAR),VAR_%1)),%2 %3[v(CNF_DELIMETER)]))))])]
+&TRI_FEATURE.LIST CharGen Parent=[ifelse(match(xget(v(PTR_CharGen.DB),LIST_%1),%2),[u(TRI_EDIT.[ifelse(v(CNF_STORAGE.Features),Combo,Split)],%0,Features,%1,grab(xget(v(PTR_CharGen.DB),LIST_%1),%2),1)][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_FEATURE.Set),Feature '%1' has been set to [grab(xget(v(PTR_CharGen.DB),LIST_%1),%2)].)])],u(TRI_ERROR,%0,FEATURE_!VALID,capstr(lcstr(%1)),secure(%2)))]
+&TRI_EDIT.SPLIT CharGen Parent=[set(%0,[mid(%1,0,dec(strlen(%1)))]_%2:[ifelse(lt(words(xget(%0,[mid(%1,0,dec(strlen(%1)))]_%2)),%4),trim(squish(cat(cat(xget(%0,[mid(%1,0,dec(strlen(%1)))]_%2),repeat(-,dec(sub(%4,words(xget(%0,[mid(%1,0,dec(strlen(%1)))]_%2)))))),%3))),replace(xget(%0,[mid(%1,0,dec(strlen(%1)))]_%2),%4,%3))])]
+&TRI_SKILL.PURCHASE CharGen Parent=[ifelse(or(match(none,%3),and(ifelse(v(CNF_STORAGE.Skills),match(xget(%0,xget(v(PTR_CharGen.VAR),VAR_SKILLS)),%3 *,v(CNF_DELIMETER)),and(hasattr(%0,SKILL_%3),words(xget(%0,SKILL_%3)))),gte(add(ifelse(v(CNF_STORAGE.Attributes),last(grab(xget(%0,xget(v(PTR_CharGen.VAR),VAR_ATTRIBUTES)),%2 *,v(CNF_DELIMETER))),xget(%0,ATTRIBUTE_%2)),ifelse(v(CNF_STORAGE.Skills),extract(extract(grab(xget(%0,xget(v(PTR_CharGen.VAR),VAR_SKILLS)),%3 *,v(CNF_DELIMETER)),1,1,v(CNF_DELIMETER2)),2,1),extract(xget(%0,SKILL_%3),1,1,v(CNF_DELIMETER2)))),v(DATA_SKILLS.Req.Min)))),ifelse(gte(ifelse(v(CNF_STORAGE.Tokens),xget(%0,xget(v(PTR_CharGen.VAR),VAR_TOKENS)),xget(%0,xget(v(PTR_CharGen.VAR),VAR_TOKENS.Skills))),setr(0,first(xget(v(PTR_CharGen.DB),LIST_[first(xget(v(PTR_CharGen.DB),DATA_SKILL.%1))].[extract(xget(v(PTR_CharGen.DB),DATA_SKILL.%1),2,1)].COST)))),[ifelse(v(CNF_STORAGE.Skills),set(%0,[xget(v(PTR_CharGen.VAR),VAR_SKILLS)]:[strcat(xget(%0,xget(v(PTR_CharGen.VAR),VAR_SKILLS)),%1 [xget(v(PTR_CharGen.DB),DATA_[first(xget(v(PTR_CharGen.DB),DATA_SKILL.%1))].[extract(xget(v(PTR_CharGen.DB),DATA_SKILL.%1),2,1)].BASE)][v(CNF_DELIMETER)])]),set(%0,SKILL_%1:[xget(v(PTR_CharGen.DB),DATA_[first(xget(v(PTR_CharGen.DB),DATA_SKILL.%1))].[extract(xget(v(PTR_CharGen.DB),DATA_SKILL.%1),2,1)].BASE)]))][u(TRI_EDIT.Tokens,%0,Skills,sub(0,%q0))][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_SKILL.Set),You have purchased the '%1' Skill.)])][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_SKILL.Set),That cost you %q0 [ifelse(eq(%q0,1),v(DATA_TOKEN.Name.Singular),v(DATA_TOKEN.Name.Plural))].)])][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_SKILL.Set),ifelse(extract(xget(v(PTR_CharGen.DB),DATA_SKILL.%1),6,1),You MUST indicate at least [extract(xget(v(PTR_CharGen.DB),DATA_SKILL.%1),6,1)] specializations for this skill.,ifelse(extract(xget(v(PTR_CharGen.DB),DATA_SKILL.%1),7,1),You may indicate a specialization for this skill.,You may NOT indicate any specializations for this skill.)))])],u(TRI_ERROR,%0,TOKENS_!ENOUGH)),u(TRI_ERROR,%0,SKILL_REQUIRED,%2,%3))]
+&TRI_SKILL.DEL CharGen Parent=[ifelse(ifelse(v(CNF_STORAGE.Skills),match(xget(%0,xget(v(PTR_CharGen.VAR),VAR_SKILLS)),%1 *,v(CNF_DELIMETER)),and(hasattr(%0,SKILL_%1),words(xget(%0,SKILL_%1)))),u(TRI_SKILL.[ifelse(lte(setr(0,ifelse(v(CNF_STORAGE.Skills),extract(extract(grab(xget(%0,xget(v(PTR_CharGen.VAR),VAR_SKILLS)),%1 *,v(CNF_DELIMETER)),1,1,v(CNF_DELIMETER2)),2,1),extract(xget(%0,SKILL_%1),1,1,v(CNF_DELIMETER2)))),setr(1,xget(v(PTR_CharGen.DB),DATA_[first(xget(v(PTR_CharGen.DB),DATA_SKILL.%1))].[extract(xget(v(PTR_CharGen.DB),DATA_SKILL.%1),2,1)].BASE))),SELL,DECREASE)],%0,%1,%q0,%q1),u(TRI_ERROR,%0,!HAVE_SKILL,%1))]
+&TRI_SETUP.FINISH CharGen Parent=[pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_SETUP.Title),CharGen Setup Finished! Type 'chargen/commands' for more info.)])]
+&TRI_SETUP.ATTRIBUTES.COMBO CharGen Parent=[set(%0,[xget(v(PTR_CharGen.VAR),VAR_ATTRIBUTES)]:[edit(edit(iter(v(LIST_ATTRIBUTES),[ucstr(##)]~[v(DATA_Attribute.Start)][v(CNF_DELIMETER)]),space(1),space(0)),~,space(1))])][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_SETUP.Text),- Attributes initialized into one variable.)])]
+&TRI_SETUP.ATTRIBUTES.SPLIT CharGen Parent=[iter(v(LIST_ATTRIBUTES),[set(%0,ATTRIBUTE_##:[v(DATA_Attribute.Start)])][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_SETUP.Text),- Attribute [ucstr(##)] initialized.)])])]
+&TRI_SETUP.TOKENS.SPLIT CharGen Parent=[iter(v(LIST_TYPES),[set(%0,[xget(v(PTR_CharGen.VAR),VAR_Tokens.##)]:[v(DATA_TOKEN.##)])][ifelse(words(v(DATA_TOKEN.##)),pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_SETUP.Text),- [capstr(lcstr(##))] [capstr(lcstr(v(DATA_TOKEN.Name.Plural)))] initialized at [v(DATA_TOKEN.##)].)]),space(0))])]
+&TRI_SETUP.TOKENS.COMBO CharGen Parent=[set(%0,[xget(v(PTR_CharGen.VAR),VAR_Tokens)]:[v(DATA_TOKEN.Combo)])][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_SETUP.Text),- [capstr(lcstr(v(DATA_TOKEN.Name.Plural)))] initialized at [v(DATA_TOKEN.Combo)].)]
+&TRI_SETUP.START CharGen Parent=[pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_SETUP.Title),CharGen Setup Initializing..)])]
+&TRI_SETUP.SKILLS.COMBO CharGen Parent=[ifelse(match(v(CNF_MU.Type),MUSH),wipe(%0/[xget(v(PTR_CharGen.VAR),VAR_SKILLS)]),set(%0,[xget(v(PTR_CharGen.VAR),VAR_SKILLS)]:))][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_SETUP.Text),- Skills deletion complete.)])]
+&TRI_SETUP.SKILLS.SPLIT CharGen Parent=[iter(u([v(PTR_CharGen.FUN)]/FUN_LIST.Skills),ifelse(match(v(CNF_MU.Type),MUSH),wipe(%0/Skill_##),set(%0,Skill_##:)))][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_SETUP.Text),- Skills deletion complete.)])]
+&TRI_SETUP.FEATURES.SPLIT CharGen Parent=[iter(u([v(PTR_CharGen.FUN)]/FUN_LIST.Features),ifelse(match(v(CNF_MU.Type),MUSH),wipe(%0/Feature_##),set(%0,Feature_##:)))][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_SETUP.Text),- Features deletion complete.)])]
+&TRI_SETUP.FEATURES.COMBO CharGen Parent=[ifelse(match(v(CNF_MU.Type),MUSH),wipe(%0/[xget(v(PTR_CharGen.VAR),VAR_FEATURES)]),set(%0,[xget(v(PTR_CharGen.VAR),VAR_FEATURES)]:))][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_SETUP.Text),- Features deletion complete.)])]
+&TRI_SETUP.VANTAGES.COMBO CharGen Parent=[ifelse(match(v(CNF_MU.Type),MUSH),wipe(%0/[xget(v(PTR_CharGen.VAR),VAR_VANTAGES)]),set(%0,[xget(v(PTR_CharGen.VAR),VAR_VANTAGES)]:))][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_SETUP.Text),- Vantages deletion complete.)])]
+&TRI_SETUP.VANTAGES.SPLIT CharGen Parent=[iter(u([v(PTR_CharGen.FUN)]/FUN_LIST.Vantages),ifelse(match(v(CNF_MU.Type),MUSH),wipe(%0/Vantage_##),set(%0,Vantage_##:)))][pemit(%0,[u(DATA_PREFIX.Game)] [ansi(v(FONT_SETUP.Text),- Vantages deletion complete.)])]
+@STARTUP CharGen Parent=@dol [ifelse(v(CNF_STORAGE.Tokens),xget(v(PTR_CharGen.VAR),VAR_TOKENS),iter(lattr([v(PTR_CharGen.VAR)]/VAR_TOKENS.*),xget(v(PTR_CharGen.VAR),##)))]={@attribute/retroactive/access ##=Wizard};@dol [ifelse(v(CNF_STORAGE.Attributes),xget(v(PTR_CharGen.VAR),VAR_ATTRIBUTES),iter(v(LIST_ATTRIBUTES),ATTRIBUTE_##))]={@attribute/retroactive/access ##=Wizard};@dol [ifelse(v(CNF_STORAGE.Features),xget(v(PTR_CharGen.VAR),VAR_FEATURES),iter(v(LIST_FEATURES),FEATURE_##))]={@attribute/retroactive/access ##=Wizard};@dol [ifelse(v(CNF_STORAGE.Vantages),xget(v(PTR_CharGen.VAR),VAR_VANTAGES),iter(cat(v(LIST_DISADVANTAGES),v(LIST_ADVANTAGES)),VANTAGE_##))]={@attribute/retroactive/access ##=Wizard};@dol [ifelse(v(CNF_STORAGE.Skills),xget(v(PTR_CharGen.VAR),VAR_SKILLS),iter(v(LIST_SKILLS),SKILL_##))]={@attribute/retroactive/access ##=Wizard}
+@switch [isdbref(num(CharGen Database))]=0,{think [ansi(hm,INSTALL:)] No "CharGen Database" object found -- creating...;@create CharGen Database},1,{think [ansi(hm,INSTALL:)] "CharGen Database" object already exists... skipping creation.}
+think [ansi(hm,INSTALL:)] Setting CharGen Database Flags...
+@set CharGen Database = WIZARD
+@set CharGen Database = SAFE
+@set CharGen Database = NO_COMMAND
+think [ansi(hm,INSTALL:)] Downloading CharGen Vantage Data...
+&DATA_VANTAGE.ODD-FEATURE CharGen Database=-5 1 5
+&DATA_VANTAGE.UNFIT CharGen Database=-10 0 0 fitness
+&DATA_VANTAGE.STERILITY CharGen Database=-5 0 0
+&DATA_VANTAGE.PARALYZED CharGen Database=-45 0 0
+&DATA_VANTAGE.MIGRAINES CharGen Database=-5 0 1
+&DATA_VANTAGE.HUNCHBACK CharGen Database=-10 0 0 attractive
+&DATA_VANTAGE.DISOWNED CharGen Database=-10 0 0 heir
+&DATA_VANTAGE.G-INTOLERANCE CharGen Database=-5 0 0 unfit
+&DATA_VANTAGE.VERY-FIT CharGen Database=5 0 0 unfit
+&DATA_VANTAGE.SPATIAL-SENSE CharGen Database=6 0 0
+&DATA_VANTAGE.MANUAL-DEXTERITY CharGen Database=6 0 0 clumsy
+&DATA_VANTAGE.LIGHT-SLEEPER CharGen Database=10 0 0 heavy-sleeper
+&DATA_VANTAGE.HEIR CharGen Database=10 0 0 disowned
+&DATA_VANTAGE.RISK-TAKER CharGen Database=15 0 0
+&DATA_VANTAGE.STEADY-NERVES CharGen Database=5 0 0
+&DATA_VANTAGE.G-TOLERANCE CharGen Database=10 0 0 g-intolerance
+&DATA_VANTAGE.ODIUS-HABIT CharGen Database=-10 1 3
+&DATA_VANTAGE.RICH CharGen Database=30 0 0 wealthy poor dead-broke
+&DATA_VANTAGE.ABSOLUTE-TIMING CharGen Database=5 0 0
+&DATA_VANTAGE.ALERTNESS CharGen Database=15 0 0
+&DATA_VANTAGE.ACUTE-HEARING CharGen Database=2 0 0 bad-hearing
+&DATA_VANTAGE.ACUTE-VISION CharGen Database=2 0 0 bad-eyesight blind
+&DATA_VANTAGE.ACUTE-TASTE/SMELL CharGen Database=2 0 0
+&DATA_VANTAGE.AMBIDEXTERITY CharGen Database=2 0 0 one-arm one-hand
+&DATA_VANTAGE.CHARISMA CharGen Database=5 0 0 stutter
+&DATA_VANTAGE.FAST-REFLEXES CharGen Database=15 0 0 slow-reflexes
+&DATA_VANTAGE.DANGER-SENSE CharGen Database=15 0 0
+&DATA_VANTAGE.DIPLOMATIC-IMMUNITY CharGen Database=20 0 0
+&DATA_VANTAGE.DOUBLE-JOINTED CharGen Database=5 0 0
+&DATA_VANTAGE.PAIN-TOLERANCE CharGen Database=10 0 0 chronic-pain
+&DATA_VANTAGE.DISEASE-IMMUNITY CharGen Database=10 0 0
+&DATA_VANTAGE.LEGAL-POWERS CharGen Database=10 0 0
+&DATA_VANTAGE.LUCK-POINT CharGen Database=50 0 0 unlucky
+&DATA_VANTAGE.NIGHT-VISION CharGen Database=10 0 0 night-blindness
+&DATA_VANTAGE.STRONG-WILL CharGen Database=10 0 0 weak-will
+&DATA_VANTAGE.WEALTHY CharGen Database=20 0 0 poor dead-broke
+&DATA_VANTAGE.INTERNAL-COMPASS CharGen Database=5 0 0
+&DATA_VANTAGE.ACUTE-TOUCH CharGen Database=5 0 0
+&DATA_VANTAGE.ARTISTIC-TALENT CharGen Database=5 0 0
+&DATA_VANTAGE.MUSICAL-TALENT CharGen Database=5 0 0
+&DATA_VANTAGE.GOOD-BALANCE CharGen Database=5 0 0
+&DATA_VANTAGE.ATHLETIC-ABILITY CharGen Database=10 0 0
+&DATA_VANTAGE.TECHNICAL-APTITUDE CharGen Database=5 0 0
+&DATA_VANTAGE.TOUGHNESS CharGen Database=15 0 0
+&DATA_VANTAGE.ATTRACTIVE CharGen Database=15 0 0 unattractive
+&DATA_VANTAGE.SPACE-SICKNESS CharGen Database=-10 0 0
+&DATA_VANTAGE.ODIOUS-HABIT CharGen Database=-10 1 3
+&DATA_VANTAGE.POOR CharGen Database=-15 0 0 wealthy rich dead-broke
+&DATA_VANTAGE.DEAD-BROKE CharGen Database=-25 0 0 wealthy rich poor
+&DATA_VANTAGE.ALBINISM CharGen Database=-10 0 0
+&DATA_VANTAGE.BAD-EYESIGHT CharGen Database=-10 0 0 acute-vision night-vision blind
+&DATA_VANTAGE.NIGHT-BLINDNESS CharGen Database=-10 0 0 blind night-vision bad-eyesight
+&DATA_VANTAGE.CRIPPLED-LEG CharGen Database=-15 0 0 no-legs
+&DATA_VANTAGE.MISSING-LEG CharGen Database=-25 0 0 no-legs
+&DATA_VANTAGE.NO-LEGS CharGen Database=-35 0 0 crippled-leg missing-leg athletic-ability good-balance
+&DATA_VANTAGE.MUTE CharGen Database=-25 0 0 stutter
+&DATA_VANTAGE.ONE-ARM CharGen Database=-20 0 0 ambidexterity
+&DATA_VANTAGE.ONE-EYE CharGen Database=-15 0 0
+&DATA_VANTAGE.ONE-HAND CharGen Database=-15 0 0 ambidexterity
+&DATA_VANTAGE.OVERWEIGHT CharGen Database=-5 0 0 obese skinny
+&DATA_VANTAGE.OBESE CharGen Database=-10 0 0 overweight athletic-ability skinny
+&DATA_VANTAGE.SKINNY CharGen Database=-5 0 0 obese overweight
+&DATA_VANTAGE.STUTTER CharGen Database=-10 0 0
+&DATA_VANTAGE.TERMINALLY-ILL CharGen Database=-50 0 1
+&DATA_VANTAGE.AMNESIA CharGen Database=-25 0 0
+&DATA_VANTAGE.PHOBIA CharGen Database=-15 1 3
+&DATA_VANTAGE.BAD-TEMPER CharGen Database=-10 0 0
+&DATA_VANTAGE.ADDICTION CharGen Database=-15 1 3
+&DATA_VANTAGE.COMPULSIVE-LIAR CharGen Database=-15 0 0
+&DATA_VANTAGE.GREED CharGen Database=-15 0 0
+&DATA_VANTAGE.IMPULSIVE CharGen Database=-10 0 0
+&DATA_VANTAGE.LAZY CharGen Database=-10 0 0
+&DATA_VANTAGE.UNLUCKY CharGen Database=-10 0 0 luck-point
+&DATA_VANTAGE.WEAK-WILL CharGen Database=-20 0 0 strong-will
+&DATA_VANTAGE.OVERCONFIDENT CharGen Database=-10 0 0
+&DATA_VANTAGE.ALLERGY CharGen Database=-10 1 3
+&DATA_VANTAGE.CLUMSY CharGen Database=-5 0 0 good-balance
+&DATA_VANTAGE.COLOR-BLIND CharGen Database=-5 0 0 night-vision
+&DATA_VANTAGE.BAD-HEARING CharGen Database=-10 0 0 acute-hearing
+&DATA_VANTAGE.MORAL-ISSUES CharGen Database=-10 1 2
+&DATA_VANTAGE.UNCOUTH CharGen Database=-10 0 0 charisma
+&DATA_VANTAGE.UNATTRACTIVE CharGen Database=-15 0 0 attractive
+&DATA_VANTAGE.QUIRK CharGen Database=-1 1 10
+&DATA_VANTAGE.MOTION-SICKNESS CharGen Database=-10 0 0
+&DATA_VANTAGE.CHRONIC-PAIN CharGen Database=-15 0 0 pain-tolerance
+&DATA_VANTAGE.ABSENT-MINDED CharGen Database=-15 0 0
+&DATA_VANTAGE.POOR-SELF-ESTEEM CharGen Database=-10 0 0
+&DATA_VANTAGE.GAMBLING CharGen Database=-10 0 0
+&DATA_VANTAGE.SLOW-REFLEXES CharGen Database=-15 0 0 fast-reflexes
+&DATA_VANTAGE.CONFUSED CharGen Database=-10 0 0 alertness
+&DATA_VANTAGE.FLASHBACK CharGen Database=-5 1 3
+&DATA_VANTAGE.NOSY CharGen Database=-1 0 0
+&DATA_VANTAGE.ON-EDGE CharGen Database=-15 0 0
+&DATA_VANTAGE.COMPULSIVE CharGen Database=-5 1 5
+&DATA_VANTAGE.HEAVY-SLEEPER CharGen Database=-5 0 0 light-sleeper
+&DATA_VANTAGE.INTOLERANT CharGen Database=-5 1 5
+&DATA_VANTAGE.PHYSICAL-AILMENT CharGen Database=-5 1 5
+think [ansi(hm,INSTALL:)] Downloading CharGen Skill Data...
+&DATA_SKILL.VETERINARY CharGen Database=Mental Average Intelligence NONE -6 0 0 None
+&DATA_SKILL.SHIP-ENGINEER CharGen Database=Mental Hard Intelligence None -5 0 0 None
+&DATA_SKILL.TURRET-GUN CharGen Database=Physical Hard Dexterity None -5 0 0 None
+&DATA_SKILL.FREE-FALL CharGen Database=Physical Average Dexterity None -5 0 0 None
+&DATA_SKILL.SPACESUIT CharGen Database=Mental Average Intelligence Free-Fall -6 0 0 None
+&DATA_SKILL.STARPILOT CharGen Database=Mental Hard Intelligence None -7 0 0 None
+&DATA_SKILL.PILOT CharGen Database=Mental Hard Intelligence None -7 1 10 None
+&DATA_SKILL.TRAP CharGen Database=Mental Average Intelligence None -5 0 0 None
+&DATA_SKILL.STEALTH CharGen Database=Physical Average Dexterity None -5 0 0 None
+&DATA_SKILL.PICKPOCKET CharGen Database=Physical Hard Dexterity None -6 0 0 None
+&DATA_SKILL.LOCKPICKING CharGen Database=Mental Average Intelligence None -5 0 0 None
+&DATA_SKILL.INTERROGATION CharGen Database=Mental Average Intelligence None -5 0 0 None
+&DATA_SKILL.KNIFE CharGen Database=Physical easy dexterity none -4 0 0 none
+&DATA_SKILL.FIRST-AID CharGen Database=Mental Easy Intelligence NONE -5 0 0 none
+&DATA_SKILL.PHYSICIAN CharGen Database=Mental Hard Intelligence NONE -7 0 0 none
+&DATA_SKILL.SURGERY CharGen Database=Mental very-Hard Intelligence physician 0 0 0 physician-5 vet-5 physiology-8 first-aid-12
+&DATA_SKILL.ACCOUNTING CharGen Database=Mental Hard Intelligence none -10 0 0 merchant-5 mathematics-5
+&DATA_SKILL.LAW CharGen Database=Mental Hard Intelligence none -6 0 10 none
+&DATA_SKILL.ARTIST CharGen Database=Mental Hard Intelligence none -6 0 10 none
+&DATA_SKILL.DANCE CharGen Database=Physical Average dexterity none -5 0 0 none
+&DATA_SKILL.MUSICAL-INSTRUMENT CharGen Database=Mental hard intelligence none 0 1 10 Musical-Instrument-5
+&DATA_SKILL.HOLOPHOTOGRAPHY CharGen Database=mental average intelligence none -5 0 0 none
+&DATA_SKILL.GUN CharGen Database=Physical Hard Dexterity None -4 0 0 none
+&DATA_SKILL.LASER CharGen Database=Physical Easy Dexterity None -4 0 0 none
+&DATA_SKILL.SWORD CharGen Database=Physical Average Dexterity None -5 0 0 None
+&DATA_SKILL.WRESTLING CharGen Database=Physical Hard Dexterity None 0 0 0 None
+&DATA_SKILL.KARATE CharGen Database=Physical Hard Dexterity None 0 0 0 None
+&DATA_SKILL.CLUB CharGen Database=Physical Average Dexterity None -5 0 0 None
+&DATA_SKILL.POLE-WEAPONS CharGen Database=Physical Hard Dexterity None -5 0 0 None
+&DATA_SKILL.THROWING CharGen Database=Physical Easy Dexterity None -4 0 0 None
+&DATA_SKILL.POETRY CharGen Database=Mental Average Intelligence None -5 0 0 None
+&DATA_SKILL.SCULPTURE CharGen Database=physical Average dexterity None -5 0 0 None
+&DATA_SKILL.SINGING CharGen Database=physical easy health None -4 0 10 None
+&DATA_SKILL.WRITING CharGen Database=mental average intelligence None -5 0 10 None
+&DATA_SKILL.METALSMITH CharGen Database=Mental Average intelligence None -5 0 0 None
+&DATA_SKILL.WOODWORKING CharGen Database=Mental Easy Intelligence None -4 0 0 None
+&DATA_SKILL.COOKING CharGen Database=Mental Easy Intelligence None -4 0 0 None
+&DATA_SKILL.JEWELER CharGen Database=Mental Hard Intelligence None -6 0 0 None
+&DATA_SKILL.TANNER CharGen Database=Mental Easy Intelligence None -4 0 0 None
+&DATA_SKILL.MECHANIC CharGen Database=Mental Hard Intelligence None -6 1 10 None
+&DATA_SKILL.DIAGNOSIS CharGen Database=Mental Hard Intelligence None -6 0 0 First-Aid-8 Veterinary-5 Physician-4
+&DATA_SKILL.DESERT-SURVIVAL CharGen Database=Mental Average Intelligence None -5 0 0 None
+&DATA_SKILL.COLD-SURVIVAL CharGen Database=Mental Average Intelligence None -5 0 0 None
+&DATA_SKILL.JUNGLE-SURVIVAL CharGen Database=Mental Average Intelligence None -5 0 0 None
+&DATA_SKILL.FOREST-SURVIVAL CharGen Database=Mental Average Intelligence None -5 0 0 None
+&DATA_SKILL.MARSH-SURVIVAL CharGen Database=Mental Average Intelligence None -5 0 0 None
+&DATA_SKILL.SPACE-SURVIVAL CharGen Database=Mental Average Intelligence None -5 0 0 None
+&DATA_SKILL.MOUNTAIN-SURVIVAL CharGen Database=Mental Average Intelligence None -5 0 0 None
+&DATA_SKILL.CLIMBING CharGen Database=Physical Average dexterity None -5 0 0 None
+&DATA_SKILL.AGRONONMY CharGen Database=Mental Average intelligence None -5 0 0 None
+&DATA_SKILL.ASTROGATION CharGen Database=Mental Average intelligence None -4 0 0 None
+&DATA_SKILL.BIOCHEMISTRY CharGen Database=Mental Very-Hard intelligence Chemistry 0 0 0 None
+&DATA_SKILL.CHEMISTRY CharGen Database=Mental Hard intelligence None -6 0 0 None
+&DATA_SKILL.BOTANY CharGen Database=Mental Hard intelligence None -6 0 0 None
+&DATA_SKILL.COMPUTER-PROGRAM CharGen Database=Mental Hard intelligence Computer-Op 0 0 0 None
+&DATA_SKILL.COMPUTER-OP CharGen Database=Mental Easy intelligence None -4 0 0 None
+&DATA_SKILL.ELECTRONICS-OP CharGen Database=Mental Average Intelligence None -5 0 0 None
+&DATA_SKILL.ENGINEER-ELECTRONIC CharGen Database=Mental Hard Intelligence mathematics 0 0 0 None
+&DATA_SKILL.ENGINEER-ELECTRIC CharGen Database=Mental Hard Intelligence None 0 0 0 None
+&DATA_SKILL.ENGINEER-MECHANICAL CharGen Database=Mental Hard Intelligence None 0 0 0 None
+&DATA_SKILL.ENGINEER-COMBAT CharGen Database=Mental Hard Intelligence None 0 0 0 None
+&DATA_SKILL.ENGINEER-MINING CharGen Database=Mental Hard Intelligence Geology 0 0 0 None
+&DATA_SKILL.ENGINEER-STARSHIP CharGen Database=Mental Hard Intelligence None 0 0 0 None
+&DATA_SKILL.GENETICS CharGen Database=Mental Very-Hard Intelligence None 0 0 0 Biochemistry-5 Physiology-5
+&DATA_SKILL.GEOLOGY CharGen Database=Mental Hard Intelligence None -6 0 0 None
+&DATA_SKILL.HISTORY CharGen Database=Mental Hard Intelligence None -6 0 10 None
+&DATA_SKILL.MATHEMATICS CharGen Database=Mental Hard Intelligence None -6 0 0 None
+&DATA_SKILL.METALLURGY CharGen Database=Mental Hard Intelligence None 0 0 0 Chemistry-5
+&DATA_SKILL.PHYSICS CharGen Database=Mental Hard Intelligence None -6 0 0 None
+&DATA_SKILL.PHYSIOLOGY CharGen Database=Mental Very-Hard Intelligence None -7 0 0 None
+&DATA_SKILL.PSYCHOLOGY CharGen Database=Mental Hard Intelligence None -6 0 0 None
+&DATA_SKILL.ZOOLOGY CharGen Database=Mental Hard Intelligence None -6 0 0 None
+&DATA_SKILL.ADMINISTRATION CharGen Database=Mental average Intelligence None -6 0 0 None
+&DATA_SKILL.ACTING CharGen Database=Mental average Intelligence None -5 0 0 None
+&DATA_SKILL.DIPLOMACY CharGen Database=Mental Hard Intelligence None -6 0 0 None
+&DATA_SKILL.LEADERSHIP CharGen Database=Mental Average Strength None -5 0 0 None
+&DATA_SKILL.POLITICS CharGen Database=Mental Average intelligence None -5 0 0 None
+&DATA_SKILL.PERFORMANCE CharGen Database=Mental Average intelligence None -5 0 0 None
+&DATA_SKILL.STRATEGY CharGen Database=Mental Hard intelligence None -6 0 0 Tactics-6
+&DATA_SKILL.TACTICS CharGen Database=Mental Hard intelligence None -6 0 0 strategy-6
+&DATA_SKILL.TEACHING CharGen Database=Mental Average intelligence None -5 0 0 None
+&DATA_SKILL.DEMOLITION CharGen Database=Mental Average intelligence None -5 0 0 None
+&DATA_SKILL.CAMOUFLAGE CharGen Database=Mental Easy intelligence None -4 0 0 None
+&DATA_SKILL.DISGUISE CharGen Database=Mental Average intelligence None -5 0 0 None
+&DATA_SKILL.ESCAPE CharGen Database=Physical hard dexterity None -6 0 0 None
+&DATA_SKILL.FORGERY CharGen Database=Mental hard intelligence None -6 0 0 artist-5
+&DATA_SKILL.ANALYSIS CharGen Database=Mental hard intelligence None -6 0 0 None
+think [ansi(hm,INSTALL:)] Downloading CharGen Difficulties Data...
+&DATA_MENTAL.VERY-HARD.BASE CharGen Database=-4
+&DATA_MENTAL.HARD.BASE CharGen Database=-3
+&DATA_MENTAL.AVERAGE.BASE CharGen Database=-2
+&DATA_MENTAL.EASY.BASE CharGen Database=-1
+&DATA_PHYSICAL.HARD.BASE CharGen Database=-3
+&DATA_PHYSICAL.AVERAGE.BASE CharGen Database=-2
+&DATA_PHYSICAL.EASY.BASE CharGen Database=-1
+think [ansi(hm,INSTALL:)] Downloading CharGen Features Data...
+&DATA_DEXTERITY.MIN CharGen Database=1
+&DATA_DEXTERITY.MAX CharGen Database=20
+&DATA_INTELLIGENCE.MIN CharGen Database=1
+&DATA_INTELLIGENCE.MAX CharGen Database=20
+&DATA_STRENGTH.MIN CharGen Database=1
+&DATA_STRENGTH.MAX CharGen Database=20
+&DATA_HEALTH.MIN CharGen Database=1
+&DATA_HEALTH.MAX CharGen Database=20
+&DATA_WEIGHT.MAX CharGen Database=200
+&DATA_WEIGHT.MIN CharGen Database=25
+&DATA_HEIGHT.MAX CharGen Database=96
+&DATA_HEIGHT.MIN CharGen Database=24
+&DATA_AGE.MIN CharGen Database=5
+&DATA_AGE.MAX CharGen Database=100
+&DATA_TOKEN.START CharGen Database=100
+&LIST_SKIN-COLOR CharGen Database=Dark-Brown Brown Tanned Light-Tan White Pale-White
+&LIST_EYE-COLOR CharGen Database=Black Brown Deep-Green Green Deep-Blue Blue Hazel Grey
+&LIST_HAIR-STYLE CharGen Database=None Buzz Crew-Cut Straight Curly Wavie Braided French-Braided Ponytail Pulled-Back
+&LIST_HAIR-COLOR CharGen Database=Black Blond Strawberry-Blond Light-Brown Medium-Brown Dark-Brown Chestnut Deep-Red Auburn Burnt-Red Silver Grey White
+&LIST_HAIR-LENGTH CharGen Database=Bald Very-Short Short Standard Long Very-Long
+&LIST_COLONY CharGen Database=Caprica Canceria Aquaria Taura Gemini Sagitara Leo Piscera Scorpia Libra Virgo Aries
+&LIST_HAND-CHOICE CharGen Database=Right Left
+think [ansi(hm,INSTALL:)] Downloading CharGen Costs Data...
+&LIST_MENTAL.VERY-HARD.COST CharGen Database=2 2 2 2 3 3 3 3 3 3 4 4 4 4 4 5 5 5 5 5 5 5 6 6 6 6 7 7 7 7
+&LIST_MENTAL.HARD.COST CharGen Database=2 2 2 2 4 4 4 4 4 4 4 4 4 4 6 6 6 6 6 6 6 6 6 6 6 6 8 8 8 8 8
+&LIST_MENTAL.AVERAGE.COST CharGen Database=1 1 1 2 2 2 2 2 2 2 2 2 2 4 4 4 4 4 4 4 4 4 4 6 6 6 6 6 6 6 6
+&LIST_MENTAL.EASY.COST CharGen Database=1 1 1 2 2 2 2 2 2 2 2 2 2 4 4 4 4 4 4 4 4 4 4 6 6 6 6 6 6 6 6
+&LIST_PHYSICAL.HARD.COST CharGen Database=1 1 1 2 4 8 8 8 8 8 8 8 8 8 8 16 16 16 16 16 16 16 16 24 24 24 24 24 24 24
+&LIST_PHYSICAL.AVERAGE.COST CharGen Database=1 1 1 2 4 8 8 8 8 8 8 8 8 8 8 16 16 16 16 16 16 16 16 24 24 24 24 24 24 24
+&LIST_PHYSICAL.EASY.COST CharGen Database=1 1 1 2 4 8 8 8 8 8 8 8 8 8 8 16 16 16 16 16 16 16 16 24 24 24 24 24 24 24
+&DATA_ATTRIBUTE.START CharGen Database=10
+@switch [isdbref(num(CharGen Configuration))]=0,{think [ansi(hm,INSTALL:)] No "CharGen Configuration" object found -- creating...;@create CharGen Configuration},1,{think [ansi(hm,INSTALL:)] "CharGen Configuration" object already exists... skipping creation.}
+think [ansi(hm,INSTALL:)] Setting CharGen Configuration Flags...
+@set CharGen Configuration = WIZARD
+@set CharGen Configuration = SAFE
+@set CharGen Configuration = NO_COMMAND
+think [ansi(hm,INSTALL:)] Downloading CharGen Fonts...
+&FONT_SKILL.SET CharGen Configuration=hc
+&FONT_ATTRIBUTE.SET CharGen Configuration=hc
+&FONT_VANTAGE.SET CharGen Configuration=hc
+&FONT_FOOTER.BORDER CharGen Configuration=hb
+&FONT_FOOTER.TITLE CharGen Configuration=hm
+&FONT_FOOTER.CMDS CharGen Configuration=hc
+&FONT_FOOTER.INFO CharGen Configuration=hb
+&FONT_SETUP.TEXT CharGen Configuration=hc
+&FONT_SETUP.TITLE CharGen Configuration=hg
+&FONT_TITLE.BORDER CharGen Configuration=hb
+&FONT_TITLE.TEXT CharGen Configuration=hc
+&FONT_FEATURE.SET CharGen Configuration=hc
+&FONT_SETUP.TOKENS CharGen Configuration=hy
+&FONT_SETUP.CATEGORIES CharGen Configuration=hb
+&FONT_SETUP.INFO CharGen Configuration=hc
+&FONT_STATUS.TITLES CharGen Configuration=hm
+&FONT_STATUS.CATEGORIES CharGen Configuration=hb
+&FONT_STATUS.INFO CharGen Configuration=hc
+&FONT_STATUS.TOKENS CharGen Configuration=hy
+&FONT_COMPLETE.INFO CharGen Configuration=hc
+&FONT_COMPLETE.TITLE CharGen Configuration=hg
+&FONT_COMPLETE.WARN CharGen Configuration=hy
+&FONT_COMPLETE.ERROR CharGen Configuration=hr
+&FONT_COMPLETE.REGISTERED CharGen Configuration=hm
+think [ansi(hm,INSTALL:)] Downloading CharGen Configurations...
+&DATA_HEIGHT.NAME.SINGULAR CharGen Configuration=inch
+&DATA_HEIGHT.NAME.PLURAL CharGen Configuration=inches
+&DATA_ATTRIBUTE.START CharGen Configuration=10
+&DATA_MU.NAME CharGen Configuration='[mudname()]'
+&DATA_VERSION CharGen Configuration=1.98
+&DATA_TOKEN.NAME.PLURAL CharGen Configuration=tokens
+&DATA_TOKEN.NAME.SINGULAR CharGen Configuration=token
+&DATA_TOKEN.ATTRIB CharGen Configuration=40
+&DATA_TOKEN.ATTRIBUTES CharGen Configuration=40
+&DATA_TOKEN.SKILLS CharGen Configuration=30
+&DATA_TOKEN.VANTAGES CharGen Configuration=30
+&DATA_TOKEN.COMBO CharGen Configuration=100
+&DATA_WEIGHT.NAME.PLURAL CharGen Configuration=pounds
+&DATA_WEIGHT.NAME.SINGULAR CharGen Configuration=pound
+&DATA_AGE.NAME.PLURAL CharGen Configuration=years
+&DATA_AGE.NAME.SINGULAR CharGen Configuration=year
+&DATA_SKILLS.REQ.MIN CharGen Configuration=12
+&CNF_MU.TYPE CharGen Configuration=MUSH
+&CNF_STORAGE.FEATURES CharGen Configuration=1
+&CNF_STORAGE.ATTRIBUTES CharGen Configuration=1
+&CNF_STORAGE.SKILLS CharGen Configuration=1
+&CNF_STORAGE.VANTAGES CharGen Configuration=1
+&CNF_STORAGE.TOKENS CharGen Configuration=1
+&CNF_DELIMETER CharGen Configuration=|
+&CNF_FEATURE.ROUND CharGen Configuration=1
+&CNF_DELIMETER2 CharGen Configuration=&
+@switch [isdbref(num(CharGen Variables))]=0,{think [ansi(hm,INSTALL:)] No "CharGen Variables" object found -- creating...;@create CharGen Variables},1,{think [ansi(hm,INSTALL:)] "CharGen Variables" object already exists... skipping creation.}
+think [ansi(hm,INSTALL:)] Setting CharGen Variables Flags...
+@set CharGen Variables = WIZARD
+@set CharGen Variables = SAFE
+@set CharGen Variables = NO_COMMAND
+think [ansi(hm,INSTALL:)] Downloading CharGen Variables...
+&VAR_FEATURES CharGen Variables=Features
+&VAR_SKILLS CharGen Variables=Skills
+&VAR_TOKENS CharGen Variables=Tokens
+&VAR_VANTAGES CharGen Variables=Vantages
+&VAR_TOKENS.ATTRIBUTES CharGen Variables=Tokens.Attributes
+&VAR_TOKENS.SKILLS CharGen Variables=Tokens.Skills
+&VAR_TOKENS.VANTAGES CharGen Variables=Tokens.Vantages
+&VAR_ATTRIBUTES CharGen Variables=Attributes
+@switch [isdbref(num(CharGen Info))]=0,{think [ansi(hm,INSTALL:)] No "CharGen Info" object found -- creating...;@create CharGen Info},1,{think [ansi(hm,INSTALL:)] "CharGen Info" object already exists... skipping creation.}
+think [ansi(hm,INSTALL:)] Setting CharGen Info Flags...
+@set Chargen Info = WIZARD
+@set Chargen Info = SAFE
+@set Chargen Info = NO_COMMAND
+think [ansi(hm,INSTALL:)] Downloading CharGen Intro Information...
+&INFO_INTRO.STATUS Chargen Info=This returns a detailed printout of your current CharGen status. It is currently split into five sections.%r%r[space(5)]* Tokens%r[space(5)]* Attributes%r[space(5)]* Features%r[space(5)]- Skills%r[space(5)]- Vantages%r%r* indicates all fields are shown, regardless if they are set or not.%r- indicates only fields which are set are shown for this category.
+think [ansi(hm,INSTALL:)] Downloading CharGen Basics Information...
+&INFO_BASICS.AGE Chargen Info=The AGE of your character indicates how young or old you are. The age is set in '[v(DATA_AGE.Name.Plural)]' and must be between [xget(v(PTR_CharGen.DB),DATA_AGE.Min)] and [xget(v(PTR_CharGen.DB),DATA_AGE.Max)].
+&INFO_BASICS.HEIGHT Chargen Info=The HEIGHT of your character indicates how tall or short you are. The height is set in '[v(DATA_HEIGHT.Name.Plural)]' and must be between [xget(v(PTR_CharGen.DB),DATA_HEIGHT.Min)] and [xget(v(PTR_CharGen.DB),DATA_HEIGHT.Max)].
+&INFO_BASICS.WEIGHT Chargen Info=The WEIGHT of your character indicates how heavy or slim you are. The weight is set in '[v(DATA_WEIGHT.Name.Plural)]' and must be between [xget(v(PTR_CharGen.DB),DATA_WEIGHT.Min)] and [xget(v(PTR_CharGen.DB),DATA_WEIGHT.Max)].
+&INFO_BASICS.HAIR-COLOR Chargen Info=This is obviously the color of your hair. Valid choices are:%r%r[edit(xget(v(PTR_CharGen.DB),LIST_Hair-Color),space(1),\,[space(1)])]
+&INFO_BASICS.HAIR-LENGTH Chargen Info=This is obviously the length of your hair. Valid choices are:%r%r[edit(xget(v(PTR_CharGen.DB),LIST_Hair-Length),space(1),\,[space(1)])]
+&INFO_BASICS.HAIR-STYLE Chargen Info=This is obviously the hair-style of your hair. Valid choices are:%r%r[edit(xget(v(PTR_CharGen.DB),LIST_Hair-Style),space(1),\,[space(1)])]
+&INFO_BASICS.EYE-COLOR Chargen Info=This is obviously the color of your eyes. Valid choises are:%r%r[edit(xget(v(PTR_CharGen.DB),LIST_Eye-Color),space(1),\,[space(1)])]
+&INFO_BASICS.FEATURES Chargen Info=You can set any of your character's features by typing:%r%b%b%bchargen/feature <field>=<info>%r%rThe <field> can be one of any of the following:%r[u([v(PTR_CharGen.FUN)]/FORMAT_Columns,sort(xget(v(PTR_CharGen.MAIN),LIST_FEATURES),a),3,20,3)]%r%rFor more information on any <field>, type:%r%b%b%bchargen/info <field>
+&INFO_BASICS.COLONY Chargen Info=This is the Colony of Origin for your character. Valid choices are:%r%r[edit(xget(v(PTR_CharGen.DB),LIST_Colony),space(1),\,[space(1)])]
+&INFO_BASICS.SKIN-COLOR Chargen Info=This indicates the color of your skin. Valid choices are:%r%r[edit(xget(v(PTR_CharGen.DB),LIST_Skin-Color),space(1),\,[space(1)])]
+think [ansi(hm,INSTALL:)] Downloading CharGen Vantages Information...
+&INFO_VANTAGES.SPECIALIZATION Chargen Info=The specialization feature allows you to specify your advantages or disadvantages in more detail. Some vantages do not allow any specializations to be made, but for those that do -- the FIRST specialization is free!  Any additional specializations you make to that category will cost you the base-price.%r%rThere are also some categories that REQUIRE a specialization. If you attempt to complete CharGen while leaving these blank, you'll most certain receive some error messages.
+&INFO_VANTAGES.DISADVANTAGES Chargen Info=%r\[ DISADVANTAGES \]%r[edit(u([v(PTR_CharGen.FUN)]/FORMAT_Columns,sort(xget(v(PTR_CharGen.MAIN),LIST_Disadvantages),a),3,25),-,space(1))]%r
+&INFO_VANTAGES.ADVANTAGES Chargen Info=%r\[ ADVANTAGES \]%r[edit(u([v(PTR_CharGen.FUN)]/FORMAT_Columns,sort(xget(v(PTR_CharGen.MAIN),LIST_Advantages),a),3,25),-,space(1))]%r
+&INFO_VANTAGES.VANTAGES Chargen Info=[u([v(PTR_CharGen.MAIN)]/TRI_LIST.Vantages)]
+think [ansi(hm,INSTALL:)] Downloading CharGen Skills Information...
+&INFO_SKILLS.SKILLS-LIST Chargen Info=The <field> can be any one of the following:%r[iter(lattr([v(PTR_CharGen.MAIN)]/LIST_SKILLS.*),%r%b[edit(##,LIST_SKILLS.,space(0))]%r[u([v(PTR_CharGen.FUN)]/FORMAT_Columns,xget(v(PTR_CharGen.MAIN),##),4,18,3)]%r)]%rFor more information on any <field>, type:%r%b%b%bchargen/info <field>
+&INFO_SKILLS.SKILLS Chargen Info=To see a list of skills, type:%r%b%b%bchargen/info <field>%r%r* NOTE: <field> can be one of the following:%r[u([v(PTR_CharGen.FUN)]/FORMAT_Columns,squish(edit(lattr([v(PTR_CharGen.MAIN)]/LIST_SKILLS.*),LIST_SKILLS.,space(0))),4,16,7)]
+&INFO_SKILLS.SPACE Chargen Info=List of SPACE skills:%r[u([v(PTR_CharGen.FUN)]/FORMAT_Columns,xget(v(PTR_CharGen.MAIN),LIST_SKILLS.Space),3,24,3)]
+&INFO_SKILLS.VEHICLE Chargen Info=List of VEHICLE skills:%r[u([v(PTR_CharGen.FUN)]/FORMAT_Columns,xget(v(PTR_CharGen.MAIN),LIST_SKILLS.VEHICLE),3,24,3)]
+&INFO_SKILLS.MEDICAL Chargen Info=List of MEDICAL skills:%r[u([v(PTR_CharGen.FUN)]/FORMAT_Columns,xget(v(PTR_CharGen.MAIN),LIST_SKILLS.MEDICAL),3,24,3)]
+&INFO_SKILLS.COMBAT Chargen Info=List of COMBAT skills:%r[u([v(PTR_CharGen.FUN)]/FORMAT_Columns,xget(v(PTR_CharGen.MAIN),LIST_SKILLS.COMBAT),3,24,3)]
+&INFO_SKILLS.ARTISTIC Chargen Info=List of ARTISTIC skills:%r[u([v(PTR_CharGen.FUN)]/FORMAT_Columns,xget(v(PTR_CharGen.MAIN),LIST_SKILLS.ARTISTIC),3,24,3)]
+&INFO_SKILLS.GENERAL Chargen Info=List of GENERAL skills:%r[u([v(PTR_CharGen.FUN)]/FORMAT_Columns,xget(v(PTR_CharGen.MAIN),LIST_SKILLS.GENERAL),3,24,3)]
+&INFO_SKILLS.PROFESSIONAL Chargen Info=List of PROFESSIONAL skills:%r[u([v(PTR_CharGen.FUN)]/FORMAT_Columns,xget(v(PTR_CharGen.MAIN),LIST_SKILLS.PROFESSIONAL),3,24,3)]
+&INFO_SKILLS.CRAFT Chargen Info=List of CRAFT skills:%r[u([v(PTR_CharGen.FUN)]/FORMAT_Columns,xget(v(PTR_CharGen.MAIN),LIST_SKILLS.CRAFT),3,24,3)]
+&INFO_SKILLS.SURVIVAL Chargen Info=List of SURVIVAL skills:%r[u([v(PTR_CharGen.FUN)]/FORMAT_Columns,xget(v(PTR_CharGen.MAIN),LIST_SKILLS.SURVIVAL),3,24,3)]
+&INFO_SKILLS.SCIENCE Chargen Info=List of SCIENCE skills:%r[u([v(PTR_CharGen.FUN)]/FORMAT_Columns,xget(v(PTR_CharGen.MAIN),LIST_SKILLS.SCIENCE),3,24,3)]
+&INFO_SKILLS.SOCIAL Chargen Info=List of SOCIAL skills:%r[u([v(PTR_CharGen.FUN)]/FORMAT_Columns,xget(v(PTR_CharGen.MAIN),LIST_SKILLS.SOCIAL),3,24,3)]
+&INFO_SKILLS.PARAMILITARY Chargen Info=List of PARAMILITARY skills:%r[u([v(PTR_CharGen.FUN)]/FORMAT_Columns,xget(v(PTR_CharGen.MAIN),LIST_SKILLS.PARAMILITARY),3,24,3)]
+think [ansi(hm,INSTALL:)] Downloading CharGen Attributes Information...
+&INFO_ATTRIBUTES.STRENGTH Chargen Info=This dictates the strength of your character. The higher the number, the stronger you are.%r%rThe specified strength must be between [v(DATA_STRENGTH.Min)] and [v(DATA_STRENGTH.Max)].%rIt costs [v(DATA_Strength.Cost)] [v(DATA_TOKEN.NAME.Plural)] to raise your Strength one unit.
+&INFO_ATTRIBUTES.DEXTERITY Chargen Info=This dictates the dexterity of your character. The higher the number, the quicker you are.%r%rThe specified dexterity must be between [v(DATA_DEXTERITY.Min)] and [v(DATA_DEXTERITY.Max)].%rIt costs [v(DATA_Dexterity.Cost)] [v(DATA_TOKEN.NAME.Plural)] to raise your Dexterity one unit.
+&INFO_ATTRIBUTES.HEALTH Chargen Info=This dictates the health of your character. The higher the number, the healthier you are.%r%rThe specified health must be between [v(DATA_HEALTH.Min)] and [v(DATA_HEALTH.Max)].%rIt costs [v(DATA_Health.Cost)] [v(DATA_TOKEN.NAME.Plural)] to raise your Health one unit.
+&INFO_ATTRIBUTES.INTELLIGENCE Chargen Info=This dictates the intelligence of your character. The higher the number, the smarter you are.%r%rThe specified intelligence must be between [v(DATA_INTELLIGENCE.Min)] and [v(DATA_INTELLIGENCE.Max)].%rIt costs [v(DATA_Intelligence.Cost)] [v(DATA_TOKEN.NAME.Plural)] to raise your Intelligence one unit.
+&INFO_ATTRIBUTES.ATTRIBUTES Chargen Info=You can set any of your character's attributes by typing:%r%b%b%bchargen/attribute <field>=<info>%r%rThe <field> can be any one of the following:%r%b%b%b[edit(v(LIST_ATTRIBUTES),space(1),\,[space(1)])]%r%rFor more information on any <field>, type:%r%b%b%bchargen/info <field>
+think [ansi(hm,INSTALL:)] Downloading CharGen Miscellaneous Information...
+&INFO_DEFAULT Chargen Info=ERROR: There is no information available on: %0
+&INFO_ERROR Chargen Info=[u(DESC_DEFAULT)]
+@switch [isdbref(num(CharGen Functions))]=0,{think [ansi(hm,INSTALL:)] No "CharGen Functions" object found -- creating...;@create CharGen Functions},1,{think [ansi(hm,INSTALL:)] "CharGen Functions" object already exists... skipping creation.}
+think [ansi(hm,INSTALL:)] Setting CharGen Functions Flags...
+@set CharGen Functions = WIZARD
+@set CharGen Functions = SAFE
+@set CharGen Functions = NO_COMMAND
+think [ansi(hm,INSTALL:)] Downloading CharGen Functions...
+&FUN_LIST.VANTAGES CharGen Functions=[cat(xget(v(PTR_CharGen.MAIN),LIST_ADVANTAGES),xget(v(PTR_CharGen.MAIN),LIST_DISADVANTAGES))]
+&FUN_LIST.FEATURES CharGen Functions=[xget(v(PTR_CharGen.MAIN),LIST_FEATURES)]
+&FUN_LIST.SKILLS CharGen Functions=[iter(lattr([v(PTR_CharGen.MAIN)]/LIST_SKILLS.*),xget(v(PTR_CharGen.MAIN),##))]
+&FUN_PLR.REG CharGen Functions=[or(not(hasflag(%0,Unregistered)),not(and(member(org(%0),xget(v(PTR_Org.DB),DATA_ORG.Generic)),lt(rank(%0),3))))]
+&FORMAT_COLUMNS CharGen Functions=%b[iter(%0,ifelse(mod(#@,ifelse(and(words(%1),gt(trunc(%3),0)),trunc(%1),div(78,abs(%2)))),ifelse(mod(dec(#@),ifelse(and(words(%1),gt(trunc(%1),0)),trunc(%1),div(78,abs(%2)))),ljust(mid(##,0,%2),%2),[space(ifelse(words(%3),trunc(%3),0))][ljust(mid(##,0,%2),%2)]),[mid(##,0,%2)]%r))]
+&FUN_PLR.AUTH CharGen Functions=[match(type(%0),PLAYER)]
+&FUN_PLR.SETUP CharGen Functions=[or(hasattr(%0,xget(v(PTR_CharGen.VAR),VAR_ATTRIBUTES)),hasattr(%0,ATTRIBUTE_[first(xget(v(PTR_CharGen.MAIN),LIST_Attributes))]))]
+&SYN_COLUMNS CharGen Functions=Syntax: [u([v(PTR_CharGen.FUN)]/FORMAT_Columns,Text,# Columns,Column Width,Preceeding Spaces)]
+&FUN_CALC.TOTAL.COST CharGen Functions=[trim(squish(u([v(PTR_CharGen.FUN)]/FUN_CALC2.Total.Cost,%0,%1)))]
+&FUN_CALC2.TOTAL.COST CharGen Functions=[setq(8,0)][iter(extract(xget(v(PTR_CharGen.DB),LIST_[first(xget(v(PTR_CharGen.DB),DATA_SKILL.%0))].[extract(xget(v(PTR_CharGen.DB),DATA_SKILL.%0),2,1)].COST),1,inc(sub(%1,xget(v(PTR_CharGen.DB),DATA_[first(xget(v(PTR_CharGen.DB),DATA_SKILL.%0))].[extract(xget(v(PTR_CharGen.DB),DATA_SKILL.%0),2,1)].BASE)))),setq(8,add(%q8,##)))]%q8
+&FUN_PLR.WIZ CharGen Functions=[hasflag(%0,Wizard)]
+@switch [isdbref(num(CharGen Errors))]=0,{think [ansi(hm,INSTALL:)] No "CharGen Errors" object found -- creating...;@create CharGen Errors},1,{think [ansi(hm,INSTALL:)] "CharGen Errors" object already exists... skipping creation.}
+think [ansi(hm,INSTALL:)] Setting CharGen Errors Flags...
+@set CharGen Errors = WIZARD
+@set CharGen Errors = SAFE
+@set CharGen Errors = NO_COMMAND
+think [ansi(hm,INSTALL:)] Downloading CharGen Errors...
+&ERR_!HAVE_SPEC CharGen Errors=But you do not have specialty '%1' in Vantage %0.
+&ERR_HAVE_SPEC CharGen Errors=You already have specialization '%1' in Vantage %0.
+&ERR_!HAVE_VANTAGE CharGen Errors=You do not have vantage '%0'.
+&ERR_SPEC_!IN-RANGE CharGen Errors=You may [edit(only have between [extract(xget(v(PTR_CharGen.DB),DATA_VANTAGE.%0),2,1)] and [extract(xget(v(PTR_CharGen.DB),DATA_VANTAGE.%0),3,1)],only have between 0 and 0,not have any)] specialties in vantage '%0'.
+&ERR_HAVE_VANTAGE CharGen Errors=You already have vantage '%0'.
+&ERR_HAVE_DISQUAL CharGen Errors=You have one of these disqualifiers and cannot add '%0':%r[space(7)]- [edit(extract(xget(v(PTR_CharGen.DB),DATA_VANTAGE.%0),4,99),space(1),\,[space(1)])]
+&ERR_BAD_SKILL CharGen Errors='%0' is not a valid Skill.
+&ERR_BAD_VANTAGE CharGen Errors='%0' is not a valid Vantage.
+&ERR_PLR_REG CharGen Errors=You cannot use this command once you are registered.
+&ERR_CMD_BAD_LOC CharGen Errors=You cannot use that command here.
+&ERR_PLR_!SETUP CharGen Errors=You have not been setup yet. Return to the beginning of CharGen and type 'chargen/setup'. If you have already done this, contact an Administrator.
+&ERR_PLR_!AUTH CharGen Errors=You are not an authorized player.
+&ERR_BAD_FEATURE CharGen Errors='%0' is not a valid Feature.
+&ERR_FEATURE_!VALID CharGen Errors='%1' is not a valid %0 type.
+&ERR_FEATURE_!IN-RANGE CharGen Errors=The specified %0 must be between [xget(v(PTR_CharGen.DB),DATA_%0.Min)] and [xget(v(PTR_CharGen.DB),DATA_%0.Max)]
+&ERR_BAD_ATTRIBUTE CharGen Errors='%0' is not a valid Attribute.
+&ERR_ATTRIBUTE_!VALID CharGen Errors=Your %0 Attribute must be between [xget(v(PTR_CharGen.DB),DATA_%0.Min)] and [xget(v(PTR_CharGen.DB),DATA_%0.Max)].
+&ERR_TOKENS_!ENOUGH CharGen Errors=You do not have enough [lcstr(v(DATA_TOKEN.Name.Plural))] for that.
+&ERR_SKILL_REQUIRED CharGen Errors=That skill requires the '%1' skill with at least [v(DATA_SKILLS.Req.Min)] %0.
+&ERR_SKILL_MAXED CharGen Errors=You are already maxed out on the '%0' skill.
+&ERR_!HAVE_SKILL CharGen Errors=You do not have skill '%0'.
+&ERR_SPEC_MAXED CharGen Errors=You are already maxed out on the '%1' specialty.
+&ERR_!HAVE_SPEC.SKILL CharGen Errors=But you do not have specialty '%1' in Skill %0.
+&ERR_STATUS-TYPE_!VALID CharGen Errors=That is not a valid status-type. Use:%r[space(7)]tokens, attributes, features, vantages, skills
+&ERR_SPEC2_!IN-RANGE CharGen Errors=You may [edit(only have between [extract(xget(v(PTR_CharGen.DB),DATA_SKILL.%0),6,1)] and [extract(xget(v(PTR_CharGen.DB),DATA_SKILL.%0),7,1)],only have between 0 and 0,not have any)] specialties in skill '%0'.
+&ERR_VIC_!VALID CharGen Errors='%0' is not a valid player.
+@switch [isdbref(num(CharGen Exits))]=0,{think [ansi(hm,INSTALL:)] No "CharGen Exits" object found -- creating...;@create CharGen Exits},1,{think [ansi(hm,INSTALL:)] "CharGen Exits" object already exists... skipping creation.}
+think [ansi(hm,INSTALL:)] Setting CharGen Exits Flags...
+@set CharGen Exits = WIZARD
+@set CharGen Exits = SAFE
+@set CharGen Exits = NO_COMMAND
+think [ansi(hm,INSTALL:)] Downloading CharGen Exit Messages...
+@DESCRIBE CharGen Exits=[switch(first(name(me)),Continue,You see the next phase of CharGen: [rest(after(name(loc(me)),<))],Back,You see the previous phase of CharGen: [rest(after(name(loc(me)),<))],Exit,You see a way out of CharGen and back to [name(loc(me))].,You see an entrance way to [name(loc(me))].)]
+@set CharGen Exits/DESCRIBE=no_command visual
+@FAILURE CharGen Exits=For some reason, you cannot go that way.
+@set CharGen Exits/FAILURE=no_command
+@ODROP CharGen Exits=walks in from [name(home(me))].
+@set CharGen Exits/ODROP=no_command
+@OSUCCESS CharGen Exits=[switch(first(name(me)),Continue,continues to the next phase of CharGen.,Back,returns to the previous phase of CharGen.,Exit,departs the CharGen area.,walks toward [name(loc(me))].)]
+@set CharGen Exits/OSUCCESS=no_command
+@SUCCESS CharGen Exits=[switch(first(name(me)),Continue,You continue to the next phase of CharGen.,Back,You return to the previous phase of CharGen.,Exit,You depart the CharGen area.,You walk toward [name(loc(me))].)]
+@set CharGen Exits/SUCCESS=no_command
+@parent CharGen Parent=CharGen Configuration
+@parent CharGen Database=CharGen Configuration
+@parent CharGen Variables=CharGen Configuration
+@parent Chargen Info=CharGen Configuration
+@parent CharGen Functions=CharGen Configuration
+@parent CharGen Errors=CharGen Configuration
+@parent CharGen Exits=CharGen Configuration
+think [ansi(hm,INSTALL:)] Attempting to set pointers...
+@fo me=&PTR_CHARGEN.Main CharGen Configuration=[num(CharGen Parent)]
+@fo me=&PTR_CHARGEN.DB CharGen Configuration=[num(CharGen Database)]
+@fo me=&PTR_CHARGEN.Cnf CharGen Configuration=[num(CharGen Configuration)
+@fo me=&PTR_CHARGEN.Var CharGen Configuration=[num(CharGen Variables)]
+@fo me=&PTR_CHARGEN.Fun CharGen Configuration=[num(CharGen Functions)]
+@fo me=&PTR_CHARGEN.Info CharGen Configuration=[num(CharGen Info)]
+@fo me=&PTR_CHARGEN.Err CharGen Configuration=[num(CharGen Errors)]
+@fo me=&PTR_CHARGEN.Exit CharGen Configuration=[num(CharGen Exits)]
+think [ansi(hm,INSTALL:)] [ansi(hr,Download is complete!  Now you must do the following:)]
+think [ansi(hm,INSTALL:)] Now you need to create the rooms for your CharGen system.  It is
+think [ansi(hm,INSTALL:)] recommended that you make six (6) rooms, but you can make less than
+think [ansi(hm,INSTALL:)] that. Parent each room to the 'CharGen Parent' object, and each exit
+think [ansi(hm,INSTALL:)] to the 'CharGen Exit' object.  You must then set what type of CharGen
+think [ansi(hm,INSTALL:)] commands each room will have.  To do this, set the FLAG_CHARGEN
+think [ansi(hm,INSTALL:)] attribute in each room to any combination of the following:
+think [ansi(hm,INSTALL:)] %b%bIntro, Basics, Attributes, Skills, Vantages, Final
+think [ansi(hm,INSTALL:)] %b%b(you may indicate more than one per room if you want)
+think [ansi(hm,INSTALL:)] 
+think [ansi(hm,INSTALL:)] Finally you want to customize your code.  Most of the things that are
+think [ansi(hm,INSTALL:)] easy to customize are in the 'CharGen Configuration' and 'CharGen
+think [ansi(hm,INSTALL:)] Database' objects.
+think [ansi(hm,INSTALL:)] 
+think [ansi(hm,INSTALL:)] Of course, the Copyright code should remain on the object AS IS -- it
+think [ansi(hm,INSTALL:)] should not be modified.  The only exception to this is IF you improve
+think [ansi(hm,INSTALL:)] the code or add to it, you may ADD 'Modified By: <your name>' after
+think [ansi(hm,INSTALL:)] the original text.  Type 'chargen/help' for additional information.
+think [ansi(hm,INSTALL:)] 
+think [ansi(hm,INSTALL:)] If you have any problems with this code, e-mail:
+think [ansi(hm,INSTALL:)] %b%b[ansi(hc,worldwar@bb6.betterbox.net)]
+@set me=!quiet
+
+
+
+
+
+

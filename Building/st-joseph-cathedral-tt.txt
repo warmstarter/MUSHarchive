@@ -1,0 +1,591 @@
+@@ From Gwen Morse:
+@@
+@@ In the mid 90's on the oWOD Texas Twilight MUSH, I took over the builder
+@@ For the in-game cathedral. It was a two room building, a small cathedral room,
+@@ with a small crypt area. Inspired by the real Cathedral of Saint John the Divine
+@@ in NYC, and the book "The Pillars of the Earth" by Ken Follett, I set out to
+@@ construct a giant in-game Gothic cathedral.
+@@
+@@ How this stone monstrosity was hiding under the plaster of the original modest
+@@ Cathedral structure was never explained.
+@@
+@@ Credits: All coding (as such) is my own.
+@@ Many of the descriptions of the primary cathedral areas were blatantly
+@@ plagiarized from Ken Follett's book. They are architectural in nature and
+@@ therefore easy to pick out.
+@@ Most others were written by myself.
+@@ The rose window is based on a real tapestry.
+@@ A few +views were donated and the author's IC name included in the text.
+@@
+@@ This construction requires the Modal Space also found in my archives.
+@@
+@@ Apparently I did very little spell checking. I'm not sure why staff
+@@ approved my poor spelling.
+@@
+@@ You will have to go through and figure out dbref editing by context.
+@@ Additionally there are some non-quotable lines to be edited out.
+
+@dig/teleport Triforium - St. Joseph's Cathedral
+&MODE_LOOK_2 here=[space(5)]This is the main part of the Triforium level, a continuous stone balcony which runs along the three sides of the Nave and into the Transepts, before edging into the Chancel's Choir. A row of stained-glass windows, each about twenty feet tall, nestles between the tall marble buttresses and support piers. Glancing down over the four-foot raining, you see the rows of pews fanning out below you. You suddenly realize just how far down eighty feet is.
+&MODE_LOOK_1 here=[space(5)]This walkway is the junction between the Triforium balcony and the entrance to the staircase leading down to the main level. Beautiful carved wooden quire stalls line the stone wall extending up about twenty feet - they replace a stained-glass window. The wood is carved into fanciful shapes of suffering figures, saints being martyred in a multitude of ways. These contrast grimly with the overall cheerful ornamentation found in the rest of the building.
+&MODE_NAMES here=Walkway Triforium Choir
+&MODE_LOOK_3 here=[space(5)]You stand in the beautiful Choir arcade, right near the pipe organ. A sturdy riser with four sections takes up most of the space besides the organ.
+&MODE_CROSS_1_2 here=[u(WALKS)] from the Walkway to the Triforium.
+&MODE_CROSS_2_1 here=[u(WALKS)] from the Triforium back to the Walkway.
+&MODE_CROSS_2_3 here=[u(WALKS)] along the Triforium and into the Choir arcade.
+&MODE_CROSS_3_2 here=[u(WALKS)] out of the Choir arcade and back into the Triforium.
+&MODE_NAMES_1 here=Triforium
+&MODE_NAMES_2 here=Walkway Choir
+&MODE_NAMES_3 here=Triforium
+&MODE_COMMANDS_1 here=at the Walkway junction near the stairs.
+&MODE_COMMANDS_2 here=on the Triforium looking around.
+&MODE_COMMANDS_3 here=in the Choir arcade near the Organ and Risers
+&JUDGENOTE here=This room has a Faith Rating of: 4. It may be activated by anyone with the Christian-denominational merit True Faith. It does not effect supernatural characters unless there is a Faithful person present. See pgs 23-24 "Hunters Hunted"
+@lock here/JUDGENOTE
+&JUDGENOTE-2 here=This location interferes with Hedge Magic or Psychic Ability rolls in the following manner: +1 diff to Psychic Abilities / +2 diff to Hedge Magic. This is in effect at all times.
+@lock here/JUDGENOTE-2
+@Forwardlist here=#6974
+@Prefix here=From the Triforium above,
+@Filter here={* has arrived.},{* has left.},{* has connected.},{*has disconnected.},{*granite spiral staircase*},{* moves into view.},{* moves out of view.},
+&JUDGENOTE-PEOPLE here=There are always between 3 and 5 NPC people wandering the Triforium at any particular time. As long as the main doors are 'open' (unlocked), there will be people here. They will be alert enough to notice openly unusual or sacrilegious behavior and interfere.
+@lock here/JUDGENOTE-PEOPLE
+&CPU here=#9917
+&STATUS here=ON-LINE
+&JUDGENOTE-AEGIS here=The aegis security system has been installed in this room. As long as the 'status' attribute in this room is 'on-line', or it's otherwise noted, the system is activated. Please 'ex #9917/*judge*' for more information.
+@lock here/JUDGENOTE-AEGIS
+&APPROVAL here=This room and all its exits were approved by Madam Medusa: Sat Sep  7 10:31:59 1996
+&INSPECTED here=Yes #6988 #6986
+@lock here/INSPECTED
+&VIEW_SPANISH-CROSS here=%rA heavy Renaissance cross made of stolen Incan gold sits in a red velvet lined Lexan display case. Almost a pound in weight, the fabulous cross draws the eyes with its heavily carved surface that is only slightly worn away with time and many caressing hands. The very nature of the casting is reminiscent of Old World style. Its glittering surface is augmented by 11 square cut one-quarter carat emeralds that burn blue in their depths. A single square cut one-carat emerald sits at the center of the cross. A tiny card is set alongside the splendid cross in its case, announcing 'Restoration performed by Tawny Alexander'.%r%rOOC note: 'ex here/judgenote_cross-security' for security notes.%r
+@desc here=[space(5)]This is the second level Triforium, a balcony that follows the Roman cross shape of the cathedral. The floor of the balcony is level with the base of twenty-foot tall windows also named the Triforium windows. Reaching sixty feet up from the crown of those are the Clerestory windows, which end at the vault. (In other words: the walls extend up another eighty feet above the floor of the Triforium, with two levels of windows). Several people move along the walkway. Some are craning their heads up to stare at the windows, while others curiously glance around at each other and you. Looking over the four-foot tall stone balustrade railing guarding the edge of the walkway, you can make out the main cathedral floor down about eighty feet below.
+@Adesc here=@switch [u(status)]=ON-LINE,{@tr [u(cpu)]/main=You see an image of the PC: [name(%#)] who is dbref [%#],%#};@pemit %#=NOTE: Please '+view' important descriptions.
+&JUDGENOTE_CROSS-SECURITY here=The gold cross detailed in the '+view spanish-cross' is protected by several layers of security. First is a Lexan (bullet/shatterproof) case. Second is a series of breakage detectors along the case that will sound an alarm if the case is opened or successfully shattered. Finally, Aegis eqipment is pointed at the case (ex here/judgenote-aegis).
+@lock here/JUDGENOTE_CROSS-SECURITY
+&DBD_CONT here=1
+&DBD_CMND here=1
+&DBI_CONT here=#10970
+@set here=DARK
+@set here=UNFINDABLE
+@set here=COMMANDS
+You walk down the granite spiral staircase to the main level. Eighty feet sure is a long way down.
+St. Joseph's Cathedral(#6974RDJMa$)
+Contents:
+Confessional(#1836OUe$)
+Obvious exits:
+Down <D>  Up <U>  Wooden Door <WD>  Street <O>
+NOTE: Please '+view' important descriptions, and looks at the 'map' for more details on the layout.
+
+@dig/teleport St. Joseph's Cathedral
+@desc here=%r[space(5)]This is St. Joseph's cathedral, dedicated to Saint Joseph, foster father of Jesus and husband of Mary. Huge wooden doors lead out to the street, flanked by quality reproductions of classical DaVinci angels clasping golden bowls of holy water. A red carpet is rolled out starting at the entrance doorway and leading straight down the main aisleway of the cathedral to the base of the elevated altar. The cathedral is a gothic roman cross shape, with a point-arched vault ceiling over bay walls. Tall and impossibly-slender column piers provide support for the ceiling and a balcony running along the second level as well as outline the magnificent stained glass windows that form the walls. The bottom level of windows is eighty feet tall, and called the Arcade. The middle level of windows is twenty feet tall and is called the Triforium, as is the balcony that runs along it around the whole interior of the building. The upper level of windows is called the Clerestory, and at sixty feet tall, they just meet the lower edge of the vault above.%r[space(5)]Pews fan out the length and breadth of the area, dotted with parishoners praying intently. People trickle in and out of side chapels along the Arcade, and occasionally you hear footsteps echo from above. There seems to be a good amount of visitors here, no matter what the time of day.
+&JUDGENOTE here=This room has a Faith Rating of: 4. It may be activated by anyone with the Christian-denominational merit True Faith. It does not effect supernatural characters unless there is a Faithful person present. See pgs 23-24 "Hunters Hunted"
+@lock here/JUDGENOTE
+&MODE_NAMES here=Nave Crossing Chancel NTrans STrans Pew1 Pew2 Altar
+&MODE_NAMES_1 here=Crossing Pew1 Pew2
+&MODE_NAMES_2 here=Nave Chancel NTrans STrans
+&MODE_NAMES_3 here=Crossing Altar
+&MODE_NAMES_4 here=Crossing
+&MODE_NAMES_5 here=Crossing
+&MODE_NAMES_6 here=Nave
+&MODE_NAMES_7 here=Nave
+&MODE_NAMES_8 here=Chancel
+&MODE_CROSS_1_2 here=[u(WALKS)] through the Nave into the Crossing.
+&MODE_CROSS_2_1 here=[u(WALKS)] from the Crossing into the Nave.
+&MODE_CROSS_1_6 here=[u(WALKS)] from the main part of the Nave into Pew 1.
+&MODE_CROSS_6_1 here=exits Pew 1, and [u(WALKS)] into the main part of the Nave.
+&MODE_CROSS_1_7 here=[u(WALKS)] from the main part of the Nave into Pew 2.
+&MODE_CROSS_7_1 here=exits Pew 2, and [u(WALKS)] into the main part of the Nave.
+&MODE_CROSS_2_3 here=[u(WALKS)] from the Crossing into the Chancel.
+&MODE_CROSS_3_2 here=[u(WALKS)] through the Chancel into the Crossing.
+&MODE_CROSS_2_4 here=[u(WALKS)] from the Crossing into the North Transept tower.
+&MODE_CROSS_4_2 here=[u(WALKS)] through the North Transept tower into the Crossing.
+&MODE_CROSS_2_5 here=[u(WALKS)] from the Crossing into the South Transept tower.
+&MODE_CROSS_5_2 here=[u(WALKS)] through the South Transept tower into the Crossing.
+&MODE_CROSS_2_8 here=[u(WALKS)] from the main part of the Chancel to behind the Altar.
+&MODE_CROSS_8_2 here=exits from behind the Altar, and [u(WALKS)] into the main part of the Chancel.
+&MODE_COMMANDS_1 here=in the Nave near the Pews
+&MODE_COMMANDS_2 here=in the center of the Crossing
+&MODE_COMMANDS_3 here=in the Chancel near the Altar
+&MODE_COMMANDS_4 here=in the North Transept tower
+&MODE_COMMANDS_5 here=In the South Transept tower
+&MODE_COMMANDS_6 here=seated in Pew 1 of the Nave
+&MODE_COMMANDS_7 here=seated in Pew 2 of the Nave
+&MODE_COMMANDS_8 here=behind the Altar in the Chancel
+&MODE_LOOK_1 here=[space(5)]This is the Nave. Seemingly endless rows of pews take up most of the space. Looking up, you see the overwhelming splendor of the vault. Trim, white stone arches called "ribs" criss-cross each bay, and the wide triangular spaces between are filled with smooth grey concrete. The connection of the piers, buttresses, and ribs gives the illusory appearance of downward-curving birds wings along the length of the vault. You might want to check out the stained glass 'windows' visible in the Nave.
+&MODE_LOOK_2 here=[space(5)]This is the Crossing, so named because you must walk through here to cross to any other part of the Cathedral, and it forms the center of the Roman Cross shape of the building. There are no windows or walls in the Crossing (it represents the 'air' space in the center of the two tower Transepts and the Chancel and Nave), only the vault high above. This is the most intricate area of the vault in the whole cathedral, both because the pattern of the ribbing changes from a simple criss-cross to the cross being surrounded by extra arches turning it into a four-pointed star, and because the concrete has been carved with eye-pleasing triangular maze patterns. Straight above you on the exterior of the vault is the cathedral spire, which houses the auto-chimes.
+&MODE_LOOK_3 here=[space(5)]Here in the Chancel, you can look at the altar platform or turn back and look down length of the cathedral towards the main entrance. Looking down the sweeping length of the building, it looks unreal: it is too tall, too slender, too graceful and fragile to stand up. It seems to have no walls, nothing to hold up the stone vault but a row of willowy piers reaching eloquently upward as they outline tremendous glass windows. The piers continue to form the ribs meeting at the crown of the vault, curving and supporting like the overarching branches of a stand of hardwood trees. Light from outside shines through the colored glass in the windows, making it glow, the effect almost magical. The Chancel is divided into two parts. Near the Crossing is the quire, with carved hardwood stalls for the Benedictine sisters of the abbey to rest during services. Beyond the quire is the high Altar area.
+&MODE_LOOK_4 here=[space(5)]You are in the North Transept tower. About thirty square feet in size, it extends up the full height of the rest of the Cathedral. There is a side altar dedicated to Mary, the Holy Mother. A collection of icon statuettes depict Mary in her traditional blue and white robes, a smiling woman surrounded by a heavenly host of winged angels. A fan-shaped shelf with votive candles spreads out at her feet. Several candles are lit, their flames flickering slightly as if defying some ill wind.
+&MODE_LOOK_5 here=[space(5)]You are in the South Transept tower. About thirty square feet in size, it extends up the full height of the rest of the Cathedral. There is a side altar dedicated to Saint Joseph, the foster father of Jesus and the husband of Mary. An icon statuette of Saint Joseph depicts him in his traditional brown robes, holding a plank of wood and an axe. The peacefully sublime expression on his face is often particularly relaxing to people who notice it. A fan-shaped shelf with votive candles spreads out at his feet. Several candles are lit, their flames flickering defiantly in a slight breeze.
+&MODE_LOOK_6 here=[space(5)]You are seated in Pew 1. The solid wooden length of the pew extends past where you're sitting, polished smooth by both the original builder and countless faithful who have rested here before you. The back of the pew in front of yours has missals and songbooks arranged neatly in a latticed rack. A padded kneeler can be lowered to provide minimal relief from the cold marble floors.
+&MODE_LOOK_7 here=[space(5)]You are seated in Pew 2. The solid wooden length of the pew extends past where you're sitting, polished smooth by both the original builder and countless faithful who have rested here before you. The back of the pew in front of yours has missals and songbooks arranged neatly in a latticed rack. A padded kneeler can be lowered to provide minimal relief from the cold marble floors.
+&MODE_LOOK_8 here=[space(5)]The elevated Altar area is dominated by the altar itself, a large slab apparently solid stone covered with a white linen cloth embroidered with gold and silver cross images. Behind the altar is the highly ornamented tabernacle, curtained with more decorated fabric. There are lit candles in heavy polished candlesticks on either side of the tabernacle enclosure. Eighty feet above curves a pointed arch, the point of which supports the base of the tall hardwood cross, with a carved-ivory corpus in larger-than-life detail. The crucifix arch arcs OVER the altar area, so that it rests seemingly in midair, rather than on the wall. Seasonal colored cloth hangings with simple pictoral images and text messages flutter below either side of the base of the cross. To each side of the altar is a wooden pulpit with a microphone neatly wired in place. Each one supports a different closed book.
+&VIEW_CORNERSTONE here=%rThe cornerstone was set in place on March 3, 1846. The first processional mass was held upon its completion on September 14, 1861.%r
+@Forwardlist here=#1929
+@Prefix here=From Down in the Chapel
+&JUDGENOTE-2 here=This location interferes with Hedge Magic or Psychic Ability rolls in the following manner: +1 diff to Psychic Abilities / +2 diff to Hedge Magic. This is in effect at all times.
+@lock here/JUDGENOTE-2
+@Adesc here=@switch [u(status)]=ON-LINE,{@tr [u(cpu)]/main=You see an image of the PC: [name(%#)] who is dbref [%#],%#};@pemit %#=NOTE: Please '+view' important descriptions, and looks at the 'map' for more details on the layout.
+&CPU here=#9917
+&STATUS here=OFF-LINE
+&WINDOW here=$windows:@switch [extract(u(dbd_cont),match(u(dbi_cont),%#),1)]=1,{@pemit %#=%rPlease specify which window you want to see: the 'rose window', the 'tree window', the 'emperor window' or the 'triple window'.%r},{@pemit %#=You're not close enough to the Nave to look at the windows.}
+@VA here=#6139
+@Filter here={* has arrived.},{* has left.},{* has connected.},{*has disconnected.},{*granite spiral staircase*},
+&JUDGENOTE-PEOPLE here=There are always between 10 and 50 NPC's (outside of daily Mass) wandering the main Cathedral area at any particular time. As long as the main doors are 'open' (unlocked), there will be people here. They will be alert enough to notice openly unusual or sacriligious behavior and interfere.
+@lock here/JUDGENOTE-PEOPLE
+&UNLOCK-CMD here=$unlock *:@switch [member(u(#6982/staff), %#)]=0,{@pemit %#=You don't have the key to that door.},{@switch %0=wd,{@pemit/contents me=%N unlocks the Wooden Door. Type 'wd' to use this exit.; @unlock #6982; @wait 90=@pemit/contents me=The Wooden Door shuts and is locked again.;@wait 91=@lock #6982=!rcc2_lock/0},down,{@pemit/contents me=%N unlocks the grate leading Down. Type 'down' to use this exit.; @unlock #5239; @wait 90=@pemit/contents me=The grate leading Down is locked again.; @wait 91=@lock #5239=!rcc2_lock/0},{@pemit %#=Try 'unlock wd' or 'unlock down', instead.}}
+&JUDGENOTE-AEGIS here=The aegis security system has been installed in this part of the Cathedral. ALTHOUGH the 'status' attribute in this area may be 'off-line', the area forming the chancel and altar (which is normally not an area where anyone but religious go) is ALWAYS on-line. This represents that the public may freely 'wander' the nave, STrans, NTrans, and crossing. While the off-line aegis cameras do not 'pattern match', other video surveillance records all activity throughout the entire chapel area.
+@lock here/JUDGENOTE-AEGIS
+&WINDOW2 here=$* window:@switch [extract(u(dbd_cont),match(u(dbi_cont),%#),1)]=1,{@switch %0=rose,{@pemit %#=%rLooking up, one of the windows catches your attention. The great round Rose window, seated over the western entry door, is a breathtaking accomplishment. A reconstruction of the famous 'Tapestry of Creation', each 'petal' in the rose shape was based on a separate panel from the tapestry. In the roundel center, God the Creator - depicted as a solemn young man with a wise expression - raises His hand to bless the beginning of Creation. Radiating from Him are the six days of creation, long slivers of brilliant color depicting the stages from the separation of the firmament, to the making of Eve. Mini-rose windows at the four cardinal points surrounding the greater central window depict angels seated on inflated goatskins from which blow the four winds. The window is done in dominant shades of green and brown, with bright patches of primary reds and yellows in the 'petals'.},triple,{@pemit %#=%rLooking up, one of the windows catches your attention. Long, narrow, pointed triple windows sit to either side of the great Rose window. The stone hood-moldings are carved with human heads while within the capital arches chevrons interlock into a herringbone pattern. Images of Eve and the Serpent to the left of the Rose window are balanced by images of Adam and Eve to the right.},emperor,{@pemit %#=%rLooking up, one of the windows catches your attention. A series of 20 windows marches along the Arcade. Each is a depiction of one of the Holy Roman Emperors in their royal robes - crowned, haloed, with Latin blessings worked into the glass. Forming the background image to each ruler are tiny geometric glass shapes representing windows and arches - as if each Emperor himself posed before a stained-glass window.},tree,{@pemit %#=%rLooking up, one of the windows catches your attention. Cerulean and dark ruby, patched together with green and white and a touch of goldenrod yellow form the colored pieces of one Nave window. Each of the panels in the tall pointed window are separated by stone tracery - slender carved stone supports. An adaption of the Chartres 'Jesse Tree', it shows a pictorial genealogy of Christ from King David to Joseph, each male member shown on a separate flowering branch of the tree. Jesus, himself, is seated cross-legged in the center. Light streams in through the window, back-lighting it brilliantly, till it almost glows.},{@pemit %#=%rPlease specify which window you want to see: the 'rose window', the 'tree window', the 'emperor window' or the 'triple window'.%r}},{@pemit %#=You're not close enough to the Nave to look at the windows.}
+&MAP-CMD here=$map:@pemit %#={%r[center(*,79,*)]%r[center(Cathedral Map,79)]%r%r[space(15)]----[space(2)]----%r[space(15)]|[space(3)]#1[space(3)]|%r[space(15)]|[space(8)]|[space(20)] First Floor Key%r---------------|[space(8)]|-----------[space(10)]#1=North Transept%r|[space(15)][space(9)][space(10)]|[space(10)]#2=Nave%r|[space(6)]#2[space(6)][space(4)]#3[space(4)][space(4)]#4[space(4)]|[space(10)]#3=Crossing%r|[space(15)][space(9)][space(10)]|[space(10)]#4 Chancel (and altar)%r---------------|[space(8)]|-----------[space(10)]#5 South Transept%r[space(15)]|[space(8)]|%r[space(15)]|[space(3)]#5[space(3)]|%r[space(15)]----[space(2)]----%r%rExtra information: The Main Exit is to the left, or 'west' of the Nave. The Confessional door is off the South Transept. The Wooden Door is off the North Transept.%r%r[center(*,79,*)]%r}
+&APPROVAL here=This room and all its exits were approved by Madam Medusa: Sat Sep  7 10:29:03 1996
+&INSPECTED here=Yes #5239 #6985 #6982 #6978
+@lock here/INSPECTED
+&VIEW_CRUCIFIX here=%rEighty feet above the floor of the Chancel spans a wide arch, the point of which supports the base of the tall hardwood cross with a carved-ivory corpus in larger-than-life detail. The arch arcs OVER the altar area, so that the crucifix floats seemingly in midair, rather than on the wall. Christ rests wearily against the heavy wooden cross, His pale limbs barely draped with a bit of rag carved into soft folds. His palms and overlapped feet are pierced with dark nails (which appear to be faintly stained red, but that could be a trick of the light). Scrolled above His thorn-crowned head are the letters "INRI". His face has a decidedly Semetic cast to it, and the ivory has yellowed with age, a fair indication that the corpus was carved many centuries ago. Seasonal colored cloth hangings with simple pictoral images and text messages flutter below either side of the base of the cross.%r
+&VIEW_CANDELABRAS here=%rTwelve standing candelabras made of bronze and tipped with silver are set into specially designed niches along the length of the building. All these 8 foot candelabra were obviously gifts to the Church from a noble in the distant past, and preserved till they were placed in this cathedral. Each bears a distinctive coat of arms that is worked several times into the base plates. Ten of these massive pieces can hold up to 12 candles each on their tiered outspread arms. Two larger than the rest can hold up to 18 candles in such a way to maximize the spread of their light to the surrounding altar area where they have been placed. Each has a fine etching of fleur-de-lis into the silver that surrounds the base cuff and the arms of the candle-holders. A slight crimping in a few portions of the fleur-de-lis patterns and coats-of-arms are the only indication that these have been restored from some previously unseemly state.%rRestoration, courtesy Tawny Alexander%r
+&VIEW_BAPTISMAL-FONT here=%rLooking through the grilled gate locking the baptismal chapel you see a large copper bowl resting comfortably on its base of clawed feet. This was used by priests to baptize people on the battlefield before combat during the Dark Ages. A man could immerse himself to the waist when standing in it while it was filled. Now it has the more peaceful obligation of being used in modern infant and adult baptisms. Almost worn away is a faint, half-discernible pattern of diamonds that are etched into its outer surface. One foot has been replaced with a newer and harder copper that practically matches the color of the older copper. Portions of its curving lip are penny bright with replacement material while other portions are darker but still brightly-polished copper from many centuries ago.%rRestoration, courtesy Tawny Alexander%r
+&JUDGENOTE-COMPUTER here=There is an IBM PC clone here in the room. It is hooked up to the internal cathedral LAN, as well as having a modem for outside dial-up connections. It accesses the St-Joes.org account system for outside connections.up
+&DBD_CONT here=1
+&DBD_CMND here=1
+&DBI_CONT here=#10970
+@set here=DARK
+@set here=JUMP_OK
+@set here=MONITOR
+@set here=AUDIBLE
+@set here=COMMANDS
+You open a blacked iron grate set into the floor and head to the crypt area down below, closing the grate behind you.
+Crypt - St. Joseph's Cathedral(#6976RMU$)
+Obvious exits:
+Up <U>
+NOTE: Please '+view' important descriptions and treat the 'tables' as rooms.
+
+@dig/teleport Crypt - St. Joseph's Cathedral
+&JUDGENOTE here=This room has a Faith Rating of: 4. It may be activated by anyone with the Christian-denominational merit True Faith. It does not effect supernatural characters unless there is a Faithful person present. See pgs 23-24 "Hunters Hunted"
+@lock here/JUDGENOTE
+&JUDGENOTE-2 here=This location interferes with Hedge Magic or Psychic Ability rolls in the following manner: +1 diff to Psychic Abilities / +2 diff to Hedge Magic. This is in effect at all times.
+@lock here/JUDGENOTE-2
+&JUDGENOTE-PEOPLE here=There are always between 2 and 3 NPC people filtering in and out of the Crypt at any particular time. As long as the main doors are 'open' (unlocked), there will be people here. They will be alert enough to notice openly unusual or sacriligious behavior and interfere.
+@lock here/JUDGENOTE-PEOPLE
+@Adesc here=@switch [u(status)]=ON-LINE,{@tr [u(cpu)]/main=You see an image of the PC: [name(%#)] who is dbref [%#],%#};@pemit %#=NOTE: Please '+view' important descriptions and treat the 'tables' as rooms.
+&CPU here=#9917
+&STATUS here=ON-LINE
+&JUDGENOTE-AEGIS here=The aegis security system has been installed in this room. As long as the 'status' attribute in this room is 'on-line', or it's otherwise noted, the system is activated. Please 'ex #9917/*judge*' for more information.
+@lock here/JUDGENOTE-AEGIS
+&JUDGENOTE_EXTRA-ROOMS here=There is a complex of 'extra' rooms off the main crypt room, as indicated by +view and descs. This includes a library, a variety of storage rooms, a tunnel to the Cloisters building, ect. These rooms can be accessed as necessary by RP in Crypt room, and are not included to save db space. They are still protected by the Aegis security system.
+@lock here/JUDGENOTE_EXTRA-ROOMS
+&VIEW_EXTRA-ROOMS here=There is a series of extra rooms off the main crypt area. This includes several small rooms storing cathedral valuables (gold chalices and plates, expensive vestments, ect), a complex of library rooms, a collection of workrooms, and a locked 'wooden door'. Several rooms can be 'assumed' to be here while not listed, if required for cathedral-based RP and standard to cathedrals.
+&WOODEN-DOOR here=$wooden door:@switch [member(u(#6982/STAFF),%#)]=0,{@pemit/contents #6976=%N tries the wooden door, but it is securely locked.},{@pemit/contents #6976=%N opens a wooden door in one wall, and moves out of view. The door clicks closed behind %N.; @tel %#=#2301; @pemit/contents #2301=%N opens a wooden door in one wall, and steps into view. The door clicks closed behind %N.}
+@desc here=[space(5)]This is the lower level of the cathedral, the underground Crypt where deceased religious and important local Catholic figures have been entombed. Doors and hallways lead off in several directions, into a maze-like series of passages and rooms.
+&CLEANUPSEATSA here=^* has left.:@switch member(iter(rest(lnum(add(v(maxplaces), 1))), [v(place##names)]), %#)=>0,{[setq(0, [extract(iter(rest(lnum(add(v(maxplaces), 1))), [switch(words(v(place##names)), 0,, [repeat(%b##,words(v(place##names)))])]), member(iter(rest(lnum(add(v(maxplaces), 1))), [v(place##names)]), %#), 1)])];
+&place[r(0)]names me=[remove(v(place[r(0)]names), %#)];@dolist [v(place[r(0)]names)]={@pemit ##=%N stands, leaving the place.};@pemit %#=You stand, leaving your seat.}
+&CLEANUPSEATSB here=^* has disconnected.:@switch member(iter(rest(lnum(add(v(maxplaces), 1))), [v(place##names)]), %#)=>0,{[setq(0, [extract(iter(rest(lnum(add(v(maxplaces), 1))), [switch(words(v(place##names)), 0,, [repeat(%b##, words(v(place##names)))])]), member(iter(rest(lnum(add(v(maxplaces), 1))), [v(place##names)]), %#), 1)])];@dolist [v(place[r(0)]names)]={@pemit ##=%N stands, leaving the place.};
+&place[r(0)]names me=[remove(v(place[r(0)]names), %#)]}
+&MAXPLACES here=3
+&MAXSEATS1 here=10
+&PLACE1 here=Crypt
+&MAXSEATS2 here=10
+&PLACE2 here=Library
+&MAXSEATS3 here=10
+&PLACE3 here=Storage
+&BOOKS-CMD here=$grill*:[switch(hasattr(#6976,place2names),1,[switch(member(v(place2names),%#),0,,@pemit/contents #6976=%N approaches the 'grille' in the Library and looks at it.;@pemit %#=%rThe grille consists of an outer heavy iron grid fitted with spikes several inches long[,] then a wooden screen screen of heavy slats[,] and finally an inner pair of black shutters that can be closed[,] and presumably locked. They reach from floor to ceiling[,] and bar the entry between the library and the lower level of the Benedictine Cloisters. There are no visible locks on this side. A small bell can be rung to get the attention of the Sisters on duty on the other side of the grille. A revolving cupboard about three feet off the floor[,] large enough to hold a pile of books[,] is built into the wall next to the grille.)])]
+&MODE_LOOK_1 here=XXX
+&MODE_LOOK_2 here=This is a large, well-lit library room (about 100' x 100') with a secondary room only slightly smaller past a wide archway framed with shelves. The walls are shelved, and the length of the room is filled with shelved stacks. Three tables each cornered with chairs and an elaborate door-style grille (type 'grille' to look at it) in the north wall are the only things to break up the monotony of books. That, and a small framed picture of bluebell flowers around the inscription: May your prayers ascend to God on this happy day and draw upon you the blessings of Heaven.%r[space(5)]The books available in this library are as follows: The main room is filled with books on a variety of 'liberal-arts' style studies: The standard collection of fiction, non-fiction, and reference books to be found in a high-school library. The secondary room concentrates on religious studies. Contact a staffer, and point them to the '
+&judgenote-library' note on #6139 for more.%r
+&MODE_LOOK_3 here=XXX
+&VIEW_CRYPTS here=%rDeceased PC religious have crypts here. (Among the many other crypts).%r%r Archbishop Hale, predecessor to Archbishop Justin Xavier and called the 'Fencing Bishop'. Died 2001. Beloved by his diocese and certain to be counted among the blessed.%r Monsignor Dominic Radaceau, assigned to the University of Dallas for research. Died 2005. Died a martyr's death, mourned by those who knew him.%r
+@set here=MONITOR
+@set here=UNFINDABLE
+@set here=COMMANDS
+BLDR021 opens a wooden door in one wall, and moves out of view. The door clicks closed behind BLDR021.
+Entryway - The Cloisters(#2301RMU$)
+Obvious exits:
+Novice Luisa's Room <NLR>  Geria's Room <GR>  EXit <EX>
+BLDR021 opens a wooden door in one wall, and steps into view. The door clicks closed behind BLDR021.
+NOTE: Please '+view' important descriptions or try 'tablehelp' for seating.
+
+@dig/teleport Entryway - The Cloisters
+&INSPECTED here=Yes #3509 #2031
+@lock here/INSPECTED
+@desc here=[space(5)]Cold. Austere. These are the first two impressions you get of the convent entryway, warmed only when you take in the beauty of the architecture. The tall marble walls repeat the style of the cathedral - buttressed piers framing breathtaking stained glass windows. Hallways lead off to the various offices, dormitories, work areas, and the Chapter Hall. There is a fine mosaic floor you can appreciate more fully with +view. A thick wooden door with a heavy lock leads further into the complex. This building houses a completely self-contained community of religious.
+@succ here=[space(5)] A pair of Sisters and a younger Novice are always 'posted' on-duty, to take messages, and deal with visitors. Men are NOT allowed in the building, and WILL be 'escorted' out. Women may only visit in the Entryway. NO VISITORS are allowed in the other rooms except as noted in '+view extra-rooms'.
+&JUDGENOTE here=The Cloisters have a Faith rating of 3. It may be activated by anyone with the Christian-denomination merit True Faith. It does not effect supernatural creatures unless there is a Faithful person present. This location interferes with Hedge Magic or Psychic Abilities in the following manner: +1 diff to Psychic Abilities / +2 diff to Hedge Magic (except Theurgy). This is in effect at all times. These attributes include the ENTIRE building.
+@lock here/JUDGENOTE
+@Adesc here=@switch [u(status)]=ON-LINE,{@tr [u(cpu)]/main=You see an image of the PC: [name(%#)] who is dbref [%#],%#};@pemit %#=NOTE: Please '+view' important descriptions or try 'tablehelp' for seating.
+&CPU here=#9917
+&STATUS here=ON-LINE
+&JUDGENOTE-AEGIS here=The aegis security system has been installed in this building. As long as the 'status' attribute in this building is 'on-line', or it's otherwise noted, the system is activated. Please 'ex #9917/*judge*' for more information.
+@lock here/JUDGENOTE-AEGIS
+&JUDGENOTE-CONSTRUCTION here=There are NO windows that open/close in individual rooms. There may be stained glass windows, but they will include stone tracery, and basically be decoration rather than a possible means of entrance/escape (tracery refers to carved lengths of stone that seperate bits of glass. No holes larger than a human head may be poked in them). They are 10' above the ground, and extend 5' up to the ceiling. All rooms are stone (or, more properly, concrete faced with stone - there are no 'vents'/'ducts'/'shafts' in the walls). There are old-style heavy wooden doors doors in and out. Wiring and heating systems are hidden under metal protectors along the seams of the rooms. Solar power backs up the main electrical and water heating systems with panels situated along the roof. THESE NOTES OVERRIDE INDIVIDUAL ROOM DESCS!
+@lock here/JUDGENOTE-CONSTRUCTION
+&WOODEN-DOOR here=$wooden door:@switch [member(u(#6982/STAFF),%#)]=0,{@pemit/contents #2301=%N tries the wooden door, but it is securely locked.},{@pemit/contents #2301=%N opens a wooden door in one wall, and moves out of view. The door clicks closed behind %N.; @tel %#=#6976; @pemit/contents #6976=%N opens a wooden door in one wall, and steps into view. The door clicks closed behind %N.}
+&VIEW_EXTRA-ROOMS here=%rHallways lead off to the many rooms in this abbey complex. A 'wooden door' near the entryway catches your attention, as well as the Sisters sitting watching the entrance with alert patience. Several rooms can be accessed as necessary by RP in the main Cloisters area: the common Dormitory, the abbey chapel, the refrectory, the chapter hall, the work area, the scriptorium and library, the guest rooms (female only), storage and security rooms, etc.
+&VIEW_RANKS here=%rPostulancy: the lowest rank. A postulant joins the religious 'community', and has a small ceremony where they ask to be taught the rule of the convent and be shown the religious way of life. They are required to wear a specific 'uniform', are bound by simple vows, and must meet all the entry requirements. IC postulancy is one IC year (minimum). A postulant has no change to her name. All PC's who retroactively join must go through the postulancy, new characters may start as novices or professed sisters. She may ask to be released at any time, though, returning will of course be difficult.%r%rNovitiate: the middle rank. A postulant may present herself to the community after one year, and ask to start her novitiate. The community will vote, and if she's found acceptable, she will be allowed to join as a Novice. At this point, she has a more elaborate ceremony, changes her 'uniform' slightly, is allowed to wear the Benedictine crest, and is bound by more specific vows. The vows are traditionally taken for one or three years at a time. A novice may not progress to professed sister until she is at least 25 years old. She may ask to be released at any time - special dispensation is required unless is it occurs at the time she would normally renew her vows.%r%rProfessed Sisters: a traditional 'nun'. She is bound by solemn, perpetual (lifetime) vows, and may only be released with special dispensation. She may either dress in a full habit, or a modified version of the novice and postulants uniforms. Professed Sisters may perform certain ceremonies excluded from the other two groups (Liturgy of the Hours, etc), may offer the sacrament of Baptism, and may perform some parts of the mass (excluding blessing the Eucharist).%r%rThere are two levels of professed sisters: Choir nuns are an 'elevated' form of religious (above standard Professed Sister). There is no real IC difference in 'rank' between the two groups, choir nuns are simply better educated, and are the group the abbess and other teachers or leaders are chosen from. A choir nun is expected to start with (or buy during training) the following stats: Lingustics: Latin, Leadership or Etiquette 1, Expression or Public-speaking 1, Music 2, Singing 2, Theology 3 OR Theology 2 + a 3 in one of the following groups: Medicine, Instruction, Psychology, Diplomacy, Law, Artistry, Crafts.
+&VIEW_DRESS-CODE here=%rThe dress code for postulants is: calf-length grey skirt, any solid color blouse or shirt with a loose grey vest. The shoes must be black, polished, and 'sensible' or 'comfortable' looking. A white veil with a white band covers the hair, but leaves the face bare.%r%rThe dress code for novice sisters is: an ankle-length grey skirt, white long-sleeved blouse/shirt, and a loose grey vest. The shoes must be black, polished, and 'sensible' or 'comfortable' looking. A white veil with a white band covers the hair, but leaves the face bare. They may wear a pin or embroidered vest patch with the Benedictine crest on it.%r%rThe dress code for professed sisters is: same as a novice, or may be modified by replacing the skirt with trousers. A black veil with a white band covers the hair, but leaves the face bare.%r%rWinter garb replaces the vest with a grey sweater.%r
+&VIEW_RESTRICTIONS here=XXX
+&VIEW_MOSAIC here=%rTiny tiles have been arranged into a large, simple, but visually striking mosaic on the floor of this entryway. The white background is overlaid with a black cross; the pointed equilateral arms separate the shield-shaped mosaic into four quarters with bold, script-styled letters in each section. Facing in from the doorway, the top left holds a 'c', the top right a 's', the bottom left a 'p', and the bottom right a 'b'. This is the simple crest of the supporters of the Rule of Saint Benedict. Bold red tiles outline the stark black-and-white pattern.%r
+&CLEANUPSEATSA here=^* has left.:@switch member(iter(rest(lnum(add(v(maxplaces), 1))), [v(place##names)]), %#)=>0,{[setq(0, [extract(iter(rest(lnum(add(v(maxplaces), 1))), [switch(words(v(place##names)), 0,, [repeat(%b##,words(v(place##names)))])]), member(iter(rest(lnum(add(v(maxplaces), 1))), [v(place##names)]), %#), 1)])];
+&place[r(0)]names me=[remove(v(place[r(0)]names), %#)];@dolist [v(place[r(0)]names)]={@pemit ##=%N stands, leaving the place.};@pemit %#=You stand, leaving your seat.}
+&CLEANUPSEATSB here=^* has disconnected.:@switch member(iter(rest(lnum(add(v(maxplaces), 1))), [v(place##names)]), %#)=>0,{[setq(0, [extract(iter(rest(lnum(add(v(maxplaces), 1))), [switch(words(v(place##names)), 0,, [repeat(%b##, words(v(place##names)))])]), member(iter(rest(lnum(add(v(maxplaces), 1))), [v(place##names)]), %#), 1)])];@dolist [v(place[r(0)]names)]={@pemit ##=%N stands, leaving the place.};
+&place[r(0)]names me=[remove(v(place[r(0)]names), %#)]}
+&MAXPLACES here=3
+&MAXSEATS1 here=3
+&PLACE1 here=Maple Bench
+&MAXSEATS2 here=2
+&PLACE2 here=Short Oak Bench
+&MAXSEATS3 here=9
+&PLACE3 here=Long Oak Table
+&JUDGENOTE-WATCHERS here=There are 3 Benedictine nuns (two professed Sisters and a Novice on rotating duty) who wait in the entryway area at a desk station to monitor who comes in and out of the building. Since male PCs and NPC's may not realize they're 'not' allowed in, the Sisters monitor that as well as interact with female visitors, and generally keeping an eye on the other Sisters moving in and out of the location. They watch the door and entryway area at all times. Presume an alertness pool of 6 for the two Sisters and 5 for the Novice. Finally, there are between 3 and 5 other Sisters and visitors moving throughout the entryway area, as well as between 10 and 40 nuns throughout the building at any particular time. They will notice any openly unusual or sacrilegious behavior and react to it appropriately.
+@lock here/JUDGENOTE-WATCHERS
+&JUDGENOTE_SECURITY-ROOM here=There is a security room within the complex of rooms making up the Benedictine Cloisters. This includes a monitor system to track what is happening on the aegis cameras throughout the grounds, video tape equipment to replay tapes at a later time, locked cabinets to store the tapes in, etc. ex '#9917/judgenote-videotapes' for details on the video tape system. A visitor/intruder looking for this room should make a series of search rolls. PC residents of the building know where the room is as do they know the location of every other common room within the building.
+@lock here/JUDGENOTE_SECURITY-ROOM
+@set here=MONITOR
+@set here=UNFINDABLE
+@set here=COMMANDS
+You open the Exit and step outside, shutting it firmly behind you.
+Cathedral Courtyard(#6981RDU$)
+Obvious exits:
+Iron Gates <IG>  Our Lady of Angels - Shelter <SH>  The Cloisters <TC>  Community Center <CC>  Rectory <R>  Wooden Door <WD>
+OOC: Check the +views for important information.
+You open the door to the Shelter and step inside, shutting it firmly behind you.
+Our Lady of Angels Shelter(#1779RAM)
+Obvious exits:
+EXit <EX>
+
+@dig/teleport Our Lady of Angels Shelter
+@desc here=%tThe interior walls of the Shelter have been painted a subtle but pleasant shade of light blue, and the furnishing are neutral beige and pine. There are several reproduction prints of famous paintings, including Van Gogh's "Sunflowers" and one amateur work that appears to be a watercolor of a vase of purple-and-gold irises.
+&MODE_NAMES here=Entrance Tables Beds
+&MODE_NAMES_1 here=Tables Beds
+&MODE_NAMES_2 here=Entrance Beds
+&MODE_NAMES_3 here=Entrance Tables
+&MODE_CROSS_1_2 here=[u(WALKS)] from near the Entrance towards the Tables.
+&MODE_CROSS_2_1 here=[u(WALKS)] from the Tables to near the Entrance.
+&MODE_CROSS_2_3 here=[u(WALKS)] from the Tables towards the Beds.
+&MODE_CROSS_3_2 here=[u(WALKS)] from the Beds to near the Entrance.
+&MODE_CROSS_3_1 here=[u(WALKS)] from Beds to near the Entrance.
+&MODE_CROSS_1_3 here=[u(WALKS)] from near the Entrance towards the Beds.
+&MODE_COMMANDS_1 here=standing near the Entrance
+&MODE_COMMANDS_2 here=sitting at the Tables
+&MODE_COMMANDS_3 here=by the Beds
+&MODE_LOOK_1 here=%tYou are in the Entrance of the main Shelter room. The room is divided by a low wall into two smaller areas - one for sleeping, and one for eating and recreation. Doors lead off into private rooms.
+&MODE_LOOK_2 here=%tHere seated at one of the many pine tables, you have a good view of the eating and recreational area. There is a small door leading off into the kitchen, but only the cook and his staff is allowed in there. There is a large TV bolted high in one corner, as well as a rather cheap but functional CD stereo system.
+&MODE_LOOK_3 here=%tHere near one of the many beds, you are struck by how efficient and private the spacing is at the same time. Each person has a bed, padlocked footlocker, desk with lamp, and a hospital-style curtain that can be pulled shut around their area. This is the area for transient homeless, semi-permanent residents of the Shelter get private rooms.
+&INSPECTED here=Yes #1537
+@lock here/INSPECTED
+@Adesc here=@switch [u(status)]=ON-LINE,{@tr [u(cpu)]/main=You see an image of the PC: [name(%#)] who is dbref [%#],%#}
+&CPU here=#9917
+&STATUS here=ON-LINE
+&JUDGENOTE-AEGIS here=The aegis security system has been installed in this building. As long as the 'status' attribute in this building is 'on-line', or it's otherwise noted, the system is activated. Please 'ex #9917/*judge*' for more information.
+@lock here/JUDGENOTE-AEGIS
+&JUDGENOTE-PEOPLE here=There are always between 5 and 15 NPC's here (residents and cathedral staff) at any particular time. This is an active shelter. People are always here. They will be alert enough to notice openly unusual or sacrilegious behavior and interfere.
+@lock here/JUDGENOTE-PEOPLE
+&DBD_CONT here=1
+&DBD_CMND here=1
+&DBI_CONT here=#10970
+@set here=ABODE
+@set here=MONITOR
+You open the Exit and step outside, shutting it firmly behind you.
+Cathedral Courtyard(#6981RDU$)
+Obvious exits:
+Iron Gates <IG>  Our Lady of Angels - Shelter <SH>  The Cloisters <TC>  Community Center <CC>  Rectory <R>  Wooden Door <WD>
+OOC: Check the +views for important information.
+You open the door to the Community Center and step inside, shutting it firmly behind you.
+Community Center(#9366R)
+Obvious exits:
+EXit <EX>
+
+@dig/teleport Community Center
+@desc here=This is the main area of the community center. Rows of tables and chairs dominate the room, canted to provide those seated with visual access to the Bingo display. Some of the tables have food and soft drinks arranged on them.
+@Adesc here=@switch [u(status)]=ON-LINE,{@tr [u(cpu)]/main=You see an image of the PC: [name(%#)] who is dbref [%#],%#}
+&CPU here=#9917
+&STATUS here=ON-LINE
+&JUDGENOTE-AEGIS here=The aegis security system has been installed in this building. As long as the 'status' attribute in this building is 'on-line', or it's otherwise noted, the system is activated. Please 'ex #9917/*judge*' for more information.
+@lock here/JUDGENOTE-AEGIS
+You opens Exit and steps outside, shutting it firmly behind you.
+Cathedral Courtyard(#6981RDU$)
+Obvious exits:
+Iron Gates <IG>  Our Lady of Angels - Shelter <SH>  The Cloisters <TC>  Community Center <CC>  Rectory <R>  Wooden Door <WD>
+OOC: Check the +views for important information.
+You open the door to the Rectory and step inside, shutting it firmly behind you.
+Rectory(#9368RALM)
+Contents:
+Set of 6 goblets
+Obvious exits:
+Father Mercante's Room <FMR>  Bishop's Office <BO>  Exit <E>
+NOTE: Please '+view' important descriptions or try 'tablehelp' for seating.
+
+@dig/teleport Rectory
+@desc here=[space(5)]This is the waiting area for the Cathedral offices. The walls are oak-panelled, and are decorated with various religious paintings. In the middle of the wall opposite the offices is an alcove with a statue of St. Joseph in it. Comfortable couches are on either side of the alcove. Besides the door leading out, and the doors to the offices, there is a hallway leading up to stairs which go to the second floor, where living quarters are found. The floor here is typical institutional flat carpet, but many green plants are scattered about the room to lend it a feeling of life. Several pictures are arranged along the walls - representations of bible scenes, and a portrait of the present pontiff - his Holiness, Pope John Paul the Second.
+&INSPECTED here=Yes #1173 #7105 #9374 #9370
+@lock here/INSPECTED
+&JUDGENOTE here=This room has a Faith Rating of: 1. It may be activated by anyone with the Christian-denominational merit True Faith. It does not effect supernatural characters unless there is a Faithful person present. See pgs 23-24 "Hunters Hunted" All rooms in this building have a minimum Faith Rating of 1. This includes the private offices of each of the player characters, and includes NPC staff members as well.
+@lock here/JUDGENOTE
+@succ here=[space(5)]Cathedral staff members cluster in a corner, working on some project or another almost silently. They glance over at you as you enter, then return to their paperwork.
+@Adesc here=@switch [u(status)]=ON-LINE,{@tr [u(cpu)]/main=You see an image of the PC: [name(%#)] who is dbref [%#],%#};@pemit %#=NOTE: Please '+view' important descriptions or try 'tablehelp' for seating.
+&CPU here=#9917
+&STATUS here=ON-LINE
+&JUDGENOTE-AEGIS here=The aegis security system has been installed in this building. As long as the 'status' attribute in this building is 'on-line', or it's otherwise noted, the system is activated. Please 'ex #9917/*judge*' for more information.
+@lock here/JUDGENOTE-AEGIS
+&JUDGENOTE-PEOPLE here=There are always between 5 and 10 NPC's here (cathedral staff and visitors) at any particular time. People are always in the Rectory. They will be alert enough to notice openly unusual or sacriligious behavior and interfere.
+@lock here/JUDGENOTE-PEOPLE
+&JUDGENOTE-SAFE here=Hidden behind a picture of Pope John Paul the Second is a safe. It's small, designed to hold documents, and some precious items (perhaps 6 cubic feet of space?). It's heavily reinforced steel, but standard difficulty to crack.
+@lock here/JUDGENOTE-SAFE
+&VIEW_PORTRAITS here=%rDressed in his cardinal-red robes, with a white circle of cloth covering his balding head, the Pope John Paul the Second beams out at you from a reproduction of a oil portrait, one hand raised in benediction. The heavy carved wood frame surrounding the picture is leafed in gold.%r%rFurther along the wall is a second picture, a photograph of another old, pleasant-faced man you probably don't recognize. A nameplate beneath the picture identifies him as the Abbot Primate of the Order of Saint Benedict.%r
+&CLEANUPSEATSA here=^* has left.:@switch member(iter(rest(lnum(add(v(maxplaces), 1))), [v(place##names)]), %#)=>0,{[setq(0, [extract(iter(rest(lnum(add(v(maxplaces), 1))), [switch(words(v(place##names)), 0,, [repeat(%b##,words(v(place##names)))])]), member(iter(rest(lnum(add(v(maxplaces), 1))), [v(place##names)]), %#), 1)])];
+&place[r(0)]names me=[remove(v(place[r(0)]names), %#)];@dolist [v(place[r(0)]names)]={@pemit ##=%N stands, leaving the place.};@pemit %#=You stand, leaving your seat.}
+&CLEANUPSEATSB here=^* has disconnected.:@switch member(iter(rest(lnum(add(v(maxplaces), 1))), [v(place##names)]), %#)=>0,{[setq(0, [extract(iter(rest(lnum(add(v(maxplaces), 1))), [switch(words(v(place##names)), 0,, [repeat(%b##, words(v(place##names)))])]), member(iter(rest(lnum(add(v(maxplaces), 1))), [v(place##names)]), %#), 1)])];@dolist [v(place[r(0)]names)]={@pemit ##=%N stands, leaving the place.};
+&place[r(0)]names me=[remove(v(place[r(0)]names), %#)]}
+&MAXPLACES here=4
+&MAXSEATS1 here=5
+&PLACE1 here=Oak Table
+&MAXSEATS2 here=9
+&PLACE2 here=Long Sectional Couch
+&MAXSEATS3 here=3
+&PLACE3 here=Corner Table
+&MAXSEATS4 here=2
+&PLACE4 here=Small Private Couch
+&VIEW_EXTRA-ROOMS here=%rThis is the cathedral Rectory. It appears that there are offices along the first floor, as well as living quarters for PC male religious and NPC cathedral staff on the second. Rooms appropriate to a Rectory may be assumed and moved through/RPed even though they don't exist to conserve db space. There are always people in this building no matter what the time of day, as the desc of this room notes.%r
+@set here=ABODE
+@set here=LINK_OK
+@set here=MONITOR
+You open Exit and steps outside, shutting it firmly behind you.
+Cathedral Courtyard(#6981RDU$)
+Obvious exits:
+Iron Gates <IG>  Our Lady of Angels - Shelter <SH>  The Cloisters <TC>  Community Center <CC>  Rectory <R>  Wooden Door <WD>
+OOC: Check the +views for important information.
+
+@dig/teleport Cathedral Courtyard
+@desc here=%tYou are in the Courtyard between the Cathedral and the support buildings. This is a surprisingly large place considering its location in a busy metropolitan area - a rather unsubtle reminder of the power of the Roman Catholic Church. The main courtyard is a brick square flanking each of the support buildings, with a fountain in the center. The forest and herb gardens are to the west.
+&MODE_NAMES here=Fountain Garden Forest
+&MODE_NAMES_1 here=Garden Forest
+&MODE_NAMES_2 here=Fountain Forest
+&MODE_NAMES_3 here=Fountain garden
+&MODE_CROSS_1_2 here=[u(WALKS)] from near the Fountain into the herb Garden.
+&MODE_CROSS_2_1 here=[u(WALKS)] from the herb Garden to near the Fountain.
+&MODE_CROSS_2_3 here=[u(WALKS)] from the herb Garden towards the birch Forest.
+&MODE_CROSS_3_2 here=[u(WALKS)] from the birch Forest into the herb Garden.
+&MODE_CROSS_3_1 here=[u(WALKS)] from the birch Forest to near the Fountain.
+&MODE_CROSS_1_3 here=[u(WALKS)] from near the Fountain into the birch Forest.
+&MODE_COMMANDS_1 here=standing near the Fountain
+&MODE_COMMANDS_2 here=in the herb Garden
+&MODE_COMMANDS_3 here=in the birch Forest
+&MODE_LOOK_1 here=%tCarved from a rather chalky shade of grey granite is fountain capped by a pair of statues representing what appears to be Jesus with Mary Magdalene. Kneeling at the feet of the rather weary-looking Christ is a young woman, her long hair uncovered, with a pitcher that endlessly pours water just past Christ's feet. You could probably 'drink' some water if you wanted to. Smoothed granite chunks have been have been stacked and cemented together to represent rocky shores around the fountain pool. The water looks cool and very clear. The scene acts as a daily reminder that it is not always the most socially acceptable people who have the strongest and deepest faith.
+&MODE_LOOK_2 here=%tThis garden is a traditional English knot garden with symmetrical planting beds and graveled paths. It is shaped like a wagon wheel with a sundial at the center, low growing herbs as the spokes, and four beds between the spokes which have a small tree centered in each; a bay tree, a dwarf cinnamon, a dwarf nutmeg, and a tree rose. Shrub and hedge-like herbs surround the trees. The seasonal herbs are used to help flavor the foods served in the shelter and orphanage.
+&MODE_LOOK_3 here=%tThe "forest" (if you can really call it that) is a small selection of varieties of birch trees, from Silver to Paper-Bark, that were lovingly protected during the initial construction of the Cathedral. Paths wander amidst the trees, covered with old fallen leaves that soften the ground. Large green leaves deck the birch trees, shivering with every movement of the air. A few bright flowers--wood violets and foxglove--peek out from behind greenery. Star jasmine climbs the trunks of a few trees sending out a rich fragrance. The daytime sun shines through moving leaves, casting dappled shade; at night the moon and stars silver the trees-tops with bright light, while the bases remain dark pools of shadow. Sword ferns spread between the trunks of the trees. Pendulous blossoms of purple, magenta, and white dangle from the fuchsias nestled in the ferny undergrowth. Scattered throughout the forest are a few benches of chalky-looking grey granite.
+&INSPECTED here=Yes #6980 #2118 #9371 #9369 #6983
+@lock here/INSPECTED
+&JUDGENOTE here=This room has a Faith Rating of: 1. It may be activated by anyone with the Christian-denominational merit True Faith. It does not effect supernatural characters unless there is a Faithful person present. See pgs 23-24 "Hunters Hunted"
+@lock here/JUDGENOTE
+&FOUNTAIN here=$drink:@switch [extract(u(dbd_cont),match(u(dbi_cont),%#),1)]=1,{@pemit/contents #6981=%N drink some water from the fountain.;@pemit %#=You sip some of the cool water falling from the fountain. It tastes as if it comes from a natural spring.},{@pemit %#=You're not close enough to the fountain to get a drink.}
+&JUDGENOTE-PEOPLE here=There are always between 7 and 10 NPC people (mostly religious or Cathedral Staff) filtering in and out of the Courtyward at any particular time (this includes late at night/early morning). As long as the main doors are 'open' (unlocked), there will be people here. They will be alert enough to notice openly unusual or sacriligious behavior and interfere.
+@lock here/JUDGENOTE-PEOPLE
+@Adesc here=@switch [u(status)]=ON-LINE,{@tr [u(cpu)]/main=You see an image of the PC: [name(%#)] who is dbref [%#],%#}; @pemit %#=OOC: Check the +views for important information.
+&CPU here=#9917
+&STATUS here=ON-LINE
+&JUDGENOTE-AEGIS here=The aegis security system has been installed in this outdoor area. As long as the 'status' attribute in this outdoor area is 'on-line', or it's otherwise noted, the system is activated. Please 'ex #9917/*judge*' for more information.
+@lock here/JUDGENOTE-AEGIS
+&MAP-CMD here=$map:@pemit %#=[u(#6139/map-1)] [u(#6139/map-2)] [u(#6139/map-3)] [u(#6139/map-4)] [u(#6139/map-5)] [u(#6139/map-6)] [u(#6139/map-7)] [u(#6139/map-8)] [u(#6139/map-9)] [u(#6139/map-10)] [u(#6139/map-11)] [u(#6139/map-12)] [u(#6139/map-13)] [u(#6139/map-14)]
+&APPROVAL here=This room and all its exits were approved by Madam Medusa: Sun Sep  8 00:18:15 1996
+&JUDGENOTE-SANCTUARY here=People who have been offered sanctuary by a PC religious will not be removed from the grounds unless the commit an act of such heinous sacrilege that risking their life is worth removing them from the grounds. Note: 'acting up' is not heinious. Two examples of extreme behavior would be: urinating on a sacred/revered item or spray-painting profanities within the cathedral complex. In NO CASE will they be removed from the grounds without getting in IC contact with the religious who invited them here in the first place. If the behavior is extreme enough, an offending character can be 'paused' until all parties involved are online to deal with it. While on the grounds, they will be 'protected' by a small group (2-4) of religious at all times. These watchers will NOT interfere with their privacy, simply be there to make sure no one gets in to attack them. Treat as normal mortal bystanders as far as stats, with a high Mental grouping. (High Per/Wits). Sanctuary recipients leave the grounds at their own risk.
+@lock here/JUDGENOTE-SANCTUARY
+&VIEW_OOC-SANCTUARY here=%rAny character agreeing to abide by the basic rules set forth within the following list may be offered IC 'Sanctuary' within the church grounds.%r%rThey must be 'threatened' in some way. Visitors may come on retreat at any time, but, to be offered any sort of protection they must have something to be protected from. All female guests stay in the Cloister guest rooms, all male guests in the Rectory guest rooms.%r%rThey must agree not to act violently while on cathedral grounds towards visitors, religious, and other guests.%r%rThey must agree not to desecrate or damage any part of the grounds.%r%rTHEY DO NOT HAVE TO BE CATHOLIC or CHRISTIAN in beliefs. But, they must respect that this is a religious community and so keep personal beliefs or worship as private as possible. They will not be expected or required to participate in any ceremonies within the complex itself.%r%rSanctuary recipients are presumed to be the responsibility of the PC religious who invited them.%r%rHave staff ex '#6981/judgenote-sanctuary' for more.%r
+&DBD_CONT here=1 1
+&DBD_CMND here=1 1
+&DBI_CONT here=#10970 #7853
+@set here=DARK
+@set here=UNFINDABLE
+@set here=COMMANDS
+
+@open Wooden Door <WD>;wooden door;wd;wood;out;o;leave
+@lock Wooden Door <WD>=*BLDR021
+@Odrop Wooden Door <WD>=enters from the Cathedral Courtyard.
+@desc Wooden Door <WD>=A sturdy wooden door leading into the Main Cathedral.
+@succ Wooden Door <WD>=You open the Wooden Door and step inside, shutting it firmly behind you.
+@Osucc Wooden Door <WD>=opens the Wooden Door and steps inside, shutting it firmly behind %o.
+@Fail Wooden Door <WD>=You try the Wooden Door, but it is locked.
+@Ofail Wooden Door <WD>=tries the Wooden Door, but it is locked.
+&JUDGENOTE-SECURITY Wooden Door <WD>=The door is about fifteen feet tall, and appropriately thick - planks of carved hardwood banded together with blackened steel. It locks with a heavy tumbler lock, flanged to help prevent picking (diff 7 to pick, requires 3 successes). Aegis equipment is trained on the door area at all times (ex #9917/judgenote*).
+@lock Wooden Door <WD>/JUDGENOTE-SECURITY
+@set Wooden Door <WD>=LIGHT
+
+@open Iron Gates <IG>;ig;iron;iron gates;gates;gate
+@Fail Iron Gates <IG>=You try the Iron Gates, but they are closed and locked.
+@Ofail Iron Gates <IG>=tries the Iron Gates, but they are closed and locked.
+@succ Iron Gates <IG>=You leave the cathedral courtyard through the Iron Gates.
+@Osucc Iron Gates <IG>=leaves the cathedral courtyard through the Iron Gates.
+@Odrop Iron Gates <IG>=enters from the cathedral courtyard, coming through the Iron Gates.
+@desc Iron Gates <IG>=Tall blackened iron gates with a heavy locking mechanism that form a break in the smooth twenty-feet tall cement wall that surrounds the grounds of Saint Joseph's Cathedral. You can barely make out the street corner and assorted civic buildings between the iron bars of the gate.
+@set Iron Gates <IG>=LIGHT
+@set Iron Gates <IG>=TRANSPARENT
+You leave the cathedral courtyard through the Iron Gates.
+Civic Center: Griffin and Young(#130RJs)
+Obvious exits:
+Scottish Embassy <SCE>  Iron Gates <IG>  Saint Joseph's Cathedral <SJC>  Government Complex <GC>  Griffin <S>  Young <E>  Griffin <N>  Young <W>
+
+@open Iron Gates <IG>;ig;iron;iron gates;gates;gate;courtyard;court;cy
+@lock Iron Gates <IG>=!RCC2_LOCK/0
+@desc Iron Gates <IG>=%rTall blackened iron gates with a heavy locking mechanism that form a break in the smooth twenty-feet tall cement wall that surrounds the grounds of Saint Joseph's Cathedral. The wall itself surrounds the entire cathedral complex excepting the West Facade entrance (the exit marked 'Saint Josephs Cathedral'). You can barely make out the courtyard buildings between the iron bars of the gate. (ex #6981/judgenote* for security info)%r
+@Fail Iron Gates <IG>=You try the Iron Gates, but they are closed and locked.
+@Ofail Iron Gates <IG>=tries the Iron Gates, but they are closed and locked.
+@succ Iron Gates <IG>=You enter the cathedral courtyard through the Iron Gates.
+@Osucc Iron Gates <IG>=enters the cathedral courtyard through the Iron Gates.
+@Odrop Iron Gates <IG>=enters from the street, coming through the Iron Gates.
+&JUDGENOTE-GATES Iron Gates <IG>=These are modern iron-alloy gates. The bars are about 2" in diameter, and 15 feet tall, interlaced together with crosspieces at the base and about twelve feet up. There is about three fingers worth of space between each bar, with sharp decorative spiking along the top. Any obvious attempt to scale either the gates or the wall around the complex will be noted by people inside the complex (ex #6981/judgenote-people) and reacted to accordingly. The wall itself surrounds the entire cathedral complex excepting the West Facade entrance (the exit marked 'Saint Josephs Cathedral'). It is twenty feet tall, formed of poured concrete 2+ feet thick, with rounded tops to prevent any sort of grappling attempt. The gates have a lock of standard diff to pick.
+@lock Iron Gates <IG>/JUDGENOTE-GATES
+@Odesc Iron Gates <IG>=peers between the bars of the Iron Gates into the grounds of Saint Joseph's Cathedral.
+&RCC2_LOCK Iron Gates <IG>=[or(match(u(#6982/GUEST),%#),match(u(#6982/STAFF),%#))]
+@set Iron Gates <IG>=TRANSPARENT
+
+@open Saint Joseph's Cathedral <SJC>;saint joseph's cathedral;sjc;sj;jc;cathedral;saint
+@lock Saint Joseph's Cathedral <SJC>=*BLDR021
+@succ Saint Joseph's Cathedral <SJC>=You step through the central doorway leading into St. Joseph's Cathedral.
+@Osucc Saint Joseph's Cathedral <SJC>=goes into the peace of St. Joseph's.
+@Odrop Saint Joseph's Cathedral <SJC>=arrives from the street.
+@desc Saint Joseph's Cathedral <SJC>=%rYou examine the tall, solemn structure of Saint Joseph's Cathedral. The West Facade entrance is dominated by a twenty-five foot-tall oak door with giant blackened iron hinges. Subsidiary doors about half the size of the central one (but still imposing looking) arch on either side of the main. The great Rose window crowns the main door, but the interior lighting of the building is not bright enough to let you make out any details. Flanking the doors are stained-glass windows and stone piers. More piers form the sides of the cathedral, and possibly the back as well. %r%rTall, column-like piers and arched buttresses support the weight of the stone walls and roof, allowing high, broad spaces for the giant tiers of windows. It is basically cross-shaped, with the length of the building running east-west (west is the longest section), and tall, narrow towers to the north and south. You can make out at least three seperate stories, plus a graceful point-arch vaulted roof. The building appears to be almost two hundred feet tall, and the complex takes up most of the block. A smooth twenty-feet tall cement wall surrounds the grounds of Saint Joseph's Cathedral. The wall itself surrounds the entire cathedral complex excepting the West Facade entrance (the exit marked 'Saint Josephs Cathedral').%r%rCapping the roof is the spire, which shelters the auto-chimes that toll on the hour. Stone gargoyles leer at you from shadowy niches along the west front. The entrance looks like the gateway to Heaven, which, in a way, it is.
+@Adrop Saint Joseph's Cathedral <SJC>=@pemit/contents #6974=A tinkling chime sounds as %N enters.;@switch [hasflag(%#,connected)]=1,{@dolist [u(#6982/staff)]=@switch [nearby(#6974,##)]=0,{@pemit ##=<<%N has entered the Cathedral - why not see what %s needs.>>},},
+@Fail Saint Joseph's Cathedral <SJC>=You try the huge wooden doors leading into Saint Joseph's Cathedral but they appear to be locked.
+@Ofail Saint Joseph's Cathedral <SJC>=tries the huge wooden doors leading into Saint Joseph's Cathedral but they appear to be locked.
+You step through the central doorway leading into St. Joseph's Cathedral.
+St. Joseph's Cathedral(#6974RDJMa$)
+Contents:
+Confessional(#1836OUe$)
+Obvious exits:
+Down <D>  Up <U>  Wooden Door <WD>  Street <O>
+NOTE: Please '+view' important descriptions, and looks at the 'map' for more details on the layout.
+A tinkling chime sounds as BLDR021 enters.
+
+@create Confessional=10
+@Idesc Confessional=[space(5)]This is a small, well-lighted, windowless room. It has a few scattered padded chairs, as well as wooden benches along one wall. There are more 'traditional' confessional stalls along one wall. The penitent may chose where they want to offer up their confessions.%r[space(5)]The exit has a functioning lock. It is presently [u(LOCK-STAT)]ed. You may 'lock' or 'unlock' it.
+&JUDGENOTE Confessional=This room has a Faith Rating of :4. It may be activated by anyone with the Christian-denominational merit True Faith. It does not effect supernatural characters unless there is a Faithful person present. See pgs 23-24 "Hunters Hunted"
+@lock Confessional/JUDGENOTE
+&JUDGENOTE-2 Confessional=This location interferes with Hedge Magic (except Theurgy) or Psychic Ability rolls in the following manner: +1 diff to Psychic Abilities / +2 diff to Hedge Magic. This is in effect at all times.
+@lock Confessional/JUDGENOTE-2
+@Adesc Confessional=@switch [u(status)]=ON-LINE,{@tr [u(cpu)]/main=[get_eval(%#/desc)] ooc:dbref [%#],%#};@pemit %#=[space(5)]NOTE: The Confessional may be entered, talked in, and even locked, just like a regular room. It is set up as an object to conserve database space.%r
+&CPU Confessional=#9917
+&JUDGENOTE-AEGIS Confessional=The aegis security system has been installed in this room. As long as the 'status' attribute in this room is 'on-line', or it's otherwise noted, the system is activated. Please 'ex #9917/*judge*' for more information.
+@lock Confessional/JUDGENOTE-AEGIS
+&LOCK-STAT Confessional=unlock
+&STATUS Confessional=online
+@Ealias Confessional=confessional;confess;con;c
+@Lalias Confessional=out;o;exit;x;leave
+@desc Confessional=[space(5)]All you can see leading to the confessional area from here is the carved wooden door leading in. This ornately carved wooden door, featuring St. Joseph displaying his carpenter's tools, is leafed in silver and gold. The heavy mahagany wood is scarred and stained with age, but the beauty of the carving and loving care put into maintaining it shines through. Smaller images framing the main one feature the fourteen stations of the cross carved in relief. The door is located along the south transept area.
+@Enter Confessional=You open the door to the Confessional and step inside, shutting it firmly behind you.
+@Oenter Confessional=opens the door to the Confessional and steps inside, shutting it firmly behind %o.
+@Leave Confessional=You come into the main cathedral area from the Confessional.
+@Oleave Confessional=comes into the main cathedral area from the Confessional.
+@Efail Confessional=You try the door to the Confessional, but it is locked.
+@Oefail Confessional=tries the door to the Confessional, but it is locked.
+&LOCK-CMD Confessional=$lock:@switch [u(LOCK-STAT)]=lock,{@pemit %#=The exit is already locked.},unlock,{@switch [member([lcon(#1836)],%#)]=0,{@pemit %#=You must be inside the Confessional to lock it.},{@lock/enter #1836=#0; @lock/leave #1836=#0;
+&lock-stat me=lock; @pemit/contents me= %N locks the door to the Confessional.}},{@pemit %#=The lock function for the confessional is malfunctioning: please +mail [name(owner(me))] and inform them about it.}
+&UNLOCK-CMD Confessional=$unlock:@switch [u(LOCK-STAT)]=unlock,{@pemit %#=The exit is already unlocked.},lock,{@switch [member([lcon(#1836)],%#)]=0,{@pemit %#=You must be inside the Confessional to unlock it.},{@unlock/enter #1836; @unlock/leave #1836;
+&lock-stat me=unlock; @pemit/contents me=%N unlocks the door to the Confessional.}},{@pemit %#=The unlock function for the confessional is malfunctioning: please +mail [name(owner(me))] and inform them about it.}
+@Startup Confessional=@unlock/enter me; @unlock/leave me;
+&lock-stat me=unlock;
+&status me=online
+@Lfail Confessional=You try the exit, but it is locked. Perhaps you should 'unlock' it.
+@Oxenter Confessional=opens the door to the Confessional and steps inside, shutting it firmly behind %o. If you would like to follow, type 'confessional', or 'con' for short.%r
+@Oxleave Confessional=opens the door to the Confessional and steps back out into the main cathedral area, shutting it firmly behind %o. If you would like to follow, type 'out' or 'o' for short.
+@set Confessional=OPAQUE
+@set Confessional=UNFINDABLE
+@set Confessional=ENTER_OK
+@set Confessional=COMMANDS
+
+@open Wooden Door <WD>;wd;wooden;wooden door
+@desc Wooden Door <WD>=%rThis door is about fifteen feet tall, with thick planks of hardwood fitted edge-to-edge then banded with blackened steel. Stall stone carytid pillars to each side of the door support a heavy carved lintel cap ornamented with the faded coat-of-arms of some ancient noble family. Looking more closely you see the dominant colors are red and white, perhaps a Bishop's crest. Lined on either side of the crest are a repeating pattern of trefoils surrounding a 'Chi Rho' symbol. Images of the chi rho are scattered throughout the cathedral. It resembles a long cross with a curved hook off the top and right of the upper arm, almost like a 'P' with a horizontal bar in the center. It represents the Greek characters 'X' and 'P', the first two letters of the Greek word for Christos.%r
+@Fail Wooden Door <WD>=You try the Wooden Door, but it is locked.
+@Ofail Wooden Door <WD>=tries the Wooden Door, but it is locked.
+@succ Wooden Door <WD>=You open the Wooden Door and step outside, shutting it firmly behind you.
+@Osucc Wooden Door <WD>=opens the Wooden Door and steps outside, shutting it firmly behind %o.
+&STAFF Wooden Door <WD>=#0 #1417 #10970 #9311 #7797 #7575 #8892 #4802 #11457 #7853 #1340 #11287 #-1 #7287 #11448 #11823
+&RCC2_LOCK Wooden Door <WD>=[or(match(u(GUEST),%#),match(u(STAFF),%#))]
+@Odrop Wooden Door <WD>=enters from the Main Cathedral.
+&JUDGENOTE-SECURITY Wooden Door <WD>=The door is about fifteen feet tall, and appropriately thick - planks of carved hardwood banded together with blackened steel. It locks with a heavy tumbler lock, flanged to help prevent picking (diff 7 to pick, requires 3 successes). Aegis equipment is trained on the door area at all times (ex #9917/judgenote*).
+@lock Wooden Door <WD>/JUDGENOTE-SECURITY
+&GUEST Wooden Door <WD>=#3186 #6311 #11287
+@set Wooden Door <WD>=LIGHT
+
+@open Up <U>;u;up
+@lock Up <U>=*BLDR021
+@desc Up <U>=A granite spiral staircase leads up.
+@succ Up <U>=You walk up the granite spiral staircase to the Triforium level. Eighty feet sure is a long way up.
+@Osucc Up <U>=walks up the granite spiral staircase to the Triforium level.
+@Odrop Up <U>=walks out of the stairwell from the main level.
+@Ofail Up <U>=approaches the stairwell up, but the door is closed and locked.
+@Fail Up <U>=You approach the stairwell up, but the door is closed and locked. It appears the damage done by the missile has made the second level unsafe.
+@set Up <U>=LIGHT
+
+
+
+@dig/teleport St. Joseph's Cathedral
+@desc here=%r[space(5)]This is St. Joseph's cathedral, dedicated to Saint Joseph, foster father of Jesus and husband of Mary. Huge wooden doors lead out to the street, flanked by quality reproductions of classical DaVinci angels clasping golden bowls of holy water. A red carpet is rolled out starting at the entrance doorway and leading straight down the main aisleway of the cathedral to the base of the elevated altar. The cathedral is a gothic roman cross shape, with a point-arched vault ceiling over bay walls. Tall and impossibly-slender column piers provide support for the ceiling and a balcony running along the second level as well as outline the magnificent stained glass windows that form the walls. The bottom level of windows is eighty feet tall, and called the Arcade. The middle level of windows is twenty feet tall and is called the Triforium, as is the balcony that runs along it around the whole interior of the building. The upper level of windows is called the Clerestory, and at sixty feet tall, they just meet the lower edge of the vault above.%r[space(5)]Pews fan out the length and breadth of the area, dotted with parishoners praying intently. People trickle in and out of side chapels along the Arcade, and occasionally you hear foosteps echo from above. There seems to be a good amount of visitors here, no matter what the time of day.
+&JUDGENOTE here=This room has a Faith Rating of: 4. It may be activated by anyone with the Christian-denominational merit True Faith. It does not effect supernatural characters unless there is a Faithful person present. See pgs 23-24 "Hunters Hunted"
+@lock here/JUDGENOTE
+&MODE_NAMES here=Nave Crossing Chancel NTrans STrans Pew1 Pew2 Altar
+&MODE_NAMES_1 here=Crossing Pew1 Pew2
+&MODE_NAMES_2 here=Nave Chancel NTrans STrans
+&MODE_NAMES_3 here=Crossing Altar
+&MODE_NAMES_4 here=Crossing
+&MODE_NAMES_5 here=Crossing
+&MODE_NAMES_6 here=Nave
+&MODE_NAMES_7 here=Nave
+&MODE_NAMES_8 here=Chancel
+&MODE_CROSS_1_2 here=[u(WALKS)] through the Nave into the Crossing.
+&MODE_CROSS_2_1 here=[u(WALKS)] from the Crossing into the Nave.
+&MODE_CROSS_1_6 here=[u(WALKS)] from the main part of the Nave into Pew 1.
+&MODE_CROSS_6_1 here=exits Pew 1, and [u(WALKS)] into the main part of the Nave.
+&MODE_CROSS_1_7 here=[u(WALKS)] from the main part of the Nave into Pew 2.
+&MODE_CROSS_7_1 here=exits Pew 2, and [u(WALKS)] into the main part of the Nave.
+&MODE_CROSS_2_3 here=[u(WALKS)] from the Crossing into the Chancel.
+&MODE_CROSS_3_2 here=[u(WALKS)] through the Chancel into the Crossing.
+&MODE_CROSS_2_4 here=[u(WALKS)] from the Crossing into the North Transept tower.
+&MODE_CROSS_4_2 here=[u(WALKS)] through the North Transept tower into the Crossing.
+&MODE_CROSS_2_5 here=[u(WALKS)] from the Crossing into the South Transept tower.
+&MODE_CROSS_5_2 here=[u(WALKS)] through the South Transept tower into the Crossing.
+&MODE_CROSS_2_8 here=[u(WALKS)] from the main part of the Chancel to behind the Altar.
+&MODE_CROSS_8_2 here=exits from behind the Altar, and [u(WALKS)] into the main part of the Chancel.
+&MODE_COMMANDS_1 here=in the Nave near the Pews
+&MODE_COMMANDS_2 here=in the center of the Crossing
+&MODE_COMMANDS_3 here=in the Chancel near the Altar
+&MODE_COMMANDS_4 here=in the North Transept tower
+&MODE_COMMANDS_5 here=In the South Transept tower
+&MODE_COMMANDS_6 here=seated in Pew 1 of the Nave
+&MODE_COMMANDS_7 here=seated in Pew 2 of the Nave
+&MODE_COMMANDS_8 here=behind the Altar in the Chancel
+&MODE_LOOK_1 here=[space(5)]This is the Nave. Seemingly endless rows of pews take up most of the space. Looking up, you see the overwhelming splendour of the vault. Trim, white stone arches called "ribs" criss-cross each bay, and the wide triangular spaces between are filled with smooth grey concrete. The connection of the piers, buttresses, and ribs gives the illusory appearance of downward-curving birds wings along the length of the vault. You might want to check out the stained glass 'windows' visible in the Nave.
+&MODE_LOOK_2 here=[space(5)]This is the Crossing, so named because you must walk through here to cross to any other part of the Cathedral, and it forms the center of the Roman Cross shape of the building. There are no windows or walls in the Crossing (it represents the 'air' space in the center of the two tower Transepts and the Chancel and Nave), only the vault high above. This is the most intricate area of the vault in the whole cathedral, both because the pattern of the ribbing changes from a simple criss-cross to the cross being surounded by extra arches turning it into a four-pointed star, and because the concrete has been carved with eye-pleasing triangular maze patterns. Straight above you on the exterior of the vault is the cathedral spire, which houses the auto-chimes.
+&MODE_LOOK_3 here=[space(5)]Here in the Chancel, you can look at the altar platform or turn back and look down length of the cathedral towards the main entrance. Looking down the sweeping length of the building, it looks unreal: it is too tall, too slender, too graceful and fragile to stand up. It seems to have no walls, nothing to hold up the stone vault but a row of willowy piers reaching eloquently upward as they outline tremendous glass windows. The piers continue to form the ribs meeting at the crown of the vault, curving and supporting like the overarching branches of a stand of hardwood trees. Light from outside shines through the colored glass in the windows, making it glow, the effect almost magical. The Chancel is divided into two parts. Near the Crossing is the quire, with carved hardwood stalls for the Benedictine sisters of the abbey to rest during services. Beyond the quire is the high Altar area.
+&MODE_LOOK_4 here=[space(5)]You are in the North Transept tower. About thirty square feet in size, it extends up the full height of the rest of the Cathedral. There is a side altar dedicated to Mary, the Holy Mother. A collection of icon statuettes depict Mary in her traditional blue and white robes, a smiling woman surrounded by a heavenly host of winged angels. A fan-shaped shelf with votive candles spreads out at her feet. Several candles are lit, their flames flickering slightly as if defying some ill wind.
+&MODE_LOOK_5 here=[space(5)]You are in the South Transept tower. About thirty square feet in size, it extends up the full height of the rest of the Cathedral. There is a side altar dedicated to Saint Joseph, the foster father of Jesus and the husband of Mary. An icon statuette of Saint Joseph depicts him in his traditional brown robes, holding a plank of wood and an axe. The peacefully sublime expression on his face is often particularly relaxing to people who notice it. A fan-shaped shelf with votive candles spreads out at his feet. Several candles are lit, their flames flickering defiantly in a slight breeze.
+&MODE_LOOK_6 here=[space(5)]You are seated in Pew 1. The solid wooden length of the pew extends past where you're sitting, polished smooth by both the original builder and countless faithful who have rested here before you. The back of the pew in front of yours has missals and songbooks arranged neatly in a latticed rack. A padded kneeler can be lowered to provide minimal relief from the cold marble floors.
+&MODE_LOOK_7 here=[space(5)]You are seated in Pew 2. The solid wooden length of the pew extends past where you're sitting, polished smooth by both the original builder and countless faithful who have rested here before you. The back of the pew in front of yours has missals and songbooks arranged neatly in a latticed rack. A padded kneeler can be lowered to provide minimal relief from the cold marble floors.
+&MODE_LOOK_8 here=[space(5)]The elevated Altar area is dominated by the altar itself, a large slab apparently solid stone covered with a white linen cloth embroidered with gold and silver cross images. Behind the altar is the highly ornamented tabernacle, curtained with more decorated fabric. There are lit candles in heavy polished candlesticks on either side of the tabernacle enclosure. Eighty feet above curves a pointed arch, the point of which supports the base of the tall hardwood cross, with a carved-ivory corpus in larger-than-life detail. The crucifix arch arcs OVER the altar area, so that it rests seemingly in midair, rather than on the wall. Seasonal colored cloth hangings with simple pictoral images and text messages flutter below either side of the base of the cross. To each side of the altar is a wooden pulpit with a microphone neatly wired in place. Each one supports a different closed book.
+&VIEW_CORNERSTONE here=%rThe cornerstone was set in place on March 3, 1846. The first processional mass was held upon its completion on September 14, 1861.%r
+@Forwardlist here=#1929
+@Prefix here=From Down in the Chapel
+&JUDGENOTE-2 here=This location interferes with Hedge Magic or Psychic Ability rolls in the following manner: +1 diff to Psychic Abilities / +2 diff to Hedge Magic. This is in effect at all times.
+@lock here/JUDGENOTE-2
+@Adesc here=@switch [u(status)]=ON-LINE,{@tr [u(cpu)]/main=You see an image of the PC: [name(%#)] who is dbref [%#],%#};@pemit %#=NOTE: Please '+view' important descriptions, and looks at the 'map' for more details on the layout.
+&CPU here=#9917
+&STATUS here=OFF-LINE
+&WINDOW here=$windows:@switch [extract(u(dbd_cont),match(u(dbi_cont),%#),1)]=1,{@pemit %#=%rPlease specify which window you want to see: the 'rose window', the 'tree window', the 'emperor window' or the 'triple window'.%r},{@pemit %#=You're not close enough to the Nave to look at the windows.}
+@VA here=#6139
+@Filter here={* has arrived.},{* has left.},{* has connected.},{*has disconnected.},{*granite spiral staircase*},
+&JUDGENOTE-PEOPLE here=There are always between 10 and 50 NPC's (outside of daily Mass) wandering the main Cathedral area at any particular time. As long as the main doors are 'open' (unlocked), there will be people here. They will be alert enough to notice openly unusual or sacriligious behavior and interfere.
+@lock here/JUDGENOTE-PEOPLE
+&UNLOCK-CMD here=$unlock *:@switch [member(u(#6982/staff), %#)]=0,{@pemit %#=You don't have the key to that door.},{@switch %0=wd,{@pemit/contents me=%N unlocks the Wooden Door. Type 'wd' to use this exit.; @unlock #6982; @wait 90=@pemit/contents me=The Wooden Door shuts and is locked again.;@wait 91=@lock #6982=!rcc2_lock/0},down,{@pemit/contents me=%N unlocks the grate leading Down. Type 'down' to use this exit.; @unlock #5239; @wait 90=@pemit/contents me=The grate leading Down is locked again.; @wait 91=@lock #5239=!rcc2_lock/0},{@pemit %#=Try 'unlock wd' or 'unlock down', instead.}}
+&JUDGENOTE-AEGIS here=The aegis security system has been installed in this part of the Cathedral. ALTHOUGH the 'status' attribute in this area may be 'off-line', the area forming the chancel and altar (which is normally not an area where anyone but religious go) is ALWAYS on-line. This represents that the public may freely 'wander' the nave, STrans, NTrans, and crossing. While the off-line aegis cameras do not 'pattern match', other video surveillance records all activity throughout the entire chapel area.
+@lock here/JUDGENOTE-AEGIS
+&WINDOW2 here=$* window:@switch [extract(u(dbd_cont),match(u(dbi_cont),%#),1)]=1,{@switch %0=rose,{@pemit %#=%rLooking up, one of the windows catches your attention. The great round Rose window, seated over the western entry door, is a breathtaking accomplishment. A reconstruction of the famous 'Tapestry of Creation', each 'petal' in the rose shape was based on a seperate panel from the tapestry. In the roundel center, God the Creator - depicted as a solemn young man with a wise expression - raises His hand to bless the beginning of Creation. Radiating from Him are the six days of creation, long slivers of brilliant color depicting the stages from the separation of the firmament, to the making of Eve. Mini-rose windows at the four cardinal points surrounding the greater central window depict angels seated on inflated goatskins from which blow the four winds. The window is done in dominant shades of green and brown, with bright patches of primary reds and yellows in the 'petals'.},triple,{@pemit %#=%rLooking up, one of the windows catches your attention. Long, narrow, pointed triple windows sit to either side of the great Rose window. The stone hood-mouldings are carved with human heads while within the capital arches chevrons interlock into a herringbone pattern. Images of Eve and the Serpent to the left of the Rose window are balanced by images of Adam and Eve to the right.},emperor,{@pemit %#=%rLooking up, one of the windows catches your attention. A series of 20 windows marches along the Arcade. Each is a depiction of one of the Holy Roman Emperors in their royal robes - crowned, haloed, with Latin blessings worked into the glass. Forming the background image to each ruler are tiny geometric glass shapes reprersenting windows and arches - as if each Emperor himself posed before a stained-glass window.},tree,{@pemit %#=%rLooking up, one of the windows catches your attention. Cerulean and dark ruby, patched together with green and white and a touch of goldenrod yellow form the colored pieces of one Nave window. Each of the panels in the tall pointed window are seperated by stone tracery - slender carved stone supports. An adaption of the Chartres 'Jesse Tree', it shows a pictoral genealogy of Christ from King David to Joseph, each male member shown on a seperate flowering branch of the tree. Jesus, himself, is seated cross-legged in the center. Light streams in through the window, backlighting it brilliantly, till it almost glows.},{@pemit %#=%rPlease specify which window you want to see: the 'rose window', the 'tree window', the 'emperor window' or the 'triple window'.%r}},{@pemit %#=You're not close enough to the Nave to look at the windows.}
+&MAP-CMD here=$map:@pemit %#={%r[center(*,79,*)]%r[center(Cathedral Map,79)]%r%r[space(15)]----[space(2)]----%r[space(15)]|[space(3)]#1[space(3)]|%r[space(15)]|[space(8)]|[space(20)] First Floor Key%r---------------|[space(8)]|-----------[space(10)]#1=North Transept%r|[space(15)][space(9)][space(10)]|[space(10)]#2=Nave%r|[space(6)]#2[space(6)][space(4)]#3[space(4)][space(4)]#4[space(4)]|[space(10)]#3=Crossing%r|[space(15)][space(9)][space(10)]|[space(10)]#4 Chancel (and altar)%r---------------|[space(8)]|-----------[space(10)]#5 South Transept%r[space(15)]|[space(8)]|%r[space(15)]|[space(3)]#5[space(3)]|%r[space(15)]----[space(2)]----%r%rExtra information: The Main Exit is to the left, or 'west' of the Nave. The Confessional door is off the South Transept. The Wooden Door is off the North Transept.%r%r[center(*,79,*)]%r}
+&APPROVAL here=This room and all its exits were approved by Madam Medusa: Sat Sep  7 10:29:03 1996
+&INSPECTED here=Yes #5239 #6985 #6982 #6978
+@lock here/INSPECTED
+&VIEW_CRUCIFIX here=%rEighty feet above the floor of the Chancel spans a wide arch, the point of which supports the base of the tall hardwood cross with a carved-ivory corpus in larger-than-life detail. The arch arcs OVER the altar area, so that the crucifix floats seemingly in midair, rather than on the wall. Christ rests wearily against the heavy wooden cross, His pale limbs barely draped with a bit of rag carved into soft folds. His palms and overlapped feet are pierced with dark nails (which appear to be faintly stained red, but that could be a trick of the light). Scrolled above His thorn-crowned head are the letters "INRI". His face has a decidedly Semetic cast to it, and the ivory has yellowed with age, a fair indication that the corpus was carved many centuries ago. Seasonal colored cloth hangings with simple pictoral images and text messages flutter below either side of the base of the cross.%r
+&VIEW_CANDELABRAS here=%rTwelve standing candelabras made of bronze and tipped with silver are set into specially designed niches along the length of the building. All these 8 foot candelabras were obviously gifts to the Church from a noble in the distant past, and preserved till they were placed in this cathedral. Each bears a distinctive coat of arms that is worked several times into the base plates. Ten of these massive pieces can hold up to 12 candles each on their tiered outspread arms. Two larger than the rest can hold up to 18 candles in such a way to maximize the spread of their light to the surrounding altar area where they have been placed. Each has a fine etching of fleur-de-lis into the silver that surrounds the base cuff and the arms of the candle-holders. A slight crimping in a few portions of the fleur-de-lis patterns and coats-of-arms are the only indication that these have been restored from some previously unseemly state.%rRestoration, courtesy Tawny Alexander%r
+&VIEW_BAPTISMAL-FONT here=%rLooking through the grilled gate locking the baptismal chapel you see a large copper bowl resting comfortably on its base of clawed feet. This was used by priests to baptize people on the battlefield before combat during the Dark Ages. A man could immerse himself to the waist when standing in it while it was filled. Now it has the more peaceful obligation of being used in modern infant and adult baptisms. Almost worn away is a faint, half-discernable pattern of diamonds that are etched into its outer surface. One foot has been replaced with a newer and harder copper that practically matches the color of the older copper. Portions of its curving lip are penny bright with replacement material while other portions are darker but still brightly-polished copper from many centuries ago.%rRestoration, courtesy Tawny Alexander%r
+&DBD_CONT here=1
+&DBD_CMND here=1
+&DBI_CONT here=#10970
+@set here=DARK
+@set here=JUMP_OK
+@set here=MONITOR
+@set here=AUDIBLE
+@set here=COMMANDS
+

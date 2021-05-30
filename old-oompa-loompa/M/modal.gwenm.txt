@@ -1,0 +1,66 @@
+@@ Modal Space is something like tables space, but, instead of 
+@@ facilitating comunicating, it gives you different descs based on where you 
+@@ go within the modes. I like it to give the impression of large areas in a 
+@@ single game "room". Because of the unique nature of the modes (you only see 
+@@ available modes as you move to a mode that's before or after it), you can
+@@ create things like mazes and somewhat 'secret' areas.
+
+@@ There's a sample lock featured below that will allow you to build on the 
+@@ secrecy options of the modes.
+
+@create Modal Parent=10
+&VIS_PEOPLE Modal Parent=[s(iter(lcon(me),switch([type(##)] [hasflag(##,CONNECTED)] [hasflag(##,DARK)],PLAYER 1 0,##,)))]
+&ALL_WHERE@ Modal Parent=[s(iter(lcon(me),switch(type(##),PLAYER,[setq(1,extract(u(DBD_CONT),match(u(DBI_CONT),##),1))][switch(r(1),,1,r(1))],)))]
+@Aenter Modal Parent=&DBD_CONT me=[u(ALL_WHERE@)];&DBD_CMND me=[u(ALL_COMMAND)];&DBI_CONT me=[u(ALL_PEOPLE)]
+&MODE_CHANGE Modal Parent=$>*:&DBD_CONT me=[setq(3,switch(type(%#),PLAYER,%#,%1))][setq(4,switch([setq(2,extract(u(DBD_ACT),match(u(DBI_CONT),%q3),1))][%q2],,%q3,0,%q3,extract(u(ACTORS),%q2,1)))][setq(5,extract(u(DBD_CONT),match(u(DBI_CONT),%q3),1))][setq(5,switch(%2,,%q5,%2))][setq(6,switch(u(MODE_NAMES_[%q5]),,u(MODE_NAMES),u(MODE_NAMES_[%q5])))][setq(6,match(%q6,%0))][setq(7,match(u(MODE_NAMES),%0))][replace(u(DBD_CONT),match(u(DBI_CONT),%q3),switch(%q7 %q6,0 *,%q5,* 0,%q5,%q7))];&DBD_CMND me=[replace(u(DBD_CMND),match(u(DBI_CONT),%q3),1)]; @switch %q6=0,{@pemit %#=That is not a suitable modal location. Please try again.},{@pemit %q3=[setq(2,[extract(u(DBD_CONT),match(u(DBI_CONT),%#),1)])][setq(1,u(MODE_LOOK_[r(2)]))][switch(r(1),,[switch(u(MODE_LOOK_1),,,[u(MODE_LOOK_1)]%r)],[r(1)]%r)]Obvious Places:%b[iter(u(MODE_NAMES_[%q7]),%b>##)]; @remit loc(%#)=%N moves from the [extract(u(mode_names),%q5,1)] to the [extract(u(mode_names),%q7,1)].}
+@Succ Modal Parent=[setq(2,[extract(u(DBD_CONT),match(u(DBI_CONT),%#),1)])][setq(1,u(MODE_LOOK_[r(2)]))][switch(r(1),,[switch(u(MODE_LOOK_1),,,[u(MODE_LOOK_1)]%r)],[r(1)]%r)]Contents:[setq(3,u(VIS_PEOPLE))][setq(4,u(VIS_WHERE@))][setq(5,u(VIS_CMND_WHERE@))][iter(lnum(words(r(3))),%r%b%b[name(extract(r(3),add(##,1),1))]%,%b[lcstr(u(MODE_COMMANDS_[extract(r(4),add(##,1),1)]))])][iter(u(VIS_THINGS),%r%b%b[name(##)])]%rObvious Places: for help moving around type 'MHELP'%r%b[setq(6,switch(r(2),,1,r(2)))][setq(5,switch(u(MODE_NAMES_[r(6)]),,u(MODE_NAMES),u(MODE_NAMES_[r(6)])))][iter(r(5),%b>##)][iter(r(7),%b[name(##)])]
+&CON_COMMAND Modal Parent=[s(iter(lcon(me),switch([type(##)] [hasflag(##,CONNECTED)],PLAYER 1,[setq(1,extract(u(DBD_CMND),match(u(DBI_CONT),##),1))][switch(r(1),,1,r(1))],)))]
+&VIS_THINGS Modal Parent=[s(iter(lcon(me),switch([type(##)] [hasflag(##,DARK)],THING 0,##,)))]
+@Aleave Modal Parent=&DBD_CONT me=[u(ALL_WHERE@)];&DBD_CMND me=[u(ALL_COMMAND)];&DBI_CONT me=[u(ALL_PEOPLE)]
+&VIS_CMND_WHERE@ Modal Parent=[s(iter(lcon(me),switch([type(##)] [hasflag(##,CONNECTED)] [hasflag(##,DARK)],PLAYER 1 0,[setq(1,extract(u(DBD_CMND),match(u(DBI_CONT),##),1))][switch(r(1),,1,r(1))],)))]
+&ALL_COMMAND Modal Parent=[s(iter(lcon(me),switch([type(##)],PLAYER,[setq(1,extract(u(DBD_CMND),match(u(DBI_CONT),##),1))][switch(r(1),,1,r(1))],)))]
+&MHELP Modal Parent=$mhelp:@pemit %#=%r%r%tModal Space Help%r%rThis room utilizes modified Modal Space, developed on CrystalMUSH. Its purpose is to cause the desc of an area to change based on what VR place you stand in. To change places, look at the list of 'Obvious Places', and then type the name of the one you want to choose, INCLUDING the bracket '>'. For example, if you want to sit at the >bar, you would type '>bar', NOT 'bar'. Then you can 'look' around.%r%rBecause Modal Space can be configured so that certain places can only be reached from other places, you may have to explore a bit before you see everthing.%r
+&CON_WHERE@ Modal Parent=[s(iter(lcon(me),switch([type(##)] [hasflag(##,CONNECTED)],PLAYER 1,[setq(1,extract(u(DBD_CONT),match(u(DBI_CONT),##),1))][switch(r(1),,1,r(1))],)))]
+&CON_PEOPLE Modal Parent=[s(iter(lcon(me),switch([type(##)] [hasflag(##,CONNECTED)],PLAYER 1,##,)))]
+&FILTER_DATA Modal Parent=s(iter(u(DBI_CONT),switch([extract(u(DBD_CONT),match(u(DBI_CONT),##),1)],%0,##,)))
+&VIS_WHERE@ Modal Parent=[s(iter(lcon(me),switch([type(##)] [hasflag(##,CONNECTED)] [hasflag(##,DARK)],PLAYER 1 0,[setq(1,extract(u(DBD_CONT),match(u(DBI_CONT),##),1))][switch(r(1),,1,r(1))],)))]
+&ALL_PEOPLE Modal Parent=[s(iter(lcon(me),switch(type(##),PLAYER,##,)))]
+&IS_ACTING Modal Parent=[extract(u(DBD_ACT),match(u(DBI_CONT),%0),1)]
+&CREDITS Modal Model Parent=Originally written by a planet-builder on Crystal MUSH. Minor (but necessary) code fixes by Brokkiere@TexasTwilight. Severe rebuild of the code by Gwen Morse (http://www.geocities.com/goldmooneachna/mush.html).
+@set Modal Parent=VISUAL
+@set Modal Parent=PARENT_OK
+@set Modal Parent=HALTED
+@set Modal Parent=SAFE
+
+@@ Sample Modal configuration - to get an idea of how it works! 
+@@ This is part of a Cathedral setup...(includes some early descing efforts)
+@@ Note the Mode_names attributes. They provide a path to get from one mode to
+@@ another.
+@@ You need a Mode_Names_0 that exactly matches Mode_names_1.
+@@ Leave the @succ of each room blank, as that's where the mode information is shown.
+@@ All else should be self-evident if you install the cathedral room and test it out.
+
+@dig/teleport cathedral room
+@parent here=Modal Parent
+&MODE_LOOK_1 here=[space(5)]This walkway is the junction between the Triforium balcony and the entrance to the staircase leading down to the main level. Beautiful carved wooden quire stalls line the stone wall extending up about twenty feet - they replace a stained-glass window. The wood is carved into fanciful shapes of suffering figures, saints being martyred in a multitude of ways. These contrast grimly with the overall cheerful ornamentation found in the rest of the building.
+&MODE_LOOK_2 here=[space(5)]This is the main part of the Triforium level, a continuous stone balcony which runs along the three sides of the Nave and into the Transepts, before edging into the Chancel's Choir. A row of stained-glass windows, each about twenty feet tall, nestles between the tall marble buttresses and support piers. Glancing down over the four-foot railing, you see the rows of pews fanning out below you. You suddenly realize just how far down eighty feet is.
+&MODE_LOOK_3 here=[space(5)]You stand in the beautiful Choir arcade, right near the pipe organ. A sturdy riser with four sections takes up most of the space besides the organ. Peering closely at the wall reveals the outline of a 'secret door'.
+&MODE_NAMES here=Walkway Triforium Choir
+&MODE_NAMES_0 here=Triforium
+&MODE_NAMES_1 here=Triforium
+&MODE_NAMES_2 here=Walkway Choir
+&MODE_NAMES_3 here=Triforium
+&MODE_COMMANDS_1 here=at the Walkway junction near the stairs.
+&MODE_COMMANDS_2 here=on the Triforium looking around.
+&MODE_COMMANDS_3 here=in the Choir arcade near the Organ and Risers.
+@set here=commands
+
+@@ Here's a sample of how to lock something to only being at one mode. 
+@@ In this example, a player has to be at mode 3 (The Choir), and they can
+@@ teleport to another room by typing 'secret door'. 
+@@ You can build all sorts of locks using the extract command and changing 
+@@ the number 3 to whatever mode you want players to be at to access the 
+@@ command. 
+
+&TEL-1 here=$secret door:@switch [extract(u(loc(%#)/dbd_cont),match(u(loc(%#)/dbi_cont),%#),1)]=3,{@remit loc(%#)=%N slips through a small 'secret door' hidden in the stonework of the Choir wall, and disappears.;@tel %#=#7729;@remit #7229=%N slips in through a 'secret door' in the stone wall.},{@pemit %#=You're not close enough to the Choir wall to find the 'secret door'.}
+

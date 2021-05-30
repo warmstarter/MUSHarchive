@@ -1,0 +1,73 @@
+@create checker
+
+@lock checker==me
+
+@set checker=!no_command
+
+&fnc-has checker =[gt(strlen(get(v(0)/[v(1)])),0)]
+@@ This is the 2.0 version
+
+@@ &fnc-has checker =[not(match(get(v(0)/[v(1)]),#-1*))]
+@@ This is the 1.5 version
+
+@pemit me = Make sure you set the correct fnc-has version!
+
+&fnc-permission checker=[or(hasflag(v(1),wizard),or(hasflag(v(0),visual),match(owner(v(0)),v(1))))]
+
+&cmd-check_alone checker = $+check:@pemit v(#)=But what do you want to check?
+&cmd-check_only_alone checker = $+check/only:@pemit v(#)=But what do you want to check?
+
+
+
+&sub-check_only checker=@switch u(fnc-permission,v(0),v(1))=1,{@pemit v(1)=Checking [name(v(0))]:;@tr me/sub-check_[type(v(0))]=v(0),v(1)},{@pemit v(1)=[u(fmt-denied,v(0))]}
+
+&cmd-check checker =$+check *:@switch locate(v(#),v(0),*)=#-1*,{@pemit v(#)=I don't see that here.},#-2*,{@pemit v(#)=I don't know which one you mean.},{@tr me/sub-check=locate(v(#),v(0),*),v(#)}
+
+&sub-check checker=@switch u(fnc-permission,v(0),v(1))=1,{@pemit v(1)=Checking [name(v(0))]:;@dolist [switch(type(v(0)),player,[v(0)] [lcon(v(0))],room,[v(0)] [lexits(v(0))] [lcon(v(0))],thing,[v(0)] [lcon(v(0))],exit,[v(0)])]={@switch u(fnc-permission,##,v(1))=1,{@tr me/sub-check_[type(##)]=##,v(1)},{@pemit v(1)=[u(fmt-denied,##)]}}},{@pemit v(1)=[u(fmt-denied,v(0))]}
+
+@@ Rooms should have:
+@@ Description
+@@ Succ
+
+&fnc-check_room checker=[and(u(fnc-has,v(0),describe),u(fnc-has,v(0),success))]
+
+&fmt-denied checker=[type(v(0))] [name(v(0))]: Permission denied.
+
+&fmt-missing checker =[type(v(0))] [name(v(0))] ([v(0)][flags(v(0))]) is missing a[switch(v(1),o*,n)] [v(1)].
+
+&fmt-complete checker =[type(v(0))] [name(v(0))] ([v(0)][flags(v(0))]) is complete.
+
+&sub-check_room checker=@switch u(fnc-check_room,v(0))=1,{@pemit v(1)=[u(fmt-complete,v(0))]},{@dolist describe success={@switch u(fnc-has,v(0),##)=0,{@pemit v(1)=[u(fmt-missing,v(0),##)]}}}
+
+@@ Exits should have:
+@@ Description
+@@ Succ
+@@ Osucc
+@@ Odrop
+
+&sub-check_exit checker = @switch u(fnc-check_exit,v(0))=1,{@pemit v(1)=[u(fmt-complete,v(0))]},{@dolist describe success osuccess odrop={@switch u(fnc-has,v(0),##)=0,{@pemit v(1)=[u(fmt-missing,v(0),##)]}}}
+
+&fnc-check_exit  checker=[and(and(and(u(fnc-has,v(0),describe),u(fnc-has,v(0),success)),u(fnc-has,v(0),osuccess)),u(fnc-has,v(0),odrop))]
+
+@@ Objects should have:
+@@ Description
+@@ Succ
+@@ Osucc
+@@ Drop
+@@ Odrop
+
+
+&sub-check_thing checker = @switch u(fnc-check_thing,v(0))=1,{@pemit v(1)=[u(fmt-complete,v(0))]},{@dolist describe success osuccess drop odrop={@switch u(fnc-has,v(0),##)=0,{@pemit v(1)=[u(fmt-missing,v(0),##)]}}}
+
+&fnc-check_thing checker=[and(and(and(and(u(fnc-has,v(0),describe),u(fnc-has,v(0),success)),u(fnc-has,v(0),osuccess)),u(fnc-has,v(0),drop)),u(fnc-has,v(0),odrop))]
+
+@@ Players should have:
+@@ Description
+@@ Sex
+
+&sub-check_player checker = @switch u(fnc-check_player,v(0))=1,{@pemit v(1)=[u(fmt-complete,v(0))]},{@dolist describe sex ={@switch u(fnc-has,v(0),##)=0,{@pemit v(1)=[u(fmt-missing,v(0),##)]}}}
+
+&fnc-check_player checker=[and(u(fnc-has,v(0),describe),u(fnc-has,v(0),sex))]
+
+
+think Format: +check <object>

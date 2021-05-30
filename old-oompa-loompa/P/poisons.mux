@@ -1,0 +1,145 @@
+#=================================================================#
+#             POISON.MUX                                          #
+#=================================================================#
+
+#-----------------------------------------------------------------#
+#     COMMAND: poison <food/drink> with <poison item>             #
+#-----------------------------------------------------------------#
+
+&cmd-poison #8=$poison * with *:
+
+#---------------------------------------------------------------
+# %q0 = dbref of food/drink
+# %q1 = dbref of poison
+# %q2 = poison currency
+# %q3 = player's success at being sneaky about this
+#---------------------------------------------------------------
+
+   think setq(0, locate(%#, %0, n));
+   think setq(0, ifelse(isdbref(%q0), %q0, locate(%#, %0, i)));
+   think setq(1, locate(%#, %1, i));
+   think setq(2, get(%q1/currency));
+   think setq(3, successes(skill(%#, stealth), sub(12, attribute(%#,
+           shrewdness))));
+ 
+#----------------------------------------------------------------
+# Error Check:
+# 
+#      a) Did we locate the food/drink to be poisoned?
+#      b) Did we locate the supposed poison in the player's inventory
+#      c) Is the food/drink really food or drink?
+#      d) Is the supposed poison really poison?
+#-----------------------------------------------------------------
+ 
+    think setq(9, [isdbref(%q0)]
+                  [isdbref(%q1)]
+                  [or(hastag(%q0, food), hastag(%q0, beverage))]
+                  [hastag(paccount(%q2), poison)]);
+
+    @select %q9=
+ 
+       0???, {@pemit %#=I don't see what you want to poison.},
+       ?0??, {@pemit %#=You don't appear to be carrying that poison.},
+       ??0?, {@pemit %#=You can only put poison in food or drinks.},
+       ???0, {@pemit %#=[name(%q1)] isn't poisonous.  What are you thinking?},
+       1111, {@tag %q0=poison;
+              &poison %q0=[get(%q1/poison)];
+              &poison-doses %q0=[fdiv(inc(default(%q0/poison-doses, 0)),                     getaccount(%q0,get(%q0/currency)))];
+              think ac_adjust(%q1, %q2, -1);
+              @switch [gt(getaccount(%q1, %q2), 0)]=
+                 1, {@@ do nothing @@},
+                 0, {@zap %q1};
+              @switch %q3=
+                 <0, {@@ player botched @@;
+                      @remit %L=%N suspiciously adds some sort of 
+                             poison to [name(%q0)].;
+                      @witness/100% %N/was seen trying to poison 
+                                      [name(%q0)].;                    
+                      @gossip/add %N was seen trying to poison some 
+                                  [name(%q0)] in [name(%L)] [ictime()].},
+                  0, {@@ player failed @@;
+                      @remit %L=%N suspiciously adds something to 
+                       [name(%q0)].;
+                      @witness/75% %N/was seen trying to poison [name(%q0)].},
+                >3, {@@ player bonus @@;
+                     @pemit %#=You slip the poison in unnoticed.},
+                >0, {@@ player success @@;
+                     @pemit %#=You slip the poison into [name(%q0)].;
+                     @witness/25% %N/was seen poisoning [name(%q0)].}}
+
+-
+
+#-----------------------------------------------------------------#
+#     COMMAND: taste <blah> for poison            #
+#-----------------------------------------------------------------#
+
+&cmd-taste #8=$taste * for poison:
+
+#---------------------------------------------------------------
+# %q0 = dbref of food/drink
+# %q1 = player's success at being sneaky about this
+# %q2 = is it poisoned?
+#---------------------------------------------------------------
+
+   think setq(0, locate(%#, %0, n));
+   think setq(0, ifelse(isdbref(%q0), %q0, locate(%#, %0, i)));
+   think setq(1, successes(
+		  skill(%#, toxicology),
+		 sub(11, attribute(%#, attention))));
+  
+#----------------------------------------------------------------
+# Error Check:
+# 
+#      a) Did we locate the food/drink to be tasted?
+#      b) Does this guy know how to?
+#      c) Is the food/drink really food or drink?
+#-----------------------------------------------------------------
+ 
+    think setq(9, [isdbref(%q0)]
+                  [gt(skill(%#, toxicology), 0)]
+                  [or(hastag(%q0, food), hastag(%q0, beverage))]);
+
+    @select %q9=
+ 
+       0??, {@pemit %#=I don't see what you want to taste.},
+       ?0?, {@pemit %#=You don't know how to taste for poison.},
+       ??0, {@pemit %#=You can only taste food or drinks.},
+       111, {@remit %L=%N tastes [name(%q0)].;
+              think [setq(2, hastag(%q0, poison))];
+              @tr me/trig-taste-result=%q0, %q1, %q2, %#}
+              
+-
+
+&trig-taste-result #8=
+
+              @switch %1=
+                 <0, {@@ player botched @@;
+                      @pemit %3=%cc%chYou determine that [name(%0)] 
+                      [switch(choose(1 0 %2,1 1 1),0,is,1,is not)] 
+                      poisoned.%cn;
+                    @switch %2 = 1, 
+                    {@tr [get(%0/poison)]/aeat = %3, 
+                     [fdiv(default(%0/poison-doses, 1), 2)]} },
+ 
+                  0, {@@ player failed @@;
+                      @pemit %3=%cc%chYou determine that [name(%0)] 
+                      [switch(choose(1 0 %2,1 1 1),0,is,1,is not)] 
+                      poisoned.%cn },
+
+                >3, {@@ player bonus @@;
+                      @pemit %3=%cc%chYou determine that [name(%0)] 
+                      [switch(%2,0,is not poisoned. ,1,is poisoned with 
+                      [default(%0/poison-doses, 1)] doses of 
+                      [goodname(get(%0/poison))]. )] %cn },
+
+                >0, {@@ player success @@;
+                      @pemit %3=%cc%chYou determine that [name(%0)] 
+                      [switch(%2,0,is not poisoned. ,1,is poisoned.)]}
+
+-
+
+
+
+
+
+

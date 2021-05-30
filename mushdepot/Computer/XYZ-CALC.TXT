@@ -1,0 +1,17 @@
+@create Coordinates Calculator
+@link Coordinates Calculator=[owner(me)]
+@lock Coordinates Calculator==[owner(me)]
+@set Coordinates Calculator=WIZARD
+@set Coordinates Calculator=SAFE
+@set Coordinates Calculator=!NO_COMMAND
+@DESCRIBE Coordinates Calculator=Distance calculator that actually calculates distances from one Trek Planet to Another.%r`+chelp' for commands.
+&HELP-1 Coordinates Calculator=$+chelp:@pemit %#=Help for [name(me)]:%rFROM <A> <B> <C> to <X> <Y> <Z> -- Calculates the distance from A, B, C  to  X, Y, Z and displays the difference in parsecs.%rDISPLAY TOTAL -- Displays totals from the last calculation.
+&COORDS-1 Coordinates Calculator=$from * * * to * * *:&dest-coord me=%3 %4 %5;&home-coord me=%0 %1 %2;@pemit %#=Distance to Destination Coordinates %3, %4, %5 from coordinates %0, %1, %2 is:;&x-pos me=[power([sub(%0,%3)],2)];&y-pos me=[power([sub(%1,%4)],2)];&z-pos me=[power([sub(%2,%5)],2)];&total-1 me=[add([get(me/x-pos)],[get(me/y-pos)],[get(me/z-pos)])];&total-2 me=[sqrt([get(me/total-1)])];@pemit %#=[get(me/total-2)] parsec(s), or [mul([get(me/total-2)],3.26)] light-year(s).
+&DISPLAY_TOTAL Coordinates Calculator=$display total:@pemit %#=Start Location: [get(me/home-coord)]%rDestination: [get(me/dest-coord)]%r%rDistance between coordinates: [get(me/total-2)] parsec(s), which is about [mul([get(me/total-2)],3.26)] light-year(s).
+&TOTAL-2 Coordinates Calculator=325.198555
+&TOTAL-1 Coordinates Calculator=105754.1
+&HOME-COORD Coordinates Calculator=23.9 61.8 0
+&DEST-COORD Coordinates Calculator=-128.9 -221.7 -45.1
+&Z-POS Coordinates Calculator=2034.01
+&Y-POS Coordinates Calculator=80372.25
+&X-POS Coordinates Calculator=23347.84

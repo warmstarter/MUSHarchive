@@ -1,0 +1,40 @@
+@create Room Parent
+@link Room Parent=#987
+@set Room Parent=LINK_OK
+@set Room Parent=VISUAL
+@set Room Parent=SAFE
+@set Room Parent=!NO_COMMAND
+&ONAME Room Parent=Contents:
+&PNAME Room Parent=Players:
+&ZCOLOR Room Parent=r
+&ZLINE Room Parent=~
+&ZONE Room Parent=[zone(me)]
+@DESCRIBE Room Parent=[switch(u(line1),1,[ansi([v(hcolor)],repeat([v(line)],[div(79,strlen(v(line)))]))]%r)][ansi([v(zcolor)],[center([remove([name(zone(me))],Zone)],79)])]%r[ansi([v(dcolor)],[eval(me,rdesc)])][switch(v(rsucc),,,%r[u(rsucc)])][switch(u(line2),1,%r[ansi([v(hcolor)],repeat([v(line)],[div(79,strlen(v(line)))]))])][switch(words(lattr(me/feature_*)),0,,%r%r[ansi([v(hcolor)],[v(featurename)])]%r%b[iter([lattr(me/feature_*)],[ansi([v(fcolor)],[capstr(lcstr(edit(after(##,FEATURE_),_,%b)))])], ,%r%b)])]%r%r[ansi([v(hcolor)],[v(pname)])][switch(t(u(plist)),1,%r%b[iter(u(plist),[ansi([v(pcolor)],name(##))] [switch(hasflag(##,IC),1,(get(##/HEALTH)))], ,%r%b)])]%r%r[ansi([v(hcolor)],[v(oname)])][switch(t(u(objlist)),1,%r%b[iter(u(objlist),[ansi(v(ocolor),name(##))], ,%r%b)])][switch([hasflag(me,transparent)],0,%r%r[ansi(v(hcolor),[u(oexitname)])]%r%b[iter([lexits(me)],[ansi([v(hcolor)],[ljust(<[ucstr([extract([fullname(##)],2,1,;)])]>,5)])][ansi([v(ecolor)],[name(##)])]%b%b%b)],[switch(words(u(oexitlist)),0,,%r%r[ansi(v(hcolor),[v(oexitname)])]%r%b[iter([u(oexitlist)],[ansi([v(hcolor)],[ljust(<[ucstr([extract([fullname(##)],2,1,;)])]>,5)])] [ansi([v(ecolor)],[name(##)])]%b%b%b)])])][switch([hasflag(me,transparent)],1,[switch(words(u(texitlist)),0,,%r%r[ansi([v(hcolor)],[v(texitname)])][iter([u(texitlist)],%r%b[ansi([v(hcolor)],[ljust(<[ucstr([extract([fullname(##)],2,1,;)])]>,5)])] [ansi([v(ecolor)],[ljust([name(##)],24)])] [ansi([v(eecolor)],u(nameotherside,##))])])]
+&RDESC Room Parent=Help for setting up a room can also be found by typing `room setup help'%r%r[u(setuphelp)]
+&PCOLOR Room Parent=r
+&OCOLOR Room Parent=g
+&HCOLOR Room Parent=b
+&ECOLOR Room Parent=y
+&EECOLOR Room Parent=hr
+&OEXITNAME Room Parent=Obvious Exits:
+&TEXITNAME Room Parent=Obvious Exits:
+&FEATURENAME Room Parent=Features:
+&CONTENTNAME Room Parent=Contents:
+&EXITNAME Room Parent=Obvious Exits:
+&NAMEOTHERSIDE Room Parent=[switch(t(u(%0/nameotherside)),1,u(%0/nameotherside),0,name(loc(%0)))]
+&FCOLOR Room Parent=c
+&DCOLOR Room Parent=hw
+&OEXITLIST Room Parent=[iter(lexits(me),switch([hasflag(##,opaque)][hasflag(##,dark)],10,##))]
+&TEXITLIST Room Parent=[iter(lexits(me),switch([hasflag(##,opaque)][hasflag(##,dark)],00,##))]
+&PLIST Room Parent=[squish(iter(lcon(me),[switch(type(##),PLAYER,[switch(idle(##),-1,,[switch(hasflag(##,Dark),0,##)])])]))]
+&OBJLIST Room Parent=[squish(iter(lcon(me),[switch(type(##),THING,[switch(hasflag(##,Dark),0,##)])]))]
+&ROOMBEFORE Room Parent=%b<
+&COM_VIEW Room Parent=$view *:think [pemit(%#,[switch([words([lattr(me/feature_[edit(%0,%b,_)]*)])],0,I don't see that here.,1,[ansi(h,capstr(lcstr(edit(after(lattr(me/feature_[edit(%0,%b,_)]*),FEATURE_),_,%b))))]%r[u(lattr(me/feature_[edit(%0,%b,_)]*))],I can't tell which one you mean.)])]
+&LINE Room Parent=-=
+&COM_ROOM_SETUP_HELP Room Parent=$room setup help:think [pemit(%#,[ansi([v(hcolor)],repeat([v(line)],[div(79,strlen(v(line)))]))]%r[ansi(hr,[center(ROOM SETUP HELP,79)])]%r[ansi([v(hcolor)],repeat([v(line)],[div(79,strlen(v(line)))]))]%r[u(setuphelp)]%r[ansi([v(hcolor)],repeat([v(line)],[div(79,strlen(v(line)))]))])]
+&SETUPHELP Room Parent=Neccessary Items:%r&rdesc <Room>=<Description> %(Instead of @desc%)%r@set <Room>=dark%r@set <Room>=transparent%r@set <Each Exit>=!light%r%rPreset Items:%r&line <Room>=<What is repeated for the top line>%r&featurename <Room>=<Features Heading> %(Type 'Feature Help'%)%r&contentname <Room>=<Contents Heading>%r&oexitname <Room>=<Heading for Opaque Exits>%r&texitname <Room>=<Heading for Transparent Exits>%r%rColors:%r&dcolor <Room>=<Description Color>%r&fcolor <Room>=<Feature Color>%r&pcolor <Room>=<Player Color>%r&ocolor <Room>=<Object Color>%r&hcolor <Room>=<Heading Color>%r&ecolor <Room>=<Exit Color>%r&eecolor <Room>=<Exit Destination Color>%r%rNote:%r#15 is the only approved room parent. If you want, @parent to it and change it some, but it must be approved by a director.
+&COM_FEATURE_HELP Room Parent=$feature help:think [pemit(%#,[ansi([v(hcolor)],repeat([v(line)],[div(79,strlen(v(line)))]))]%r[ansi(hr,[center(FEATURE HELP,79)])]%r[ansi([v(hcolor)],repeat([v(line)],[div(79,strlen(v(line)))]))]%r[u(featurehelp)]%r[ansi([v(hcolor)],repeat([v(line)],[div(79,strlen(v(line)))]))])]
+&FEATUREHELP Room Parent=&feature_<Name>=<Description> %(Change spaces to underscores %(_%) in <Name>%)%rView <Feature Name>
+&SYS Room Parent=1
+&LINE1 Room Parent=1
+&LINE2 Room Parent=1

@@ -1,0 +1,6 @@
+@Desc PWHO machine=Command:%rpwho[space(16)]See who from your list is on%rpwho list[space(11)]List your entire pwho list%rpwho add <name>[space(5)]Add a name to your list%rpwho delete <name>[space(2)]Remove a name from your list%rpwho new[space(12)]Clear your list
+&cmd-pwho PWHO machine=$+pwho:@pemit v(#)=The people on your pwho list are:;@dolist get(v(#)/data-pwho)=@switch hasflag(##,connect)=1,@pemit v(#)=[name(##)] is connected.
+&cmd-pwho_list PWHO machine=$+pwho list:@pemit v(#)=Your entire pwho list is:;@dolist get(v(#)/data-pwho)=@pemit v(#)=[name(##)]
+&cmd-pwho_add PWHO machine=$+pwho add *:@switch num(*[v(0)])=#-1,{@pemit v(#)=No such player '[v(0)]'.},{@pemit v(#)=[name(*[v(0)])] has been added to your pwho list.;&data-pwho [v(#)] = [get(v(#)/data-pwho)] [num(*[v(0)])]}
+&cmd-pwho_new PWHO machine=$+pwho new:@pemit v(#) = Your pwho list has been cleared.;&data-pwho [v(#)]
+&cmd-pwho_delete PWHO machine=$+pwho delete *:@switch num(*[v(0)])=#-1,{@pemit v(#)=No such player '[v(0)]'.},{@switch member(get(v(#)/data-pwho),num(*[v(0)]))=0,{@pemit v(#)=[name(*[v(0)])] isn't even on your list.},{@pemit v(#)=[name(*[v(0)])] has been removed from your list.;&data-pwho [v(#)] = [remove(get(v(#)/data-pwho),num(*[v(0)]))]}}

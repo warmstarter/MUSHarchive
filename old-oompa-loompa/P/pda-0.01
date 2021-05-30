@@ -1,0 +1,115 @@
+@@ dave's PDA parent object
+
+@@ create PDA Parent
+@set PDA Parent=no_command
+
+&fun.useoktxt PDA Parent=[switch([get(me/power)][get(me/locked)],0?,The [name(me)] is not turned on.,11,The [name(me)] is locked.)]
+&fun.useok PDA Parent=[and([get(me/power)],not([get(me/locked)]))]
+
+@@ list notes from page <n> (10 to a page)
+&fun.list PDA Parent=[ansi(yh,[ljustx([name(me)],39)])][ansi(h,[rjustx(Notes %(Folder [ucstr(%0)]%, Page %1%),39)])]%r[ansi(g,[repeat(~,78)])]%r[setq(0,0)][iter([extract(sort([lattr(me/notes.%0.*)],a),[add([mul([sub(%1,1)],10)],1)],10)],[setq(0,[add(%q0,1)])][ansi(h,%q0.)] [ansi(yh,[ljustx([after(##,NOTES.[ucstr(%0)].)],10)])] [ljustx([get(me/##)],58)][if(gt([strlen([get(me/##)])],58),...)]%r,,)][ansi(g,[repeat(~,78)])]
+&cmd.list PDA Parent=$+notes:@pemit %#=[if([u(fun.useok)],[u(fun.list,unsorted,1)],[u(fun.useoktxt)])]
+&cmd.list2 PDA Parent=$+notes *:@pemit %#=[if([u(fun.useok)],[if(isnum(%0),[u(fun.list,unsorted,%0)],That is not a valid page.)],[u(fun.useoktxt)])]
+&cmd.list3 PDA Parent=$+notes/*:@pemit %#=[if(eq(words(%0),1),[if([u(fun.useok)],[if(member([get(me/folders)],[ucstr(%0)]),[u(fun.list,%0,1)],You don't have a folder called [ucstr(%0)].)],[u(fun.useoktxt)])])]
+&cmd.list4 PDA Parent=$+notes/* *:@pemit %#=[if([u(fun.useok)],[if(member([get(me/folders)],[ucstr(%0)]),[if(isnum(%1),[u(fun.list,%0,%1)],That isn't a valid page number)],You don't have a folder called [ucstr(%0)].)],[u(fun.useoktxt)])]
+
+@@ add a note
+&cmd.add PDA Parent=$+addnote *=*:@pemit %#=[if([u(fun.useok)],[if(gt(words([lattr(me/notes.*)]),254),You have too many notes%, delete some.,[if(hasattr(me,notes.unsorted.%0),You already have a note called that. Try another name%, or delete the note.,You add a new note called [ucstr(%0)].[u(fun.addnote,unsorted,%0,%1)])])],[u(fun.useoktxt)])]
+&cmd.add2 PDA Parent=$+addnote/* *=*:@pemit %#=[if([u(fun.useok)],[if(gt(words([lattr(me/notes.*)]),254),You have too many notes%, delete some.,[if(hasattr(me,notes.%0.%1),You already have a note called than. Try another name%, or delete the note.,You add a new note called [ucstr(%1)] into folder [ucstr(%0)].[u(fun.addnote,%0,%1,%2)])])],[u(fun.useoktxt)])]
+&fun.addnote PDA Parent=[set(me,notes.%0.%1:%2)]
+
+@@ read a note
+&cmd.read PDA Parent=$+readnote *:@pemit %#=[if([u(fun.useok)],[if(hasattr(me,notes.unsorted.%0),[u(fun.readnote,unsorted,%0)])],[u(fun.useoktxt)]
+&cmd.read2 PDA Parent=$+readnote/* *:@pemit %#=[if([u(fun.useok)],[if(hasattr(me,notes.%0.%1),[u(fun.readnote,%0,%1)])],[u(fun.useoktxt)])]
+&fun.readnote PDA Parent=[ansi(yh,[ljustx([name(me)],39)])][ansi(h,[rjustx(Note name: [ucstr(%1)] %([ucstr(%0)]%),39)])]%r[ansi(g,[repeat(~,78)])]%r[get(me/notes.%0.%1)]%r[ansi(g,[repeat(~,78)])]
+
+@@ delete a note
+&cmd.delete PDA Parent=$+delnote *:@pemit %#=[if([u(fun.useok)],[if(hasattr(me,notes.unsorted.%0),You delete the note called [ucstr(%0)][u(fun.delnote,unsorted,%0)],You don't have a note called that.)],[u(fun.useoktxt)])]
+&cmd.delete2 PDA Parent=$+delnote/* *:@pemit %#=[if([u(fun.useok)],[if(hasattr(me,notes.%0.%1),You delete the note called [ucstr(%1)] in the [ucstr(%0)] folder.[u(fun.delnote,%0,%1)],You don't have a note or folder called that.)],[u(fun.useoktxt)])]
+&fun.delnote PDA Parent=[wipe(me/notes.%0.%1)]
+
+@@ folder creation
+&cmd.newfolder PDA Parent=$+addfolder *:@pemit %#=[if([get(me/power)],[if([get(me/locked)],The [name(me)] is locked,[if(gt(words([get(me/folders)]),30),You have too many folders%, delete some.,[if(member([get(me/folders)],%0),You already have a folder called that.,Creating new notes folder called [ucstr(%0)].[u(fun.newfolder,[ucstr(%0)])])])])],The [name(me)] is turned off.)]
+&fun.newfolder PDA Parent=[set(me,folders:[get(me/folders)] %0)]
+
+@@ folder deletion
+&cmd.delfolder PDA Parent=$+delfolder *:@pemit %#=[if([u(fun.useok)],[if(strmatch([ucstr(%0)],UNSORTED),You cannot delete the UNSORTED folder.,[if(member([get(me/folders)],[ucstr(%0)]),You delete the folder [ucstr(%0)].[setq(0,[lattr(me/notes.%0.*)])][if(words(%q0),[setq(1,0)][if(not(member([get(me/folders)],UNSORTED)),[u(fun.newfolder,UNSORTED)])][iter(%q0,[u(fun.movenote,##,unsorted)][setq(1,[add(%q1,1)])])]%r%q1 [if(eq(%q1,1),note,notes)] moved to UNSORTED folder.)][set(me,folders:[remove([get(me/folders)],[ucstr(%0)])])],That is not a valid folder.)])],[u(fun.useoktxt)])]
+
+@@ list folders
+&cmd.folders PDA Parent=$+folders:@pemit %#=[if([u(fun.useok)],[u(fun.folders,1)],[u(fun.useoktxt)])]
+&fun.folders PDA Parent=[ansi(yh,[ljustx([name(me)],39)])][ansi(h,[rjustx(Folders,39)])]%r[ansi(g,[repeat(~,78)])]%r[setq(0,0)][iter([sort([get(me/folders)],a)],[setq(0,[add(%q0,1)])][ljustx([ucstr(##)] %([words([lattr(me/notes.##.*)])]%),19)][if(not(mod(%q0,4)),%r)],,)][ansi(g,[repeat(~,78)])]
+
+&cmd.move PDA Parent=$+movenote */*=*:@pemit %#=[if([u(fun.useok)],[if(and(hasattr(me,notes.%0.%1),member([get(me/folders)],[ucstr(%2)])),You move the note [ucstr(%1)] from folder [ucstr(%0)] to [ucstr(%2)][u(fun.movenote,NOTES.%0.%1,%2)],The note or one of the folders does not exist.)],[u(fun.useoktxt)])]
+&fun.movenote PDA Parent=[set(me,notes.%1.[u(fun.notename,%0)]:[get(me/%0)])][wipe(me/%0)]
+&fun.notename PDA Parent=[after([after(%0,NOTES.)],.)]
+
+@@ major commands (power, codes, lock/unlock)
+&cmd.power PDA Parent=$+pda power:@pemit %#=[if([get(me/power)],You turn the [name(me)] off.[set(me,power:0)],You turn the [name(me)] on.[set(me,power:1)])]
+&cmd.lock PDA Parent=$+lock:@pemit %#=[if([get(me/power)],[if([get(me/locked)],The [name(me)] is already locked.,[if(hasattr(me,code),You lock the [name(me)].[set(me,locked:1)],Please set a code first!)])],[u(fun.power)])]
+&cmd.unlock PDA Parent=$+unlock *:@pemit %#=[if([get(me/power)],[if([get(me/locked)],[if(eq([get(me/code)],%0),You unlocked the [name(me)].[set(me,locked:0)],The [name(me)] BZZTs as you enter the wrong code.)],The [name(me)] is already unlocked)],[u(fun.power)])]
+&cmd.code PDA Parent=$+code *:@pemit %#=[if([get(me/power)],[if([get(me/locked)],The [name(me)] is locked.,[if(isnum(%0),You set the code on the [name(me)] to %0.[set(me,code:%0)],That is not a valid code)])],[u(fun.power)])]
+
+@@ log add
+&cmd.addlog PDA Parent=$+addlog *:@pemit %#=[if([get(me/power)],[if([get(me/locked)],The [name(me)] is locked.,[if(gt(words([lattr(me/log.*)]),49),You have too many entries in your log%, delete some.,You add '%0' as a log entry.[set(me,log.[secs()]:%0)])])],The [name(me)] is not turned on.)]
+
+@@ log remove
+&cmd.dellog PDA Parent=$+dellog *:@pemit %#=[if([get(me/power)],[if([get(me/locked)],The [name(me)] is locked.,[if(hasattr(me,log.*),You delete the log entry for [convsecs(%0)].[wipe(me/log.%0)],You don't have a log entry under that.)])],The [name(me)] is not turned on.)]
+
+@@ list log contents
+&fun.listlog PDA Parent=[ansi(yh,[ljustx([name(me)],39)])][ansi(h,[rjustx(Personal Log %(Page %0%),39)])]%r[ansi(g,[repeat(~,78)])]%r[setq(0,0)][iter([extract(sort([lattr(me/log.*)],a),[add([mul([sub(%0,1)],10)],1)],10)],[setq(0,[add(%q0,1)])][ansi(h,%q0.)] [ansi(yh,[ljustx([after(##,LOG.)],10)])] [ljustx([get(me/##)],58)][if(gt([strlen([get(me/##)])],58),...)]%r,,)][ansi(g,[repeat(~,78)])]
+&cmd.viewlog PDA Parent=$+log:@pemit %#=[if([get(me/power)],[if([get(me/locked)],The [name(me)] is locked.,[u(fun.listlog,1)])],The [name(me)] is turned off.)]
+&cmd.viewlog2 PDA Parent=$+log *:@pemit %#=[if([get(me/power)],[if([get(me/locked)],The [name(me)] is locked.,[u(fun.listlog,%0)])],The [name(me)] is turned off.)]
+
+@@ read a log entry
+&cmd.readlog PDA Parent=$+readlog *:@pemit %#=[if([get(me/power)],[if([get(me/locked)],The [name(me)] is locked,[u(fun.readlog,%0)])],The [name(me)] is turned off.)]
+&fun.readlog PDA Parent=[if(isnum(%0),[if(hasattr(me,log.%0),[ansi(yh,[ljustx([name(me)],39)])][ansi(h,[rjustx(Log entry for [convsecs(%0)],39)])]%r[ansi(g,[repeat(~,78)])]%r[get(me/log.%0)]%r[ansi(g,[repeat(~,78)])],You don't have that log entry)],That is not a valid log entry)]
+
+@@ space add
+&cmd.spaceadd PDA Parent=$+spaceadd *=*:@pemit %#=[if([u(fun.useok)],[if(gt(words([lattr(me/space.name.*)]),254),[if(hasattr(me,space.name.%0),You already have an entry called [ucstr(%0)]. Use +spaceset to change the information.,You add an entry to the space database for [ucstr(%0)].[set(me,space.name.%0:%1)])],You have too many items in the PDA's space section.)],[u(fun.useoktxt)])]
+
+@@ space del
+&cmd.spacedel PDA Parent=$+spacedel *:@pemit %#=[if([u(fun.useok)],[if(hasattr(me,space.name.%0),You remove [ucstr(%0)] from the PDA's space db.[wipe(me/space.*.%0)],That doesn't appear to exist.)],[u(fun.useoktxt)]
+
+@@ space.list
+&fun.spacelist PDA Parent=[ansi(yh,[ljustx([name(me)],39)])][ansi(h,[rjustx(Space Database %(Page %0%),39)])]%r[ansi(g,[repeat(~,78)])]%r[setq(0,0)][iter([extract(sort([lattr(me/space.name.*)],a),[add([mul([sub(%0,1)],10)],1)],10)],[setq(0,[add(%q0,1)])][ansi(h,%q0.)] [ansi(yh,[ljustx([after(##,SPACE.NAME.)],10)])] [get(me/##)] %([get(me/space.xyz.[after(##,SPACE.NAME.)])]%) [u(fun.spshowflags,##)]%r,,)][ansi(g,[repeat(~,78)])]
+&fun.spshowflags PDA Parent=[iter([get(me/space.flags.[after(%0,SPACE.NAME.)])],[setq(0,[member([u(sp.flags.full)],##)])][if(%q0,[ansi([extract([u(sp.flags.colors)],%q0,1)],[extract([u(sp.flags.full)],%q0,1)])])])]
+&cmd.spacelist PDA Parent=$+space:@pemit %#=[if([u(fun.useok)],[u(fun.spacelist,1)],[u(fun.useoktxt)])]
+&cmd.spacelist2 PDA Parent=$+space *:@pemit %#=[if([u(fun.useok)],[if(isnum(%0),[u(fun.spacelist,%0)],That is not a valid page number.)],[u(fun.useoktxt)])]
+
+@@ space db set
+&sp.attribs PDA Parent=xyz ruler flags note well name
+&sp.flags.full PDA Parent=HOSTILE PLANET FUEL BANK OWNER HOOKERS
+&sp.flags.syms PDA Parent=H P F B O S
+&sp.flags.colors PDA Parent=rh gh yh h mh ch 
+&cmd.spaceset.xyz PDA Parent=$+spaceset */*=*:@pemit %#=[if([u(fun.useok)],[if(hasattr(me,space.name.%0),[if(member([u(sp.attribs)],%1),[u(fun.spaceset.%1,%0,%2)],That is not a valid space db attribute.)],That entry does not exist.)],[u(fun.useoktxt)])] 
+
+&isnumx PDA Parent=[iter(%0,isnum(##),,)]
+
+&fun.spaceset.xyz PDA Parent=[switch([u(isnumx,%1)],111,You set the co-ordinates for [ucstr(%0)] to %1[set(me,space.xyz.%0:%1)],Those co-ordinates are not valid.)]
+&fun.spaceset.name PDA Parent=You set the full name of [ucstr(%0)] to %1[set(me,space.name.%0:%1)]
+&fun.spaceset.flags PDA Parent=[if(strmatch(%1,!*),[setq(0,[right(%1,[sub([strlen(%1)],1)])])][if(member([u(sp.flags.full)],[ucstr(%q0)]),[if(member([get(me/space.flags.%0)],[ucstr(%1)]),That flag is already not set on [ucstr(%q0)],You remove the [ucstr(%q0)] flag.[set(me,space.flags.%0:[remove([get(me/space.flags.%0)],[ucstr(%q0)])])])],That is not a valid flag)],[if(member([u(sp.flags.full)],[ucstr(%1)]),[if(member([get(me/space.flags.%0)],%1),That flag is already set on [ucstr(%0)].,You set the [ucstr(%1)] flag.[set(me,space.flags.%0:[get(me/space.flags.%0)] [ucstr(%1)])])],That is not a valid flag)])]
+&fun.spaceset.note PDA Parent=You set the note on [ucstr(%0)] to %1[set(me,space.note.%0:%1)]
+
+&cmd.spaceview PDA Parent=$+spaceview *:@pemit %#=[if([u(fun.useok)],[if(hasattr(me,space.name.%0),[ansi(yh,[ljustx([name(me)],39)])][ansi(h,[rjustx(Space DB: [ucstr(%0)],39)])]%r[ansi(g,[repeat(~,78)])]%r[ansi(h,Official Name:)] [ljustx([get(me/space.name.%0)],64)]%r[ansi(h,XYZ:)] [ljustx([get(me/space.xyz.%0)],34)] [ansi(h,Well:)] [ljustx([get(me/space.well.%0)],33)]%r[ansi(h,Ruler:)] [ljustx([get(me/space.ruler.%0)],32)] [ansi(h,Flags:)] [ljustx([get(me/space.flags.%0)],32)]%r[ansi(h,Note:)]%r[get(me/space.note.%0)]%r[ansi(g,[repeat(~,78)])],That entry does appear to exist.)],[u(fun.useoktxt)])]
+
+@@ docs
+&commands PDA Parent=+PDA POWER - Turn on/off the PDA%r+LOCK - Lock the PDA%r+UNLOCK <code> - Unlock the PDA using <code>%r+NOTES <page> - List unstored notes%r+NOTES/<folder> <page> - List notes in <folder>%r+READNOTE <id> - Read note with <id> from unsorted%r+READNOTE/<folder> <id> - Read note with <id> from folder <folder>%r+ADDNOTE <id>=<note> - Add an unsorted note%r+ADDNOTE/<folder> <id>=<note> - Add note to <folder>%r+DELNOTE <id> - Remove a note.%r+DELNOTE/<folder> <id> - Delete note from <folder> with <id>%r+FOLDERS - List available folders%r+ADDFOLDER <name> - Create new folder%r+DELFOLDER <name> - Remove folding, moving notes into unsorted folder.%r+LOG <page> - View personal log%r+ADDLOG <message> - Add a message to your personal log%r+DELLOG <id> - Delete the log with <id>%r+SPACE <page> - List items in the space db%r+SPACEADD <id>=<name> - Create a new entry <id> with <name>%r+SPACEDEL <id> - Delete <id> from the space db%r+SPACESET <id>/<attribute>=<value> - Set an attribute on an entry.%r+SPACESET <id> - View an entry in full.%r%rSpace Attributes: [ucstr([u(sp.attribs)])]%rFlag Values: [ucstr([u(sp.flags.full)])]%rFlags can be preceeded by ! to remove.
+&info PDA Parent=The PDA is a fairly flexiable data storage object. Creation is made simple, not requring any @clone'd objects. Once this parent has been created, simply create an object, parenting it to this. Folders for classifying notes, a simple personal log, and a specialised space db are supported, and it can be locked. It does not currently support tranmitting items to other PDAs.%rCredits: Coded 1998 by dave2@earthling.net. Folder idea "stolen" from amy@snw.
+
+@@ what the thing looks like
+@desc PDA Parent=[if(get(me/power),[if(get(me/locked),[u(desc.locked)],[u(desc.normal)])],[u(desc.nopower)])]
+&desc.nopower PDA Parent=.-----.----------------------------------------.%r|[space(2)].[space(2)]| [ljustx(Personal Digital Assistant,38)] |%r|[space(2)].[space(2)]| .------------------------------------. |%r[repeat(|[space(2)].[space(2)]| |[space(36)]| |%r,3)]|[space(5)]| |[space(36)]| |%r| ::: | |[space(36)]| |%r| ::: | `------------------------------------' |%r`-----'----------------------------------------'
+&desc.locked PDA Parent=.-----.----------------------------------------.%r|[space(2)].[space(2)]| [ljustx(Personal Digital Assistant,38)] |%r|[space(2)].[space(2)]| .------------------------------------. |%r|[space(2)].[space(2)]| |[ansi(Rx,[space(36)])]| |%r|[space(2)].[space(2)]| |[ansi(Rx,[space(36)])]| |%r|[space(2)].[space(2)]| |[ansi(Rh,[center(L O C K E D,36)])]| |%r|[space(5)]| |[ansi(Rx,[space(36)])]| |%r| ::: | |[ansi(Rx,[space(36)])]| |%r| ::: | `------------------------------------' |%r`-----'----------------------------------------'
+&desc.normal PDA Parent=.-----.----------------------------------------.%r|[space(2)].[space(2)]| [ljustx(Personal Digital Assistant,38)] |%r|[space(2)].[space(2)]| .------------------------------------. |%r|[space(2)].[space(2)]| |[ansi(Bh,[space(2)][ljustx(Notes: [words(lattr(me/notes.*))],16)][space(1)][ljustx(Folders: [words([get(me/folders)])],16)][space(1)])]| |%r|[space(2)].[space(2)]| |[ansi(Bh,[space(2)][ljustx(Log entries: [words([lattr(me/log.*)])],32)][space(2)])]| |%r|[space(2)].[space(2)]| |[ansi(Bh,[space(2)][ljustx(Space DB: [words([lattr(me/space.name.*)])],32)][space(2)])]| |%r|[space(5)]| |[ansi(Bh,[space(1)][repeat(-,34)][space(1)])]| |%r| ::: | |[ansi(Bh,[space(1)][rjustx([convsecs(secs())],34)][space(1)])]| |%r| ::: | `------------------------------------' |%r`-----'----------------------------------------'
+
+
+@@ .-----.----------------------------------------.
+@@ |  .  | Personal Digital Assistant             |
+@@ |  .  | .------------------------------------. |
+@@ |  .  | |  Notes: 5677                       | |
+@@ |  .  | |                                    | |
+@@ |  .  | |                                    | |
+@@ |     | | ---------------------------------- | |
+@@ | ::: | |           Mon Nov 23 16:29:01 1998 | |
+@@ | ::: | `------------------------------------' |
+@@ `-----'----------------------------------------'

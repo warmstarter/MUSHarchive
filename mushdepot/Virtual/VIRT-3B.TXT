@@ -1,0 +1,10 @@
+@create Place Functions and Data Object
+@link Place Functions and Data Object=[owner(me)]
+@set Place Functions and Data Object=VISUAL
+@set Place Functions and Data Object=SAFE
+&COLORS Place Functions and Data Object=b c
+&LEAVING Place Functions and Data Object=@dolist [lnum(add(v(maxplaces),1))]=&place##names me=[setdiff(v(place##names),%#)]
+&CLEANUPSEATS Place Functions and Data Object=^* disconnected.:@dolist [lnum(add(v(maxplaces),1))]=&place##names me=[setdiff(v(place##names),%#)]
+@DESCRIBE Place Functions and Data Object=This is the data object for the place parent object.
+&HELP Place Functions and Data Object=Places are a virtual `place' to sit. You remain in the same room, but%rjoin a group of people within that room who may or may not be having a%rquiet conversation at that place. Credit for this concept goes to%rGahron@AmberMUSH for the original idea.%r%r[space(2)]Commands:%r[space(2)]---------%r[space(2)]Sit at #<num>[space(15)]Sits you at place #<num>.%r[space(2)]Sit with <name>[space(13)]Sits you at the place with <name>.%r[space(2)]Sit at <place name>[space(9)]Sit at a place by name.%r[space(2)]Stand[space(23)]Removes you from your place.%r%r[space(2)]Tt <message>[space(16)]Relays a message to all those at your place.%r[space(30)]This command takes ':' and '\;' substitutions.%r%r[space(2)]Places[space(22)]Lists who's sitting at all places. (Also: tables)%r
+&PLACE_LOOK Place Functions and Data Object=[iter(%0, [switch(##, first(revwords(%0)), [name(##)]., first(rest(revwords(%0))), {[name(##)], and }, {[name(##)],%b})])]

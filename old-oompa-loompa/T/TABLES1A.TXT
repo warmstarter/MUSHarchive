@@ -1,0 +1,36 @@
+@create PARENT: Tables
+@link PARENT: Tables=[owner(me)]
+@lock PARENT: Tables==*[owner(me)]
+&JOINTABLE1 PARENT: Tables=$sit at #*:@switch 0=[not(member(iter(rest(lnum(add(v(maxtables), 1))), [v(table##names)]), %#))],{@pemit %#=Don't you think you should 'stand' first?},[lte(%0, v(maxtables))],{@pemit %#=It would help if there were that many tables.},[gt(v(maxseats%0), words(v(table%0names)))],{@pemit %#=There aren't any free seats at that table.},{@oemit %#=%N sits down at [v(table%0)].;@pemit %#=You sit down at [v(table%0)].;@dolist [v(table%0names)]=@pemit ##=%N sits down and joins you.;&table%0names me=[v(table%0names)] %#}
+&JOINTABLE PARENT: Tables=$sit with *:[setq(0, extract(iter(rest(lnum(add(v(maxtables), 1))), [switch(words(v(table##names)), 0,, [repeat(%b##, words(v(table##names)))])]),member(iter(rest(lnum(add(v(maxtables), 1))), [v(table##names)]), num(%0)), 1))];@switch 0=[member(iter(rest(lnum(add(v(maxtables), 1))), [v(table##names)]),num(%0))],{@pemit %#=There isn't anyone named '%0' sitting here.},[not(member(iter(rest(lnum(add(v(maxtables), 1))), [v(table##names)]), %#))],{@pemit %#=Don't you think you should 'stand' first?},[lte(r(0), v(maxtables))],{@pemit %#=It would help if there were that many tables.},[gt(v(maxseats[r(0)]), words(v(table[r(0)]names)))],{@pemit %#=There aren't any free seats at the table %0 is at.},{@oemit %#=%N sits down at [v(table[r(0)])].;@pemit %#=You sit down at [v(table[r(0)])].;@dolist [v(table[r(0)]names)]=@pemit ##=%N sits down and joins you.;&table[r(0)]names me=[v(table[r(0)]names)] %#}
+&STANDTABLE PARENT: Tables=$stand:@switch [member(iter(rest(lnum(add(v(maxtables), 1))),[v(table##names)]), %#)]=0,{@pemit %#=Well, you stretch, but standing is hard considering you already are.},{[setq(0, [extract(s(iter(rest(lnum(add(v(maxtables), 1))), [switch(words(v(table##names)), 0,, [repeat(%b##, words(v(table##names)))])])), member(iter(s(rest(lnum(add(v(maxtables), 1)))), [v(table##names)]), %#), 1)])];&table[r(0)]names me=[remove(v(table[r(0)]names), %#)];@pemit %#=You stand and stretch, leaving your seat.;@dolist [v(table[r(0)]names)]=@pemit ##=%N stands, leaving the table.}
+&TALK PARENT: Tables=$tt *:@switch [member(iter(rest(lnum(add(v(maxtables), 1))), [v(table##names)]), %#)]=0,{@pemit %#=Try sitting down at a table first, perhaps?},{@dolist [v(table[extract(iter(rest(lnum(add(v(maxtables), 1))), [switch(words(v(table##names)), 0,, [repeat(%b##, words(v(table##names)))])]), member(iter(rest(lnum(add(v(maxtables), 1))), [v(table##names)]), %#), 1)]names)]={@pemit ##=At your table, %N[switch(mid(%0, 0, 1), :, %b[delete(%0, 0, 1)], ;, [delete(%0, 0, 1)], %bsays "%0")]}}
+&TABLE_CMD PARENT: Tables=$tables:@dolist [rest(lnum(add(v(maxtables), 1)))]=@pemit %#=[capstr(v(table##))] ({#}##) has [switch(sub(v(maxseats##), words(v(table##names))), 0, no, [sub(v(maxseats##), words(v(table##names)))])] empty [switch(sub(v(maxseats##), words(v(table##names))), 1, seat, seats)].[switch(words(v(table##names)), 0,,1, %rSeated is: %b[name(v(table##names))].,%rSeated are: %b[u(#362/table_look, v(table##names))])]
+&TABLEHELP PARENT: Tables=$tablehelp:@pemit %#=get_eval(me/help)
+&CONFIGURE PARENT: Tables=$configure * tables:@switch isnum(%0)=0,@pemit %#=The number of tables needs to be a number!,{&CLEANUPSEATSA me=get(me/CLEANUPSEATSA);&CLEANUPSEATSB me=get(me/CLEANUPSEATSB);@set me=monitor;&MAXTABLES me=%0;@dolist [lnum(v(maxtables))]={&maxseats[add(##, 1)] me=[add(rand(9), 1)];&table[add(##, 1)] me=table [add(##, 1)]}}
+@Desc PARENT: Tables=This is the table object. To use this do the following:%r%r@create <object>%r@parent <object>=#362 (you may have already done this)%r@lock <object>=me%rdrop <object>%rconfigure <number of tables> tables%r%rThis will set up the numbler of tables you want with a random maximum of seats per table, and a name for each table of 'table <number>'. These can be reset by typing:%r%r&maxseats<table number> <object>=<number of seats>%r%rThe tables can be renamed by typing:%r%r&table<table number> <object>=<new table name>%r%rThe table name should not start with a capital letter, or end in a period. One final note, due to the fact that the object listens for messages (it MUST be set MONITOR) it cannot be set dark to hide it.
+&CREDITS PARENT: Tables=Table code parent from Dark Web. Coder unknown. Originaly from Damned?
+&CLEANUPSEATSA PARENT: Tables=^* has left.:@switch member(iter(rest(lnum(add(v(maxtables), 1))), [v(table##names)]), %#)=>0,{[setq(0, [extract(iter(rest(lnum(add(v(maxtables), 1))), [switch(words(v(table##names)), 0,, [repeat(%b##,words(v(table##names)))])]), member(iter(rest(lnum(add(v(maxtables), 1))), [v(table##names)]), %#), 1)])];&table[r(0)]names me=[remove(v(table[r(0)]names), %#)];@dolist [v(table[r(0)]names)]={@pemit ##=%N stands, leaving the table.};@pemit %#=You stand, leaving your seat.}
+&CLEANUPSEATSB PARENT: Tables=^* has disconnected.:@switch member(iter(rest(lnum(add(v(maxtables), 1))), [v(table##names)]), %#)=>0,{[setq(0, [extract(iter(rest(lnum(add(v(maxtables), 1))), [switch(words(v(table##names)), 0,, [repeat(%b##, words(v(table##names)))])]), member(iter(rest(lnum(add(v(maxtables), 1))), [v(table##names)]), %#), 1)])];@dolist [v(table[r(0)]names)]={@pemit ##=%N stands, leaving the table.};&table[r(0)]names me=[remove(v(table[r(0)]names), %#)]}
+&MAXTABLES PARENT: Tables=8
+&MAXSEATS1 PARENT: Tables=5
+&TABLE1 PARENT: Tables=table 1
+&MAXSEATS2 PARENT: Tables=4
+&TABLE2 PARENT: Tables=table 2
+&MAXSEATS3 PARENT: Tables=2
+&TABLE3 PARENT: Tables=table 3
+&MAXSEATS4 PARENT: Tables=1
+&TABLE4 PARENT: Tables=table 4
+&MAXSEATS5 PARENT: Tables=8
+&TABLE5 PARENT: Tables=table 5
+&MAXSEATS6 PARENT: Tables=6
+&TABLE6 PARENT: Tables=table 6
+&MAXSEATS7 PARENT: Tables=3
+&TABLE7 PARENT: Tables=table 7
+&MAXSEATS8 PARENT: Tables=9
+&TABLE8 PARENT: Tables=table 8
+&HELP PARENT: Tables=Tables are a virtual `place' to sit. You remain in the same room, but%rjoin a group of people within that room who may or may not be having a%rquiet conversation at that table. Credit for this concept goes to%rGahron@AmberMUSH for the original idea.%r%r[space(2)]Commands:%r[space(2)]---------%r[space(2)]Sit <table name>[space(12)]Sits you at <tablename> (Disabled)%r[space(2)]Sit at #<num>[space(15)]Sits you at table #<num>.%r[space(2)]Sit with <name>[space(13)]Sits you at the table with <name>.%r[space(2)]Stand[space(23)]Removes you from your table.%r%r[space(2)]Tt <message>[space(16)]Relays a message to all those at your table.%r[space(30)]This command takes ':' and '\;' substitutions.%r%r[space(2)]Tables[space(22)]Lists who's sitting at all tables.%r[space(2)]Table <num>[space(17)]Lists who's sitting at table <num>. (Disabled)
+&TABLE_LOOK PARENT: Tables=[iter(%0[setq(8,words(%0))],[setq(9,add(%q9,1))][switch([SUB(%q8,%q9)],0, and [name(##)],{[name(##)], })])]
+@set PARENT: Tables=MONITOR
+@set PARENT: Tables=OPAQUE
+@set PARENT: Tables=SAFE

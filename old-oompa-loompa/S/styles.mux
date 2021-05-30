@@ -1,0 +1,204 @@
+#=============================================================================
+# STYLES.MUX -- combat styles
+#=============================================================================
+
+&db-styles #12 = #38
+-
+
+&cmd-style #12 = $style *: 
+  think setq(9, 
+    [u(u-may-use-styles, %#)]
+    [hasattr(v(db-styles), style-%0)]
+    [u(u-can-change-styles-now, %#)]
+    [not(u(u-is-engaged-to-someone, %#))]
+    [not(u(u-is-engaged-by-someone, %#))]
+    [u(u-knows-style, %#, %0)]
+  ); 
+
+  @select %q9 = 
+
+  111111, { 
+    @style %#=%0; 
+
+#   timestamp them
+    &last-combat %# = secs(); 
+  }, 
+
+  0?????, { @pemit %# = You aren't permitted to use styles. }, 
+  ?0????, { @pemit %# = There's no such style. Type 'styles' to list the 
+                        styles you know. }, 
+  ??0???, { @pemit %# = You must wait another 
+                        [sub(u(u-time-till-style-change, %#), secs())] 
+                        seconds before you can change styles. }, 
+  ???0??, { @pemit %# = You can't change styles while engaged to someone. }, 
+  ????0?, { @pemit %# = You can't change styles while engaged by someone. }, 
+  ?????0, { @pemit %# = You don't know that style. }, 
+          { @pemit %# = ERROR: #12/cmd-style: %%q9='%q9'. 
+                        Inform the staff of this error message. }
+-
+
+&cmd-style-stub #12 = $style: 
+  think setq(0, lcstr(default(%#/combat-style, none))); 
+  @pemit %# = u(u-style-desc, %q0); 
+  @dolist lattr(%#/modifier-*) = {
+    think setq(5, after(##, MODIFIER-)); 
+    think setq(6, default(%#/##, 0)); 
+    @pemit %# = u(u-modifier-desc, %q5, %q6);
+  }
+-
+
+&cmd-@style #12 = $@style *=*: 
+  think setq(0, trim(%0)); 
+  think setq(1, trim(%1)); 
+
+  &combat-style %q0 = %q1; 
+  @wipe %q0/modifier-*;
+  @pemit %q0 = switch(%q1, none, You stop using a style., 
+                                 You switch to the '%q1' style.);  
+  @oemit %q0 = switch(%q1, none, [name(%q0)] stops using a style., 
+                                 [name(%q0)] switches to the '%q1' style.); 
+  @dolist xget(v(db-styles), style-%q1) = {
+    think setq(5, first(##, :)); 
+    think setq(6, rest(##, :)); 
+    &modifier-%q5 %q0 = %q6; 
+    @pemit %q0 = u(u-modifier-desc, %q5, %q6); 
+  }
+-
+
+&cmd-styles #12 = $styles: 
+  @pemit %# = Styles; 
+  @pemit %# = 
+    list(lcstr(sort(u(u-styles-known, %#))), 
+        %b [u(u-style-desc, ##)]
+    ); 
+  @pemit %# = --
+-
+
+
+&cmd-styles/details #12 = $styles/details: 
+  think setq(0, u(u-styles-known, %#)); 
+  @pemit %# = Styles; 
+  @pemit %# = %b [ansi(c, u(u-style-details-header))]; 
+  @pemit %# = 
+    list(lcstr(sort(u(u-styles-known, %#))), 
+        %b [u(u-style-details, ##)]
+    ); 
+  @pemit %# = --
+-
+
+
+#=============================================================================
+# Ufunctions
+#=============================================================================
+
+&u-may-use-styles #12 = 
+  or(hasflag(%0, wizard), 
+     hastag(%0, styles)
+  )
+-
+#### override so everyone can
+&u-may-use-styles #12 = 1
+-
+
+&u-knows-style #12 = 
+  or(and(hasflag(%0, wizard),not(comp(type(%0),PLAYER))), 
+     t(match(default(%0/styles_I_know, none zero), %1))
+  )
+-
+
+&u-styles-all #12 = 
+  iter(lattr(v(db-styles)/style-*), clip(##))
+-
+&u-styles-known #12 = 
+  squish(
+    iter(u(u-styles-all), 
+      switch(u(u-knows-style, %0, ##), 1, ##)
+    )
+  )
+-
+
+&u-style-desc #12 = 
+  [ljust(%0:, 12)] [left(xget(v(db-styles), desc-%0), 60)]
+-
+
+&u-style-details-header #12 = 
+  [ljust(STYLE, 12)] 
+  [iter(xget(v(db-styles), modifiers), 
+    rjust(before(##,:), 3)
+  )]
+
+-
+&u-style-details #12 = 
+  [ljust(%0:, 12)] [u(u-style-stats, %0)]
+-
+&u-style-stats #12 = 
+  iter(xget(v(db-styles), modifiers), 
+    rjust(ulocal(ul-get-style-modifier, %0, after(##,:)), 3)
+  )
+-
+&ul-get-style-modifier #12 = 
+  [setq(0, after(grab(xget(v(db-styles), style-%0), %1:*), :))]
+  [switch(%q0,, +0, +*, %q0, -*, %q0, +%q0)]
+-
+
+
+&u-modifier-desc #12 = 
+  [rjust(%1, 4)] %b
+  [ljust(%0, 15)]
+-
+
+
+#----------------------------------------
+# U(U-CAN-CHANGE-STYLES-NOW, player)
+# 
+# Returns 1 if the player is allowed to change styles now; else, 0.
+# Condition is based on the amount of time since he last acted and
+# includes factors such as the player's Intuition and Attention.
+# 
+#----------------------------------------
+&u-can-change-styles-now #12 = 
+#----------------------------------------
+  gte(secs(), u(u-time-till-style-change, %0))
+-
+
+
+#----------------------------------------
+# U(U-TIME-TILL-STYLE-CHANGE, player)
+# 
+# Returns the 'secs()' format time at which the player is allowed to try
+# to attack.
+#
+# Waiting period is (15 - (Intuition + Attention)) seconds.
+# That's 9 seconds for an average character, +/- 1 second per point of 
+# Intuition or Attention above or below 3 (best: 5 secs, worst: 13 secs).
+# 
+#----------------------------------------
+&u-time-till-style-change #12 = 
+#----------------------------------------
+  add(default(%0/last-combat, 0), u(u-seconds-till-style-change, %0))
+-
+
+
+#----------------------------------------
+# U(U-SECONDS-TILL-STYLE-CHANGE, player)
+# 
+# Returns the number of seconds a player must wait before he changes 
+# styles, after he has just used a combat command.
+#
+# Waiting period is (15 - (Intuition + Attention)) seconds.
+# That's 9 seconds for an average character, +/- 1 second per point of 
+# Intuition or Attention above or below 3 (best: 5 secs, worst: 13 secs).
+# 
+#----------------------------------------
+&u-seconds-till-style-change #12 = 
+#----------------------------------------
+  round(mul(v(Combat-Multiplier),
+      max(5, 
+          sub(15, 
+              add(attribute(%0, Intuition), 
+                  attribute(%0, Attention)))
+      )
+  ),0)
+-
+
+

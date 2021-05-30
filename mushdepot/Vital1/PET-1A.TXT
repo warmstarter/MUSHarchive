@@ -1,0 +1,23 @@
+@create PARENT: Generic Pet Object
+@Osucc PARENT: Generic Pet Object=picks up %o pet.
+@Ofail PARENT: Generic Pet Object=growls at %N as %s tries to pick it up.
+@Fail PARENT: Generic Pet Object=The animal makes it -very- clear that you shouldn't do that.
+@Succ PARENT: Generic Pet Object=Your pet bounds happily into your arms.
+@Desc PARENT: Generic Pet Object=This is a generic pet object. Feel free to make copies of it (else all my hard work has gone to waste <g>).%rFor a list of commands, type `commands'. You should move your pet outside of this room before you do this, however, or you'll get them twice.%rA few more notes...%rYou will most likely want to personalize the succ, drop, and fail messages. The ones already set are, of course, generic.%rIf you want your pet to be a horse, you'll need to set it enter_ok, and set the messages that go along with that.%rAfter you @parent your object, you'll need to type the following: `@set <object>=inherit', `@set <object>=terse', `lock <object>=me', `@lock/u <object>=me', and then `reset'.
+@Odrop PARENT: Generic Pet Object=puts %o pet down.
+@Drop PARENT: Generic Pet Object=You put your pet down.
+@Listen PARENT: Generic Pet Object=*
+@Adesc PARENT: Generic Pet Object=@pemit me=%N just glanced at you.
+&RESET PARENT: Generic Pet Object=$reset:&pet_follow me=[^OWNER has left.::follows quickly after OWNER.;@set me=!puppet;@tel *OWNER;leave;:arrives, following OWNER.;@set me=puppet]
+&SETUP PARENT: Generic Pet Object=$setup *:@edit me/pet_follow=OWNER,%0
+&PET_POSE PARENT: Generic Pet Object=$pp* *:@emit [name(me)][switch([mid(%1,0,1)],;,[delete(%1,0,1)],:,%b[delete(%1,0,1)],%bsays "%1")]
+&PET_FOLLOW PARENT: Generic Pet Object=^OWNER has left.::follows quickly after OWNER.;@set me=!puppet;@tel *OWNER;leave;:arrives, following OWNER.;@set me=puppet
+&PET_COMMAND PARENT: Generic Pet Object=$pc *:@fo me=%0
+&FOLLOW_OFF PARENT: Generic Pet Object=$fol off:@set me=!monitor;@pemit [owner(me)]=Your pet is no longer following you.
+&FOLLOW_ON PARENT: Generic Pet Object=$fol on:@set me=monitor;@pemit [owner(me)]=Your pet is following you.
+&LIST_COMMANDS PARENT: Generic Pet Object=$commands:@pemit %N=The commands for the generic pet are as {follows...%r%rps <text> = Makes the pet say <text>.%rpp <text> = Makes the pet pose <text>.%rpc <text> = Used for other commands, such as `look' and moving through an exit.%rfol on = Sets the pet in follow mode, so it will follow you from room to room.%rfol off = Turns follow mode off.%rsetup <name> = Sets the follow code to follow <name> (usually the owner)%rreset = Resets the follow code, so that it can be set to another player. If this command is not used, the setup command -will not- work.%r%rUPDATE: The ps and pp commands are now one command. It works like this...%rpp "<text> - Makes the pet say <text>.%r pp :<text> - Makes the pet pose <text>. This also has the nospace pose form.
+@set PARENT: Generic Pet Object=DARK
+@set PARENT: Generic Pet Object=VISUAL
+@set PARENT: Generic Pet Object=PARENT_OK
+@set PARENT: Generic Pet Object=HALT
+@set PARENT: Generic Pet Object=SAFE

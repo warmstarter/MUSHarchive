@@ -1,0 +1,20 @@
+@create Room Parent
+@link Room Parent=#331
+@set Room Parent=LINK_OK
+@set Room Parent=SAFE
+&ALERT Room Parent=ALERT STATUS: [get(zone/salert)]
+@DESCRIBE Room Parent=[get_eval(me/rdesc)][switch([zone(me)],#-1,,%r%rThe clock reads: [ansi(c,[extract([time()],4,1)])
+&CMD_RDESC Room Parent=$rdesc *:@switch [match(v(occupant),%#)]=1,{@fo [owner(me)]=&rdesc here=%0;@pemit %#=You Redecorated the room%r%r- %0 -},@pemit %#=You are not authorized to redecorate this room.
+&RDESC Room Parent=%r%rRooms which use this parent, must be 1) set dark, 2) hold their desc in rdesc %r%rItems: Will be displayed in green%rContents: Will be displayed in bold-green%r%rObvious exits:Take their descriptions from @edesc on the exits themselves.
+&OBJECTS Room Parent=[iter([map(no_dark,[lcon(me)])],[switch([type(##)],THING,%r%b[ansi(b,name(##))][u(Flags,##)])])]
+&PLAYERS Room Parent=[iter([remove([map(no_dark,[lcon(me)])],%0)],[switch([match(lwho(),##)],0,{},[switch([type(##)],PLAYER,[ansi(y,name(##))][u(Flags,##)])])])]
+&CONTAINS Room Parent=[switch([setq(0,filter(VisiblePlayer,remove(lcon(%!),%#)))][words(%q0)],0,,u(ListPlayers,%q0))][switch([setq(0,filter(VisibleObject,remove(lcon(%!),%#)))][words(%q0)],0,,u(ListObjects,%q0))]
+&NO_DARK Room Parent=[switch([hasflag(%0,dark)],0,%0,1,[switch([hasflag(%0,puppet)],1,%0)])]
+&EXITS Room Parent=[switch([words([map(no_dark,[lexits(me)])])],0,[ansi(y,No obvious exits.)],[ansi(y,Obvious exits:)]%r[iter([map(no_dark,[lexits(me)])],[s(ealias(##))])])]
+@SUCCESS Room Parent=[switch(escape(u(contains,%#)),,[ansi(w,There are no obvious features.)]%r,#$)][get_eval(me/exits)]
+&FLAGS Room Parent=[switch(or(or(haspower(%#,SEE_ALL),controls(%#,%0)),or(hasflag(%#,WIZARD),hasflag(%#,ROYALTY))),1,(%0[flags(%0)]))]
+&NOTDARK Room Parent=[not(or(and(hasflag(%0,DARK),not(hasflag(%0,PUPPET))),and(hasflag(%0,DARK),not(hasflag(%0,CONNECTED)))))]
+&VISIBLEPLAYER Room Parent=[and(hastype(%0,Player),and(not(hasflag(%0,DARK)),switch(conn(%0),-1,0,1)))]
+&VISIBLEOBJECT Room Parent=[and(hastype(%0,Thing),or(hasflag(%0,Puppet),not(hasflag(%0,Dark))))]
+&LISTPLAYERS Room Parent=[ansi(hg,Players:)][iter(%0,%r[ansi(hy,name(##))][u(flags,##)])]%r
+&LISTOBJECTS Room Parent=[ansi(hg,Objects:)][iter(%0,%r[ansi(hb,name(##))][u(flags,##)])]%r

@@ -1,0 +1,179 @@
+@@  -*- mushcode -*- $Id: funclib.txt 1.2 Wed, 02 Aug 2000 22:39:31 -0700 shawnw $
+@@ Just quote this in... everything should work right. I hope.
+@create Raevnos' Function Lib
+@lock/Basic Raevnos' Function Lib==me
+@set Raevnos' Function Lib = VISUAL
+@set Raevnos' Function Lib = SAFE
+@set Raevnos' Function Lib = NO_COMMAND
+&..BAGINTER Raevnos' Function Lib=alphamin(graball(%q0, %0, %q2), graball(%q1, %0, %q2))
+&..BTEST1 Raevnos' Function Lib=if(eq(mod(%q1, 2), 1), , setq(0, inc(%q0))[setq(1, shr(%q1, 1))][u(..btest1)])
+&..BTEST2 Raevnos' Function Lib=switch(1, eq(%1, 0), 0, eq(setr(2, u(expomod, %q2, 2, %0)), %2), 1, u(..btest2, %0, dec(%1), %2))
+&..ISPRIME Raevnos' Function Lib=ulocal(.btest, %0, first(shuffle(lnum(2, sub(%0, 2)))))
+&.BAGINTER Raevnos' Function Lib=map(..baginter, setinter(setr(0, %0), setr(1, %1)), setr(2, if(%2, %2, %b)))
+&.BETWEEN Raevnos' Function Lib=switch(words(%2), >1, if(cand(gte(%0, first(%2)), lte(%0, first(rest(%2)))), %1, u(.between, %0, inc(%1), rest(%2))), 0)
+&.BTEST Raevnos' Function Lib=setq(0, 0)[setq(1, dec(%0))][u(..btest1)][setq(2, u(expomod, %1, %q1, %0))][switch(1, %q2, 1, eq(%q2, dec(%0)), 1, u(..btest2, %0, dec(%q0), dec(%0)))]
+&.ENUMERATE Raevnos' Function Lib=edit(extract(%0, 1, %6, %1), %1, %5%4)%3%4%2%4%7
+&.EXPOMOD Raevnos' Function Lib=switch(%0, >0, u(.expomod, shr(%0, 1), if(mod(%0, 2), mod(mul(%1, %2), %3), %1), mod(power(%2, 2), %3), %3), %1)
+&.FACTORIAL_TABLE Raevnos' Function Lib=1 2 6 24 120 720 5040 40320 362880 3628800 39916800 479001600 6227020800 87178291200 1307674368000 20922789888000 355687428096000 6402373705728000 121645100408832000 2432902008176640000
+&.INSERT_BREAK Raevnos' Function Lib=setq(0, if(lt(setr(9, wordpos(%q3, min(%0, %q2))), words(%q3)), edit(insert(%q0, %q9, %r), %r%b, %r), %q0))
+&.ISPRIME Raevnos' Function Lib=switch(0, gt(%1, 0), 1, u(..isprime, %0), 0, u(.isprime, %0, dec(%1)))
+&.PATTERN Raevnos' Function Lib=if(regmatch(%0, (%1)+, 0), div(strlen(%q0), strlen(%1)), 0)
+&.POSITION Raevnos' Function Lib=%1%b[vadd(repeat(%2%b, setr(1, div(%q2,   sub(%1, %2)))), vmul(sub(%1, %2), lnum(2, inc(%q1))))]
+&.ROT13 Raevnos' Function Lib=if(regmatch(%0, \[a-zA-Z\]), mid(nopqrstuvwxyzabcdefghijklmNOPQRSTUVWXYZABCDEFGHIJKLM, dec(pos(%0, abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ)), 1), %0)
+&.SQUISHD Raevnos' Function Lib=if(strmatch(%0, *%1%1*), u(.squishd, edit(%0, %1%1, %1), %1), %0)
+&.TRANSPOSE Raevnos' Function Lib=vadd(sort(repeat(lnum(1, %1)%b, %2)), repeat(vmul(%1, lnum(%2))%b, %1))
+&.WRAP Raevnos' Function Lib=if(lte(setr(2, strlen(setr(0, [repeat(_, %2)]%0))), %1), %0, map(.insert_break[setq(3, %q0)], u(.position, , %1, %2))[edit(delete(%q0, 0, %2), %b%r, %r[space(%2)])]
+&AVERAGE Raevnos' Function Lib=lmath(mean, %0, %1)
+&AVERAGE_ABOUT Raevnos' Function Lib=Computes the average of a list of numbers. First argument are the numbers, second (Optional) is a delimiter. You should use mean() now instead.
+&BAGINTER Raevnos' Function Lib=ulocal(.baginter, %0, %1, %2)
+&BAGINTER_ABOUT Raevnos' Function Lib=u(#1838/baginter,list1,list2[,delimiter]). Does a bag-set intersection of the two lists. A bag set is a set that can have multiple copies of the same item.
+&BETWEEN Raevnos' Function Lib=u(.between, %0, 1, %1 %2 %3 %4 %5 %6 %7 %8)
+&BETWEEN_ABOUT Raevnos' Function Lib=u(#1838/between, <number>, <N1>, <N2>[, ..., <N8>]) Returns the position <N> falls into between the rest of it's arguments, which should be in sorted order. For example, u(#1838/between, 2, 1, 5, 10) would return 1.
+&BLANK_OPTION Raevnos' Function Lib=0
+&BLANK_OPTION_ABOUT Raevnos' Function Lib=u(#6489/newset) returns an empty option set.
+&CALC Raevnos' Function Lib=u(%xb/calc, %0)
+&CALC_ABOUT Raevnos' Function Lib=u(#1838/calc,<EXPRESSION>), u(#2852/calc,<EXPRESSION>). Treats EXPRESSION as a sequence of math operations and returns the evaluated result. Understands +, -, /, *, ^, and parenthesis for grouping.
+&CAPITALIZE Raevnos' Function Lib=map(%xa/capstr, lcstr(%0), %1)
+&CAPITALIZE_ABOUT Raevnos' Function Lib=u(#1838/capitalize,<SENTENCE> [,<DELIM>]). Returns SENTENCE, with every word converted to lowercase - except the first of each word, which is upper case. DELIM is an optional seperator; the default is space.
+&CLEAR_OPTION Raevnos' Function Lib=bnand(%1, shl(1, member(%0, %2)))
+&CLEAR_OPTION_ABOUT Raevnos' Function Lib=u(#6489, OPTION LIST, OPTION SET, OPTION) - Returns an option set with all the options in the second argument set except the third argument.
+&CUBE_ROOT Raevnos' Function Lib=u(xroot, %0, 3)
+&CUBE_ROOT_ABOUT Raevnos' Function Lib=u(#1838/cube_root, number). Returns the cube root of number.
+&DBREFBYNAME Raevnos' Function Lib=munge(%xa/sort_pipe, map(%xa/name, edit(%0, %b, |), |), edit(%0, %b, |), |)
+&DBREFBYNAME_ABOUT Raevnos' Function Lib=u(#1838/dbrefbyname,<LIST OF DBREFS>) Returns LIST, sorted by the names of the object. Basically, the example in HELP MUNGE().
+&DEG2RAD Raevnos' Function Lib=fdiv(mul(%0, pi()), 180)
+&DEG2RAD_ABOUT Raevnos' Function Lib=u(#1838/deg2rad,<DEG>). Returns DEG converted from degrees to radians.
+@DESCRIBE Raevnos' Function Lib=This object has an assortment of various useful (I hope) ufuns and the like, meant to be called by anything any time. Currently, here's what it has:%r%r[u(enumerate,v(functions))].%r%r[name(owner(me))] is working on adding more, so if there's a problem with one of them, or something you'd like to see, contact [obj(owner(me))].%r%rTo see how to use any of these functions, examine #1838/<function name>_about
+@set Raevnos' Function Lib/DESCRIBE=no_command
+&ENUMERATE Raevnos' Function Lib=switch(words(%0, %1), >1, u(.enumerate, %0, if(strlen(%1), %1, %b), if(%2, %2, and), if(%3, if(strlen(%5), %5, \,)), if(strlen(%4), %4, %b), if(strlen(%5), %5, \,), dec(#$), last(%0, %1)), %0)
+&ENUMERATE_ABOUT Raevnos' Function Lib=u(#1838/enumerate,<LIST> [,<DELIM>, <CONJUCTION>, <EXTRA-COMMA>, <OUTPUT-DELIM>, <COMMA-CHAR>]). Returns LIST in comma-seperated format (1, 2, 3 and 4). DELIM is an optional delimiter, default is space. If CONJUCTION is specified, it is used instead of 'and'. If EXTRA-COMMA is a true value, a comma will be added to the end of the word before the conjuction. If OUTPUT-DELIM is specified, it's used instead of a space. If COMMA-CHAR is specified, it's used instead of a comma.
+&EXPOMOD Raevnos' Function Lib=u(.expomod, %1, 1, mod(%0, %2), %2)
+&EXPOMOD_ABOUT Raevnos' Function Lib=u(#1838/expomod,<X1>,<X2>,<X3>) Equilivant to mod(power(X1,X2),X3), but better for large values of X*.
+&FACTORIAL Raevnos' Function Lib=lmath(mul, if(gt(%0, 20), lnum(21, %0)) [extract(v(.factorial_table), min(%0, 20), 1)])
+&FACTORIAL_ABOUT Raevnos' Function Lib=u(#1838/factorial,<INT>). Returns INT!. The relation 0 < INT < 171 must hold true. Anything larger results in math overflows, and anything less will return 0 or -0.
+&FUNCTIONS Raevnos' Function Lib=AVERAGE BAGINTER BETWEEN CALC CAPITALIZE CUBE_ROOT DBREFBYNAME DEG2RAD ENUMERATE EXPOMOD FACTORIAL GCD GRABDEFAULT INLIST ISINT ISPRIME LCM LINC LOGN MAKEUNIQUE MAXN MINN NCR NPR PATTERN POL2XY RAD2DEG REC2SPHERE REMOVEALL SPHERE2REC SQUISHD TRANSPOSE WRAP XROOT XY2POL SET_OPTION ISSET_OPTION CLEAR_OPTION BLANK_OPTION
+&GCD Raevnos' Function Lib=switch(%0, >0, u(gcd, mod(%1, %0), %0), %1)
+&GCD_ABOUT Raevnos' Function Lib=u(#1838/gcd,<INT1>,<INT2>). Returns the greatest common divisor of INT1 and INT2 usuing Euclid's algorithm. It's a recursive implementation, so really big numbers might not work well. Both arguments should be positive integers.
+&GRABDEFAULT Raevnos' Function Lib=switch(grab(%0, %1, %3), , %2, #$)
+&GRABDEFAULT_ABOUT Raevnos' Function Lib=u(#1838/grabdefault,list,pattern,default[,delimiter]) -- Acts just like grab(), except that if the pattern doesn't match anything in the list, the the first item of the default value is returned. delimiter is optional, default is a space.
+&INLIST Raevnos' Function Lib=t(member(%0, %1, %2))
+&INLIST_ABOUT Raevnos' Function Lib=u(#1838/inlist,<LIST>,<ITEM>[,<DELIM>]). Returns 1 if the ITEM is in the list, 0 if it's not. DELIM is optional, default is space.
+&INRANGE Raevnos' Function Lib=cand(gte(%0, %1), lte(%0, %2))
+&ISINT Raevnos' Function Lib=u(%xa/isint, %0)
+&ISINT_ABOUT Raevnos' Function Lib=u(#1838/isint, <string>) Returns 1 if <string> is an integer, 0 otherwise. Similar to isnum(), except isnum() also checks for decimal numbers. No longer needed as of PennMUSH 1.7.3
+&ISPRIME Raevnos' Function Lib=switch(0, gt(%0, 4), 1, mod(%0, 2), 0, u(.isprime, %0, 10))
+&ISPRIME_ABOUT Raevnos' Function Lib=u(#1838/isprime,<NUM>). Returns 1 if NUM is prime, 0 if not. If it returns 1, there is a very slight chance (Once in a million), that the number is actually nonprime.
+&ISSET_OPTION Raevnos' Function Lib=band(%1, shl(1, member(%0, %2)))
+&ISSET_OPTION_ABOUT Raevnos' Function Lib=u(#6489/isset, OPTION LIST, OPTION SET, OPTION) - Returns a true value if the option is set, 0 if not.
+&LCM Raevnos' Function Lib=fdiv(mul(%0, %1), u(gcd, %0, %1))
+&LCM_ABOUT Raevnos' Function Lib=u(#1838/lcm,<INT1>,<INT2>). Returns the lowest common multiple of INT1 and INT2, which should both be postive integers.
+&LICENSE Raevnos' Function Lib=All code on this object (Raevnos' Function Library) is released under the Lesser Gnu Public License. A copy of that license is avaliable at [tagwrap(a, href="http://www.gnu.org/copyleft/lesser.html", http://www.gnu.org/copyleft/lesser.html)]
+&LINC Raevnos' Function Lib=mid(abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWYXZ, pos(right(%0, 1), abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWYXZ), 1)
+&LINC_ABOUT Raevnos' Function Lib=u(#1838/linc,<LETTER>). Returns LETTER, incremented. Preserves case for the most part, wrapping from lower to upper at z. Z returns nothing.
+&LOGN Raevnos' Function Lib=fdiv(ln(%0), ln(%1))
+&LOGN_ABOUT Raevnos' Function Lib=u(#1838/logn,<NUM>,<B>). Returns the logarithm of NUM in base B.
+&MAKEUNIQUE Raevnos' Function Lib=edit(replace(splice(%0, trim(repeat(NOTAWORD[if(%2, %2, %b)], words(%0, %2)), %2), %1, %2), member(%0, %1, %2), %1, %2), %2NOTAWORD, )
+&MAKEUNIQUE_ABOUT Raevnos' Function Lib=u(#1838/makeunique,<LIST>,<ELEMENT> [,<DELIM>])). This returns LIST, will all occurances of <ELEMENT> after the first one deleted. The order of the rest of the list is preserved, unlike with setX() functions. DELIM is an optional delimiter, default is space.
+&MAXN Raevnos' Function Lib=extract(revwords(sort(%0, %3, %2), %2), 1, %1, %2)
+&MAXN_ABOUT Raevnos' Function Lib=u(#1838/maxn,<LIST>,<NUM>[,<DELIM>,<TYPE>]). Returns the NUM-most highest elements of LIST. DELIM is an optional delimiter, default is space.  TYPE is also optional, it determines what kind of items are in the list, same as sort()'s second argument.
+&MINN Raevnos' Function Lib=extract(sort(%0, %3, %2), 1, %1, %2)
+&MINN_ABOUT Raevnos' Function Lib=u(#1838/minn,<LIST>,<NUM>[,<DELIM>,<TYPE>]). Returns the NUM-most lowest elements of LIST. DELIM is an optional delimiter, default is space. TYPE is also optional, it determines what kind of items are in the list, same as sort()'s second argument.
+&NCR Raevnos' Function Lib=fdiv(u(factorial, %0), mul(u(factorial, %1), u(factorial, sub(%0, %1))))
+&NCR_ABOUT Raevnos' Function Lib=u(#1838/ncr,N,R). Returns the number of combinations of R items from a set of N total items.
+&NPR Raevnos' Function Lib=fdiv(u(factorial, %0), u(factorial, sub(%0, %1)))
+&NPR_ABOUT Raevnos' Function Lib=u(#1838/npr,N,R). Returns the number of permutations of R items from a set of N total items.
+&PATTERN Raevnos' Function Lib=ulocal(.pattern, %0, %1)
+&PATTERN_ABOUT Raevnos' Function Lib=u(#1838/pattern, <string>, <pattern string>). Returns the number of consecutive times <pattern string> repeats in <string>.
+&POL2XY Raevnos' Function Lib=mul(%0,cos(%1)) [mul(%0,sin(%1))]
+&POL2XY_ABOUT Raevnos' Function Lib=u(#1838/pol2xy,<R>,<ANGLE>). Returns a two element list, of R and ANGLE converted from Polar coordinates to Cartesian coordinates. The list is in X Y order. ANGLE should be in radians.
+&RAD2DEG Raevnos' Function Lib=fdiv(mul(%0, 180), pi())
+&RAD2DEG_ABOUT Raevnos' Function Lib=u(#1838/rad2deg,<RAD>). Returns RAD converted from radians to degrees.
+&REC2SPHERE Raevnos' Function Lib=vmag(%0 %1 %2) [switch(%0, 0, mul(sign(%1), fdiv(pi(), 2)), add(atan(fdiv(%1, %0)), if(lt(%0, 0), mul(sign(%1), pi()), 0)))] [switch(vmag(%0 %1 %2), 0, 0, acos(fdiv(%2, #$)))]
+&REC2SPHERE_ABOUT Raevnos' Function Lib=u(#1838/rec2sphere,X,Y,Z) -- Turns rectangular coordinates to spherical (Radius, angle, phi).
+&REMOVEALL Raevnos' Function Lib=squish(edit(splice(%0, trim(repeat(NOTAWORD[if(%2, %2, %b)], words(%0, %2)), %2), %1, %2), %2NOTAWORD,, NOTAWORD%2, ))
+&REMOVEALL_ABOUT Raevnos' Function Lib=u(#1838/removeall,<LIST>,<ITEM>[,<DELIM>]). Removes all occurances of <ITEM> in <LIST>. <DELIM> is optional, default is space.
+&ROT13 Raevnos' Function Lib=foreach(.rot13, stripansi(%0))
+&SET_OPTION Raevnos' Function Lib=bor(%1, shl(1, member(%0, %2)))
+&SET_OPTION_ABOUT Raevnos' Function Lib=u(#6489/set, OPTION LIST, OPTION SET, OPTION) returns a new option set with everything in it's second argument set, as well as the new option.
+&SPHERE2REC Raevnos' Function Lib=mul(%0, cos(%1), sin(%2)) [mul(%0, sin(%1), sin(%2))] [mul(%0, cos(%2))]
+&SPHERE2REC_ABOUT Raevnos' Function Lib=u(#1838/sphere2rec,r,theta,phi) - Turns spherical coordinates into rectangular (X Y Z)
+&SQUISHD Raevnos' Function Lib=if(%1, u(.squishd, trim(%0, %1), %1), squish(%0))
+&SQUISHD_ABOUT Raevnos' Function Lib=u(#1838/squishd, <list>[, <delimiter>]) Just like squish, but with a delimiter so you can choose what gets squished. Default is space.
+&TRANSPOSE Raevnos' Function Lib=elements(%0[repeat(%2, %1)], u(.transpose, %0, ceil(fdiv(words(%0, %2), %1)), %1), %2)
+&TRANSPOSE_ABOUT Raevnos' Function Lib=Transposes a matrix. u(#1838/transpose,list,columns,delimiter). u(#1838/transpose,a|b|c|d,2,|) returns a|c|b|d, for example.
+&WRAP Raevnos' Function Lib=trim(ulocal(.wrap, squish(edit(edit(%0, %t, %b), %r, %b)), if(%1, %1, 75), if(%2, %2, 0)))
+&WRAP_ABOUT Raevnos' Function Lib=Wraps text in a effecient (Low number of function calls, no recursion) manner, with the only size limit for the text being BUFFER_LEN. (Really, clients should  be doing the wrapping, but at times you want to force where the text wraps.)%r%rSyntax: u(#1838/wrap,TEXT[, LINE LENGTH,][,INDENT]). If no line length is specifed, 75 characters is used. If no indent is specifed, none is used. Otherwise, all lines after the first are indented by INDENT spaces.%r%rExample: u(#1838/wrap,v(describe),60).%r%rNotes: Words longer than the line length will make this barf. GIGO applies. Including the substring -$- in the text to be wrapped will make it wrap unpredictably, as well as destroy that substring. All registers are preseved, so you don't have to worry about it messing up things like %q0.
+&XROOT Raevnos' Function Lib=power(%0, fdiv(1, %1))
+&XROOT_ABOUT Raevnos' Function Lib=u(#1838/xroot, <number>, <root>) Returns the Xth root of <number>. u(#1838/xroot, N, 3) is the same as u(#1838/cube_root, N).
+&XY2POL Raevnos' Function Lib=vmag(%0 %1) [switch(%0, 0, mul(sign(%1), fdiv(pi(), 2)), add(atan(fdiv(%1, %0)), if(lt(%0, 0), mul(sign(%1), pi()), 0)))]
+&XY2POL_ABOUT Raevnos' Function Lib=u(#1838/xy2pol,<X>,<Y>). Returns a two element list, of X and Y converted from Cartesian coordinates to Polar coordinates. The first element is range, second is angle (In radians).
+@create Predicates And Transformation Functions
+@lock/Basic Predicates And Transformation Functions==me
+@set Predicates And Transformation Functions = VISUAL
+@set Predicates And Transformation Functions = SAFE
+@set Predicates And Transformation Functions = NO_COMMAND
+&CAPSTR Predicates And Transformation Functions=capstr(%0)
+@DESCRIBE Predicates And Transformation Functions=A bunch of predicates and functions for use with filter(), map(), and the like. Part of Raevnos' Function Library. Hopefully, the attribute names give a good enough idea of what they do.
+@set Predicates And Transformation Functions/DESCRIBE=no_command visual
+&ISADMIN Predicates And Transformation Functions=cand(u(isplayer, %0), orflags(%0, Wr))
+&ISCONNECTED Predicates And Transformation Functions=gte(conn(%0), 0)
+&ISEVEN Predicates And Transformation Functions=not(band(%0, 1))
+&ISEXIT Predicates And Transformation Functions=hastype(%0, exit)
+&ISGOODOBJECT Predicates And Transformation Functions=t(member(PLAYER THING EXIT ROOM, type(%0))
+&ISGUEST Predicates And Transformation Functions=haspower(%0, guest)
+&ISINT Predicates And Transformation Functions=isint(%0)
+&ISNUM Predicates And Transformation Functions=isnum(%0)
+&ISODD Predicates And Transformation Functions=band(%0, 1)
+&ISPLAYER Predicates And Transformation Functions=hastype(%0, player)
+&ISPUPPET Predicates And Transformation Functions=hasflag(%0, puppet)
+&ISROOM Predicates And Transformation Functions=hastype(%0, room)
+&ISTHING Predicates And Transformation Functions=hastype(%0, thing)
+&ISWHITESPACE Predicates And Transformation Functions=regmatch(%0, ^\[%t%r \]$)
+&ISWORD Predicates And Transformation Functions=isword(%0)
+&LCSTR Predicates And Transformation Functions=lcstr(%0)
+&LICENSE Predicates And Transformation Functions=All code on this object (Raevnos' Function Library (Predicates and Transformations)) is released under the Lesser Gnu Public License. A copy of that license is avaliable at [tagwrap(a, href="http://www.gnu.org/copyleft/lesser.html", http://www.gnu.org/copyleft/lesser.html)]
+&LOC Predicates And Transformation Functions=loc(%0)
+&NAME Predicates And Transformation Functions=name(%0)
+&NCOMP Predicates And Transformation Functions=sub(%1, %0)
+&NOT_DARK Predicates And Transformation Functions=andflags(%0, !D)
+&SORT Predicates And Transformation Functions=sort(%0, %1, %2)
+&SORT_PIPE Predicates And Transformation Functions=sort(%0, %1, |)
+&STREQ Predicates And Transformation Functions=not(comp(%0, %1))
+&UCSTR Predicates And Transformation Functions=ucstr(%0)
+&VISIBLE_CONTENT Predicates And Transformation Functions=cand(andflags(%0, !D), if(hastype(%0, player), gte(conn(%0), 0), 1))
+@create Calculator
+@lock/Basic Calculator==me
+@set Calculator = VISUAL
+@set Calculator = SAFE
+@set Calculator = NO_COMMAND
+&ADD Calculator=if(strlen(%1), add(u(parse_sub, %0), u(parse_sub, %1)), u(parse_sub, %0))
+&CALC Calculator=u(parse_parens, trim(edit(ulocal(insert_mul, edit(%0, %b, , --, +)), \(, %b\(, \), \)%b)))
+&CALC_CMD Calculator=$calc *:@pemit %#=Calc> [u(calc, %0)]
+@DESCRIBE Calculator=A four function (Well, 5 if you count the ^ (Power) key,) calculator with working () keys (Thanks to Trispis for the idea for how to do that bit, as well as lots of bug testing), and an LCD display. To use, just 'calc <expression>' where <expression> is something like 1+2-3
+@set Calculator/DESCRIBE=no_command visual
+&DIV Calculator=if(strlen(%1), fdiv(u(parse_exp, %0), u(parse_exp, %1)), u(parse_exp, %0))
+&EXP Calculator=if(strlen(%1), power(u(parse_fact, %0), u(parse_fact, %1)), u(parse_fact, %0))
+&INSERT_MUL Calculator=if(regmatch(%0, lit(([0-9\)])(\()|(\))([0-9\(])), 0 1 2 3 4), u(insert_mul, edit(%0, %q0, if(%q1, %q1, %q3)*[if(%q2, %q2, %q4)])), %0)
+&LICENSE Calculator=All code on this object (Raevnos' Calculator) is released under the Lesser Gnu Public License. A copy of that license is avaliable at [tagwrap(a, href="http://www.gnu.org/copyleft/lesser.html", http://www.gnu.org/copyleft/lesser.html)]
+&MUL Calculator=if(strlen(%1), mul(u(parse_div, %0), u(parse_div, %1)), u(parse_div, %0)
+&PARSE_ADD Calculator=fold(add, rest(%0, +), first(%0, +), +)
+&PARSE_DIV Calculator=fold(div, rest(%0, /), first(%0, /), /)
+&PARSE_EXP Calculator=fold(exp, rest(%0, ^), first(%0, ^), ^)
+&PARSE_FACT Calculator=switch(right(%0, 1), !, u(%xc/factorial, edit(%0, !, )), %0)
+&PARSE_MUL Calculator=fold(mul, rest(%0, *), first(%0, *), *)
+&PARSE_PARENS Calculator=if(pos(\(,%0), u(parse_parens, trim(edit(replace(%0, match(%0, \(*\)), u(parse_add, edit(grab(%0, \(*\)), \(, , \), ))), %b, , \(, %b\(, \), \)%b))), u(parse_add, %0))
+&PARSE_SUB Calculator=if(regmatch(%0, \[\*/\]-), u(parse_mul, %0), fold(sub, rest(%0, -), first(%0, -), -))
+&SUB Calculator=if(strlen(%1), if(%0, sub(u(parse_mul, %0), u(parse_mul, %1)), u(parse_mul, -%1)), u(parse_mul, %0))
+@@ Save the dbrefs of the objects in the right places.
+@force me=@xa Raevnos' Function Lib=[num(Predicates And Transformation Functions)]
+@force me={@xa Predicates And Transformation Functions=[num(Predicates And Transformation Functions)];
+@force me={@xa Calculator=[num(Predicates And Transformation Functions)];
+@force me={@xb Raevnos' Function Lib=[num(Calculator)];
+@force me={@xb Predicates And Transformation Functions=[num(Calculator)];
+@force me={@xb Calculator=[num(Calculator)];
+@force me={@xc Raevnos' Function Library=[num(Raevnos' Function Library)];
+@force me={@xc Predicates And Transformation Functions=[num(Raevnos' Function Library)];
+@force me={@xc Calculator=[num(Raevnos' Function Library)];
+@teleport Predicates And Transformation Functions=Raevnos' Function Library
+@teleport Calculator=Raevnos' Function Library
+think Setup complete

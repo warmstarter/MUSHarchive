@@ -1,0 +1,1402 @@
+#################################################################
+#			CONTAINERS SYSTEM                       #
+#                                                               #
+# This file contains commands:                                  #
+#   open, close, put, take, drop, load, give, fill & inventory  #
+#   unload -- Dan                                               #
+# See separate file for the @resynch command.                   #
+#                                                               #
+# Stephanie Dray                                                #
+#                                                               #
+# Where they Generic Container = #2529                          #
+# Where the Container Code Object = #70                         #
+#################################################################
+
+
+#===============================================================#
+#          COMMAND: FILL <CONTAINER> FROM <CONTAINER>           #
+#                                                               #
+# Allows players to fill their glasses from pitchers and so on. #
+#===============================================================#
+
+&cmd-fill #70=$fill * from *:
+
+#----------------------------------------------------------------
+# Step One: Set the registers of the items involved
+#
+# %q0 = The container to be filled
+# %q1 = The container to be emptied (partially or fully)
+# %q2 = list of contents of the object to be emptied
+# %q3 = list of accounts on the object to be emptied (-currency)
+#        (this list is necessary to ensure future expandability 
+#         of the code to handle things like a bottle with a wine 
+#         account on it instead of a wine object in it) 
+#-----------------------------------------------------------------
+
+  think setq(0, locate(%#, %0, aiX));
+  think setq(1, locate(%#, %1, ainX));
+  think setq(2, lcon(%q1));
+  think setq(3, laccounts(%q1));
+  think setq(3, remove(lcstr(%q3), makeattr(get(%q1/currency))));
+
+#--------------------------------------------------------------------
+# Step Two: Initial Error Checking
+# 
+# A) Did we find the container to be filled?
+# B) Did we find the container to be emptied?
+# C) Is the container to be filled closed?
+# D) Is the container to be emptied closed?
+# E) Does the container have too much stuff in it to work?
+#--------------------------------------------------------------------
+
+  think setq(9, [isdbref(%q0)]
+                [isdbref(%q1)]
+                [not(hastag(%q0, closed))]
+                [not(hastag(%q1, closed))]
+                [not(or(gt(words(%q2), 1), gt(words(%q3), 1)))]
+                [not(t(words(lcon(%q0))))]);
+
+  @switch/first %q9=
+    111111, {think setq(8, switch(1, t(words(%q2)), object,
+                                   t(words(%q3)), account, empty));
+             @tr me/trig-fill-[trim(%q8)]=%q0, %q1, %q2, %q3, %#},
+    0?????, {@pemit %#=You have to be holding the object you want 
+                       to fill.},
+    ?0????, {@pemit %#=I don't see %1 here.},
+    ??0???, {@pemit %#=You can only fill open containers.},
+    ???0??, {@pemit %#=You can only fill from open containers.},
+    ????0?, {@pemit %#=Sorry, but [name(%q1)] has more than one thing 
+                   in it, and so the fill command can't be used.},
+    ?????0, {@pemit %#=You can only fill empty containers.}
+-
+#=================================================================#
+#         TRIG-FILL-ACCOUNT: triggered by cmd-fill where          #
+#                                                                 #
+# %0 = container to be filled                                     #
+# %1 = container to be emptied (partially or in full)             #
+# %2 = the dbref of the substance to transfer                     #
+# %3 = list of accounts other than the currency (probably null)   #
+# %4 = dbref of the enactor                                       #
+#=================================================================#
+
+&trig-fill-account #70=
+  @pemit %4=The functionality by which you could fill out of this 
+         container's %q3 accounts is not yet coded.
+
+-
+#=================================================================#
+#         TRIG-FILL-EMPTY: triggered by cmd-fill where            #
+#                                                                 #
+# %0 = container to be filled                                     #
+# %1 = container to be emptied (partially or in full)             #
+# %2 = the dbref of the substance to transfer                     #
+# %3 = list of accounts other than the currency (probably null)   #
+# %4 = dbref of the enactor                                       #
+#=================================================================#
+
+&trig-fill-empty #70=
+  @pemit %4=The [goodname(%1)] is empty.  There's nothing in it to 
+         fill your [name(%0)] with.
+-
+#=================================================================#
+#         TRIG-FILL-OBJECT: triggered by cmd-fill where           #
+#                                                                 #
+# %0 = container to be filled                                     #
+# %1 = container to be emptied (partially or in full)             #
+# %2 = the dbref of the substance to transfer                     #
+# %3 = list of accounts other than the currency (probably null)   #
+# %4 = dbref of the enactor                                       #
+#=================================================================#
+
+&trig-fill-object #70=
+
+#------------------------------------------------------------------#
+# Step One: Set new registers                                      #
+#                                                                  #
+# %q0 = volume of the substance                                    #
+# %q1 = capacity of the container to be filled                     #
+#------------------------------------------------------------------#
+
+  think setq(0, get(%2/volume));
+  think setq(1, get(%0/capacity));
+
+#------------------------------------------------------------------
+# Step Two: Error Check some more      
+#
+# Does the substance either fit inside the container to be filled 
+# or is it at least tagged fractional?
+# 
+# If the substance is a fluid, is the container to fill watertight?
+#---------------------------------------------------------------------
+ 
+   think setq(9, [or(gte(%q1, %q0), hastag(%2, fractional))]
+                 [or(not(or(hastag(%2, fluid), hastag(%2, liquid))),
+                     hastag(%0, watertight))]);
+
+  @switch/first %q9=
+    0?, {@pemit %4=I'm sorry but [name(%2)] won't fit inside [name(%0)].},
+    ?0, {@pemit %4=I'm sorry but you can't fill non-watertight 
+                containers like [name(%0)] with fluids like [goodname(%2)].},
+
+#------------------------------------------------------------------
+# If the whole object will fit into the container to be filled then 
+# teleport the whole thing.  If it can't, then separate out some 
+# fractional part that will fit, and have it teleported to the 
+# container to be filled.
+#
+# Then resynch and send appropriate messages
+#-------------------------------------------------------------------
+
+    11, {think ifelse(gte(%q1, %q0), tel(%2, %1), separate(%q1, %2, %0, %4));
+         @resynch %2;
+         @resynch %0;
+         @resynch %1;
+         @pemit %4=You fill [name(%0)] with [goodname(%2)] 
+                      from [name(%1)].;
+         @oemit [loc(%4)]=[name(%4)] fills [name(%0)] with 
+                      [goodname(%2)] from [name(%1)].}
+
+-
+
+###############################################################
+#		COMMAND: OPEN <OBJECT>                        #
+###############################################################
+
+&cmd-open #70=$open *:
+
+#-------------------------------------------------------------#
+# Set the registers:
+# %q0 = dbref of thing to be opened
+# %q9 = error code
+#-------------------------------------------------------------#
+
+  think setq(0, locate(%#, %0, ine));
+
+#-------------------------------------------------------------#  
+# Error check to see that:
+#   a) that the object is actually found
+#   b) the object is a container or a door
+#   c) the object is closed
+#   d) the object is locked
+#   e) check that the object can be sealed
+#-------------------------------------------------------------#
+
+  think setq(9, [isdbref(%q0)]
+                [or(hastag(%q0, container), hastag(%q0, door))]
+                [hastag(%q0, closed)]
+                [not(or(hastag(%q0, locked), hastag(%q0, latched),
+                        hastag(%q0, barred)))]
+                [or(and(hastag(%q0, sealable), hastag(%q0, container)),
+                    hastag(%q0, door))]);
+
+  @switch/first %q9 = 
+    0????, {@pemit %#=I don't see that here.},
+    ?0???, {@pemit %#=You can only open containers or doors.},
+    ??0??, {@pemit %#=The [switch(hastag(%q0, door), 1, door, name(%q0))] 
+                       isn't closed!},
+    ???0?, {@pemit %#=The [switch(hastag(%q0, door), 1, door, name(%q0))] 
+                       is locked!},
+    ????0, {@pemit %#=You can't close this type of container.},
+
+#---------------------------------------------------------------------#
+# It got through error checking
+# 
+# if it checks through error checking ok, then remove the 'closed' tag
+# from the container, force the player to pose appropriately, and make
+# sure that all the contents of the container are now visible.
+#-----------------------------------------------------------------------#
+
+  11111, {
+
+#        Send appropriate messages to the room(s)
+
+         @fpose %#=opens the 
+            [switch(hastag(%q0, door), 1, [u(u-name-door, %q0)], 
+                                          [name(%q0)])].;
+          
+         @switch [hastag(%q0, door)]=
+           1, {@remit [loc(%q0)]=
+                      %N opens the [u(u-name-door, exittwin(%q0))].};
+
+#        If it's a container, set the contents not dark (show them)
+
+          @switch [hastag(%q0, door)]=
+            1, {@@ do nothing @@},
+            0, {@dolist lcon(%q0)=@set ##=!dark};
+
+#         Clear the closed tags off of the door or object
+
+          @cleartags %q0=closed;
+          @cleartags [exittwin(%q0)]=closed},
+          
+
+# default
+        {@pemit %#=Error: Admin have been alerted.;
+         @qmail steph/Open Cmd Bug=Unexpected Condition: %q9}
+
+-
+
+&u-name-door #70=
+ [switch(1, 
+   strmatch(goodname(%0), *door*), goodname(%0),
+   and(not(hastag(%L,outside)),hastag(loc(%q0),outside)), door to the outside, 
+   door to [trim(edit(name(loc(%0)), Anarinuell:,))])]
+
+-
+################################################################
+#		COMMAND: CLOSE <OBJECT>                        #
+################################################################
+
+&cmd-close #70=$close *:
+
+#-------------------------------------------------------------#
+# Set the registers:
+# %q0 = dbref of thing to be opened
+# %q9 = error code
+#-------------------------------------------------------------#
+
+  think setq(0, locate(%#, %0, ine));
+  
+#-------------------------------------------------------------#
+# check to see that:
+#   a) the object was found
+#   b) the object is a container or a door
+#   c) the object is open
+#   d) the object is not locked
+#   e) is the kind of object that can be closed or opened
+#-------------------------------------------------------------#
+
+  think setq(9, [isdbref(%q0)]
+                [or(hastag(%q0, container), hastag(%q0, door))]
+                [not(hastag(%q0, closed))]
+                [not(or(hastag(%q0, locked), hastag(%q0, barred),
+                        hastag(%q0, latched)))]
+                [or(and(hastag(%q0, sealable), hastag(%q0, container)),
+                    hastag(%q0, door))]);
+
+  @switch/first %q9 =
+       0????, {@pemit %#=I don't see that here!}, 
+       ?0???, {@pemit %#=You can only close containers or doors.},
+       ??0??, {@pemit %#=The [switch(hastag(%q0, door), 1, door, name(%q0))] 
+                         isn't open!},
+       ???0?, {@pemit %#=The [switch(hastag(%q0, door), 1, door, name(%q0))] 
+                         is locked!},
+       ????0, {@pemit %#=You can't close this type of container.},
+
+#-------------------------------------------------------------------#
+#
+# If it makes it through error checking, add the tag 'closed' to the
+# containers tag list, force the player to pose appropriately, and
+# make sure that all the objects are set dark so that they're no
+# longer visible to the player.
+#-------------------------------------------------------------------#
+
+      11111, {
+
+#          Tag everything closed
+
+           think settag(%q0, closed);
+           think switch(isdbref(exittwin(%q0)), 1, 
+               settag([exittwin(%q0)], closed));
+
+#          Send appropriate messages to the room
+
+           @fpose %#=closes the 
+           [switch(hastag(%q0, door), 1, u(u-name-door, %q0), [name(%q0)])].;
+               
+          @switch [hastag(%q0, door)]=
+           1, {@remit [loc(%q0)]=
+                 %N closes the [u(u-name-door, exittwin(%q0))].};
+
+
+#         If it's a container, set all its contents dark
+          @switch hastag(%q0, door)=
+             0, {@dolist lcon(%q0)=@set ##=dark}},
+
+# default
+        {@pemit %#=Error: Admin have been alerted.;
+         @qmail steph/Open Cmd Bug=Unexpected Condition: %q9}
+                                         
+-
+
+#################################################################
+#		COMMAND: TAKE <OBJECT>                          #
+#                        TAKE <EXIT>                            #
+#################################################################
+
+&cmd-take #70=$take *:
+
+# Resynch the player before s/he even tries so that we can be sure 
+# Resynch the object too
+
+ @resynch %#;
+
+#----------------------------------------------------------------#
+# Set the registers:
+# %q0 = object dbref
+# %q1 = weight of object
+#----------------------------------------------------------------#
+
+  think setq(0, locate(%#, %0, nae));
+  @resynch %q0;
+  
+  think setq(1, default(%q0/weight, 9999999999));
+  think setq(9, [not(strmatch(%0, * from *))]
+                [isdbref(%q0)]
+                [or(hasflag(%#, wizard), u(u-has-space, %#))]
+                [or(hasflag(%#, wizard), ulocal(ul-can-carry, %#, %q1))]
+                [or(hasflag(%#, wizard), not(hastype(%q0, exit)))]
+                [or(hasflag(%#, wizard), aware(%#))]);
+
+#---------------------------------------------------------------------#
+# Error checking from above: 
+#    a) Make sure that the syntax is correct
+#    b) make sure that the object to be taken is found
+#    c) make sure that the player's hands aren't full or s/he is a wiz
+#    d) make sure that the player can carry it or player is a wiz
+#    e) make sure that the object isn't an object or player is a wiz
+# (In other words, wizards can use this command in ways that players can't)
+#----------------------------------------------------------------------#
+
+  @switch/first %q9=
+       0?????, {@@ do nothing take-from syntax will take care of it @@},
+
+       ?0????, {@pemit %#=I don't see that here.},
+
+       ??0???, {@pemit %#=Your hands are full.  You should probably 
+                      get a bag or backpack or something.},
+       ?????0, {@pemit %#=You have to be awake and aware to take stuff.},
+#---------------------------------------------------------------------#
+# If the object is too heavy for the player to carry around normally, 
+# give the player the option of expending a lot of energy to try to
+# pick it up anyhow
+#---------------------------------------------------------------------#
+
+       ???0??, {@program %#=me/prog-too-heavy:
+                      [name(%q0)] is too heavy for you to pick up. 
+                      Would you like to exert extra energy to try to 
+                      pick it up anyhow? (Answer 'yes' or 'no')},
+
+       ????0?, {@pemit %#=You can't take that!},
+
+#---------------------------------------------------------------------#
+# If error checking succeeds, force the player to take the object and 
+# adjust the player's encumbrance
+#---------------------------------------------------------------------#
+
+       111111, {@fo %#=__take %q0;
+               &touched_last %q0=[secs()];
+               &touched_by %q0=%#},
+
+# default condition
+
+        {@pemit %#=Error: Admin have been alerted.;
+         @qmail steph/take bug=Unexpected Condition on cmd-take on 
+                [num(me)]: %q9}
+
+-
+
+######################### PROG-TOO-HEAVY #######################
+# triggered by cmd-take, where
+# %q0 = object to take
+# %q1 = weight of the object
+# %# = %#
+# %0 = yes or no
+# 
+# Code assumes that it costs .25 energy unit per pound
+##################################################################
+
+&prog-too-heavy #70=
+
+#----------------------------------------------------------------#
+# Set Registers: 
+# 
+# %q2 = the amount of energy the player has total
+# %q3 = required energy to lift it
+#----------------------------------------------------------------#
+
+ think setq(2, add(getaccount(%#, energy), getaccount(%#, energy reserves)));
+ think setq(3, div(%q1, 4));
+
+  @switch %0=
+	n*, {@pemit %#=Attempt to pick up [name(%q0)] aborted.},
+
+        y*, {think setq(9, [ulocal(ul-can-lift, %#, %q1)]
+                           [gte(%q2, %q3)]);
+             @switch/first %q9=
+
+#---------------------------------------------------------------------#
+# Player succeeds in the attempt, so:
+#   a) force the player to take it
+#   b) time stamp the item with when it was touched
+#   c) store the identity of the person who just picked up the object
+#   d) take the appropriate energy from the player
+#   e) resynch the player so that hir encumbrance is fixed right
+#----------------------------------------------------------------------#
+
+                11, {@fo %#=__take %q0;
+                     &touched_last %q0=[secs()];
+                     &touched_by %q0=%#;
+                     @pemit %#=You used up %q3 energy points.;
+                     think take_energy(%#, %q3, both, e)},
+
+#-----------------------------------------------------------------------#
+# If the player is strong enough to lift this in an emergency but just
+# doesn't have enough energy let the player know why and pose approp.
+#-----------------------------------------------------------------------#
+
+                ?0, {@fpose %#=attempts to pick up [name(%q0)] but fails.;
+                     @pemit %#=You just don't have enough energy. 
+                       It would take %q3 energy points to lift 
+                       [name(%q0)] and you only have %q2 energy points.},
+ 
+
+#----------------------------------------------------------------------#
+# If the player just isn't strong enough, even in an emergency, to
+# pick this up let the player know why and pose appropriately.
+#----------------------------------------------------------------------#
+  
+                0?, {@fpose %#=attempts to pick up [name(%q0)] 
+                       but fails. [capstr(subj(%q0))] is just too 
+                       heavy for [name(%#)] to lift under the circumstances.;
+                     @pemit %#=The item you're attempting to pick up 
+                       is approximately %q1 pounds.  You are 
+                       already carrying [get(%#/encumbrance)] pounds, 
+                       and you're only capable of lifting 
+                       [get(%#/strength-max-[trim(attribute(%#,muscle))])] 
+                       pounds total, even in an emergency. },
+               {@pemit %#=%q9} },
+
+# default
+
+        {@program %#=me/prog-too-heavy:It's very heavy!  Do you want 
+                  to try to lift it anyhow, or not? (You must answer 
+                  'yes' or 'no')}
+
+-
+
+#################################################################
+#                        TAKE <OBJECT> FROM <container>         #
+#################################################################
+
+&cmd-take-from #70=$take * from *:
+
+#----------------------------------------------------------------#
+# Set the registers:
+# %q0 = container dbref
+# %q1 = object to remove from container
+# %q2 = weight of the object to remove from the container
+# %q3 = volume of the object to remove from the container
+#----------------------------------------------------------------#
+  
+  think setq(0, locate(%#, %1, inh));
+  think setq(1, locate(%q0, %0, i));
+  think setq(2, default(%q1/weight, 9999999999));
+  think setq(3, default(%q1/volume, 9999999999));
+
+#-----------------------------------------------------------------#
+# check to see that we found the container
+# check to see that the object is a container or the enactor is a wiz
+# check to see if the container is closed  
+# check to see that we found the object inside the container
+# check to ensure that the object in the container isn't a fluid
+# check to see that the player can carry the object or is a wiz
+# check to see if the object's an ornament
+#-----------------------------------------------------------------#
+
+  think setq(9, [and(isdbref(%q0), not(hasflag(%q0, dark)))]
+                [not(hastag(%q0, closed))]
+                [or(hasflag(%#, wizard), hastag(%q0, container))]
+                [isdbref(%q1)]
+                [or(hasflag(%#, wizard), u(u-has-space, %#))]
+                [not(ortags(%q1, fluid liquid))]
+                [or(strmatch(%#, loc(%q0)),
+                    ulocal(ul-can-carry, %#, %q2), 
+                    hasflag(%#, wizard))]
+                [not(hastag(%q1, ornament))]);
+
+  @switch/first %q9=
+	0???????, {@pemit %#=I don't see %1 here. (OOC Hint: If you're 
+                  wearing it, you'll have to take it off first)},
+        ?0??????, {@pemit %#=The [name(%q0)] is closed.},
+        ??0?????, {@pemit %#=You can only take things from containers.  
+                        If you're trying to take from a player, 
+                        you'll need to use the 'steal' command.},
+        ???0????, {@pemit %#=I don't see %0 in [name(%q0)].},
+        ????0???, {@pemit %#=Your hands are full.  You should probably 
+                       get a bag or a backpack or something.},
+        ?????0??, {@pemit %#=You can't just pick up fluids like that. 
+                         Use the 'fill' command.},
+	???????0, {@pemit %#=That [name(%q1)] is attached to the [name(%q0)]!},
+#--------------------------------------------------------------------#
+# if the object is too heavy for the player to carry around normally,
+# give the player the option of expending a lot of energy to try to pick
+# it up anyhow.
+#--------------------------------------------------------------------#
+
+        ??????01, {@program %#=me/prog-heavy-container:
+                        [name(%q1)] is too heavy for you to lift. 
+                        Would you like to exert a great deal of 
+                        energy and try to lift it anyway? (Answer 
+                        'yes' or 'no')},
+
+#---------------------------------------------------------------------#
+# Player succeeds:
+#  a) Force the player to take the object
+#  b) store the touched last and touched by information on all the 
+#     relevant pieces (container and object)                      
+#  c) resynch all the objects involved
+#---------------------------------------------------------------------#
+
+        11111111, {@fo %#={__take %q0's %q1};
+                 &touched_last %q0=[secs()];
+                 &touched_by %q0=%#;
+                 &touched %q1=[secs()];
+                 &touched_by %q1=%#; 
+
+# No need to resynch because of @aenter and @aleave
+#                 @resynch %#;
+#                 @resynch %q0;
+#                 @resynch %q1
+                                      },
+ 
+# default
+
+       {@pemit %#=Error: Admin have been alerted.;
+         @qmail steph/cmd-take-from=Unexpected Condition on 
+                                    [num(me)] %q9}
+-
+
+########################### PROG-HEAVY-CONTAINER ################
+# triggered by cmd-take-from, where
+# %q0 = container dbref
+# %q1 = object to remove from container
+# %q2 = weight of the object to remove from the container
+# %# = %#
+# %0 = yes or no
+#
+# %q3 = amount of energy to take
+
+&prog-heavy-container #70=
+  
+  think setq(3, div(%q2, 4));
+
+  @switch %0=
+	n*, {@pemit %#=Attempt to pick up [name(%q1)] aborted.},
+        y*, {@switch/first [ulocal(ul-can-lift, %#, %q2)]
+                           [gte(add(getaccount(%#, energy),
+                                    getaccount(%#, energy reserves)), %q3)]=
+# If the player's maximum would not be exceeded and when he has enough
+# energy: force the player to take the object, adjust the player's
+# encumbrance, deduct the energy points
+
+		11, {@fo %#=__take %q0's %q1;
+                     &touched_last %q1=[secs()];
+                     &touched_by %q1=%#;
+                     &touched_last %q0=[secs()];
+                     &touched_by %q0=%#;
+
+# No need to resynch because of @aleave and @aenter on generic object
+#                     @resynch %#;
+#                     @resynch %q1;
+#                     @resynch %q0;
+
+                     @pemit %#=Deducting %q3 energy points.;
+                     think take_energy(%#, %q3, both, e)},
+
+# Didn't seem to work
+#                     think ac_adjust(%#, both, -%q3, e)},
+
+# If the player doesn't have enough energy or if the object is too
+# heavy even for the player's max
+
+                0?, {@fpose %#=attempts to pick up [name(%q1)] but fails.;
+                     @pemit %#=It's still too heavy for you to pick up!},
+                ?0, {@fpose %#=attempts to pick up [name(%q1)] but fails.;
+                     @pemit %#=You just don't have enough energy!}},
+
+# default
+
+        {@program %#=me/prog-heavy-container:It's very heavy!  Do you want 
+                  to try to lift it anyhow, or not? (You must answer 
+                  'yes' or 'no')}
+-
+
+#################################################################
+#                        TAKE/QUIET <OBJECT>                    #
+#                        TAKE/QUIET <EXIT>                      #
+#                        TAKE/QUIET <OBJECT>'s <SUB-OBJECT>     #
+#################################################################
+# this command allows the old take/quiet command to work for 
+# wizards like it used to.
+
+&cmd-take-quiet #70=$take/quiet *:
+  @switch [hasflag(%#, wizard)]=
+	1, {@fo %#=__take/quiet %0;
+            &touched_last %0=[secs()];
+            &touched_by %0=%# },
+        0, {@pemit %#=Only wizards can take or get things quietly.}
+
+
+-
+&cmd-put-dummy #70=$put:
+  @pemit %#=The correct syntax of this command is: 
+         %chput <object> into <container>
+-
+&cmd-put-in #70=$put * in *:@fo %#=put %0 into %1
+-
+
+###################################################################
+#		COMMAND: PUT <OBJECT> INTO <CONTAINER>            #
+###################################################################
+
+&cmd-put #70=$put * into *:
+
+# Set the Registers:
+# %q0 = container
+# %q1 = object to be put into the container
+# %q2 = weight of the object to be put
+# %q3 = encumbrance of the player
+
+  think setq(0, locate(%#, %1, inh));
+  think setq(1, locate(%#, %0, i));
+  think setq(2, default(%q1/weight, 9999999999));
+  think setq(3, default(%#/encumbrance, 10));
+
+  @resynch %q1;
+  @resynch %q0;
+
+# check to see if we found the container
+# check to see if we found the object to put in the container
+# check to see we're not putting something inside itself
+# check to see that the object isn't worn clothing
+# check to see that the container is a container
+# check to see that the container is open
+# check to see that there is enough room in the container
+# check to see that the object isn't a soul
+# check to see if the object, enactor, container combo pass
+#   the containerlock (new attribute)
+
+  think setq(9, [isdbref(%q0)]
+                [isdbref(%q1)]
+                [not(strmatch(%q0, %q1))]
+                [or(not(or(hastag(%q1, fluid), hastag(%q1, liquid))), 
+                    hastag(%q0, watertight))]
+                [not(and(hastag(%q1, clothing), hastag(%q1, worn)))]
+                [hastag(%q0, container)]
+                [not(hastag(%q0, closed))]
+                [ulocal(ul-can-fit, %q0, %q1)]
+                [not(hastag(%q1,soul))]
+                [switch(u(%q0/containerinlock,%q1,%#,%q0),0,0,1)]);
+  
+  @switch/first %q9=
+
+# If Error checking passes ok, force the player to pose appropriately,
+# teleport the object into the container, add the weight of the object
+# to the overall weight of the container, subtract the weight of the
+# object from the player's encumbrance
+
+        1111111111, {@fpose %#=puts [name(%q1)] into [name(%q0)].;
+                 @tel %q1=%q0;
+                 &touched_last %q1=[secs()];
+                 &touched_by %q1=%#;
+                 &touched_last %q0=[secs()];
+                 &touched_by %q0=%#;
+# No need to resynch if generic object has @aleave and @aenter with 
+# resynching
+#                @switch [strmatch(loc(%q0), %#)]=
+#                  0, {@resynch %q0;
+#                      @resynch %#},
+#                  1, {@resynch %#}
+                                      },
+	0?????????, {@pemit %#=I don't see %1.},
+        ?0????????, {@pemit %#=You're not holding %0. 
+                           %cgOOC Hint: If it's too heavy to pick 
+                           up, you should see 'help load'%cn},
+        ??0???????, {@pemit %#=You can't put something inside of itself.},
+
+        ???0??????, {@pemit %#=Your [name(%q0)] is not a watertight 
+                         container.  If you dumped [name(%q1)] into 
+                         it, it would leak everywhere!},
+        ????0?????, {@pemit %#=You're wearing [name(%q1)]!  
+                        You need to remove it first.  Yeesh!},
+        ?????0????, {@pemit %#=[name(%q0)] is not a container.},
+        ??????0???, {@pemit %#=[name(%q0)] is closed!  You'll have to 
+                           open it first.},
+        ???????0??, {@pemit %#=[name(%q1)] won't fit inside [name(%q0)].},
+        ????????0?, {@pemit %#=You want to give your soul away to 
+                       a [name(%q0)]?},
+        ?????????0, {@pemit %#=You can't put [name(%q1)] into [name(%q0)].},
+
+# default
+
+        {@pemit %#=Error: Admin have been alerted.;
+         @qmail steph/cmd-put=Unexpected Condition on &cmd-put on 
+                              [num(me)]: %q9}
+-
+
+###################################################################
+#		COMMAND: LOAD <OBJECT> INTO <CONTAINER>           #
+###################################################################
+
+
+&cmd-load #70=$load * into *:
+
+#------------------------------------------------------------------#
+# %q0 = container
+# %q1 = object to be loaded into the container
+# %q2 = weight of the object to be put
+# %q3 = encumbrance of the player
+# %q4 = player's total energy
+# %q5 = energy to charge
+#------------------------------------------------------------------#
+
+  think setq(0, locate(%#, %1, inh));
+  think setq(1, locate(%#, %0, inh));
+ 
+  @resynch %q0;
+  @resynch %q1;
+
+  think setq(2, default(%q1/weight, 9999999999));
+  think setq(3, default(%#/encumbrance, 10));
+  think setq(4, add(getaccount(%#, energy reserves), 
+                    getaccount(%#, energy)));
+  think setq(5, div(%q2, 10));
+
+# @@ this would have made the energy charge 1 point for every pound 
+#    over encumbrance @@
+#
+#  think setq(5, ifelse(lte(%q2, %q3), div(%q2, 10), 
+#                                      add(div(%q3, 10), sub(%q2, %q3))));
+
+ 
+#------------------------------------------------------------------#
+# a) check to see if we found the container
+# b) check to see if we found the object to put in the container
+# c) check to see if the player is not holding the object
+# d) check to see that the container is a container and is open
+# e) check to see that you're not pouring liquid into a non watertight vessel
+# f) check to see that there is enough room in the container
+# g) check to see that the player has enough energy
+# h) check to see that the object is not immoveable
+# i) check to see that we pass the container in lock.
+#------------------------------------------------------------------#
+
+
+  think setq(9, [isdbref(%q0)]
+                [isdbref(%q1)]
+                [not(t(match(lcon(%#), %q1)))]
+                [and(hastag(%q0, container), not(hastag(%q0, closed)))]
+                [or(not(or(hastag(%q1, liquid), hastag(%q1, fluid))),
+                    hastag(%q0, watertight))]
+                [ulocal(ul-can-fit, %q0, %q1)]
+                [gte(%q4, %q5)]
+                [not(and(hastag(%q1,clothing),hastag(%q1,worn)))]
+		[not(hastag(%q1, immoveable))]
+                [switch(u(%q0/containerinlock,%q1,%#,%q0),0,0,1)]);
+  
+  @switch/first %q9=
+
+# If error checking passes, force the player to pose appropriately,
+# teleport the big heavy object into the container, add the weight of
+# the big heavy object to the overall weight of the container,
+# subtract the volume of the big heavy object from the capacity of the
+# container it's loaded into and then adjust the player's energy
+# accounts appropriately.  The encumbrance of the player is not
+# effected because it's assumed that the player keeps picking up
+# pieces of the big heavy object, and then dumping them into the
+# container and starting again.
+
+        1111111111, {@fpose %#=loads [name(%q1)] into [name(%q0)].;
+                  @tel %q1=%q0;
+                  &touched_last %q1=[secs()];
+                  &touched_by %q1=%#;
+                  &touched_last %q0=[secs()];
+                  &touched_by %q0=%#;
+                  @resynch %q0;
+                  think take_energy(%#, %q5, both, r);
+                  @pemit %#=Deducted %q5 energy points.},
+#------------------------------------------------------------------#
+# a) check to see if we found the container
+# b) check to see if we found the object to put in the container
+# c) check to see if the player is not holding the object
+# d) check to see that the container is a container and is open
+# e) check to see that you're not pouring liquid into a non watertight vessel
+# f) check to see that there is enough room in the container
+# g) check to see that the player has enough energy
+#------------------------------------------------------------------#
+
+	0?????????, {@pemit %#=I don't see %1.},
+        ?0????????, {@pemit %#=I don't see %0.},
+        ??0???????, {@pemit %#=You can't load things you're holding. 
+                           %cgOOC Hint: See 'help put'%cn},
+        ???0??????, {@pemit %#=[name(%q0)] is not an open container.},
+        ????0?????, {@pemit %#=[name(%q0)] is not a watertight containter.  
+                         If you put [name(%q1)] it would leak everywhere.},
+        ?????0????, {@pemit %#=[name(%q1)] won't fit inside [name(%q0)].},
+        ??????0???, {@pemit %#=You need %q5 energy points to load 
+                         [name(%q1)] into [name(%q0)] and you only 
+                         have %q4 total energy points.},
+        ???????0??, {@pemit %#=You'll need to take off [name(%q1)] first.},
+        ????????0?, {@pemit %#=[name(%q1)] is immoveable.},
+        ?????????0, {@pemit %#=You can't load [name(%q1)] into [name(%q0)].},
+# default
+
+        {@pemit %#=Error: Admin have been alerted.;
+         @qmail steph/cmd-put=Unexpected Condition on &cmd-put on 
+                              [num(me)]: %q9}
+
+-
+##################################################################
+#		      COMMAND: DROP <OBJECT>                     #
+##################################################################
+
+&cmd-drop #70=$drop *:
+
+# Set the registers:
+# %q0 = object dbref
+# %q1 = weight of the object
+# %q2 = encumbrance of the player
+
+  think setq(0, locate(%#, %0, iae));
+  think setq(1, default(%q0/weight, 10));
+  think setq(2, default(%#/encumbrance, 0));
+
+  @switch [isdbref(%q0)][not(hastag(%L,dreamworld))][not(hastag(%q0,worn))]=
+	0??, {@pemit %#=You don't seem to have %0.},
+        10?, {@pemit %#=You can't drop stuff while asleep.},
+	110, {@pemit %#=You can't drop [name(%q0)] until you take it off.},
+
+# if the player is holding the object, force the player to drop it,
+# then force the player to use the @unencumber command which is
+# obscure and undocumented for security reasons.  Because players are
+# restricted from triggering, setting attributes, @notifying, etc,
+# this was the only option to make sure that the drop was actually
+# successful.  @force has an unpredictable queue cycle length, and
+# semaphores were impossible.
+
+        111, {@fo %#={__drop %q0};
+            &touched_last %q0=[secs()];
+            &touched_by %q0=%#;
+# No need to resynch if generic object has the aleave and aenter
+#            @resynch %# 
+                                }
+
+-
+#######################################################################
+#		COMMAND: DROP/QUIET <OBJECT>               
+#######################################################################
+&cmd-drop-quiet #70=$drop/quiet *:
+
+@pemit %#=Sorry, but the old 'drop' command has been entirely 
+replaced, and a drop/quiet version has not been written for wizard 
+use.
+
+-
+
+
+###################################################################
+#        COMMAND: GIVE <OBJECT/PLAYER> TO <PLAYER>                #
+###################################################################
+
+&cmd-give #70=$give * to *:
+
+# Set the registers:
+# %q0 = dbref of object in enactor's inventory
+# %q1 = player dbref in the same room
+
+  think setq(0, locate(%#, %0, ia));
+  think setq(1, locate(%#, %1, nhiaP));
+  @resynch %#;
+  @resynch %q1;
+
+  think setq(2, default(%q0/weight, 9999999999));
+ 
+  think setq(9, [isdbref(%q0)]
+                [isdbref(%q1)]
+                [not(and(hastag(%q0, worn), hastag(%q0, clothing)))]
+                [or(hastype(%q1, player), hastag(%q1, npc))]
+                [or(hasflag(%q1, wizard), u(u-has-space, %q1))]
+                [or(ulocal(ul-can-carry, %q1, %q2), hasflag(%q1, wizard))]);
+
+  @switch/first %q9=
+     0?????, {@pemit %#=You don't seem to be holding anything by that name.  },
+     ?0????, {@pemit %#=I don't see that player here.  },
+     ??0???, {@pemit %#=You're wearing that.  Take it off first.},
+     ???0??, {@pemit %#=You can only give stuff to players or NPCs!  },
+     ????0?, {@pemit %#=[name(%q1)]'s hands are full. They should 
+                    probably invest in a backpack or something.},
+     ?????0, {@fo %#=drop %q0;
+             @fpose %q1=tries to take [name(%q0)] from [name(%#)] but 
+                    it's too heavy and [subj(%q1)] has to put it down.},
+
+# If it passes through error checking: force the player to give the 
+# object to the other player, and then adjust the encumbrance of the 
+# player.
+
+     111111, {@fo %#={__give %q1=%q0};
+              &touched_last %q0=[secs()];
+              &touched_by %q0=%#;
+              &touched_last %q1=[secs()];
+              &touched_by %q1=%#;
+# no need             @resynch %#;
+#                     @resynch %q1;
+             @tr %q1/agive=%#, %q0 },
+
+# default
+
+     {@pemit %#=Error: Admin have been alerted.;
+      @qmail steph/Bug 'give'=Unexpected Condition occurred in the 
+             cmd-give attribute on [num(me)]: %q9  }
+-
+#################### CMD-GIVE-OLD ######################
+# this command enables wizards to use give in the old way 
+# for currency
+
+&cmd-give-old #70=$give *=*:
+  think setq(0, locate(%#, %0, *));
+  think setq(1, locate(%#, %1, *));
+ 
+  @switch [isdbref(%q1)]=
+	1, {@pemit %#=That is the wrong syntax for giving things.},
+        0, {@fo %#=__give %0=%1
+            &touched_last %0=[secs()];
+            &touched_by %0=%#;
+            &touched_last %1=[secs()];
+            &touched_by %1=%#}
+-
+
+
+###################################################################
+#		    COMMAND: INVENTORY                            #
+###################################################################
+
+&cmd-inventory #70=$inventory:
+  @pemit %#=
+      center(%bInventory Report: [name(%#)]%b,78,=); 
+
+  @pemit %#=
+      {%crYou have [getaccountd(%#, energy)] energy points and 
+          [getaccountd(%#, energy reserves)] energy reserve points.%r
+       %ccYou are carrying [setr(0, trim(default(%#/encumbrance, 0)))] 
+            pounds of stuff.%r
+          You can carry 
+          [default(%#/strength-[attribute(%#, muscle)], many many)] pounds 
+            (and a maximum of 
+          [default(%#/strength-max-[attribute(%#, muscle)], many many)] 
+          pounds if strictly necessary).%r
+       %cgYou have [getaccountd(%#, stenis)] stenis and 
+                   [getaccountd(%#, social points)] social points.%r
+ %ch%cX%cyYou have [getaccountd(%#, unused xp)] unused experience points, 
+                   [add(getaccountd(%#, unused xp), 
+                        getaccountd(%#, used xp))] total experience 
+          points.%r%cn
+ %chYou are ignoring:%cn [ifelse(words(setr(8,filter(me/filter-isplayer,
+      get(%#/ignored-page),|))),[iter(%q8,[name(##)],|)], no one)]%r%cn
+ %chYou are wearing:%cn [after(clothingdesc(%#),:)]%r };
+
+  @pemit %# = %cm%chYou are carrying:%cn;
+
+  @pemit %# = 
+       u(u-inventory-[switch(orflags(%#, WZ), 1, staff, player)], %#);
+
+  @pemit %# = center(=,78,=)
+-
+
+&filter-isplayer #70=[hastype(%0, player)]
+
+-
+
+
+&u-inventory-staff #70 = 
+  columns(
+    iter([lcon(%0)][lexits(%0)], left([name(##)](##), 39), %b, |)
+   , 39, |)
+-
+
+&u-inventory-player #70 = 
+#  columns(
+#    iter(filter(me/filter-player-inventory, lcon(%0)), 
+#         left(name(##), 39), %b, |)
+#   , 39, |)
+
+  iter(filter(me/filter-player-inventory, lcon(%0)), %r%t[name(##)])
+-
+
+&filter-player-inventory #70 = 
+#  [and(not(hasflag(%0,dark)),not(hastag(%0,worn)))]
+  [not(or(hasflag(%0,dark),hastag(%0,worn)))]
+-
+
+###################################################################
+#			FUNCTIONS                                 #
+###################################################################
+
+# u(u-has-space, <player>)
+# 
+# Returns a 1 if the player has free hands or a 0 if not
+# Currently allows players to be carrying up to four things and a soul in their
+# inventory.  It excludes objects with the item 'clothing' and 'worn'.
+
+&u-has-space #70=
+ [switch(lt(words(filter(filter-not-worn-clothing, lcon(%0))), 5), 1, 1, 0)]
+-
+ 
+&filter-not-worn-clothing #70=
+[not(and(hastag(%0, worn), hastag(%0, clothing)))]
+-
+
+# ulocal(ul-can-fit, <container>, <object>)
+# Returns a 1 if it can fit and a 0 if not
+# 
+# %q0 = capacity of the container
+# %q1 = volume of the object
+
+&ul-can-fit #70=
+  [setq(0, default(%0/capacity, 0))]
+  [setq(1, default(%1/volume, 9999999999))]
+  [switch(gte(%q0, %q1), 1, 1, 0)]
+
+-
+   
+# ulocal(ul-can-carry, <player>, <weight>)
+#
+# Returns a 1 if the player can carry it, and a 0 if not
+# 
+# %q0 = the total weight that the player is carrying
+# %q1 = the strength of the player
+# %q2 = the total amount of weight that the player can carry (for
+#       players who have strengths higher than 6 the formula is 10 times
+#       their own weight.
+# %q3 = the amount of weight the player has left (capacity)
+
+&ul-can-carry #70=
+  [setq(0, default(%0/encumbrance, 0))]
+  [setq(1, attribute(%0, muscle))]
+  [setq(2, default(%0/strength-%q1, mul(default(%0/weight, 100), 10)))]
+  [setq(3, sub(%q2, %q0))]
+  [switch(lte(%1, %q3), 1, 1, 0)]
+ 
+
+-
+
+
+# ulocal(ul-can-lift, <player>, <weight>)
+#
+# Returns a 1 if the player can carry it, and a 0 if not
+# 
+# %q0 = the total weight that the player is carrying
+# %q1 = the strength of the player
+# %q2 = the total amount of weight that the player can lift (for
+#       players who have strengths higher than 6 the formula is 10 times
+#       their own weight.
+# %q3 = the amount of weight the player has left (capacity)
+
+&ul-can-lift #70=
+  
+  [setq(0, default(%0/encumbrance, 0))]
+  [setq(1, attribute(%0, muscle))]
+  [setq(1, switch(1, isnum(%q1), %q1, 0))]
+  [setq(2, get(%0/strength-max-[trim(%q1)]))]
+  [setq(3, sub(%q2, %q0))]
+  [switch(lte(%1, %q3), 1, 1, 0)]
+ 
+
+-
+&FOLD-ADD #70=
+	add(%0,%1)
+-
+&CMD-DUMP #70= $dump *:
+        think setq(0, locate(%#, %0, n));
+	think setq(1,fold(me/fold-add,
+			[iter(lcon(%q0),default(##/weight,9999))]))
+        think setq(3, default(%#/encumbrance,10));
+        think setq(4,add(getaccount(%#,energy_reserves),
+                         getaccount(%#,energy)));
+        think setq(5, round(add(div(%q1, 25),1),1));
+        think setq(9,
+                [isdbref(%q0)]
+                [and(hastag(%q0,container), 
+		     not(hastag(%q0, closed)),
+		     hastag(%q0,dumpable))]
+                [gte(%q4, %q5)] );
+        @switch/first %q9=
+                111, {@fpose %#=tilts [name(%q0)] and everything falls 
+ out from it.;
+			@dolist lcon(%q0)=
+				{@switch not(hastag(##,ornament))=
+					1,{ @tel ##=%L;
+	        	 	               &touched_last ##=[secs()];
+        	    			       &touched_by ##=%#}};
+                        &touched_last %q0=[secs()];
+                        &touched_by %q0=%#;
+			@resynch %q0;
+                        think take_energy(%#, %q5, both, r);
+                        @pemit %#=Deducted %q5 energy points.},
+                0??, {@pemit %#=I don't see %0.},
+                ?0?, {@pemit %#=[capstr(name(%q0))] is not an open container that 
+ you can dump.},
+                ??0, {@pemit %#=You need %q5 energy points to unload 
+  [name(%q1)] from [name(%q0)] and you only have %q4 total energy points.},
+                {@pemit %#=Error: Admin have been alerted.;@qmail 
+ steph/cmd-dump=Unexpected Condition on &cmd-dump on [num(me)]: %q9}
+
+-
+&CMD-UNLOAD #70= $unload * from *:
+        think setq(0, locate(%#, %1, inh));
+        think setq(1, locate(%q0, %0, i));
+        @resynch %q0;
+        @resynch %q1;
+        think setq(2,default(%q1/weight, 9999999999));
+        think setq(3, default(%#/encumbrance,10));
+        think setq(4, add(getaccount(%#, energy_reserves),
+                          getaccount(%#,energy))); 
+	think setq(5, div(%q2, 10));
+        think setq(9,
+                [isdbref(%q0)]
+                [isdbref(%q1)]
+                [not(t(match(lcon(%#), %q1)))]
+                [and(hastag(%q0,container), not(hastag(%q0, closed)))]
+                [hastag(%q1, grouped)]
+		[gte(%q4,%q5)]
+		[not(hastag(%q1,ornament))]);
+        @switch/first %q9=
+                1111111, {@fpose %#=unloads [name(%q1)] from [name(%q0)].;
+                        @tel %q1=%L;
+			&touched_last %q1=[secs()];
+                        &touched_by %q1=%#;
+			&touched_last %q0=[secs()];
+                        &touched_by %q0=%#;
+			@resynch %q0;
+                        think take_energy(%#, %q5, both, r);
+                        @pemit %#=Deducted %q5 energy points.},
+                0??????, {@pemit %#=I don't see %1.},
+		?0?????, {@pemit %#=I don't see %0.},
+                ??0????, {@pemit %#=You can't unload things from 
+                                 yourself.%cgOOC Hint: See 'help drop'%cn},
+                ???0???, {@pemit %#=[name(%q0)] is not an open container.},
+                ????0??, {@pemit %#=You can't unload [name(%q1)] because
+                                 you aren't able to break it up into 
+                                 manageable pieces. Use the 'take'  
+                                 command.},
+                ?????0?, {@pemit %#=You need %q5 energy points to unload 
+ [name(%q1)] from [name(%q0)] and you only have %q4 total energy points.},
+		??????0, {@pemit %#=The [name(%q1)] is attached to the
+			[name(%q0)]!},
+                {@pemit %#=Error: Admin have been alerted.;@qmail
+steph/cmd-unload=Unexpected Condition on &cmd-unload on [num(me)]: %q9}
+-
+
+
+
+#----------------------------------------
+# SELECT <position> FROM <container>
+#----------------------------------------
+# 
+# Basically, I want to hijack the container code so that slotted containers
+# will allow retrieval of object # N from the container's contents using a 
+# 'select <position> from <container>' command, where <position> is a whole
+# number between 1 and the number of items in the container.  This allows a
+# player to grab any item from a container, even if it has a name identical
+# to another object.
+# 
+&cmd-select #70 = $select * from *: 
+
+# convert %0 (the position) to an integer, even if 0
+  think setq(0, add(0, %0)); 
+
+# discover the dbref for %1 (the container)
+  think setq(1, locate(%#, %1, *T)); 
+
+# create a list of dbrefs of objects inside the container
+  think setq(2, u(u-nondark-contents, %q1)); 
+
+  think setq(9, 
+    [isdbref(%q1)]
+    [isnum(%0)]
+    [and(gt(%q0,0), lte(%q0,words(%q2)))]
+    [strmatch(%L, %q1)]
+  );
+
+  @select %q9 = 
+
+  1111, {@force %# = take [extract(%q2, %q0, 1)]}, 
+  1110, {@force %# = take [extract(%q2, %q0, 1)] from %q1}, 
+
+  0???, {@error %# = locate %q1}, 
+  ?0??, {@pemit %# = '%0' is not a whole number.}, 
+  ??0?, {@pemit %# = You must specify a number between 1 and [words(%q2)], 
+                     referring to the position of the item you want to 
+                     select from the [name(%q1)].}, 
+  *,    {@pemit %# = %ch%cyAn unexpected error occurred in the select command. 
+                     You should report what you were doing to a staff member, 
+                     so that the problem can be corrected. DIAGNOSTICS = '%q9'
+                     %cn}
+-
+
+
+&u-nondark-contents #70 = 
+  filter(filter-nondark, lcon(%0))
+-
+&filter-nondark #70 = 
+  not(hasflag(%0, dark))
+-
+
+
+#----------------------------------------
+# CONTENTS <container>
+#----------------------------------------
+#
+# Grab the Nth nondark item from the container by specifying N (the 
+# position).
+#
+&cmd-contents #70 = $contents *: 
+
+# discover the dbref for %0 (the container)
+  think setq(0, locate(%#, %0, *T)); 
+  think setq(1, u(u-nondark-contents, %q0)); 
+
+  think setq(9, 
+    [isdbref(%q0)]
+    [gt(words(%q1),0)]
+  );
+
+  @select %q9 = 
+  
+  11, {@pemit %# = u(u-list-contents, %q0, %q1)}, 
+  10, {@pemit %# = That item has no contents to list.}, 
+  0?, {@error %# = locate %q0}, 
+  *,  {@pemit %# = %ch%cyAn unexpected error has occurred in the list command. 
+                   Let a staff member know what you did to find this bug so 
+                   that they can fix it. DIAGNOSTICS = '%q9'%cn}
+-
+
+
+&u-list-contents #70 = 
+  Contents of [name(%0)] [switch(hasflag(%#, staff), 1, \(%0\))]
+  [iter(%1, 
+    %r
+    %b %b 
+    [rjust(#@, 3)] 
+    [ljust(left(name(##),40), 40)] 
+    [ljust(u(u-decode-note, ##, %#), v(max-note-length))] 
+    [switch(hasflag(%#, staff), 1, rjust(##, 7))]
+  )]
+  %r--
+-
+
+
+#----------------------------------------
+# NOTE <object> = <short note>
+#----------------------------------------
+# Store an OOC note that only you can see on an object.
+#
+&cmd-note #70 = $note *=*: 
+
+# discover the dbref for %0 (the container)
+  think setq(0, locate(%#, %0, *T)); 
+
+  think setq(9, 
+    [isdbref(%q0)]
+    [lte(strlen(%1), v(max-note-length))]
+    [neq(0, trim(strlen(%1)))]
+  );
+
+  @select %q9 = 
+  
+  111, {
+    @pemit %# = You make an OOC note on [name(%q0)]: [secure(%1)]; 
+    &note-%# %q0 = NOTE: [secure(%1)]; 
+  }, 
+
+  110, {
+    @pemit %# = You erase any notes you'd stored on [name(%q0)].; 
+    @wipe %q0/note-%#
+  }, 
+
+  0??, {@error %# = locate %q0}, 
+  ?0?, {@pemit %# = Notes must be no longer than [v(max-note-length)] 
+                   characters.}, 
+  *,   {@pemit %# = %ch%cyAn unexpected error occurred in the note command. 
+                    Please let a staff member know what you were doing when 
+                    this happened so they can correct the error.  DIAGNOSTICS: 
+                    '%q9'%cn}
+-
+
+
+#----------------------------------------
+# NOTES <object>
+#----------------------------------------
+# View the notes you have written on the object.
+#
+&cmd-notes #70 = $notes *: 
+
+# discover the dbref for %0 (the container)
+  think setq(0, locate(%#, %0, *T)); 
+
+  think setq(9, 
+    [isdbref(%q0)]
+    [hasattr(%q0, note-%#)]
+  );
+
+  @select %q9 = 
+  
+  11, {
+    @pemit %# = You have stored the following OOC note on [name(%q0)]: 
+                [u(u-decode-note, %q0, %#)]
+  }, 
+
+  0?, {@error %# = locate %q0}, 
+  ?0, {@pemit %# = You didn't store any OOC notes on [name(%q0)].}, 
+  *,  {@pemit %# = %ch%cyAn unexpected error occurred in the notes command. 
+                   Please let a staff member know what you were doing when 
+                   this happened so they can correct the error.  DIAGNOSTICS: 
+                   '%q9'%cn}
+-
+
+#----------------------------------------
+# NOTES/ALL <object>
+#----------------------------------------
+# Admin-only. View the all the object's notes (and owners).
+#
+&cmd-notes/all #70 = $notes/all *: 
+
+# discover the dbref for %0 (the container)
+  think setq(0, locate(%#, %0, *T)); 
+
+  think setq(9, 
+    [hasflag(%#, staff)]
+    [isdbref(%q0)]
+    [gt(words(lattr(%q0/note-*)), 0)]
+  );
+
+  @select %q9 = 
+  
+  111, {@pemit %# = u(u-all-notes, %q0)}, 
+  
+  0??, {@pemit %# = Sorry, only staff may use that command.}, 
+  ?0?, {@error %# = locate %q0}, 
+  ??0, {@pemit %# = There are no notes on [name(%q0)] (%q0).}, 
+  *,   {@pemit %# = %ch%cyAn unexpected error occurred in the notes command. 
+                    Please let a staff member know what you were doing when 
+                    this happened so they can correct the error.  DIAGNOSTICS: 
+                    '%q9'%cn}
+-
+
+&u-all-notes #70 = 
+  Notes on [name(%0)] (%0 [flags(%0)])
+
+  [iter(lattr(%0/note-*), 
+    %r
+    %b %b 
+    [ljust(name(clip(##)), 20)]: [u(u-decode-note, %0, clip(##))]
+  )]
+  %r--
+-
+
+&max-note-length #70 = 20
+-
+
+&u-decode-note #70 = 
+  after(switch(hasattr(%0, note-%1), 1, xget(%0, note-%1)), NOTE:%b)
+-

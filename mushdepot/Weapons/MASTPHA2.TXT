@@ -1,0 +1,31 @@
+@create Hand Phaser Parent
+@link Hand Phaser Parent=#13183
+@parent Hand Phaser Parent=#13183
+@lock/Zone Hand Phaser Parent=CHECK/1
+@lock/Basic Hand Phaser Parent==#1753
+@set Hand Phaser Parent=VISUAL
+@set Hand Phaser Parent=WIZARD
+@set Hand Phaser Parent=NO_COMMAND
+&INIT_SNIPE Hand Phaser Parent=div(96,trunc(default(%#/_ATTRIBUTE_AGILITY,10)))
+&HELP_SNIPE Hand Phaser Parent=Syntax: [ansi(hw,$Snipe <Exit>/<Target>)]%RDelay: Longer than $shoot.%R%RSniping is, in this case, the act of shooting a target from an adjacent room. Note that you can only shoot through open doors. You also cause less damage, have less of a chance to stun, etc. Also less accurate.
+&EXEC_SNIPE Hand Phaser Parent=switch(locate(setq(8,loc(setq(7,locate(%#,first(%0,/),e))%q7))%q8,rest(%0,/),i),#-*,0 [switch(%q8#$,#-1*,I can't see that exit here.,#-2*,Please be more specific about which exit.,#*#-1*,That's not a valid target.,Please be more specific about the target.)],switch(gte(xget(%q9,CHARGE),rest(setq(4,xget(%q9,SETTING))%q4))[u(door,%q7)],10,1 You fire to the [first(first(name(%q7),<),\()] at [name(#$)].[remit(%q8,%N fires from [name(%l)].)][u(do_dmg,#$,0,2,switch(%q4,S*,,add(die([mod(shr(rest(%q4),1),20)],2),max(sub(shr(rest(%q4),1),20),0))),switch(%q4,S*,mul(10,shr(rest(%q4)))),set(%q9,CHARGE:[sub(xget(%q9,CHARGE),rest(%q4))])[hastype(#$,PLAYER)])],0?,0 You don't have enough charge to do that.,0 You can only shoot through open doors.))
+&HIT-01A Hand Phaser Parent=%N shoots [name(%0)] with a phaser beam.
+&CASUALTY-0A Hand Phaser Parent=%N destroys [name(%0)] with a phaser blast.
+&CASUALTY-1A Hand Phaser Parent=[name(%0)] falls, mortally wounded by %N's phaser beam.
+&DESTROYED-10 Hand Phaser Parent=%N blasts a hole to [name(loc(%0))].
+&MISS-10 Hand Phaser Parent=%N utterly misses [name(%0)].
+&STUN-10 Hand Phaser Parent=[name(%0)] is felled by %N's stun beam.
+&HELP_SHOOT Hand Phaser Parent=Syntax: [ansi(hw,$Shoot <Player/Thing/Exit>)]%RDelay: Agility dependant%R%RThis command lets you shoot a phaser blast at the target. It would probably be a good idea to know what setting your phaser is on before shooting.%R%RBeta Comments: Please don't shoot exits. Please don't kill players. Please don't kill anything you want to keep, or someone else might want to keep.
+&EQUIPPEDMESG Hand Phaser Parent=%N draws %p [u(uart,name(xget(%#,_EQUIPPED)))] [extract(with a flourish|quickly|cautiously|carefully,add(1,rand(4)),1,|)].
+&CHECK Hand Phaser Parent=switch(parent(%@),#12699,1,0)
+&HELP_SETTING Hand Phaser Parent=Syntax: [ansi(hw,$Setting <S/K/<Number>>)]%RDelay: 2%R%RSetting sets your phaser to <S>tun, <K>ill, or level <Number>. <Number> must be between of equal to the maximum and the minimum values for your weapon.
+@DESCRIBE Hand Phaser Parent=An awesome looking weapon. Really.%R%RSetting: [switch(v(SETTING),s *,ansi(hg,STUN [rest(#$)]),ansi(hr,KILL [rest(#$)]))]%R%RMin/Max Setting: [v(MINSET)]/[v(MAXSET)]%RCharge: [rjust(v(CHARGE),strlen(v(MAXCHARGE)),0)]/[v(MAXCHARGE)]
+&INIT_SETTING Hand Phaser Parent=2
+&EXEC_SETTING Hand Phaser Parent=switch(0,or(and(gte(%0,xget(%q9,MINSET)),lte(%0,xget(%q9,MAXSET))),match(s k,lcstr(%0))),{0 Valid settings are K, S, or a number from [xget(%q9,MINSET)] to [xget(%q9,MAXSET)].},remit(%l,set(pemit(%#,Weapon set to %0.)%q9,SETTING:[switch(isnum(%0),1,first(xget(%q9,SETTING)) %0,%0 [rest(xget(%q9,SETTING))])])%N fiddles with %p [u(uart,name(%q9))].))
+&EXEC_SHOOT Hand Phaser Parent=switch(locate(%#,%0,Tne),#-1*,0 I don't see that here.,#-2*,0 Please be more specific about your target.,switch(gte(xget(%q9,CHARGE),rest(setq(4,xget(%q9,SETTING))%q4)),1,u(do_dmg,#$,0,2,switch(%q4,S*,,add(die([mod(rest(%q4),20)],2),max(sub(rest(%q4),20),0))),switch(%q4,S*,mul(10,rest(%q4))),set(%q9,CHARGE:[sub(xget(%q9,CHARGE),rest(%q4))])[hastype(#$,PLAYER)]),0 You don't have enough charge to do that.))
+&INIT_SHOOT Hand Phaser Parent=div(72,trunc(default(%#/_ATTRIBUTE_AGILITY,10)))
+&SETTING Hand Phaser Parent=s 10
+&CHARGE Hand Phaser Parent=50
+&MAXCHARGE Hand Phaser Parent=50
+&MINSET Hand Phaser Parent=1
+&MAXSET Hand Phaser Parent=8

@@ -1,0 +1,212 @@
+@set me=quiet
+@switch [isdbref(num(Poker Machine Parent))]=0,{think [ansi(hm,INSTALL:)] No "Poker Machine Parent" object found -- creating...;@create Poker Machine Parent},1,{think [ansi(hm,INSTALL:)] "Poker Machine Parent" object already exists... skipping creation.}
+@set Poker Machine Parent=Safe
+@set Poker Machine Parent=no_command
+@set Poker Machine Parent=!halt
+think [ansi(hm,INSTALL:)] Downloading Poker Object Messages...
+@AENTER Poker Machine Parent=[pemit(%#,* Type '[ansi(v(FONT_POKER.Cmds),poker/help)]' for more information.)]
+@ALEAVE Poker Machine Parent=[u(TRI_AUTO.Stuff,%#,%n)]
+@OENTER Poker Machine Parent=approaches the Poker Machine from [name(loc(me))].
+@OLEAVE Poker Machine Parent=departs the Poker Machine and heads back toward [name(loc(me))].
+@OXENTER Poker Machine Parent=departs toward [name(me)]'s area.
+@OXLEAVE Poker Machine Parent=approaches from [name(me)]'s area.
+@LEAVE Poker Machine Parent=You depart [name(me)]'s area.
+@FAILURE Poker Machine Parent=It seems to be bolted to the ground.
+@FAILURE Poker Machine Parent=It seems to be bolted to the ground.
+@IDESCRIBE Poker Machine Parent=[u(ADD_DESC)][ansi(v(FONT_DESC.Border),%r--------------%r)]This is a [ansi(v(FONT_DESC.Info),[v(DATA_CREDIT.Value)] [u(FUN_MONEY.Name,v(DATA_CREDIT.Value))])] per 'credit' Poker Machine.
+@DESCRIBE Poker Machine Parent=Type '[ansi(hc,enter [name(me)])]' to play a game.
+@ENTER Poker Machine Parent=You approach [name(me)]'s area.
+think [ansi(hm,INSTALL:)] Downloading Poker Commands...
+&CMD_POKER.COPYRIGHT Poker Machine Parent=$poker/copy*:[pemit(%#,Poker Machine Code v[v(DATA_VERSION)] -- Created by: Demonic \(1999\)%rUpdated versions of this code can be found on:%r%b%bhttp://www.mindspring.com/~loparo)]
+&CMD_POKER.PAYOFFS Poker Machine Parent=$poker/pay*:[pemit(%#,[ansi(v(FONT_PAYOFFS.Border),-------------------------------------------------------------------------------%r|||||)][ansi(v(FONT_PAYOFFS.Header),center(POKER MACHINE -- PAYOFFS,69))][ansi(v(FONT_PAYOFFS.Border),|||||%r.-----------------------------------------------------------------------------.%r|)] [ansi(v(FONT_PAYOFFS.Title),HAND NAME)][space(7)][ansi(v(FONT_PAYOFFS.Border),|)]%b%b[ansi(v(FONT_PAYOFFS.Title),1 Credit)] [ansi(v(FONT_PAYOFFS.Border),|)] [ansi(v(FONT_PAYOFFS.Title),2 Credits)] [ansi(v(FONT_PAYOFFS.Border),|)] [ansi(v(FONT_PAYOFFS.Title),3 Credits)] [ansi(v(FONT_PAYOFFS.Border),|)] [ansi(v(FONT_PAYOFFS.Title),4 Credits)] [ansi(v(FONT_PAYOFFS.Border),|)] [ansi(v(FONT_PAYOFFS.Title),5 Credits)] [ansi(v(FONT_PAYOFFS.Border),|%r|-----------------+-----------+-----------+-----------+-----------+-----------|%r|)] [ansi(v(FONT_PAYOFFS.Hand),Royal Flush)][space(5)][ansi(v(FONT_PAYOFFS.Border),|)] [iter(v(LIST_PAYOFFS.Royal-Flush),[rjust(mul(##,v(DATA_CREDIT.Value)),9)] [ansi(v(FONT_PAYOFFS.Border),|)])]%r[ansi(v(FONT_PAYOFFS.Border),|)] [ansi(v(FONT_PAYOFFS.Hand),ljust(Straight Flush,16))][ansi(v(FONT_PAYOFFS.Border),|)] [iter(v(LIST_PAYOFFS.Straight-Flush),[rjust(mul(##,v(DATA_CREDIT.Value)),9)] [ansi(v(FONT_PAYOFFS.Border),|)])]%r[ansi(v(FONT_PAYOFFS.Border),|)] [ansi(v(FONT_PAYOFFS.Hand),ljust(Four of a Kind,16))][ansi(v(FONT_PAYOFFS.Border),|)] [iter(v(LIST_PAYOFFS.Four-of-a-Kind),[rjust(mul(##,v(DATA_CREDIT.Value)),9)] [ansi(v(FONT_PAYOFFS.Border),|)])]%r[ansi(v(FONT_PAYOFFS.Border),|)] [ansi(v(FONT_PAYOFFS.Hand),ljust(Full House,16))][ansi(v(FONT_PAYOFFS.Border),|)] [iter(v(LIST_PAYOFFS.Full-House),[rjust(mul(##,v(DATA_CREDIT.Value)),9)] [ansi(v(FONT_PAYOFFS.Border),|)])]%r[ansi(v(FONT_PAYOFFS.Border),|)] [ansi(v(FONT_PAYOFFS.Hand),ljust(Flush,16))][ansi(v(FONT_PAYOFFS.Border),|)] [iter(v(LIST_PAYOFFS.Flush),[rjust(mul(##,v(DATA_CREDIT.Value)),9)] [ansi(v(FONT_PAYOFFS.Border),|)])]%r[ansi(v(FONT_PAYOFFS.Border),|)] [ansi(v(FONT_PAYOFFS.Hand),ljust(Straight,16))][ansi(v(FONT_PAYOFFS.Border),|)] [iter(v(LIST_PAYOFFS.Straight),[rjust(mul(##,v(DATA_CREDIT.Value)),9)] [ansi(v(FONT_PAYOFFS.Border),|)])]%r[ansi(v(FONT_PAYOFFS.Border),|)] [ansi(v(FONT_PAYOFFS.Hand),ljust(Three of a Kind,16))][ansi(v(FONT_PAYOFFS.Border),|)] [iter(v(LIST_PAYOFFS.Three-of-a-Kind),[rjust(mul(##,v(DATA_CREDIT.Value)),9)] [ansi(v(FONT_PAYOFFS.Border),|)])]%r[ansi(v(FONT_PAYOFFS.Border),|)] [ansi(v(FONT_PAYOFFS.Hand),ljust(Two Pair,16))][ansi(v(FONT_PAYOFFS.Border),|)] [iter(v(LIST_PAYOFFS.Two-Pair),[rjust(mul(##,v(DATA_CREDIT.Value)),9)] [ansi(v(FONT_PAYOFFS.Border),|)])]%r[ansi(v(FONT_PAYOFFS.Border),|)] [ansi(v(FONT_PAYOFFS.Hand),ljust(One Pair\(Jacks+\),16))][ansi(v(FONT_PAYOFFS.Border),|)] [iter(v(LIST_PAYOFFS.One-Pair),[rjust(mul(##,v(DATA_CREDIT.Value)),9)] [ansi(v(FONT_PAYOFFS.Border),|)])]%r[ansi(v(FONT_PAYOFFS.Border),`-----------------------------------------------------------------------------')]%r* Any hand below a PAIR OF JACKS is a loss.)]
+&CMD_POKER.HELP Poker Machine Parent=$poker/help:[pemit(%#,[ansi(v(FONT_HELP.Border),[repeat(-,78)]%r<<<<<)][ansi(v(FONT_HELP.Header),center(POKER MACHINE -- HELP SECTION,68))][ansi(v(FONT_HELP.Border),>>>>>%r[repeat(-,78)])]%rThe Poker Machine is a one-player card game.  You are dealt a hand of five (5) cards\, and can then exchange them to attempt to get a winning combination.  You may exchange between 1 and [v(DATA_EXCHANGE.Max)] cards..%r%r[ansi(v(FONT_HELP.Title),Commands:%r---------)]%r%b%b[ansi(v(FONT_HELP.Cmds),ljust(poker/setup,18))] - Resets the Poker Machine \(Admin Only\).%r%b%b[ansi(v(FONT_HELP.Cmds),ljust(poker/bet <#>,18))] - Makes a bet using specified number of credits.%r%b%b[ansi(v(FONT_HELP.Cmds),ljust(poker/exchange <L>,18))] - Exchanges LIST of cards as indicated by 'Slot' alphas.%r%b%b[ansi(v(FONT_HELP.Cmds),ljust(poker/stay,18))] - Passes your option to exchange cards.%r%b%b[ansi(v(FONT_HELP.Cmds),ljust(poker/screen,18))] - Shows the Poker Machine screen.%r%b%b[ansi(v(FONT_HELP.Cmds),ljust(poker/hand,18))] - Same as poker/screen.%r%b%b[ansi(v(FONT_HELP.Cmds),ljust(poker/payoffs,18))] - Shows a chart of Poker payoffs.%r%b%b[ansi(v(FONT_HELP.Cmds),ljust(poker/combinations,18))] - Shows a list of winning combinations.%r%b%b[ansi(v(FONT_HELP.Cmds),ljust(poker/copyright,18))] - Shows Copyright information.%r[ansi(v(FONT_HELP.Border),repeat(-,78))])]
+&CMD_POKER.COMBINATIONS Poker Machine Parent=$poker/comb*:[pemit(%#,[ansi(v(FONT_HELP.Border),[repeat(-,78)]%r<<<<<)][ansi(v(FONT_HELP.Header),center(POKER MACHINE -- WINNING COMBINATIONS,68))][ansi(v(FONT_HELP.Border),>>>>>%r[repeat(-,78)])]%rThe following is a list of hand-sequences -- from weakest to strongest.  To win money\, you must have a pair of Jacks or better.%r%r[ansi(v(FONT_HELP.Cmds),One Pair)]%r%b%bWhen you have two cards in your hand have the same number on them.%r[ansi(v(FONT_HELP.Cmds),Two Pair)]%r%b%bWhen you have two different sets of pairs.%r[ansi(v(FONT_HELP.Cmds),Three of a Kind)]%r%b%bWhen three of your cards have the same number on them.%r[ansi(v(FONT_HELP.Cmds),Straight)]%r%b%bWhen your cards fall in sequential order.%r[ansi(v(FONT_HELP.Cmds),Flush)]%r%b%bWhen your cards all have the same SUIT.%r[ansi(v(FONT_HELP.Cmds),Full  House)]%r%b%bWhen you have a combination of One Pair and Three of a Kind.%r[ansi(v(FONT_HELP.Cmds),Four of a Kind)]%r%b%bWhen four of your cards have the same number on them.%r[ansi(v(FONT_HELP.Cmds),Straight Flush)]%r%b%bWhen your hand meets the qualifications for both a Straight and a Flush.%r[ansi(v(FONT_HELP.Cmds),Royal Flush)]%r%b%bThis is the best hand in poker.  It is the same as a Straight Flush except it is of the highest cards in the game:  Ten\, Jack\, Queen\, King\, Ace.%r[ansi(v(FONT_HELP.Border),repeat(-,78))]
+&CMD_POKER.SCREEN Poker Machine Parent=$poker/screen:[ifelse(u(FUN_PLR.Playing,%#),u(TRI_POKER.Hand,%#),u(TRI_POKER.Screen,%#))]
+&CMD_POKER.SETUP Poker Machine Parent=$poker/setup:[ifelse(u(FUN_PLR.Auth,%#),u(TRI_POKER.Setup,%#),u(TRI_ERROR,%#,PLR_!AUTH))]
+&CMD_POKER.STAY Poker Machine Parent=$poker/stay:[switch([u(FLAG_BUSY)][u(FUN_PLR.Playing,%#)][u(FLAG_EXCHANGE)],0??,u(TRI_ERROR,%#,!BUSY),10?,u(TRI_ERROR,%#,PLR_!PLAYING),110,u(TRI_ERROR,%#,TIME_!EXCHANGE),111,u(TRI_POKER.Stay,%#),u(TRI_SYSERR,%#))]
+&CMD_POKER.EXCHANGE Poker Machine Parent=$poker/ex* *:[switch([u(FLAG_BUSY)][u(FUN_PLR.Playing,%#)][u(FLAG_EXCHANGE)][u(FUN_EXCHANGE.Valid,setunion(secure(%1),))],0???,u(TRI_ERROR,%#,!BUSY),10??,u(TRI_ERROR,%#,PLR_!PLAYING),110?,u(TRI_ERROR,%#,TIME_!EXCHANGE),1110,u(TRI_ERROR,%#,EXCHANGE_!VALID),1111,u(TRI_POKER.Exchange,%#,setunion(secure(%1),)),u(TRI_SYSERR,%#))]
+&CMD_POKER.HAND Poker Machine Parent=$poker/hand:[ifelse(u(FUN_PLR.Playing,%#),u(TRI_POKER.Hand,%#),u(TRI_POKER.Screen,%#))]
+&CMD_POKER.START Poker Machine Parent=$poker/start:[switch([u(FLAG_BUSY)][u(FUN_PLR.Playing,%#)],1?,u(TRI_ERROR,%#,BUSY),00,u(TRI_ERROR,%#,PLR_!PLAYING),01,u(TRI_POKER.Start,%#),u(TRI_SYSERR,%#))]
+&CMD_POKER.BET Poker Machine Parent=$poker/bet *:[switch([u(FLAG_BUSY)][u(FUN_PLR.Valid,%#)][u(FUN_PLR.Banned,%#)][or(u(FUN_PLR.Playing,%#),eq(words(v(DATA_PLAYER.DB)),0))][u(FUN_ENOUGH.Money,%#,mul(trunc(secure(%0)),v(DATA_CREDIT.Value)))][u(FUN_BET.Valid,trunc(secure(%0)))][u(FUN_POKER.Enough-Money,mul(mul(trunc(secure(%0)),v(DATA_CREDIT.Value)),last(v(LIST_PAYOFFS.Royal-Flush))))],1??????,u(TRI_ERROR,%#,TIME_!BET),00?????,u(TRI_ERROR,%#,PLR_!VALID),011????,u(TRI_ERROR,%#,PLR_BANNED),0100???,u(TRI_ERROR,%#,PLR_!PLAYING2),01010??,u(TRI_ERROR,%#,!ENOUGH_MONEY),010110?,u(TRI_ERROR,%#,BET_!VALID),0101110,u(TRI_ERROR,%#,OUT_OF_MONEY),0101111,u(TRI_POKER.Bet,%#,trunc(secure(%0))),u(TRI_SYSERR,%#))]
+think [ansi(hm,INSTALL:)] Downloading Poker Data...
+&DATA_VERSION Poker Machine Parent=2.1
+&DATA_EXCHANGE.MAX Poker Machine Parent=5
+&DATA_PLAYER.STYLE Poker Machine Parent=1
+&DATA_DECK.DEFAULT Poker Machine Parent=02-H 03-H 04-H 05-H 06-H 07-H 08-H 09-H 10-H 11-H 12-H 13-H 14-H 02-C 03-C 04-C 05-C 06-C 07-C 08-C 09-C 10-C 11-C 12-C 13-C 14-C 02-D 03-D 04-D 05-D 06-D 07-D 08-D 09-D 10-D 11-D 12-D 13-D 14-D 02-S 03-S 04-S 05-S 06-S 07-S 08-S 09-S 10-S 11-S 12-S 13-S 14-S
+&DATA_MONEY.PLURAL Poker Machine Parent=dollars
+&DATA_MONEY.SINGULAR Poker Machine Parent=dollar
+&DATA_CREDIT.VALUE Poker Machine Parent=5
+&DATA_BET.MAX Poker Machine Parent=5
+&DATA_BET.MIN Poker Machine Parent=1
+&DATA_POKER.Money Poker Machine Parent=1000000
+think [ansi(hm,INSTALL:)] Downloading Poker ASCII-Art...
+&DRAW_SCREEN.FOOTER Poker Machine Parent=%r[ansi(v(FONT_FOOTER.Border),[repeat(-,78)]%r|||)] [ansi(v(FONT_FOOTER.Title),[ljust([name(v(DATA_PLAYER.Last))]'s [ifelse(u(DATA_PLAYER.Bet),Best Hand,Last Best Hand)]: [ifelse(words(v(DATA_PLAYER.Hand)),[u(FUN_HAND.Bin2Name,u(FUN_HAND.Total,v(DATA_PLAYER.Hand)))],-NULL-)],70)] [ansi(v(FONT_FOOTER.Border),|||)]%r[ansi(v(FONT_FOOTER.Border),|||)] [ansi(v(FONT_FOOTER.Title),ljust([name(v(DATA_PLAYER.Last))]'s [ifelse(u(DATA_PLAYER.Bet),Current Bet: [v(DATA_PLAYER.Bet)],Last Bet: -NULL-)],70))] [ansi(v(FONT_FOOTER.Border),|||%r[repeat(-,78)])]%r[ifelse(v(FLAG_BUSY),* [name(v(DATA_PLAYER.Last))] may now '[ansi(v(FONT_POKER.Cmds),poker/exchange <list>)]' or '[ansi(v(FONT_POKER.Cmds),poker/stay)]'.,ifelse(v(DATA_PLAYER.Bet),* [name(v(DATA_PLAYER.Last))] may now '[ansi(v(FONT_POKER.Cmds),poker/start)]'.,* You may now '[ansi(v(FONT_POKER.Cmds),poker/bet <#>)]'.))]
+&DRAW_SCREEN.HEADER Poker Machine Parent=[ansi(v(FONT_HAND.Border),[repeat(-,78)]%r<<<<<)][ansi(v(FONT_HAND.Title),center(POKER MACHINE -- [name(v(DATA_PLAYER.Last))]'s [ifelse(words(v(DATA_PLAYER.DB)),Hand,Last Hand)],68))][ansi(v(FONT_HAND.Border),>>>>>%r[repeat(-,78)])]
+&DRAW_CARD Poker Machine Parent=[iter(%0,u(DRAW_CARD.Style%2-%1,before(##,-),after(##,-)))]
+&DRAW_CARD.STYLE3-1 Poker Machine Parent=.------------.
+&DRAW_CARD.STYLE3-2 Poker Machine Parent=|[ansi(n,%b[extract(2 3 4 5 6 7 8 9 10 J Q K A,dec(%0),1)][ifelse(eq(10,%0),space(9),space(10))])]|
+&DRAW_CARD.STYLE3-3 Poker Machine Parent=|[ansi(n,switch(%1,C,[space(5)]__[space(5)],H,%b%b%b__%b%b__%b%b%b,S,[space(5)]/\\[space(5)],D,[space(5)]/\\[space(5)]))]|
+&DRAW_CARD.STYLE3-4 Poker Machine Parent=|[ansi(n,switch(%1,C,%b%b%b_\(%b%b\)_%b%b%b,H,%b%b/%b%b\\/%b%b\\%b%b,S,%b%b%b%b/%b%b\\%b%b%b%b,D,%b%b%b%b/%b%b\\%b%b%b%b))]|
+&DRAW_CARD.STYLE3-5 Poker Machine Parent=|[ansi(n,switch(%1,C,%b%b\(_.%b%b._\)%b%b,H,%b%b\\[space(6)]/%b%b,S,%b%b/'[space(4)]`\\%b%b,D,[space(4)]\\%b%b/[space(4)]))]|
+&DRAW_CARD.STYLE3-6 Poker Machine Parent=|[ansi(n,switch(%1,C,[space(5)]||[space(5)],H,%b%b%b`\\%b%b/'%b%b%b,S,%b|%b%b%b..%b%b%b|%b,D,[space(5)]\\/[space(5)]))]|
+&DRAW_CARD.STYLE3-7 Poker Machine Parent=|[ansi(n,switch(%1,C,[space(5)]`^[space(5)],H,[space(5)]`'[space(5)],S,%b%b`-'||`-'%b%b,D,[space(12)]))]|
+&DRAW_CARD.STYLE3-8 Poker Machine Parent=|[ansi(n,[ifelse(eq(%0,10),space(9),space(10))][extract(2 3 4 5 6 7 8 9 10 J Q K A,dec(%0),1)]%b)]|
+&DRAW_CARD.STYLE3-9 Poker Machine Parent=`------------'
+&DRAW_CARD.STYLE3 Poker Machine Parent=[iter(lnum(9),%r[u(DRAW_CARD,%1,#@,%2)])]%r[center(Card \[V\],14)] [center(Card \[W\],14)] [center(Card \[X\],14)] [center(Card \[Y\],14)] [center(Card \[Z\],14)]
+&DRAW_CARD.STYLE4 Poker Machine Parent=[iter(%1,%rCard \[[extract(V W X Y Z,#@,1)]\]: [u(FUN_CARD.Abb2Name,##)])]
+&DRAW_CARD.STYLE2 Poker Machine Parent=[iter(lnum(9),%r[u(DRAW_CARD,%1,#@,%2)])]%r[center(Card \[V\],14)] [center(Card \[W\],14)] [center(Card \[X\],14)] [center(Card \[Y\],14)] [center(Card \[Z\],14)]
+&DRAW_CARD.STYLE1 Poker Machine Parent=[iter(lnum(9),%r[u(DRAW_CARD,%1,#@,%2)])]%r[center(Card \[V\],14)] [center(Card \[W\],14)] [center(Card \[X\],14)] [center(Card \[Y\],14)] [center(Card \[Z\],14)]
+&DRAW_CARD.STYLE1-1 Poker Machine Parent=.------------.
+&DRAW_CARD.STYLE1-2 Poker Machine Parent=|[ansi(X[ifelse(match(H D,%1),hr,w)],%b[extract(2 3 4 5 6 7 8 9 10 J Q K A,dec(%0),1)][ifelse(eq(10,%0),space(9),space(10))])]|
+&DRAW_CARD.STYLE1-3 Poker Machine Parent=|[ansi(X[ifelse(match(H D,%1),hr,w)],switch(%1,C,[space(5)]__[space(5)],H,%b%b%b__%b%b__%b%b%b,S,[space(5)]/\\[space(5)],D,[space(5)]/\\[space(5)]))]|
+&DRAW_CARD.STYLE1-4 Poker Machine Parent=|[ansi(X[ifelse(match(H D,%1),hr,w)],switch(%1,C,%b%b%b_\(%b%b\)_%b%b%b,H,%b%b/%b%b\\/%b%b\\%b%b,S,%b%b%b%b/%b%b\\%b%b%b%b,D,%b%b%b%b/%b%b\\%b%b%b%b))]|
+think [ansi(hm,INSTALL:)] *STILL* Downloading Poker ASCII-Art...
+&DRAW_CARD.STYLE1-5 Poker Machine Parent=|[ansi(X[ifelse(match(H D,%1),hr,w)],switch(%1,C,%b%b\(_.%b%b._\)%b%b,H,%b%b\\[space(6)]/%b%b,S,%b%b/'[space(4)]`\\%b%b,D,[space(4)]\\%b%b/[space(4)]))]|
+&DRAW_CARD.STYLE1-6 Poker Machine Parent=|[ansi(X[ifelse(match(H D,%1),hr,w)],switch(%1,C,[space(5)]||[space(5)],H,%b%b%b`\\%b%b/'%b%b%b,S,%b|%b%b%b..%b%b%b|%b,D,[space(5)]\\/[space(5)]))]|
+&DRAW_CARD.STYLE1-7 Poker Machine Parent=|[ansi(X[ifelse(match(H D,%1),hr,w)],switch(%1,C,[space(5)]`^[space(5)],H,[space(5)]`'[space(5)],S,%b%b`-'||`-'%b%b,D,[space(12)]))]|
+&DRAW_CARD.STYLE1-8 Poker Machine Parent=|[ansi(X[ifelse(match(H D,%1),hr,w)],[ifelse(eq(%0,10),space(9),space(10))][extract(2 3 4 5 6 7 8 9 10 J Q K A,dec(%0),1)]%b)]|
+&DRAW_CARD.STYLE1-9 Poker Machine Parent=`------------'
+&DRAW_CARD.STYLE2-1 Poker Machine Parent=.------------.
+&DRAW_CARD.STYLE2-2 Poker Machine Parent=|[ansi(W[ifelse(match(H D,%1),hr,x)],%b[extract(2 3 4 5 6 7 8 9 10 J Q K A,dec(%0),1)][ifelse(eq(10,%0),space(9),space(10))])]|
+&DRAW_CARD.STYLE2-3 Poker Machine Parent=|[ansi(W[ifelse(match(H D,%1),hr,x)],switch(%1,C,[space(5)]__[space(5)],H,%b%b%b__%b%b__%b%b%b,S,[space(5)]/\\[space(5)],D,[space(5)]/\\[space(5)]))]|
+&DRAW_CARD.STYLE2-4 Poker Machine Parent=|[ansi(W[ifelse(match(H D,%1),hr,x)],switch(%1,C,%b%b%b_\(%b%b\)_%b%b%b,H,%b%b/%b%b\\/%b%b\\%b%b,S,%b%b%b%b/%b%b\\%b%b%b%b,D,%b%b%b%b/%b%b\\%b%b%b%b))]|
+&DRAW_CARD.STYLE2-5 Poker Machine Parent=|[ansi(W[ifelse(match(H D,%1),hr,x)],switch(%1,C,%b%b\(_.%b%b._\)%b%b,H,%b%b\\[space(6)]/%b%b,S,%b%b/'[space(4)]`\\%b%b,D,[space(4)]\\%b%b/[space(4)]))]|
+&DRAW_CARD.STYLE2-6 Poker Machine Parent=|[ansi(W[ifelse(match(H D,%1),hr,x)],switch(%1,C,[space(5)]||[space(5)],H,%b%b%b`\\%b%b/'%b%b%b,S,%b|%b%b%b..%b%b%b|%b,D,[space(5)]\\/[space(5)]))]|
+&DRAW_CARD.STYLE2-7 Poker Machine Parent=|[ansi(W[ifelse(match(H D,%1),hr,x)],switch(%1,C,[space(5)]`^[space(5)],H,[space(5)]`'[space(5)],S,%b%b`-'||`-'%b%b,D,[space(12)]))]|
+&DRAW_CARD.STYLE2-8 Poker Machine Parent=|[ansi(W[ifelse(match(H D,%1),hr,x)],[ifelse(eq(%0,10),space(9),space(10))][extract(2 3 4 5 6 7 8 9 10 J Q K A,dec(%0),1)]%b)]|
+&DRAW_CARD.STYLE2-9 Poker Machine Parent=`------------'
+&DRAW_HAND.FOOTER Poker Machine Parent=%r[ansi(v(FONT_FOOTER.Border),[repeat(-,78)]%r|||)] [ansi(v(FONT_FOOTER.Title),[ljust(Your Best Hand%b: [ifelse(words(v(DATA_PLAYER.Hand)),u(FUN_HAND.Bin2Name,u(FUN_HAND.Total,v(DATA_PLAYER.Hand))),-NULL-)],34)] [rjust(Your Current Bet: [v(DATA_PLAYER.Bet)],35)])] [ansi(v(FONT_FOOTER.Border),|||)]%r[ansi(v(FONT_FOOTER.Border),|||)] [ansi(v(FONT_FOOTER.Title),ljust(Account Balance: [u(FUN_GET.Plr-Money,%0)],70))] [ansi(v(FONT_FOOTER.Border),|||%r[repeat(-,78)])]%r[ifelse(u(FLAG_EXCHANGE),* You may now '[ansi(v(FONT_POKER.Cmds),poker/exchange <list>)]' or '[ansi(v(FONT_POKER.Cmds),poker/stay)]'.,ifelse(v(DATA_PLAYER.Bet),* You may now '[ansi(v(FONT_POKER.Cmds),poker/start)]'.,* You may now '[ansi(v(FONT_POKER.Cmds),poker/bet <#>)]'.))]
+&DRAW_HAND.HEADER Poker Machine Parent=[ansi(v(FONT_HAND.Border),[repeat(-,78)]%r<<<<<)][ansi(v(FONT_HAND.Title),center(POKER MACHINE -- Your Hand,68))][ansi(v(FONT_HAND.Border),>>>>>%r[repeat(-,78)])]
+think [ansi(hm,INSTALL:)] Downloading Poker Error Messages...
+&ERR_PLR_!PLAYING Poker Machine Parent=You must first '[ansi(v(FONT_POKER.Cmds),poker/bet <#>)]'.
+&ERR_PLR_!PLAYING2 Poker Machine Parent=[name(v(DATA_PLAYER.DB))] is using this machine. Please wait or use another one.
+&ERR_PLR_!AUTH Poker Machine Parent=You are not authorized to do that.
+&ERR_EXCHANGE_!VALID Poker Machine Parent=One or more of the card slots you specified are not valid. You may only exchange up to [v(DATA_EXCHANGE.Max)] cards\, and must use the letters in the \[\]'s to indicate which you want to exchange.  \(For example: poker/exchange V Y\)
+&ERR_TIME_!EXCHANGE Poker Machine Parent=Now is not a valid time to exchange cards.
+&ERR_!BUSY Poker Machine Parent=But there is no game in progress.
+&ERR_TIME_!BET Poker Machine Parent=You cannot bet once a game has been started.
+&ERR_BUSY Poker Machine Parent=But there is already a game in progress.
+&ERR_OUT_OF_MONEY Poker Machine Parent=This machine does not have enough money to cover that bet. Please contact the Casino owner.
+&ERR_BET_!VALID Poker Machine Parent=Your bet must be between [v(DATA_BET.Min)] and [v(DATA_BET.Max)] credits.
+&ERR_!ENOUGH_MONEY Poker Machine Parent=You do not have enough money to do that.
+&ERR_PLR_BANNED Poker Machine Parent=You are banned from playing Poker.
+&ERR_PLR_!VALID Poker Machine Parent=You are not a valid player.
+think [ansi(hm,INSTALL:)] Downloading Poker Softflags...
+&FLAG_BUSY Poker Machine Parent=0
+think [ansi(hm,INSTALL:)] Downloading Poker Fonts...
+&FONT_PAYOFFS.TITLE Poker Machine Parent=hm
+&FONT_PAYOFFS.HAND Poker Machine Parent=hc
+&FONT_PAYOFFS.HEADER Poker Machine Parent=hc
+&FONT_PAYOFFS.BORDER Poker Machine Parent=hb
+&FONT_HELP.TITLE Poker Machine Parent=hb
+&FONT_HELP.HEADER Poker Machine Parent=hc
+&FONT_HELP.CMDS Poker Machine Parent=hc
+&FONT_HELP.BORDER Poker Machine Parent=hb
+&FONT_DESC.BORDER Poker Machine Parent=hb
+&FONT_DESC.INFO Poker Machine Parent=hg
+&FONT_FOOTER.TITLE Poker Machine Parent=hg
+&FONT_FOOTER.BORDER Poker Machine Parent=hb
+&FONT_HAND.TITLE Poker Machine Parent=hc
+&FONT_HAND.HEADER Poker Machine Parent=hg
+&FONT_HAND.BORDER Poker Machine Parent=hb
+&FONT_POKER.CMDS Poker Machine Parent=hc
+think [ansi(hm,INSTALL:)] Downloading Poker Functions...
+&FUN_PLR.AUTH Poker Machine Parent=[hasflag(%0,Wizard)]
+&FUN_EXCHANGE.VALID Poker Machine Parent=[and(and(gt(words(%0),0),lte(words(%0),v(DATA_EXCHANGE.Max))),not(member(iter(%0,match(V W X Y Z,##)),0)))]
+&FUN_CARD.ABB2NAME Poker Machine Parent=[extract(Two Three Four Five Six Seven Eight Nine Ten Jack Queen King Ace,dec(before(%0,-)),1)] of [extract(Hearts Spades Diamonds Clubs,match(h s d c,after(%0,-)),1)]
+&FUN_MONEY.NAME Poker Machine Parent=[ifelse(eq(%0,1),u(DATA_MONEY.Singular),u(DATA_MONEY.Plural))]
+&FUN_POKER.ENOUGH-MONEY Poker Machine Parent=[gte(trunc(v(DATA_POKER.Money)),trunc(%0))]
+&FUN_BET.VALID Poker Machine Parent=[and(gte(%0,trunc(v(DATA_BET.Min))),lte(%0,trunc(v(DATA_BET.Max))))]
+&FUN_GET.PLR-MONEY Poker Machine Parent=[default(%0/[v(VAR_MONEY)],0)]
+&FUN_ENOUGH.MONEY Poker Machine Parent=[gte(trunc(u(FUN_GET.Plr-Money,%0)),trunc(%1))]
+&FUN_PLR.PLAYING Poker Machine Parent=[member(v(DATA_PLAYER.DB),%0)]
+&FUN_PLR.BANNED Poker Machine Parent=[not(not(member(v(LIST_POKER.Banned),%0)))]
+&FUN_PLR.VALID Poker Machine Parent=[hastype(%0,PLAYER)]
+&FUN_HAND.BIN2PAYOFF Poker Machine Parent=[ifelse(or(not(member(1 2 5 10 15 26 29 36 43,pos(1,%0))),and(member(43,pos(1,%0)),lt(trunc(mid(%0,43,2)),11))),0,extract(v(LIST_PAYOFFS.[edit(u(FUN_HAND.Bin2Name,%0),%b,-)]),v(DATA_PLAYER.Bet),1))]
+&FUN_HAND.BIN2NAME Poker Machine Parent=[edit(extract(High-Card Royal-Flush Straight-Flush Four-of-a-Kind Full-House Flush Straight Three-of-a-Kind Two-Pair One-Pair,inc(member(1 2 5 10 15 26 29 36 43,pos(1,%0))),1),-,space(1))]
+&FUN_HAND.TOTAL3 Poker Machine Parent=[u(HAND_Royal.Flush,%0,%1,%2,%3,%4)][u(HAND_Straight.Flush,%0,%1,%2,%3,%4)][u(HAND_Four.Of.Kind,%0,%1,%2,%3,%4)][u(HAND_Full.House,%0,%1,%2,%3,%4)][u(HAND_Flush,%0,%1,%2,%3,%4)][u(HAND_Straight,%0,%1,%2,%3,%4)][u(HAND_Three.Of.Kind,%0,%1,%2,%3,%4)][u(HAND_Two.Pair,%0,%1,%2,%3,%4)][u(HAND_One.Pair,%0,%1,%2,%3,%4)][before(%4,-)][before(%3,-)][before(%2,-)][before(%1,-)][before(%0,-)]
+&FUN_HAND.TOTAL2 Poker Machine Parent=[u(FUN_HAND.Total3,extract(%0,1,1),extract(%0,2,1),extract(%0,3,1),extract(%0,4,1),extract(%0,5,1))]
+&FUN_HAND.TOTAL Poker Machine Parent=[u(FUN_HAND.Total2,sort(%0,n))]
+think [ansi(hm,INSTALL:)] Downloading Poker Hand Calculations...
+&HAND_ONE.PAIR Poker Machine Parent=[switch([member(before(%0,-),before(%1,-))][member(before(%1,-),before(%2,-))][member(before(%2,-),before(%3,-))][member(before(%3,-),before(%4,-))],1000,1[before(%0,-)][before(%4,-)][before(%3,-)][before(%2,-)],0100,1[before(%1,-)][before(%4,-)][before(%3,-)][before(%0,-)],0010,1[before(%2,-)][before(%4,-)][before(%1,-)][before(%0,-)],0001,1[before(%3,-)][before(%2,-)][before(%1,-)][before(%0,-)],000000000)]
+&HAND_FULL.HOUSE Poker Machine Parent=[ifelse(and(and(member(before(%2,-),before(%1,-)),member(before(%2,-),before(%0,-))),member(before(%3,-),before(%4,-))),1[before(%0,-)][before(%4,-)],ifelse(and(and(member(before(%2,-),before(%3,-)),member(before(%2,-),before(%4,-))),member(before(%0,-),before(%1,-))),1[before(%4,-)][before(%0,-)],00000))]
+&HAND_THREE.OF.KIND Poker Machine Parent=[ifelse(and(member(before(%0,-),before(%1,-)),member(before(%1,-),before(%2,-))),1[before(%1,-)][before(%4,-)][before(%3,-)],ifelse(and(member(before(%1,-),before(%2,-)),member(before(%2,-),before(%3,-))),1[before(%2,-)][before(%4,-)][before(%0,-)],ifelse(and(member(before(%2,-),before(%3,-)),member(before(%3,-),before(%4,-))),1[before(%3,-)][before(%1,-)][before(%0,-)],0000000)))]
+&HAND_TWO.PAIR Poker Machine Parent=[ifelse(and(member(before(%0,-),before(%1,-)),member(before(%2,-),before(%3,-))),1[before(%2,-)][before(%0,-)][before(%4,-)],ifelse(and(member(before(%0,-),before(%1,-)),member(before(%3,-),before(%4,-))),1[before(%3,-)][before(%0,-)][before(%2,-)],ifelse(and(member(before(%1,-),before(%2,-)),member(before(%3,-),before(%4,-))),1[before(%3,-)][before(%1,-)][before(%0,-)],0000000)))]
+&HAND_ROYAL.FLUSH Poker Machine Parent=[ifelse(and(match(mid(u(HAND_STRAIGHT.Flush,%0,%1,%2,%3,%4),0,1),1),and(eq(before(%4,-),14),eq(before(%0,-),10))),1,0)]
+&HAND_FLUSH Poker Machine Parent=[ifelse(match([after(%0,-)][after(%1,-)][after(%2,-)][after(%3,-)],repeat(after(%4,-),4)),1[before(%4,-)][before(%3,-)][before(%2,-)][before(%1,-)][before(%0,-)],00000000000)]
+&HAND_STRAIGHT.FLUSH Poker Machine Parent=[ifelse(and(match(mid(u(HAND_Straight,%0,%1,%2,%3,%4),0,1),1),match(mid(u(HAND_Flush,%0,%1,%2,%3,%4),0,1),1)),1[ifelse(and(eq(before(%4,-),14),eq(before(%0,-),2)),05,before(%4,-))],000)]
+&HAND_STRAIGHT Poker Machine Parent=[ifelse(ifelse(and(eq(before(%4,-),14),eq(before(%0,-),2)),and(and(eq(before(%1,-),3),eq(before(%2,-),4)),eq(before(%3,-),5)),match(1111,[sub(before(%4,-),before(%3,-))][sub(before(%3,-),before(%2,-))][sub(before(%2,-),before(%1,-))][sub(before(%1,-),before(%0,-))])),1[ifelse(and(eq(before(%4,-),14),eq(before(%0,-),2)),05,before(%4,-))],000)]
+&HAND_FOUR.OF.KIND Poker Machine Parent=[ifelse(and(and(eq(before(%2,-),before(%1,-)),eq(before(%2,-),before(%3,-))),xor(eq(before(%0,-),before(%2,-)),eq(before(%4,-),before(%2,-)))),1[ifelse(eq(before(%4,-),before(%2,-)),[before(%4,-)][before(%0,-)],[before(%0,-)][before(%4,-)])],00000)]
+think [ansi(hm,INSTALL:)] Downloading Poker Lists...
+&LIST_ATTRIBUTES Poker Machine Parent=AENTER ALEAVE CMD DATA DESCRIBE DRAW ENTER ERR FAIL FAILURE FLAG FONT FUN HAND LEAVE LIST LISTEN LOCK MSG OENTER OLEAVE OXENTER OXLEAVE TRI VAR
+think [ansi(hm,INSTALL:)] Downloading Poker Monitors...
+&LISTEN_DISCONNECT Poker Machine Parent=^* has disconnected.:[u(TRI_AUTO.Stuff,%#,%0)]
+think [ansi(hm,INSTALL:)] Downloading Poker Payoffs...
+&LIST_PAYOFFS.HIGH-CARD Poker Machine Parent=0 0 0 0 0
+&LIST_PAYOFFS.ONE-PAIR Poker Machine Parent=1 2 3 4 5
+&LIST_PAYOFFS.TWO-PAIR Poker Machine Parent=2 4 6 8 10
+&LIST_PAYOFFS.THREE-OF-A-KIND Poker Machine Parent=3 6 9 12 15
+&LIST_PAYOFFS.STRAIGHT Poker Machine Parent=4 8 12 16 20
+&LIST_PAYOFFS.FLUSH Poker Machine Parent=6 12 18 24 30
+&LIST_PAYOFFS.FULL-HOUSE Poker Machine Parent=9 18 27 36 45
+&LIST_PAYOFFS.FOUR-OF-A-KIND Poker Machine Parent=25 50 75 100 125
+&LIST_PAYOFFS.STRAIGHT-FLUSH Poker Machine Parent=50 100 150 200 250
+&LIST_PAYOFFS.ROYAL-FLUSH Poker Machine Parent=250 500 750 1000 4000
+think [ansi(hm,INSTALL:)] Downloading Poker Locks...
+&LOCK_AT.MACHINE Poker Machine Parent=[member(%l,%!)]
+think [ansi(hm,INSTALL:)] Downloading Poker Game Messages...
+&MSG_PLR_SETUP Poker Machine Parent=[name(%0)] RESETS the Poker Machine.
+&MSG_PLR_FORFEITS Poker Machine Parent=[name(%0)]\(%0\) automatically forfeits [poss(%0)] bet!
+&MSG_PLR_WON Poker Machine Parent=[name(%0)] WON %1 [u(FUN_MONEY.Name,%1)] with a hand of %2!
+&MSG_PLR_LOST Poker Machine Parent=[name(%0)] LOSES this hand.
+&MSG_PLR_STAY Poker Machine Parent=[name(%0)] grins mysteriously and PASSES the chance to exchange cards.
+&MSG_DEALT_CARD Poker Machine Parent=You are DEALT a card --> [u(FUN_CARD.Abb2Name,%0)].
+&MSG_PLR_EXCHANGE Poker Machine Parent=[name(%0)] exchanges [words(%1)] [ifelse(eq(words(%1),1),card and receives a new one,cards and receives new ones)].
+&MSG_NEXT_EXCHANGE Poker Machine Parent=[name(v(DATA_PLAYER.DB))]\, you may now '[ansi(v(FONT_POKER.Cmds),poker/exchange <list>)]' or '[ansi(v(FONT_POKER.Cmds),poker/stay)]'.
+&MSG_SEPARATOR Poker Machine Parent=[ansi(hg,repeat(=,40))]
+&MSG_DEAL_START Poker Machine Parent=The machine beeps as it deals five cards to [name(v(DATA_PLAYER.DB))].
+&MSG_NEXT_START Poker Machine Parent=[name(%0)]\, you may now '[ansi(v(FONT_POKER.Cmds),poker/start)]'.
+&MSG_SAME_PLAYER Poker Machine Parent=[name(%0)] changes [poss(%0)] Poker BET to %1 [ifelse(eq(%1,1),credit,credits)] \([mul(%1,v(DATA_CREDIT.Value))] [u(FUN_MONEY.Name,mul(%1,v(DATA_CREDIT.Value)))]\).
+&MSG_NEW_PLAYER Poker Machine Parent=[name(%0)] BETS %1 [ifelse(eq(%1,1),credit,credits)] \([mul(%1,v(DATA_CREDIT.Value))] [u(FUN_MONEY.Name,mul(%1,v(DATA_CREDIT.Value)))]\) at the Poker Machine.
+think [ansi(hm,INSTALL:)] Downloading Poker Triggers...
+&TRI_POKER.SCREEN Poker Machine Parent=[pemit(%0,[u(DRAW_SCREEN.Header)]%r[ifelse(words(v(DATA_PLAYER.Hand)),[u(DRAW_CARD.Style[v(DATA_PLAYER.Style)],%0,v(DATA_PLAYER.Hand),v(DATA_PLAYER.Style))],No hand has been dealt.)]%r[u(DRAW_SCREEN.Footer,%0)])]
+&TRI_POKER.SETUP Poker Machine Parent=[lock(me,me)][lock(me/use,LOCK_AT.Machine/1)][set(me,LISTEN_DISCONNECT:^* has disconnected.:\[u\(TRI_AUTO.Stuff\,\%#\,\%0\)\])][set(me,DATA_CREDIT.Value:[v(DATA_CREDIT.Value)])][set(me,MONITOR)][set(me,ENTER_OK)][u(TRI_RESET)][set(me,DATA_PLAYER.Hand:)][set(me,DATA_DECK.Current:)][u(TRI_MESSAGE,PLR_SETUP,%0)]
+&TRI_RESET Poker Machine Parent=[set(me,DATA_PLAYER.Bet:)][set(me,DATA_PLAYER.DB:)][set(me,FLAG_BUSY:0)][set(me,FLAG_EXCHANGE:0)]
+&TRI_AUTO.FORFEIT Poker Machine Parent=[u(TRI_MESSAGE,PLR_FORFEITS,%0)][u(TRI_RESET)]
+&TRI_AUTO.STUFF Poker Machine Parent=[ifelse(and(match(pmatch(%1),%0),match(v(DATA_PLAYER.DB),%0)),u(TRI_AUTO.FORFEIT,%0),)]
+&TRI_SETTLEMENT Poker Machine Parent=[u(TRI_MESSAGE,SEPARATOR)][setq(9,u(FUN_HAND.Bin2Payoff,setr(8,u(FUN_HAND.Total,v(DATA_PLAYER.Hand)))))][ifelse(eq(%q9,0),u(TRI_MESSAGE,PLR_LOST,u(DATA_PLAYER.DB)),[u(TRI_MESSAGE,PLR_WON,u(DATA_PLAYER.DB),mul(%q9,v(DATA_CREDIT.Value)),u(FUN_HAND.Bin2Name,%q8))][u(TRI_DECREASE.Poker,mul(v(DATA_CREDIT.Value),%q9))][u(TRI_SET.Plr-Money,%0,add(u(FUN_GET.Plr-Money,%0),mul(v(DATA_CREDIT.Value),%q9)))])][u(TRI_RESET)]
+&TRI_POKER.STAY Poker Machine Parent=[u(TRI_MESSAGE,PLR_STAY,%0)][set(me,FLAG_EXCHANGE:0)][u(TRI_SETTLEMENT,%0)]
+&TRI_MESSAGE.PRIV Poker Machine Parent=[pemit(%0,[u(DATA_PREFIX.Game)][space(not(not(words(u(DATA_PREFIX.Game)))))][u(MSG_%1,%2,%3,%3\4)])]
+&TRI_POKER.EXCHANGE Poker Machine Parent=[u(TRI_MESSAGE,PLR_EXCHANGE,%0,%1)][iter(%1,[set(me,DATA_PLAYER.Hand:[replace(v(DATA_PLAYER.Hand),match(V W X Y Z,##),extract(v(DATA_DECK.Current),#@,1))])][u(TRI_MESSAGE.Priv,%0,DEALT_CARD,extract(v(DATA_DECK.Current),#@,1))])][set(me,DATA_DECK.Current:[extract(v(DATA_DECK.Current),inc(words(%1)),words(v(DATA_DECK.Current)))])][set(me,DATA_PLAYER.Hand:[sort(v(DATA_PLAYER.Hand),n)])][set(me,FLAG_EXCHANGE:0)][u(TRI_POKER.Hand,%0)][u(TRI_SETTLEMENT,%0)]
+&TRI_POKER.HAND Poker Machine Parent=[pemit(%0,[u(DRAW_HAND.Header)]%r[ifelse(words(v(DATA_PLAYER.Hand)),[u(DRAW_CARD.Style[v(DATA_PLAYER.Style)],%0,v(DATA_PLAYER.Hand),v(DATA_PLAYER.Style))],No hand has been dealt.)]%r[u(DRAW_HAND.Footer,%0)])]
+&TRI_DECK.DEAL Poker Machine Parent=[u(TRI_MESSAGE,SEPARATOR)][u(TRI_MESSAGE,DEAL_START)][set(me,DATA_PLAYER.Hand:[sort(extract(v(DATA_DECK.Current),1,5),n)])][set(me,DATA_DECK.Current:[extract(v(DATA_DECK.Current),6,words(v(DATA_DECK.Current)))])]
+&TRI_DECK.SHUFFLE Poker Machine Parent=[set(me,DATA_DECK.Current:[shuffle(shuffle(v(DATA_DECK.Default)))])]
+&TRI_POKER.START Poker Machine Parent=[set(me,FLAG_BUSY:1)][u(TRI_DECK.Shuffle)][u(TRI_DECK.Deal)][set(me,FLAG_EXCHANGE:1)][u(TRI_MESSAGE,NEXT_EXCHANGE)][u(TRI_POKER.Hand,%0)]
+&TRI_POKER.BET Poker Machine Parent=[setq(1,0)][ifelse(eq(words(v(DATA_PLAYER.DB)),0),[u(TRI_MESSAGE,NEW_PLAYER,%0,%1)][set(me,DATA_PLAYER.Style:1)][set(me,DATA_PLAYER.DB:%0)][set(me,DATA_PLAYER.Bet:%1)][u(TRI_SET.Plr-Money,%0,sub(u(FUN_GET.Plr-Money,%0),setr(1,mul(%1,v(DATA_CREDIT.Value)))))][ifelse(member(v(DATA_PLAYER.Last),%0),,[set(me,DATA_PLAYER.Last:%0)][set(me,DATA_PLAYER.Hand:)])],[u(TRI_MESSAGE,SAME_PLAYER,%0,%1)][u(TRI_SET.Plr-Money,%0,add(u(FUN_GET.Plr-Money,%0),setr(1,sub(mul(v(DATA_PLAYER.Bet),v(DATA_CREDIT.Value)),mul(v(DATA_CREDIT.Value),%1)))))][setq(1,mul(%q1,-1))][set(me,DATA_PLAYER.Bet:%1)])][u(TRI_INCREASE.Poker,%q1)][u(TRI_MESSAGE,NEXT_START,%0)]
+&TRI_DECREASE.POKER Poker Machine Parent=[set(me,DATA_POKER.Money:[sub(v(DATA_POKER.Money),%0)])]
+&TRI_INCREASE.POKER Poker Machine Parent=[set(me,DATA_POKER.Money:[add(v(DATA_POKER.Money),%0)])]
+&TRI_SET.PLR-MONEY Poker Machine Parent=[ifelse(gte(%1,v(DATA_MAX.Money)),[set(%0,[v(VAR_MONEY)]:[v(DATA_MAX.Money)])][pemit(%0,[u(DATA_PREFIX.Warn)] You cannot carry any more money! Any money won from this point on will NOT be given to you.)][set(me,DATA_POKER.Money:[add(v(DATA_POKER.Money),sub(%1,v(DATA_MAX.Money)))])],set(%0,[v(VAR_MONEY)]:%1))]
+&TRI_SYSERR Poker Machine Parent=[pemit(%0,[ansi(hfr,SYSERR:)] There is a bug in the code. Report this to an Admin immediately.)]
+&TRI_MESSAGE Poker Machine Parent=[remit(me,[u(DATA_PREFIX.Game)][space(not(not(words(u(DATA_PREFIX.Game)))))][u(MSG_%0,%1,%2,%3)])]
+&TRI_ERROR Poker Machine Parent=[pemit(%0,[u(DATA_PREFIX.Error)][space(not(not(words(u(DATA_PREFIX.Error)))))][u(ERR_%1,%2,%3,%4)])]
+think [ansi(hm,INSTALL:)] Downloading Poker Variables...
+&VAR_MONEY Poker Machine Parent=Econ_Money
+think [ansi(hm,INSTALL:)] Downloading Poker Prefixes...
+&DATA_PREFIX.WARN Poker Machine Parent=[ansi(hy,WARN:)]
+&DATA_PREFIX.GAME Poker Machine Parent=[ansi(hg,GAME:)]
+&DATA_PREFIX.ERROR Poker Machine Parent=[ansi(hr,ERROR:)]
+&DATA_PREFIX.SYSERR Poker Machine Parent=[ansi(fhr,SYSERR:)]
+think [ansi(hm,INSTALL:)] [ansi(hr,Download is complete!  Now you must do the following:)]
+think [ansi(hm,INSTALL:)] %b%b%b- @create a poker machine and drop it
+think [ansi(hm,INSTALL:)] %b%b%b- @parent the created object to the Poker Machine Parent
+think [ansi(hm,INSTALL:)] %b%b%b- @set the created object !NO_COMMAND and !HALT
+think [ansi(hm,INSTALL:)] %b%b%b- Enter the created object and type poker/setup
+think [ansi(hm,INSTALL:)] %b%b%b- Set the created object WIZARD if others will be using it.
+think [ansi(hm,INSTALL:)] %b%b%b- BE SURE TO SET &VAR_MONEY ON THE POKER MACHINE PARENT.  It
+think [ansi(hm,INSTALL:)] %b%b%b%b should be set to the name of the variable you use for money.
+think [ansi(hm,INSTALL:)] 
+think [ansi(hm,INSTALL:)] The Copyright must stay with this code.  If you have any questions
+think [ansi(hm,INSTALL:)] or complaints \(bug reports\) concerning this code\, please contact
+think [ansi(hm,INSTALL:)] me at: [ansi(hc,worldwar@bb6.betterbox.net)].  Thank you.
+@set me=!quiet
+

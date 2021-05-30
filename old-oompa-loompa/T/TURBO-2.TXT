@@ -1,0 +1,59 @@
+@create Panel Parent
+@link Panel Parent = #11938
+@chzone Panel Parent = #4730
+@set Panel Parent = LINK_OK
+@set Panel Parent = VISUAL
+@set Panel Parent = NO_COMMAND
+&-FLOOR Panel Parent=$floor *:@tr me/[u(USEMSG,%#)][switch(match(v(ALIASES),* %0,|),0,u(FAILMSG,%#)NULL,switch(v(QUEUED),0,set(me,QUEUED:1)MOVE,NULL)[set(me,DESTS:[v(DESTS)] [first(extract(v(ALIASES),#$,1,|))])][u(SUCCMSG,%#)])]
+&TRIGGERS Panel Parent=level floor deck please copmuter computer turbolift lift tl
+&PARSE Panel Parent=[setq(0,iter(lcstr(v(ALIASES)),switch(match(%0,rest(##)),0,,rest(##)|),|,))][setq(2,setinter(%0,v(TRIGGERS)))][switch(and(words(%q0,|),words(%q2)),1,setq(1,first(extract(v(ALIASES),match(v(ALIASES),* [first(%q0,|)],|),1,|))),setq(0,))]
+&_FLOOR Panel Parent=$* floor:@tr me/[u(USEMSG,%#)][switch(match(v(ALIASES),* %0,|),0,u(FAILMSG,%#)NULL,switch(v(QUEUED),0,set(me,QUEUED:1)MOVE,NULL)[set(me,DESTS:[v(DESTS)] [first(extract(v(ALIASES),#$,1,|))])][u(SUCCMSG,%#)])]
+&USEMSG Panel Parent=lemit(name(%0) taps a button on the [lcstr(name(me))].
+&FAILMSG Panel Parent=lemit(The [lcstr(name(me))] squawks in error.)
+&SUCCMSG Panel Parent=lemit(The [lcstr(name(me))] chirps in acknowledgement.)
+@AHEAR Panel Parent=@tr me/[u(PARSE,secure(%1))][switch(t(words(%q0)),0,NULL,switch(v(QUEUED),0,set(me,QUEUED:1)MOVE,NULL)[set(me,DESTS:[v(DESTS)] %q1)][u(SUCCMSG,%#)])]
+@LISTEN Panel Parent=* says, "*"
+&FLOOR Panel Parent=1
+&_DECK Panel Parent=$* deck:@tr me/[u(USEMSG,%#)][switch(match(v(ALIASES),* %0,|),0,u(FAILMSG,%#)NULL,switch(v(QUEUED),0,set(me,QUEUED:1)MOVE,NULL)[set(me,DESTS:[v(DESTS)] [first(extract(v(ALIASES),#$,1,|))])][u(SUCCMSG,%#)])]
+&_LEVEL Panel Parent=$* level:@tr me/[u(USEMSG,%#)][switch(match(v(ALIASES),* %0,|),0,u(FAILMSG,%#)NULL,switch(v(QUEUED),0,set(me,QUEUED:1)MOVE,NULL)[set(me,DESTS:[v(DESTS)] [first(extract(v(ALIASES),#$,1,|))])][u(SUCCMSG,%#)])]
+&DECK Panel Parent=$deck *:@tr me/[u(USEMSG,%#)][switch(match(v(ALIASES),* %0,|),0,u(FAILMSG,%#)NULL,switch(v(QUEUED),0,set(me,QUEUED:1)MOVE,NULL)[set(me,DESTS:[v(DESTS)] [first(extract(v(ALIASES),#$,1,|))])][u(SUCCMSG,%#)])]
+@DESCRIBE Panel Parent=%R[ansi(bh,%B %B %B Level: %BDestination:)]%R[iter(v(IN),switch(v(FLOOR),#@,--->,%B %B%B)[mid(rjust(rest(extract(v(ALIASES),match(v(ALIASES),#@ *,|),1,|)),8),0,8)] %B[switch(hasattr(me,NAME.#@),1,eval(me,NAME.#@),name(home(##)))]%R, ,)][ansi(bh,The turbolift [switch(lock(v(OUT)),*UNLOCKED*,is not,is)] moving.)]
+&OPEN Panel Parent=1
+&ALIASES Panel Parent=1 1|2 2|3 3
+&LOCKUP Panel Parent=setq(9,lock(v(OUT),%0)[lock(u(INDBREF),%0)])
+&WAITTIME Panel Parent=10
+&OPENTIME Panel Parent=5
+&QUEUED Panel Parent=0
+&EMSG Panel Parent=remit(home(v(OUT)),%0)[remit(home(u(INDBREF)),%0)]
+&INDBREF Panel Parent=extract(v(IN),v(FLOOR),1)
+@MOVE Panel Parent=@switch strcat(v(OPEN),t(match(v(DESTS),v(FLOOR))),strmatch(lock(v(OUT)),LOCK/1),t(words(v(DESTS))))=1*,{@wait v(OPENTIME)=@tr me/MOVE[set(me,OPEN:0)][u(EMSG,The turbolift's doors close.)]},011?,{@remit home(v(OUT))=[u(LOCKUP,)]The turbolift slows to a stop.},01??,{@tr me/MOVE[set(me,OPEN:1)][set(me,DESTS:[remove(v(DESTS),v(FLOOR))])][u(EMSG,The turoblift's doors open.)]},0001,{@remit home(v(OUT))=[u(LOCKUP,LOCK/1)]The turbolift starts to move.},00?1,{@wait v(WAITTIME)=@tr me/MOVE[set(me,FLOOR:[sub(v(FLOOR),comp(v(FLOOR),first(v(DESTS))))])][link(v(OUT),home(u(INDBREF)))]},{think [set(me,QUEUED:0)][u(LOCKUP,)]}
+&LEVEL Panel Parent=$level *:@tr me/[u(USEMSG,%#)][switch(match(v(ALIASES),* %0,|),0,u(FAILMSG,%#)NULL,switch(v(QUEUED),0,set(me,QUEUED:1)MOVE,NULL)[set(me,DESTS:[v(DESTS)] [first(extract(v(ALIASES),#$,1,|))])][u(SUCCMSG,%#)])]
+
+@create Enter Parent
+@link Enter Parent = #11938
+@chzone Enter Parent = #4730
+@set Enter Parent = LINK_OK
+@set Enter Parent = VISUAL
+@set Enter Parent = NO_COMMAND
+@ASUCCESS Enter Parent=@tr v(PANEL)/[switch(get(v(PANEL)/QUEUED),1,NULL,set(v(PANEL),QUEUED:1)MOVE)]
+@AFAILURE Enter Parent=@tr v(PANEL)/[switch(get(v(PANEL)/QUEUED),0,set(v(PANEL),QUEUED:1)MOVE,NULL)][set(v(PANEL),DESTS: [match(get(v(PANEL)/IN),%!)])]
+@ODROP Enter Parent=quickly enters the turbolift.
+@OSUCCESS Enter Parent=quickly enters the turbolift.
+@SUCCESS Enter Parent=switch(get(v(PANEL)/OPEN),0,u(v(PANEL)/EMSG,The turbolift's doors open.))You enter the turbolift.
+@OFAILURE Enter Parent=waits near the turbolift door.
+@FAILURE Enter Parent=You walk towards the turbolift door and await its arrival.
+&LOCK Enter Parent=and(strmatch(match(get(v(PANEL)/IN),%!),get(v(PANEL)/FLOOR)),strmatch(*UNLOCKED*,lock(me)))
+
+@create Exit Parent
+@link Exit Parent = #11938
+@chzone Exit Parent = #4730
+@set Exit Parent = LINK_OK
+@set Exit Parent = VISUAL
+@set Exit Parent = NO_COMMAND
+@ASUCCESS Exit Parent=@tr v(PANEL)/[switch(get(v(PANEL)/QUEUED),1,NULL,set(v(PANEL),QUEUED:1)MOVE)]
+@ODROP Exit Parent=quickly departs the turbolift.
+@OSUCCESS Exit Parent=quickly departs the turbolift.
+@OFAILURE Exit Parent=steps closer to the exit.
+@SUCCESS Exit Parent=switch(get(v(PANEL)/OPEN),0,u(v(PANEL)/EMSG,The turbolift's doors open.)[set(v(PANEL),OPEN:1)])You exit the turbolift.
+@FAILURE Exit Parent=You walk toward the exit, but it fails to open.
+&LOCK Exit Parent=strmatch(*UNLOCKED*,lock(me))

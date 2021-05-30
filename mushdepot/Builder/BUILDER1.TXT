@@ -1,0 +1,72 @@
+Jesse_Krug's builder(#108629I)
+Type: THING Flags: INHERIT
+Just type (exit abbrev)>>(name of new room), where exit abbrev is n,s,w,e,nw,
+ne,sw,se,u, or d, and the room will be created with forward and backward exits,
+and succ, osucc, and odrop messages set on both exits.%rFeel free to modify
+exit names and success messages, or even add your own, just model after the
+ones that are already there.  All that needs to be set are an attribute for the
+names of the two exits (i.e.: N:north;n south;s), and an attribute for the
+success messages.%r%rNOTE: This object is (initially) set sticky and will go to
+room #0 if you drop it.%r%rPlease talk to Shiala if you find any bugs or have
+any comments.
+Owner: Jesse_Krug  Key: Jesse_Krug(#108636Pc) Pennies: 1
+BUILD:$*>>*:@force [owner(me)]=@dig %1={[escape(first(get(builder/%0)))]},{
+[escape(rest(get(builder/%0)))]};@trigger me/%0msgs
+N:north;n south;s
+NMSGS:@force [owner(me)]={@succ north=You walk north.;@osucc north=walks
+north.;@odrop north=arrives from the south.;north;@succ south=You walk south.;
+@osucc south=walks south.;@odrop south=arrives from the north.}
+S:south;s north;n
+W:west;w east;e
+E:east;e west;w
+U:up;u down;d
+D:down;d up;u
+SMSGS:@force [owner(me)]={@succ south=You walk south.;@osucc south=walks
+south.;@odrop south=arrives from the north.;south;@succ north=You walk north.;
+@osucc north=walks north.;@odrop north=arrives from the south.}
+WMSGS:@force [owner(me)]={@succ west=You walk west.;@osucc west=walks west.;
+@odrop west=arrives from the east.;west;@succ east=You walk east.;@osucc east=
+walks east.;@odrop east=arrives from the west.}
+EMSGS:@force [owner(me)]={@succ east=You walk east.;@osucc east=walks east.;
+@odrop east=arrives from the west.;east;@succ west=You walk west.;@osucc west=
+walks west.;@odrop west=arrives from the east.}
+UMSGS:@force [owner(me)]={@succ up=You climb up the stairway.;@osucc up=climbs
+up the stairway.;@odrop up=arrives from below.;up;@succ down=You climb down the
+stairway.;@osucc down=climbs down the stairway.;@odrop down=arrives from
+above.}
+DMSGS:@force [owner(me)]={@succ down=You climb down the stairway.;@osucc down=
+climbs down the stairway.;@odrop down=arrives from above.;down;@succ up=You
+climb up the stairway.;@osucc up=climbs up the stairway.;@odrop up=arrives from
+below.}
+NW:northwest;nw southeast;se
+NE:northeast;ne southwest;sw
+SW:southwest;sw northeast;ne
+SE:southeast;se northwest;nw
+NWMSGS:@force [owner(me)]={@succ northwest=You walk northwest.;@osucc northwest
+=walks northwest.;@odrop northwest=arrives from the southeast.;northwest;@succ
+southeast=You walk southeast.;@osucc southeast=walks southeast.;@odrop
+southeast=arrives from the northwest.}
+NEMSGS:@force [owner(me)]={@succ northeast=You walk northeast.;@osucc northeast
+=walks northeast.;@odrop northeast=arrives from the southwest.;northeast;@succ
+southwest=You walk southwest.;@osucc southwest=walks southwest.;@odrop
+southwest=arrives from the northeast.}
+SWMSGS:@force [owner(me)]={@succ southwest=You walk southwest.;@osucc southwest
+=walks southwest.;@odrop southwest=arrives from the northeast.;southwest;@succ
+northeast=You walk northeast.;@osucc northeast=walks northeast.;@odrop
+northeast=arrives from the southwest.}
+SEMSGS:@force [owner(me)]={@succ southeast=You walk southeast.;@osucc southeast
+=walks southeast.;@odrop southeast=arrives from the northwest.;southeast;@succ
+northwest=You walk northwest.;@osucc northwest=walks northwest.;@odrop
+northwest=arrives from the southeast.}
+Succ:Before using this object you must first type the following commands:%r
+@chown [num(me)]=me%r@set [num(me)]=!halted%r@set [num(me)]=inherit%r@lock/use
+[num(me)]=me%r%rThen LOOK at it for instructions.
+Aclone:&owner me=[get(#48891/vt)];@lock me=*[v(owner)];@name me=[v(owner)]'s
+builder;@link me=#0;@set me=chown_ok;@set me=sticky;@pemit [v(owner)]=Your
+builder has been created.  Please type `get [num(me)]'
+OWNER:Jesse_Krug
+UseLock:Jesse_Krug(#108636Pc)
+No exits.
+Home: Jesse_Krug(#108636Pc)
+Location: T/D Room(#108627RFJ)
+_______________________________________________________________________________

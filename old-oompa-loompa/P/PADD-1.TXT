@@ -1,0 +1,20 @@
+@create Prototype PADD
+@link Prototype PADD = [owner(me)]
+@lock/Enter Prototype PADD==[owner(me)]
+@lock Prototype PADD==[owner(me)]
+@set Prototype PADD=INHERIT
+@set Prototype PADD=QUIET
+@set Prototype PADD=WIZARD
+@set Prototype PADD=SAFE
+@set Prototype PADD=!NO_COMMAND
+&CMD-OOCMAIL Prototype PADD=$oocmail *=*/*:@dol [setunion(u(playerlist,%0),)]=@force *[name(owner(me))]=@mail ##=OOC Mail From [name(owner(me))]/%[ansi(hb,%[ljust(To,7)])]: [class(*##)] [name(*##)]%r%[ansi(hb,%[ljust(Subject,7)])]: %1%r%r%2%r%r%[ansi(hr,This @mail is considered OOC, and is not to be used in a IC manner.)]%r%[ansi(c,CC)]: [setdiff(setunion(u(playerlist,%0),),##)][switch(hasattr([num(me)],line1),1,%r%r[u(line1)])][switch(hasattr([num(me)],line2),1,%r[u(line2)])][switch(hasattr([num(me)],line3),1,%r[u(line3)])];@pemit [owner(me)]=[ansi(hb,[name(me)])]: OOC Mail has been sent to %0.
+&CMD-PHELP Prototype PADD=$phelp:@pemit/silent %#=[u(line)]%r[ansi(hy,[center(PADD Help For [name(me)],79)])]%r[u(line)]%r[ansi(hr,[ljust(PMAIL <player list>=<subject>/<message>,40)])] -- @mail's Everyone on <player list>%r[repeat(%b,44)]with <subject>/<message>.%r[ljust([ansi(hr,OOCMAIL <p-list>=<subect>/<message>)],40)] -- Same as PMAIL only OOCly.%r
+&CMD-INSTALL Prototype PADD=$pinstall:@switch [u(installed)]=no,{@cpattr [parent(me)]/line1=[num(me)];@lock [num(me)]==[owner(me)];@lock/enter [num(me)]==[owner(me)];@lock/use [num(me)]==me;@pemit/silent %#=[ansi(hb,[name(me)])]: PADD Installed. Type `phelp' For Instructions.;&installed me=yes},yes,{[ansi(hb,[name(me)])]: PADD Has Already Been Installed!}
+@DESCRIBE Prototype PADD=This is a prototype PADD.%rType `[ansi(hy,phelp)]' for instructions.
+&CMD-PMAIL Prototype PADD=$pmail *=*/*:@dolist [setunion(u(playerlist,%0),)]=@force *[name(owner(me))]=@mail ##=%1/%[ansi(hb,%[ljust(To,7)])]: [class(*##)] [name(*##)]%r%[ansi(hb,%[ljust(Subject,7)])]: %1%r%[ansi(hb,%[ljust(Time,7)])]: [time()]%r%r%2%r%r%[ansi(c,CC)]: [setdiff(setunion(u(playerlist,%0),),##)][switch(hasattr([num(me)],line1),1,%r%r[u(line1)])][switch(hasattr([num(me)],line2),1,%r[u(line2)])][switch(hasattr([num(me)],line3),1,%r[u(line3)])];@pemit [owner(me)]=[ansi(hb,[name(me)])]: Message(s) sent to %0.
+&LINE1 Prototype PADD=[class(owner(me))] [name(owner(me))]
+&INSTALLED Prototype PADD=no
+&PLAYERLIST Prototype PADD=[iter(%0,switch(num(*##),#-1,,[name(*##)]))]
+&LINE Prototype PADD=[ansi(c,[repeat(=,79)])]
+&CREDITS Prototype PADD=Believed to be made a long time ago by someone called Norbert Hudson@Future TrekMUSH during his early days and the code is believed to be old and ugly
+@set Prototype PADD/CREDITS=visual no_command

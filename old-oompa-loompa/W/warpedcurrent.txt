@@ -1,0 +1,293 @@
+@@ WARNING!!!
+@@ This installation script writes and wipes one attribute
+@@ to and from your character.
+@@
+@@ Specifically, it will write and wipe the following attribute.
+@@
+@@ &~
+@@
+@@ END WARNING
+@@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@
+@@ BEGIN REQUIREMENTS
+@@
+@@ Written for PennMUSH 1.7.4 or higher only.
+@@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@
+@@ BEGIN SCRIPT
+@@
+@pemit/silent %#=~ Preparing to install...
+@@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@
+@@ Prepare Objects
+@@
+@pemit/silent %#=~ Creating first object...
+@@
+@set me=~:[create(CMND,10)]
+@@
+@pemit/silent %#=~ Muffling Installation.
+@set me=QUIET
+@@
+@@ ~
+@@
+@pemit/silent %#=~ Creating two more objects for installation process...
+@@
+@set [v(~)]=~:[create(FUNC,10)]
+@set [v(~)]=~~:[create(DATA,10)]
+@@
+@parent [v(~)]=[get(v(~)/~)]
+@parent [get(v(~)/~)]=[get(v(~)/~~)]
+@@
+@describe [v(~)]=Installer
+@describe [get(v(~)/~)]=Functions
+@describe [get(v(~)/~~)]=Database
+@@
+@@ ~
+@set [v(~)]=SAFE
+@set [get(v(~)/~)]=SAFE
+@set [get(v(~)/~~)]=SAFE
+@@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@
+@@ Configure Installion References
+@@
+@pemit/silent %#=~ Configuring Installer...
+@@
+&~.VERSION [v(~)]=0.02
+@set [v(~)]=~.INDATE:[ifelse(isnum(convtime(ctime(v(~)))),ctime(v(~)),time())]
+@@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@
+@@ Setup Sequencers.
+@@
+@@ Check for existing installation.
+@@
+&i.0 [v(~)]=@switch [isdbref(~())]=0,{@tr me/i.2=2,1},@tr me/I.1
+@@
+@@ Check version.
+@@
+&i.1 [v(~)]=@switch [~(version)]=<[v(~.version)],{@tr me/I.2=1,1},{@tr me/I.2=0,1}
+@@
+@@ Process Sequence Trigger
+@@
+@@ %0 == 0, Abort
+@@ %0 == 1, Upgrade
+@@ %0 == 2, Install
+@@
+&i.2 [v(~)]=@dol [lattr(me/I.%0.%1.*)]=@wait #@=@tr me/##
+@@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@
+@@ Setup Process Sequences
+@@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@
+@@ 010 Abort Sequence
+@@
+&i.0.1.0 [v(~)]=@pemit/silent [owner(me)]=~ Current ~\(\) is either up-to-date or incompatible.%r~ Aborting...
+&i.0.1.1 [v(~)]=@pemit/silent [owner(me)]=~ Recycling installation objects...
+&i.0.1.2 [v(~)]=@dol %! [v(~)] [v(~~)]={@set ##=!SAFE}
+&i.0.1.3 [v(~)]=@wait 3={@pemit [owner(me)]=~ Done.}
+&i.0.1.4 [v(~)]=@dol %! [v(~)] [v(~~)]={@rec ##;@rec ##}
+@@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@
+@@ 110 Upgrade Sequence
+@@
+@@ Set upgrade attribute lists.
+@@
+&I.LIST.UPG.0 [v(~)]=
+&I.LIST.UPG.1 [v(~)]=
+&I.LIST.UPG.2 [v(~)]=
+@@
+@@ ~
+@@
+@@ Setup Upgrade Triggers
+@@
+&I.TRIG.MV.0123 [v(~)]=@mvattr %0/%1=%2/%3
+&I.TRIG.DOL.UPG [v(~)]=@dol [v(I.LIST.UPG.%0)]={@tr me/I.TRIG.0123=me,##,[~(%0)],##}
+@@
+@@ ~
+@@ Perform Upgrade...
+@@
+&i.1.1.0 [v(~)]=@pemit/silent [owner(me)]=~ Upgrading current installation...
+&i.1.1.1 [v(~)]=@dol [lnum(3)]={@tr me/TR_DOL.UPG=##}
+&i.1.1.2 [v(~)]=@pemit/silent [owner(me)]=~ Updating [~(0)]...
+&i.1.1.3 [v(~)]=@pemit/silent [owner(me)]=~ Updating [~(1)]...
+&i.1.1.4 [v(~)]=@pemit/silent [owner(me)]=~ Updating [~(2)]...
+@@
+&i.1.1.9 [v(~)]=@dol [rest(lattr(me/I.0.1.*))]={@wait #@={@tr me/##}}
+@@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@
+@@ 200 Install Sequence
+@@
+@@ 210 Setup Self-registration of WARPEDcore.
+@@
+&i.2.1.0 [v(~)]=@pemit/silent [owner(me)]=~ Starting Installation Process...
+&i.2.1.1 [v(~)]=@set [parent(v(~))]=DB_~:[v(~)]
+&i.2.1.2 [v(~)]=@set [parent(v(~))]=DB_WARPEDCORE:[v(~)]
+&i.2.1.3 [v(~)]=@set [v(~)]=~.VERSION:[v(~.VERSION)]
+&i.2.1.4 [v(~)]=@set [v(~)]=~.INDATE:[v(~.INDATE)]
+&i.2.1.5 [v(~)]=@set [v(~)]=~.UPDATE:[v(~.INDATE)]
+@@
+&i.2.1.9 [v(~)]=@tr me/i.2=2,2
+@@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@
+@@ Pre-Setup the core ~functions.
+@@
+@@ ~
+@@
+@@ Pre-Setup ~().
+@@
+&I.FN_~ [v(~)]=[ifelse(lmath(and,iter(lnum(1,9),not(v(itext(0))))),switch(lcstr(%0),,%!,version,v(~.VERSION),indate,v(~.INDATE),update,v(~.UPDATE),#-1 Invalid input.),#-1 FUNCTION \(~\) EXPECTS 0 OR 1 ARGUMENTS.)]
+@@
+&I.FR_~ [v(~)]=admin
+@@
+@@ ~
+@@
+@@ Pre-Setup ~db().
+@@
+&I.FN_~DB [v(~)]=[ifelse(lmath(and,t(%0) [iter(lnum(2,9),not(t(v(itext(0)))))]),ifelse(v(DB_%0),ifelse(and(t(%1),not(isint(%1))),#-1 Integer expected.,elements(v(DB_%0),ifelse(t(%1),%1,1))),#-1 No match.),#-1 FUNCTION \(~DB\) EXPECTS 1 OR 2 ARGUMENTS)]
+@@
+&I.FR_~DB [v(~)]=admin
+@@
+@@ ~
+@@
+@@ Pre-Setup ~ldb().
+@@
+&I.FN_~LDB [v(~)]=[ifelse(lmath(and,t(%0) [iter(lnum(1\,9),not(t(v(itext(0)))))]),ifelse(v(DB_%0),v(DB_%0),#-1 No match.),#-1 FUNCTION \(~LDB\) EXPECTS 1 ARGUMENT.)]
+@@
+&I.FR ~DB [v(~)]=admin
+@@
+@@ ~
+@@
+@@ Pre-Setup @function Processing
+@@
+&TRIG.FN_X0_X1_X2 [v(~)]=@function %0=%1,%2
+&TRIG.FN-RESTRICT_X0_X1 [v(~)]=@function/restrict %0=%1
+@@
+&TRIG.DOL.FN_X [v(~)]=@dol [lattr(%0/FN_*)]={@tr me/TRIG.FN_X0_X1_X2=[after(##,FN_)],%0,##}
+&TRIG.DOL.FR_X [v(~)]=@dol [lattr(%0/FR_*)]={@tr me/TRIG.FN-RESTRICT_X0_X1=[after(##,FR_)],[v(##)]}
+@@
+@@ ~
+@@
+@@ Pre-Setup Startup Processing
+@@
+&st [v(~)]=@dol [lattr(me/ST_*)]=@wait [dec(#@)]=@tr me/##
+&st_00 [v(~)]=@dol [lattr(last(me)/FN_*)]={@tr me/TRIG.FN_X0-X1-X2=[after(##,FN_)],[num(me)],##}
+&st_01 [v(~)]=@dol [lattr(~(2)/FR_*)]={@tr me/TRIG.FN-RESTRICT_X0_X1=[after(##,FR_)],[v(##)]}
+&st_10 [v(~)]=@dol [lattr(~(2)/DB_MORT_FUNC ROY_FUNC WIZ_FUNC={@tr me/TRIG.DOL.FN_X=[~db(##)]}
+&st_11 [v(~)]=@dol MORT_FUNC
+@@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@
+@@ 220 Setup @function and Startup
+@@
+&i.2.2.0 [v(~)]=@pemit/silent [owner(me)]=~ Setting up startup...
+&i.2.2.1 [v(~)]=@dol ~ ~DB ~LDB=@mvattr me/FN_##=[v(~)]
+&i.2.2.2 [v(~)]=@dol ~ ~DB ~LDB=@mvattr me/FR_##=[v(~)]
+&i.2.2.3 [v(~)]=@dol FN_X0_X1_X2 FN-RESTRICT_X0_X1=@mvattr me/TRIG.##=[v(~)]
+&i.2.2.4 [v(~)]=@dol DOL.FN_X DOL.FR_X=@mvattr me/TRIG.##=[v(~)]
+&i.2.2.5 [v(~)]=@dol [lattr(me/ST*)]=@mvattr me/##=[v(~)]
+@@
+&i.2.2.9 [v(~)]=@tr me/i.2=2,3
+@@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@
+@@ 230 Other Objects Creation Sequence
+@@
+&i.2.3.0 [v(~)]=@pemit/silent [owner(me)]=~ Creating globals objects...
+@@
+@@ ~
+@@ Globals
+@@
+&i.2.3.1 [v(~)]=@dol MORT_CMND_FOR_MORT ROY_CMND_FOR_MORT WIZ_CMND_FOR_MORT MORT_CMND_FOR_ROY ROY_CMND_FOR_ROY WIZ_CMND_FOR_ROY MORT_CMND_FOR_WIZ ROY_CMND_FOR_WIZ WIZ_CMND_FOR_WIZ=@SET [v(~~)]=DB_##:[create(##,10)]
+@@
+@@ ~
+@@
+@@ @functions
+@@
+&i.2.3.2 [v(~)]=@pemit/silent [owner(me)]=~ Creating @functions objects...
+@@
+&i.2.3.3 [v(~)]=@dol MORT_FUNC ROY_FUNC WIZ_FUNC=@set [v(~~)]=DB_##:[create(##,10)]
+@@
+@@ ~
+@@
+@@ Parents
+@@
+&i.2.3.4 [v(~)]=@pemit/silent [owner(me)]=~ Creating parents...
+@@
+&i.2.3.5 [v(~)]=@dol [setdiff(lattr(v(~~)/DB_*),DB_~)]=@parent [get(v(~~)/##)]=[create([rest(##,_)]_PARENT,10)]
+&i.2.3.6 [v(~)]=@dol [lattr(v(~~)/DB_*)]=@link [parent(get(v(~~)/##))]=[get(v(~~)/##)]
+@@
+&i.2.3.9 [v(~)]=@tr me/I.2=2,4
+@@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@
+@@ 240 Storage Sequence
+@@
+&i.2.4.0 [v(~)]=@pemit/silent [owner(me)]=~ Storing Objects...
+@@
+&i.2.4.1 [v(~)]=@dol [setdiff(lattr(v(~~)/DB_*),DB_~)]=@tel [parent(get(v(~)/##))]=[get(v(~)/##)]
+&i.2.4.2 [v(~)]=@dol [setdiff(lattr(v(~~)/DB_*),DB_~ DB_WARPEDCORE [lattr(v(~~)/DB_*CMND*)])]=@tel [get(v(~~)/##)]=[v(~)]
+&i.2.4.3 [v(~)]=@dol [lattr(v(~~)/DB_*CMND*)]=@tel [get(v(~~)/##)]=[config(master_room)]
+@@
+&i.2.4.9 [v(~)]=@tr me/i.2=2,5
+@@ ~
+@@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@
+@@ Convert Installer to Command Object
+@@
+@@ Setup $commands
+@@
+&CMND.~ [v(~)]=$~:@pemit %#=[u(UFUN.~)]
+&CMND.~ls [v(~)]=$~ls:@pemit %#=[u(UFUN.~LS)]
+&CMND.~ls_x [v(~)]=$~ls *:@pemit %#=[u(UFUN.~LS_X,%0)]
+@@
+@@ ~
+@@
+@@ Pre-Setup ufuns
+@@
+&UFUN.~ [v(~)]=Write this function.
+&UFUN.~LS [v(~)]=Write this function.
+&UFUN.~LS_X [v(~)]=Write this function.
+@@
+@@ ~
+@@ Pre-Setup usage lock
+@@
+&LOCK.USE [v(~)]=[orflags(%#,Wr)]
+@@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@
+@@ 250 Conversion to Command Object Sequence
+@@
+&i.2.5.0 [v(~)]=@pemit/silent [owner(me)]=~ Converting Installer into Global WARPEDcore Command Object...
+@@
+&i.2.5.1 [v(~)]=@parent me=[v(~)]
+&i.2.5.2 [v(~)]=@dol [lattr(me/UFUN.*)] [lattr(me/LOCK.*)]=@mvattr me/##=[last(lparent(me))]
+&i.2.5.3 [v(~)]=@set me=!NO_COMMAND
+@@
+&i.2.5.9 [v(~)]=@tr me/I.2=2,6
+@@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@
+@@ Installation Testing Sequence
+@@
+&i.2.6.0 [v(~)]=@pemit/silent [owner(me)]=~ Testing installation...
+&i.2.6.1 [v(~)]=
+@@ 
+@@
+@lock/use [v(~)]=LOCK.USE/1
+@set [v(~)]=ROYALTY
+@power [get(v(~)/~)]=functions
+@@
+@pemit/silent %#=~ Installer Configured.
+@@
+@@
+@@ The end.

@@ -1,0 +1,12 @@
+@create PARENT: Guest Book
+@Desc PARENT: Guest Book=This is just a little device for us to find out where people are coming from and how they are finding out about the MUX. You can put in [ansi(ncX,your Email address)] if you want, as well as a message about how you found us. Thanks a lot.
+@Adesc PARENT: Guest Book=@pemit %#=%r+sign book <message> - Signs the book where <message> is any text you may want to leave us, including your Email address, if you like.
+&SIGNBOOK PARENT: Guest Book=$+sign book *:@edit me/visitors=$,{%r%r[time()] from [get(%#/lastsite)]%r--%0--};@pemit %#=Thank you for signing the guest book!
+&VISITORS PARENT: Guest Book=Visitors
+&DISPLAY PARENT: Guest Book=$+display:[ifelse(or(hasflag(%#,WIZARD),hasflag(%#,IMMORTAL)),pemit(%#,%r[ansi(ngX,Visitor List)]%r[get(#795/visitors)]%r),Permission Denied)]
+@set PARENT: Guest Book=DARK
+@set PARENT: Guest Book=STICKY
+@set PARENT: Guest Book=VISUAL
+@set PARENT: Guest Book=PARENT_OK
+@set PARENT: Guest Book=HALT
+@set PARENT: Guest Book=SAFE

@@ -1,0 +1,136 @@
+#####################################################################
+#			DETERIORATION                               #
+#                                                                   #
+# This system handles both the depletion rate of supplies for the   #
+# representatives in the economic system as well as the             #
+# deterioration of various things in the players' possession.       #
+#####################################################################
+
+################### DEPLETION ################################
+# Where #99 is the economic command object
+#
+# These depletion triggers are all fed a representatives dbref
+# one at a time:
+#  %0 = representatives dbref
+#  %1 = list of accounts of that representative
+
+#--------------------------------------------------------------#
+#                      TRIG-DEPLETE-FOOD                       #
+# %0 = Rep Dbref                                               #
+#--------------------------------------------------------------#
+
+&trig-deplete-food #99=
+
+# %q0 = a shuffled list of food accounts on the rep
+# %q1 = how many food units the rep must consume
+
+  think setq(0, laccounts(%0));
+  think setq(0, filter(filter-is-food, %q0));
+
+# Remove all the empty food accounts
+
+  think iter(%q0, switch(1, lte(getaccount(%0, ##), 0), ac_destroy(%0, ##)));
+
+# Make a new updated list
+  think setq(0, laccounts(%0));
+  think setq(0, filter(filter-is-food, %q0));
+  think setq(0, shuffle(%q0));
+
+  think setq(1, u(%0/u-how-much-i-eat));
+  
+  @fpose %0 =sits down to eat!;
+  @trig me/trig-reps-eat = %0, %q0, %q1
+-
+
+# %0 = dbref of the rep
+# %1 = list of food accounts to eat from
+# %2 = how much the rep needs to eat
+
+&trig-reps-eat #99=
+  
+  @switch [words(%1)]=
+     <1, {@@ Rep has no more food to eat @@;
+          @fpose %0 =leaves the table hungry.;
+          think ac_adjust(%0, food, -%2)},
+     
+#   So long as the rep still has more food to eat:
+#
+#     %q0 = the account to eat from
+#     %q1 = the remaining food accounts that the rep has
+#     %q2 = amount of the food account that the rep has
+#     %q3 = amount of food the rep should eat from the account
+#           (if, for example, the rep is hungry for 3 food units, 
+#            but the rep has 100 strawberries, the rep should eat 
+#            only 3 of the strawberries, but if the rep is hungry 
+#            for 200 strawberries, the rep should eat the 100 he 
+#            has)
+#     %q4 = how much food the rep will still need to eat after 
+#           eating from this account
+
+   {think setq(0, first(%1));
+    think setq(1, rest(%1));
+    think setq(2, getaccount(%0, %q0));
+    think setq(3, switch(1, lte(%q2, %2), %q2, %2));
+    think setq(4, sub(%2, %q3));
+    
+#   Have the rep eat the food
+    @fpose %0 =eats %q3 %q0!;
+    think ac_adjust(%0, %q0, -%q3);
+    
+#   Give the representative the energy from the food s/he ate
+#
+#      (I first try to adjust it, and if the rep doesn't have an energy 
+#       account, it'll give an error message.  Then I try to create it, 
+#       and if an energy account already exists it'll give an error
+#       message.  This method keeps me from having to switch on it.)
+
+    think ac_adjust(%0, energy, %q3);
+    think ac_energy(%0, energy, %q3);
+
+#   If the rep is full, stop the cycle.  If not, retrigger
+
+    @switch [lte(%q4, 0)]=
+       0, {@tr me/trig-reps-eat= %0, %q1, %q4},
+          {@fpose %0=is all full!}}
+
+-
+&fold-add-num #99=[add(%0, %1)]
+-
+
+
+#  %0 = representatives dbref
+#  %1 = list of accounts of that representative
+
+# Deplete each clothing account by the rate of usage on the rep
+
+&trig-deplete-clothing #99=
+ 
+ think setq(0, filter(filter-clothing, %1));
+ think iter(%q0, switch(1, 
+                  lt(getaccount(%0, ##), 1), pemit(%#, no ## to deplete), 
+                  ac_adjust(%0, 
+                            ##, 
+                            -[mul(getaccount(%0, ##), 
+                                  get(%0/clothing-depletion))])));
+
+
+
+-
+
+&trig-deplete-land #99=
+-
+
+&trig-deplete-tools #99=
+-
+
+&trig-deplete-weapons #99=
+-
+
+&trig-deplete-shelter #99=
+-
+
+&trig-deplete-containers #99=
+
+
+
+

@@ -1,0 +1,83 @@
+Laptop Computer(#30I)
+Type: THING Flags: INHERIT
+This is a small laptop computer from the looks of it. The lid is currently
+open, showing a colour crystal matrix screen. It is grey in color and looking
+to weigh 5 pounds. The keys are like a normal computer keyboard except maybe
+compacted. There are several noticeable ports in the back for added perpherials
+and a 3.5 slot for disks on one side. When you take a closer look, you see a
+small apple to one side, telling you this is a Macintrash.
+Owner: Armageddon  Key: Free Code Store(#349RF) Plocks: 10
+Zone: *NOTHING*
+Powers:
+LIST_FILES: $ls:@pemit %#=%rAvailable Files:%r[iter(lattr(me/f_[v(curr_dir)]
+_*),[delete(##,0,add(3,strlen(v(curr_dir))))]%r)]
+DELETE: $+rm *:@switch [hasattr(me,f_[v(curr_dir)]_%0)]=0,{@pemit %#=You can't
+delete something that isn't there. Check 'ls' to find the correct filename.},
+{@remit %1=[u(erase_msg)];&f_[v(curr_dir)]_%0 me=;&d_[v(curr_dir)] me=[remove
+(v(d_[v(curr_dir)]),%0)];@pemit %#=File %0 removed.}
+READ: $+cat *:@switch [hasattr(me,f_[v(curr_dir)]_%0)]=0,{@pemit %#=That is not
+a file in the current directory. Check 'ls' for the correct filename.},{@pemit
+%#=:: FILE %0 ::%r[s(v(f_[v(curr_dir)]_%0))]}
+MOVE_FILE: $+mv *=*:@switch [hasattr(me,f_[v(curr_dir)]_%0)]=0,{@pemit %#=That
+is not a file in the current directory: [v(curr_dir)]. Check 'ls' for correct
+filename},{@switch [member(v(d_%1),%1)]=0,{@pemit %#=That is not a directory.
+Please check '+dirs for correct directory name.},{&f_%1_%0 me=[u(f_[u
+(curr_dir)]_%0)];&f_[v(curr_dir)]_%0 me;@pemit %#=The file %0 has been moved to
+the %1 directory.}}
+D_MAIN: Main Directory
+DIR: $+dir:@pemit %#=%RAvailable Directories:%r[iter(lattr(me/d_*),[delete
+(##,0,2)]--[v(##)]%r)]
+CHGDIR: $+cd *:@switch words(lattr(me/d_%0))=0,@pemit %#=No such directory.,
+{&curr_dir me=[capstr(%0)]; @pemit %#=Current directory is now [capstr(%0)].}
+EDIT: $+ed *=*/*:@switch [hasattr(me,f_[v(curr_dir)]_%0)]=0,{@pemit %#=You
+can't revise something that isn't there. Check 'ls' to find the correct
+filename.},{{@emit %N rapidly hits the key on %p computer.};@edit me/f_[v
+(curr_dir)]_%0={%1},{%2}}
+MKDIR: $+mkdir *=*:&d_%0 me=%1;@pemit %#=Directory %0 made. Please make a note
+that it is NOT set as your current directory.
+HELP: $cmenu:@pemit %#=%t%t%t<*> Computer Menu <*>%r%r+pico%b<NEW FILE>%t%twill
+open a new file.%rsave file%t%t%twill close & save the the file made in pico.%r
++cat%b<FILE>%t%t%twill view FILE.%r+dir%t%t%t%twill show available directories.
+%r+cd%b<DIR>%t%t%twill change current directory to DIR%rls%t%t%t%twill list
+files in current directory.%r+ed%b<FILE>=<TEXTA>/<TEXTB>[space(4)]will replace
+TEXTA with TEXTB in FILE.%r+rm%b<FILE>%t%t%twill remove FILE in current
+directory.%r+mv%b<FILE>=<DIR>%t%twill move FILE in current directory to
+DIR.%r+mkdir%b<DIR>=<DESC>%t%twill make a new directory with small desc.%r
+credits%t%t%t%twho is responsible for this coding project.%r
+OPEN: $open lid:@switch [name(me)]=Laptop Computer(open),{@pemit %#=The lid is
+already open silly. You can't open it again.},{@remit rloc(me,2)=%N opens the
+lid to %p laptop.;@desc me=[get(me/Lid-up)];@name me=Laptop Computer(open)}
+LID-DOWN: This is a small laptop computer from the looks of it. Grey in color
+and looking to weigh around 6 pounds. There are several noticeable ports in the
+back for added perpherials and a 3.5 slot for disks on one side.
+LID-UP: This is a small laptop computer from the looks of it. The lid is
+currently open, showing a color crystal matrix screen. It is grey in color
+and looking to weigh 5 pounds. The keys are like a normal computer keyboard
+except maybe compacted. There are several noticeable ports in the back for
+added perpherials and a 3.5 slot for disks on one side. When you take a closer
+look, you see a small apple to one side, telling you this is a Macintrash.
+CLOSE: $close lid:@switch [name(me)]=Laptop Computer(open),{@remit rloc(me,2)=
+%N closes the lid to %p laptop.;@name me=[get(me/lid-down)];@name me=Laptop
+Computer},{@pemit %#=The lid is already down.}
+Adesc: @pemit %#=The current directory shown is:%b[get(me/curr_dir)]%rType
+'cmenu' for help.
+PICO: $+pico *:@switch hasattr(me,current_file)=1,{@pemit %#=You already have
+a file in process. Please continue with that, or close it and open another
+file.},{&f_[v(curr_dir)]_%0 me=>;@pemit %#=You may now enter text with the
+command: ''<text>'.;&current_file me=%0}
+CLOSE_FILE: $save file:@switch [v(current_file)]=0,{@pemit %#=There isn't a
+file in the making.},{@pemit %#=You close the file '[u(current_file)]'.;
+&current_file me=}
+APPEND: $'*:@switch hasattr(me,current_file)=1,{&f_[v(curr_dir)]_[v
+(current_file)] me=[get(me/f_[v(curr_dir)]_[v(current_file)])]%b%0;@pemit
+%#=Text added.},{@pemit %#=There isn't a file to append to.}
+Fail: This isn't yours so why are you trying to take it?
+Ofail: attempts to take a laptop, then decides against it.
+Succ: You take the laptop in your hands.
+Osucc: takes a laptop in %p hands.
+Drop: You set the laptop down in a careful place.
+Odrop: sets a laptop down in a secure place.
+No exits.
+Home: Armageddon(#182PXZc)
+Location: Armageddon's Office(#32RF)
+_______________________________________________________________________________

@@ -1,0 +1,310 @@
+@set me=quiet
+@switch [isdbref(num(Slot Machine Parent))]=0,{think [ansi(hm,INSTALL:)] No "Slot Machine Parent" object found -- creating...;@create Slot Machine Parent},1,{think [ansi(hm,INSTALL:)] "Slot Machine Parent" object already exists... skipping creation.}
+think [ansi(hm,INSTALL:)] Setting Slot Machine Flags...
+@set Slot Machine Parent=NO_COMMAND
+@set Slot Machine Parent=SAFE
+think [ansi(hm,INSTALL:)] Downloading Slot Machine Commands...
+&CMD_SLOT.HELP Slot Machine Parent=$slot/help:[pemit(%#,[ansi(v(FONT_HELP.Border),[repeat(-,78)]%r<<<<<)][ansi(v(FONT_HELP.Header),center(SLOT MACHINE -- HELP SECTION,68))][ansi(v(FONT_HELP.Border),>>>>>%r[repeat(-,78)])]%r[if(u(FUN_PLR.Auth,%#),\(Since you are an Admin\, you will want to do a '[ansi(v(FONT_HELP.Cmds),slot/setup)]' ONLY IF this is a new machine OR IF something seems to be broken.\)%r%r)]The Slot Machine (sometimes referred to as the One-Armed Bandit) is very easy to use. There is one main command '[ansi(v(FONT_HELP.Cmds),slot/pull <#>)]' -- where [ansi(v(FONT_HELP.Cmds),<#>)] is the number of 'credits' you want to use on that particular pull \(if none is specified, it defaults to 1\).%r%rThe number of credits specified must be between 1 and 3. To find out the value of a single credit\, type '[ansi(v(FONT_HELP.Cmds),look)]'.  The more credits you use\, the higher the payoffs will be IF you win.%r%rThe object is to match as many symbols in the MIDDLE row as possible. The more symbols you can match the more you will win. To see a list of payoffs\, type '[ansi(v(FONT_HELP.Cmds),slot/odds)]'.  The chart may seem a little hard to read at first\, but once you figure it out its setup will make sense.%r[ansi(v(FONT_HELP.Border),repeat(-,78))])]
+&CMD_SLOT.ODDS Slot Machine Parent=$slot/odds:[setq(0,revwords(munge(FUN_SORT.Nums,iter(setunion(v(DATA_WHEEL),),ifelse(words(v(DATA_WIN3.##)),last(v(DATA_WIN3.##)),0)),setunion(v(DATA_WHEEL),))))][pemit(%#,[ansi(v(FONT_ODDS.Border),[repeat(-,78)]%r<<<<<)][ansi(v(FONT_ODDS.Header),center(SLOT MACHINE -- ODDS,68))][ansi(v(FONT_ODDS.Border),>>>>>%r[repeat(-,78)])]%rThe following is a list of symbols for this machine. It also indicates the number of symbols per wheel \(if you are an Admin\)\, and the payoffs for various matches.%r%r[ansi(v(FONT_ODDS.Title),[space(16)][ansi(v(FONT_ODDS.Border),_____)][ansi(v(FONT_ODDS.Title),\[ 1 Credit \])][ansi(v(FONT_ODDS.Border),________)][ansi(v(FONT_ODDS.Title),\[ 2 Credits \])][ansi(v(FONT_ODDS.Border),________)][ansi(v(FONT_ODDS.Title),\[ 3 Credits \])][ansi(v(FONT_ODDS.Border),___)]%r%b%b%b%b[ansi(v(FONT_ODDS.Title),ljust(\[ Name \],11))][ansi(v(FONT_ODDS.Border),|)]%b%b[ansi(v(FONT_ODDS.Title),\(M1\)%b%b%b\(M2\)%b%b%b\(M3\))][ansi(v(FONT_ODDS.Border),|)]%b%b[ansi(v(FONT_ODDS.Title),\(M1\)%b%b%b\(M2\)%b%b%b\(M3\))][ansi(v(FONT_ODDS.Border),|)]%b%b[ansi(v(FONT_ODDS.TItle),\(M1\)%b%b%b\(M2\)%b%b%b\(M3\))][iter(%q0,%r[ifelse(u(FUN_PLR.Auth,%#),\([rjust(words(matchall(v(DATA_WHEEL),##)),2)]\),space(4))] [ljust(left(##,10),10)][ansi(v(FONT_ODDS.Border),|)][rjust(ifelse(words(v(DATA_WIN1.##)),extract(v(DATA_WIN1.##),1,1),0),6)] [rjust(ifelse(words(v(DATA_WIN2.##)),extract(v(DATA_WIN2.##),1,1),0),6)] [rjust(ifelse(words(v(DATA_WIN3.##)),extract(v(DATA_WIN3.##),1,1),0),6)][ansi(v(FONT_ODDS.Border),|)][rjust(ifelse(words(v(DATA_WIN1.##)),extract(v(DATA_WIN1.##),2,1),0),6)] [rjust(ifelse(words(v(DATA_WIN2.##)),extract(v(DATA_WIN2.##),2,1),0),6)] [rjust(ifelse(words(v(DATA_WIN3.##)),extract(v(DATA_WIN3.##),2,1),0),6)][ansi(v(FONT_ODDS.Border),|)][rjust(ifelse(words(v(DATA_WIN1.##)),extract(v(DATA_WIN1.##),3,1),0),6)] [rjust(ifelse(words(v(DATA_WIN2.##)),extract(v(DATA_WIN2.##),3,1),0),6)] [rjust(ifelse(words(v(DATA_WIN3.##)),extract(v(DATA_WIN3.##),3,1),0),6)])]%r%r[ansi(v(FONT_ODDS.Title),\(M1\))] - Match 1 Symbol [space(4)] [ansi(v(FONT_ODDS.Title),\(M2\))] - Match 2 Symbols [space(4)] [ansi(v(FONT_ODDS.Title),\(M3\))] - Match 3 Symbols)]
+&CMD_SLOT.PULL Slot Machine Parent=$slot/pull*:[switch([u(FLAG_BUSY)][u(FUN_PLR.Banned,%#)][u(FUN_PLR.Valid,%#)][u(FUN_SLOT.Valid,secure(%0))][u(FUN_ENOUGH.Money,%#,u(FUN_INPUT2SLOT,secure(%0)))][gt(trunc(v(DATA_SLOT.Money)),trunc(v(DATA_WIN3.[u(FUN_SYMBOL.Best)])))],1?????,u(TRI_ERROR,%#,BUSY),01????,u(TRI_ERROR,%#,PLR_BANNED),000???,u(TRI_ERROR,%#,PLR_!VALID),0010??,u(TRI_ERROR,%#,SLOT_!VALID),00110?,u(TRI_ERROR,%#,!ENOUGH_MONEY,u(FUN_INPUT2SLOT,secure(%0))),001110,u(TRI_ERROR,%#,SLOT_LOW),001111,u(TRI_SLOT.Pull,%#,u(FUN_INPUT2SLOT,secure(%0))),u(TRI_SYSERR,%#))]
+&CMD_SLOT.SETUP Slot Machine Parent=$slot/setup:[ifelse(u(FUN_PLR.Auth,%#),u(TRI_SLOT.Setup,%#),u(TRI_ERROR,%#,PLR_!AUTH))]
+&CMD_SLOT.COPYRIGHT Slot Machine Parent=$slot/copy*:[pemit(%#,Slot Machine v[v(DATA_VERSION)] - Created by: Demonic \(1999\)%rUpdated versions of this code can be found on:%r%b%bhttp://www.mindspring.com/~loparo)]
+think [ansi(hm,INSTALL:)] Downloading Slot Machine Configurations...
+&CNF_WIN.ONE Slot Machine Parent=1
+&CNF_WIN.TWO Slot Machine Parent=1
+think [ansi(hm,INSTALL:)] Downloading Slot Machine Data...
+&DATA_VERSION Slot Machine Parent=2.1
+&DATA_WIN2.TRISKELE Slot Machine Parent=8 15 20
+&DATA_WIN3.TRISKELE Slot Machine Parent=20 45 80
+&DATA_WIN3.TANK Slot Machine Parent=250 500 1000
+&DATA_WIN2.TANK Slot Machine Parent=30 60 100
+&DATA_WIN3.WW3 Slot Machine Parent=1250 2000 5000
+&DATA_WIN3.DOLLAR Slot Machine Parent=75 110 150
+&DATA_WIN3.HEART Slot Machine Parent=5 17 40
+&DATA_WIN3.CASTLE Slot Machine Parent=125 200 300
+&DATA_WIN3.YINYANG Slot Machine Parent=10 25 60
+&DATA_WIN3.BAR Slot Machine Parent=3 10 20
+&DATA_WIN3.SEVEN Slot Machine Parent=50 85 120
+&DATA_WIN3.CHECK Slot Machine Parent=2 6 15
+&DATA_WIN2.WW3 Slot Machine Parent=50 100 200
+&DATA_WIN2.DOLLAR Slot Machine Parent=15 35 60
+&DATA_WIN2.HEART Slot Machine Parent=2 5 8
+&DATA_WIN2.CASTLE Slot Machine Parent=20 45 75
+&DATA_WIN2.YINYANG Slot Machine Parent=4 8 14
+&DATA_WIN2.BAR Slot Machine Parent=.50 .75 1
+&DATA_WIN2.SEVEN Slot Machine Parent=10 22 40
+&DATA_WIN2.CHECK Slot Machine Parent=.25 .50 .75
+&DATA_WIN1.WW3 Slot Machine Parent=1 2 3
+&DATA_SLOT.MONEY Slot Machine Parent=1000000
+&DATA_SYMBOL.SOLOWIN Slot Machine Parent=ww3
+&DATA_WHEEL Slot Machine Parent=heart dollar bar dollar blank check check bar yinyang blank bar blank check heart ww3 castle bar heart blank check triskele castle blank heart heart bar blank check blank blank blank blank blank seven yinyang blank triskele heart check blank blank blank blank heart blank seven blank triskele check seven blank yinyang blank blank wild triskele dollar heart bar check triskele blank seven check seven blank bar check check blank blank check castle dollar blank castle heart blank blank yinyang heart blank blank triskele check blank wild blank triskele bar bar bar bar yinyang heart bar blank blank seven bar blank yinyang blank triskele dollar triskele blank blank yinyang check yinyang tank blank heart check yinyang blank yinyang check check heart bar dollar tank bar check seven yinyang
+&DATA_SYMBOL.WILD Slot Machine Parent=wild
+&DATA_SYMBOL.NULL Slot Machine Parent=blank
+&DATA_MONEY.NAME Slot Machine Parent=dollars
+&DATA_CREDIT.VALUE Slot Machine Parent=1
+think [ansi(hm,INSTALL:)] Downloading Slot Machine ASCII-Art...
+&DRAW_WILD.LINE14 Slot Machine Parent=[ansi(hg,[space(17)]|____/%b)]
+&DRAW_WILD.LINE13 Slot Machine Parent=[ansi(hg,[space(17)]|%b%b%b%b%b|)]
+&DRAW_WILD.LINE12 Slot Machine Parent=[ansi(hg,[space(17)]|%b%b_|%b|)]
+&DRAW_WILD.LINE11 Slot Machine Parent=[ansi(hc,[space(13)]|____|%b)][ansi(hg,_%b%B|)]
+&DRAW_WILD.LINE10 Slot Machine Parent=[ansi(hc,[space(13)]|%b|_)][ansi(hg,|%b%b%b%b\\%b)]
+&DRAW_WILD.LINE9 Slot Machine Parent=[ansi(hc,[space(13)]|%b|%b%b)][ansi(hg,____%b%b)]
+&DRAW_WILD.LINE8 Slot Machine Parent=[ansi(hy,[space(7)]|_______|[space(8)])]
+&DRAW_WILD.LINE7 Slot Machine Parent=[ansi(hy,[space(8)]__|%b|)][ansi(hc,|)][ansi(hy,_)][ansi(hc,|[space(8)])]
+&DRAW_WILD.LINE6 Slot Machine Parent=[ansi(hy,[space(10)]|%b|%b)][ansi(hc,_[space(9)])]
+&DRAW_WILD.LINE5 Slot Machine Parent=[ansi(hr,%b%b%b\\__/\\__/)][ansi(hy,%b|[space(11)])]
+&DRAW_WILD.LINE4 Slot Machine Parent=[ansi(hr,%b%b\\[space(8)]/%b)][ansi(hy,_|[space(9)])]
+&DRAW_WILD.LINE3 Slot Machine Parent=[ansi(hr,%b\\[space(10)]/)][ansi(hy,_[space(10)])]
+&DRAW_WILD.LINE2 Slot Machine Parent=[ansi(hr,\\%b%b%b\\/%b%b\\/%b%b%b/[space(10)])]
+&DRAW_WILD.LINE1 Slot Machine Parent=[ansi(hr,%b___%b%b__%b%b___[space(11)])]
+&DRAW_TANK.LINE14 Slot Machine Parent=[space(24)]
+&DRAW_TANK.LINE13 Slot Machine Parent=[space(24)]
+&DRAW_TANK.LINE12 Slot Machine Parent=[ansi(hx,%b%b%b~~~~~~~[space(7)]~~~~~~~)]
+&DRAW_TANK.LINE11 Slot Machine Parent=[ansi(hx,%b\\~~~\\____/[space(5)]\\---\\Oo_)]
+&DRAW_TANK.LINE10 Slot Machine Parent=[ansi(hx,\(===\([ansi(ng,\\_________)][ansi(hx,\(===\(Oo%bo)]
+&DRAW_TANK.LINE0 Slot Machine Parent=[ansi(hx,\(===\([ansi(g,\\_________)][ansi(hx,\(===\(Oo%bo)]
+&DRAW_TANK.LINE9 Slot Machine Parent=[ansi(g,/___________________/)][ansi(hx,O%b%b)]
+&DRAW_TANK.LINE8 Slot Machine Parent=[ansi(g,%b./---/__|=/_/------//~~)]
+&DRAW_TANK.LINE7 Slot Machine Parent=[ansi(g,[space(7)]/)][ansi(hx,\\%b\\)][ansi(g,%b%b%b/%b~~\\_[space(4)])]
+&DRAW_TANK.LINE6 Slot Machine Parent=[ansi(hx,[space(7)]\\%b\\)][ansi(g,--'---_[space(7)])]
+&DRAW_TANK.LINE5 Slot Machine Parent=[ansi(hx,[space(6)]\\%b\\%b%b\\o/[space(10)])]
+&DRAW_TANK.LINE4 Slot Machine Parent=[ansi(hx,[space(5)]\\%b\\[space(6)]p[space(9)])]
+&DRAW_TANK.LINE3 Slot Machine Parent=[ansi(h,%b%b%b\[%bO%b\][space(16)])]
+&DRAW_TANK.LINE2 Slot Machine Parent=[space(24)]
+&DRAW_TANK.LINE1 Slot Machine Parent=[space(24)]
+&DRAW_TRISKELE.LINE14 Slot Machine Parent=[space(24)]
+&DRAW_TRISKELE.LINE13 Slot Machine Parent=[ansi(hr,[space(7)]`-._____.-'[space(6)])]
+&DRAW_TRISKELE.LINE12 Slot Machine Parent=[ansi(h,/__,--'[space(7)]`--.____--)]
+&DRAW_TRISKELE.LINE11 Slot Machine Parent=[ansi(h,%b,-'%b%b%b___\\\\.//%b%b%b`-__[space(2)])]
+&DRAW_TRISKELE.LINE10 Slot Machine Parent=[ansi(h,[space(4)]-'%b%b%b\\\\%b%b%b//\\_%b)][ansi(hr,|[space(4)])]
+&DRAW_TRISKELE.LINE9 Slot Machine Parent=[ansi(hr,[space(5)]|)][ansi(h,__,\\[space(5)]/%b%b%b)][ansi(hr,|[space(4)])]
+&DRAW_TRISKELE.LINE8 Slot Machine Parent=[ansi(hr,[space(6)]/)][ansi(h,%b%b/[space(5)]\\)][ansi(hr,%b%b\\[space(5)])]
+&DRAW_TRISKELE.LINE7 Slot Machine Parent=[ansi(hr,[space(7)].-')][ansi(h,|%b%b%b|)][ansi(hr,`-.[space(6)])]
+&DRAW_TRISKELE.LINE6 Slot Machine Parent=[ansi(h,[space(10)]'%b%b%b`[space(9)])]
+&DRAW_TRISKELE.LINE5 Slot Machine Parent=[ansi(h,[space(11)]|%b|[space(10)])]
+&DRAW_TRISKELE.LINE4 Slot Machine Parent=[ansi(h,[space(11)]'%b`[space(10)])]
+&DRAW_TRISKELE.LINE3 Slot Machine Parent=[ansi(h,[space(12)]|[space(11)])]
+&DRAW_TRISKELE.LINE2 Slot Machine Parent=[ansi(h,[space(12)]|[space(11)])]
+&DRAW_TRISKELE.LINE1 Slot Machine Parent=[space(24)]
+&DRAW_WW3.LINE14 Slot Machine Parent=[ansi(hm,%b%b%b%b`\\_____________/'%b%b%b)]
+&DRAW_WW3.LINE13 Slot Machine Parent=[ansi(hm,%b%b%b`|[space(15)]|'%b%b)]
+&DRAW_WW3.LINE12 Slot Machine Parent=[ansi(hm,%b%b`|%b%b%b%b`\\_____/'%b%b%b%b|'%b)]
+&DRAW_WW3.LINE11 Slot Machine Parent=[ansi(hm,%b%b|%b%b%b%b`|[space(7)]|'[space(4)]|%b)]
+&DRAW_WW3.LINE10 Slot Machine Parent=[ansi(hm,%b%b%b_____[space(9)]|'%b%b%b|%b)]
+&DRAW_WW3.LINE9 Slot Machine Parent=[ansi(hm,[space(17)]|[space(4)]|%b)]
+&DRAW_WW3.LINE8 Slot Machine Parent=[ansi(hm,[space(11)]/____//%b%b%b%b\\%b)]
+&DRAW_WW3.LINE7 Slot Machine Parent=[ansi(hm,[space(12)]/[space(4)]/____%b%b)]
+&DRAW_WW3.LINE6 Slot Machine Parent=[ansi(hm,[space(13)]/[space(4)]/%b%b%b%b%b)]
+&DRAW_WW3.LINE5 Slot Machine Parent=[ansi(hm,[space(14)]/[space(4)]/%b%b%b%b)]
+&DRAW_WW3.LINE4 Slot Machine Parent=[ansi(hm,%b%b%b\\___________[space(5)]/%b%b%b)]
+&DRAW_WW3.LINE3 Slot Machine Parent=[ansi(hm,%b%b\\[space(18)]/%b%b)]
+&DRAW_WW3.LINE2 Slot Machine Parent=[ansi(hm,%b%b____________________%b%b)]
+&DRAW_WW3.LINE1 Slot Machine Parent=[ansi(hm,%b%bW%bO%bR%bL%bD[space(6)]W%bA%bR%b%b)]
+&DRAW_DOLLAR.LINE14 Slot Machine Parent=[ansi(hg,[space(11)]$$$$[space(9)])]
+&DRAW_DOLLAR.LINE13 Slot Machine Parent=[ansi(hg,[space(5)]$$$$$$$$$$$$$$%b%b%b%b%b)]
+&DRAW_DOLLAR.LINE12 Slot Machine Parent=[ansi(hg,[space(3)]$$$$$$$$$$$$$$$$$$%b%b%b)]
+&DRAW_DOLLAR.LINE11 Slot Machine Parent=[ansi(hg,[space(3)]$$$$%b%b%b%b$$$$%b%b%b$$$%b%b%b)]
+&DRAW_DOLLAR.LINE10 Slot Machine Parent=[ansi(hg,[space(11)]$$$$%b%b%b%b$$$%b%b)]
+&DRAW_DOLLAR.LINE9 Slot Machine Parent=[ansi(hg,[space(11)]$$$$%b%b%b$$$$%b%b)]
+&DRAW_DOLLAR.LINE8 Slot Machine Parent=[ansi(hg,[space(4)]$$$$$$$$$$$$$$$$$%b%b%b)]
+&DRAW_DOLLAR.LINE7 Slot Machine Parent=[ansi(hg,[space(4)]$$$$$$$$$$$$$$$$$%b%b%b)]
+&DRAW_DOLLAR.LINE6 Slot Machine Parent=[ansi(hg,[space(3)]$$$[space(5)]$$$$[space(9)])]
+&DRAW_DOLLAR.LINE5 Slot Machine Parent=[ansi(hg,[space(3)]$$$[space(5)]$$$$[space(9)])]
+&DRAW_DOLLAR.LINE4 Slot Machine Parent=[ansi(hg,[space(4)]$$$%b%b%b%b$$$$%b%b%b$$$$%b%b)]
+&DRAW_DOLLAR.LINE3 Slot Machine Parent=[ansi(hg,[space(4)]$$$$$$$$$$$$$$$$$%b%b%b)]
+&DRAW_DOLLAR.LINE2 Slot Machine Parent=[ansi(hg,[space(6)]$$$$$$$$$$$$$$%b%b%b%b)]
+&DRAW_DOLLAR.LINE1 Slot Machine Parent=[ansi(hg,[space(11)]$$$$[space(9)])]
+&DRAW_HEART.LINE14 Slot Machine Parent=[space(24)]
+&DRAW_HEART.LINE13 Slot Machine Parent=[space(24)]
+&DRAW_HEART.LINE12 Slot Machine Parent=[ansi(hr,[space(12)]".[space(10)])]
+&DRAW_HEART.LINE11 Slot Machine Parent=[ansi(hr,[space(10)]`Oo[space(11)])]
+&DRAW_HEART.LINE10 Slot Machine Parent=[ansi(hr,[space(9)]oOO@o[space(10)])]
+&DRAW_HEART.LINE9 Slot Machine Parent=[ansi(hr,[space(7)]oOOOOO@@o[space(8)])]
+&DRAW_HEART.LINE8 Slot Machine Parent=[ansi(hr,[space(5)]o[repeat(O,9)]@@o[space(6)])]
+&DRAW_HEART.LINE7 Slot Machine Parent=[ansi(hr,%b%b%boOO.[repeat(O,10)]@@o%b%b%b%b)]
+&DRAW_HEART.LINE6 Slot Machine Parent=[ansi(hr,%b%boOO.o[repeat(O,13)]o%b%b%b)]
+&DRAW_HEART.LINE5 Slot Machine Parent=[ansi(hr,%b%boO..o[repeat(O,13)]o%b%b%b)]
+&DRAW_HEART.LINE4 Slot Machine Parent=[ansi(hr,%b%boOO.o[repeat(O,13)]o%b%b%b)]
+&DRAW_HEART.LINE3 Slot Machine Parent=[ansi(hr,%b%b%boOO.oOOo.oOOOOOOo%b%b%b%b)]
+&DRAW_HEART.LINE2 Slot Machine Parent=[ansi(hr,[space(5)]oOOOo%b%b%boOOOo[space(6)])]
+&DRAW_HEART.LINE1 Slot Machine Parent=[space(24)]
+think [ansi(hm,INSTALL:)] *STILL* Downloading Slot Machine ASCII-Art...
+&DRAW_BAR.LINE14 Slot Machine Parent=[space(24)]
+&DRAW_BAR.LINE13 Slot Machine Parent=[ansi(Bw,space(24))]
+&DRAW_BAR.LINE12 Slot Machine Parent=[ansi(Bw,space(24))]
+&DRAW_BAR.LINE11 Slot Machine Parent=[ansi(Bw,space(24))]
+&DRAW_BAR.LINE10 Slot Machine Parent=%b`-----'%b`--^--'%b`--^--'
+&DRAW_BAR.LINE9 Slot Machine Parent=%b|[space(5)]|%b|%b%b|%b%b|%b|%b%b|%b%b|
+&DRAW_BAR.LINE8 Slot Machine Parent=[ansi(n,%b|%b%b_%b%b\\%b|[space(5)]|%b|[space(5)]\\)]
+&DRAW_BAR.LINE7 Slot Machine Parent=[ansi(n,%b|%b%b%b%b<%b%b|[space(5)]|%b|%b%b%b%b<%b)]
+&DRAW_BAR.LINE6 Slot Machine Parent=[ansi(n,%b|[space(5)]/%b|%b%bo%b%b|%b|[space(5)]/)]
+&DRAW_BAR.LINE5 Slot Machine Parent=%b|%b%b_%b%b|%b|[space(5)]|%b|%b%b_%b%b|
+&DRAW_BAR.LINE4 Slot Machine Parent=%b.-----.%b.-----.%b.-----.
+&DRAW_BAR.LINE3 Slot Machine Parent=[ansi(Bw,space(24))]
+&DRAW_BAR.LINE2 Slot Machine Parent=[ansi(Bw,space(24))]
+&DRAW_BAR.LINE1 Slot Machine Parent=[ansi(Bw,space(24))]
+&DRAW_CASTLE.LINE14 Slot Machine Parent=[ansi(hb,/______________________\\)]
+&DRAW_CASTLE.LINE13 Slot Machine Parent=[ansi(hb,%b./[space(18)]\\.)]%b
+&DRAW_CASTLE.LINE12 Slot Machine Parent=[ansi(hb,%b%b\(__________________\))]%b%b
+&DRAW_CASTLE.LINE11 Slot Machine Parent=[ansi(hb,%b%b%b|[ansi(hr,____________|___)][ansi(hb,|)]%b%b%b
+&DRAW_CASTLE.LINE10 Slot Machine Parent=[ansi(hb,%b%b%b|[ansi(hr,_____|__________)][ansi(hb,|)]%b%b%b
+&DRAW_CASTLE.LINE9 Slot Machine Parent=[ansi(hb,%b%b%b|[ansi(hr,____________|___)][ansi(hb,|)]%b%b%b
+&DRAW_CASTLE.LINE8 Slot Machine Parent=[ansi(hb,%b%b%b|[ansi(hr,_____|__________)][ansi(hb,|)]%b%b%b
+&DRAW_CASTLE.LINE7 Slot Machine Parent=[ansi(hb,%b%b%b|[ansi(hr,____________|___)][ansi(hb,|)]%b%b%b
+&DRAW_CASTLE.LINE6 Slot Machine Parent=[ansi(hb,%b%b\\)][ansi(hr,_____%b%b__________)][ansi(hb,%b/)]%b%b
+&DRAW_CASTLE.LINE5 Slot Machine Parent=[ansi(hb,%b\\[space(20)]/)]%b
+&DRAW_CASTLE.LINE4 Slot Machine Parent=[ansi(hb,%b|____________________|)]%b
+&DRAW_CASTLE.LINE3 Slot Machine Parent=[ansi(hb,%b|[space(20)]|)]%b
+&DRAW_CASTLE.LINE2 Slot Machine Parent=[ansi(hb,%b|%b%b%b|___|%b%b%b%b|___|%b%b%b|)]%b
+&DRAW_CASTLE.LINE1 Slot Machine Parent=[ansi(hb,%b%b___[space(5)]____[space(5)]___)]%b%b
+&DRAW_YINYANG.LINE14 Slot Machine Parent=[space(24)]
+&DRAW_YINYANG.LINE13 Slot Machine Parent=[ansi(b,[space(6)]******)][ansi(y,@@@@@@)][space(6)]
+&DRAW_YINYANG.LINE12 Slot Machine Parent=[ansi(b,%b%b%b%b***)][ansi(y,@@@)][ansi(b,***)][ansi(y,@@@@@@@)][space(4)]
+&DRAW_YINYANG.LINE11 Slot Machine Parent=[ansi(b,%b%b****)][ansi(y,@@@@@)][ansi(b,***)][ansi(y,@@@@@@@@)]%b%b
+&DRAW_YINYANG.LINE10 Slot Machine Parent=[ansi(b,%b******)][ansi(y,@@@)][ansi(b,****)][ansi(y,@@@@@@@@@)]%b
+&DRAW_YINYANG.LINE9 Slot Machine Parent=[ansi(b,***************)][ansi(y,@@@@@@@@@)]
+&DRAW_YINYANG.LINE8 Slot Machine Parent=[ansi(b,***************)][ansi(y,@@@@@@@@@)]
+&DRAW_YINYANG.LINE7 Slot Machine Parent=[ansi(b,*************)][ansi(y,@@@@@@@@@@@)]
+&DRAW_YINYANG.LINE6 Slot Machine Parent=[ansi(b,***********)][ansi(y,@@@@@@@@@@@@@)]
+&DRAW_YINYANG.LINE5 Slot Machine Parent=[ansi(b,%b********)][ansi(y,@@@@@)][ansi(b,***)][ansi(y,@@@@@@)]%b
+&DRAW_YINYANG.LINE4 Slot Machine Parent=[ansi(b,%b%b*******)][ansi(y,@@@@)][ansi(b,*****)][ansi(y,@@@@)]%b%b
+&DRAW_YINYANG.LINE3 Slot Machine Parent=[ansi(b,%b%b%b%b******)][ansi(y,@@@@)][ansi(b,***)][ansi(y,@@@)][space(4)]
+&DRAW_YINYANG.LINE2 Slot Machine Parent=[ansi(b,[space(6)]******)][ansi(y,@@@@@@)][space(6)]
+&DRAW_YINYANG.LINE1 Slot Machine Parent=[space(24)]
+&DRAW_SEVEN.LINE14 Slot Machine Parent=[ansi(hc,[space(11)]`------'[space(5)])]
+&DRAW_SEVEN.LINE13 Slot Machine Parent=[ansi(hc,[space(11)]|[space(6)]|[space(5)])]
+&DRAW_SEVEN.LINE12 Slot Machine Parent=[ansi(hc,[space(11)]|[space(6)]|[space(5)])]
+&DRAW_SEVEN.LINE11 Slot Machine Parent=[ansi(hc,[space(11)]|[space(6)]|[space(5)])]
+&DRAW_SEVEN.LINE10 Slot Machine Parent=[ansi(hc,[space(6)]`----------------')]
+&DRAW_SEVEN.LINE9 Slot Machine Parent=[ansi(hc,[space(6)]|[space(16)]|)]
+&DRAW_SEVEN.LINE8 Slot Machine Parent=[ansi(hc,[space(6)]|[space(16)]|)]
+&DRAW_SEVEN.LINE7 Slot Machine Parent=[ansi(hc,[space(6)].----------------.)]
+&DRAW_SEVEN.LINE6 Slot Machine Parent=[ansi(hc,[space(11)]|[space(6)]|[space(5)])]
+&DRAW_SEVEN.LINE5 Slot Machine Parent=[ansi(hc,/______/%b%b%b|[space(6)]|[space(5)])]
+&DRAW_SEVEN.LINE4 Slot Machine Parent=[ansi(hc,%b/[space(6)]___[space(7)]|[space(5)])]
+&DRAW_SEVEN.LINE3 Slot Machine Parent=[ansi(hc,%b%b/[space(15)]|[space(5)])]
+&DRAW_SEVEN.LINE2 Slot Machine Parent=[ansi(hc,%b%b%b/[space(14)]|[space(5)])]
+&DRAW_SEVEN.LINE1 Slot Machine Parent=[ansi(hc,%b%b%b%b.-------------.[space(5)])]
+&DRAW_CHECK.LINE14 Slot Machine Parent=[ansi(h,[space(7)]!!![space(14)])]
+&DRAW_CHECK.LINE13 Slot Machine Parent=[ansi(h,[space(6)]!!!![space(14)])]
+&DRAW_CHECK.LINE12 Slot Machine Parent=[ansi(h,[space(6)]!!!!![space(13)])]
+&DRAW_CHECK.LINE11 Slot Machine Parent=[ansi(h,[space(4)]!!!!%b!!![space(12)])]
+&DRAW_CHECK.LINE10 Slot Machine Parent=[ansi(h,%b%b!!!!!%b%b!!!![space(11)])]
+&DRAW_CHECK.LINE9 Slot Machine Parent=[ansi(h,!!!!!!%b%b%b%b!!!![space(10)])]
+&DRAW_CHECK.LINE8 Slot Machine Parent=[ansi(h,%b!!![space(6)]!!!!![space(9)])]
+&DRAW_CHECK.LINE7 Slot Machine Parent=[ansi(h,[space(11)]!!!!!![space(7)])]
+&DRAW_CHECK.LINE6 Slot Machine Parent=[ansi(h,[space(12)]!!!!!![space(6)])]
+&DRAW_CHECK.LINE5 Slot Machine Parent=[ansi(h,[space(14)]!!!!![space(5)])]
+&DRAW_CHECK.LINE4 Slot Machine Parent=[ansi(h,[space(15)]!!!!!!%b%b%b)]
+&DRAW_CHECK.LINE3 Slot Machine Parent=[ansi(h,[space(17)]!!!!!!%b)]
+&DRAW_CHECK.LINE2 Slot Machine Parent=[ansi(h,[space(19)]!!!!!)]
+&DRAW_CHECK.LINE1 Slot Machine Parent=[ansi(h,[space(20)]!!!%b)]
+&DRAW_BLANK.LINE14 Slot Machine Parent=[space(24)]
+&DRAW_BLANK.LINE13 Slot Machine Parent=[space(24)]
+&DRAW_BLANK.LINE12 Slot Machine Parent=[space(24)]
+&DRAW_BLANK.LINE11 Slot Machine Parent=[space(24)]
+&DRAW_BLANK.LINE10 Slot Machine Parent=[space(24)]
+&DRAW_BLANK.LINE9 Slot Machine Parent=[space(24)]
+&DRAW_BLANK.LINE8 Slot Machine Parent=[space(24)]
+&DRAW_BLANK.LINE7 Slot Machine Parent=[space(24)]
+&DRAW_BLANK.LINE6 Slot Machine Parent=[space(24)]
+&DRAW_BLANK.LINE5 Slot Machine Parent=[space(24)]
+&DRAW_BLANK.LINE4 Slot Machine Parent=[space(24)]
+&DRAW_BLANK.LINE3 Slot Machine Parent=[space(24)]
+&DRAW_BLANK.LINE2 Slot Machine Parent=[space(24)]
+&DRAW_BLANK.LINE1 Slot Machine Parent=[space(24)]
+think [ansi(hm,INSTALL:)] Downloading Slot Machine Error Messages...
+&ERR_SLOT_LOW Slot Machine Parent=The Slot Machine is low on money. Contact the Casino owner to have it refilled.
+&ERR_!ENOUGH_MONEY Slot Machine Parent=You do not have enough money for %0 'credits'. That would cost you [mul(%0,v(DATA_CREDIT.Value))] [v(DATA_MONEY.Name)].
+&ERR_SLOT_!VALID Slot Machine Parent=That is not a valid number of 'credits'. Choose between 1 and 3.
+&ERR_PLR_!VALID Slot Machine Parent=You are not a valid player.
+&ERR_PLR_BANNED Slot Machine Parent=You are banned from using the Slot Machines.
+&ERR_BUSY Slot Machine Parent=The Slot Machine is busy at the moment. Try again soon.
+&ERR_PLR_!AUTH Slot Machine Parent=You are not authorized to do that.
+think [ansi(hm,INSTALL:)] Downloading Slot Machine Soft-flags...
+&FLAG_BUSY Slot Machine Parent=0
+think [ansi(hm,INSTALL:)] Downloading Slot Machine Fonts...
+&FONT_DESC.INFO Slot Machine Parent=hg
+&FONT_DESC.BORDER Slot Machine Parent=hb
+&FONT_HELP.CMDS Slot Machine Parent=hc
+&FONT_HELP.HEADER Slot Machine Parent=hc
+&FONT_HELP.BORDER Slot Machine Parent=hb
+&FONT_ODDS.HEADER Slot Machine Parent=hc
+&FONT_ODDS.BORDER Slot Machine Parent=hb
+&FONT_ODDS.TITLE Slot Machine Parent=hc
+think [ansi(hm,INSTALL:)] Downloading Slot Machine Functions...
+&FUN_SYMBOL.PREV Slot Machine Parent=[ifelse(eq(%0,1),words(v(DATA_WHEEL)),dec(%0))]
+&FUN_SYMBOL.NEXT Slot Machine Parent=[ifelse(eq(%0,words(v(DATA_WHEEL))),1,inc(%0))]
+&FUN_OWIN.MSG Slot Machine Parent=[switch(%0,>4999,<<<!!!* HITS THE JACKPOT *!!!>>>,>999,<<! WINS AN ENORMOUS AMOUNT OF MONEY !>>,>199,< wins a LARGE sum of money >,>99,wins a great deal of money,>19,wins some money,>4,wins a little money,wins some pocket change)]
+&FUN_SORT.NUMS Slot Machine Parent=[sort(%0)]
+&FUN_SYMBOL.BEST Slot Machine Parent=[last(munge(FUN_SORT.Nums,iter(lattr([parent(me)]/DATA_WIN3.*),last(v(##))),iter(lattr([parent(me)]/DATA_WIN3.*),lcstr(after(##,DATA_WIN3.)))))]
+&FUN_WIN.MSG Slot Machine Parent=[switch(%0,>4999,<<<!!!* HIT THE JACKPOT *!!!>>> and win #$ [v(DATA_MONEY.Name)],>1000,WON #$ [v(DATA_MONEY.Name)],won #$ [v(DATA_MONEY.Name)])]
+&FUN_GET.SLOT-MONEY Slot Machine Parent=[xget(me,DATA_SLOT.Money)]
+&FUN_GET.PLR-MONEY Slot Machine Parent=[ifelse(strlen(xget(%0,v(VAR_MONEY))),xget(%0,v(VAR_MONEY)),0)]
+&FUN_COMP.SYMB Slot Machine Parent=[inc(gt(last(v(DATA_WIN3.%1)),last(v(DATA_WIN3.%0))))]
+&FUN_EVAL.PULL Slot Machine Parent=[setq(0,[match(%4,%5)][match(%4,%6)][match(%5,%6)][match(%4,v(DATA_SYMBOL.Wild))][match(%5,v(DATA_SYMBOL.Wild))][match(%6,v(DATA_SYMBOL.Wild))][match(%4,v(DATA_SYMBOL.Null))][match(%5,v(DATA_SYMBOL.Null))][match(%6,v(DATA_SYMBOL.Null))][not(not(match(%4 %5 %6,v(DATA_SYMBOL.SoloWin))))][v(CNF_WIN.Two)][v(CNF_WIN.One)])][switch(%q0,111???000???,123,1????1000???,123,?1??1?000???,123,??11??000???,123,???11?000???,123,????11000???,123,???1?1000???,123,switch(%q0,1?????00??1?,12,01????0?0?1?,13,001????00?1?,23,0001??????1?,ifelse(eq(u(FUN_COMP.Symb,%5,%6),1),12,13),000?1?????1?,ifelse(eq(u(FUN_COMP.Symb,%4,%6),1),12,23),000??1????1?,ifelse(eq(u(FUN_COMP.Symb,%4,%5),1),13,23),switch(%q0,???000???1?1,match(%4 %5 %6,v(DATA_SYMBOL.SoloWin)),???100???0?1,1,???010???0?1,2,???001???0?1,3,???1000110?1,1,???0101010?1,2,???0011100?1,3,0)))]
+&FUN_INPUT2SLOT Slot Machine Parent=[ifelse(trunc(%0),trunc(%0),1)]
+&FUN_ENOUGH.MONEY Slot Machine Parent=[gte(trunc(xget(%0,v(VAR_MONEY))),mul(u(FUN_Input2Slot,%1),v(DATA_CREDIT.Value)))]
+&FUN_SLOT.VALID Slot Machine Parent=[or(eq(words(%0),0),and(gte(trunc(%0),1),lte(trunc(%0),3)))]
+&FUN_PLR.BANNED Slot Machine Parent=[not(not(member(v(LIST_SLOT.Banned),%0)))]
+&FUN_PLR.VALID Slot Machine Parent=[hastype(%0,PLAYER)]
+&FUN_PLR.AUTH Slot Machine Parent=[orflags(%0,Wr)]
+think [ansi(hm,INSTALL:)] Downloading Slot Machine Lists...
+&LIST_ATTRIBUTES Slot Machine Parent=AENTER CMD CNF DATA DESCRIBE DRAW ENTER ERR FAILURE FLAG FONT FUN LEAVE LOCK MSG OENTER OLEAVE OXENTER OXLEAVE TRI VAR
+think [ansi(hm,INSTALL:)] Downloading Slot Machine Locks...
+&LOCK_AT.SLOT Slot Machine Parent=[member(%l,%!)]
+think [ansi(hm,INSTALL:)] Downloading Slot Machine Game Messages...
+&MSG_WIN_OTHER Slot Machine Parent=[name(%0)]\(%0\) [u(FUN_OWIN.Msg,%1)] on the Slot Machine.
+&MSG_WIN_THREE Slot Machine Parent=You [u(FUN_WIN.Msg,%2)] as ALL THE WHEELS are '%3'!
+&MSG_WIN_TWO Slot Machine Parent=You [u(FUN_WIN.Msg,%2)] as wheels [mid(%1,0,1)] and [mid(%1,1,1)] are both '%3'!
+&MSG_WIN_ONE Slot Machine Parent=You [u(FUN_WIN.Msg,%2)] as wheel %1 matches a '%3'.
+&MSG_LOST Slot Machine Parent=Sorry\, you have no matches. Please try again.
+&MSG_SLOT_PULLED Slot Machine Parent=[name(%0)] pulls the lever on the Slot Machine using %1 '[ifelse(eq(%1,1),credit,credits)]'.
+&MSG_PLR_SETUP Slot Machine Parent=[name(%0)]\(%0\) has RESET the Slot Machine.
+think [ansi(hm,INSTALL:)] Downloading Slot Machine Messages...
+@IDESCRIBE Slot Machine Parent=[u(ADD_DESC)][ansi(v(FONT_DESC.Border),%r--------------%r)]This is a [ansi(v(FONT_DESC.Info),[v(DATA_CREDIT.Value)] [v(DATA_MONEY.Name)])] per 'credit' Slot Machine.
+@DESCRIBE Slot Machine Parent=Type '[ansi(hc,enter [name(me)])]' to play a game.
+@AENTER Slot Machine Parent=[pemit(%#,* Type '[ansi(hc,slot/help)]' for more information.)]
+@ENTER Slot Machine Parent=You approach [name(me)]'s area.
+@FAILURE Slot Machine Parent=It seems to be bolted to the ground.
+@LEAVE Slot Machine Parent=You depart [name(me)]'s area.
+@OENTER Slot Machine Parent=approaches the Slot Machine from [name(loc(me))].
+@OLEAVE Slot Machine Parent=departs the Slot Machine area and heads back toward [name(loc(me))].
+@OXENTER Slot Machine Parent=departs toward [name(me)]'s area.
+@OXLEAVE Slot Machine Parent=approaches from [name(me)]'s area.
+think [ansi(hm,INSTALL:)] Downloading Slot Machine Triggers...
+&TRI_OMESSAGE Slot Machine Parent=[oemit([loc(%0)]/%0,[u(DATA_PREFIX.Game)][space(not(not(words(u(DATA_PREFIX.Game)))))][u(MSG_%1,%2,%3,%4,%5,%6)])]
+&TRI_MESSAGE.PRIV Slot Machine Parent=[pemit(%0,[u(DATA_PREFIX.Game)][space(not(not(words(u(DATA_PREFIX.Game)))))][u(MSG_%1,%2,%3,%4,%5,%6)])]
+&TRI_SET.SLOT-MONEY Slot Machine Parent=[set(me,DATA_SLOT.Money:%0)]
+&TRI_SET.PLR-MONEY Slot Machine Parent=[ifelse(gte(%1,v(DATA_MAX.Money)),[set(%0,[v(VAR_MONEY)]:[v(DATA_MAX.Money)])][pemit(%0,[u(DATA_PREFIX.Warn)] You cannot carry any more money! Any money won from this point on will NOT be given to you.)][set(me,DATA_SLOT.Money:[add(v(DATA_SLOT.Money),sub(%1,v(DATA_MAX.Money)))])],set(%0,[v(VAR_MONEY)]:%1))]
+&TRI_MESSAGE Slot Machine Parent=[remit(me,[u(DATA_PREFIX.Game)][space(not(not(words(u(DATA_PREFIX.Game)))))][u(MSG_%0,%1,%2,%3,%4,%5)])]
+&TRI_MATCH.NONE Slot Machine Parent=[u(TRI_MESSAGE.Priv,%0,LOST,%0)]
+&TRI_MATCH.ONE Slot Machine Parent=[setq(8,extract(v(DATA_WIN1.[setr(9,ifelse(words(v(DATA_SYMBOL.SoloWin)),v(DATA_SYMBOL.SoloWin),u(FUN_SYMBOL.Best)))]),%8,1))][u(TRI_SET.Slot-Money,sub(u(FUN_GET.Slot-Money),%q8))][u(TRI_SET.Plr-Money,%0,add(u(FUN_GET.Plr-Money,%0),%q8))][u(TRI_MESSAGE.Priv,%0,WIN_ONE,%0,%7,%q8,%q9)][u(TRI_OMESSAGE,%0,WIN_OTHER,%0,%q8)]
+&TRI_MATCH.TWO Slot Machine Parent=[setq(8,extract(v(DATA_WIN2.[setr(9,ifelse(match(edit(sort(%4 %5 %6),space(1),_),edit(sort([v(DATA_SYMBOL.Wild)] [v(DATA_SYMBOL.Wild)] [v(DATA_SYMBOL.Null)]),space(1),_)),u(FUN_SYMBOL.Best),first(remove([extract(%4 %5 %6,mid(%7,0,1),1)] [extract(%4 %5 %6,mid(%7,1,1),1)],v(DATA_SYMBOL.Wild)))))]),%8,1))][u(TRI_SET.Slot-Money,sub(u(FUN_GET.Slot-Money),%q8))][u(TRI_SET.Plr-Money,%0,add(u(FUN_GET.Plr-Money,%0),%q8))][u(TRI_MESSAGE.Priv,%0,WIN_TWO,%0,%7,%q8,%q9)][u(TRI_OMESSAGE,%0,WIN_OTHER,%0,%q8)]
+&TRI_MATCH.THREE Slot Machine Parent=[setq(8,extract(v(DATA_WIN3.[setr(9,ifelse(words(setr(0,remove(remove(remove(%4 %5 %6,v(DATA_SYMBOL.Wild)),v(DATA_SYMBOL.Wild)),v(DATA_SYMBOL.Wild)))),first(%q0),u(FUN_SYMBOL.Best)))]),%8,1))][[u(TRI_SET.Slot-Money,sub(u(FUN_GET.Slot-Money),%q8))][u(TRI_SET.Plr-Money,%0,add(u(FUN_GET.Plr-Money,%0),%q8))][u(TRI_MESSAGE.Priv,%0,WIN_THREE,%0,%7,%q8,%q9)][u(TRI_OMESSAGE,%0,WIN_OTHER,%0,%q8)]
+&TRI_SLOT.PULL Slot Machine Parent=[set(me,FLAG_BUSY:1)][setq(1,inc(rand(words(v(DATA_WHEEL)))))][setq(2,inc(rand(words(v(DATA_WHEEL)))))][setq(3,inc(rand(words(v(DATA_WHEEL)))))][setq(4,extract(v(DATA_WHEEL),%q1,1))][setq(5,extract(v(DATA_WHEEL),%q2,1))][setq(6,extract(v(DATA_WHEEL),%q3,1))][u(TRI_SET.Slot-Money,add(u(FUN_GET.Slot-Money),mul(%1,v(DATA_CREDIT.Value))))][u(TRI_SET.Plr-Money,%0,sub(u(FUN_GET.Plr-Money,%0),mul(%1,v(DATA_CREDIT.Value))))][u(TRI_MESSAGE,SLOT_PULLED,%0,%1)][pemit(%0,[iter(lnum(5),%r|[u(DRAW_[extract(v(DATA_WHEEL),u(FUN_SYMBOL.Prev,%q1),1)].Line[add(#@,9)])]|[u(DRAW_[extract(v(DATA_WHEEL),u(FUN_SYMBOL.Prev,%q2),1)].Line[add(#@,9)])]|[u(DRAW_[extract(v(DATA_WHEEL),u(FUN_SYMBOL.Prev,%q3),1)].Line[add(#@,9)])]|)]%r|[repeat(-,24)]+[repeat(-,24)]+[repeat(-,24)]|[iter(lnum(14),%r|[u(DRAW_%q4.Line#@)]|[u(DRAW_%q5.Line#@)]|[u(DRAW_%q6.Line#@)]|)]%r|[repeat(-,24)]+[repeat(-,24)]+[repeat(-,24)]|[iter(lnum(5),%r|[u(DRAW_[extract(v(DATA_WHEEL),u(FUN_SYMBOL.Next,%q1),1)].Line#@)]|[u(DRAW_[extract(v(DATA_WHEEL),u(FUN_SYMBOL.Next,%q2),1)].Line#@)]|[u(DRAW_[extract(v(DATA_WHEEL),u(FUN_SYMBOL.Next,%q3),1)].Line#@)]|)]%r)][switch(u(FUN_EVAL.Pull,%#,%q1,%q2,%q3,%q4,%q5,%q6),123,u(TRI_MATCH.Three,%#,%q1,%q2,%q3,%q4,%q5,%q6,NULL,%1),12,u(TRI_MATCH.Two,%#,%q1,%q2,%q3,%q4,%q5,%q6,12,%1),13,u(TRI_MATCH.Two,%#,%q1,%q2,%q3,%q4,%q5,%q6,13,%1),23,u(TRI_MATCH.Two,%#,%q1,%q2,%q3,%q4,%q5,%q6,23,%1),1,u(TRI_MATCH.One,%#,%q1,%q2,%q3,%q4,%q5,%q6,1,%1),2,u(TRI_MATCH.One,%#,%q1,%q2,%q3,%q4,%q5,%q6,2,%1),3,u(TRI_MATCH.One,%#,%q1,%q2,%q3,%q4,%q5,%q6,3,%1),u(TRI_MATCH.None,%#,%q1,%q2,%q3,%q4,%q5,%q6))][set(me,FLAG_BUSY:0)]
+&TRI_SYSERR Slot Machine Parent=[pemit(%0,[ansi(hfr,SYSERR:)] There is a bug in the code. Report this to an Admin immediately.)]
+&TRI_ERROR Slot Machine Parent=[pemit(%0,[u(DATA_PREFIX.Error)][space(not(not(words(u(DATA_PREFIX.Error)))))][u(ERR_%1,%2,%3,%4)])]
+&TRI_SLOT.SETUP Slot Machine Parent=[lock(me,me)][lock(me/use,LOCK_AT.Slot/1)][set(me,FLAG_BUSY:0)][set(me,ENTER_OK)][u(TRI_MESSAGE,PLR_SETUP,%0)]
+think [ansi(hm,INSTALL:)] Downloading Slot Machine Variables...
+&VAR_MONEY Slot Machine Parent=ECON_MONEY
+think [ansi(hm,INSTALL:)] Downloading Slot Machine Prefixes...
+&DATA_PREFIX.WARN Slot Machine Parent=[ansi(hy,WARN:)]
+&DATA_PREFIX.GAME Slot Machine Parent=[ansi(hg,GAME:)]
+&DATA_PREFIX.ERROR Slot Machine Parent=[ansi(hr,ERROR:)]
+&DATA_PREFIX.SYSERR Slot Machine Parent=[ansi(fhr,SYSERR:)]
+think [ansi(hm,INSTALL:)] [ansi(hr,Download is complete!  Now you must do the following:)]
+think [ansi(hm,INSTALL:)] %b%b%b- @create a slot machine and drop it
+think [ansi(hm,INSTALL:)] %b%b%b- @parent the created object to the Slot Machine Parent
+think [ansi(hm,INSTALL:)] %b%b%b- @set the created object !NO_COMMAND and !HALT
+think [ansi(hm,INSTALL:)] %b%b%b- Enter the created object and type 'slot/setup'
+think [ansi(hm,INSTALL:)] %b%b%b- @set the created object WIZARD if others will be using it.
+think [ansi(hm,INSTALL:)] %b%b%b- BE SURE TO SET &VAR_MONEY ON THE SLOT MACHINE PARENT.  It
+think [ansi(hm,INSTALL:)] %b%b%b%b should be set to the name of the variable you use for money.
+think [ansi(hm,INSTALL:)] 
+think [ansi(hm,INSTALL:)] The Copyright must stay with this code.  If you have any questions
+think [ansi(hm,INSTALL:)] or complaints \(bug reports\) concerning this code\, please contact
+think [ansi(hm,INSTALL:)] me at: [ansi(hc,worldwar@bb6.betterbox.net)].  Thank you.
+@set me=!quiet
+
+

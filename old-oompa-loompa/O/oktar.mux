@@ -1,0 +1,502 @@
+#################################################################
+#                           OKTAR NOSHARIK                      #
+#                                                               #
+# This is the maitre'd for the Diplomat Inn.  He's a bit        #
+# snobby and reacts to players given his personal               #
+# relationships and a player's social class.                    #
+#                                                               #
+#################################################################
+
+
+#===============================================================#
+#               CMD-NEW-GUEST                                   #
+#                                                               #
+# This is the code that triggers how Oktar will respond to      #
+# a new player 'arriving' in the restaurant.                    #
+#                                                               #
+#===============================================================#   
+
+&CMD-NEW-GUEST Oktar Nosharik=^* has arrived.:
+ think setq(0, num(*%0));
+ think setq(1, default(%0/social-status, 2));
+ think setq(2, default(me/relationship-%0, neutral));
+ @tr me/trig-greet-%q1-%q2=%q0
+
+-
+
+#==============================================================#
+#           COMMAND: TABLE                                     #
+#                                                              #
+# Just allows a guest to be seated.  Roleplaying use only.     #
+#==============================================================#
+
+&CMD-TABLE Oktar Nosharik=$table:
+  think setq(0, %#);
+  @tr me/trig-table-[default(%q0/social-status, 2)]-
+                    [default(me/relationship-
+                    [name(%q0)], neutral)]=%q0
+-
+
+#==============================================================#
+#          COMMAND: MENU                                       #
+#                                                              #
+# This command simply allows a guest to see the menu for the   #
+# diplomat inn.  Can and should be altered for other places.   #
+# This menu resets daily based on the most expensive prepared  #
+# food items in the economy each day.                          #
+#==============================================================#
+
+&CMD-MENU oktar nosharik=$menu:
+  @pemit %#=
+  [box(%r%ch%crThe Menu for the Diplomat Inn%cn%r%r
+       [iter(v(menu), 
+             columns(##|[round(mul(price(##), 1.3), 0)] stenis, 25, |),|)]%r, 
+          55, 2, +)];
+  @force %#=pose looks at %p menu.
+-
+
+#==============================================================#
+#               COMMAND: ORDER <food item>                     #
+#                                                              #
+# This allows players to order off of the menu.  The waiter    #
+# then sees if he can buy the dish from the market, and if so  #
+# money is exchanged and the dish is extracted to the location #
+# of the player.                                               #
+#==============================================================#
+
+&cmd-order oktar nosharik=$order *:
+ 
+  think setq(0, trim(%0));
+  think setq(1, round(mul(price(%q0), 1.3), 0));
+  
+  think setq(9, [iscurrency(%q0)]
+                [t(match(v(menu), %q0, |))]
+                [gte(getaccount(%#, stenis), %q1)]);
+
+  @switch/first %q9=
+    0??, {@pemit %#=%0 is not on the menu.},
+    ?0?, {@pemit %#=%0 is not on the menu.},
+    ??0, {@pemit %#=You can't afford %q0.},
+    111, {@remit %#=A [first(shuffle(serving girl|
+                                     handsome waiter|
+                                     lovely waitress|
+                                     young waiter|
+                                     beautiful maiden|
+                                     serving boy, |), |)] takes 
+                 %N's order.;
+          @tr me/trig-get-order = %#, %q0, %q1 }
+-
+
+# %0 = the person who put in the order
+# %1 = the dish the person ordered
+# %2 = the price of the dish
+
+&trig-get-order oktar nosharik=
+ 
+  @buy 1 %1;
+  @wait 0=@wait 0=@wait 0=@wait 0=@wait 0=
+  @switch [default(me/result-[makeattr(%1)], none)]=
+     none, {@extract 1/%1=[num(me)]/[paccount(%1)]=%L;
+            @remit loc(%0)=A [first(shuffle(serving girl|
+                                     handsome waiter|
+                                     lovely waitress|
+                                     young waiter|
+                                     beautiful maiden|
+                                     serving boy, |), |)] brings 
+                          [name(%0)] [poss(%0)] %1.;
+            @money/transfer %2 from %0 to [num(me)];
+            @force me=
+pose happily collects [name(%0)]'s 
+                   %2 stenis.; },
+    {@force me=say I'm so sorry [name(%0)], but we are out of %1.;
+     &result-[makeattr(%1)] %#= }
+-
+
+
+@daily oktar nosharik=
+
+# Set the menu for the day #
+
+  think setq(0, dishes());
+  think setq(0, filter(filter-available, %q0, |));
+  think setq(0, remove(%q0, marriage cakes, |));
+  think setq(0, sortby(#99/sortby-price, %q0, |));
+  think setq(0, revwords(%q0, |));
+  think setq(0, extract(%q0, 1, 8, |));
+  think setq(0, setunion(%q0, red wine|yarrow tea, |));
+  &menu me=%q0;
+
+# Do the evictions for the day
+
+  @fo me=@tr #44/trig-evict-guests=[num(me)]
+
+-
+&filter-available oktar=
+ [gt(getaccount(#26, %0), 1)]
+-
+
+#=================================================================#
+#            COMMAND: ROOM                                        #
+#                                                                 #
+# This is a temporary command to be removed when we have          #
+# functional room rentals.                                        #
+#=================================================================#
+
+&cmd-room oktar nosharik=$room:
+  @force %#=pose requests a room.;
+  @pemit %#=%ch%crThis command is out of date. Please use the 
+         'rent/room' command. See 'help rent room'.%cn;
+  @tr me/trig-room-[default(%#/social-status, 2)]-
+                       [default(me/relationship-[name(%#)], neutral)]=%#
+-
+
+#=================================================================#
+#           COMMAND: TIP <TARGET>=<AMOUNT>                        #
+#                                                                 #
+# Can be used to gain the waiter's favor                          #
+#                                                                 #
+#=================================================================#
+
+
+
+#=================================================================#
+#            TRIGGERS AND MESSAGES                                #
+#=================================================================#
+
+&trig-room-1-enemy oktar nosharik=
+ @force me=say We make it a habit to ensure that no vermin ever set 
+ foot in our rooms, [name(%0)].  I won't be making an exception for 
+ you.
+-
+&trig-room-1-neutral oktar nosharik=
+ say I'm sorry, but we can't be upsetting our guests with the 
+  likes of you.
+-
+&trig-room-1-friend oktar nosharik=
+ whisper %0=I'll see if I can squeeze you in, my friend.
+-
+&trig-room-2-enemy oktar nosharik=
+ @force me=say I wouldn't hire you to clear out sewage, much 
+  less allow you to stay in this establishment, [name(%0)].  
+-
+&trig-room-2-neutral oktar nosharik=
+ say I'm sorry but we don't have any rooms available at this time.
+-
+&trig-room-2-friend oktar nosharik=
+ whisper %0=I'll see if I can squeeze you in, my friend.
+-
+
+&trig-room-3-enemy oktar nosharik=
+ @force me=say So sorry, [name(%0)] but we're all booked up -- won't 
+	have an opening for you here till . . . hmmm.. . lets 
+	see. . . oh, that's right, till Zutiv himself decides to 
+	dine here and requests your company.
+-
+&trig-room-3-neutral oktar nosharik=
+ @force me=pose quirks a brow at [name(%0)].;
+ say Alright, but I'll require your payment in advance.
+-
+&trig-room-4-enemy oktar nosharik=
+ @force me=say  Very well, [switch(get(%0/sex), f*, Lady, m*, Lord)] 
+            [name(%0)].  I have a perfectly appropriate room 
+            available for you -- with a quaint view of the gutter 
+            in the back.
+-
+&trig-room-4-neutral oktar nosharik=
+ @force me=say  Right away [switch(get(%0/sex), f*,M'lady,m*,M'lord)]! 
+            We'll have a room made ready for you immediately.  Please 
+            let me know if I can be of any further assistance!
+-
+&trig-room-4-friend oktar nosharik=
+ @force me=say  How delightful that you'll be staying with us 
+      [switch(get(%0/sex), f*, Lady, m*, Lord)] [name(%0)]!  
+      I have a beautiful room available for you upstairs and 
+      I'll be sure to have one of the girls bring up some 
+      fresh flowers and fruit to your room.
+-
+&trig-room-5-enemy oktar nosharik=
+ @switch [hastag(%0, ranivor)]=
+   1, {pose bows deeply.;
+       say  Most powerful Ranivor, I will have your suite prepared for 
+                  you at once.},
+   0, {pose bows politely.;
+       say  I will have a room prepared for the most noble [name(%0)] 
+                  at once.}
+-
+&trig-room-5-friend oktar nosharik=
+ @switch [hastag(%0, ranivor)]=
+   1, {say  It is always our pleasure to serve the Mighty 
+                  Ranivor of the Firan Republic!  We will have 
+                  your suite prepared for you immediately, and 
+                  remain ever attentive to your needs. If anything 
+                  is not exactly as you like it, please alert me 
+                  at once! },
+   0, {pose bows happily and then bows again!;
+       @force me=say  We may have the Ranivor's suite open for your most noble 
+              personage, clan leader [name(%0)]!  It will be hour honor to 
+              have you as a guest.  We are charmed by your mere presence, as 
+              always!;
+       pose smiles and motions to the staff in the back.;
+       say I'll have your room prepared with fresh flowers and 
+                  send up a basket of all your favorites, your honor!}
+-
+&trig-room-5-neutral oktar nosharik=
+ @switch [hastag(%0, ranivor)]=
+   1, {say We are at your service, noble Ranivor!  I will 
+            have my staff prepare your suite immediately, and note 
+            that it is my personal honor to serve your honor to the 
+            best of my ability.},
+   0, {pose bows graciously.;
+       @force me=say  It will be our pleasure and honor to lend our roof to 
+             the most noble [name(%0)].  I will see if we have the 
+             Ranivor's suite open, and will make sure that your 
+             every need is attended to!}
+-
+
+
+
+&TRIG-GREET-1-ENEMY Oktar Nosharik=
+@force me=pose turns beet red at the mere sight of [name(%0)]. ; 
+say Get out of this establishment at once you filthy wretch! 
+If you don't leave, I'll have you thrown out.
+
+-
+&TRIG-GREET-1-NEUTRAL Oktar Nosharik=
+@force me=pose eyes [name(%0)] with disgust and blocks [poss(%0)] path.;
+@force me=whisper %0=I'm sorry, but we don't serve your kind here. 
+You'll have to take your business elsewhere.
+
+-
+&TRIG-GREET-1-FRIEND Oktar Nosharik=
+@force me=pose smiles at [name(%0)] briefly and then quickly hides the 
+smile under a look of officiousness.;
+@force me=whisper %0=It's good to see you [name(%0)], my friend, 
+but you'll have to pretend to be a delivery person here. This is 
+a highbrow establishment, as you know, and they might not 
+take well to your presence.
+-
+&TRIG-GREET-2-ENEMY Oktar Nosharik=
+@force me=pose scowls at [name(%0)].;
+@force me=say  No one in this establishment needs to set eyes on you, 
+[name(%0)]. Now kindly vacate the premises before things get ugly.
+-
+
+&TRIG-GREET-2-NEUTRAL Oktar Nosharik=
+@force me=pose looks [name(%0)] up and down disapprovingly.;
+@force me=whisper %0=Perhaps you'd be better able to afford another 
+establishment. Our fare is very expensive and we cater to the rich.
+
+-
+&TRIG-GREET-2-FRIEND Oktar Nosharik=
+@force me=pose grins at [name(%0)] and leans over to whisper in [poss(%0)] 
+  ear.;
+@force me=whisper %0=How wonderful to see you! Let me show you to a table 
+in the back.
+-
+&TRIG-GREET-3-ENEMY Oktar Nosharik=
+@force me=pose snorts with derision at the sight of [name(%0)].;
+@force me=pose allows [name(%0)] to stand waiting a long time before 
+approaching.;
+@force me=say  Allow me to find someone who is willing to wait on you, 
+   [name(%0)]. It might take days.
+-
+
+&TRIG-GREET-3-NEUTRAL Oktar Nosharik=
+@force me=pose bows slightly to [name(%0)].;
+@force me=say  There is about a [rand(60)] minute wait at present, perhaps 
+you would care to take a look at the menu while we get a table ready for you.
+
+-
+&TRIG-GREET-3-FRIEND Oktar Nosharik=
+@force me=pose brightens at the sight of [name(%0)].;
+@force me=say How good it is to see you, [name(%0)]. Allow me to show you to 
+a table.;
+@force me=pose leads [name(%0)] to a table in the corner.
+-
+
+&TRIG-GREET-4-ENEMY Oktar Nosharik=
+@force me=pose narrows his eyes and bows stiffly towards [name(%0)].;
+@force me=say If you are here for a night's rest, or for a meal I am sure I 
+  can find someone willing to serve the 
+[switch(get(%0/sex), m*, Lord, f*, Lady)] [name(%0)].
+
+-
+
+&TRIG-GREET-4-NEUTRAL Oktar Nosharik=
+@force me=pose bows graciously to [name(%0)].;
+@force me=say  [switch(get(%0/sex), m*, M'lord, f*, M'lady, Noble [name(%0)])], 
+Welcome to the Diplomat. We have luxurious rooms upstairs and 
+delicious meals to be served. Please let me know if I can show 
+you to a %chtable%cn or have a %chroom%cn prepared for you.
+-
+
+&TRIG-GREET-4-FRIEND Oktar Nosharik=
+@force me=pose beams with delight at [name(%0)].;
+@force me=say  [switch(get(%0/sex), m*, M'lord [name(%0)], f*, M'lady 
+  [name(%0)])], it is so delightful to see you again. We are always glad to 
+  have you at the Diplomat Inn and I should be honored to assist you in any 
+  way that I can. Would you like a %chtable%cn or a %chroom%cn?;
+whisper %0=I will make sure that you get only the best! *wink*
+
+-
+&TRIG-GREET-5-ENEMY Oktar Nosharik=
+pose snaps to attention.;
+@switch hastag(%0, ranivor)=
+ 0, {@force me=say Clan Leader [name(%0)], how may we mere mortals at the 
+     Diplomat Inn make ourselves worthy of your magnificence? Would 
+     you like a %chtable%cn or a %chroom%cn?},
+ 1, {say Welcome back to the Diplomat Inn, noble Ranivor. 
+          How may I best be of service to you?  Would you like a 
+          %chtable%cn or a %chroom%cn?}
+
+-
+&TRIG-GREET-5-NEUTRAL Oktar Nosharik=
+@force me=pose scurries to welcome [name(%0)] with a smile.;
+@switch hastag(%0, ranivor)=
+  1, {say All Hail, the mighty Ranivor!;
+      say We are your humble servants here at the Diplomat 
+           Inn. How may we be of service to you?},
+  0, {pose bows formally and with a flourish.;
+      @force me=say  Clan Leader [name(%0)]! 
+          It is with great honor that I receive you into the Diplomat Inn. 
+          May I get you a %chroom%cn or a %chtable%cn? 
+          Please let me know if I can be of any assistance to you 
+          whatsoever!}
+
+-
+&TRIG-GREET-5-FRIEND Oktar Nosharik=
+pose rushes forward in a gracious bow to welcome [name(%0)].;
+@switch hastag(%0, ranivor)=
+ 1, {say All hail the Ranivor!},
+ 0, {@@ do nothing @@};
+@force me=say  Most Noble [name(%0)]! It is my privilige and 
+honor to welcome you back to the Diplomat Inn, where we always 
+keep a special table open for you and a special room available 
+at your need. May I escort you to your %chtable%cn? 
+Would you rather I prepared your %chroom%cn for you?
+-
+
+&TRIG-TABLE-1-ENEMY Oktar Nosharik=
+@fpose %0=demands to be seated at a table.;
+@force me=pose refuses to show [name(%0)] to a table, and instead, 
+calls to the back for the bouncer.
+
+-
+&TRIG-TABLE-1-FRIEND Oktar Nosharik=
+@force %0=pose whispers something to Oktar about getting a table.;
+@force me=pose shuffles [name(%0)] back into the kitchen!
+-
+
+&trig-table-1-neutral oktar nosharik=
+@force %0=pose requests to be seated at a table.;
+@force me=pose clears his throat and explains to [name(%0)], "We don't serve 
+  your kind."
+-
+
+&trig-table-2-friend oktar nosharik=
+@force %0=pose whispers something to Oktar about a table.;
+@force me=pose grins and, draping a hand over [name(%0)]'s shoulder, walks 
+with [obj(%0)] to a table at the back of the room.
+-
+
+&trig-table-2-enemy oktar nosharik=
+@force %0=pose demands to be seated at a table.;
+@force me=pose glares at [name(%0)].;
+@force me=say  You can't afford to eat here, [name(%0)].  And even if you could, 
+I certainly wouldn't serve the likes of you.  Be gone.
+-
+
+&trig-table-2-neutral oktar nosharik=
+@force %0=pose asks to be seated at a table.;
+pose makes a face.;
+@force me=say  I'm afraid there aren't any tables available, [name(%0)].
+-
+
+&trig-table-3-neutral oktar nosharik=
+@force %0=pose requests to be seated at a table.;
+@force me=pose looks [name(%0)] up and down disapprovingly, but finds a 
+table for [obj(%0)] in the back.
+-
+
+&trig-table-3-friend oktar nosharik=
+@force %0=pose requests to be seated at a table.;
+pose grins widely at [name(%0)], and finds [obj(%0)] a table 
+in the middle of the room.  "Right this way.";
+whisper %0=I'll let the chef know to prepare something special for 
+you my friend.
+-
+
+&trig-table-3-enemy oktar nosharik=
+@force %0=pose demands to be seated at a table.;
+@force me=pose scowls at [name(%0)].;
+say I'm sorry, but there are no tables available at this time.  Feel 
+free to try another establishment.
+-
+
+&trig-table-4-neutral oktar nosharik=
+@force %0=pose requests a table be prepared for [obj(%0)].;
+@force me=pose motions to staff at the back of the room.;
+@force me=say  Right away, [switch(get(%0/sex), m*, M'lord, f*, M'lady)].  If 
+    you will follow me, it would be my honor to seat you at one of 
+    our finest tables!
+-
+
+&trig-table-4-enemy oktar nosharik=
+@force %0=pose demands to be seated at a table.;
+@force me=pose sends another waiter to seat [name(%0)].
+-
+
+&trig-table-4-friend oktar nosharik=
+@force %0=pose requests a table be prepared for [obj(%0)].
+pose grins with delight.;
+@force me=say Right away, [switch(get(%0/sex), m*, M'lord, f*, M'lady)]!  I am 
+ at your service, as always.  Follow me, and I'll seat you at one of 
+ our very special tables with the silk curtains and plush couches.
+-
+
+&trig-table-5-neutral oktar nosharik=
+@force %0=pose requests a table.;
+pose claps his hands at the staff in the back.;
+@switch hastag(%0, ranivor)=
+ 1, {say Prepare the Ranivor's table at once!;
+     pose leads The Ranivor to the finest table in the Inn.},
+ 0, {@force me=say  Prepare a table for the honorable [name(%0)] at once!;
+     pose bows graciously to [name(%0)], and leads [obj(%0)] to one 
+     a highly decorative table enclosed by fancy silk curtains and 
+     surrounded by plush couches.;
+     say Please let me know if I can be of any further assistance.}
+-
+
+&trig-table-5-enemy oktar nosharik=
+@force %0=pose demands a table.;
+say I will have a waiter seat you at one of our finest tables, 
+           your honor.;
+@force me=pose has another waiter seat [name(%0)].
+-
+
+&trig-table-5-friend oktar nosharik=
+@force %0=pose requests to be seated at a table.;
+pose claps his hands to get the attention of the staff at the 
+back.;
+@force me=say  Prepare Noble [name(%0)]'s table for [obj(%0)] at once!;
+@force me=pose leads [name(%0)] to a luxurious table as the staff scurries 
+       to ornament it with fresh fruit and new linens.;
+say Only the best for our most honored and welcome guest!
+-
+
+
+@set Oktar Nosharik=MONITOR
+-
+@set Oktar Nosharik=WIZARD
+-
+@parent Oktar Nosharik=#3345
+
+
+
+
+
+
+
+
+
+

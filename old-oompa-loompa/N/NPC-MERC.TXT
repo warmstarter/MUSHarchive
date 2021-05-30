@@ -1,0 +1,47 @@
+@create NPC Merchant Parent
+@lock/Basic NPC Merchant Parent==me
+@set NPC Merchant Parent = WIZARD
+@set NPC Merchant Parent = SAFE
+@set NPC Merchant Parent = NO_COMMAND
+&CMD_BUY NPC Merchant Parent=$purchase * of *=*:th [if(hasattr(me,storage_%1),[if(isnum(%0),[if(lte(%0,v(storage_%1)),[if(gt(%0,0),[if(lte(u(fun_calc_price,%0,%1),get(%#/money)),[if(and(hasattr(%2,cargocan),hasflag(%2,wiz)),[if(gte(get(%2/capacity_remaining),mul(%0,v(%1.weight))),[u(fun_sell,%0,%1,%2)],[trigger(me/msg_notenoughspace)])],[trigger(me/msg_whereisit)])],[trigger(me/msg_notenoughmoney)])],[trigger(me/msg_belowzero)])],[trigger(me/msg_dontgotenough)])],[trigger(me/msg_notnum)])],[trigger(me/msg_dontgotthat)])]
+&CMD_DELIVER_PACKAGE NPC Merchant Parent=$deliver package:th [if(hasattr(%#,HASPACKAGE),[if(strmatch(get(v(jobdb)/HASJOB_%#),[v(PLACED_ORDER_[get([get(%#/HASPACKAGE)]/COMMOD)])]),[u(fun_deliver_package,[get([get(%#/HASPACKAGE)]/COMMOD)],[get(v(jobdb)/HASJOB_%#)],[get(%#/HASPACKAGE)])])],[pemit(%#,You cannot deliver that here.)])],[pemit(%#,You don't have a package to deliver.)])]
+&CMD_FOR_SALE NPC Merchant Parent=$for sale:th [trigger(me/msg_showinv)][pemit(%#,[ansi(hb,[repeat(=,76)])]%r[center([ansi(h,[name(loc(me))] Store Inventory)],76)]%r[ansi(hb,[repeat(=,76)])]%r[u(fun_for_sale)][ansi(hb,[repeat(=,76)])]
+&DAILY NPC Merchant Parent=[u(fun_reprice)]
+&DAT_SALE_ITEMS NPC Merchant Parent=<PLACE ITEMS THAT ARE ON SALE IN HERE>
+&DAT_SPECIALTY NPC Merchant Parent=general
+&DAT_STORE_INVENTORY NPC Merchant Parent=
+@DESCRIBE NPC Merchant Parent=The [switch([strmatch(v(sex),Male)],1,man,woman)] looks extremely occupied behind the desc checking inventory papers. [switch(v(sex),Male,He,She)] wears a greenish-blue long sleeved shirt with matching pants, which compliments [switch(v(sex),Male,his,her)] slender body. [switch(v(sex),Male,He,She)] sits below a giant sign reading "[name(loc(me))]".
+@set NPC Merchant Parent/DESCRIBE=no_command visual
+&FOUND_SUPPLIERS NPC Merchant Parent=
+&FUN_CALC_PAYMENT NPC Merchant Parent=[round(fdiv([add(fdiv(mul(v(%0.weight),2),%1),mul(v(selling_price_%0),%1))],mul(%2,4)),0)]
+&FUN_CALC_PRICE NPC Merchant Parent=[mul(%0,v(selling_price_%1))]
+&FUN_CALC_TIMELIMIT NPC Merchant Parent=[setq(9,[rand(12)])][switch(%q9,<2,[u(fun_calc_timelimit)],%q9)]
+&FUN_DELIVER_PACKAGE NPC Merchant Parent=[setq(3,[u(fun_jobinfo,TAKEN_%1)])][if(hasattr(me,storage_%0),[set(me,storage_%0:[add(v(storage_%0),get(%2/storage_%0))])],[set(me,storage_%0:[get(%2/storage_%0)])])][wipe(me/placed_order_%0)][wipe(%2/BAK_RESERVE_JOB_%1)][trigger(me/fun_nuke,%2)][wipe(%#/haspackage)][set(%#,money:[add(get(%#/money),[extract(%q3,8,1)])])][pemit(%#,[name(me)] pays you [ansi(h,[extract(%q3,8,1)])] credits.)][trigger(me/msg_thanks)][wipe(v(jobdb)/TAKEN_%1)][wipe(v(jobdb)/HASJOB_%#)]
+&FUN_FIND_SUPPLIER NPC Merchant Parent=[if(hasattr(v(npcdb),%0_suppliers),[iter(get(v(npcdb)/%0_suppliers),[if(hasattr(##,storage_%0),[if(gte(get(##/storage_%0),%1),[if(not(strmatch(zone(loc(me)),zone(loc(##)))),[set(me,found_suppliers:[v(found_suppliers)] ##)])])])])][setq(5,[words(v(found_suppliers))])][if(strmatch(%q5,0),None,[extract(v(found_suppliers),[inc(rand(%q5))],1)])][set(me,found_suppliers:)],None)]
+&FUN_FOR_SALE NPC Merchant Parent=%b[ljust([ansi(ny,Item)],20)][ljust([ansi(ny,Quantity)],15)][ansi(ny,Price)]%r%b[iter(v(dat_store_inventory),[ljust([capstr(##)],20)][ljust([if(hasattr(me,storage_##),[switch(v(storage_##),>0,[ansi(nc,[v(storage_##)])],[ansi(hr,Sold Out)])],[ansi(hr,Sold Out)])],15)][v(selling_price_##)]%b%b%b%b[if(strmatch(v(dat_sale_items),*##*),[ansi(hg,== SALE ==)])]%r)]
+&FUN_JOBINFO NPC Merchant Parent=[edit([edit([get(v(jobdb)/%0)],%b,_)],|,%b)]
+&FUN_LOW_SUPPLY NPC Merchant Parent=[round(mul(v(start_%0),0.4),0)]
+&FUN_NEWJOB NPC Merchant Parent=[setq(7,[v(dat_jobnum)])][setq(0,[squish([u(fun_find_supplier,%0,%1)])])][if(not(strmatch(%q0,None)),[set(me,PLACED_ORDER_%0:%q7)][u(fun_ready_supplier,%q0,%0,%1,%q7)][setq(1,[u(fun_calc_timelimit)])][setq(2,[u(fun_calc_payment,%0,%1,%q1)])][wait(1,[lit([set(v(jobdb),JOB_%q7:[name(zone(loc(me)))]|[name(zone(loc(%q0)))]|%0|%1|%q1|[num(me)]|%q0|%q2)][if(gte(%q7,9999),[set(v(econparent),dat_jobnum:1)],[cemit(Jobs,[ansi(hb,<)][ansi(h,Jobs)][ansi(hb,>)] [ansi(hg,== NEW JOB ==)] Job [ansi(ny,%q7)] - %1 of %0 needed to be transported from [ansi(nc,[name(zone(loc(%q0)))])] to [ansi(nc,[name(zone(loc(me)))])] in [ansi(ng,%q1)] hours.)])])])])][set(v(econparent),dat_jobnum:[inc(%q7)])]
+&FUN_NUKE NPC Merchant Parent=@nuke %0;@nuke %0
+&FUN_READY_SUPPLIER NPC Merchant Parent=[set(%0,RESERVE_JOB_%3:%1 %2)][set(%0,STORAGE_%1:[sub(get(%0/storage_%1),%2)])]
+&FUN_REPRICE NPC Merchant Parent=[iter(v(dat_store_inventory),[u(fun_reprice2,##)][wait(2,[lit([set(me,selling_price_##:[round(fdiv(v(total_##_price),v(total_##_markets)),0)])])])])]
+&FUN_REPRICE2 NPC Merchant Parent=[set(me,total_%0_markets:0)][set(me,total_%0_price:0)][iter(rinzone(zone(loc(me))),[u(fun_reprice3,%0,##)])]
+&FUN_REPRICE3 NPC Merchant Parent=[iter(lcon(%1),[if([or(strmatch(name(##),*Market*),[and(hasattr(##,npc),hasflag(##,wiz))])],[if(hasattr(##,storage_%0),[set(me,total_%0_markets:[inc(v(total_%0_markets))])][set(me,total_%0_price:[add(v(total_%0_price),[get(##/selling_price_%0)])])])]
+&FUN_SELL NPC Merchant Parent=[if(hasattr(%2,locked),[trigger(me/msg_locked)],[set(%#,money:[sub(get(%#/money),u(fun_calc_price,%0,%1))])][set(me,money:[add(v(money),u(fun_calc_price,%0,%1))])][if(hasattr(%2,storage_%1),[set(%2,storage_%1:[add(get(%2/storage_%1),%0)])],[set(%2,storage_%1:%0)])][set(me,storage_%1:[sub(v(storage_%1),%0)])][switch(v(storage_%1),0,[wipe(me/storage_%1)])][trigger(me/msg_sale,[u(fun_calc_price,%0,%1)])][trigger(%2/fun_calc_capacity_used)][trigger(%2/fun_calc_capacity_remaining)])]
+&INSTRUCTIONS NPC Merchant Parent=Place stuff it sells, seperated by spaces, in DAT_STORE_INVENTORY. For each commod, place in START_<COMMOD> to the most it should have at any given time. Then set STORAGE_<COMMOD> to whatever you set START_<COMMOD> to, to start us off.
+&MONEY NPC Merchant Parent=10000
+&MSG_BELOWZERO NPC Merchant Parent=:bursts out laughing, "What do you take me for? A fool?!"
+&MSG_DONTGOTENOUGH NPC Merchant Parent=say I don't have enough of that to sell. Sorry.
+&MSG_DONTGOTTHAT NPC Merchant Parent=:laughs, "We don't carry that, sir..."
+&MSG_LOCKED NPC Merchant Parent=say It appears to be locked, sir.
+&MSG_NOTENOUGHMONEY NPC Merchant Parent=say It does not appear you have the cash for such a transaction.
+&MSG_NOTENOUGHSPACE NPC Merchant Parent=say It appears your container does not have enough room.
+&MSG_NOTNUM NPC Merchant Parent=say Sir, how much do you want?
+&MSG_SALE NPC Merchant Parent=say That'll be %0 credits. Pleasure doing business with you.
+&MSG_THANKS NPC Merchant Parent=say Ah. Thank you.
+&MSG_WHEREISIT NPC Merchant Parent=say I don't see where you want me to put it.
+&NPC NPC Merchant Parent=yes
+&RACE NPC Merchant Parent=Human
+&SWEEP NPC Merchant Parent=[iter(v(dat_store_inventory),[if(hasattr(me,STORAGE_##),[if(lte(v(storage_##),u(fun_low_supply,##)),[if(not(hasattr(me,PLACED_ORDER_##)),[u(fun_newjob,[capstr(##)],[sub(v(start_##),v(storage_##))])])])],[if(not(hasattr(me,PLACED_ORDER_##)),[u(fun_newjob,[capstr(##)],[v(start_##)])])])])]
+&SYNTAX NPC Merchant Parent=[u(fun_newjob,<commod>,<amount of commod>)]
+&VERSION NPC Merchant Parent=3.0

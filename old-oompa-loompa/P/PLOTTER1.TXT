@@ -1,0 +1,9 @@
+@create Calcwidget
+@link Calcwidget=[owner(me)]
+@lock/Basic Calcwidget==*[owner(me)]
+@VA Calcwidget=$cplot * * * to * * *:@pemit %#=From: b: %0%b%b%be: %1%b%b%br: %2%b%b%bto: b: %3%b%b%be: %4%b%b%br: %5%r[setq(9,u(cplot,%0,%1,%2,%3,%4,%5))]Head: b: [first(%q9)]%b%b%be: [second(%q9)]%b%b%br: [third(%q9)]
+&CPLOT Calcwidget=[setq(0,vsub(sph2xyz(%3,%4,%5),sph2xyz(%0,%1,%2)))][xyz2sph(first(%q0),second(%q0),third(%q0))]
+@VB Calcwidget=$cfind * * * from * * *:@pemit %#=Find: b: %0%b%b%be: %1%b%b%br: %2%b%b%bfrom: b: %3%b%b%be: %4%b%b%br: %5%r[setq(9,u(cfind,%0,%1,%2,%3,%4,%5))]Coords: b: [first(%q9)]%b%b%be: [second(%q9)]%b%b%br: [third(%q9)]
+&CFIND Calcwidget=[setq(0,vadd(sph2xyz(%3,%4,%5),sph2xyz(%0,%1,%2)))][xyz2sph(first(%q0),second(%q0),third(%q0))]
+@VC Calcwidget=$from * * * to * * * at *:@pemit %#=From: b: %0%b%b%be: %1%b%b%br: %2%b%b%bto: b: %3%b%b%be: %4%b%b%br: %5%b%b%bwarp: %6%r[setq(9,u(cplot,%0,%1,%2,%3,%4,%5))]Head: b: [first(%q9)]%b%b%be: [second(%q9)]%b%b%br: [third(%q9)]%rETA: [setq(8,round(u(ETA,third(%q9),%6),0))][div(%q8,3600)] hours [div(mod(%q8,3600),60)] minutes [mod(%q8,60)] seconds.
+&ETA Calcwidget=[mul(2,fdiv(%0,mul(%1,mul(%1,%1))))]

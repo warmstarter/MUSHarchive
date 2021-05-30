@@ -1,0 +1,84 @@
+@create madlibs=10
+&MAD madlibs=$mad:&sname me=[extract(v(scripts),add(1,rand(words(v(scripts)))),1)];&active me=[get(me/[get(me/sname)])];@trigger me/foop=[name(%#)] resets the MadLibs machine.  The new topic is [v(sname)].;@drain me;@notify me;@trigger me/blah
+&SNAME madlibs=test
+@set madlibs/SNAME = no_command
+&SCRIPTS madlibs=political aids election dear_abby tolkienesque debug greeting test meta savior finals homecoming suddenly bulwer-litton
+@set madlibs/SCRIPTS = no_command
+&ADD madlibs=$addlib *=*:@switch [member(lattr(me),ucstr(%0))]=0,{@set me=%0:%1;@pemit %#=Set.;@set me=%0_author:%#;&scripts me=[v(scripts)] %0},{@switch comp(v(#),[get(me/%0_author)])=0,{@set me=%0:%1;@pemit %#=Set.},{@pemit %#=That name exists already.}}
+&BOOF madlibs=$topics:@pemit %#=MadLib topics: [v(scripts)]
+&FOOP madlibs=@pemit/list [setinter(lcon(here),v(subscribers))]=%0
+&SUB madlibs=$sub madlibs:@pemit %#=Your subscription has been noted.;&subscribers me=[remove(v(subscribers),%#)] %#
+&UNSUB madlibs=$unsub madlibs:@pemit %#=Your subscription has been cancelled.;&subscribers me=[remove(v(subscribers),%#)]
+&FOOPFOOP madlibs=@trigger me/foop=madlibs says "Please suggest [v(seek)]."
+@Adesc madlibs=@switch [v(state)]=asking,@pemit %#=Please suggest [v(seek)].,busy,@pemit %#=The madlibs machine is busy.,@pemit %#=The madlibs machine is idle.
+&SUGGEST madlibs=$suggest *:@wait me={@switch [v(state)]=asking,{&state me=busy;&active me=[before(v(active),@)][v(0)][after(after(v(active),@),@)];w %N=thanks;@wait 10=@trigger me/blah;@notify me},{w %N=Another answer got to me first, but thanks.;@notify me}}
+&BLAH madlibs=@switch [pos(@,v(active))]=#-1,@trigger me/fini,{&seek me=before(after(v(active),@),@);&state me=asking;@trigger me/foopfoop}
+&BLURT madlibs=$blurt *:@pemit %#=%0: [v(%0)]
+&FINI madlibs=@trigger me/foop=Madlibs: [v(active)];&state me=idle;@drain me
+&STATE madlibs=idle
+@set madlibs/STATE = no_command
+&CREDITS madlibs=$credits:@pemit %#=The MadLibs Machine was written by Tourmaline.  The script [switch(v(state),idle,last run,being run)] was written by [name(get(me/[v(sname)]_author))].
+@Desc madlibs=To get MadLibs output, type 'sub madlibs'.  To not get MadLibs output, type 'unsub madlibs'.  To start a new MadLib, type 'mad'.  Type 'mad <topic>' to start a particular MadLib.  To fill in a blank in the MadLib, type 'suggest <whatever>'.  To see who wrote the current MadLib, type 'credits'.  Type 'madlibs help' to see how to write MadLibs.
+@set madlibs/Desc = no_command
+&HELP madlibs=$madlibs help:@pemit %#=Type 'topics' to see what scripts there are.  Type 'addlib <topic>=<whatever>' to add a script.  <topic> must be one word.  To have fill-in blanks in your script, delimit the blank with @'s.  Example: addlib greeting=Have a @an adjective@ day.  Whatever you put in between @'s will appear in the form 'Please suggest XXX' so the previous example would yield 'Please suggest an adjective'.
+&POLITICAL madlibs=Congressional @a plural noun@ urged President-elect @someone's name@ Sunday to go @an adverb@ on overturning the @an organization@'s ban on homo@a noun@uals, arguing that sudden action would create a @a noun@ in Congress and could endanger @a plural noun@ in the @an adjective@ forces.
+@set madlibs/POLITICAL = no_command
+&POLITICAL_AUTHOR madlibs=#505
+@set madlibs/POLITICAL_AUTHOR = no_command
+&AIDS madlibs=Learning about @a disease@ and making educated @a plural noun@ is the purpose of @a bad thing@ Awareness Day on Wednesday, November 18.  Sponsored by @an organization@, organizers of this @a noun@ will @a verb@ condoms and educational @a plural noun@.  @an organization@ will present programs on @a noun@ Awareness at @a place@ and also will have a table under the @a noun@ in Stewart Center.
+@set madlibs/AIDS = no_command
+&AIDS_AUTHOR madlibs=#505
+@set madlibs/AIDS_AUTHOR = no_command
+&ELECTION madlibs=DId you know that @someone's named@ was named the next president of @an organization@?  If you don't know by @a time@, there's no reason to be @an emotion@.  Between @a plural noun@ and the commotion surrounding the U.S. presidential election, you could have easily @a verb in the past tense@ it.  After all, only about @a number@ people bothered even to @a verb@ in last week's election.  The elections secretary, @a female named@, commented how @an adjective@ she was with the low @a noun@, especially in the view of the new @a plural noun@ around campus.  They seemed to be everywhere.  One couldn't walk to class without @a verb ending in -ing@ at least two.
+@set madlibs/ELECTION = no_command
+&ELECTION_AUTHOR madlibs=#505
+@set madlibs/ELECTION_AUTHOR = no_command
+&DEAR_ABBY madlibs=Dear @someone's name@: Have you ever seen a @an adjective@ homeless person and wondered, "Where is the @a noun@?  How could they have @a verb in the past tense@ this to happen?"  Well, I'm @an emotion@ I'm going to be a guilty @a noun@ in the not-too-distant future.  My @a noun@ and I have helped @a male name@ for years.  During the 60s, he decided to "@a catch phrase@".  We hoped it was just a @a noun@, but it isn't.  How do I deal with a brother who marches to a different @a musician@?
+@set madlibs/DEAR_ABBY = no_command
+&DEAR_ABBY_AUTHOR madlibs=#505
+@set madlibs/DEAR_ABBY_AUTHOR = no_command
+&TOLKIENESQUE madlibs=Lo!  The @a capitalized noun@ of the @a capitalized plural noun@ came forth from @a place@, and the earth @a past tense verb@ with @an adjective@ @a plural 'sound'@.  Can @a name@ conquer the @a plural noun@ of evil and restore @a noun@ to the land?
+@set madlibs/TOLKIENESQUE = no_command
+&TOLKIENESQUE_AUTHOR madlibs=#5
+@set madlibs/TOLKIENESQUE_AUTHOR = no_command
+&DEBUG madlibs=To track down a @noun@, you need to @verb@ how the lost @plural noun@ are used and where they are @past tense verb@, trying to understand where they are @past tense verb@.  Then, you need to @transitive verb@ your @noun@, stopping after the @adjective@ sections of @noun@ have @past tense verb@, and having Purify check for new @plural noun@ by calling @proper noun@ from the debugger.
+@set madlibs/DEBUG = no_command
+&DEBUG_AUTHOR madlibs=#4
+@set madlibs/DEBUG_AUTHOR = no_command
+&GREETING madlibs=Good evening.  This is @a proper noun@ News and I'm your @a profession@, @Someone's name@.  We've just learned that @an adjective@ @a plural noun@ have been sighted on @a proper noun@ street driving @a make of automobile, plural@ and waving @plural noun@.  They are believed to be extremely @adjective@.  If you spot them and they @a transitive verb@ at you, do not @a verb@, @a verb@.
+@set madlibs/GREETING = no_command
+&GREETING_AUTHOR madlibs=#4944
+@set madlibs/GREETING_AUTHOR = no_command
+&TEST madlibs=@the name of a popular Space Madness player@, well known for @a verb ending in -ing@ while @an adjective@, was arrested for @another verb ending in -ing@.  @the name of another popular Space Madness player@ was @an adverb@ shocked.
+&TEST_AUTHOR madlibs=#4944
+@set madlibs/TEST_AUTHOR = no_command
+&META madlibs=The @a singular noun@ usually appears @an adjective@ on the other @a noun@ of the @a noun@, but we must be @an adjective@, because what's really on the other @a noun@ of that @a noun@ might be a bad @a noun@.
+@set madlibs/META = no_command
+&META_AUTHOR madlibs=#4
+@set madlibs/META_AUTHOR = no_command
+&MADSTAR madlibs=$mad *:&sname me=%0;&active me=[get(me/%0)];@trigger me/foop=[name(%#)] resets the MadLibs machine.  The new topic is %0.;@drain me;@notify me;@trigger me/blah
+&FURRIES_AUTHOR madlibs=#5714
+@set madlibs/FURRIES_AUTHOR = no_command
+&SAVIOR madlibs=The Prophecy of @a made-up name for a country@ spoke of the @a period of time such as "day" or "eon"@ when a saviour would come from the lands to the @a direction like south or north-northwest@ and liberate the realm.  More specifically, the Prophecy spoke of the @a mode of transportation on the ground, plural, such as "dogsleds"@ the Savior would be driving, the @a snack food@ the Savior would be handing out, and the @an adjective you'd use to describe a food, such as "tangy" or "juicy"@ @a snack food such as "canteloupes" or "funyuns"@ his followers would be selling at bargain rates.  Word had it that the Savior would even be available for @a human activity such as "sex" or "sportfishing"@ with devout @a profession such as "sailors" or "lawyers"@ and @an adjective to describe a group of people@ @a type of woman, plural@.  All in all, the merchandisers were quite looking forward to it all coming to pass.
+@set madlibs/SAVIOR = no_command
+&SAVIOR_AUTHOR madlibs=#5714
+@set madlibs/SAVIOR_AUTHOR = no_command
+&FINALS madlibs=Early one morning at @college@ a young man named @boy's name@ woke up with a start.  He scratched his @bodypart@ carefully, thinking, "Haven't I forgotten something?"  His roommate, @someone's name@, said, "You @insult@! You @adjective@ @animal@!  Today is your @school subject@ Final!"  He freaked, leaping out of bed and grabbing his favorite @adjective@ @article of clothing@ and putting it on.  Wearing just this, he tore through our the dorm and through @place@, screaming, "Get out of the way!"  He arrived in class just in time.  Professor @name@ wasn't even angry.  What ann anti-climax.
+@set madlibs/FINALS = no_command
+&FINALS_AUTHOR madlibs=#824
+@set madlibs/FINALS_AUTHOR = no_command
+&SEEK madlibs=an adverb
+@set madlibs/SEEK = no_command
+&HOMECOMING madlibs=Dear Mom,  I've been thinking, these past few @unit of time@, that perhaps I'm not meant to be in @a profession@ after all.  Maybe...maybe I'm more cut out to do things like @an odd job@ or @an unusual job@...even @a dangerous job@.  I guess I'm too @adjective@...I suppose you could call me an @an animal@, Mom, because I'm just feeling @an emotion@ about all of this.  Mom, I'm not coming home, and I'm quitting my job.  @female name@ and I are running off to @a place@ together.  We have about @a number@ dollars, and maybe I'll call you when we get there.  Don't worry, Mom.  We'll be okay.  Love, @a name@.
+@set madlibs/HOMECOMING = no_command
+&HOMECOMING_AUTHOR madlibs=#824
+@set madlibs/HOMECOMING_AUTHOR = no_command
+&SUDDENLY madlibs=Suddenly, he was there. @name of a male player@. He smiled @adverb@ and took off his @a kind of material (tin, leather, rock)@ cap, the ones with the chains. His leather coat was dusty, and smelled of @a noun@. His babe, @name of a female player@, sat behind him on the huge, humming @color@ bike. He kicked the stand, dismounted, and then grabbed the girl by her waist and lifted her off too. Handcuffs clinked at her belt. "Where's @name of a female player@?" he inquires. (She giggles in the background.)  "We have some..." he cracks his knuckles "..._business_ to attend to."
+@set madlibs/SUDDENLY = no_command
+&SUDDENLY_AUTHOR madlibs=#631
+@set madlibs/SUDDENLY_AUTHOR = no_command
+&ACTIVE madlibs=Tourmaline, well known for flying while homely, was arrested for sleeping.  hugh was strangely shocked.
+@set madlibs/ACTIVE = no_command
+&BULWER-LITTON madlibs=It was a @an adjective@ and @an adjective@ night.  Soon the sound of @a plural sound@ was audible as @a female proper name@ @a past tense verb@ from the manor of the @a last name@ family.  She turned, and @a past tense verb associated with horror@ as @a monster@ itself reached her with its @a noun, singular or plural@, dripping in @a fluid@...
+&BULWER-LITTON_AUTHOR madlibs=#334
+@set madlibs=VISUAL

@@ -1,0 +1,86 @@
+@@ Project:  Global +Help System v1.2
+@@ Author:  Sholevi (D Young; mrdyg@yahoo.com)
+@@ Date:  Oct 7, 2003
+@@ Requirements:  PennMUSH 1.7.7 patchlevel 9
+
+
+@@ Licensing:  This package may be used and redistributed by anyone, so long as
+@@ my name and email address is retained in its attributes to designate me as the
+@@ original author.  You may make changes to it, but if you make changes and then
+@@ redistribute it, then you must explicitly describe the changes wherever it is
+@@ made available for download, or in the package itself.  You may also NOT sell
+@@ this code for any reason whatsoever, although you may give it away for free. 
+@@ If I decide that you are not observing this loose terms of use, I reserve
+@@ the right to designate you as infringing on copyright and may pursue any legal
+@@ line of action associated with that violation in the U.S.
+
+
+@@ Features:  (what this system does that others don't)
+@@    * One command set for both mortals and admin -- +help displays based
+@@ on read/write permissions.
+@@    * Permission function for mortals and admin to read/write entries.
+@@    * Customizeable visual interface.
+@@    * Supports subtopics (topics within topics, i.e., +help topic/subtopic)
+@@    * Add aliases for entries with really long names.
+@@    * Add hidden topics to prevent index clutter.
+@@    * +Help matches first partial entry names (i.e., '+help sp' may display 
+@@ '+help spiderman', and '+help spiderman/a' can match '+help spiderman/amazing')
+@@    * Separate 'entries' and 'collections' fields distinguish between a command
+@@ reference and much more lengthy topic discourse.
+@@    * Comes with self-documenting '+help help' entries/aliases preconfigured.
+
+
+@@ Installation:  This entire file is fully compilable.  Copy and paste contents
+@@ into your client, or use tinyfugue's /quote command.  Make sure that
+@@ you are at least a Royal that can @link the object to the master room.
+@@ It will create two objects -- the +help system and the database which will 
+@@ store entries.  Also must be installed on at least PennMUSH 1.7.7p9.
+
+
+@@ Wicked stuff follows.
+
+
+@set %!=QUIET
+@set %!=GHS:[create(Global +Help System v1.2 <GHS>)]
+@link v(GHS) = config(master_room)
+@set v(GHS) = SAFE
+@set v(GHS) = ROYALTY
+@set v(GHS) = !NO_COMMAND
+&CMD_ADDHELP v(GHS)=$^\+addhelp(/[a-z/]+)? ([^/=]+)(/[^/=]+)?=([\S \s]*)?:@switch [setq(1,edit(setr(0,squish(secure(%2%3))),%b,_))][u(fn_canwrite)][cor(u(fn_canwritedark),not(strmatch(%1,*dark*)))][switch([strmatch(%1,*collection*)][t(u(fn_isentry,%q0))][t(u(fn_iscollection,%q0))],11?,0,0?1,0,1)][not(and(setr(a,strmatch(%1,*alias*)),or(u(fn_isentry,%q0),u(fn_iscollection,%q0))))][switch([%qa][u(fn_isentry,setr(t,edit(squish(secure(%4)),%b,_)))][u(fn_iscollection,%qt)],100,0,1)]=0*,{@pemit %#=Permission denied.},10*,{@pemit %#=You are not quite powerful enough to do that.},110*,{@pemit %#=[ansi(hr,-%b)]A +help [if(u(fn_isentry,%q0),entry,collection)] already exists with that name, but you are trying to add a +help [if(u(fn_isentry,%q0),collection,entry)].},1110*,{@pemit %#=[ansi(hr,-%b)]You cannot add the alias [ansi(hg,edit(%q0,_,%b))] because a[if(u(fn_isentry,%q0),n entry,%b collection)] already exists with that name.},11110,{@pemit %#=[ansi(hr,-%b)]You are trying to add an alias [ansi(hg,%q0)], but there is no topic called [ansi(hg,%4)].},11111,{@pemit %#=[ansi(hg,-%b)]You [if(u(fn_exists,%q0),update existing,add new)] +help [if(%qa,alias,[if(%3,sub-)]entry)]: [ansi(hg,%q0)][if(%qa,%b->%b%qt)].;@set [v(db_database)]=[if(%qa,alias,help)]_%q1:[if(%qa,%qt,%4)];think [if(not(or(%3,%qa)),set(v(db_database),list_[setr(l,if(cor(u(fn_iscollection,%2),strmatch(%1,*collection*)),collections,entries))]:[setunion(ldelete(get(v(db_database)/list_%ql),match(get(v(db_database)/list_%ql),%q0,|),|),%q0,|)]))] [if(not(%qa),set(v(db_database)/help_%q1,if(cor(strmatch(%1,*dark*),and(%3,u(fn_isdarkattr,help_[before(%q1,/)]))),mortal_dark,!mortal_dark)))] [if(not(%qa),set(v(db_database)/help_%q1,if(strmatch(%1,*hidden*),veiled,!veiled)))] [if(and(not(%qa),not(hasattrval(v(db_database),help_[before(%q1,/)]))),pemit(%#,[ansi(hr,-%b)]Warning: You have not yet added a root topic ([ansi(hg,before(%q0,/))]) for this sub-entry.))]},{@pemit %#=[ansi(hr,-%b)]Critical error occured.}
+@set v(GHS)/CMD_ADDHELP=regexp
+&CMD_AHELP v(GHS)=$+ahelp*:@pemit %#=if(u(fn_canreaddark,%#),Index of dark\, veiled and visible +help topics and sub-topics:[iter(lattr(v(db_database)/help*),%b[ansi(hg,edit(after(##,HELP_),_,%b))],,\,)].%r%rIndex of +help aliases:[iter(lattr(v(db_database)/alias*),%b[ansi(hg,edit(after(##,ALIAS_),_,%b))] -> [get(v(db_database)/##)],,\,)].,Who do you think you are?)
+&CMD_DELHELP v(GHS)=$+delhelp *:@pemit %#=[setq(0,edit(squish(%0),%b,_))][switch([u(fn_canwrite)][cor(u(fn_canwritedark),not(u(fn_isdarkattr,help_%q0)))][u(fn_exists,%q0)],0*,Permission denied.,10*,You are not quite powerful enough to do that.,110,[ansi(hr,-%b)]No such +help entry or alias exists: [ansi(hg,edit(%q0,_,%b))].,111,[if(not(setr(t,hasattrval(v(db_database),alias_%q0))),set(v(db_database),list_[setr(a,if(u(fn_isentry,%q0),entries,collections))]:[ldelete(get(v(db_database)/list_%qa),match(get(v(db_database)/list_%qa),[edit(%q0,_,%b)],|),|)]))][wipe(v(db_database)/[if(%qt,alias,help)]_%q0)][ansi(hg,-%b)]You have removed the +help [if(%qt,alias,entry)]: [ansi(hg,edit(%q0,_,%b))].[if(and(not(after(%q0,/)),setr(s,lattr(v(db_database)/help_%q0/*))),%r[ansi(hr,-%b)]Warning: You just deleted a root topic ([ansi(hg,edit(%q0,_,%b))]) while subtopics still exist: [ansi(hg,edit(itemize(iter(%qs,after(itext(0),HELP_))),_,%b))].)],[ansi(hr,-%b)]Critical error occured.)]
+&CMD_HELP v(GHS)=$+help*:@pemit %#=[ifelse(or(not(%0),match(index,squish(%0))),[u(fn_header,+Help: Index)]%r[u(fn_index,ENTRIES)]%r%r[ansi(b,[repeat(-,32)]<)][ansi(hg,%bCollections:%b)][ansi(b,>[repeat(-,31)])]%r[u(fn_index,COLLECTIONS)]%r[if(u(fn_canreaddark),%r[ansi(b,repeat(-,79))]%r[u(fn_demo_restricted)]%r)][u(fn_footer,mudname())],[setq(t,edit(squish(secure(%0)),%b,_))][setq(0,default(v(db_database)/alias_%qt,[default(v(db_database)/alias_[before(%qt,/)],before(%qt,/))][if(strmatch(%qt,*/*),/[after(%qt,/)])]))][if(setr(g,after(grab(lattr(v(db_database)),help_%q0*),HELP_)),setq(0,%qg))][setq(1,iter(edit(before(%q0,/),_,%b),capstr(lcstr(itext(0)))))][setq(2,iter(edit(after(%q0,/),_,%b),capstr(lcstr(itext(0)))))][if(cand(%q2,u(fn_isdarkattr,help_%q1)),set(v(db_database)/help_%q0,mortal_dark))][switch([u(fn_exists,%q0)][u(fn_isdarkattr,help_%q0)][u(fn_canreaddark)][u(fn_canread)],0*,[ansi(hr,-%b)]No such +help entry exists: [ansi(hg,edit(%q0,_,%b))].,?10?,Permission denied.,*0,Permission denied.,1*,[u(fn_header,+Help: %q1[if(%q2,%b/%b%q2)])]%r[get(v(db_database)/help_%q0)][if(and(not(%q2),setr(3,if(u(fn_canreaddark),filter(fn_adm_filter,lattr(v(db_database)/help_%q0/*)),filter(fn_mortal_filter,lattr(v(db_database)/help_%q0/*))))),%r%r[u(fn_header_c,%q1%bSubtopics:,79,,,hg)][iter(%q3,[if(not(mod(dec(#@),5)),%r%b)][ljust([if(u(fn_isdarkattr,itext(0)),u(fn_restricted))][edit(after(itext(0),/),_,%b)],u(fn_width))])]%r%r[ansi(b,repeat(-,79))][if(u(fn_canreaddark),%r[u(fn_demo_restricted)])]%r[u(fn_demo_subtopics,%q1)])]%r[u(fn_footer,mudname())],[ansi(hr,-%b)]Critical error occured.)])]
+&CMD_WIZHELP v(GHS)=$+wizhelp*:@pemit %#=[ansi(hr,-%b)]This command is depreciated.  Use:%b[ansi(hg,+help [squish(secure(%0))])]
+@DESCRIBE v(GHS)=Please use [ansi(hc,+help help)], be sure that I am set !NO_COMMAND.
+&FN_ADM_FILTER v(GHS)=not(match(lflags(v(db_database)/%0),*veiled*))
+&FN_CANREAD v(GHS)=1
+&FN_CANREADDARK v(GHS)=orflags(%#,WrJ)
+&FN_CANWRITE v(GHS)=orflags(%#,W)
+&FN_CANWRITEDARK v(GHS)=orflags(%#,W)
+&FN_DEMO_RESTRICTED v(GHS)=[center([squish(u(fn_restricted))] = restricted,79)]
+&FN_DEMO_SUBTOPICS v(GHS)=[center(ansi(hg,Use [ansi(hm,+help [lcstr(%0)]/<subtopic>)] to display subtopics.),79)]
+&FN_EXISTS v(GHS)=cor(u(fn_isentry,%0),u(fn_iscollection,%0),hasattrval(v(db_database),help_[edit(%0,%b,_)]),hasattrval(v(db_database),alias_[edit(%0,%b,_)]))
+&FN_FOOTER v(GHS)=u(fn_header_lr,,%0,79,,b,w)
+&FN_HEADER v(GHS)=u(fn_header_lr,%0,,79,,b,w)
+&FN_HEADER_C v(GHS)=[switch(lt(%1,add(strlen(%0),4)),#-*,switch(%1,,[ansi(hr,-)] Invalid Argument List For Header_C.,[ansi(hr,-)] Invalid Length For Header_C.),1,[ansi(hr,-)] Invalid Length For Header_C.,[ansi(switch(%3,,b,%3),[left(repeat(switch(%2,,-,%2),inc(div(div(sub(%1,add(strlen(%0),4)),2),switch(%2,,1,strlen(%2))))),add(mod(add(strlen(%0),%1),2),div(sub(%1,add(strlen(%0),4)),2)))])][switch(t(strlen(%0)),0,[ansi(switch(%3,,b,%3),[left(repeat(switch(%2,,-,%2),4),4)])],[ansi(switch(%5,,b,%5),switch(strlen(%6),1,%6,<))][ansi(switch(%4,,w,%4),%b%0%b)][ansi(switch(%5,,b,%5),switch(strlen(%7),1,%7,>))])][ansi(switch(%3,,b,%3),[left(repeat(switch(%2,,-,%2),div(div(sub(%1,add(strlen(%0),4)),2),switch(%2,,1,strlen(%2)))),div(sub(%1,add(strlen(%0),4)),2))])])]
+&FN_HEADER_LR v(GHS)=[switch(lt(%2,add(strlen(%0),strlen(%1),12)),#-*,switch(%2,,[ansi(hr,-)] Invalid Argument List For Header_Lr.,[ansi(hr,-)] Invalid Length For Header_LR.),1,[ansi(hr,-)] Invalid Length For Header_Lr.,[ansi([switch(%4,,b,%4)],[left(switch(%3,,--,%3%3),2)])][switch(t(strlen(%0)),0,[ansi([switch(%4,,b,%4)],[left(repeat(switch(%3,,-,%3),4),4)])],[ansi([switch(%6,,b,%6)],switch(strlen(%7),1,%7,<))][ansi([switch(%5,,w,%5)],%b%0%b)][ansi([switch(%6,,b,%6)],switch(strlen(%8),1,%8,>))])][ansi([switch(%4,,b,%4)],[left([repeat([switch(%3,,-,%3)],inc(div(sub(sub(sub(%2,12),strlen(%0)),strlen(%1)),switch(%3,,1,strlen(%3)))))],sub(sub(sub(%2,12),strlen(%0)),strlen(%1)))])][switch(t(strlen(%1)),0,[ansi([switch(%4,,b,%4)],[left([repeat([switch(%3,,-,%3)],4)],4)])],[ansi([switch(%6,,b,%6)],switch(strlen(%7),1,%7,<))][ansi([switch(%5,,w,%5)],%b%1%b)][ansi([switch(%6,,b,%6)],switch(strlen(%8),1,%8,>))])][ansi([switch(%4,,b,%4)],[left(switch(%3,,--,%3%3),2)])])]
+&FN_INDEX v(GHS)=[setq(0,squish(iter(get(v(db_database)/list_[squish(%0)]),switch([strmatch(itext(0),*/*)][t(match(lflags(v(db_database)/HELP_[edit(itext(0),%b,_)]),veiled))][t(match(lflags(v(db_database)/HELP_[edit(itext(0),%b,_)]),mortal_dark))][u(fn_canreaddark)][u(fn_canread)],0011?,itext(0),000?1,itext(0),),|,|),|))][iter(%q0,[if(not(mod(dec(#@),5)),%r%b)][ljust([if(match(lflags(v(db_database)/HELP_[edit(itext(0),%b,_)]),mortal_dark),u(fn_restricted),space(strlen(u(fn_restricted))))][itext(0)],v(fn_width))],|)]
+&FN_ISCOLLECTION v(GHS)=match(get(v(db_database)/list_collections),edit(%0,_,%b),|)
+&FN_ISDARKATTR v(GHS)=t(match(lflags(v(db_database)/%0),*mortal_dark*))
+&FN_ISENTRY v(GHS)=match(get(v(db_database)/list_entries),edit(%0,_,%b),|)
+&FN_ISNOTDARKATTR v(GHS)=not(match(lflags(v(db_database)/%0),*mortal_dark*))
+&FN_MORTAL_FILTER v(GHS)=and(not(match(lflags(v(db_database)/%0),*mortal_dark*)),not(match(lflags(v(db_database)/%0),*veiled*)))
+&FN_RESTRICTED v(GHS)=[ansi(hr,*%b)]
+&FN_WIDTH v(GHS)=15
+&GHS_VER v(GHS)=1.2
+&GHS_AUTHOR v(GHS)=D Young (mrdyg@yahoo.com)
+GIVE v(GHS)=[set(v(GHS),DB_DATABASE:[setr(d,create(Global +Help Database))])]%qd
+@wipe %!/GHS
+@set %!=!QUIET
++addhelp/collection Help=[center(ansi(hb,Global +Help System v1.2),79)%r%rUse [ansi(hg,+help)] to list the topic index, and [ansi(hg,+help <topic>)] to show that topic. If a topic from my index has even more topics listed inside of it (subtopics), you can view those entries by typing [ansi(hg,+help <topic>/<subtopic>)].%r%rFor example, typing [ansi(hg,+help help/credits)] right now will show you information about the author of this system. If you are a privileged user, you may use [ansi(hg,+help help/admin)] to list topics relevent for game owners that use the +help system.
++addhelp Help/Credits=This is a free package written and designed by Sholevi (D Young; mrdyg@yahoo.com), released on Oct 7, 2003. Although anyone using it may hack it to whatever extent desired, it may not be sold to anyone else (but it can be given away for free).%r%rI will do my best to respond to questions or suggestions.  If you decide to redistribute this package, please write me at my email address first.%r%rSholevi (mrdyg@yahoo.com)
++addhelp/dark Help/Admin=The system is contained entirely on one object, with the database on another, but it must have the ROYAL flag or SEE_ALL power to function fully, and must have the NO_COMMAND flag removed.%r%r[ansi(hg,+addhelp[ansi(hm,\[/dark\]\[/hidden\]\[/collection\]\[/alias\] )] <topic>[ansi(hm,\[/<subtopic>\])]=<text>)]%r%rThis command adds a new +help entry to the system. The switches are optional and can be added in any order. Subtopics are also optional.%r%r'Hidden' will supress that entry from being displayed in the +help indices. Although people with permission can still call the entry.%r%r'Dark' means that the command will not be visible to anyone who doesn't pass the system's fn_canreaddark attribute (it can be customized). To add a dark (restricted) entry, you yourself must pass the system's fn_canwritedark attribute. If not adding a dark entry, then you must pass the system's fn_canwrite attribute.%r%rThe 'alias' switch requires that <text> should be a valid, existing topic. It creates a hidden entry that will will be an alternative entry for the topic specified. You must, of course, pass fn_canwrite to make an alias, but if the alias you are making it for happens to be dark and you do not pass fn_canreaddark, you still won't be able to call it. Aliases can be made for subtopics.%r%rThe 'Collection' switch indicates that the entry will be added to the "collections" list instead of the normal +help entries area. This has no affect if you are adding a sub-entry, since they appear in their respective roots regardless of what section the root is in. Adding +Help Collections is useful to provide information to users that have lots of pages, while normal entries offer the quick and dirty access of a reference, per se. Again, you must pass at least fn_canwrite to add any entry.%r%r[ansi(hg,+delhelp <topic>[ansi(hm,\[/<subtopic>\])])]%r%rThis will delete a +help entry or alias. You must pass fn_canwrite to do so, but if the particular entry is restricted, you must pass fn_canwritedark.%r%r[ansi(hg,+ahelp)]%r%rBecause not all entries show up in the +help, this command is provided for maintenance purposes, for admin to keep track of all topics. You must pass fn_canreaddark to use it.%r%rFor information on customizing the system, see [ansi(hg,+help help/hacking)].
++addhelp/dark Help/Hacking=Anyone can look at the +help index (unless you recode how the +help system works.) However, anyone looking up a +help entry must pass [ansi(hm,FN_CANREAD)]. By default, it always returns 1 so that everyone can read all visible entries. You can change this. [ansi(hm,FN_CANWRITE)] filters the permission for people who are allowed to add/update entries.%r%r[ansi(hm,FN_CANREADDARK)] restricts people from seeing mortal_dark entries. Use this to filter entries that only previleged people (admin) are allowed to see. [ansi(hm,FN_CANWRITEDARK)] filters the permission for people who are allowed to add/update dark (restricted) entries.%r%r[ansi(hm,FN_WIDTH)] is the number that becomes the field width of each entry in the +help index. It is the minimum amount of space between each name.%r%r[ansi(hm,FN_HEADER)] and [ansi(hm,FN_FOOTER)] are the titles that appear above and below every +help command call, respectively.%r%r[ansi(hm,FN_RESTRICTED)], it is a string that will be evaluated just before an entry name in the index, if that entry is dark. Change this to your liking to indicate which entries are restricted. Mortals, however, will never see it, it is just for privilaged users to tell the other entries apart.
++addhelp/alias H=Help
+@pemit/silent %!=Finished creating Global +Help system.

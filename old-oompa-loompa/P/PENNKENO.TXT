@@ -1,0 +1,149 @@
+@set me=quiet
+@switch [isdbref(num(Keno Parent))]=0,{think [ansi(hm,INSTALL:)] No "Keno Parent" object found -- creating...;@create Keno Parent},1,{think [ansi(hm,INSTALL:)] "Keno Parent" object already exists... skipping creation.}
+@set Keno Parent=Safe
+@set Keno Parent=no_command
+@set Keno Parent=!halt
+think [ansi(hm,INSTALL:)] Downloading Keno Commands...
+&CMD_KENO.BET Keno Parent=$keno/bet *:[switch([u(FUN_PLR.Valid,%#)][u(FUN_PLR.Banned,%#)][or(u(FUN_PLR.Playing,%#),eq(words(v(DATA_PLAYER.DB)),0))][u(FUN_ENOUGH.Money,%#,trunc(secure(%0)))][u(FUN_BET.Valid,trunc(secure(%0)))][u(FUN_KENO.Enough-Money,mul(mul(trunc(secure(%0)),v(DATA_CREDIT.Value)),last(v(LIST_PAYOFF.[v(DATA_PICKS.Max)]))))],0?????,u(TRI_ERROR,%#,PLR_!VALID),11????,u(TRI_ERROR,%#,PLR_BANNED),100???,u(TRI_ERROR,%#,PLR_!PLAYING),1010??,u(TRI_ERROR,%#,!ENOUGH_MONEY),10110?,u(TRI_ERROR,%#,BET_!VALID),101110,u(TRI_ERROR,%#,OUT_OF_MONEY),101111,u(TRI_KENO.Bet,%#,trunc(secure(%0))),u(TRI_SYSERR,%#))]
+&CMD_KENO.START Keno Parent=$keno/start:[switch([u(FUN_PLR.Playing,%#)][u(FUN_PICKS.Valid,v(DATA_PLAYER.Nums))],0?,u(TRI_ERROR,%#,PLR_!PLAYING),10,u(TRI_ERROR,%#,MUST_PICK),11,u(TRI_KENO.Start,%#),u(TRI_SYSERR,%#))]
+&CMD_KENO.PAYOFFS Keno Parent=$keno/pay*:[pemit(%#,[u(DRAW_PAYOFFS.Header)][iter(lnum(v(DATA_PICKS.Max)),%r[u(DRAW_PAYOFF.Line,#@)])]%r[u(DRAW_PAYOFFS.Footer)])]
+&CMD_KENO.SCREEN Keno Parent=$keno/screen:[pemit(%#,u(DRAW_KENO.Screen,%#))]
+&CMD_KENO.MARK Keno Parent=$keno/mark *:[switch([u(FUN_PLR.Playing,%#)][u(FUN_PICKS.Valid,setunion(secure(%0),))],0?,u(TRI_ERROR,%#,PLR_!PLAYING),10,u(TRI_ERROR,%#,PICKS_!VALID),11,u(TRI_KENO.Mark,%#,setunion(secure(%0),)),u(TRI_SYSERR,%#))]
+&CMD_KENO.HELP Keno Parent=$keno/help:[pemit(%#,[ansi(v(FONT_HELP.Border),[repeat(-,78)]%r<<<<<)][ansi(v(FONT_HELP.Header),center(KENO -- HELP SECTION,68))][ansi(v(FONT_HELP.Border),>>>>>%r[repeat(-,78)])]%rKeno is like a Lottery system\, but a bit more flexible.  In Keno\, you can choose how many numbers you want to 'mark' and your winnings will be calculated based on that. Also\, your winnings are directly ratio'd to the amount you bet -- thus allowing more control on your rewards and losses.%r%r[ansi(v(FONT_HELP.Title),Commands:%r---------)]%r%b%b[ansi(v(FONT_HELP.Cmds),ljust(keno/setup,16))] - Resets the Keno Machine \(Admin Only\).%r%b%b[ansi(v(FONT_HELP.Cmds),ljust(keno/bet <#>,16))] - Makes a bet using specified number of credits.%r%b%b[ansi(v(FONT_HELP.Cmds),ljust(keno/mark <list>,16))] - Marks the specified list of numbers.%r%b%b[ansi(v(FONT_HELP.Cmds),ljust(keno/start,16))] - Causes the Keno random selection to begin.%r%b%b[ansi(v(FONT_HELP.Cmds),ljust(keno/screen,16))] - Views the current Keno screen.%r%b%B[ansi(v(FONT_HELP.CMds),ljust(keno/payoffs,16))] - Shows a chart of Keno payoffs.%r%b%b[ansi(v(FONT_HELP.Cmds),ljust(keno/copyright,16))] - Shows Copyright information.%r%r* Type '[ansi(v(FONT_HELP.Cmds),keno/rules)]' for instructions on how to play the game.%r[ansi(v(FONT_HELP.Border),repeat(-,78))])]
+&CMD_KENO.COPYRIGHT Keno Parent=$keno/copy*:[pemit(%#,Keno Code v[v(DATA_VERSION)] -- Created by: Demonic \(1999\)%rUpdated versions of this code can be found on:%r%b%bhttp://www.mindspring.com/~loparo)]
+&CMD_KENO.RULES Keno Parent=$keno/rules:[pemit(%#,[ansi(v(FONT_RULES.Border),[repeat(-,78)]%r<<<<<)][ansi(v(FONT_RULES.Header),center(KENO -- RULES SECTION,68))][ansi(v(FONT_RULES.Border),>>>>>%r[repeat(-,78)])]%rThe first thing you must do is place a bet.  The amount you bet directly influences your winnings.  For example\, if you bet 4 credits you will win four times as much as if you were to bet only 1 credit -- on the flipside\, you will also lose four times as much should you not win.%r%rNext you must choose the numbers you want.  You can select between [v(DATA_PICKS.Min)] and [v(DATA_PICKS.Max)] numbers at a time -- each one must be between 1 and 80.  The more numbers you pick\, the more numbers you must 'match' to win\, but the rewards will also be higher.%r%rNext you must '[ansi(v(FONT_RULES.Cmds),keno/start)]'.  This will cause the machine to randomly pick twenty numbers (between 1 and 80).  For each number that it picks\, it will check to see if you 'marked' it.  If you have\, it is called a MATCH -- and if you get enough matches\, you will win money according to your bet and according to the payoff chart.  To see the payoff chart\, type '[ansi(v(FONT_RULES.Cmds),keno/payoffs)]'.%r[ansi(v(FONT_RULES.Border),repeat(-,78))])]
+&CMD_KENO.SETUP Keno Parent=$keno/setup:[ifelse(u(FUN_PLR.Auth,%#),u(TRI_KENO.Setup,%#),u(TRI_ERROR,%#,PLR_!AUTH))]
+think [ansi(hm,INSTALL:)] Downloading Keno Triggers...
+&TRI_ERROR Keno Parent=[pemit(%0,[u(DATA_PREFIX.Error)][space(not(not(words(u(DATA_PREFIX.Error)))))][u(ERR_%1,%2,%3,%4)])]
+&TRI_SYSERR Keno Parent=[pemit(%0,[ansi(hfr,SYSERR:)] There is a bug in the code. Report this to an Admin immediately.)]
+&TRI_MESSAGE Keno Parent=[remit(me,[u(DATA_PREFIX.Game)][space(not(not(words(u(DATA_PREFIX.Game)))))][u(MSG_%0,%1,%2,%3)])]
+&TRI_KENO.BET Keno Parent=[setq(1,0)][ifelse(eq(words(v(DATA_PLAYER.DB)),0),[u(TRI_MESSAGE,NEW_PLAYER,%0,%1)][set(me,DATA_PLAYER.DB:%0)][set(me,DATA_PLAYER.Bet:%1)][u(TRI_SET.Plr-Money,%0,sub(u(FUN_GET.Plr-Money,%0),setr(1,mul(%1,v(DATA_CREDIT.Value)))))][ifelse(member(v(DATA_PLAYER.Last),%0),,[set(me,DATA_PLAYER.Last:%0)][set(me,DATA_PLAYER.Nums:)])],[u(TRI_MESSAGE,SAME_PLAYER,%0,%1)][u(TRI_SET.Plr-Money,%0,add(u(FUN_GET.Plr-Money,%0),setr(1,sub(mul(v(DATA_PLAYER.Bet),v(DATA_CREDIT.Value)),mul(v(DATA_CREDIT.Value),%1)))))][setq(1,mul(%q1,-1))][set(me,DATA_PLAYER.Bet:%1)])][u(TRI_INCREASE.Keno,%q1)][u(TRI_MESSAGE,NEXT_PICK,%0)]
+&TRI_SET.PLR-MONEY Keno Parent=[ifelse(gte(%1,v(DATA_MAX.Money)),[set(%0,[v(VAR_MONEY)]:[v(DATA_MAX.Money)])][pemit(%0,[u(DATA_PREFIX.Warn)] You cannot carry any more money! Any money won from this point on will NOT be given to you.)][set(me,DATA_KENO.Money:[add(v(DATA_KENO.Money),sub(%1,v(DATA_MAX.Money)))])],set(%0,[v(VAR_MONEY)]:%1))]
+&TRI_KENO.START Keno Parent=[setq(2,0)][set(me,LAST_SELECTED:[sort(extract(shuffle(lnum(80,1)),1,20),n)])][u(TRI_MESSAGE,GAME_SELECTED,v(LAST_SELECTED))][setq(0,words(setinter(v(LAST_SELECTED),v(DATA_PLAYER.Nums))))][ifelse(eq(words(setr(1,extract(v(LIST_PAYOFF.[words(v(DATA_PLAYER.Nums))]),%q0,1))),0),setq(1,0),)][ifelse(eq(%q0,0),u(TRI_MESSAGE,PLR_LOST,%0),ifelse(eq(%q1,0),u(TRI_MESSAGE,PLR_WON_NOTHING,%0,%q0),[u(TRI_MESSAGE,PLR_WON,%0,%q0,setr(2,mul(mul(%q1,v(DATA_CREDIT.Value)),v(DATA_PLAYER.Bet))))][u(TRI_SET.Plr-Money,%0,add(u(FUN_GET.Plr-Money,%0),%q2))]))][u(TRI_DECREASE.Keno,%q2)][u(TRI_RESET)][pemit(%0,u(DRAW_KENO.Screen,%0))]
+&TRI_RESET Keno Parent=[set(me,DATA_PLAYER.DB:)][set(me,DATA_PLAYER.Bet:)]
+&TRI_INCREASE.KENO Keno Parent=[set(me,DATA_KENO.Money:[add(v(DATA_KENO.Money),%0)])]
+&TRI_DECREASE.KENO Keno Parent=[set(me,DATA_KENO.Money:[sub(v(DATA_KENO.Money),%0)])]
+&TRI_AUTO.STUFF Keno Parent=[ifelse(and(match(pmatch(%1),%0),match(v(DATA_PLAYER.DB),%0)),u(TRI_AUTO.FORFEIT,%0),)]
+&TRI_AUTO.FORFEIT Keno Parent=[u(TRI_MESSAGE,PLR_FORFEITS,%0)][u(TRI_RESET)]
+&TRI_KENO.MARK Keno Parent=[ifelse(words(v(DATA_PLAYER.Nums)),u(TRI_MESSAGE,PLR_CHANGES-Picks,%0,%1),u(TRI_MESSAGE,PLR_NEW-Picks,%0,%1))][set(me,DATA_PLAYER.Nums:%1)][pemit(%0,u(DRAW_KENO.Screen,%0))][u(TRI_MESSAGE,NEXT_START,%0)]
+&TRI_KENO.SETUP Keno Parent=[lock(me,me)][lock(me/use,LOCK_AT.Machine/1)][set(me,LISTEN_DISCONNECT:^* has disconnected.:\[u\(TRI_AUTO.Stuff\,\%#\,\%0\)\])][set(me,DATA_CREDIT.Value:[v(DATA_CREDIT.Value)])][set(me,DATA_PLAYER.DB:)][set(me,DATA_PLAYER.Nums:)][set(me,DATA_PLAYER.Last:)][set(me,DATA_PLAYER.Bet:)][set(me,LAST_SELECTED:)][set(me,MONITOR)][set(me,ENTER_OK)][u(TRI_MESSAGE,PLR_SETUP,%0)]
+think [ansi(hm,INSTALL:)] Downloading Keno Variables...
+&VAR_MONEY Keno Parent=Econ_Money
+think [ansi(hm,INSTALL:)] Downloading Keno Data...
+&DATA_BET.MIN Keno Parent=1
+&DATA_BET.MAX Keno Parent=6
+&DATA_CREDIT.VALUE Keno Parent=1
+&DATA_MONEY.SINGULAR Keno Parent=dollar
+&DATA_MEONY.PLURAL Keno Parent=dollars
+&DATA_MONEY.PLURAL Keno Parent=dollars
+&DATA_PICKS.MIN Keno Parent=2
+&DATA_PICKS.MAX Keno Parent=10
+&DATA_VERSION Keno Parent=2.1
+&DATA_KENO.Money Keno Parent=1000000
+&DATA_MAX.MONEY Keno Parent=200000
+think [ansi(hm,INSTALL:)] Downloading Keno ASCII-Art...
+&DRAW_PAYOFF.LINE Keno Parent=[ansi(v(FONT_PAYOFFS.Title2),rjust(%0,5))]%b [ansi(v(FONT_PAYOFFS.Border),|)][iter(revwords(lnum(trunc(v(DATA_PICKS.Max)),trunc(v(DATA_PICKS.Min)))),[rjust(ifelse(words(setr(2,extract(v(LIST_PAYOFF.##),%0,1))),%q2,0),ifelse(eq(#@,1),5,7))])]
+&DRAW_PAYOFFS.HEADER Keno Parent=[ansi(v(FONT_PAYOFFS.Border),[repeat(-,78)]%r<<<<<)][ansi(v(FONT_PAYOFFS.Header),center(KENO PAYOFFS,68))][ansi(v(FONT_PAYOFFS.Border),>>>>>%r-------.[repeat(-,70)])]%r[ansi(v(FONT_PAYOFFS.Title),Amount)] [ansi(v(FONT_PAYOFFS.Border),|)][ansi(v(FONT_PAYOFFS.Title),[center(Number of Selections You Made,70)]%rMatched)][ansi(v(FONT_PAYOFFS.Border),|)][ansi(v(FONT_PAYOFFS.Title2),iter(revwords(lnum(trunc(v(DATA_PICKS.Max)),trunc(v(DATA_PICKS.Min)))),rjust(##,ifelse(eq(#@,1),5,7))))]%r[ansi(v(FONT_PAYOFFS.Border),-------|[repeat(-,70)])]
+&DRAW_PAYOFFS.FOOTER Keno Parent=[ansi(v(FONT_PAYOFFS.Border),repeat(-,78))]
+&DRAW_KENO.SCREEN Keno Parent=[setq(0,space(0))][iter(lnum(80),setq(0,%q0 [ifelse(v(DATA_PLAYER.Bet),n,ifelse(member(v(LAST_SELECTED),#@),ifelse(member(v(DATA_PLAYER.Nums),#@),v(FONT_SCREEN.Hit),v(FONT_SCREEN.Miss)),n))]))][repeat(_,79)][u(DRAW_SCREEN.Line,1,%q0)][u(DRAW_SCREEN.Line,21,%q0)]%r%r[ifelse(v(DATA_PLAYER.Bet),[ansi(v(FONT_SCREEN.YouBet),[ifelse(member(v(DATA_PLAYER.DB),%0),You have,[name(v(DATA_PLAYER.DB))] has)] bet: [v(DATA_PLAYER.Bet)] Credit \([setr(3,mul(v(DATA_PLAYER.Bet),v(DATA_CREDIT.Value)))] [u(FUN_MONEY.Name,%q3)]\))]%r[ansi(v(FONT_SCREEN.YouMarked),[ifelse(member(v(DATA_PLAYER.DB),%0),You have,[name(v(DATA_PLAYER.DB))] has)] marked: [edit(v(DATA_PLAYER.Nums),%b,\,%b)])]%r[ansi(v(FONT_SCREEN.LastNums),Last numbers:%r[edit(v(LAST_SELECTED),%b,\,%b)])],* - The number was marked.%r[ansi(v(FONT_SCREEN.Hit),%b)] - The number was randomly selected and marked \(a MATCH\).%r[ansi(v(FONT_SCREEN.Miss),%b)] - The number was randomly selected but not marked.%r%rType '[ansi(v(FONT_SCREEN.Cmds),keno/bet <#>)]' to start a new game.)]%r[repeat(_,79)][u(DRAW_SCREEN.Line,41,%q0)][u(DRAW_SCREEN.Line,61,%q0)]
+&DRAW_SCREEN.LINE Keno Parent=%r[ansi(extract(%1,%0,1),%b%b%b)][iter(lnum(19),|[ansi(extract(%1,add(#@,%0),1),%b%b%b)],%b,space(0))]%r[ansi(extract(%1,%0,1),[rjust(ifelse(member(v(DATA_PLAYER.Nums),%0),*,%0),2)]%b)][iter(lnum(19),|[ansi(extract(%1,add(#@,%0),1),[rjust(ifelse(member(v(DATA_PLAYER.Nums),add(#@,%0)),*,add(#@,%0)),2)]%b)],%b,space(0))]%r[ansi(extract(%1,%0,1),___)][iter(lnum(19),|[ansi(extract(%1,add(#@,%0),1),___)],%b,space(0))]
+think [ansi(hm,INSTALL:)] Downloading Keno Error Messages...
+&ERR_PLR_!VALID Keno Parent=You are not a valid player.
+&ERR_PLR_BANNED Keno Parent=You are banned from playing Keno.
+&ERR_!ENOUGH_MONEY Keno Parent=You do not have enough money to do that.
+&ERR_PLR_!PLAYING Keno Parent=[ifelse(words(v(DATA_PLAYER.DB)),But [name(v(DATA_PLAYER.DB))] is already playing.,But you have not bet yet.)]
+&ERR_BET_!VALID Keno Parent=Your bet must be between [v(DATA_BET.Min)] and [v(DATA_BET.Max)] credits.
+&ERR_PICKS_!VALID Keno Parent=One or more of your picks are not valid. You must choose between [v(DATA_PICKS.Min)] and [v(DATA_PICKS.Max)] numbers\, with each one being between 1 and 80.
+&ERR_MUST_PICK Keno Parent=You must pick your numbers before starting the machine.
+&ERR_OUT_OF_MONEY Keno Parent=This machine does not have enough money to cover that bet. Please contact the Casino owner.
+think [ansi(hm,INSTALL:)] Downloading Keno Fonts...
+&FONT_PAYOFFS.BORDER Keno Parent=hb
+&FONT_PAYOFFS.TITLE Keno Parent=hc
+&FONT_PAYOFFS.TITLE2 Keno Parent=hm
+&FONT_PAYOFFS.HEADER Keno Parent=hm
+&FONT_SCREEN.HIT Keno Parent=Rw
+&FONT_SCREEN.MISS Keno Parent=Bw
+&FONT_SCREEN.CMDS Keno Parent=hc
+&FONT_SCREEN.YOUBET Keno Parent=hg
+&FONT_SCREEN.YOUMARKED Keno Parent=hm
+&FONT_SCREEN.LASTNUMS Keno Parent=hc
+&FONT_KENO.CMDS Keno Parent=hc
+&FONT_HELP.BORDER Keno Parent=hb
+&FONT_HELP.HEADER Keno Parent=hc
+&FONT_HELP.CMDS Keno Parent=hc
+&FONT_HELP.TITLE Keno Parent=hb
+&FONT_RULES.CMDS Keno Parent=hc
+&FONT_RULES.BORDER Keno Parent=hb
+&FONT_RULES.HEADER Keno Parent=hc
+&FONT_DESC.INFO Keno Parent=hg
+&FONT_DESC.BORDER Keno Parent=hb
+think [ansi(hm,INSTALL:)] Downloading Keno Functions...
+&FUN_PLR.PLAYING Keno Parent=[member(v(DATA_PLAYER.DB),%0)]
+&FUN_ENOUGH.MONEY Keno Parent=[gte(trunc(u(FUN_GET.Plr-Money,%0)),trunc(%1))]
+&FUN_PLR.VALID Keno Parent=[hastype(%0,PLAYER)]
+&FUN_PLR.BANNED Keno Parent=[not(not(member(v(LIST_KENO.Banned),%0)))]
+&FUN_BET.VALID Keno Parent=[and(gte(%0,trunc(v(DATA_BET.Min))),lte(%0,trunc(v(DATA_BET.Max)))]
+&FUN_GET.PLR-MONEY Keno Parent=[default(%0/[v(VAR_MONEY)],0)]
+&FUN_MONEY.NAME Keno Parent=[ifelse(eq(%0,1),u(DATA_MONEY.Singular),u(DATA_MONEY.Plural))]
+&FUN_PICKS.VALID Keno Parent=[and(and(gte(words(%0),v(DATA_PICKS.Min)),lte(words(%0),v(DATA_PICKS.Max))),not(member(iter(%0,member(lnum(80,1),##)),0)))]
+&FUN_PLR.AUTH Keno Parent=[hasflag(%0,Wizard)]
+&FUN_KENO.ENOUGH-MONEY Keno Parent=[gte(v(DATA_KENO.Money),%0)]
+think [ansi(hm,INSTALL:)] Downloading Keno Lists...
+&LIST_ATTRIBUTES Keno Parent=AENTER ALEAVE CMD DATA DESCRIBE DRAW ENTER ERR FAILURE FONT FUN LEAVE LIST LISTEN LOCK MSG OENTER OLEAVE OXENTER OXLEAVE TRI VAR
+&LIST_PAYOFF.2 Keno Parent=2   4
+&LIST_PAYOFF.6 Keno Parent=0   0  1   6   90  1600
+&LIST_PAYOFF.5 Keno Parent=.25 .5 2   14  810
+&LIST_PAYOFF.7 Keno Parent=0   0  .25   3   21  400  7000
+&LIST_PAYOFF.8 Keno Parent=0   0  0   2   12  90   1650 25000
+&LIST_PAYOFF.9 Keno Parent=0   0  0   1   5   45   335  4700  50000
+&LIST_PAYOFF.10 Keno Parent=0   0  0 .5  3   24   140  1000  7500  100000
+&LIST_PAYOFF.3 Keno Parent=1   3  20
+&LIST_PAYOFF.4 Keno Parent=.75 1  10  40
+think [ansi(hm,INSTALL:)] Downloading Keno Monitors...
+&LISTEN_DISCONNECT Keno Parent=^* has disconnected.:[u(TRI_AUTO.Stuff,%#,%0)]
+think [ansi(hm,INSTALL:)] Downloading Keno Locks...
+&LOCK_AT.MACHINE Keno Parent=[member(%l,%!)]
+think [ansi(hm,INSTALL:)] Downloading Keno Game Messages...
+&MSG_NEW_PLAYER Keno Parent=[name(%0)] BETS %1 [ifelse(eq(%1,1),credit,credits)] \([mul(%1,v(DATA_CREDIT.Value))] [u(FUN_MONEY.Name,mul(%1,v(DATA_CREDIT.Value)))]\) at the Keno Machine.
+&MSG_SAME_PLAYER Keno Parent=[name(%0)] changes [poss(%0)] Keno BET to %1 [ifelse(eq(%1,1),credit,credits)] \([mul(%1,v(DATA_CREDIT.Value))] [u(FUN_MONEY.Name,mul(%1,v(DATA_CREDIT.Value)))]\).
+&MSG_PLR_CHANGES-PICKS Keno Parent=[name(%0)] changes [poss(%0)] PICKS to: [edit(%1,%b,\,%b)].
+&MSG_PLR_NEW-PICKS Keno Parent=[name(%0)] makes the following Keno PICKS: [edit(%1,%b,\,%b)].
+&MSG_PLR_LOST Keno Parent=[name(%0)] has no matches this time.
+&MSG_PLR_WON Keno Parent=[name(%0)] WON %2 [u(FUN_MONEY.Name,%2)] with %1 matches!
+&MSG_GAME_SELECTED Keno Parent=The game selects the numbers: %r[iter(%0,ifelse(member(v(DATA_PLAYER.Nums),##),ansi(hr,##),ansi(hc,##)),%b,\,%b)]
+&MSG_PLR_WON_NOTHING Keno Parent=[name(%0)] matched %1 [ifelse(eq(%1,1),number,numbers)] but won nothing.
+&MSG_NEXT_PICK Keno Parent=[name(%0)]\, you may now '[ansi(v(FONT_KENO.Cmds),keno/mark <list>)]'[ifelse(words(v(DATA_PLAYER.Nums)),%bor '[ansi(v(FONT_KENO.Cmds),keno/start)]',)].
+&MSG_NEXT_START Keno Parent=[name(%0)]\, you may now '[ansi(v(FONT_KENO.Cmds),keno/start)]'.
+&MSG_PLR_FORFEITS Keno Parent=[name(%0)]\(%0\) automatically forfeits [poss(%0)] bet!
+&MSG_PLR_SETUP Keno Parent=[name(%0)]\(%0\) has RESET the Keno Machine.
+think [ansi(hm,INSTALL:)] Downloading Keno Object Messages...
+@OENTER Keno Parent=approaches the Keno Machine from [name(loc(me))].
+@OLEAVE Keno Parent=departs the Keno Machine and heads back toward [name(loc(me))].
+@OXENTER Keno Parent=departs toward [name(me)]'s area.
+@OXLEAVE Keno Parent=approaches from [name(me)]'s area.
+@AENTER Keno Parent=[pemit(%#,* Type '[ansi(v(FONT_KENO.Cmds),keno/help)]' for more information.)]
+@ALEAVE Keno Parent=[u(TRI_AUTO.Stuff,%#,%n)]
+@LEAVE Keno Parent=You depart [name(me)]'s area.
+@FAILURE Keno Parent=It seems to be bolted to the ground.
+@ENTER Keno Parent=You approach [name(me)]'s area.
+@IDESCRIBE Keno Parent=[u(ADD_DESC)][ansi(v(FONT_DESC.Border),%r--------------%r)]This is a [ansi(v(FONT_DESC.Info),[v(DATA_CREDIT.Value)] [u(FUN_MONEY.Name,v(DATA_CREDIT.Value))])] per 'credit' Keno Machine.
+@DESCRIBE Keno Parent=Type '[ansi(hc,enter [name(me)])]' to play a game.
+think [ansi(hm,INSTALL:)] Downloading Keno Prefixes...
+&DATA_PREFIX.WARN Keno Parent=[ansi(hy,WARN:)]
+&DATA_PREFIX.GAME Keno Parent=[ansi(hg,GAME:)]
+&DATA_PREFIX.ERROR Keno Parent=[ansi(hr,ERROR:)]
+&DATA_PREFIX.SYSERR Keno Parent=[ansi(fhr,SYSERR:)]
+think [ansi(hm,INSTALL:)] [ansi(hr,Download is complete!  Now you must do the following:)]
+think [ansi(hm,INSTALL:)] %b%b%b- @create a Keno Machine and drop it
+think [ansi(hm,INSTALL:)] %b%b%b- @parent the created object to the Keno Parent
+think [ansi(hm,INSTALL:)] %b%b%b- @set the created object !NO_COMMAND and !HALT
+think [ansi(hm,INSTALL:)] %b%b%b- Enter the created object and type keno/setup
+think [ansi(hm,INSTALL:)] %b%b%b- Set the created object WIZARD if others will be using it.
+think [ansi(hm,INSTALL:)] %b%b%b- BE SURE TO SET &VAR_MONEY ON THE KENO PARENT.  It
+think [ansi(hm,INSTALL:)] %b%b%b%b should be set to the name of the variable you use for money.
+think [ansi(hm,INSTALL:)] 
+think [ansi(hm,INSTALL:)] The Copyright must stay with this code.  If you have any questions
+think [ansi(hm,INSTALL:)] or complaints \(bug reports\) concerning this code\, please contact
+think [ansi(hm,INSTALL:)] me at: [ansi(hc,worldwar@bb6.betterbox.net)].  Thank you.
+@set me=!quiet
+

@@ -1,0 +1,833 @@
+Keran's MUX Weather and Time Code Package
+Version 3.0
+
+Installation Instructions and Code
+
+You can do anything with this code except sell it or claim credit for
+the parts I wrote.
+
+You need to be a wizard to install this code. Quote the items below to
+your MUX, one at a time; if you try to quote all the code at once
+you'll very likely overrun your buffer.
+
+You should have the following 14 items when you get done:
+
+     Time Functions Object 
+     Tree Weather Descriptions Bank (optional) 
+     Weather Long Descriptions Bank 
+     Box of Keran's Weather Stuff, with Notes 
+     Globals and Common +Function help 
+     Weather and Time Topics 
+     Weathermaker 
+     Wizard Weather and Time Commands 
+     Slave Weather Station (optional) 
+     Clock 
+     Uncommon +function help 
+     Outdoor Parent Room 
+     Emits Bank 
+     Global Command Object 
+
+Carefully note which item receives which number in your database, and
+@edit the items so that database reference numbers in the code point
+to the correct item. You can plug your new numbers into the following
+commands, which you should probably execute one line at time because
+some of the items are very large and editing them all at once will
+likely exceed your buffer limit. Do not @edit the Box; it contains a
+reference to my original MUX code #'s in case any of the @edits fail
+for some reason.
+
+@edit <new item>/* = #7, <new Time Functions #>
+@edit <new item>/* = #25, <new Tree Weather Descriptions #>
+@edit <new item>/* = #26, <new Weather Long Desc Bank #>
+@edit <new item>/* = #106, <new Global and Common +Function help #>
+@edit <new item>/* = #109, <new Weather and Time Topics #>
+@edit <new item>/* = #111, <new Weathermaker #>
+@edit <new item>/* = #113, <new Wizard Weather and Time Commands #>
+@edit <new item>/* = #114, <new Slave Weather Station #>
+@edit <new item>/* = #115, <new Clock #>
+@edit <new item>/* = #116, <new Uncommon +Functions help #>
+@edit <new item>/* = #133, <new Outdoor Parent Room #>
+@edit <new item>/* = #173, <new Emits Bank #>
+@edit <new item>/* = #175, <new Global Command Object #>
+
+Make sure Time Functions is set visual. 
+
+Make sure the Emits Bank is set royalty. 
+
+Make sure the Box, the Global Command Object, and the Wizard Weather
+and Time Command object are set !no_command. 
+
+Make sure the Clock and the Wizard Weather and Time Command object
+are set wizard or inherit.
+
+@link the Global Command Object to the Master Room and put it there.
+
+@link all the other items to the Box, put them in the Box, and put
+the Box in the Auxiliary Room.
+
+Read +topic global-setup to see how to put the required global
+functions on #1. Log in as #1, put the global function setup on #1,
+and @restart the MUX. Log out as #1 and relog as yourself. The code
+should work if you omit this step; however, the documentation will
+be incorrect, since it assumes randword(), blank2tilde(), and
+tilde2blank() are installed as global functions.
+
+@trigger Clock/startup.
+
+Test the installation so far by typing '+today'. You should get
+intelligible results.
+
+Type @ps. You should see the Clock in the wait queue.
+
+Look in the Outdoor Parent Room. You should see this, followed by the
+instructions:
+
+     This part of the desc never changes. This is what the place is
+     like by <day or night>. This is what the place is like in <season>.
+
+     <A short weather desc from the Weathermaker>
+
+Edit the +today command on the Global Command Object so that instead of
+the stuff about King Halar, it says something appropriate to your
+setting.
+
+Find the +help entry on the Box and put it under a weather-and-time
+topic in your +help.
+
+Type +topic and read everything marked with a *. 
+
+Go to where the Wizard Weather and Time Command object can hear you
+and type +i wiz weather. Read the +help. Execute the commands for
+the calendar and compression you want to use. Reset time-begins if
+you want to.
+
+This is the end of basic installation. You may need to read other
++topics, depending on your setting; there are many ways this weather
+and time code can be customized outside the scope of basic
+installation.
+
+If you set up regional weather, you will need to @trigger Slave
+Weather Station/startup after it's set up; it should be in the
+semaphore queue (type @ps) after you do.
+
+
+
+#7 - Time Functions
+
+@create Time Functions=1
+@lock Time Functions=#0
+&RANDWORD Time Functions=[extract(%0, add(1, rand(words(%0))), 1)]
+&TILDE2BLANK Time Functions=[edit(v(0),~,%b)]
+&BLANK2TILDE Time Functions=[edit(v(0),%b,~)]
+&TIME-BEGINS Time Functions=838872000
+&STARTING-YEAR Time Functions=0
+&SECS-PER-DAY Time Functions=[mul(u(secs-per-hour), 24)]
+&SECS-PER-HOUR Time Functions=[fdiv(3600, u(clock-compression))]
+&SECS-PER-HALFDAY Time Functions=[mul(u(secs-per-hour), 12)]
+&SECS-PER-QUARTERDAY Time Functions=[mul(u(secs-per-hour), 6)]
+&SECS-PER-HALFHOUR Time Functions=[div(u(secs-per-hour), 2)]
+&DAY-FROM-0 Time Functions=[div(sub(secs(), u(time-begins)), u(secs-per-day))]
+&DAY-OF-YEAR Time Functions=[mod(u(day-from-0), u(days-per-year))]
+&YEAR Time Functions=[u(native-year)]
+&SEASON Time Functions=[u(native-season)]
+&HOUR Time Functions=[div(u(secs-elapsed-today), u(secs-per-hour))]
+&LAST-MIDNIGHT Time Functions=[add(mul(u(day-from-0), u(secs-per-day)), u(time-begins))]
+&NIGHT-LENGTH Time Functions=[sub(u(secs-per-day), u(day-length))]
+&DAY-LENGTH Time Functions=[round(add(mul(sin(fdiv(mul(mul(pi(), 2), u(day-of-year)), u(days-per-year))), u(day-length-variation)), u(secs-per-halfday)), 0)]
+&DAY-NIGHT Time Functions=[ifelse(and(lt(u(secs-elapsed-today), u(sunset)), gt(u(secs-elapsed-today), u(sunrise))), day, night)]
+&IS-DAWN Time Functions=[and(gt(u(secs-elapsed-today), sub(u(sunrise), u(secs-per-halfhour))), lt(u(secs-elapsed-today), add(u(sunrise), u(secs-per-halfhour))))]
+&IS-MIDNIGHT Time Functions=[or(gt(u(secs-elapsed-today), sub(u(secs-per-day), u(secs-per-halfhour))), lt(u(secs-elapsed-today), u(secs-per-halfhour)))]
+&IS-DUSK Time Functions=[and(gt(u(secs-elapsed-today), sub(u(sunset), u(secs-per-halfhour))), lt(u(secs-elapsed-today), add(u(sunset), u(secs-per-halfhour))))]
+&IS-NOON Time Functions=[and(gt(u(secs-elapsed-today), sub(u(secs-per-halfday), u(secs-per-halfhour))), lt(u(secs-elapsed-today), add(u(secs-per-halfday), u(secs-per-halfhour))))]
+&IFDAWN Time Functions=[ifelse(u(is-dawn), dawn, u(ifmorning))]
+&IFNOON Time Functions=[ifelse(u(is-noon), noon, u(ifafternoon))]
+&IFDUSK Time Functions=[ifelse(u(is-dusk), dusk, u(day-night))]
+&TIME-OF-DAY Time Functions=[ifelse(u(is-midnight), midnight, u(ifaftermidnight))]
+&DAY-NIGHT-DAWN-DUSK Time Functions=[ifelse(u(is-dawn), dawn, u(ifdusk))]
+&LONG-WEATHER Time Functions=[u(#26/[u(season)][u(day-night-dawn-dusk)][u(#111/weathertype)])]
+&SHORT-WEATHER Time Functions=[u(#111/[u(season)][u(#111/weathertype)])]
+&TREE-WEATHER Time Functions=[u(#25/trees_[u(season)]_[u(day-night)]_[u(#111/weathertype)])]
+&WINDOW Time Functions=[lcstr(first(u(long-weather)))] [rest(u(long-weather))]
+&MOON-ADJECTIVE Time Functions=[switch(u(day-night), day, {[switch([u(moon-phase-division)], 1, dark, 2, faint, 3, dim, 4, bright, 5, brilliant, 6, bright, 7, dim, 8, faint)]}, night, u(last-moon-adjective))]
+&MOON-PHASE Time Functions=[switch(u(day-night), day, {[switch([u(moon-phase-division)], 1, new, 2, waxing crescent, 3, first quarter, 4, waxing gibbous, 5, full, 6, waning gibbous, 7, last quarter, 8, waning crescent)]}, night, u(last-moon-phase))]
+&MOON-UP Time Functions=[switch([gt(secs(), u(moonrise))], 0, 0, 1, {[switch([lt(secs(), u(moonset))], 0, 0, 1, 1)]})]
+&SECS-PER-MOONDAY Time Functions=[sub(u(secs-per-day), mul(u(sunday-minus-moonday-in-minutes), round(fdiv(60, u(clock-compression)), 0), u(calendar-compression)))]
+&MOONDAY-FROM-0 Time Functions=[div(sub(secs(), u(time-begins)), u(secs-per-moonday))]
+&CLOCK-COMPRESSION Time Functions=48
+&SECS-PER-TIDEDAY Time Functions=[div(u(secs-per-moonday), 2)]
+&TIDEDAY-FROM-0 Time Functions=[div(sub(secs(), u(time-begins)), u(secs-per-tideday))]
+&FLOOD-BEGINS Time Functions=[add(mul(u(tideday-from-0), u(secs-per-tideday)), u(time-begins))]
+&MID-FLOOD Time Functions=[add(u(tide-cycle-begins), div(u(secs-per-tideday), 4))]
+&EBB-BEGINS Time Functions=[add(u(tide-cycle-begins), div(u(secs-per-tideday), 2))]
+&MID-EBB Time Functions=[add(u(tide-cycle-begins), mul(div(u(secs-per-tideday), 4), 3))]
+&SLACK-HIGH-WATER-BEGINS Time Functions=[sub(u(ebb-begins), u(secs-per-halfhour))]
+&SLACK-HIGH-WATER-ENDS Time Functions=[add(u(ebb-begins), u(secs-per-halfhour))]
+&SLACK-LOW-WATER-BEGINS Time Functions=[add(u(flood-begins), sub(div(u(time/secs-per-moonday), 2), u(time/secs-per-halfhour)))]
+&SLACK-LOW-WATER-ENDS Time Functions=[add(u(tide-cycle-begins), u(secs-per-hour))]
+&LOW-AND-RISING Time Functions=[and(gte(secs(), u(slack-low-water-ends)), lt(secs(), u(mid-flood)))]
+&HIGH-AND-RISING Time Functions=[and(gte(secs(), u(mid-flood)), lt(secs(), u(slack-high-water-begins)))]
+&SLACK-HIGH-WATER Time Functions=[and(gte(secs(), u(slack-high-water-begins)), lt(secs(), u(slack-high-water-ends)))]
+&HIGH-AND-EBBING Time Functions=[and(gte(secs(), u(slack-high-water-ends)), lt(secs(), u(mid-ebb)))]
+&LOW-AND-EBBING Time Functions=[gte(secs(), u(mid-ebb))]
+&SLACK-LOW-WATER Time Functions=[and(gte(secs(), u(tide-cycle-begins)), lt(secs(), u(slack-low-water-ends)))]
+&TIDE Time Functions=[ifelse(u(low-and-rising), low and rising,)][ifelse(u(high-and-rising), high and rising,)][ifelse(u(slack-high-water), high and slack,)][ifelse(u(high-and-ebbing), high and ebbing,)][ifelse(u(low-and-ebbing), low and ebbing,)][ifelse(u(slack-low-water), low and slack,)]
+&SUNDAY-MINUS-MOONDAY-IN-MINUTES Time Functions=48
+&MOON-PHASE-DIVISION Time Functions=[inc(div(u(secs-elapsed-this-lunar-month), div(u(secs-per-lunar-month), 8)))]
+&DAYS-PER-YEAR Time Functions=[div(u(base-days-per-year), u(calendar-compression))]
+&DAYS-PER-SEASON Time Functions=[div(u(days-per-year), 4)]
+&CALENDAR-COMPRESSION Time Functions=1
+&MOON-PHASE-UNADJUSTED Time Functions=[switch([u(moon-phase-division)], 1, new, 2, waxing crescent, 3, first quarter, 4, waxing gibbous, 5, full, 6, waning gibbous, 7, last quarter, 8, waning crescent)]
+&LAST-MOON-PHASE Time Functions=waxing crescent
+&MOON-ADJECTIVE-UNADJUSTED Time Functions=[switch([u(moon-phase-division)], 1, dark, 2, faint, 3, dim, 4, bright, 5, brilliant, 6, bright, 7, dim, 8, faint)]
+&LAST-MOON-ADJECTIVE Time Functions=faint
+&CALENDAR-MONTH Time Functions=the [elements(first~month~of~spring second~month~of~spring third~month~of~spring first~month~of~summer second~month~of~summer third~month~of~summer first~month~of~autumn second~month~of~autumn third~month~of~autumn first~month~of~winter second~month~of~winter third~month~of~winter, u(number-of-calendar-month))]
+&NUMBER-OF-CALENDAR-MONTH Time Functions=[inc(mod(div(u(day-from-0), u(days-per-calendar-month)), 12))]
+&DAY-OF-CALENDAR-MONTH Time Functions=[inc(mod(u(day-of-year), u(days-per-calendar-month)))]
+&SECS-PER-CALENDAR-MONTH Time Functions=[mul(u(secs-per-day), u(days-per-calendar-month))]
+&SECS-PER-LUNAR-MONTH Time Functions=[mul(u(secs-per-day), u(days-per-lunar-month))]
+&DAYS-PER-CALENDAR-MONTH Time Functions=[div(u(days-per-year), 12)]
+&DAYS-PER-LUNAR-MONTH Time Functions=[div(u(days-per-year), 12)]
+&GREGORIAN-MONTH Time Functions=[elements(March April May June July August September October November December January February, u(number-of-calendar-month))]
+&GREGORIAN-SEASON Time Functions=[elements(spring summer autumn winter, add(mod(div(u(day-from-0), u(days-per-season)), 4), 1))]
+&DAY-OF-LUNAR-MONTH Time Functions=[inc(mod(u(day-of-year), u(days-per-lunar-month)))]
+&GREGORIAN-YEAR Time Functions=[switch(u(gregorian-month), January, inc(u(native-year)), February, inc(u(native-year)), u(native-year))]
+&IS-MORNING Time Functions=[and(gt(u(secs-elapsed-today), add(u(sunrise), u(secs-per-halfhour))), lt(u(secs-elapsed-today), sub(u(secs-per-halfday), u(secs-per-halfhour))))]
+&IS-AFTERNOON Time Functions=[and(gt(u(secs-elapsed-today), add(u(secs-per-halfday), u(secs-per-halfhour))), lt(u(secs-elapsed-today), sub(u(sunset), u(secs-per-halfhour))))]
+&IFMORNING Time Functions=[ifelse(u(is-morning), morning, u(ifnoon))]
+&IFAFTERNOON Time Functions=[ifelse(u(is-afternoon), afternoon, u(ifdusk))]
+&SUNSET Time Functions=[add(div(u(night-length), 2), u(day-length))]
+&SUNRISE Time Functions=[div(u(night-length), 2)]
+&MOONSET Time Functions=[add(u(moonrise), div(u(secs-per-moonday), 2))]
+&MOONRISE Time Functions=[add(mul(u(moonday-from-0), u(secs-per-moonday)), u(time-begins))]
+&NATIVE-SEASON Time Functions=[elements(spring summer autumn winter, add(mod(div(u(day-from-0), u(days-per-season)), 4), 1))]
+&NATIVE-YEAR Time Functions=[add(div(u(day-from-0), u(days-per-year)), u(starting-year))]
+&MONTH Time Functions=[u(calendar-month)]
+&SECS-ELAPSED-TODAY Time Functions=[mod(sub(secs(), u(time-begins)), u(secs-per-day))]
+&SECS-ELAPSED-THIS-CALENDAR-MONTH Time Functions=[mod(sub(secs(), u(time-begins)), u(secs-per-calendar-month))]
+&SECS-ELAPSED-THIS-LUNAR-MONTH Time Functions=[mod(sub(secs(), u(time-begins)), u(secs-per-lunar-month))]
+&BASE-DAYS-PER-YEAR Time Functions=360
+&WEEK Time Functions=[inc(div(mul(u(day-of-calendar-month), u(calendar-compression)), 7))]
+&WEATHERTYPE Time Functions=[u(#111/weathertype)]
+&TIDE-CYCLE-BEGINS Time Functions=[add(mul(u(tideday-from-0), u(secs-per-tideday)), u(time-begins))]
+&SLAVE-LONG-WEATHER Time Functions=[u(#26/[u(season)][u(day-night-dawn-dusk)][u(#114/weathertype)])]
+&SLAVE-SHORT-WEATHER Time Functions=[u(#111/[u(season)][u(#114/weathertype)])]
+&SLAVE-TREE-WEATHER Time Functions=[u(#25/trees_[u(season)]_[u(day-night)]_[u(#114/weathertype)])]
+&SLAVE-WEATHERTYPE Time Functions=[u(#114/weathertype)]
+@Desc Time Functions=This object has many important functions on it, including three that must be installed as Globals. (randword, blank2tilde, tilde2blank). It belongs in the Auxiliary room and has no commands on it. It should be set visual.
+&IS-AFTER-MIDNIGHT Time Functions=[and(gt(u(secs-elapsed-today), u(secs-per-halfhour)), lt(u(secs-elapsed-today), sub(u(sunrise), u(secs-per-halfhour))))]
+&IFAFTERMIDNIGHT Time Functions=[ifelse(u(is-after-midnight), after midnight, u(ifdawn))]
+&VERSION Time Functions=3.0
+&AUTHOR Time Functions=Keran@Keranset Island
+&DAY-LENGTH-VARIATION Time Functions=[mul(sub(u(solstice-day-length), 12), u(#7/secs-per-hour))]
+&SOLSTICE-DAY-LENGTH Time Functions=18
+@set Time Functions=VISUAL
+@set Time Functions=NO_COMMAND
+@set Time Functions=SAFE
+
+
+#25 - Tree Weather Descriptions (optional)
+
+@create Tree Weather Descriptions=1
+@lock Tree Weather Descriptions=#0
+&TREES_SPRING_DAY_FAIR Tree Weather Descriptions=[v(trees_spring_day_pollen)]
+&TREES_SPRING_DAY_CLEAR Tree Weather Descriptions=[v(trees_spring_day_pollen)]
+&TREES_SPRING_DAY_STORMY Tree Weather Descriptions=Gusts of wind tear through the tree limbs and howl around rocks, turning the leaves over so that you can see their silvery undersides.
+&TREES_SPRING_NIGHT_STORMY Tree Weather Descriptions=[v(trees_stormy)]
+&TREES_SPRING_NIGHT_OVERCAST Tree Weather Descriptions=[v(trees_spring_frogs)]
+&TREES_SPRING_NIGHT_CLEAR Tree Weather Descriptions=[v(trees_spring_frogs)]
+&TREES_SUMMER_NIGHT_CLEAR Tree Weather Descriptions=The leaves of the trees and bushes rustle in the breeze. Crickets and katydids sing throughout the night.
+&TREES_AUTUMN_NIGHT_CLEAR Tree Weather Descriptions=[v(trees_autumn_night)]
+&TREES_AUTUMN_NIGHT_STORMY Tree Weather Descriptions=[v(trees_stormy)] Fallen leaves blow past you in the dark.
+&TREES_SUMMER_NIGHT_STORMY Tree Weather Descriptions=[v(trees_stormy)]
+&TREES_SUMMER_DAY_STORMY Tree Weather Descriptions=[v(trees_stormy)]
+&TREES_AUTUMN_DAY_STORMY Tree Weather Descriptions=[v(trees_stormy)] Red, orange and gold leaves swirl past you on the wind.
+&TREES_SPRING_DAY_OVERCAST Tree Weather Descriptions=[v(trees_spring_day_pollen)]
+&TREES_SPRING_DAY_RAIN Tree Weather Descriptions=Raindrops patter against the fresh leaves, and glisten like silver beads on their bright green surfaces. The wet tree trunks have darkened from grey to brown.
+&TREES_SUMMER_DAY_RAIN Tree Weather Descriptions=Raindrops patter against the leaves, and glisten like silver beads on their deep green surfaces. The wet tree trunks have darkened from grey to brown.
+&TREES_AUTUMN_DAY_RAIN Tree Weather Descriptions=Raindrops patter against the leaves, and glisten like silver beads on their fiery vermillion and gold surfaces. The wet tree trunks have darkened from grey to brown.
+&TREES_AUTUMN_NIGHT_RAIN Tree Weather Descriptions=[v(trees_night_rain)]
+&TREES_SUMMER_NIGHT_RAIN Tree Weather Descriptions=[v(trees_night_rain)]
+&TREES_SPRING_NIGHT_RAIN Tree Weather Descriptions=[v(trees_night_rain)]
+&TREES_SUMMER_DAY_CLEAR Tree Weather Descriptions=The deep green leaves of the trees and bushes rustle in the breeze, which provides welcome cooling from the heat of the blazing sun.
+&TREES_AUTUNM_DAY_HUMID Tree Weather Descriptions=Only the nearest tree branches, half-bereft of leaves, show their full color; more distant trees and branches are colorless and indistinct in the pallid grey fog, looking ghostly and not quite real.
+&TREES_AUTUMN_DAY_CLEAR Tree Weather Descriptions=[v(trees_autumn_day)]
+&TREES_AUTUMN_DAY_OVERCAST Tree Weather Descriptions=[v(trees_autumn_day)]
+&TREES_AUTUMN_NIGHT_OVERCAST Tree Weather Descriptions=[v(trees_autumn_night)]
+&TREES_WINTER_DAY_OVERCAST Tree Weather Descriptions=Snow lingers in the forks of the broadleafed trees and on the needle-clad branches of the conifers.
+&TREES_WINTER_NIGHT_OVERCAST Tree Weather Descriptions=Snow lingers in the forks of the broadleafed trees and on the needle-clad branches of the conifers, limning them palely in the darkness.
+&TREES_WINTER_NIGHT_FAIR Tree Weather Descriptions=Blowing snow drifts against the trunks of the dark trees.
+&TREES_WINTER_DAY_FAIR Tree Weather Descriptions=Blowing snow drifts against the trunks of the trees.
+&TREES_WINTER_NIGHT_CLEAR Tree Weather Descriptions=Blowing snow drifts against the trunks of the dark trees, clinging to their windward sides.
+&TREES_WINTER_DAY_CLEAR Tree Weather Descriptions=[v(trees_winter_clear)]
+&TREES_SPRING_NIGHT_FAIR Tree Weather Descriptions=[v(trees_spring_frogs)]
+&TREES_SPRING_FROGS Tree Weather Descriptions=You can hear peepfrogs, bullfrogs, and treefrogs singing. The leaves of the trees and bushes rustle in the wind.
+&TREES_STORMY Tree Weather Descriptions=Gusts of wind tear through the tree limbs and howl around rocks.
+&TREES_NIGHT_RAIN Tree Weather Descriptions=Raindrops patter against the leaves, invisible in the darkness.
+&TREES_WINTER_CLEAR Tree Weather Descriptions=Blowing snow drifts against the trunks of the trees, clinging to their windward sides.
+&TREES_SUMMER_DAY_OVERCAST Tree Weather Descriptions=The deep green leaves of the trees are unstirred.
+&TREES_SUMMER_NIGHT_OVERCAST Tree Weather Descriptions=The leaves of the trees and bushes are unstirred.
+&TREES_SUMMER_DAY_FAIR Tree Weather Descriptions=The shade under the deep green leaves of the trees is welcome relief from the hot glare of the sun.
+&TREES_SUMMER_NIGHT_FAIR Tree Weather Descriptions=The shadows under the canopy of leaves are deep, and you can hear cicadas and crickets singing all around you.
+&TREES_AUTUMN_DAY Tree Weather Descriptions=Fiery red, gold, and orange leaves rustle and blow past you, swirling in the wind.
+&TREES_AUTUMN_DAY_FAIR Tree Weather Descriptions=[v(trees_autumn_day)]
+&TREES_AUTUMN_NIGHT Tree Weather Descriptions=Leaves on the ground rustle, unseen, stirred by the winds. Falling leaves blow past you, whirled around by the wind in the dark.
+&TREES_AUTUMN_NIGHT_FAIR Tree Weather Descriptions=[v(trees_autumn_night)]
+&TREES_SPRING_DAY_POLLEN Tree Weather Descriptions=The wind rustles the bright green leaves of trees and bushes and carries pollen, downy seeds, and the fragrance of wildflowers along with it.
+&TREES_WINTER_DAY_LIGHTSNOW Tree Weather Descriptions=Snowflurries dust the bare branches of the broadleaves and the needles of the conifers.
+&TREES_WINTER_NIGHT_LIGHTSNOW Tree Weather Descriptions=Snowflurries dust the bare branches of the broadleaves and the needles of the conifers, giving them faint pale outlines which render them visible in the darkness.
+&TREES_WINTER_DAY_SLEET Tree Weather Descriptions=Rain freezes on the bare twigs of the broadleafed trees and the needles of the conifers, coating them with a layer of glistening silver ice and weighing the branches down.
+&TREES_WINTER_NIGHT_SLEET Tree Weather Descriptions=Rain freezes on the tree limbs. Occasionally you hear the crack of a branch breaking, weighed down by its coating of ice.
+&TREES_WINTER_DAY_BLIZZARD Tree Weather Descriptions=The whirling curtain of snow accumulates in the forks of the trees and piles up in drifts against their trunks.
+&TREES_WINTER_NIGHT_BLIZZARD Tree Weather Descriptions=The whirling curtain of snow accumulates in the forks of the trees, outlining them in the darkness, and piles up in drifts against their trunks.
+&TREES_NIGHT_FOG Tree Weather Descriptions=The dark shapes of nearby trees loom at you suddenly out of the deep grey fog as you approach them.
+&TREES_WINTER_NIGHT_FOG Tree Weather Descriptions=In the darkness and the veils of fog, the bare branches of the trees fade from sight.
+&TREES_WINTER_DAY_FOG Tree Weather Descriptions=The bare branches of the trees form stark silhouettes of darker grey.
+&TREES_AUTUMN_DAY_FOG Tree Weather Descriptions=Only the nearest tree branches, half-bereft of leaves, show their full color; more distant trees and branches are colorless and indistinct in the pallid grey fog, looking ghostly and not quite real.
+&TREES_SUMMER_DAY_FOG Tree Weather Descriptions=Only the nearest tree branches show their full color; more distant trees and branches are colorless and indistinct in the pallid grey fog, looking ghostly and not quite real.
+&TREES_AUTUMN_NIGHT_FOG Tree Weather Descriptions=[v(trees_night_fog)]
+&TREES_SUMMER_NIGHT_FOG Tree Weather Descriptions=[v(trees_night_fog)]
+&TREES_SPRING_NIGHT_FOG Tree Weather Descriptions=[v(trees_night_fog)]
+&TREES_SPRING_DAY_FOG Tree Weather Descriptions=Only the nearest tree branches show the full color of their buds and new leaves; more distant trees and branches are colorless and indistinct in the pallid grey fog, looking ghostly and not quite real.
+&TREES_SPRING_DAY_LIGHTSNOW Tree Weather Descriptions=[v(trees_spring_day_pollen)]
+&TREES_SPRING_NIGHT_LIGHTSNOW Tree Weather Descriptions=[v(trees_spring_frogs)]
+&TREES_SPRING_NIGHT_SLEET Tree Weather Descriptions=[v(trees_night_rain)]
+&TREES_SPRING_DAY_SLEET Tree Weather Descriptions=Raindrops patter against the fresh leaves, and glisten like silver beads on their bright green surfaces. The wet tree trunks have darkened from grey to brown.
+&TREES_SPRING_DAY_BLIZZARD Tree Weather Descriptions=Gusts of wind tear through the tree limbs and howl around rocks, turning the leaves over so that you can see their silvery undersides.
+&TREES_SPRING_NIGHT_BLIZZARD Tree Weather Descriptions=[v(trees_stormy)]
+&TREES_WINTER_NIGHT_RAIN Tree Weather Descriptions=Rain freezes on the tree limbs. Occasionally you hear the crack of a branch breaking, weighed down by its coating of ice.
+&TREES_WINTER_DAY_RAIN Tree Weather Descriptions=Rain freezes on the bare twigs of the broadleafed trees and the needles of the conifers, coating them with a layer of glistening silver ice and weighing the branches down.
+&TREES_WINTER_DAY_STORMY Tree Weather Descriptions=The whirling curtain of snow accumulates in the forks of the trees and piles up in drifts against their trunks.
+&TREES_WINTER_NIGHT_STORMY Tree Weather Descriptions=The whirling curtain of snow accumulates in the forks of the trees, outlining them in the darkness, and piles up in drifts against their trunks.
+@Desc Tree Weather Descriptions=This is an auxiliary weather description bank. It has different descriptions for a temperate environment with a lot of leafy trees that vary by season and whether it's day or night. It belongs in the Auxiliary room and has no commands on it.
+&VERSION Tree Weather Descriptions=3.0
+&AUTHOR Tree Weather Descriptions=Keran@Keranset Island
+@set Tree Weather Descriptions=VISUAL
+@set Tree Weather Descriptions=NO_COMMAND
+@set Tree Weather Descriptions=SAFE
+
+
+#26 - Weather Long Description Bank
+
+@create Weather Long Description Bank=1
+@lock Weather Long Description Bank=#0
+&AUTUMNDAWNRAIN Weather Long Description Bank=Cold rain is falling as the sky begins to lighten to overcast grey. A raw wind blows from the east.
+&AUTUMNDAYRAIN Weather Long Description Bank=Chilly rain falls from a grey sky. It's bleak and raw. The wind blows from the east.
+&AUTUMNDUSKRAIN Weather Long Description Bank=A chilling rain falls as the grey sky darkens in the twilight. It's cold and wet. The wind blows from the east.
+&AUTUMNNIGHTRAIN Weather Long Description Bank=Cold rain falls from a grey-black sky without moon or stars. A raw wind blows from the east.
+&AUTUMNNIGHTCLEAR Weather Long Description Bank=The deep blue night sky is clear and cloudless, and the stars glitter. An icy wind blows from the northwest.
+&AUTUMNNIGHTSTORMY Weather Long Description Bank=Icy rain pours from grey-black clouds driven by a howling northeast wind.
+&AUTUMNDUSKSTORMY Weather Long Description Bank=A cold rain driven by a howling northeast wind drenches you while the clouded sky fades from grey to black.
+&AUTUMNDAYSTORMY Weather Long Description Bank=Chilling rain pours from thick grey clouds, driven by a furious northeast wind.
+&AUTUMNDAWNSTORMY Weather Long Description Bank=Cold rain pours from clouds slowly lightening from black to grey, driven by a howling northeaster wind.
+&AUTUMNDUSKCLEAR Weather Long Description Bank=The sun sets and the evening stars begin to appear in a blue and cloudless sky. A biting wind blows from the northwest.
+&AUTUMNDAYCLEAR Weather Long Description Bank=The sky is brilliant blue and cloudless, the sunlight is bright, and a brisk wind blows from the northwest.
+&AUTUMNDAWNCLEAR Weather Long Description Bank=It's a chilly morning and the brightening sky is clear and cloudless. The northwest wind is biting.
+&AUTUMNNIGHTOVERCAST Weather Long Description Bank=The sky is grey-black, without moon or star. It's hard for human eyes to see anything in the deep shadows round about, without a light. The wind is chilly.
+&AUTUMNDUSKOVERCAST Weather Long Description Bank=The grey of the clouds begins to darken. A chilling wind blows from the west.
+&AUTUMNDAWNOVERCAST Weather Long Description Bank=The overcast sky lightens from grey-black to cloudy grey as the sun rises. A chill wind blows from the northwest.
+&AUTUMNDAYOVERCAST Weather Long Description Bank=The sky is grey and cloudy, and nothing casts a shadow. The northwest wind is chilly.
+&AUTUMNNIGHTFAIR Weather Long Description Bank=A chilly wind blows from the west, driving dark clouds before it and blotting out the stars in patches overhead. The air is clear and elsewhere they glitter brightly in the dark sapphire sky.
+&AUTUMNDUSKFAIR Weather Long Description Bank=The fair weather clouds in the west turn orange, gold, carmine, and purple as the sun sets. A chill wind blows from the west.
+&AUTUMNDAYFAIR Weather Long Description Bank=Fair weather clouds drift through the blue sky from the west. The wind is gusty.
+&AUTUMNDAWNFAIR Weather Long Description Bank=Fair weather clouds glow pink and white-gold in the southeast, catching the rays of the rising sun while the earth remains in shadow. A cool wind blows from the west.
+&WINTERNIGHTRAIN Weather Long Description Bank=Icy rain and sleet fall invisibly from a grey-black sky. It's very dark and the ice makes walking on the slippery ground difficult. A raw wind blows from the northeast.
+&WINTERDUSKRAIN Weather Long Description Bank=Darkness comes early as thick clouds block the fading light of grey day. Freezing rain and sleet fall, coating everything with ice and making the ground slippery. Raw winds blow from the northeast.
+&WINTERDAYRAIN Weather Long Description Bank=Sleet and freezing rain fall from heavy clouds, coating everything with ice and making the ground slippery. The world looks silver in the icy grey light. A raw wind blows from the northeast.
+&WINTERDAWNRAIN Weather Long Description Bank=Darkness lingers and the dawn that breaks is grey. Sleet and freezing rain fall from heavy clouds, coating everything with ice and making the walking treacherous. Raw winds blow from the northeast.
+&WINTERNIGHTFAIR Weather Long Description Bank=A cold wind blows from the west, driving charcoal clouds before it and blotting out the stars in isolated patches overhead. The air is clear and elsewhere the stars shine brightly.
+&WINTERDUSKFAIR Weather Long Description Bank=The fair weather clouds in the west turn purple, gold, and vermillion as the sun sets. The snow, in shadow, looks blue. A cold wind blows from the west.
+&WINTERNIGHTCLEAR Weather Long Description Bank=The icy northwest wind howls, blowing snow about in savage gusts. The cold is intense. The sky is clear deep blue and the stars glitter, brilliant as diamonds.
+&WINTERDAWNCLEAR Weather Long Description Bank=The light of a cruelly cold dawn breaks in the southeast. The sky is clear and the northwest wind blasts snow across the landscape in gusts. Your breath fogs in the frigid air.
+&WINTERDUSKCLEAR Weather Long Description Bank=The cold becomes intense as the light fades from the sky. The evening stars glitter brightly. The northwest wind blows the snow about in freezing gusts.
+&WINTERDAWNFAIR Weather Long Description Bank=Fair weather clouds glow pink in the southeast, catching the rays of the rising sun while the earth remains in shadow. A cold wind blows from the west. You can see your breath misting in the cold air.
+&WINTERDAWNOVERCAST Weather Long Description Bank=Dawn's light is grey. A thin layer of translucent cloud obscures the sun, showing only a bright patch in the sky. The air is cold and slightly damp.
+&WINTERDUSKOVERCAST Weather Long Description Bank=The sky is a dull iron grey, and darkness closes in early. The air is cold and damp.
+&WINTERNIGHTOVERCAST Weather Long Description Bank=The sky is grey-black, moonless and starless. Human eyes can distinguish the snow from everything else, and not much more: every shape that isn't snow-covered is a black shadow. The air is damp and cold. There is little wind.
+&WINTERDAYCLEAR Weather Long Description Bank=The sky is cloudless and brilliant blue. The northwest wind is icy, blowing snow across the landscape in swirling white gusts.
+&WINTERDAYOVERCAST Weather Long Description Bank=The air is damp and cold, the sky a translucent grey, brighter to the south. Nothing casts a shadow.
+&WINTERDAYFAIR Weather Long Description Bank=Fair weather clouds drift through the blue sky from the west, along with the wind. The sunlight on the snow is dazzling, and it gleams on the ice.
+&SUMMERDAYRAIN Weather Long Description Bank=A light rain falls from a grey sky. It's warm and there's a slight wind from the southeast.
+&SUMMERDUSKRAIN Weather Long Description Bank=Light rain falls as the grey clouds darkens in the twilight. It's warm and there's a gentle wind from the southeast.
+&SUMMERNIGHTRAIN Weather Long Description Bank=Soft rain falls from a grey-black sky without moon or stars. A warm gentle wind blows from the southeast.
+&SUMMERDAWNRAIN Weather Long Description Bank=Soft rain is falling as the sky lightens to overcast grey. A warm breeze blows from the southeast.
+&SUMMERNIGHTCLEAR Weather Long Description Bank=The deep blue night sky is clear and cloudless, and the stars glitter. A cool breeze blows from the west.
+&SUMMDERDAWNPRECIP Weather Long Description Bank=Soft rain is falling as the sky lightens to cloudy grey. A warm breeze blows from the southeast.
+&SUMMERDAWNOVERCAST Weather Long Description Bank=The sky pales in the east, turning overcast grey. There's little wind, and it's warm and humid.
+&SUMMERDAWNFAIR Weather Long Description Bank=The sky turns a lighter blue and the stars fade out. It's clear and there's a cool breeze from the west.
+&SUMMERNIGHTSTORMY Weather Long Description Bank=Heavy rain drenches you in the dark as it falls from grey-black clouds, driven by a howling east wind.
+&SUMMERDUSKSTORMY Weather Long Description Bank=Driving rain pours from clouds darkening from grey to black as daylight fades, propelled by a furious east wind.
+&SUMMERDAWNSTORMY Weather Long Description Bank=Heavy rain pours from clouds slowly lightening from black to grey, propelled by a howling east wind.
+&SUMMERDAYSTORMY Weather Long Description Bank=Heavy rain pours from dark grey clouds, propelled by a furious east wind.
+&SUMMERNIGHTOVERCAST Weather Long Description Bank=The sky is grey-black, moonless and starless. It's hard for human eyes to see anything in the deep shadows round about, without a light. It's warm, still, and humid.
+&SUMMERDUSKOVERCAST Weather Long Description Bank=The grey of the clouds begins to darken, and the temperature drops slightly. It's warm and still.
+&SUMMERDAYOVERCAST Weather Long Description Bank=The sky is grey and cloudy, and nothing casts a shadow. It's hot, humid, and still.
+&SUMMERNIGHTFAIR Weather Long Description Bank=The night is warm and sultry, and dark clouds hide the stars in patches. Elsewhere they shine brightly. Dew forms on the ground.
+&SUMMERDUSKFAIR Weather Long Description Bank=The sun begins to set, the western clouds turning purple, red, and gold. It's hazy and warm.
+&SUMMERDAYFAIR Weather Long Description Bank=Towering white clouds drift slowly through the blue sky. It's hazy and hot, and the glare of the sun seems to drain the color from the landscape.
+&SUMMERDUSKCLEAR Weather Long Description Bank=The sun sets and the evening stars begin to appear in a blue and cloudless sky. There's a cool breeze from the west.
+&SUMMERDAYCLEAR Weather Long Description Bank=The sky is clear brilliant blue and there's a light breeze from the west. It's warm.
+&SUMMERDAWNCLEAR Weather Long Description Bank=The sky starts to lighten and the stars fade out. The sky is clear and there's a cool breeze from the west.
+&SPRINGNIGHTSTORMY Weather Long Description Bank=Cold driving rain pours down upon you in the dark from black clouds, propelled by a howling northeast wind.
+&SPRINGDUSKSTORMY Weather Long Description Bank=Twilight falls and the clouds darken from grey to charcoal as cold driving rain pours from them, lashed by a raging northeast wind.
+&SPRINGDAYSTORMY Weather Long Description Bank=Cold rain pours from thick grey clouds, driven by a howling northeast wind.
+&SPRINGDAWNSTORMY Weather Long Description Bank=A cold driving rain pours from clouds slowly lightening from black to grey, propelled by a howling northeaster wind.
+&SPRINGNIGHTOVERCAST Weather Long Description Bank=The sky is grey-black, moonless and starless. It's hard for human eyes to see anything in the deep shadows round about, without a light. It's cool and a light breeze blows from the southwest.
+&SPRINGDUSKOVERCAST Weather Long Description Bank=The grey of the clouds begins to darken, and it becomes cooler. A light wind is blowing from the southwest.
+&SPRINGDAYOVERCAST Weather Long Description Bank=The sky is cloudy grey, and nothing casts a shadow. The southwest wind is mild.
+&SPRINGDAWNOVERCAST Weather Long Description Bank=The sky begins to lighten. It's grey and overcast. A light wind blows from the southwest.
+&SPRINGDAWNCLEAR Weather Long Description Bank=The sky begins to brighten as the stars fade out. It's a chilly morning and the sky is clear blue and cloudless.
+&SPRINGDAYCLEAR Weather Long Description Bank=The sky is blue and cloudless, the sunlight is bright, and a cool wind blows from the northwest.
+&SPRINGDUSKCLEAR Weather Long Description Bank=The sun sets and the evening stars begin to appear in a blue and cloudless sky. A cool wind blows from the northwest.
+&SPRINGNIGHTCLEAR Weather Long Description Bank=The deep blue night sky is clear and cloudless, and the stars glitter. A brisk breeze blows from the northwest.
+&SPRINGDAWNFAIR Weather Long Description Bank=The blue sky brightens. The sun lights the fair weather clouds in the east with pink and pale gold before it touches the ground, which remains in shadow. A mild breeze blows from the west.
+&SPRINGDAYFAIR Weather Long Description Bank=Fair weather clouds sail across the blue sky, propelled by light breezes from the west. It's warm in the sun, cool in the shade, and the air is clear and dry.
+&SPRINGDUSKFAIR Weather Long Description Bank=Oranges, reds, and golds light the fair weather clouds, shadowed in purple, around the setting sun. A soft breeze blows from the west.
+&SPRINGNIGHTFAIR Weather Long Description Bank=A cool breeze blows from the west, driving dark clouds before it which blot out the stars in patches overhead. Elsewhere they glitter brightly in the dark sapphire sky.
+&SPRNGDAYOVERCAST Weather Long Description Bank=The sky is cloudy grey, and nothing casts a shadow. A light wind blows from the southwest.
+&SPRINGDAWNRAIN Weather Long Description Bank=Rain is falling as the sky begins to lighten to overcast grey. It's cool and there's a slight wind from the east.
+&SPRINGDAYRAIN Weather Long Description Bank=A light rain falls from a grey sky. It's cool and there's a mild wind from the east.
+&SPRINGNIGHTRAIN Weather Long Description Bank=Light rain falls from a grey-black sky without moon or stars. It's chilly and there's a fresh wind from the east.
+&SPRINGDUSKRAIN Weather Long Description Bank=A light rain falls as the grey sky darkens in the twilight. The temperature is moderate and there's a slight wind from the east.
+&WINTERDAWNLIGHTSNOW Weather Long Description Bank=The overcast sky slowly lightens from the grey-black of night to pale grey. Powdery snow falls from the clouds.
+&WINTERDAYLIGHTSNOW Weather Long Description Bank=Snow flurries drift silently down from the pale grey sky. The air is damp and cold, and there is little wind.
+&WINTERDUSKLIGHTSNOW Weather Long Description Bank=Darkness closes in early as thick grey clouds block the sun. A light snow is falling. There is scant wind.
+&WINTERNIGHTLIGHTSNOW Weather Long Description Bank=The sky is grey-black, without moon or stars. The air is cold and wet, and there is little wind. Snow flurries fall. It is easier to feel the flakes landing than it is to see them, in the darkness.
+&WINTERDUSKSLEET Weather Long Description Bank=Darkness comes early as thick clouds block the fading light of grey day. Freezing rain and sleet fall, coating everything with ice and making the ground slippery. Raw winds blow from the northeast.
+&WINTERDAYSLEET Weather Long Description Bank=Sleet and freezing rain fall from heavy clouds, coating everything with ice and making the ground slippery. The world looks silver in the icy grey light. A raw wind blows from the northeast.
+&WINTERDAWNSLEET Weather Long Description Bank=Darkness lingers and the dawn that breaks is grey. Sleet and freezing rain fall from heavy clouds, coating everything with ice and making the walking treacherous. Raw winds blow from the northeast.
+&WINTERNIGHTSLEET Weather Long Description Bank=Icy rain and sleet fall invisibly from a grey-black sky. It's very dark and the ice makes walking on the slippery ground difficult. A raw wind blows from the northeast.
+&WINTERNIGHTBLIZZARD Weather Long Description Bank=Night has come, and heavy snow falls. It's difficult to walk through the accumulating drifts, and difficult to see. It's hard to keep a sense of direction in the darkness and the blinding, swirling snow.
+&WINTERDAYBLIZZARD Weather Long Description Bank=Heavy snow falls, making it hard to walk through the accumulating drifts, and occasionally even hard to see. All the world seems grey and white. The wind blows the snow about from the east, and it swirls around objects and never falls straight down.
+&WINTERDAWNBLIZZARD Weather Long Description Bank=Dawn breaks to reveal snow falling from a dark sky that gradually lightens to grey-white. The snowfall is heavy and piles up in drifts, blown about by the shifting wind.
+&WINTERDUSKBLIZZARD Weather Long Description Bank=Snow falls heavily in the deepening twilight, making it hard to walk through the accumulating drifts, and hard to see. The wind blows the snow about from the east, and it swirls around objects and never falls straight down.
+&AUTUMNNIGHTFOG Weather Long Description Bank=The world is dark and foggy. Everything is half-hidden, nothing clearly seen. It's chilly and the air feels damp. No wind blows.
+&AUTUMNDAYFOG Weather Long Description Bank=Everything is grey, veiled by mist. It's chilly and the air feels damp. There is no wind.
+&AUTUMNDUSKFOG Weather Long Description Bank=Everything is grey, veiled by darkening twilit mist. Ihere is little wind. It's chilly and the air feels damp.
+&AUTUMNDAWNFOG Weather Long Description Bank=The sky slowly changes from dark grey to pale. Everything is veiled by fog. The air feels damp and chilly, and there is little wind.
+&WINTERDAWNFOG Weather Long Description Bank=The sky slowly lightens from deep grey to pale, and a chilly mist veils everything.
+&WINTERDAYFOG Weather Long Description Bank=The landscape looks ghostly and drained of color in the cold pale fog.
+&WINTERNIGHTFOG Weather Long Description Bank=The night is shrouded in cold bleak mist, dark grey and colorless. The ground is icy and the air wet.
+&WINTERDUSKFOG Weather Long Description Bank=The pale grey mists darken and begin to freeze, forming a slick of ice over the ground.
+&SUMMERNIGHTFOG Weather Long Description Bank=Everything is half-hidden, nothing clearly seen in the dark fog. It's warm and still.
+&SUMMERDUSKFOG Weather Long Description Bank=Everything is grey, veiled by darkening twilit mist. It's still, warm, and the air feels damp.
+&SUMMERDAWNFOG Weather Long Description Bank=The sky begins to lighten from dark grey to pale, for the world is veiled by fog. It's still, warm, and the air feels damp.
+&SUMMERDAYFOG Weather Long Description Bank=Everything is pale grey, veiled by mist. It's warm, humid, and still.
+&SPRINGNIGHTFOG Weather Long Description Bank=The world is dark and foggy. Everything is half-hidden, nothing clearly seen. It almost feels as if you walk through some otherworld. It's cool and the air feels damp and still.
+&SPRINGDUSKFOG Weather Long Description Bank=The mist begins to darken as twilight comes. It's cool and the air feels damp. There is no wind.
+&SPRINGDAYFOG Weather Long Description Bank=Everything is grey, veiled by mist. It's cool and the air feels damp. There is no wind.
+&SPRINGDAWNFOG Weather Long Description Bank=It grows lighter, and you see that everything is veiled by fog. It's moderately cool and the air feels damp and still.
+&SPRINGDAWNSLEET Weather Long Description Bank=Rain is falling as the sky begins to lighten to overcast grey. It's cool and there's a slight wind from the east.
+&SPRINGDAYSLEET Weather Long Description Bank=A light rain falls from a grey sky. It's cool and there's a mild wind from the east.
+&SPRINGDUSKSLEET Weather Long Description Bank=A light rain falls as the grey sky darkens in the twilight. The temperature is moderate and there's a slight wind from the east.
+&SPRINGNIGHTSLEET Weather Long Description Bank=Light rain falls from a grey-black sky without moon or stars. It's chilly and there's a fresh wind from the east.
+&SPRINGNIGHTLIGHTSNOW Weather Long Description Bank=The sky is grey-black, moonless and starless. It's hard for human eyes to see anything in the deep shadows round about, without a light. It's cool and a light breeze blows from the southwest.
+&SPRINGDAWNLIGHTSNOW Weather Long Description Bank=The sky begins to lighten. It's grey and overcast. A light wind blows from the southwest.
+&SPRINGDAYLIGHTSNOW Weather Long Description Bank=The sky is cloudy grey, and nothing casts a shadow. The southwest wind is mild.
+&SPRINGDUSKLIGHTSNOW Weather Long Description Bank=The grey of the clouds begins to darken, and it becomes cooler. A light wind is blowing from the southwest.
+&SPRINGDAWNBLIZZARD Weather Long Description Bank=A cold driving rain pours from clouds slowly lightening from black to grey, propelled by a howling northeaster wind.
+&SPRINGDAYBLIZZARD Weather Long Description Bank=Cold rain pours from thick grey clouds, driven by a howling northeast wind.
+&SPRINGDUSKBLIZZARD Weather Long Description Bank=Twilight falls and the clouds darken from grey to charcoal as cold driving rain pours from them, lashed by a raging northeast wind.
+&SPRINGNIGHTBLIZZARD Weather Long Description Bank=Cold driving rain pours down upon you in the dark from black clouds, propelled by a howling northeast wind.
+&WINTERDAWNSTORMY Weather Long Description Bank=Dawn breaks to reveal snow falling from a dark sky that gradually lightens to grey-white. The snowfall is heavy and piles up in drifts, blown about by the shifting wind.
+&WINTERDAYSTORMY Weather Long Description Bank=Heavy snow falls, making it hard to walk through the accumulating drifts, and occasionally even hard to see. All the world seems grey and white. The wind blows the snow about from the east, and it swirls around objects and never falls straight down.
+&WINTERDUSKSTORMY Weather Long Description Bank=Snow falls heavily in the deepening twilight, making it hard to walk through the accumulating drifts, and hard to see. The wind blows the snow about from the east, and it swirls around objects and never falls straight down.
+&WINTERNIGHTSTORMY Weather Long Description Bank=Night has come, and heavy snow falls. It's difficult to walk through the accumulating drifts, and difficult to see. It's hard to keep a sense of direction in the darkness and the blinding, swirling snow.
+@Desc Weather Long Description Bank=This is the main bank of long weather descriptions that vary with the seasons and whether it's day, night, dawn, or dusk. It belongs in the Auxiliary room and has no commands on it.
+&VERSION Weather Long Description Bank=3.0
+&AUTHOR Weather Long Description Bank=Keran@Keranset Island
+@set Weather Long Description Bank=VISUAL
+@set Weather Long Description Bank=NO_COMMAND
+@set Weather Long Description Bank=SAFE
+
+
+#31 - Box of Keran's Weather and Time Stuff, with Notes
+
+@create Box of Keran's Weather and Time Stuff, with Notes=1
+@lock Box of Keran's Weather and Time Stuff, with Notes=#0
+@Desc Box of Keran's Weather and Time Stuff, with Notes=Put me in the Auxiliary Room. Type 'note 1' and 'note 2' to read the notes.
+&NOTE2 Box of Keran's Weather and Time Stuff, with Notes=$note 2: @pemit %#=%rThe +help entry for Keran's Weather and Time Code:%r%rWeather and Time Code%r%rKeran's Weather and Time code has +help divided into several sections:%r%r1) Globals and common +function help -- The +fun command will show you a list of available +functions and the +help for same.%r%r2) Uncommon +functions - Stuff you probably don't want to know. Can be read with the +uncommon command.%r%r3) Topics - Most of this is +wizhelp, but builders will want to read the global-emits and outdoor-parent-room topics. Can be read with the +topic command.%r
+&NOTE1 Box of Keran's Weather and Time Stuff, with Notes=$note 1: @pemit %#=%rThe original item numbers in Keran's Weather Code package are:%r%r#7 - Time Functions%r#25 - Tree Weather Descriptions (optional)%r#26 - Weather Long Description Bank%r#31 - Box of Keran's Weather and Time Stuff, with Notes%r#106 - Globals and Common +Function help%r#109 - Weather and Time Topics%r#111 - Weathermaker%r#113 - Wizard Weather and Time Commands%r#114 - Slave Weather Station (optional)%r#115 - Clock%r#116 - Uncommon +function help%r#133 - Outdoor Parent Room%r#173 - Emits Bank%r#175 - Global Command Object%r%rWhen you upload these items to your database, you will need to @edit them so that they refer to the correct numbers for your game.%r
+@set Box of Keran's Weather and Time Stuff, with Notes=VISUAL
+@set Box of Keran's Weather and Time Stuff, with Notes=SAFE
+
+
+#106 - Globals and Common +Function help
+
+@create Globals and Common +Function help=1
+@lock Globals and Common +Function help=#0
+&RANDWORD Globals and Common +Function help=%rrandword(<word1> <word2> <word3> <etc.>)%r%rRandword() returns a random word from the list. %r
+&TILDE2BLANK Globals and Common +Function help=%rtilde2blank(<string>)%r%rTilde2blank() takes a string as its argument and replaces all the spaces with tildes (~). %r
+&TIDE Globals and Common +Function help=%ru(#7/tide)%r%rReturns the state of the tide. The tides are semidiurnal. Possibilities are low and rising, high and rising, slack high water, high and ebbing, low and ebbing, and slack low water.%r
+&MOONSET Globals and Common +Function help=%ru(#7/moonset)%r%rThe time of moonset, in seconds.%r
+&MOONRISE Globals and Common +Function help=%ru(#7/moonrise)%r%rThe time of moonrise, in seconds.%r
+&WINDOW Globals and Common +Function help=%ru(#7/window)%r%rReturns the long weather description without the first letter capitalized. Suitable for including in window views prefixed by something like 'Outside,'.%r
+&WEATHERTYPE Globals and Common +Function help=%ru(#7/weathertype)%r%rReturns the weathertype generated by the weathermaker for the day. May be clear, fair, overcast, fog, rain, stormy, sleet, lightsnow, or blizzard.%r
+&MOON-UP Globals and Common +Function help=%ru(#7/moon-up)%r%rReturns 1 if the moon is up and 0 if it isn't.%r
+&TREE-WEATHER Globals and Common +Function help=%ru(#7/tree-weather)%r%rReturns a description of the surroundings varying by day, night, dawn, dusk, and weather conditions, in an environment with leafy trees. A new weathertype for the day is generated shortly after dawn.%r
+&SHORT-WEATHER Globals and Common +Function help=%ru(#7/Short-weather)%r%rReturns a one-line description of the weather which varies with the season and weather conditions. A new weathertype for the day is generated shortly after dawn.%r
+&LONG-WEATHER Globals and Common +Function help=%ru(#7/long-weather)%r%rReturns a description of the weather which varies with season, day, night, dawn, or dusk, and the weather conditions clear, fair, overcast, fog, rain, stormy, sleet, lightsnow, blizzard. A new weathertype for the day is generated shortly after dawn.%r
+&SUNSET Globals and Common +Function help=%ru(#7/sunset)%r%rReturns the number of seconds after virtual midnight that sunset takes place. See +uncommon last-midnight.%r
+&SUNRISE Globals and Common +Function help=%ru(#7/sunrise)%r%rReturns the number of seconds after virtual midnight that sunrise takes place. See +uncommon last-midnight.%r
+&DAY-NIGHT-DAWN-DUSK Globals and Common +Function help=%ru(#7/day-night-dawn-dusk)%r%rReturns day, night, dawn, or dusk.%r
+&DAY-NIGHT Globals and Common +Function help=%ru(#7/day-night)%r%rReturns virtual day or night. %r
+&TIME-OF-DAY Globals and Common +Function help=%ru(#7/time-of-day)%r%rReturns day, night, dawn, dusk, noon, midnight, morning, afternoon, or after midnight. %r
+&HOUR Globals and Common +Function help=%ru(#7/hour)%r%rReturns the last hour struck in virtual time, in 24-hour format.%r
+&BLANK2TILDE Globals and Common +Function help=%rblank2tilde(<string>)%r%rTilde2blank() takes a string as its argument and replaces all the tildes (~) with spaces. %r
+&MOON-PHASE Globals and Common +Function help=%ru(#7/moon-phase)%r%rReturns the phase of the moon, which may be new, waxing crescent, first quarter, waxing gibbous, full, waning gibbous, last quarter, waning crescent. %r
+&SEASON Globals and Common +Function help=%ru(#7/season)%r%rReturns the season. Possibilities are spring, summer, autumn, or winter. %r
+&MONTH Globals and Common +Function help=%ru(#7/month)%r%rReturns the virtual month. %r
+&YEAR Globals and Common +Function help=%ru(#7/year)%r%rReturns the virtual year. %r
+&WEEK Globals and Common +Function help=%ru(#7/week)%r%rReturns the number of the week in the current month; may range from 1-5.
+&FUNCTION-LIST Globals and Common +Function help=%rGlobals:%r%r[columns(randword blank2tilde tilde2blank, 20)]%r%rOther common time and weather functions:%r%r[columns(day-night day-night-dawn-dusk hour long-weather month moon-phase moon-up moonrise moonset season short-weather sunrise sunset tide time-of-day tree-weather weathertype week window year, 20)]%r%r+fun <function-name> for help.
+@Desc Globals and Common +Function help=This is +help for the global functions (randword, blank2tilde, tilde2blank) and for other common date and time functions that players may want to use in code. It belongs in the Auxiliary Room and has no commands on it.
+&VERSION Globals and Common +Function help=3.0
+&AUTHOR Globals and Common +Function help=Keran@Keranset Island
+@set Globals and Common +Function help=VISUAL
+@set Globals and Common +Function help=NO_COMMAND
+@set Globals and Common +Function help=SAFE
+
+
+#109 - Weather and Time Topics
+
+@create Weather and Time Topics=1
+@lock Weather and Time Topics=#0
+&COMPRESSION Weather and Time Topics=There are two different ways to accelerate IC time in Keran's weather and timing code: clock compression and calendar compression. It is assumed that you will only use one of them at a time; the code has not been tested to ensure that it will produce reasonable results if both the clock and the calendar are compressed. The code has been tested at clock compression ratios of 4:1, 3:1, 2:1, 3:2, and 1:1, and at calendar compression ratios of 4:1, 3:1, 2:1, and 1:1.%r%rIn clock compression, a day goes by faster than it does in real time. For example, if you have a clock compression ratio of 3:1, 24 IC hours will go by in 8 real hours. In calendar compression, on the other hand, a day goes by in 24 hours, but you skip days, so that months, seasons and years pass more quickly. For example, if you have a calendar compression ratio of 2:1, 12 IC months will pass in 6 real months. See +topic CLOCK-COMPRESSION, +topic CALENDAR-COMPRESSION.
+&CLOCK-COMPRESSION Weather and Time Topics=%rWhen IC time is accelerated using clock compression, an IC hour goes by in less than a real hour. The number of seconds in an IC hour is determined by dividing 3600 (the number of seconds in a real hour) by the clock compression ratio. You can reset the clock compression by typing:%r%r&clock-compression time functions = <number>%r&calendar-compression time functions = 1%r&base-days-per-year time functions = 360%r%rOr by typing:%r%rclock <number>%r%rsomewhere where the Wizard Weather Command object can hear you.%r%r+topic clock-compression2 for more.%r
+&CLOCK-COMPRESSION2 Weather and Time Topics=<number> is expected to be a small positive number by which 3600 can be evenly divided. It may have a fractional part; for example, you can evenly divide 3600 by 1.5 (a 3 IC hour: 2 real hour ratio). 4, 3, 2, 1, and 1.5 are all acceptable clock compression ratios.%r%rThe effect of using ratios with fractional parts, like 1.5 (3:2), 1.25 (5:4), or 2.5 (5:2), is that it will desynchronize IC time and real time; that is, if a player logs in at the same time of day all the time, it won't always be the same time of day ICly. This can be useful if you wish to accommodate players who log in from other time zones at odd hours.%r
+&CALENDAR-COMPRESSION Weather and Time Topics=%rIn calendar compression, an IC day passes in 24 real hours, and IC time is accelerated by skipping days in each month, season, and year. At a 3:1 calendar compression, for example, an IC month passes in 10 24-hour days. You can reset the calendar compression by typing:%r%r&calendar-compression time functions = <number1>%r&clock-compression time functions = 1%r&base-days-per-year time functions = <number2>%r%rOr by typing:%r%rcalendar <number1>%r%rwhere the Wizard Weather Command object can hear you.%r%r+topic calendar-compression2 for more.%r%r
+&CALENDAR-COMPRESSION2 Weather and Time Topics=The calendar compression ratio above, <number1>, should be a small positive integer, usually 1, 2, 3, or 4. If you want to use a higher calendar compression ratio, you must make the alterations by hand; the Wizard Weather Command object commands only make the required adjustments for calendar compression ratios up to 4. Since the code works by counting days, fractional ratios do not work.%r%rIn order not to break the moon, which has 8 phases and needs at least 8 counted days per month to go through an entire phase cycle, the minimum value of base-days-per-year is 8 phases * 12 months * calendar-compression, and it must be evenly divisible by both 8 and 12. The default value for the base days per year is 360; all calendar compression ratios of 3:1 or lower, as well as typical clock compression ratios, work with this value. The Wizard Weather Command object will automatically set an appropriate value for the base days per year if you use the calendar <number> command to set a calendar compression ratio of 1-4.%r
+&CALENDARS Weather and Time Topics=%rKeran's weather and timing code comes with two possibilities for calendars, both of which have 360 day years and 30 day months. The first is a quasi-Gregorian calendar in which December, January, and February constitute winter; March, April, and May, spring; June, July, and August, summer; and September, October, and November, autumn. The dates of the solstices and equinoxes are not accurate in this mode; winter, and the winter solstice, fall on December 1, not December 21 as is the case in the real world. The other calendar is a 'native' mode in which the year and the unnamed first month of spring both begin on the vernal equinox. Calculations are made using this native mode; then month, season, and year are recalculated to produce the quasi-Gregorian timing.%r%rThe easiest way to change the calendar employed is to use the Wizard Weather Command Object; type +i wiz weather where it can hear you for help.%r
+&PARAMETERS Weather and Time Topics=%rParameters you may want to change on the Time Functions Object:%r%rTime-begins%rThe real time from which the timing object begins to reckon, in secs() format. &Time-begins time functions = <new time>%r%rStarting-year%rThe virtual year you want to start counting from. &starting-year time functions = <number>%r%rBase-days-per-year%rThe number of days in a year. Usually 360, but it may need adjustment for some calendar compression ratios. Must be set to a number evenly divisible by both 12 and 8. &base-days-per-year time functions = <number>%r%rClock-compression%rThe ratio by which all virtual time is speeded up. &clock-compression time functions = <number>%r%r+topic parameters2 for more.%r
+&PARAMETERS2 Weather and Time Topics=%rCalendar-compression%rThe ratio that determines how many days are skipped to accelerate time.%r%rMonth%rMay be set to \[u(#7/calendar-month)\] or \[u(#7/gregorian-month)\], depending on which calendar you want to use.%r%rSeason%rMay be set to \[u(#7/native-season)\] or \[u(#7/gregorian-season)\], depending on which calendar you want to use.%r%rYear%rMay be set to \[u(#7/native-year)\] or \[u(#7/gregorian-year)\], depending on which calendar you want to use.%r%rSolstice-day-length%rThe length of the longest day of the year, in hours.%r%rMost of these are easier to change using commands on the Wizard Weather Command object; type '+i wiz weather' somewhere where it can hear you for help. See +topic CALENDARS, +topic COMPRESSION, +topic CLOCK-COMPRESSION, and +topic CALENDAR-COMPRESSION.%r
+&WEATHER-MODELLING Weather and Time Topics=%rThe Weathermaker saves yesterday's weathertype, and then uses the season and yesterday's weathertype to determine which routine it should use to pick the weather for today. For example, the springtype-clear attribute is used to generate today's weather if it was clear yesterday and the season is spring. The springtype-clear attribute selects today's weather at random from among the following types: (clear clear clear clear clear fair fair fair fair fair fair fair fair fair rain fog stormy overcast). The more often a weathertype is repeated, the more likely it is to be selected. Clear weather is generally a strong high pressure area, and a brisk clear day is more often followed by another, or by a day not so brisk where there are many fair weather clouds, than it is to be followed directly by rain, storm, fog, or overcast skies. The probability of the weathertypes varies from season to season; fog is always more likely in summer, while sleet, snow, and blizzards only appear in winter.%r%r+topic modelling2 for more.
+&MODELLING2 Weather and Time Topics=%rTo change the probability of a given weathertype being selected, you need to add or reduce the number of times it appears in arguments to randword() in the &<season>type-<weathertype> attrbutes on the Weathermaker. For instance, if you want less fog in summer, reduce the number of times 'fog' appears in the &summertype-<weathertype> attributes. You might, e.g., execute the following:%r%r@edit weathermaker/summertype-* = fog fog fog fog fog,fog fog%r%rIt should be mostly obvious to an experienced coder how to add weathertypes to the code, and the inexperienced probably shouldn't attempt it: you will need to account for it in the &<season>type-<weathertype> selectors on the Weathermaker, in the &<season><weathertype> short descriptions on the Weathermaker, in the &<season><day|night|dawn|dusk><weathertype> attributes in the long desc bank, and in appropriate attributes in any auxiliary desc banks you may using, like the Tree Weather Description Bank.%r%r+topic modelling3 for more.
+&MODELLING3 Weather and Time Topics=%rThere is one non-obvious point, however: the season changes at virtual midnight, while a new weathertype for the day is not selected until virtual dawn. If you add a weathertype that isn't going to appear in all seasons, you will need to add settings and descriptions for it in the next season to cover the hours between midnight and dawn. For example, sleet, lightsnow, and blizzard are only selected by the Weathermaker in winter; there are &springtype-sleet, &springtype-lightsnow, and &springtype-blizzard weather selector attributes on the weathermaker, which may be invoked on the first day of spring if the last day of winter's weather was frozen preciptation; these selectors only include spring weather in the possibilities they choose between, naturally. There are also &springsleet, &springlightsnow, and &springblizzard short descriptions on the weathermaker, and &spring<day|night|dawn|dusk>sleet, &spring<day|night|dawn|dusk>lightsnow, and &spring<day|night|dawn|dusk>blizzard attributes on the Long Description Bank. The content of these descriptions does not describe winter weather, but spring; they correspond to the spring rain, overcast, and stormy descriptions respectively, so as not to contradict the seasonal descriptions in children of the Outdoor Parent Room.%r
+&VARYING-THE-WEATHER Weather and Time Topics=%rThere are three fundamental ways to vary the weather produced by the weather code. They are:%r%r1) Changing the frequency with which various weathertypes are selected at each season. Instructions for how to do this are provided in +topic weather-modelling. It is also possible to introduce new weathertypes; there are cursory instructions for doing that in +topic weather modelling. It is assumed that anyone attempting to introduce a new weathertype is an experienced coder who will mostly understand the code by inspection.%r%r2) Changing the descriptions of the weathertypes by writing new desc banks. This is conceptually very simple, though laborious. You rewrite the descriptions in the desc banks to fit the kind of environment you want descriptions for. The descriptions in the Long Weather Description Bank assume a temperate climate; you could write desc banks for areas where the climate was usually warmer or colder. The Tree Weather Description Bank, supplied as an example of environmental variation with auxiliary desc banks, assumes a temperate, relatively wet climate with many leafy trees. It would be possible to write desc banks for conifer forests, grassland, deserts, tundra, cities, shores, the sky, or any sort of environment you like.%r%r+topic varying2 for more.
+&VARYING2 Weather and Time Topics=%r3) Varying the weather from place to place by using regional weather. Here it is not the quality of the weather that varies, but when it arrives at different regions. Instructions for setting up regional weather can be found in +topic regional-weather.%r
+&REGIONAL-WEATHER Weather and Time Topics=%rWith regional weather set up, different areas of the MUSH experience different weather at the same time. The regions should be about a day apart--since large weather systems move at vastly different speeds that may vary between 5 and 50 miles per hour, depending on the energy of the system, a certain amount of compromise is necessary; 200-300 miles might be a good figure. The Weathermaker becomes the master weather generator, and should control the weather in the region where storms enter the virtual landscape; Slave Weather Stations control the weather in other regions. For example, say your MUSH's landscape covered the southern New England coast; weather systems there have a large tendency to reach the southwestern portions before the northeastern, and so you would set the Weathermaker up to control the southwesternmost region and the first Slave Weather Station up to control a region 200-300 miles northeastward. It is possible to daisy-chain Slave Weather Stations; you could then have a second Slave Weather Station another 200-300 miles northeastward, using the first Slave Weather Station as its master.%r%r+topic regional2 for more.
+&REGIONAL2 Weather and Time Topics=%rThe Weathermaker uses yesterday's weather--its own weather--to determine what today's probably is. The Slave Weather Station models weather in a similar fashion, but it uses its master's previous day's weather to determine what its own probably will be. In the default configuration, usually the slave will select the master's weather of the previous day for its own weather, but sometimes it will select something else. In this way weather systems seem to move from one region to another, with some variation.%r%rTo set up regional weather, you need to do the following:%r%r1) Determine the areas on your MUSH that belong to each region, and which region will belong to the Weathermaker.%r%r2) Set up the Weathermaker for regional weather by typing 'regional' where the Wizard Weather Command object can hear you. This changes the &generator attribute on the Weathermaker so that, after picking its own weather, it notifies the slave to select a new weathertype for the day also. If you wish to remove this later, the 'no regional' command on the Wizard Weather Command object will do it.%r%r+topic regional3 for more.
+&REGIONAL3 Weather and Time Topics=%r3) Clone the Outdoor Parent Room, rename it, and substitute the short-weather description as determined by the Slave Weather Station instead of by the Weathermaker in the weather desc, by typing:%r%r&weather-desc Slave Outdoor Parent Room=\[u(#7/slave-short-weather)\].%r%rThe children of this room should belong to the first Slave Weather Station's region. You can substitute \[u(#7/slave-long-weather)\] or add [u(#7/slave-tree-weather)\] to the weather=descs in the children of this room. \[u(#7/slave-weathertype)\] will return the weathertype generated by the Slave Weather Station.%r%r4) You will need to make it clear in your documentation somewhere that rooms in the Slave Region should use the slave weather functions instead of the master weather functions. One set of slave weather functions is included on the Time Functions Object as an example.%r%r+topic regional4 for more.
+&REGIONAL4 Weather and Time Topics=%r5) You can't use a single Emits Bank to broadcast time of day messages to multiple regions unless you change the messages on it: the ones supplied vary with the weather, and all regions may not have the same weather. To set up an Emits Bank for a second region, you will need to remove &hear-global-emits on the Slave Parent Room and select another attribute name that can be searched for, such as &hear-slave-emits, like so:%r%r&hear-global-emits Slave Parent Room%r&hear-slave-emits Slave Parent Room = 1%r%rThen @clone the Emits Bank, rename the copy to Slave Emits Bank, and @edit it so that its searches use your new attribute name instead of &hear-global-emits:%r%r@edit Slave Emits Bank=hear-global-emits, hear-slave-emits%r%rAdd the Slave Emits Bank's database # to the Clock's triggerlists (type +i clock where it can hear you for help).%r%r+topic regional5 for more.
+&REGIONAL5 Weather and Time Topics=%rIf you wish to make another slave station, you will have to do the following:%r%r1) Clone the Slave Weather Station.%r%r2) Edit the *first* Slave Weather Station's &generator attribute so that it reads:%r%r@wait me={&weathertype-old me = \[u(weathertype)\]; &weathertype-master me = \[u(#111/weathertype-old)\]; &weathertype me = \[u(\[u(#7/season)\]type-\[u(weathertype-master)\])\]; @notify <database # of Secondary Slave Weather Station>; @trigger me/generator}%r%rThis change causes it to notify the Secondary Slave Station to select its own weathertype of the day.%r%r+topic regional6 for more.
+&REGIONAL6 Weather and Time Topics=%r3) Now edit the &generator attribute on the Secondary Slave Station, so that the &weathertype-master command refers not to the Weathermaker, but to the first Slave Weather Station; it's going to read the first slave, not the Weathermaker, to determine its probable weather.%r%rYou will need to add another set of slave functions to #7, possibly called slave2-* instead of slave-*, another copy of the Outdoor Parent Room using the slave2 functions and with a &hear-slave2-emits attribute on it instead of &hear-global-emits, and another edited copy of the Emits Bank whose dbref must be added to the Clock's triggerlists.%r%rThere are other ways to approach parts of this. You can simply put the slave weather functions in the weather-descs of rooms in regions whose weather is controlled by a Slave Weather Station, and not make any clones of the Outdoor Parent Room. You can set up more than one slave station that depends directly on the Weathermaker, or on a higher-ranking Slave Weather Station. You can set up more than one Weathermaker to have multiple independent masters.%r%r+topic regional7 for more.
+&TOPIC-LIST Weather and Time Topics=%r[columns(*bugs *calendars *calendar-compression *clock-compression *compression *global-emits *global-setup foreign-timing moons next-version *outdoor-parent-room *parameters regional-weather varying-the-weather weather-modelling, 22)]%r%rItems marked with a * are important for normal operations. Builders should read global-emits and outdoor-parent-room.%r
+&FOREIGN-TIMING Weather and Time Topics=%rIn some cases you may wish to use this weather system with other timing code, replacing the Clock and the Time Functions Object. You may already have timing code designed specifically for your setting, for instance, or you may want to run at 1:1 in a setting with a Gregorian calendar and get your dates and times of day off the system clock. In order to use foreign timing code and preserve most of the functionality of this weather system, the timing code must capable of the following:%r%rIt must, at the very least, distinguish between day and night; preferably, it distinguishes between day, night, dawn, and dusk.%rIt must distinguish the seasons spring, summer, autumn, and winter.%rIn order for the Outdoor Parent Room to work as it does in this system, there must be a function that tells whether the moon is up or not.%rThere must be a clock capable of triggering the Weathermaker at dawn.%r%rIt is beyond the scope of this +help to attempt to explain exactly what steps must be undertaken to make the weather code work with foreign timing; however, the weather system was coded with readability and simplicity of code as a much higher priority than speed of execution, and it is intended that a competent coder should be able to examine its pieces carefully and understand how the weather is generated with comparative ease.%r
+@Desc Weather and Time Topics=This object has +help for various topics related to setting up Keran's Weather and Time Code. It has no commands and should be kept in the Auxiliary room.
+&MOONS Weather and Time Topics=%rIt should be possible to set up multiple moons by duplicating and renaming the moon functions on the Time Functions object, and altering the length of the moonday and the lunar month for the extra moons. This has not, however, been tested.%r
+&VERSION Weather and Time Topics=3.0
+&AUTHOR Weather and Time Topics=Keran@Keranset Island
+&NEXT-VERSION Weather and Time Topics=%rThis is version [v(version)] of Keran's Weather and Time Code. Slated for the next release are the following:%r%r1) The moon's rise and set times will be appropriate to its phase.%r%r2) The tides will be synchronized with the moon.%r%rThere will probably be added the ability to trigger transient events like thundershowers, etc.%r
+&BUGS Weather and Time Topics=%rThis code has been tested at calendar compression ratios of 1:1, 2:1, 3:1, and 4:1, and at clock compression ratios of 4:1, 3:1, 2:1, 1:1, and 3:2. It appears to work; however, the testing period has not been long enough to let it cycle through a whole year. It is supposed to work correctly and consistently at these ratios; if it doesn't, please tell Keran (keranset@mail1.nai.net).%r%rIf you install this code, it's recommended that you send email to keranset@mail1.nai.net saying so; if you're on Keran's weather code list you automatically get bug fixes mailed to you.%r
+&GLOBAL-EMITS Weather and Time Topics=%rThe contents of any room which has an attribute &hear-global-emits set to 1 will hear the weather emits from the Emits Bank, assuming the Emits Bank is on the Clock's lists of items to @trigger (it is, by default). Those supplied are usually only appropriate for outdoor rooms. The Outdoor Parent Room and its children are set to hear global emits by default; if you want to turn off the global emits in a child of the Outdoor Parent Room, set &hear-global-emits <room #> = 0.%r
+&OUTDOOR-PARENT-ROOM Weather and Time Topics=%rThe Outdoor Parent Room allows you to easily create rooms with descriptions that vary by night or day, season, weather, and the visibility of the moon. To use it, @parent your room to #133 (@parent <room #> = #133) and then look at the room to see the instructions. The description of the moon only shows on clear or fair nights when the moon is up and not new.%r
+&GLOBAL-SETUP Weather and Time Topics=%rYou should put these attributes on #1 to set up the required global +functions:%r%r&SETUP-GLOBAL-FUNCTIONS #1 = @function randword = #7/randword; @function tilde2blank = #7/tilde2blank; @function blank2tilde = #7/blank2tilde%r@startup #1 = @trigger me/setup-global-functions%r
+&REGIONAL7 Weather and Time Topics=%rIt's been asked whether you can to use this weather and timing code to set up different time zones. It has not been tested, but it seems likely that you could make second copy of the Time Functions Object and change time-begins slightly, so that it began 3600 secs / clock-compression after time-begins on the first Time Functions Object. It would be a nuisance to document this; you would no longer have a globally-valid value for hour, time-of-day, etc. You would probably need more than one Weathermaker and more than one Outdoor Parent Room to make it work without significant code alterations.%r
+@set Weather and Time Topics=VISUAL
+@set Weather and Time Topics=NO_COMMAND
+@set Weather and Time Topics=SAFE
+
+
+#111 - Weathermaker
+
+@create Weathermaker=1
+@lock Weathermaker=#0
+&SUMMERCLEAR Weathermaker=It's clear, warm, and breezy.
+&SUMMERFAIR Weathermaker=It's fair and very warm, with a few clouds in the sky.
+&SUMMEROVERCAST Weathermaker=It's overcast and warm.
+&SUMMERRAIN Weathermaker=It's raining and warm.
+&SUMMERSTORMY Weathermaker=It's raining hard, with thunder and flashes of lightning.
+&SPRINGCLEAR Weathermaker=It's clear, cool, and breezy.
+&SPRINGFAIR Weathermaker=It's fair and mild, with a few clouds in the sky.
+&SPRINGOVERCAST Weathermaker=It's cloudy and mild.
+&SPRINGRAIN Weathermaker=It's raining and cool.
+&SPRINGSTORMY Weathermaker=It's raining hard and the winds are strong.
+&WINTERCLEAR Weathermaker=It's clear, cold, and windy.
+&WINTERFAIR Weathermaker=It's fair and chilly.
+&WINTEROVERCAST Weathermaker=It's cloudy, cold, and damp.
+&AUTUMNCLEAR Weathermaker=It's clear, cool, and windy.
+&AUTUMNFAIR Weathermaker=It's fair and cool.
+&AUTUMNOVERCAST Weathermaker=It's cloudy and cool.
+&AUTUMNRAIN Weathermaker=It's raining and chilly.
+&AUTUMNSTORMY Weathermaker=It's raining hard and the winds are strong.
+&WINTERLIGHTSNOW Weathermaker=It's snowing.
+&WINTERSLEET Weathermaker=It's sleeting.
+&WINTERBLIZZARD Weathermaker=It's snowing heavily.
+&WINTERFOG Weathermaker=It's foggy and cold.
+&AUTUMNFOG Weathermaker=It's foggy and cool.
+&SUMMERFOG Weathermaker=It's foggy and warm.
+&SPRINGFOG Weathermaker=It's foggy and cool.
+&SPRINGTYPE-CLEAR Weathermaker=[u(#7/randword,clear clear clear clear clear fair fair fair fair fair fair fair fair fair rain fog stormy overcast)]
+&SUMMERTYPE-CLEAR Weathermaker=[u(#7/randword,clear clear clear clear fair fair fair fair fair fair fair fair fair fair rain fog fog stormy overcast)]
+&AUTUMNTYPE-CLEAR Weathermaker=[u(#7/randword,clear clear clear clear clear fair fair fair fair fair fair fair fair fair rain fog stormy overcast)]
+&WINTERTYPE-CLEAR Weathermaker=[u(#7/randword,clear clear clear clear fair fair fair fair fair fair fair fair fair fair clear fog lightsnow sleet blizzard overcast)]
+&SPRINGTYPE-FAIR Weathermaker=[u(#7/randword,clear fair fair fair fair fair fair fair fair fair fair fair fair fair fair fair rain rain rain rain fog fog fog stormy overcast overcast overcast)]
+&SUMMERTYPE-FAIR Weathermaker=[u(#7/randword,clear fair fair fair fair fair fair fair fair fair fair fair fair rain rain rain fog fog fog fog fog fog stormy overcast overcast overcast)]
+&AUTUMNTYPE-FAIR Weathermaker=[u(#7/randword,clear fair fair fair fair fair fair fair fair fair fair fair fair fair fair fair rain rain rain rain fog fog fog stormy overcast overcast overcast overcast)]
+&WINTERTYPE-FAIR Weathermaker=[u(#7/randword,clear fair fair fair fair fair fair fair fair fair fair fair fair fair fair fair clear clear clear clear fog lightsnow lightsnow blizzard lightsnow lightsnow lightsnow sleet overcast overcast overcast)]
+&SPRINGTYPE-OVERCAST Weathermaker=[u(#7/randword,clear fair fair fair fair fair fair fair fair fair fair rain rain rain rain rain rain rain fog fog fog fog fog fog fog stormy overcast overcast overcast overcast)]
+&SUMMERTYPE-OVERCAST Weathermaker=[u(#7/randword,clear fair fair fair fair fair fair fair fair rain rain rain rain rain fog fog fog fog fog fog fog fog fog fog fog fog stormy overcast overcast overcast overcast)]
+&AUTUMNTYPE-OVERCAST Weathermaker=[u(#7/randword,clear fair fair fair fair fair fair fair fair fair fair rain rain rain rain rain rain rain fog fog fog fog fog fog fog stormy overcast overcast overcast overcast)]
+&WINTERTYPE-OVERCAST Weathermaker=[u(#7/randword,clear fair fair fair fair fair fair fair fair fair fair sleet sleet sleet sleet sleet sleet sleet fog fog lightsnow lightsnow lightsnow lightsnow lightsnow blizzard overcast overcast overcast overcast)]
+&SPRINGTYPE-RAIN Weathermaker=[u(#7/randword,clear clear clear clear clear fair fair fair fair fair fair fair fair fair fair fair fair fair fair fair rain rain rain rain fog fog fog fog stormy overcast overcast overcast)]
+&SUMMERTYPE-RAIN Weathermaker=[u(#7/randword,clear clear clear clear clear fair fair fair fair fair fair fair fair fair fair fair fair fair fair fair rain rain rain fog fog fog fog fog fog fog fog fog stormy overcast overcast overcast overcast)]
+&AUTUMNTYPE-RAIN Weathermaker=[u(#7/randword,clear clear clear clear clear fair fair fair fair fair fair fair fair fair fair fair fair fair fair rain rain rain rain fog fog fog fog stormy stormy overcast overcast overcast)]
+&WINTERTYPE-SLEET Weathermaker=[u(#7/randword,clear clear clear clear clear fair fair fair fair fair fair fair fair fair fair fair fair fair fair sleet sleet sleet sleet lightsnow fog fog blizzard overcast overcast overcast)]
+&WINTERTYPE-LIGHTSNOW Weathermaker=[u(#7/randword,clear clear clear clear clear fair fair fair fair fair fair fair fair fair fair fair fair fair fair sleet sleet sleet sleet lightsnow lightsnow lightsnow lightsnow fog blizzard blizzard overcast overcast overcast overcast)]
+&SPRINGTYPE-FOG Weathermaker=[u(#7/randword,clear clear clear clear clear fair fair fair fair fair fair fair fair fair fair fair fair fair rain rain rain rain rain fog fog fog fog fog stormy overcast overcast overcast)]
+&SUMMERTYPE-FOG Weathermaker=[u(#7/randword,clear clear clear clear clear fair fair fair fair fair fair fair fair fair fair fair fair fair rain rain rain rain rain fog fog fog fog fog fog fog fog fog fog stormy overcast overcast overcast)]
+&AUTUMNTYPE-FOG Weathermaker=[u(#7/randword,clear clear clear clear clear fair fair fair fair fair fair fair fair fair fair fair fair fair rain rain rain rain rain fog fog fog fog fog stormy overcast overcast overcast)]
+&WINTERTYPE-FOG Weathermaker=[u(#7/randword,clear clear clear clear clear fair fair fair fair fair fair fair fair fair fair fair fair fair fog lightsnow lightsnow sleet sleet sleet sleet blizzard overcast overcast)]
+&SPRINGTYPE-STORMY Weathermaker=[u(#7/randword,clear clear clear clear clear clear clear fair fair fair fair rain fog stormy overcast)]
+&SUMMERTYPE-STORMY Weathermaker=[u(#7/randword,clear clear clear clear clear clear clear clear clear clear clear fair fair fair fair rain fog fog fog stormy overcast)]
+&AUTUMNTYPE-STORMY Weathermaker=[u(#7/randword,clear clear clear clear clear clear clear clear clear clear clear fair fair fair fair rain fog stormy overcast)]
+&WINTERTYPE-STORMY Weathermaker=[u(#7/randword,clear clear clear clear clear clear clear clear clear clear clear clear fair fair fair fair sleet lightsnow fog blizzard overcast)]
+&SPRINGTYPE-SLEET Weathermaker=[u(#7/randword,clear clear clear clear clear fair fair fair fair fair fair fair fair fair fair fair fair fair fair fair rain rain rain rain fog fog fog fog stormy overcast overcast overcast)]
+&SPRINGTYPE-LIGHTSNOW Weathermaker=[u(#7/randword,clear clear clear clear clear fair fair fair fair fair fair fair fair fair fair fair fair fair fair fair rain rain rain rain fog fog fog fog stormy overcast overcast overcast)]
+&WINTERTYPE-RAIN Weathermaker=[u(#7/randword,clear clear clear clear clear fair fair fair fair fair fair fair fair fair fair fair fair fair fair sleet sleet sleet sleet lightsnow fog fog blizzard overcast overcast overcast)]
+&SPRINGSLEET Weathermaker=It's raining.
+&SPRINGLIGHTSNOW Weathermaker=It's cloudy and cool.
+&SPRINGBLIZZARD Weathermaker=It's raining hard and the winds are strong.
+&SPRINGTYPE-BLIZZARD Weathermaker=[u(#7/randword,clear clear clear clear clear clear clear fair fair fair fair rain fog stormy overcast)]
+&WINTERSTORMY Weathermaker=It's snowing heavily.
+&WINTERRAIN Weathermaker=It's sleeting.
+&TRIGGER-AT-DAWN Weathermaker=&weathertype-old me=[u(weathertype)]; &weathertype me=[u([u(#7/season)]type-[u(weathertype-old)])]; @notify #114
+&TRIGGER-AT-SUNSET Weathermaker=&last-moon-phase #7 = [u(#7/moon-phase-unadjusted)]; &last-moon-adjective #7 = [u(#7/moon-adjective-unadjusted)]
+@Desc Weathermaker=The Weathermaker selects the weather for the day, triggered by the clock. It also writes the phase of the moon at sunset on the Timing Functions object for a routine that keeps the moon phase from changing while the moon is visible in the sky. If you have set up regional weather, it notifies the Slave Weather Station to select weather for the day.
+&VERSION Weathermaker=3.0
+&AUTHOR Weathermaker=Keran@Keranset Island
+&WEATHERTYPE Weathermaker=fair
+&WEATHERTYPE-OLD Weathermaker=fair
+&WINTERTYPE-BLIZZARD Weathermaker=[u(#7/randword,clear clear clear clear clear clear clear fair fair fair fair sleet fog blizzard lightsnow overcast)]
+@set Weathermaker=VISUAL
+@set Weathermaker=NO_COMMAND
+@set Weathermaker=SAFE
+
+
+#113 - Wizard Weather and Time Commands
+
+@create Wizard Weather and Time Commands=1
+@lock Wizard Weather and Time Commands=#0
+&GREGORIAN Wizard Weather and Time Commands=$gregorian: &month #7 = \[u(gregorian-month)\]; &season #7 = \[u(gregorian-season)\]; &year #7 = \[u(gregorian-year)\]
+&NATIVE Wizard Weather and Time Commands=$native: &month #7 = \[u(calendar-month)\]; &season #7 = \[u(native-season)\]; &year #7 = \[u(native-year)\]
+&CLOCK Wizard Weather and Time Commands=$clock *: &calendar-compression #7 = 1; &base-days-per-year #7 = 360; &clock-compression #7 = %0
+&CALENDAR1 Wizard Weather and Time Commands=$calendar 1: &clock-compression #7 = 1; &base-days-per-year #7 = 360; &calendar-compression #7 = 1
+&CALENDAR2 Wizard Weather and Time Commands=$calendar 2: &clock-compression #7 = 1; &base-days-per-year #7 = 360; &calendar-compression #7 = 2
+&CALENDAR3 Wizard Weather and Time Commands=$calendar 3: &clock-compression #7 = 1; &base-days-per-year #7 = 360; &calendar-compression #7 = 3
+&CALENDAR4 Wizard Weather and Time Commands=$calendar 4: &clock-compression #7 = 1; &base-days-per-year #7 = 384; &calendar-compression #7 = 4
+&START-TIME Wizard Weather and Time Commands=$start time *: &time-begins #7 = [convtime(%0)]
+&STARTING-YEAR Wizard Weather and Time Commands=$starting year *: &starting-year #7 = %0
+&REMOVE-REGIONAL-WEATHER Wizard Weather and Time Commands=$no regional: @edit #111/trigger-at-dawn = {; @notify #114},
+&ADD-REGIONAL-WEATHER Wizard Weather and Time Commands=$regional: @edit #111/trigger-at-dawn = $,{; @notify #114}
+&ITEMHELP Wizard Weather and Time Commands=$+i wiz weather: @pemit %# = {%rThe commands on this object are intended to let you easily change some of the settings most commonly reconfigured. They are:%r%rgregorian%rChanges to a quasi-Gregorian calendar instead of the native format.%r%rnative%rChanges to the native calendar format, where the year begins in spring. See +topic CALENDARS.%r%rclock <number>%rChanges the clock compression to the value supplied, the calendar compression to 1, and the base days per year to 360. See +topic COMPRESSION, +topic CLOCK-COMPRESSION.%r%rcalendar <1, 2, 3, or 4>%rChanges the calendar compression to the indcated number, the clock compression to 1, and the base days per year to an appropriate value for the compression ratio.%r%r+i2 wiz weather for more.%r}
+&ITEMHELP2 Wizard Weather and Time Commands=$+i2 wiz weather: @pemit %#={%rstart time <time>%rSets a new real starting time for the time object to begin reckoning from. <time> is in the same format as time(), for this command, and it doesn't matter if you get the day of the week right; any three letters will serve.%r%rstarting year <number>%rThe virtual year from which the timing object starts reckoning. <number> is any integer. You may have to add one to the year you want if you're using the quasi-Gregorian calendar.%r%rlongest day <number>%rSets the length of the longest day of the year, in hours. <number> should be a value between 12 and 24.%r%rregional%rSets the weathermaker up for regional weather, i.e., adds a command for it to notify a Slave Weather Station after it selects its own weather.%r%rno regional%rRemoves notification of a Slave Weather Station from the Weathermaker.%r}
+@Desc Wizard Weather and Time Commands=This object has command for making the most common configuration changes on it. (+i wiz weather for help). It writes to the Time Functions Object and the Weathermaker. It has no globals and should be kept in the Auxiliary room.
+&VERSION Wizard Weather and Time Commands=3.0
+&AUTHOR Wizard Weather and Time Commands=Keran@Keranset Island
+&IS-WIZARD Wizard Weather and Time Commands=[hasflag(%#, wizard)]
+&LONGEST-DAY Wizard Weather and Time Commands=$longest day *: &solstice-day-length #7=%0
+@lock/UseLock Wizard Weather and Time Commands=IS-WIZARD/1
+@set Wizard Weather and Time Commands=VISUAL
+@set Wizard Weather and Time Commands=INHERIT
+@set Wizard Weather and Time Commands=SAFE
+
+
+#114 - Slave Weather Station (optional)
+
+@create Slave Weather Station=1
+@lock Slave Weather Station=#0
+&SPRINGTYPE-CLEAR Slave Weather Station=[u(#7/randword,[u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] clear fair overcast rain fog stormy)]
+&SUMMERTYPE-CLEAR Slave Weather Station=[u(#7/randword,[u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] clear fair overcast rain fog stormy)]
+&AUTUMNTYPE-CLEAR Slave Weather Station=[u(#7/randword,[u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] clear fair overcast rain fog stormy)]
+&WINTERTYPE-CLEAR Slave Weather Station=[u(#7/randword,[u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] clear fair overcast sleet lightsnow fog blizzard)]
+&SPRINGTYPE-FAIR Slave Weather Station=[u(#7/randword,[u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] clear fair overcast rain fog stormy)]
+&SUMMERTYPE-FAIR Slave Weather Station=[u(#7/randword,[u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] clear fair overcast rain fog stormy)]
+&AUTUMNTYPE-FAIR Slave Weather Station=[u(#7/randword,[u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] clear fair overcast rain fog stormy)]
+&WINTERTYPE-FAIR Slave Weather Station=[u(#7/randword,[u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] clear fair overcast sleet lightsnow fog blizzard)]
+&SPRINGTYPE-OVERCAST Slave Weather Station=[u(#7/randword,[u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] clear fair overcast rain fog stormy)]
+&SUMMERTYPE-OVERCAST Slave Weather Station=[u(#7/randword,[u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] clear fair overcast rain fog stormy)]
+&AUTUMNTYPE-OVERCAST Slave Weather Station=[u(#7/randword,[u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] clear fair overcast rain fog stormy)]
+&WINTERTYPE-OVERCAST Slave Weather Station=[u(#7/randword,[u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] clear fair overcast sleet lightsnow fog blizzard)]
+&SPRINGTYPE-RAIN Slave Weather Station=[u(#7/randword,[u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] clear fair overcast rain fog stormy)]
+&SUMMERTYPE-RAIN Slave Weather Station=[u(#7/randword,[u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] clear fair overcast rain fog stormy)]
+&AUTUMNTYPE-RAIN Slave Weather Station=[u(#7/randword,[u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] clear fair overcast rain fog stormy)]
+&WINTERTYPE-SLEET Slave Weather Station=[u(#7/randword,[u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] clear fair overcast sleet lightsnow fog blizzard)]
+&WINTERTYPE-LIGHTSNOW Slave Weather Station=[u(#7/randword,[u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] clear fair overcast sleet lightsnow fog blizzard)]
+&SPRINGTYPE-FOG Slave Weather Station=[u(#7/randword,[u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] clear fair overcast rain fog stormy)]
+&SUMMERTYPE-FOG Slave Weather Station=[u(#7/randword,[u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] clear fair overcast rain fog stormy)]
+&AUTUMNTYPE-FOG Slave Weather Station=[u(#7/randword,[u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] clear fair overcast rain fog stormy)]
+&WINTERTYPE-FOG Slave Weather Station=[u(#7/randword,[u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] clear fair overcast sleet lightsnow fog blizzard)]
+&SPRINGTYPE-STORMY Slave Weather Station=[u(#7/randword,[u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] clear fair overcast rain fog stormy)]
+&SUMMERTYPE-STORMY Slave Weather Station=[u(#7/randword,[u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] clear fair overcast rain fog stormy)]
+&AUTUMNTYPE-STORMY Slave Weather Station=[u(#7/randword,[u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] clear fair overcast rain fog stormy)]
+&WINTERTYPE-STORMY Slave Weather Station=[u(#7/randword,[u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] clear fair overcast sleet lightsnow fog blizzard)]
+&SPRINGTYPE-SLEET Slave Weather Station=[u(#7/randword,[u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] clear fair overcast rain fog stormy)]
+&SPRINGTYPE-LIGHTSNOW Slave Weather Station=[u(#7/randword,[u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] clear fair overcast rain fog stormy)]
+&WINTERTYPE-RAIN Slave Weather Station=[u(#7/randword,[u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] [u(weathertype-master)] clear fair overcast sleet lightsnow fog blizzard)]
+&GENERATOR Slave Weather Station=@wait me={&weathertype-old me = [u(weathertype)]; &weathertype-master me = [u(#111/weathertype-old)]; &weathertype me = [u([u(#7/season)]type-[u(weathertype-master)])]; @trigger me/generator}
+@Startup Slave Weather Station=@drain me; @trigger me/generator
+@Desc Slave Weather Station=This Slave Weather Station is an optional part of the weather code. It is only useful if you want to run regional weather (+topic regional for help). It is notified by Weathermaker to select its own weather for the day. It has no commands and should be kept in the Auxiliary room or a regional auxiliary room.
+&VERSION Slave Weather Station=3.0
+&AUTHOR Slave Weather Station=Keran@Keranset Island
+&WEATHERTYPE-MASTER Slave Weather Station=fair
+&WEATHERTYPE Slave Weather Station=fair
+&WEATHERTYPE-OLD Slave Weather Station=fair
+@set Slave Weather Station=VISUAL
+@set Slave Weather Station=NO_COMMAND
+@set Slave Weather Station=SAFE
+
+
+#115 - Clock
+
+@create Clock=1
+@lock Clock=#0
+@Startup Clock=@trigger me/loop
+&LOOP Clock=@trigger me/routine-time-of-day; @trigger me/routine-hour; @trigger me/routine-tide; @trigger me/routine-moon; @trigger me/routine-sun; @wait 60 = @trigger me/loop
+&DAY-NIGHT-DAWN-DUSK Clock=night
+&LAST-DAY-NIGHT-DAWN-DUSK Clock=night
+&ROUTINE-TIME-OF-DAY Clock=&last-time-of-day clock = [u(time-of-day)]; &time-of-day clock = [u(#7/time-of-day)]; @switch [comp(u(last-time-of-day), u(time-of-day))] = 0, @@, @dolist [v(triggerlist-time-of-day)] = @trigger ##/trigger-at-[u(#7/blank2tilde, u(#7/time-of-day))]
+&ROUTINE-HOUR Clock=&last-hour clock = [u(hour)]; &hour clock = [u(#7/hour)]; @switch [comp(u(hour), u(last-hour))] = 0, @@, @dolist [v(triggerlist-hour)] = @trigger ##/trigger-at-[u(#7/hour)]
+&ROUTINE-TIDE Clock=&last-tide clock = [u(tide)]; &tide clock = [u(#7/tide)]; @switch [comp(u(tide), u(last-tide))] = 0, @@, @dolist [v(triggerlist-tide)] = @trigger ##/trigger-at-[u(#7/blank2tilde, u(#7/tide))]
+&ROUTINE-MOON Clock=&last-moon-up clock = [u(moon-up)]; &moon-up clock = [u(#7/moon-up)]; @switch [comp(u(moon-up), u(last-moon-up))] = 0, @@, 1, @dolist [v(triggerlist-moon)] = @trigger ##/trigger-at-moonrise, -1, @dolist [v(triggerlist-moon)] = @trigger ##/trigger-at-moonset
+&ROUTINE-SUN Clock=&last-day-night me = [u(day-night)]; &day-night me = [u(#7/day-night)]; @switch [comp(u(day-night), u(last-day-night))] = 0, @@, -1, @dolist [v(triggerlist-sun)] = @trigger ##/trigger-at-sunrise, 1, @dolist [v(triggerlist-sun)] = @trigger ##/trigger-at-sunset
+&TRIGGERLIST-HOUR Clock=#173
+&TIME-OF-DAY Clock=midnight
+&HOUR Clock=23
+&TIDE Clock=high and rising
+&MOON-UP Clock=1
+&DAY-NIGHT Clock=night
+&LAST-TIME-OF-DAY Clock=night
+&LAST-HOUR Clock=22
+&LAST-TIDE Clock=high and rising
+&LAST-MOON-UP Clock=1
+&LAST-DAY-NIGHT Clock=night
+&ADD-TO-TRIGGERLIST Clock=$add * *: &triggerlist-%1 me = [setunion(%0, v(triggerlist-%1))]
+&DELETE-FROM-TRIGGERLIST Clock=$del * *: &triggerlist-%1 me = [setdiff(v(triggerlist-%1), %0)]
+@Desc Clock=The Clock runs a continual loop in which it checks the time of day and then @triggers various objects based on the time of day. It must trigger the Weathermaker, and the Time of Day Emits Bank if you want to use emits. You can add other objects to the list of objects it will @trigger. It has commands on it (+i clock for help) and should be kept in the Auxiliary room.
+&IS-ADMIN Clock=[orflags(%#, WZ)]
+@lock/UseLock Clock=IS-ADMIN/1
+&ITEMHELP Clock=$+i clock: @pemit %# = {%rThe clock has two commands on it:%r%radd <db#> <time>%rdel <db#> <time>%r%r<db#> is the database number of the object to be triggered. <time> must be hour, time-of-day, sun, moon, or tide. These are utilities provided to make it easier to add and remove items from the clock's triggerlists. The clock can trigger objects at the appropriate time, provided the object has an attribute named &trigger-at-<time> (&trigger-at-dawn, &trigger-at-moonrise, &trigger-at-1, etc. The format for triggering after midnight is &trigger-at-after~midnight.) Note that if you want to trigger an attribute on an object precisely at 12:00 (virtual noon), set an attribute called &trigger-at-12; the time of day called noon is not an instant but a short continuous stretch of time (about a virtual hour) when the sun is nearly overhead. Midnight is also a stretch of time; use &trigger-at-0 instead.%r%rThe debugging loop attribute is not used in normal operation. It can be triggered and its @wait time adjusted so that it sends you @mail about the state of the weather and timing every so often.%r}
+&TRIGGERLIST-TIME-OF-DAY Clock=#111 #173
+&DEBUGGING-LOOP Clock=@mail/quick Shazemar/Time test = Time = [time()]%rSecs-elapsed-today = [u(#7/secs-elapsed-today)]%rTime of day = [u(#7/time-of-day)]%rHour = [u(#7/hour)]%rMoon-phase = [u(#7/moon-phase)]%rMoon up = [u(#7/moon-up)]%rThe month is [u(#7/calendar-month)]%rThe season is [u(#7/season)]%rThe tide is [u(#7/tide)]%rThe weather is [u(#111/weathertype)]%rYear = [u(#7/year)]%rDay of calendar month = [u(#7/day-of-calendar-month)]%rDay of lunar month = [u(#7/day-of-lunar-month)]%r%rGregorian season = [u(#7/gregorian-season)]%rGregorian month = [u(#7/gregorian-month)]%rGregorian year = [u(#7/gregorian-year)]%rSlave weather=[u(#114/weathertype)]; @wait 1200=@trigger me/debugging-loop
+&VERSION Clock=3.0
+&AUTHOR Clock=Keran@Keranset Island
+&TRIGGERLIST-SUN Clock=#111 #173
+&TRIGGERLIST-MOON Clock=#173
+&TRIGGERLIST-TIDE Clock=#173
+@set Clock=VISUAL
+@set Clock=INHERIT
+@set Clock=NO_COMMAND
+@set Clock=SAFE
+
+
+#116 - Uncommon +Function help
+
+@create Uncommon +Function help=1
+@lock Uncommon +function help=#0
+&SECS-PER Uncommon +function help=%ru(#7/secs-per-day)%ru(#7/secs-per-hour)%ru(#7/secs-per-halfday)%ru(#7/secs-per-quarterday)%ru(#7/secs-per-halfhour)%ru(#7/secs-per-moonday)%ru(#7/secs-per-tideday)%r%rA collection of calculations which adjust the length of various virtual intervals according to clock-compression, and make the code more readable. A moonday is the time from one moonrise to the next and a tideday is the time from one high tide to the next. %r
+&FROM-0 Uncommon +function help=%ru(#7/day-from-0)%ru(#7/moonday-from-0)%ru(#7/tideday-from-0)%r%rCalculates the number of days, moon rise and set cycles, and tide cycles since time began. %r
+&LAST-MIDNIGHT Uncommon +function help=%ru(#7/last-midnight)%r%rThe time of the last virtual midnight, in seconds. %r
+&LENGTH Uncommon +function help=%ru(#7/day-length)%ru(#7/night-length)%ru(#7/day-length-variation)%r%rThe length of day or night. The day length varies sinusoidally with the time of year, and the length of the longest day is equal to &solstice-day-length #7 in hours; the length of night, naturally, reverses this pattern. %r
+&IS Uncommon +function help=%ru(#7/is-midnight)%ru(#7/is-after-midnight)%ru(#7/is-dawn)%ru(#7/is-morning)%ru(#7/is-noon)%ru(#7/is-afternoon)%ru(#7/is-dusk)%r%rA collection of functions that return 1 if it's the indicated time of day and 0 if it isn't. Used for calculating time-of-day. %r
+&IF Uncommon +function help=%ru(#7/ifaftermidnight)%ru(#7/ifdawn)%ru(#7/ifmorning)%ru(#7/ifnoon)%ru(#7/ifafternoon)%ru(#7/ifdusk)%r%rA cascade of functions that may be called by time-of-day. They either return the time, if it matches, or call the next function, if it doesn't, until they get to day-night. %r
+&BEGINS-AND-ENDS Uncommon +function help=%ru(#7/flood-begins)%ru(#7/mid-flood)%ru(#7/ebb-begins)%ru(#7/mid-ebb)%ru(#7/slack-high-water-begins)%ru(#7/slack-high-water-ends)%ru(#7/tide-cycle-begins)%ru(#7/slack-low-water-ends)%r%rA battery of functions that return the times of the turnover points of the tide cycle, in seconds. The tide cycle starts at the beginning of slack low water.%r
+&SUNDAY-MINUS-MOONDAY Uncommon +function help=%ru(#7/sunday-minus-moonday-in-minutes)%r%rThe amount of time by which the solar day and the lunar rise and set cycle differ. %r
+&DAYS-PER Uncommon +function help=%ru(#7/days-per-year)%ru(#7/days-per-season)%ru(#7/days-per-calendar-month)%ru(#7/days-per-lunar-month)%r%rThe counted days that go by in the indicated cycles. See +fun COMPRESSION.
+&SECS-ELAPSED Uncommon +function help=%ru(#7/secs-elapsed-today)%ru(#7/secs-elapsed-this-lunar-month)%ru(#7/secs-elapsed-this-calendar-month)%r%rFunctions which return the number of seconds elapsed since the start of an virtual time period. 'Today' starts at virtual midnight. %r
+&MOON-PHASE Uncommon +function help=%ru(#7/moon-phase)%ru(#7/moon-phase-unadjusted)%ru(#7/moon-phase-division)%ru(#7/last-moon-phase)%r%rFunctions used to calculate the phase of the moon. Moon-phase-division divides the month into parts corresponding to the phases; moon-phase-unadjusted calculates the current phase. It being disconcerting for the moon to change phases in the sky in the course of a single virtual night, moon-phase reads moon-phase-unadjusted by day and last-moon-phase at night. The weathermaker writes the last moon phase to the timing object during the virtual day to accomplish this. %r
+&CALENDAR-MONTH Uncommon +function help=%ru(#7/calendar-month)%ru(#7/number-of-calendar-month)%ru(#7/day-of-calendar-month)%ru(#7/secs-per-calendar-month)%ru(#7/days-per-calendar-month)%ru(#7/secs-elapsed-this-calendar-month)%r%rCalculations pertaining to the native calendar month, which is the solar year divided into 12. The first month of spring starts at the vernal equinox. See also +uncommon gregorian, +uncommon native, +topic CALENDARS.%r
+&LUNAR-MONTH Uncommon +function help=%ru(#7/day-of-lunar-month)%ru(#7/secs-per-lunar-month)%ru(#7/days-per-lunar-month)%ru(#7/secs-elapsed-this-lunar-month)%r%rCalculations pertaining to the lunar synodical month, that is, the time it takes for the moon to go through a complete phase cycle. Set to 30 days by default; the real synodical month is about 29.5 days.%r
+&NATIVE Uncommon +function help=%ru(#7/native-season)%ru(#7/native-year)%ru(#7/calendar-month)%r%rThese functions return the month, season and year in the 'native' calendar used by the weather code. See also +topic CALENDARS. %r
+&GREGORIAN Uncommon +function help=%ru(#7/gregorian-season)%ru(#7/gregorian-year)%ru(#7/gregorian-month)%r%rThese functions return the month, season and year in a quasi-Gregorian calendar format. See also +topic CALENDARS. %r
+&UNCOMMON-FUNCTIONS Uncommon +function help=%rThese functions are used for time calculations and mostly are rarely expected to be useful to players.%r%r[columns(begins-and-ends calendar-month days-per from-0 gregorian if is last-midnight length lunar-month moon-phase native rising-ebbing-slack secs-elapsed secs-per sunday-minus-moonday, 21)]%r%r+uncommon <item-name> for help.
+&RISING-EBBING-SLACK Uncommon +function help=%ru(#7/low-and-rising)%ru(#7/high-and-rising)%ru(#7/slack-high-water)%ru(#7/high-and-ebbing)%ru(#7/low-and-ebbing)%ru(#7/slack-low-water)%r%rA collection of functions that return 1 if the tide is in the indicated state and 0 if it isn't. %r
+@Desc Uncommon +function help=This is +help for functions used in doing timing calculations. Most of the functions on it are unlikely to be of great interest to players or to anyone else. It's here in case you decide to do something strange or rewrite the timing. It belongs in the Auxiliary room and has no commands on it.
+&VERSION Uncommon +function help=3.0
+&AUTHOR Uncommon +function help=Keran@Keranset Island
+@set Uncommon +function help=VISUAL
+@set Uncommon +function help=NO_COMMAND
+@set Uncommon +function help=SAFE
+
+
+#133 - Outdoor Parent Room
+
+@dig/teleport Outdoor Parent Room
+@Desc here=[squish([u(unchanging-desc)] [u([u(#7/day-night)]-desc)] [u([u(#7/season)]-desc)])][u(separator)][squish([u(weather-desc)] [switch(u(#7/day-night), night, {[switch(u(#7/moon-phase), new,, {[switch(u(#7/moon-up), 1, {[switch(u(#7/weathertype), clear, u(moon-desc), fair, u(moon-desc))]})]})]})])]%r[u(instructions)]
+&NIGHT-DESC here=This is what the place is like by night.
+&SPRING-DESC here=This is what the place is like in spring.
+&SUMMER-DESC here=This is what the place is like in summer.
+&WINTER-DESC here=This is what the place is like in winter.
+&WEATHER-DESC here=[u(#7/short-weather)]
+&UNCHANGING-DESC here=This part of the desc never changes.
+&AUTUMN-DESC here=This is what the place is like in autumn.
+&NO-MOON-DESC here=\
+&MOON-DESC here=This is the desc of the [u(#7/moon-phase)] moon.
+&INSTRUCTIONS here=%rHow to describe an outdoor room with seasonal and weather variations: %r&unchanging-desc here=This part of the description of the place never changes.%r&night-desc here=What the place is like at night.%r&day-desc here=What the place is like by day.%r&spring-desc here=What the place is like during spring.%r&summer-desc here=What the place is like during summer.%r&autumn-desc here=What the place is like during autumn.%r&winter-desc here=What the place is like during winter.%rDon't put things that are only true in specific weather conditions in the descriptions listed above; it'll look funny if you describe a blue sky and the weathermaker comes up with rain.%r&weather-desc here=\[u(#7/short-weather)\] or \[u(#7/long-weather)\]. You can also add \[u(#7/tree-weather)\] or any other environmental weather descriptions that have been written. To use the environmental effects, do something like &weather-desc here=\[u(#7/short-weather)\] \[u(#7/tree-weather)\]%r&moon-desc here=Describe the \[u(#7/moon-phase)\] moon as it shines on the scenery at night.%r&instructions here=\\%rThis last will turn off these instructions. You can suppress any other part of the description the same way, e.g.: &moon-desc here=\\%r
+&DAY-DESC here=This is what the place is like by day.
+&SEPARATOR here=%r%r
+&MEET_OK here=1
+&VERSION here=3.0
+&HEAR-GLOBAL-EMITS here=1
+&AUTHOR here=Keran@Keranset Island
+@set here=FLOATING
+@set here=VISUAL
+@set here=NO_COMMAND
+@set here=PARENT_OK
+@set here=SAFE
+
+
+#173 - Emits Bank
+
+@create Emits Bank=1
+@lock Emits Bank=#0
+&TRIGGER-AT-DAWN Emits Bank=@dolist search(eroom=not(comp(u(##/hear-global-emits), 1))) = @pemit/contents ## = [switch(u(#7/weathertype), clear, The stars in the east begin to look washed out as the sapphire night sky pales., fair, A faint sheen touches the clouds in the sapphire night sky to the east., fog, The eastern mist pales almost imperceptibly., lightsnow, {The dark grey sky in the east pales as damp, cold dawn approaches.}, blizzard, {Faintly, a grey pallor illuminates the thick snowfall.}, sleet, A faint gleam touches the eastern sky through the sleet and the cold wind., rain, {Through the veils of rain, the clouds to the east pale.}, stormy, The stormy sky lightens faintly to the east., overcast, Faint grey light seeps through a leaden layer of clouds toward the east.)]
+&TRIGGER-AT-SUNRISE Emits Bank=@dolist search(eroom=not(comp(u(##/hear-global-emits), 1))) = @pemit/contents ## = [switch(u(#7/weathertype), clear, Pink-gold light gilds the land as the sun creeps over the eastern horizon into a cloudless blue sky., fair, {The sun rises, painting the eastern clouds with a pink and pale gold glow.}, rain, Rain falls in the dawn's light., overcast, A grey dawn breaks., fog, Everything is half-concealed by fog in the grey half-light., stormy, Rain falls in wind-lashed sheets at dawn., lightsnow, {Through the snow flurries, the translucent grey sky brightens to the east.}, sleet, Freezing rain falls in the grey light of dawn., blizzard, Snow cascades from the sky in the half-light of dawn.)]
+&TRIGGER-AT-DUSK Emits Bank=@dolist search(eroom=not(comp(u(##/hear-global-emits), 1))) = @pemit/contents ## = [switch(u(#7/weathertype), clear, Shadows lengthen and the light turns golden as the sun sinks toward the west through a clear sky., fair, {Purple, gold, and vermillion clouds grace the western sky as the sun descends toward the west.}, overcast, The soft light dims at dusk., rain, A rainy late afternoon gives way to evening., fog, The misty light dims slightly., stormy, {The clouds darken further, rain drenching the landscape as evening approaches.}, lightsnow, {Through the drifting snowflakes, the translucent pale grey of the sky deepens.}, sleet, Sleet coats the ground with ice as evening draws near., blizzard, The whiteness of the whirling snow fades to blanched grey.)]
+&TRIGGER-AT-SUNSET Emits Bank=@dolist search(eroom=not(comp(u(##/hear-global-emits), 1))) = @pemit/contents ## = [switch(u(#7/weathertype), clear, The evening stars come out as the red-orange sun sinks below the horizon., fair, {The orange-red sun sinks below the western horizon, leaving a darkening tapestry of purple and red-gold clouds behind it.}, overcast, {A featureless blanket of grey cloud covers the evening sky.}, fog, Twilight deepens the grey of the fog., rain, The shower soaks the earth as twilight deepens., stormy, {The last light in the west begins to fail, heralding a stormy night.}, lightsnow, Snow flurries fall from a darkening grey sky., sleet, {In the deepening twilight, the freezing rain makes the footing treacherous.}, blizzard, Blinding snow spills from the sky as the twilight deepens.)]
+&TRIGGER-AT-NIGHT Emits Bank=@dolist search(eroom=not(comp(u(##/hear-global-emits), 1))) = @pemit/contents ## = [switch(u(#7/weathertype), clear, The stars glitter like diamonds in the deep sapphire blue of the night sky., fair, {Brindled clouds conceal a few patches of starlit sky.}, overcast, {The night is moonless and starless.}, fog, {Fog and darkness shroud the world.}, rain, Raindrops sprinkle down from a night sky obscured by dark grey clouds., stormy, Wailing wind blows rain through the darkness., blizzard, Snow swirls about you in gusts as night falls., sleet, {As night falls, the icy rain is whipped about by the wind.}, lightsnow, {The night is raw. Snow flurries drift down from the overcast sky.})]
+@Desc Emits Bank=This is an emitter bank containing messages that are broadcast to outdoor rooms at first light, sunrise, sunset, moonrise, moonset, nightfall, etc. The messages vary with the weathertype. It is triggered by the Clock. It belongs in the Auxiliary room and has no commands on it.
+&TRIGGER-AT-MORNING Emits Bank=@dolist search(eroom=not(comp(u(##/hear-global-emits), 1))) = @pemit/contents ## = [switch(u(#7/weathertype), clear, The sun climbs into a brilliant blue sky., fair, The sun ascends in a bright blue sky filled with fluffy fair weather clouds and a few wisps of cirrus., overcast, The light from the overcast sky is diffuse and nothing casts a shadow., rain, It's a wan grey morning. Rain patters to earth., stormy, {Furious winds drive rain into the ground at angle. The morning sky is slate grey.}, sleet, Icing rain plates the world with silver in the cold light of morning., lightsnow, {The pallid gleam of the sun rises behind a veil of pearlescent grey, from which snow flurries drift. The air is chilly and damp.}, blizzard, {Heavy, wet snow falls throughout the morning.}, fog, Pale grey mists half-hide the world around you.)]
+&TRIGGER-AT-12 Emits Bank=@dolist search(eroom=not(comp(u(##/hear-global-emits), 1))) = @pemit/contents ## = [switch(u(#7/weathertype), clear, The sun blazes overhead in the clear blue sky., fair, {The sun shines overhead, bracketed by puffy fair weather clouds.}, overcast, A thick layer of stratus clouds cloaks the sky at mid-day., fog, The fog is grey-white in the light of mid-day., rain, Droplets splash in puddles at mid-day., stormy, {Torrential rains fall at mid-day, driven by raging winds.}, sleet, Freezing rain pours from the sky at mid-day., lightsnow, Light snow wafts gently down from the pale grey mid-day sky., blizzard, The world is lost in whiteness as snow blows about you at mid-day.)]
+&TRIGGER-AT-0 Emits Bank=@dolist search(eroom=not(comp(u(##/hear-global-emits), 1))) = @pemit/contents ## = [switch(u(#7/weathertype), clear, Stars glitter brilliantly in the deep blue of the midnight sky., fair, {Stars sparkle in the midnight sky, obscured here and there by clouds.}, overcast, Charcoal clouds fill the midnight sky., fog, It's hard to see through the midnight darkness and the fog., rain, {Rain falls at midnight, unseen in the darkness.}, stormy, The ferocity of the gale is unabated at midnight., lightsnow, {Powdery snow drifts down from the grey-black midnight sky, unseen in the darkness.}, sleet, Sleet spatters from the midnight sky., blizzard, The blizzard and the darkness of midnight hide everything.)]
+&TRIGGER-AT-MOONRISE Emits Bank=@switch u(#7/moon-phase) = new, @@, {@switch u(#7/day-night) = night, {@dolist search(eroom=not(comp(u(##/hear-global-emits), 1))) = @pemit/contents ## = [switch(u(#7/weathertype), clear, {The [u(#7/moon-phase)] moon rises into the sapphire blue of the night sky, dimming the light of the twinkling stars.}, fair, {Framed by a rack of clouds, the [u(#7/moon-phase)] moon rises into the deep blue of the starlit sky.},,)]}}
+&TRIGGER-AT-MOONSET Emits Bank=@switch u(#7/moon-phase) = new, @@, {@switch u(#7/day-night) = night, {@dolist search(eroom=not(comp(u(##/hear-global-emits), 1))) = @pemit/contents ## = [switch(u(#7/weathertype), clear, {The [u(#7/moon-phase)] moon sets, leaving the stars to spangle the crystalline night sky.}, fair, {The [u(#7/moon-phase)] moon, tracing a nearby wisp of cloud in silver, sinks below the western horizon. The stars sparkle in the ultramarine sky, distant and serene.},,)]}}
+&TRIGGER-AT-AFTER~MIDNIGHT Emits Bank=@emit It's after midnight.
+&TRIGGER-AT-AFTERNOON Emits Bank=@emit It's afternoon.
+&TRIGGER-AT-NOON Emits Bank=@emit It's noon.
+&TRIGGER-AT-MIDNIGHT Emits Bank=@emit It's midnight.
+&VERSION Emits Bank=3.0
+&AUTHOR Emits Bank=Keran@Keranset Island
+&TRIGGER-AT-HIGH~AND~SLACK Emits Bank=@emit The tide is high and slack.
+&TRIGGER-AT-LOW~AND~SLACK Emits Bank=@emit The tide is low and slack.
+&TRIGGER-AT-LOW~AND~EBBING Emits Bank=@emit The tide is low and ebbing.
+&TRIGGER-AT-LOW~AND~RISING Emits Bank=@emit The tide is low and rising.
+&TRIGGER-AT-HIGH~AND~RISING Emits Bank=@emit The tide is high and rising.
+&TRIGGER-AT-HIGH~AND~EBBING Emits Bank=@emit The tide is high and ebbing.
+@set Emits Bank=VISUAL
+@set Emits Bank=ROYALTY
+@set Emits Bank=NO_COMMAND
+@set Emits Bank=SAFE
+
+
+#175 - Global Command Object
+
+@create Global Command Object=0
+&FUNCTION Global Command Object=$+fun *: @pemit %#=[u(#106/%0)]
+&TODAY Global Command Object=$+today: @pemit %#=It's hour [u(#7/hour)] in the day, in week [u(#7/week)] of [u(#7/tilde2blank, u(#7/month))], in year [u(#7/year)] of the reign of King Halar. The moon is in its [u(#7/moon-phase)] phase, and it's [switch(u(#7/moon-up), 1, up., 0, not up.)] The tide is [u(#7/tide)].%r[u(#7/long-weather)]
+&UNCOMMON-FUNCTIONS Global Command Object=$+uncommon *: @pemit %# = [u(#116/%0)]
+&UNCOMMON-FUNCTION-LIST Global Command Object=$+uncommon: @pemit %# = [u(#116/uncommon-functions)]
+&FUNCTION-LIST Global Command Object=$+fun: @pemit %#=[u(#106/function-list)]
+&TOPIC-LIST Global Command Object=$+topic: @pemit %# = [u(#109/topic-list)]
+&TOPICS Global Command Object=$+topic *: @pemit %# = [u(#109/%0)]
+@Desc Global Command Object=This object has global commands on it. It belongs in the Master Room.
+&AUTHOR Global Command Object=Keran@Keranset Island
+@set Global Command Object/AUTHOR = no_command
+&VERSION Global Command Object=3.0
+@set Global Command Object/VERSION = no_command
+@set Global Command Object=VISUAL
+@set Global Command Object=SAFE
+
+
+
+
+
+

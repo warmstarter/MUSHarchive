@@ -1,0 +1,75 @@
+MUX Core 1.0 Beta 1
+--------------------------
+Thanks to everyone who helped me track down and squash bugs, especially Kat, who
+probably accounts for about half the bugs on the list solo.
+
+	New Features
+	------------
+*	Places have been completely rewritten. Please see the relevant help files.
+
+*	I have added Meta Rooms code. For the quick intro, see +help metarooms/explained.
+
+*	Two new functions have been added, UPDATE() and ACCESS() Mostly they're to
+	support some external code I'm writing, but I saw no reason not to include
+	them. Docs are in +shelp functions.
+	
+*	The underlying jobs code is now Anomaly Jobs 6.1. Anomaly Jobs is included
+	under the GNU GPL.
+	
+*	I've changed the format of the distribution file a bit to hopefully make it
+	easier for people on multiple platforms. The previous distribution file was
+	difficult to work with in Windows. Note that Windows users should stick to
+	db_load'ing the included flatfile, because the installation source relies on
+	being able to do a few @restarts.
+	
+*	I have included the ./Backup script (for Unix-based systems) in the distribution
+	file. The only change is that $TEXT/jhelp.txt has been added to be included
+	in the backup.
+
+	Bug Fixes
+	------------
+
+*	The room parent has been changed around to allow it to show longer exit
+	names. It now tries to fit exits in two columns instead of three.
+
+*	+Staff was showing #-1 NO MATCH with more than one staffer was online, because
+	the wrong delimiter had been specified.
+
+*	The uselock on the Staff Globals Object has been changed to allow staff-owned
+	objects to execute staff commands.
+
+*	Cron jobs were not firing. The code was originally written for another game
+	and the attributes were name CRON_ to fit with the attribute naming scheme
+	on that game. In my own code I use CRON. but I forgot to edit the code.
+
+*	+who was incorrectly showing 8 people online.
+
+*	Using the +view command on a room was not working due to a typo.
+
+*	The Build and Staff nexuses has the same keyword (Nexus). I've removed that
+	keyword from both exits.
+
+*	The Public and Guests channels are now @cset public on creation. New players
+	were not able to see the channels in @clist.
+
+*	A vampire tag that I'd been using for code testing snuck through on #5.
+	It's been removed. This was a remnant from an older working version of tags,
+	and taglists are now stored on the Staff Globals Object (#8).
+	
+*	The lcstr() around %1 in the HASTAG function (#5/FPRIV.HASTAG) is unnecessary.
+	The softcoded ismember() function (#5/FN.ISMEMBER) is not case sensitive. An
+	older version of the function was.
+
+*	Moving the ROLLXDY() function to the Global Functions object was a last minute
+	thing from a set of testing dice code I had. I neglected to consider that, being
+	a global @function, it would execute with the permissions of the player and try
+	to pull their D.MAXFACES and D.MAXDICE attributes instead of the ones on the
+	global object. The v()s have been changed to get(#5/) and the necessary attributes
+	are now set VISUAL.
+
+*	The "You must control %0." lines have been removed from +shelp file for the
+	tags functions. This was based on an older test version where non-staff players
+	could see the tags on objects they control. This functionality was removed to make
+	tags more focused on being a staff-only info system.
+
+*	There were unnecessary colors around the subheader() in +finger.

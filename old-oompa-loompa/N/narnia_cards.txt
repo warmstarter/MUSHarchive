@@ -1,0 +1,49 @@
+@create Card Table with Cards
+@lock Card Table with Cards == me
+@set Card Table with Cards = LINK_OK
+@set Card Table with Cards = OPAQUE
+@set Card Table with Cards = VISUAL
+&BASE_DECK Card Table with Cards=AS 2S 3S 4S 5S 6S 7S 8S 9S 10S JS QS KS AH 2H 3H 4H 5H 6H 7H 8H 9H 10H JH QH KH AD 2D 3D 4D 5D 6D 7D 8D 9D 10D JD QD KD AC 2C 3C 4C 5C 6C 7C 8C 9C 10C JC QC KC
+&BRITISH_DECK Card Table with Cards=AS 2S 3S 4S 5S 6S 7S 8S 9S 10S JS QS KS AH 2H 3H 4H 5H 6H 7H 8H 9H 10H JH QH KH AD 2D 3D 4D 5D 6D 7D 8D 9D 10D JD QD KD AC 2C 3C 4C 5C 6C 7C 8C 9C 10C JC QC KC
+&BRITISH-EMIT Card Table with Cards=%N pokes and prods at the cards until they turn back into a deck of fifty-two British cards.
+&BRIT_NAME Card Table with Cards=edit(u(redit,%0,A J K Q D H S C,Ace Jack King Queen _of_Diamonds _of_Hearts _of_Spades _of_Clubs),_,space())
+&CARD Card Table with Cards=7E
+&CGAME Card Table with Cards=British
+&CREDITS Card Table with Cards=Tash@OriginalNarniaMush
+&DEAL_TO Card Table with Cards=$deal * to *:@switch num(%1)=#-1,{@pemit %#=There is no such player here.},{@switch words(v(deck))=<%0,{@pemit %#=There aren't that many cards left!},{@emit %N deals %0 card[switch(%0,1,,s)] to [switch(name(%1),%N,%oself,name(%1))].;@dolist lnum(%0)={&hand-[num(%1)] me=[v(hand-[num(%1)])] [first(v(deck))];&deck me=rest(v(deck))}}}
+&DECK Card Table with Cards=8S 8H 7S 8D 5C JS 10S 2D 4H JC 9H 4C AC JH AD 7C KD 5H KC 4D 2C AS 3D 6S 9D AH 9C 3C 6H 7H KS QS 3S 10H QH 7D 10C 5S QD JD 6C 6D 2S 10D 9S 2H 8C QC 5D 4S 3H KH
+@DESCRIBE Card Table with Cards=This is an ordinary deck of [v(cgame)] playing cards. There [u(numname,words(v(deck)),card)] in the deck[switch(words(lattr(me/hand-*)),0,,u(player_desc))][switch(words(v(deck)),words(v(base_deck)),,u(tossed_desc))].[u(instructions)]
+@set Card Table with Cards/DESCRIBE=no_command visual
+&DONE Card Table with Cards=$done:@switch v(hand-%#)=,{@pemit %#=You are not holding a hand!},{@emit %N puts %p hand aside.;&tossed me=cat(v(tossed),v(hand-%#));&hand-%# me}
+&EUCHRE_DECK Card Table with Cards=AS 9S 10S JS QS KS AH 9H 10H JH QH KH AD 9D 10D JD QD KD AC 9C 10C JC QC KC
+&EUCHRE-EMIT Card Table with Cards=%N shuffles through the cards, taking out most of the interesting ones, leaving it a Euchre deck with only aces, nines, tensand the face cards.
+&FN_SHUFFLE Card Table with Cards=[setq(1,%0)]iter(%0,[setq(2,add(rand(words(r(1))),1))]extract(r(1),r(2),1)[setq(1,remove(r(1),extract(r(1),r(2),1)))])
+&FOLD Card Table with Cards=$fold:@switch v(hand-%#)=,{@pemit %#=You are not holding a hand!},{@emit %N folds, putting %p hand aside.;&tossed me=cat(v(tossed),v(hand-%#));&hand-%# me}
+&GAME_NAME Card Table with Cards=extract(v(games_list),match(v(games_list),%0*),1)
+&GAMES_LIST Card Table with Cards=Narnian British Euchre
+&GIVE_TO Card Table with Cards=$deliver * to *:@switch num(%1)=#-1,{@pemit %#=There is no such player here.},{&TO_GIVE me=iter(ucstr(%0),switch(member(v(hand-%#),##),0,,##));@switch words(v(to_give))=0,{@pemit %#=You are not holding those cards!},{@emit %N gives [name(%1)] [u(numname3,words(v(to_give)))] of %p cards.;@dolist v(to_give)={&hand-%# me=remove(v(hand-%#),##);&hand-[num(%1)] me=cat(v(hand-[num(%1)]),##)}}}
+&INSTRUCTIONS Card Table with Cards=%rYou can:%r[ljust(deal <number> to <player>,30)] - deal cards to a player face down.%r[ljust(sdeal <number> to <player>,30)] - deal cards to a player face up.%r[ljust(deliver <cards> to <player>,30)] - give those cards to another player.%r[ljust(hand,20)] - look at the cards in your hand.%r[ljust(show \[<cards>\],20)] - show everyone the cards in your hand.%r[ljust(discard <cards>,20)] - place those cards in the tossed pile.%r[ljust(discards,20)] - look at the cards in the discard pile.%r[ljust(shuffle all,20)] - shuffle the entire deck.%r[ljust(shuffle piles,20)] - shuffle the remaining and tossed cards together.%r[ljust(done \(or fold\),20)] - put your entire hand on the tossed pile.%r[ljust(deck <game>,20)] - reconfigure the deck (one of [v(games_list)])%r[ljust(interpret,20)] - name the cards in your hand.
+&INTERPRET Card Table with Cards=$inter*:@switch words(v(hand-%#))=0,{@pemit %#=You are not holding any cards!},{@pemit %#=The names of your cards are:;@dolist v(hand-%#)=@pemit %#=u([switch(v(cgame),Narnian,narn,brit)]_name,##)}
+&LOOK_DISCARDS Card Table with Cards=$discards:@switch words(v(tossed))=0,{@pemit %#=There are no cards in the discard pile.},{@pemit %#=Discards: [v(tossed)];@oemit %#=%N looks through the discard pile.}
+&LOOK_HAND Card Table with Cards=$hand:@switch v(hand-%#)=,{@pemit %#=You have no cards in your hand!},{@pemit %#=Your hand consists of: [iter(v(hand-%#),##)].}
+&NARNIAN_DECK Card Table with Cards=1N 2N 3N 4N 5N 6N 7N 8N 9N 10N 1C 2C 3C 4C 5C 6C 7C 8C 9C 10C 1A 2A 3A 4A 5A 6A 7A 8A 9A 10A 1U 2U 3U 4U
+&NARNIAN-EMIT Card Table with Cards=%N flips the deck of cards around, making it into a proper Narnian deck of sixty cards, ten each of the suits Narnia, Archenland, Islands, Ettinsmoor, Underland, and Calormen.
+&NARN_NAME Card Table with Cards=edit(u(redit,%0,N A U C I E,_of_Narnia _of_Archenland _of_the_Underland _of_Calormen _of_the_Islands _of_Ettinsmoor),_,space())
+&NUMBER_LIST Card Table with Cards=no one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty
+&NUMNAME Card Table with Cards=[switch(%0,1,is,are)] [u(numname3,%0)] [switch(%0,1,%1,%1s)]
+&NUMNAME2 Card Table with Cards=[u(numname3,%0)] [switch(%0,1,%1,%1s)]
+&NUMNAME3 Card Table with Cards=switch(lte(%0,20),1,extract(v(number_list),add(%0,1),1),%0)
+&P#1787-ADDRESS-CC Card Table with Cards=JD 8S KS 5H 10S
+&PICK_DECK Card Table with Cards=$deck *:@switch match(v(games_list),%0*)=0,{@pemit %#=I do not know that kind of deck. Try one of: [v(games_list)]},{@emit [u([u(GAME_NAME,%0)]-emit)];&BASE_DECK me=v([u(GAME_NAME,%0)]_DECK);&tossed me;@dolist lattr(me/hand-*)={&## me};&deck me=v(base_deck);&cgame me=[u(GAME_NAME,%0)]}
+&PLAYER_DESC Card Table with Cards=, and among the players, [iter(lattr(me/hand-*),[name(mid(##,5,99))] holds [u(numname2,words(v(##)),card)]\,)]
+&RANMEM Card Table with Cards=extract(%0,add(rand(words(%0)),1),1)
+&REDIT Card Table with Cards=switch(words(%1),1,edit(%0,%1,%2),u(redit,edit(%0,first(%1),first(%2)),rest(%1),rest(%2)))
+&SHOW_CARDS Card Table with Cards=$show *:&TO_SHOW me=iter(ucstr(%0),switch(member(v(hand-%#),##),0,,##));@switch words(v(to_SHOW))=0,{@pemit %#=You are not holding those cards!},{@emit %N shows [u(numname3,words(v(to_SHOW)))] of %p cards:[iter(v(to_show),##)]}
+&SHOW_DEAL Card Table with Cards=$sdeal * to *:@switch num(%1)=#-1,{@pemit %#=There is no such player here.},{@switch words(v(deck))=<%0,{@pemit %#=There aren't that many cards left!},{@emit %N deals %0 card[switch(%0,1,,s)] ([extract(v(deck),1,%0)]) to [switch(name(%1),%N,%oself,name(%1))].;@dolist lnum(%0)={&hand-[num(%1)] me=[v(hand-[num(%1)])] [first(v(deck))];&deck me=rest(v(deck))}}}
+&SHOW_HAND Card Table with Cards=$show:@switch v(hand-%#)=,{@pemit %#=You have no cards in your hand!},{@emit %N is holding: [iter(v(hand-%#),##)].}
+&SHUFFLE_ALL Card Table with Cards=$shuffle all:@emit %N collects all the cards and starts to shuffle them.;&deck me=v(base_deck);&tossed me;@dolist lattr(me/hand-*)={&## me};&deck me=u(fn_shuffle,v(deck));@emit %N finishes shuffling the cards.
+&SHUFFLE_PILES Card Table with Cards=$shuffle piles:@emit %N shuffles together the tossed pile with the remaining cards.;&deck me=cat(v(deck),v(tossed));&tossed me;&deck me=u(fn_shuffle,v(deck));@emit %N finishes shuffling the cards.
+&TO_SHOW Card Table with Cards=
+&TOSS_CARD Card Table with Cards=$discard *:&TO_TOSS me=iter(ucstr(%0),switch(member(v(hand-%#),##),0,,##));@switch words(v(to_toss))=0,{@pemit %#=You are not holding those cards!},{@emit %N discards [u(numname3,words(v(to_toss)))] of %p cards.;@dolist v(to_toss)={&hand-%# me=remove(v(hand-%#),##);&tossed me=cat(v(tossed),ucstr(##))}}
+&TOSSED_DESC Card Table with Cards=%band there [u(numname,words(v(tossed)),card)] tossed
+&TO_TOSS Card Table with Cards=

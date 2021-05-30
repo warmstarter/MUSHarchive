@@ -1,0 +1,490 @@
+###############################################################
+#			MARKET SYSTEM                         #
+#                                                             #
+# Where the Firan Market is #25                               #
+# Where Firan Demand Numbers are stored: #24                  #
+# Where Firan Supply is stored: #26                           #
+# Where Firan Cost Numbers are stored: #27                    #
+#                                                             #
+# This system keeps track of supply, demand, prices, and      #
+# adjusts prices accordingly.                                 #
+###############################################################
+
+@set me=quiet
+-
+
+@desc #25=[setq(0, filter(filter-supplies, laccounts(#26)))]
+          [setq(1, filter(filter-demands, lattr(#24/demand-*)))]
+          [setq(2, filter(filter-supplies2, lattr(#26/supply-*)))]
+          %r%cc%chMARKET SUPPLY:%R%cn
+          [columns(iter(%q0, [getaccount(#26,##)] [clip(##)], %b, |),25,|)]
+          %r%r
+          %cc%chDEMAND:%R%cn
+          [columns(iter(%q1, [get(#24/##)] [clip(##)], %b, |), 25, |)]
+          %R%R
+          %cc%chTOTAL SUPPLY:%cn%r
+          [columns(iter(%q2, [get(#26/##)] [clip(##)], %b, |), 25, |)]
+-
+
+&rep-dbrefs #25=#3290 #3880 #3306 #3784
+
+-
+&special-groups #25=
+ weaponry food clothing
+
+-
+
+############### TRIG-OPEN-MARKET ###################
+#
+# v(rep-dbrefs) = list of dbrefs of all the representatives
+# v(special-groups) = list of special currency types (food, weaponry)
+
+&trig-open-market #25=
+  @dolist [v(special-groups)]= {@tr me/trig-##-distribution};
+  @dolist [v(rep-dbrefs)]= {@tr me/trig-demand = ##};
+ 
+# for the market's supply
+  think setq(0, lcstr(laccounts(#26)));
+  think setq(0, remove(filter(#99/filter-commodities, %q0), stenis));
+  @dolist %q0=
+      &supply-## #26=[add(default(#26/supply-##, 0), getaccount(#26, ##))]
+-
+
+############### TRIG-FOOD-DISTRIBUTION #############
+# 
+# This trigger basically 'fakes' a food demand distribution over 
+# the various types of food so that prices can be determined.
+# 
+# v(rep-dbrefs) = list of dbrefs of all the representatives
+# %q0 = total food need of all reps
+# %q1 = 1/4 of total food need
+# %q2 = # of grain items in existence
+
+&trig-food-distribution #25=
+  think setq(0, iter(v(rep-dbrefs), needed(##, food)));
+  think setq(0, fold(#99/fold-add-num, %q0));
+
+# assuming 1/4 grains
+# assuming 1/4 meats-dairy
+# assuming 1/4 fruits & vegetables
+# assuming 1/4 prepared
+
+  think setq(1, div(%q0, 4));
+  think setq(2, words(grains(), |));
+  think setq(3, distribute(%q1, %q2, |));
+  @dolist/delimit | [grains()]=
+     {&demand-[makeattr(##)] #24=[index(%q3, |, member(grains(), ##, |), 1)]};
+
+  think setq(2, words(meats-dairy(), |));
+  think setq(3, distribute(%q1, %q2, |));
+  @dolist/delimit | [meats-dairy()]=
+     {&demand-[makeattr(##)] #24=[index(%q3, |, member(meats-dairy(), ##, |), 1)]};
+
+  think setq(9, setunion(fruits(), vegetables(), |));
+  think setq(2, words(%q9, |));
+  think setq(3, distribute(%q1, %q2, |));
+  @dolist/delimit | {%q9}=
+     {&demand-[makeattr(##)] #24=[index(%q3, |, member(%q9, ##, |), 1)]};
+
+  think setq(2, words(dishes(), |));
+  think setq(3, distribute(%q1, %q2, |));
+  @dolist/delimit | [dishes()]=
+     {&demand-[makeattr(##)] #24=[index(%q3, |, member(dishes(), ##, |), 1)]};
+-
+  
+&trig-clothing-distribution #25=
+  think setq(0, iter(v(rep-dbrefs), needed(##, clothing)));
+  think setq(0, round(fold(#99/fold-add-num, %q0),0));
+  think setq(1, words(clothing(), |));
+  think setq(2, distribute(%q0, %q1, |));
+  @dolist/delimit | [clothing()]=
+     {&demand-[makeattr(##)] #24=[index(%q2, |, member(clothing(), ##, |), 1)]}
+
+-
+
+################ TRIG-DEMAND ##########################
+# triggered by trig-open-market, where
+# %0 = representative
+
+&trig-demand #25=
+
+# Get the needed-commodity accounts off of the representative
+
+   think setq(0, lattr(%0/needed-*));
+   think setq(0, iter(%q0, clip(##), %b, |));
+
+
+# For each commodity update the demand
+
+   @dolist/delimit | %q0=
+       &demand-[makeattr(##)] #24=[add(default(#24/demand-[makeattr(##)], 0),
+                                       needed(%0, ##))];
+   @dolist/delimit | {[v(special-groups)]}=&demand-[makeattr(##)] #24
+
+-
+
+#===================================================================#
+#                    COMMAND: @SETCOST <COMMODITY>                  #
+#                                                                   #
+# This command uses the energy used to make a product, or the       #
+# current price of the ingredients, adds them up to come up with    #
+# a cost for the commodity, and puts that cost on the Firan         #
+# Cost Market Object (#27)                                          #
+#===================================================================#
+# 
+# %q0 = parent object for commodity
+# %q1 = ingredient list for commodity, if there is one, comforming to:
+#       <ingredient>=<amount>|<ingredient>=<amount>
+# %q2 = labor cost of the commodity (defaulted at .5)
+# %q3 = a base cost that might be stored on the object (defaulted to
+#                    0)
+
+&cmd-setcost #25=$@setcost *:
+
+  think setq(0, paccount(%0));
+  think setq(1, get(%q0/ingredients));
+  think setq(2, default(%q0/labor-make, .5));
+  think setq(3, default(%q0/accounts-produced, X=1));
+  think setq(3, after(%q3, =));
+  think setq(4, default(%q0/base-cost, 1));
+
+# Determine if there are any ingredients
+
+  @switch/first [isdbref(%q0)]
+                [gte(words(%q1, |), 1)]=
+    0?, {@pemit %#=You've specified an invalid currency type.},
+    ?0, {&cost-[makeattr(get(%q0/currency))] #27=[add(%q2, %q4)];
+        @pemit %#=The cost for %0 has been set as the labor cost: 
+               [cost(get(%q0/currency))]. },
+    ?1, {think setq(3, iter(%q1, fdiv(mul(price(first(##, =)), 
+                                         after(##,=)),
+                                     %q3), |, %b));
+        think setq(5, fold(#99/fold-add-num, %q3));
+        &cost-[makeattr(get(%q0/currency))] #27=[add(add(%q4, %q5),%q2)];
+        @pemit %#=The cost for %0 has been set as the 
+               combined ingredient cost: [cost(get(%q0/currency))] }
+
+
+-
+
+@@ &cmd-for-sale #26=$for sale:
+  think setq(0, laccounts(#26));
+  think setq(0, filter(#25/filter-supplies, %q0));
+  @pemit %#=%ch%cgFor Sale Today:%r%r%cn 
+  [columns(iter(%q0, %b[getaccount(#26, ##)]%b[clip(##)], %b, |), 25, |)]
+-
+
+@@ &cmd-for-sale-clothes #26=$for sale clothing:
+  think setq(0, laccounts(#26));
+  think setq(1, div(words(%q0), 2));
+  think setq(2, extract(%q0, 1, %q1));
+  think setq(3, extract(%q0, %q1, add(%q1, 1)));
+  think setq(4, filter(#99/filter-is-clothing, %q2));
+  think setq(5, filter(#99/filter-is-clothing, %q3));
+  think setq(6, %q4 %q5);
+  @pemit %#=%ch%cgFor Sale Today:%r%r%cn 
+  [columns(iter(%q6, %b[clip(##)], %b, |), 25, |)]
+-
+@@ &cmd-for-sale-food #26=$for sale food:
+  think setq(0, laccounts(#26));
+  think setq(1, div(words(%q0), 2));
+  think setq(2, extract(%q0, 1, %q1));
+  think setq(3, extract(%q0, %q1, add(%q1, 1)));
+  think setq(4, filter(#99/filter-is-food, %q2));
+  think setq(5, filter(#99/filter-is-food, %q3));
+  think setq(6, %q4 %q5);
+  @pemit %#=%ch%cgFor Sale Today:%r%r%cn 
+  [columns(iter(%q6, %b[clip(##)], %b, |), 25, |)]
+-
+@@ &cmd-for-sale-weapons #26=$for sale weapons:
+  think setq(0, laccounts(#26));
+  think setq(0, filter(#99/filter-is-weapon, %q0));
+  @pemit %#=%ch%cgFor Sale Today:%r%r%cn 
+  [columns(iter(%q0, %b[clip(##)], %b, |), 25, |)]
+-
+@@ &cmd-for-sale-tools #26=$for sale tools:
+  think setq(0, laccounts(#26));
+  think setq(1, div(words(%q0), 2));
+  think setq(2, extract(%q0, 1, %q1));
+  think setq(3, extract(%q0, %q1, add(%q1, 1)));
+  think setq(4, filter(#99/filter-is-tool, %q2));
+  think setq(5, filter(#99/filter-is-too, %q3));
+  think setq(6, %q4 %q5);
+  @pemit %#=%ch%cgFor Sale Today:%r%r%cn 
+  [columns(iter(%q6, %b[clip(##)], %b, |), 25, |)]
+-
+@@ &cmd-for-sale-containers #26=$for sale containers:
+  think setq(0, laccounts(#26));
+  think setq(0, filter(#99/filter-is-container, %q0));
+  @pemit %#=%ch%cgFor Sale Today:%r%r%cn 
+  [columns(iter(%q0, %b[clip(##)], %b, |), 25, |)]
+-
+@@ &cmd-for-sale-jewelry #26=$for sale jewelry:
+  think setq(0, laccounts(#26));
+  think setq(0, filter(#99/filter-is-jewelry, %q0));
+  @pemit %#=%ch%cgFor Sale Today:%r%r%cn 
+  [columns(iter(%q0, %b[clip(##)], %b, |), 25, |)]
+-
+@@ &cmd-for-sale-armor #26=$for sale armor:
+  think setq(0, laccounts(#26));
+  think setq(0, filter(#99/filter-is-armor, %q0));
+  @pemit %#=%ch%cgFor Sale Today:%r%r%cn 
+  [columns(iter(%q0, %b[clip(##)], %b, |), 25, |)]
+-
+@@ &cmd-for-sale-misc #26=$for sale misc:
+  think setq(0, laccounts(#26));
+  think setq(1, div(words(%q0), 2));
+  think setq(2, extract(%q0, 1, %q1));
+  think setq(3, extract(%q0, %q1, add(%q1, 2)));
+  think setq(4, filter(me/filter-misc, %q2));
+  think setq(5, filter(me/filter-misc, %q3));
+  think setq(6, %q4 %q5);
+  think setq(6, setdiff(%q6, v(not-for-sale)));
+  
+  @pemit %#=%ch%cgFor Sale Today:%r%r%cn
+  [columns(iter(%q6, %b[clip(##)], %b, |), 25, |)]
+-
+
+&cmd-for-sale #26 = $for sale:
+  @pemit %# = %ch%cc
+    Type 'for sale ' followed by a category name. For example, 
+    'for sale armor'.%r
+    Type '%cmfor sale all%cc' for a complete list. Valid categories are:%r
+         [u(u-categories)]
+  %cn
+-
+
+&cmd-for-sale-category #26 = $for sale *: 
+  think setq(9, 
+    [t(member(lcstr(get(#99/categories)), lcstr(%0)))]
+    [hasattr(#26, forsale-%0)]
+  ); 
+
+  @switch %q9 = 
+   11, {
+     @pemit %# = u(u-for-sale, %0)
+   }, 
+
+   0?, {
+    @pemit %# = No such market category, '%0'. Valid categories are:%r
+      [u(u-categories)]
+   }, 
+  
+   ?0, { 
+     @pemit %# = ERROR: You typed in a valid category name, but there 
+       is some code missing.  Tell a staff member what you typed and 
+       this error message, please.
+   }, 
+
+#  ERROR
+   { @pemit %# = ERROR: Logic error in #26/cmd-for-sale-category: %q9. }
+-
+
+&u-categories #26 = 
+  ansi(hw, 
+  columns(
+    iter(get(#99/categories), ##, %b, |), 
+    15, 
+    |
+  ))
+-
+
+# u(u-for-sale, category)
+# 
+&u-for-sale #26 = 
+  FOR SALE (%0):%r
+  [columns(
+    iter(get(#26/forsale-%0), 
+      edit(lcstr(left(##, 24)), _, %b), 
+      %b, |), 
+    25, |)]
+-
+
+# @trigger #26/trig-categorize = <category>
+# 
+&trig-categorize #26 = 
+  &new-forsale-%0 me; 
+
+  @dolist setdiff(laccounts(#26), v(not-for-sale)) = {
+    think setq(0, switch(u(#99/filter-is-%0, ##), 1, ##)); 
+    &new-forsale-%0 me = get(me/new-forsale-%0) %q0; 
+  }; 
+
+  @wait 0 = {
+    &forsale-%0 me = sort(get(me/new-forsale-%0), a); 
+    &new-forsale-%0 me;
+    @pemit %# = Done with %0.
+  }; 
+-
+
+
+&trig-categorize-all #26 = 
+  @trigger me/trig-verify-accounts; 
+
+  @dolist setdiff(get(#99/categories), ALL) = {
+    @trigger me/trig-categorize = ##
+  }; 
+
+  &forsale-all me = sort(setdiff(laccounts(#26), v(not-for-sale))); 
+-
+
+&trig-verify-accounts #26 = 
+  @dolist laccounts(me) = {
+    think setq(0, switch(isdbref(paccount(##)), 0, ##)); 
+    &bad-accounts me = v(bad-accounts) %q0; 
+  }; 
+
+  @wait 0 = {
+    think setq(1, sort(v(bad-accounts))); 
+    @switch words(%q1) = >0, {
+      @pemit %# = BAD ACCOUNTS: %q1; 
+      @bb/post Maintenance/Bad Market Accounts=
+        The following accounts on the market (#26) do not have a 
+        valid parent object: %r%q1 %r%r
+
+        See to it that the database number of the correct parent 
+        object is stored on the Master Bank with the @account/parent 
+        command.  Before you do that, though, make sure that the 
+        account was not created in error (like 'tomato' instead of 
+        'tomatoes').
+    }
+  }
+-
+
+
+
+&cron_time_resynch-market #63 = 
+  |||03|45|@@ every morning at 3:45 am @@
+-
+&cron_job_resynch-market #63 = 
+  @trigger #26/trig-categorize-all
+-
+
+
+#############################################################################
+# These filter functions must be named filter-is-<category> and the category 
+# must be included in #99/categories.
+#############################################################################
+
+
+&not-for-sale #26=STENIS LAND 
+-
+&categories #99 = 
+# ALL _must_ be the first category in this list. The first category 
+# is skipped in the @dolist in the trig-categorize-all routine, but
+# processed specially later on.
+    
+  ALL 
+
+  armor bronze cloth clothing containers cotton drinks fish food 
+  fruit gold herbs iron jewelry leather linen meals mined misc 
+  seeds silk silver tools vegetables weapons
+-
+
+&filter-is-fish #99 = 
+  [hastag(paccount(%0), fish)]
+-
+&filter-is-mined #99 = 
+  [hastag(paccount(%0), mined)]
+-
+&filter-is-drinks #99 = 
+  [andtags(paccount(%0), food fluid)]
+-
+&filter-is-meals #99 = 
+  [and(andtags(paccount(%0), prepared food), 
+       not(hastag(paccount(%0), fluid)))]
+-
+&filter-is-vegetables #99 = 
+  [and(andtags(paccount(%0), food vegetable), not(strmatch(%0, *_SEEDS)))]
+-
+&filter-is-fruit #99 = 
+  [and(andtags(paccount(%0), food fruit), not(strmatch(%0, *_SEEDS)))]
+-
+&filter-is-bronze #99 = 
+  [strmatch(%0, BRONZE_*)]
+-
+&filter-is-silver #99 = 
+  [strmatch(%0, SILVER_*)]
+-
+&filter-is-gold #99 = 
+  [strmatch(%0, GOLD_*)]
+-
+&filter-is-leather #99 = 
+  [strmatch(%0, LEATHER_*)]
+-
+&filter-is-linen #99 = 
+  [strmatch(%0, LINEN_*)]
+-
+&filter-is-cotton #99 = 
+  [strmatch(%0, COTTON_*)]
+-
+&filter-is-silk #99 = 
+  [strmatch(%0, SILK_*)]
+-
+&filter-is-iron #99 = 
+  [strmatch(%0, IRON_*)]
+-
+&filter-is-cloth #99 = 
+  [strmatch(%0, *_CLOTH)]
+-
+&filter-is-herbs #99 = 
+  [strmatch(%0, *_HERBS)]
+-
+&filter-misc #26=
+  [u(#99/filter-is-misc)]
+-
+&filter-is-misc #99 = 
+ [and(
+    not(ortags(paccount(%0), clothing food weapon tool tools container 
+                             jewelry armor mined)), 
+    not(strmatch(%0, *_SEEDS)), 
+    not(strmatch(%0, *_CLOTH)), 
+    not(strmatch(%0, *_HERBS))
+ )]
+-
+&filter-is-weapon #99=
+ [hastag(paccount(%0), weapon)]
+-
+&filter-is-weapons #99=
+ [hastag(paccount(%0), weapon)]
+-
+&filter-is-tool #99=
+ [ortags(paccount(%0), tool tools)]
+-
+&filter-is-tools #99=
+ [ortags(paccount(%0), tool tools)]
+-
+&filter-is-containers #99=
+ [hastag(paccount(%0), container)]
+-
+&filter-is-container #99=
+ [hastag(paccount(%0), container)]
+-
+&filter-is-jewelry #99=
+ [hastag(paccount(%0), jewelry)]
+-
+&filter-is-armor #99=
+ [hastag(paccount(%0), armor)]
+-
+
+
+#####################################################################
+#		      FUNCTIONS AND FILTERS                         #
+#####################################################################
+
+
+&filter-supplies #25=
+  [gt(default(#26/ac-%0, 0), 0)]
+
+-
+
+&filter-supplies2 #25=
+  [gt(default(#26/%0, 0), 0)]
+-
+
+&filter-demands #25=
+  [gt(default(#24/%0, 0), 0)]
+-
+
+@set me = !quiet
+-

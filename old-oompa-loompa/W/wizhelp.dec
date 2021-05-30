@@ -1,0 +1,22 @@
+@create Wizhelp Machine=10
+&IS_WIZARD Wizhelp Machine=[hasflag(v(#),wizard)]
+&CMD-HELP_HELP Wizhelp Machine=$+wizhelp:@pemit v(#)=[mudname()] Wizard-Only Commands:%r%r+Wizhelp is available on the following topics or commands:%r%r[u(command-list)]%r%rFor more help on a topic, type +wizhelp <topic>.
+&COMMAND-LIST Wizhelp Machine=[space(8)][iter(v(data-commands),[mid([u(fnc-decode,##)][space(20)],0,20)][switch(mod(member(v(data-commands),##),3),0,%r[space(7)])])]
+&FNC-ENCODE Wizhelp Machine=[lcstr(edit(edit(v(0),%b,$b),',$a))]
+&FNC-DECODE Wizhelp Machine=[lcstr(edit(edit(v(0),$b,%b),$a,'))]
+&INDEX-TEST Wizhelp Machine=me/help-test
+&CMD-HELP Wizhelp Machine=$+wizhelp *:@pemit v(#)=[switch(member([v(data-commands)] [v(data-commands_dark)],[u(fnc-encode,v(0))]),0,[u(msg-no_help)],[u(fmt-help,v(0),u(fnc-encode,v(0)))])]
+&MSG-NO_HELP Wizhelp Machine=No +wizhelp available on that topic.
+&FMT-HELP Wizhelp Machine=[mudname()] Global Commands: [ucstr(v(0))][u(fnc-help_part,%r%rSyntax,get_eval(con(me)/syntax-[v(1)]))]%r%r[get_eval(con(me)/help-[v(1)])][u(fnc-help_part,%r%rAlso See,get_eval(con(me)/cf-[v(1)]))]%r
+&FNC-HELP_PART Wizhelp Machine=[switch(strlen(v(1)),0,,[s(v(0))]: [v(1)])]
+&CMD-HELP_ADD Wizhelp Machine=$+wizhelp/add *=*:@switch hasflag(v(#),wizard)=0,{@pemit v(#)=Sorry, you can't add to the +wizhelp.},{&help-[u(fnc-encode,v(0))] [con(me)]=[v(1)];&data-commands me = [sort([remove(v(data-commands),u(fnc-encode,v(0)))] [u(fnc-encode,v(0))])];&data-commands_dark me [remove(v(data-commands_dark),u(fnc-encode,v(0)))];@pemit v(#)=+wizhelp added for [v(0)].}
+&CMD-HELP_CF Wizhelp Machine=$+wizhelp/cf *=*:@switch hasflag(v(#),wizard)=0,{@pemit v(#)=Sorry, you can't add to the +wizhelp.},{&cf-[u(fnc-encode,v(0))] [con(me)]=[v(1)];@pemit v(#)=Crossreference added for [v(0)].}
+&CMD-HELP_SYNTAX Wizhelp Machine=$+wizhelp/syntax *=*:@switch hasflag(v(#),wizard)=0,{@pemit v(#)=Sorry, you can't add to the +wizhelp.},{&syntax-[u(fnc-encode,v(0))] [con(me)]=[v(1)];@pemit v(#)=Syntax added for [v(0)].}
+&CMD-HELP_DARK Wizhelp Machine=$+wizhelp/dark *:@switch hasflag(v(#),wizard)=0,{@pemit v(#)=Sorry, you can't add to the +wizhelp.},{&data-commands me = [remove(v(data-commands),u(fnc-encode,v(0)))];&data-commands_dark me = [remove(v(data-commands_dark),u(fnc-encode,v(0)))] [u(fnc-encode,v(0))];@pemit v(#)=Topic '[v(0)]' set dark.}
+&CMD-HELP_LIST Wizhelp Machine=$+wizhelp/list:@pemit v(#)=Normal topics: | [iter(v(data-commands),[u(fnc-decode,##)] |)]%rDark topics: | [iter(v(data-commands_dark),[u(fnc-decode,##)] |)]
+&CMD-HELP_DELETE Wizhelp Machine=$+wizhelp/delete *:@switch 0=[hasflag(%#,wizard)],{@pemit %#=Sorry, you can't delete +wizhelp entries.},[member([v(data-commands)] [v(data-commands_dark)],u(fnc-encode,v(0)))],{@pemit %#=No such +wizhelp entry.},{&data-commands me = [remove(v(data-commands),u(fnc-encode,%0))];&data-commands_dark me = [remove(v(data-commands_dark),u(fnc-encode,%0))];@dolist help cf syntax=&##-[u(fnc-encode,%0)] [con(me)];@pemit %#=+wizhelp deleted for %0.}
+&CHECKFLAG Wizhelp Machine=[hasflag(%#,wizard)]
+@Startup Wizhelp Machine=@lock/use me = [edit(search(flags=PW),%b,|)]
+@set Wizhelp Machine=INHERIT
+@set Wizhelp Machine=SAFE
+@set Wizhelp Machine=COMMANDS

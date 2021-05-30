@@ -1,0 +1,365 @@
+& help
+
+[header(Building Help)]
+The +bhelp system provides help on building here on [mudname()]. Specific information is accessible via +bhelp <topic>. Topics include:
+
+[columns(sort(Build Requirements|Map|Ambience|Blueprints|+build|Hangouts|Banality,a,|,|),24,|,2)]
+
+[center([argcol(WARNING)] [pcol(Everything below is out of date and should be ignored.)] [argcol(WARNING)],78)]
+
+  Building Standards     Parents     Look and Feel
+  Building Commands      Timedescs   Weather
+
+[center([argcol(WARNING)] [pcol(Everything here is out of date and should be ignored.)] [argcol(WARNING)],78)]
+[footer()]
+
+& building standards
+[header(Building Standards)]
+
+Required Reading:
+  [ljust(Room Names,12)] [ljust(Room Descs,12)] [ljust(Parents,12)]
+  [ljust(Exit Names,12)] [ljust(Exit Descs,12)] [ljust(Exit Requirements,20)]
+
+Optional Reading:
+  [ljust(Weather,12)] [ljust(Timedescs,12)]
+
+[footer()]
+
+& Look and Feel
+[header(Look and Feel)]
+In the interest of providing a grid that's visually pleasing and consistant, [mudname()] implements certain look and feel standards and guidelines, setting a baseline for what can be linked to the grid and how to make a building project best fit the rest of the MUSH. Look and Feel topics are:
+
+  [ljust(Room Names,12)] [ljust(Exit Names,12)] [ljust(Room Descs,12)] [ljust(Exit Descs,12)]
+
+See Also: [ljust(Building Standards,20)]
+[footer()]
+& building commands
+[header(Building Commands)]
+The following commands are available to aid in building.
+
+  +lock
+
+[footer()]
+
+& Room Names
+[header(Room Names)]
+Room names should be chosen so that the location of players in that room is by viewing the output of +who. "Coffee Shop" is a bad choice as there may be multiple coffee shops on the grid, where as "Hill of Beans Coffee Shop" is a better choice. In buildings with room numbers, the building name should prefix the room number: instead of "Room 105", use "Westside Hilton: Room 105".
+
+Use of color in room names is encouraged in two ways. First, making use of the MUSH's primary, secondary, and teriatry colors with the functions pcol(), scol(), and tcol(). Second, use of color which is descriptive of the location, such as green for woodland areas and gardens, and yellow for desert locations. For locations such as clubs where no colors are particularly obvious, the choice is left to the builder, provided the chosen colors aren't considered distracting.
+
+See Also: [ljust(Building Standards,20)] [ljust(Look and Feel,13)]
+In +chelp: [ljust(pcol,10)] [ljust(scol,10)] [ljust(tcol,10)]
+[footer()]
+
+& Room Descs
+[header(Room Descriptions)]
+Room descriptions should at the very least convey the feeling of a room to players, if not details. Each paragraph in a room desc should begin with a %%r%%t, and at the end of the entire description, have a %%r. This helps make sure the text is easy to read and paragraph boundaries are obvious.
+
+Rooms featuring PLACES and/or +views should have a note that they are available by featuring a %%r%%r\[center\(PLACES/+views available,78\)\]%%r noting that either or both are in use in that room.
+
+Use of color in room descs is encouraged in two ways. First, making use of the MUSH's primary, secondary, and teriatry colors with the functions pcol(), scol(), and tcol(). Second, use of color which is descriptive of the location, such as green for woodland areas and gardens, and yellow for desert locations. For locations such as clubs where no colors are particularly obvious, the choice is left to the builder, provided the chosen colors aren't considered distracting.
+
+See Also: [ljust(Building Standards,20)] [ljust(Look and Feel,13)]
+In +chelp: [ljust(pcol,10)] [ljust(scol,10)] [ljust(tcol,10)]
+[footer()]
+
+& exit descs
+[header(Exit Descriptions)]
+
+Exit descriptions are %xhrequired%xn on [mudname()], however, one or two lines should suffice. When color is used, colors should be chosen based on the appearance of the exit if it is a physical thing such as a door, or based on the appearance of the destination room if it's an implied boundary, like a hallway: here guidlines for Room Descs apply.
+
+When it is logical for an exit to be looked through, such as a door with a peephole or an open path, the exit should be set TRANSPARENT. Note that when set transparent, both the destination room's desc and the exit's desc will show.
+
+See Also: [ljust(Building Standards,20)] [ljust(Look and Feel,15)] [ljust(Room Descs,12)] [ljust(+descexit,12)]
+In help: [ljust(TRANSPARENT,12)]
+[footer()]
+
+& exit names
+[header(Exit Names)]
+Exit names should be chosen to best benefit RP. Although it's common to name an exit after the building it leads to, we shouldn't always know where an exit leads at a glance. When the player would know where an exit leads to, such as an exit from the street to a hotel, the exit should make it obvious where it leads to. In cases where the destination shouldn't be obvious, such as "A Rocky Path", creative license is allowed.
+
+Exit names should include a short abbreviation making one of the exit aliases clear, such as SR for Sponge's Reef. Each exit alias should be tested as a command before used as an alias. The first example chosen for this helpfile was BR, which happens to be an abbreviation for 'brief'. The aliases 'out' and 'o' should be used on one exit in a room to lead to the next most trafficked room, where appropriate: out should lead from a hotel room to the hallway, from a club to the street, but out doesn't really make sense on the street.
+
+Then, name each exit in the format EN:Exit Name;exit;out;o
+
+See Also: [ljust(Look and Feel,13)]
+[footer()]
+
+& exit requirements
+[header(Exit Requirements)]
+
+In addition to a proper name, description and parent, all exits should have a valid @succ, @osucc and @odrop setting.
+
+See Also: 
+[rjust(+bhelp:,10)] [ljust(exit names,12)] [ljust(exit descs,12)]
+[rjust(help:,10)] [ljust(@succ,12)] [ljust(@osucc,12)] [ljust(@odrop,12)]
+[footer()]
+
+& +build
+[header(+build)]
+
+  [argcol(If you're new to our)] [pcol(+build)] [argcol(system\, see)] [pcol(+bhelp +build intro)]
+
+  [pcol(+build/list)]               - Show projects you have access to
+  [pcol(+build/select)] [argcol(<dbref>)]     - "Select" a project for later commands to refer to.
+  [pcol(+build/bp)] [argcol(<dbref>)]         - Show a project's Blueprint
+  [pcol(+build/bp)]                 - Show the selected project's Blueprint
+  [pcol(+build/setbp)] [argcol(<dbref>)]=[argcol(<blueprint>)]  - Set a specific project's blueprint
+  [pcol(+build/setbp)] [argcol(<blueprint>)]  - Set the selected project's blueprint
+  [pcol(+build/magic)] [argcol(<dbref>)]      - Build the specific project, according to its blueprint
+  [pcol(+build/magic)]              - Build the selected project, according to its blueprint
+  [pcol(+build/setloc)] [argcol(<dbref>)]     - Request the project be linked to your current location. Also sets up [pcol(+map)] within the project.
+  [pcol(+build/jump)] [argcol(<dbref>)]       - Jump to the location of a build project you own.
+
+  [pcol(+build/auth)] [argcol(<project>)]=[argcol(<player>)]  - Authorize a player for the specific project
+  [pcol(+build/auth)] [argcol(<player>)]            - Authorize a player on the selected project
+  [pcol(+build/unauth)] [argcol(<project>)]=[argcol(<player>)] - Remove an authorized player from the specific project
+  [pcol(+build/unauth)] [argcol(<player>)]          - Remove an authorized player from the selected project
+  [pcol(+build/ex)] [argcol(here|<room>|<exit>)]    - As an authorized player, examine settable attributes on the room or exit
+  [pcol(+build/set)] [argcol(here|<room>|<exit>)]/[argcol(<attribute>)]=[argcol(<value>)] - As an authorized player, set attributes on a room or exit.
+  [pcol(+build/edit)] [argcol(here|<room>|<exit>)]/[argcol(<attribute>)]=[argcol(<from>)],[argcol(<to>)] - As an authorized player, edit an attributes on a room or exit.
+
+
+See Also: +build intro   Building Standards   Blueprints   +build/ex   +build/set
+[footer()]
+
+& +build intro
+[header(+build Introduction)]
+The [pcol(+build)] system enables players to create and manage their own build projects with minimal staff intervention or delay.
+
+    [argcol(Key Concepts)]
+[pcol(Project)] - A build project captures details about what's getting built. It's represented by an object and that object serves as the project room parent. The project object contains facts about the Project. The owner of the object is considered to be the owner of the Project. The object also records (invisibly) the Project's name, how many rooms it can have, who is authorized to work on the project, and the dbrefs of the rooms and exits within the project. Take great care when modifying your Project object. To see your projects, use [pcol(+build/list)].
+
+[pcol(Selected Project)] - The [pcol(+build)] system has lots of commands that operate on a specific project. To save typing you may "select" a project for the [pcol(+build)] commands to refer to by default. Your currently selected project is indicated by an asterisk ([argcol(*)]) in [pcol(+build/list)]. To select a project, use [pcol(+build/select)].
+
+[pcol(Blueprint)] - A Project gets built according to its Blueprint. The Blueprint is a simple way of describing what rooms you want in your project and how they are connected. When setting your Blueprint, [pcol(+build/setbp)] command will check it for lots of potential errors such as rooms with no exits, floating rooms, the wrong number of rooms, etc. Blueprints are relatively easy to specify and let you experiment with layouts to ensure you'll like the results. Blueprints are viewed with [pcol(+build/bp)]. Once the Blueprint is just how you want it, running [pcol(+build/magic)] will start the build process. The rooms will be created and linked to the Building Nexus and the process should complete in less than [argcol(3 FUCKING SECONDS)].
+
+[pcol(Authorized)] - Players can be authorized to set attributes (Descs, Views, Ambience, succ/drop/fail, etc) on a project's rooms and exits. Players are added to the authorized list with [pcol(+build/auth)], removed from the list with [pcol(+build/unauth)], and authorized players can examine and make modifications to rooms and exits using [pcol(+build/ex)] and [pcol(+build/set)] respectively. [pcol(NOTE:)] authorized players can change any settable attributes (see [pcol(+bhelp +build/set)]). No backup copy is made. Only authorize a player for your build project if you're sure they're going to be helpful.
+
+See Also: Parents   Blueprints
+[footer()]
+
+& parents
+[header(Building Parents)]
+To cut down on the need to repeatedly assign descs and other attributes on rooms and exits, a diverse hierarchy of parent objects has been created for use in building projects. You should use the most specific parent that applies to a room. To set your room or exit's parent, do:
+
+  @parent here=<dbref>
+  @parent <exit>=<dbref>
+
+where <dbref> is one of the following:
+
+ Exit: #455
+  * [ansi(h,MTS Exit)]: #1281
+  * [ansi(h,Deep Forest Exit)]: #767
+  * [ansi(h,Sewer Exit)]: #1566
+
+ Room: #454
+  * [ansi(h,Backstage-OOC)]: #485
+  * [ansi(h,General-IC)]: #1820
+  * [ansi(h,Ocean)]: #473
+  * [ansi(h,Desert)]: #459
+  * [ansi(h,Forest)]: #458
+  * [ansi(h,Sky)]: #771
+  * [ansi(h,City)]: #457
+    * [ansi(h,Indoor)]: #474
+    * [ansi(h,Outdoor)]: #475
+      * [ansi(h,Alley)]: #818
+      * [ansi(h,Sewer)]: #812
+      * [ansi(h,Slum)]: #476
+      * [ansi(h,Upscale)]: #547
+
+See Also: timedescs     weather
+[footer()]
+& timedescs
+[header(Time-Based Descriptions)]
+If your room is somehow descended from the MU room parent hierarchy, it automagically has the ability to show different descriptions or portions of descriptions based on the time. To set time-based descriptions, create attributes containing the desc (or desc part) in the following fashion:
+
+  &DESC_TIMEDESC_<from>-<to> here=<description>
+
+where <from> is the earliest the desc should be shown and <to> is the latest the desc should be shown, both in 4-digit military time (0430, 1600, etc).
+Note that the time range can roll over midnight, so
+
+  &DESC_TIMEDESC_2200-0230 here=<description>
+
+will be active from 10pm to 2:30am. You can create a description to be shown when no time matches with:
+
+  &DESC_TIMEDESC-DEFAULT here=<description>
+
+Note the hyphen. Also be aware that if multiple time descs might apply, one is picked arbitrarily (and possibly not consistantly).
+
+To utilize your time-based descriptions, put the \[u\(UFUN_GET_TIMEDESC\)\] in the room's @desc where you want the time desc to show up.
+
+See Also: Parents    weather
+[footer()]
+& weather
+[header(Weather Attributes)]
+Several attributes are updated hourly on the main Room Parent by the weather system for use in room descs and other code. These attributes are as follows:
+
+  DATA_SUNRISE
+  DATA_SUNSET
+  DATA_MOON_PHASE
+  DATA_TEMPERATURE
+  DATA_WIND
+  DATA_HUMIDITY
+  DATA_SKY_CONDITION
+  DATA_BAROMETRIC_PRESSURE
+
+Be sure to get a feel for what these values are by doing 'ex/here' before making use of them.
+
+See Also: timedescs    Parents
+[footer()]
+& +lock
+[header(Exit Lock Control)]
+  +lock/init <exit>
+  
+  +lock/listcontrol <exit>
+  +lock/givecontrol <exit>=<player>
+  +lock/remcontrol <exit>=<player>
+  
+  +lock/listkeys <exit>
+  +lock/givekey <exit>=<player>
+  +lock/takekey <exit>=<player>
+  +lock/mykeys <player>
+
+  +lock/init sets an exit up for control by the +lock system. It requires that the exit is directly or indirectly parented by the main exit parent.
+
+  Control of a lock is the ability to give and revoke keys. The /listcontrol option shows who has control of a lock. The other 'control' options grant and revoke control of a lock respectively. The 'control' options require the LOCKSMITH authority.
+
+  Having a key to an exit grants someone the ability to use +lock and +unlock on the exit. Keys to an exit can be granted and revoked by someone with control of the lock. The '/mykeys <player>' option allows staff with the LOCKSMITH or VIEWSTATS authorities to see what keys a player has.
+
+See Also:      Parents
+See in +help:  +lock
+[footer()]
+
+& Map
+[header(Map)]
+    Attribute: [argcol(DATA_MAP)]
+    Attribute: [argcol(DATA_FAKE_LOCATION)]
+
+The +map command uses a few special attributes to display the proper map for a player and highlight that player's location on the map. When a player runs the [argcol(+map)] command it looks in their location for a [argcol(DATA_MAP)] attribute. This attribute names which map should be displayed to the user. This attribute should almost never be set directly on a room; it should usually be set somewhere in the parent hierarchy. The Belvedere Hotel's parent has [argcol(DATA_MAP=DOWNTOWN)] so that players inside the hotel will see the downtown map.
+
+The [argcol(DATA_FAKE_LOCATION)] is a special attribute to help players find their place on the map even when their current room is not on the map. The Belvedere Hotel's parent has [argcol(DATA_FAKE_LOCATION=#345)]. This tells the +map command to make #345 highlighted when displaying the map so the player knows where in the city they are.
+[footer()]
+
+& Banality
+[header(Banality)]
+    Attribute: [argcol(DATA_BANALITY)]
+
+The [argcol(DATA_BANALITY)] attribute specifies the banality for a room. It is usually best to set this on the project parent.
+
+A location's banality should be chosen to match its usual occupants. For public locations this is Humans, at 7.
+
+See Also: +rules banality
+[footer()]
+
+& Build Requirements
+[header(Building Requirements)]
+The following are requirements for build projects to be linked to the grid. Items marked with a [pcol(+)] require staff intervention. As these requirements change, staff will make every reasonable effort to fix linked project on the owner's behalf.
+
+  * All rooms must have a parent derived from the master Room Parent
+    * Player projects of a single room must be direct children of #3154[pcol(+)]
+    * Player projects of more than one room must have their own parent, itself a child of #3154[pcol(+)]
+  * All exits must have a parent derived from the master Exit Parent[pcol(+)]
+    * Subordinate exit parents are acceptable if derived from the master Exit Parent[pcol(+)]
+  * Exit names must take the format: [pcol(XX:Exit Name;xx;exit name;etc)]
+    * The room parent will cause the exit names to be automatically colored and formatted
+  * Rooms and Exits must RX and TX on all reality levels except when given an exception[pcol(+)]
+  * Room names must match the color of room names in the same zone (Downtown, Harbor, Forest, etc)
+  * Room names for multi-room projects must be in the form of [pcol(Project Name - Room Name)]
+
+Additional Guidelines:
+  * Player projects should have [pcol(DATA_MAP)] and [pcol(DATA_FAKE_LOCATION)] attributes
+  * Builder bits are discouraged but are appropriate in limited circumstances
+  * Players may choose to own their projects or have them owned by a staff-controlled owner object
+  * Players are welcome to request locks be configured with the [pcol(+lock)] code
+  * Rooms in player projects can be UNFINDABLE and/or ABODE
+
+See Also: Map
+[footer()]
+
+& ambience
+[header(Ambience)]
+  [pcol(&AMBIENCE-FREQUENCY)] [argcol(here)]=[argcol(<1-12>)]
+  [pcol(&AMBIENCE_)][argcol(<whatever> here)]=[argcol(<ambience emit>)]
+
+Ambience adds life to the grid by using emits to display "background activity": things happening at the location that isn't driven by players. Adding ambience to the world helps convey that it is living, breathing city of which the players are a part. Low-frequency ambience is encouraged (but not required) for all public build projects.
+
+[pcol(AMBIENCE-FREQUNCY)] determines how often ambience will be triggered. The value ([argcol(1-12)]) is how many times per hour it will be triggered, on average. Code-wise, ambience is run every five minutes. If there are players in the room the ambience code will pick a number between 1-12. If the room's [pcol(AMBIENCE-FREQUENCY)] value is equal to or less than that number, an ambience message is selected at random and emitted. Values of 3 or higher will result in ambience being distracting.
+
+Any attribute on the room with a name beginning with [pcol(AMBIENCE_)] will be considered and ambience emit. The rest of the attribute name (everything after [pcol(AMBIENCE_)]) is insignificant. When selected as an ambience emit, the value of the attribute will be displayed to the players exactly as specified.
+
+Note that both [pcol(AMBIENCE-FREQUENCY)] and [pcol(AMBIENCE_)][argcol(<whatever>)] attributes can be set on room/project parents. This enables ambience for all rooms having that object as a parent.
+
+See Also: +help +ambience
+[footer()]
+
+& blueprints
+[header(Building Blueprints)]
+
+  [argcol(1:Living Room|2:Master Bedroom|3:Sanctum of Sacrifice/0--1|1--2|1--3)]
+
+Blueprints allow you to specify how your project should be built and have it built according to that specification, without having to know [pcol(@dig)], [pcol(@open)], and [pcol(@link)]
+
+The overall format is: [argcol(<list of rooms>)]/[argcol(<list of exits>)]
+  In both lists, each item is separated by a single pipe ([argcol(|)]) character.
+  In the list of rooms, each room has a name and a number. The number must be an integer greater than 0.
+  In the list of exits, each exit specifies to the two rooms being connected, by the room number.
+    The room numbers are separated by a double hyphen ([argcol(--)]).
+    The exit list specifies a pair of rooms and the order doesn't matter: [argcol(1--2)] is the same as [argcol(2--1)].
+    Room number [argcol(0)] is special. It represents the Building Nexus.
+
+The above blueprint describes a project like this:
+
+                                [pcol(Master Bedroom)]
+                               /
+  [pcol(Building Nexus)] -- [pcol(Living Room)]
+                               \\
+                                [pcol(Sanctum of Sacrifice)]
+
+See Also: +build
+[footer()]
+
+& +build/ex
+[header(+build/ex)]
+  [pcol(+build/ex)] [argcol(here|<room>|<exit>)]    - As an authorized player, examine settable attributes on the room or exit
+
+[pcol(Settable Attributes:)]
+[argcol(columns(sort(get(#31/LIST_SETTABLE_ATTRIBUTES) [get(#31/LIST_SETTABLE_PATTERNS)]),20))]
+See Also: +build/set
+[footer()]
+
+& +build/set
+[header(+build/set)]
+  [pcol(+build/set)] [argcol(here|<room>|<exit>)]/[argcol(<attribute>)]=[argcol(<value>)] - As an authorized player, set attributes on a room or exit.
+
+[pcol(Settable Attributes:)]
+[argcol(columns(sort(get(#31/LIST_SETTABLE_ATTRIBUTES) [get(#31/LIST_SETTABLE_PATTERNS)]),20))]
+See Also: +build/ex   AMBIENCE   Map   time
+[footer()]
+
+& Policies
+[header(Build Policies)]
+  [columns(sort(Requests|Quotas,a,|,|),24,|,2)]
+[footer()]
+
+& Requests
+[header(Build Requests)]
+[footer()]
+
+& Quotas
+[header(Quotas)]
+Short Version: We're frugal on room count. Only request rooms you're confident will see regular RP. We prefer small projects that can be expanded later.
+
+There are limits to how many rooms and exits the grid can handle. The traditional limit, server storage, was obliterated long ago by gratuitously cheap disks. The current limit is unknown. Sponge has softcode that examines every room and exit and attempts to fix or record building discrepancies like incorrect reality levels, bad @parents, or broken +locks. There are limits to how much softcode is allowed to do in bulk, imposed by hard code, configuration, and the ability to maintain comprehensible code.
+[footer()]
+
+& Hangouts
+[header(Hangouts)]
+Hangouts are on-grid locations where players tend to congregate that are open to the public. The [pcol(+hangouts)] command displays the name of hangout, a brief description, and a count of how many players are in that location. Players can use the [pcol(+hangout/jump)] command to get to the hangout immediately.
+
+A Restricted Hangout is a special case of a Hangout. Restricted Hangouts are only visible to players whose [pcol(+sheet)] matches a specific criteria. This is primarily oriented toward sphere-specific locations.
+
+A personal build project such as a business cannot be a Restricted Hangout. A personal build project that is not open to the public cannot be a hangout at all. A business that is open to the public may have a small section for specific clientele but players in that section will not be counted by [pcol(+hangout)] and the majority of the project must be open to the public.
+[footer()]
+
+&

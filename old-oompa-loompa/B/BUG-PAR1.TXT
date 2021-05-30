@@ -1,0 +1,19 @@
+@create Monitoring Station
+@set Monitoring Station=!NO_COMMAND
+@set Monitoring Station=SAFE
+@set Monitoring Station=OPAQUE
+@set Monitoring Station=INHERIT
+@set Monitoring Station=UNFINDABLE
+@set Monitoring Station=QUIET
+@set Monitoring Station=DARK
+@set Monitoring Station=WIZARD
+@EALIAS Monitoring Station=monitoring station;mon;monitor;monitoring;station;ms
+@LALIAS Monitoring Station=o;o;ou;out;leave;exit
+&LISTBUGS Monitoring Station=$list bugs:@pemit %#=Rooms Currently Bugged:[v(bugrooms)]
+@DESC Monitoring Station=This is a monitoring station.
+@IDESC Monitoring Station=You are in a cramped control room.  This is where [name(owner(me))] can moniter any part of the MUSH that he pleases, and control anything he needs to.  There are flashing lights and control panels everywhere.  There is enough room for 2 people at the most.  One large, plush swivel chair occupies the center of the room, and with the track mounted in the floor, can slide the few inches needed to access any control panel.  There is an administrative transporter console, which can be used to beam anything anywhere.  This is a must for any self respecting God.
+&BUG-1A Monitoring Station=$bug *:@swi [t([member([v(bugrooms)],#%0)])]=0,{@set #%0=monitor;&buglisten #%0=^*:@rem #2468=%[ansi(hr,From %[name(%%l)] %(%%l%)\:)] %[ansi(hb,%%0)];@set #%0/buglisten=mortal_dark;&bugrooms me=[v(bugrooms)] #%0},{@pemit %#=That room is already bugged.}
+&BUG-1B Monitoring Station=$remove bug *:@swi [t([member([v(bugrooms)],#%0)])]=1,{@set #%0=!monitor;&buglisten #%0;&bugrooms me=[remove([v(bugrooms)],#%0)]},{@pemit %#=That room is not bugged.}
+&BUG-1C Monitoring Station=$remove all bugs:@dol [v(bugrooms)]=@set ##=!monitor;@dol [v(bugrooms)]=@wipe ##/buglisten;@wipe me/bugrooms
+&BUG-1D Monitoring Station=$message *=*:@switch [v(0)]=all,{@dol [v(bugrooms)]=@remit ##=[ansi(r,%[)][ansi(hw,Heaven)][ansi(r,%])] [switch(mid(%1,0,1),:,[ansi(hb,%N)]%b[ansi(c,[mid(%1,1,strlen(%1))])],;,[ansi(hb,%N)][ansi(c,[mid(%0,1,strlen(%1))])],{[ansi(hb,%N)] [ansi(c,says ")][ansi(hc,%1)][ansi(c,")]})]},{@swi [t([member([v(bugrooms)],#%0)])]=1,{@remit #%0=[ansi(r,%[)][ansi(hw,Heaven)][ansi(r,%])] [switch(mid(%1,0,1),:,[ansi(hb,%N)]%b[ansi(c,[mid(%1,1,strlen(%1))])],;,[ansi(hb,%N)][ansi(c,[mid(%1,1,strlen(%1))])],{[ansi(hb,%N)] [ansi(c,says ")][ansi(hc,%1)][ansi(c,")]})]},{@pemit %#=That room is not bugged.}}
+&BUGROOMS Monitoring Station=

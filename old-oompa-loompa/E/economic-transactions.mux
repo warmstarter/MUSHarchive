@@ -1,0 +1,213 @@
+####################################################################
+##		ECONOMIC TRANSACTIONS FOR FIRANMUX                 #
+##                                                                 #
+## This series of transactions should happen on a scheduled basis  #
+## in order to simulate a macro-economy on FiranMUX.               #
+##                                                                 #
+####################################################################
+## 
+## The basic premise of the plan for this document and system is
+## 
+##	1. Define everything everyone has to start with 
+##	2. Define everything everyone needs
+##	3. Define the rate at which the things everyone needs are
+##         depleted
+##	4. Define the rate at which the things everyone have are 
+##         replenished
+##      5. Map out the way everybody gets what they need
+##      6. Schedule in the transactions
+##
+## We need a figure to start with, so we're going to assume a 
+## balanced economy with 150,000 people
+##
+## Next, assuming that there are 3 meals a day for every person for a
+## year, or 54,750,000 units of food.  Now we have to break this down into 
+## food currencies.  With 35 potential food types, this comes out to 
+## be 12857 units of each if it were divided evenly.  Because the
+## the Firans have plentiful meat and fish, I'm going to weight the 
+## production so that fish and meat constitute 1/3 (18,250,000), 
+## wheat and corn represent 1/3 (18,250,000) and everything else splits 
+## up the last 1/3 (18,250,000):
+## 
+## Fish --              9,125,000
+## Meat --              9,125,000
+## Corn --              9,125,000
+## Wheat --             9,125,000
+
+## Assuming 31 vegitable and fruit crops (18,250,000/31) all crops will be
+## (29,4354)
+## 
+## Apples --		294354
+## Broccoli --		294354
+## Potatoes --		294354
+## Cabbage --		294354
+## Grapes --		294354
+## Olives --		294354
+## Pear --		294354
+## Spinach --		294354
+## Green Peppers --	294354
+## Tomatoes --		294354
+## Watermelon --	294354
+## Apricots --		294354
+## Asparagus
+## Bell Peppers
+## Strawberries
+## Raspberries
+## Cantalope
+## Carrots
+## Cucumbers
+## Garlic
+## Lettuce
+## Onions
+## Oats
+## Pumpkins
+## Squash
+## Zucchini
+## Blueberries
+## Gooseberries
+## Celery
+## Cherries
+## Peas
+## Milk/Cheese/Eggs
+## Honey
+##
+
+## Thus we start with the Fruit Farmer
+##	Everything the Fruit Farmer Has
+@account/create fruit farmer/apples=294354;
+@account/create fruit farmer/grapes=294354;
+@account/create fruit farmer/pears=294354;
+@account/create fruit farmer/apricots=294354;
+@account/create fruit farmer/watermelon=294354;
+@account/create fruit farmer/strawberries=294354;
+@account/create fruit farmer/raspberries=294354;
+@account/create fruit farmer/cantalope=294354;
+@account/create fruit farmer/blueberries=294354;
+@account/create fruit farmer/gooseberries=294354;
+@account/create fruit farmer/cherries=294354;
+
+
+##  Everything the Fruit Farmer Needs
+
+##  We figure that a fruit farmer mostly has orchards and picks his 
+##  fruit, so he doesn't need many plows.  Probably a few though.
+##  maybe 1 per every hundred fruit farmers
+&needed-plows fruit farmer=[div(getaccount(me, figments), 100)];
+
+## We figure that a fruit farmer probably needs a lot of bushel 
+## baskets.  A very rough guess might be 20 per farmer
+&needed-baskets fruit farmer=[mul(getaccount(me, figments), 20)];
+
+## We're going to stick with the idea that one farmer can handle one 
+## tract of land
+&needed-tracts fruit farmers=[getaccount(me, figments)];
+
+## Lets pretend that it takes one unit of energy for every unit of 
+## food the farmer produces
+&needed-energy fruit farmer=3237894;
+
+## How much energy does the farmer have? We'll start with a year's
+## worth
+@account/create fruit farmer=[mul(mul(getaccount(me, figments), 365), 3)]
+
+## Lets assume that the typical farming family is of four
+&needed-houses fruit farmers=[div(getaccount(me, figments), 4)];
+
+## Each farmer is going to need at least one garment -- possibly
+## to two
+&needed-clothes fruit farmers=[mul(getaccount(me, figments), 2)];
+
+## Each farmer is probably going to need an orchard -- existing fields
+## of fruit trees
+&needed-orchards fruit farmers=[getaccount(me, figments)];
+
+## Each farm family is probably going to need a farm animal like a 
+## horse or an ox
+&needed-horses farmers=[div(getaccount(me, figments), 4)];
+
+
+
+
+## Then the Vegetable Farmer
+@account/create vegetable farmer/broccoli=294354;
+@account/create vegetable farmer/potatoes=294354;
+@account/create vegetable farmer/cabbages=294354;
+@account/create vegetable farmer/olives=294354;
+@account/create vegetable farmer/spinach=294354;
+@account/create vegetable farmer/bell peppers=294354;
+@account/create vegetable farmer/tomatoes=294354;
+@account/create vegetable farmer/asparagus=294354;
+@account/create vegetable farmer/carrots=294354;
+@account/create vegetable farmer/cucumbers=294354;
+@account/create vegetable farmer/garlic=294354;
+@account/create vegetable farmer/lettuce=294354;
+@account/create vegetable farmer/onions=294354;
+@account/create vegetable farmer/oats=294354;
+@account/create vegetable farmer/pumpkins=294354;
+@account/create vegetable farmer/squash=294354;
+@account/create vegetable farmer/zucchini=294354;
+@account/create vegetable farmer/celery=294354;
+@account/create vegetable farmer/peas=294354;
+
+##  Everything the Vegetable Farmer Needs
+
+##  There probably needs to be one of these per farm family
+&needed-plows vegetable farmer=[div(getaccount(me, figments), 4)];
+
+## We figure that a vegetable farmer probably needs a lot of bushel 
+## baskets.  A very rough guess might be 20 per farmer
+&needed-baskets vegetable farmer=[mul(getaccount(me, figments), 20)];
+
+## We're going to stick with the idea that one farmer can handle one 
+## tract of land
+&needed-tracts vegetable farmers=[getaccount(me, figments)];
+
+## Lets pretend that it takes one unit of energy for every unit of 
+## food the farmer produces, at least initially for a balanced cycle
+&needed-energy vegetable farmer=559276;
+
+## how much energy does the farmer have? Start with a year's worth
+@account/create vegetable farmer/enery=[mul(mul(getaccount(me,
+figments), 365), 3)]
+
+## Lets assume that the typical farming family is of four
+&needed-houses vegetable farmer=[div(getaccount(me, figments), 4)];
+
+## Each farmer is going to need at least one garment -- possibly
+## to two
+&needed-clothes vegetable farmer=[mul(getaccount(me, figments), 2)];
+
+## Each farmer is going to need seeds, lets say 1 seed for every 
+## 10 vegetables on average
+&needed-seeds vegetable farmer=55927;
+
+## Each farm family is probably going to need a farm animal like a 
+## horse or an ox
+&needed-horses farmers=[div(getaccount(me, figments), 4)];
+
+
+
+
+
+## Then the Dairy Farmer
+@account/create dairy farmer/milk=1612;
+@account/create dairy farmer/cheese=1612;
+@account/create dairy farmer/eggs=1612;
+
+## Then the Beekeeper
+@account/create beekepper/honey=294354;
+
+## Then the fisherman
+@account/create fisherman/fish=9125000;
+
+## Then The Hunter
+@account/create hunter/9125000;
+
+## Then the Wheat Farmer
+@account/create wheat farmer/9125000;
+
+## Then the Corn Farmer
+@account/create corn farmer/9125000;
+
+
+

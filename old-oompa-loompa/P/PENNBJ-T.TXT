@@ -1,0 +1,248 @@
+@set me=quiet
+@switch [isdbref(num(Blackjack Table Parent))]=0,{think [ansi(hm,INSTALL:)] No "Blackjack Table Parent" object found -- creating...;@create Blackjack Table Parent},1,{think [ansi(hm,INSTALL:)] "Blackjack Table Parent" object already exists... skipping creation.}
+@set Blackjack Table Parent=Safe
+@set Blackjack Table Parent=no_command
+@set Blackjack Table Parent=!halt
+think [ansi(hm,INSTALL:)] Downloading Blackjack Commands...
+&CMD_BJACK.SETUP Blackjack Table Parent=$bjack/setup:[ifelse(u(FUN_PLR.Auth,%#),u(TRI_BJACK.Setup,%#),u(TRI_ERROR,%#,PLR_!AUTH))]
+&CMD_BJACK.RULES3 Blackjack Table Parent=$bjack/rules3:[pemit(%#,[ansi(v(FONT_RULES.Border),[repeat(-,78)]%r<<<<<)][ansi(v(FONT_RULES.Header),center(BLACKJACK -- RULES SECTION 3,68))][ansi(v(FONT_RULES.Border),>>>>>%r[repeat(-,78)])]%r'Insurance' can be bought \(for 1/2 of your inital bet\) if the dealer's FACE-UP card is an Ace. If you buy insurance\, you will not lose your initial bet if the dealer has Blackjack -- however\, you will lose your insurance money regardless what the dealer has. You may 'pass' on buying insurance\, but you will lose your entire initial bet if the dealer has Blackjack.%r%rYou can 'split' your cards if they are the same \(costing the same amount as your initial bet\). Please note that the suit of the card does NOT have to be the same. When the cards are split\, each is treated as a separate hand and is dealt an additional card. You may then 'hit' or 'stay' accordingly on each hand.%r%rYou can 'doubledown' on your hand if you feel you can obtain a decent total by being dealt only ONE additional card. Traditionally\, players hit only on values of 9\, 10\, or 11... hoping the dealt card will be a face-card \(value 10\).  Your initial bet is doubled \(thus the name\) when performing this action. %r[ansi(v(FONT_RULES.Border),repeat(-,78))])]
+&CMD_BJACK.STAY Blackjack Table Parent=$bjack/stay:[switch([u(FLAG_BUSY)][u(FLAG_NORMAL)][u(FUN_PLR.Playing,%#)][u(FUN_PLAYER.Turn,%#)],0???,u(TRI_ERROR,%#,!BUSY),10??,u(TRI_ERROR,%#,STAY_!OK),110?,u(TRI_ERROR,%#,PLR_!PLAYING),1110,u(TRI_ERROR,%#,PLR_!TURN),1111,u(TRI_BJACK.Stay,%#),u(TRI_SYSERR,%#))]
+&CMD_BJACK.RULES2 Blackjack Table Parent=$bjack/rules2:[pemit(%#,[ansi(v(FONT_RULES.Border),[repeat(-,78)]%r<<<<<)][ansi(v(FONT_RULES.Header),center(BLACKJACK -- RULES SECTION 2,68))][ansi(v(FONT_RULES.Border),>>>>>%r[repeat(-,78)])]%rThe basic rule of thumb when it comes to deciding whether to 'hit' or not is this: If your hand total is between 2 and 11 --> HIT.  If your hand total is between 12 and 16\ --> hit only if the dealer's face-up card is between 7 and Ace. If your hand total is between 17 and 21 --> STAY. Remember\, if you go over the value of 21 you 'bust' and lose automatically\, regardless of what the dealer has.%r%rAssuming you are still in the game at this point\, the remaining players will take their turns\, and then the dealer will take his/her turn. The dealer MUST hit if below 16 and MUST stay if at 17 or above. This can work to your advantage\, as the dealer often busts when hitting between 12 and 16.%r%rAfter the dealer finishes\, the hands are 'settled'\, meaning it is decided whether you won or lost. If your hand is greater than the dealer's\, you win. If your hand is equal to the dealer's\, you push \(a tie\). If your hand is less than the dealer's\, you lose.%r%r* Type '[ansi(v(FONT_RULES.Cmds),bjack/rules3)]' for more information.%r[ansi(v(FONT_RULES.Border),repeat(-,78))])]
+&CMD_BJACK.RULES Blackjack Table Parent=$bjack/rules:[pemit(%#,[ansi(v(FONT_RULES.Border),[repeat(-,78)]%r<<<<<)][ansi(v(FONT_RULES.Header),center(BLACKJACK -- RULES SECTION,68))][ansi(v(FONT_RULES.Border),>>>>>%r[repeat(-,78)])]%rThe basic premise of Blackjack is to try to get a hand that is as close to the value of '21' WITHOUT going over. Cards are equal to their face value except that Jacks, Queens, and Kings are equal to 10 -- and Aces are equal to 1 OR 11 \(whichever is best for your hand\). Therefore\, a hand of Two, Four, Ace, and King = 2 + 4 + 1 + 10 = 17.%r%rThe first step in Blackjack is placing a bet.  You should try to restrain from betting everything you have on any one given hand\, since part of the game is just pure luck.%r%rOnce all bets are placed\, a game will begin and each player \(including the dealer\) will receive two cards. If anyone's initial two cards equals 21\, they have a BLACKJACK. This hand wins automatically \(unless the dealer also has Blackjack\)\, and pays you 150%% of your bet.%r%rIf you do not have Blackjack\, you will need to decide whether you want to hit or stay. This is when the game can get a bit complicated\, because if you 'hit' \(receive another card\) you may run the risk of 'busting' \(exceeding the value of 21\).%r%r* Type '[ansi(v(FONT_RULES.Cmds),bjack/rules2)]' for more information.%r[ansi(v(FONT_RULES.Border),repeat(-,78))])]
+&CMD_BJACK.HELP Blackjack Table Parent=$bjack/help:[pemit(%#,[ansi(v(FONT_HELP.Border),[repeat(-,78)]%r<<<<<)][ansi(v(FONT_HELP.Header),center(BLACKJACK -- HELP SECTION,68))][ansi(v(FONT_HELP.Border),>>>>>%r[repeat(-,78)])]%rBlackjack is pretty simple for those who play it just for kicks.  But for those who want to play it competitively and actually win often\, it can be a pretty complex and frustrating game. If you are looking for advanced strategies\, you will not learn any here -- it is recommended buying a book \(i.e. Hoyles\) to learn advanced play.%r%r[ansi(v(FONT_HELP.Title),Commands:%r---------)]%r%b%b[ansi(v(FONT_HELP.CMds),ljust(bjack/setup,16))] - Resets the Blackjack Table \(Admin Only\).%r%b%b[ansi(v(FONT_HELP.Cmds),ljust(bjack/sit,16))] - Sits at the Blackjack table.%r%b%b[ansi(v(FONT_HELP.Cmds),ljust(bjack/stand,16))] - Stands from the Blackjack table.%r%b%b[ansi(v(FONT_HELP.Cmds),ljust(bjack/bet <#>,16))] - Places a bet of specified amount for next hand.%r%b%B[ansi(v(FONT_HELP.Cmds),ljust(bjack/start,16))] - Starts a new game using the current bets.%r%b%b[ansi(v(FONT_HELP.Cmds),ljust(bjack/hit,16))] - Requests being dealt another card to your current hand.%r%b%b[ansi(v(FONT_HELP.Cmds),ljust(bjack/stay,16))] - Requests no cards be dealt to your current hand.%r%b%b[ansi(v(FONT_HELP.Cmds),ljust(bjack/doubledown,16))] - Doubles your bet and ONE card is dealt to your hand.%r%b%b[ansi(v(FONT_HELP.Cmds),ljust(bjack/split,16))] - Splits your hand into two hands with equal bet.%r%b%b[ansi(v(FONT_HELP.Cmds),ljust(bjack/insurance,16))] - Protects against a dealer's Blackjack for 1/2 your bet.%r%b%b[ansi(v(FONT_HELP.Cmds),ljust(bjack/pass,16))] - Declines protection against a dealer's blackjack.%r%b%b[ansi(v(FONT_HELP.Cmds),ljust(bjack/table,16))] - Shows the hands of all players at the table.%r%b%b[ansi(v(FONT_HELP.Cmds),ljust(bjack/hand <#>,16))] - Views your hand. If you have 'split'\, specify a number.%r%b%b[ansi(v(FONT_HELP.Cmds),ljust(bjack/copyright,16))] - Shows Copyright information.%r%r* Type '[ansi(v(FONT_HELP.Cmds),bjack/rules)]' for instructions on how to play the game.%r[ansi(v(FONT_HELP.Border),repeat(-,78))])]
+&CMD_BJACK.COPYRIGHT Blackjack Table Parent=$bjack/copy*:[pemit(%#,Blackjack Code v[v(DATA_VERSION)] -- Created by: Demonic \(1999\)%rUpdated versions of this code can be found on:%r%b%bhttp://www.mindspring.com/~loparo)]
+&CMD_BJACK.SIT Blackjack Table Parent=$bjack/sit:[switch([u(FUN_PLR.Valid,%#)][u(FUN_PLR.Banned,%#)][u(FUN_PLR.Sitting,%#)][u(FUN_ENOUGH.Seats,%#)][u(FUN_ENOUGH.Money,%#,v(DATA_BET.Min))],0????,u(TRI_ERROR,%#,PLR_!VALID),11???,u(TRI_ERROR,%#,PLR_BANNED),101??,u(TRI_ERROR,%#,PLR_SITTING),1000?,u(TRI_ERROR,%#,!ENOUGH_SEATS),10010,u(TRI_ERROR,%#,!ENOUGH_MONEY),10011,u(TRI_BJACK.Sit,%#),u(TRI_SYSERR,%#))]
+&CMD_BJACK.BET Blackjack Table Parent=$bjack/bet *:[switch([u(FLAG_BUSY)][u(FUN_PLR.Sitting,%#)][gte(add(u(FUN_GET.Plr-Money,%#),u(FUN_GET.Game-Money,%#)),trunc(secure(%0)))][gte(trunc(secure(%0)),v(DATA_BET.Min))][lte(trunc(secure(%0)),v(DATA_BET.Max))][u(FUN_BJACK.Enough-Money,trunc(secure(%0)))],1?????,u(TRI_ERROR,%#,BUSY),00????,u(TRI_ERROR,%#,PLR_!SITTING),010???,u(TRI_ERROR,%#,!ENOUGH_MONEY),0110??,u(TRI_ERROR,%#,BET_TOO_LOW),01110?,u(TRI_ERROR,%#,BET_TOO_HIGH),011110,u(TRI_ERROR,%#,OUT_OF_MONEY),011111,u(TRI_BJACK.Bet,%#,trunc(secure(%0))),u(TRI_SYSERR,%#))]
+&CMD_BJACK.START Blackjack Table Parent=$bjack/start:[switch([u(FLAG_BUSY)][u(FUN_PLR.Sitting,%#)][not(not(u(FUN_GET.Game-Money,%#)))],1??,u(TRI_ERROR,%#,BUSY),00?,u(TRI_ERROR,%#,PLR_!SITTING),010,u(TRI_ERROR,%#,PLR_!ANTED),011,u(TRI_BJACK.Start,%#),u(TRI_SYSERR,%#))]
+&CMD_BJACK.HAND Blackjack Table Parent=$bjack/hand*:[switch([u(FLAG_BUSY)][u(FUN_PLR.Has-Hand,%#,trunc(secure(%0)))],0?,u(TRI_ERROR,%#,!BUSY),10,u(TRI_ERROR,%#,HAND_!VALID),11,u(TRI_BJACK.Hand,%#,trunc(secure(%0))),u(TRI_SYSERR,%#))]
+&CMD_BJACK.INSURANCE Blackjack Table Parent=$bjack/ins*:[switch([u(FLAG_BUSY)][u(FLAG_INSURANCE)][u(FUN_PLR.Playing,%#)][u(FUN_PLAYER.Turn,%#)][u(FUN_ENOUGH.Money,%#,fdiv(u(FUN_GET.Game-Money,%#),2))],0????,u(TRI_ERROR,%#,!BUSY),10???,u(TRI_ERROR,%#,INSURANCE_!OK),110??,u(TRI_ERROR,%#,PLR_!PLAYING),1110?,u(TRI_ERROR,%#,PLR_!TURN),11110,u(TRI_ERROR,%#,!ENOUGH_MONEY),11111,u(TRI_BJACK.Insurance,%#),u(TRI_SYSERR,%#))]
+&CMD_BJACK.PASS Blackjack Table Parent=$bjack/pass:[switch([u(FLAG_BUSY)][u(FLAG_INSURANCE)][u(FUN_PLR.Playing,%#)][u(FUN_PLAYER.Turn,%#)],0???,u(TRI_ERROR,%#,!BUSY),10??,u(TRI_ERROR,%#,INSURANCE_!OK),110?,u(TRI_ERROR,%#,PLR_!PLAYING),1110,u(TRI_ERROR,%#,PLR_!TURN),1111,u(TRI_BJACK.Pass,%#),u(TRI_SYSERR,%#))]
+&CMD_BJACK.HIT Blackjack Table Parent=$bjack/hit:[switch([u(FLAG_BUSY)][u(FLAG_NORMAL)][u(FUN_PLR.Playing,%#)][u(FUN_PLAYER.Turn,%#)],0???,u(TRI_ERROR,%#,!BUSY),10??,u(TRI_ERROR,%#,HIT_!OK),110?,u(TRI_ERROR,%#,PLR_!PLAYING),1110,u(TRI_ERROR,%#,PLR_!TURN),1111,u(TRI_BJACK.Hit,%#),u(TRI_SYSERR,%#))]
+&CMD_BJACK.STAND Blackjack Table Parent=$bjack/stand:[switch([u(FLAG_BUSY)][u(FUN_PLR.Sitting,%#)],1?,u(TRI_ERROR,%#,PLR_CANT-STAND),00,u(TRI_ERROR,%#,PLR_!SITTING),01,u(TRI_BJACK.Stand,%#),u(TRI_SYSERR,%#))]
+&CMD_BJACK.SPLIT Blackjack Table Parent=$bjack/split:[switch([u(FLAG_BUSY)][u(FLAG_NORMAL)][u(FUN_PLR.Playing,%#)][u(FUN_PLAYER.Turn,%#)][u(FUN_SPLIT.Valid,extract(last(extract(v(LIST_BJACK.Players),before(v(DATA_PLAYER.Turn),.),1,|)),after(v(DATA_PLAYER.Turn),.),1,!))][u(FUN_ENOUGH.Money,%#,u(FUN_GET.Game-Bet,%#))],0?????,u(TRI_ERROR,%#,!BUSY),10????,u(TRI_ERROR,%#,SPLIT_!OK),110???,u(TRI_ERROR,%#,PLR_!PLAYING),1110??,u(TRI_ERROR,%#,PLR_!TURN),11110?,u(TRI_ERROR,%#,SPLIT_!VALID),111110,u(TRI_ERROR,%#,!ENOUGH_MONEY),111111,u(TRI_BJACK.Split,%#),u(TRI_SYSERR,%#))]
+&CMD_BJACK.DOUBLE Blackjack Table Parent=$bjack/doub*:[switch([u(FLAG_BUSY)][u(FLAG_NORMAL)][u(FUN_PLR.Playing,%#)][u(FUN_PLAYER.Turn,%#)][u(FUN_DOUBLE.Valid,last(extract(v(LIST_BJACK.Players),before(v(DATA_PLAYER.Turn),.),1,|)))][u(FUN_ENOUGH.Money,%#,u(FUN_GET.Game-Bet,%#))],0?????,u(TRI_ERROR,%#,!BUSY),10????,u(TRI_ERROR,%#,SPLIT_!OK),110???,u(TRI_ERROR,%#,PLR_!PLAYING),1110??,u(TRI_ERROR,%#,PLR_!TURN),11110?,u(TRI_ERROR,%#,DOUBLE_!VALID),111110,u(TRI_ERROR,%#,!ENOUGH_MONEY),111111,u(TRI_BJACK.Double,%#),u(TRI_SYSERR,%#))]
+&CMD_BJACK.TABLE Blackjack Table Parent=$bjack/tab*:[switch([u(FLAG_BUSY)][u(FUN_PLR.Banned,%#)],0?,u(TRI_ERROR,%#,!BUSY),11,u(TRI_ERROR,%#,PLR_BANNED),10,u(TRI_BJACK.Table,%#),u(TRI_SYSERR,%#))]
+think [ansi(hm,INSTALL:)] Downloading Blackjack Data...
+&DATA_MAX.Money Blackjack Table Parent=200000
+&DATA_BJACK.MONEY Blackjack Table Parent=1000000
+&DATA_BET.MAX Blackjack Table Parent=500
+&DATA_VERSION Blackjack Table Parent=2.1
+&DATA_SEATS.MAX Blackjack Table Parent=6
+&DATA_BET.MIN Blackjack Table Parent=5
+&DATA_NAME.SINGULAR Blackjack Table Parent=dollar
+&DATA_NAME.PLURAL Blackjack Table Parent=dollars
+&DATA_DECK.DEFAULT Blackjack Table Parent=2-H 3-H 4-H 5-H 6-H 7-H 8-H 9-H 10-H 11-H 12-H 13-H 14-H 2-D 3-D 4-D 5-D 6-D 7-D 8-D 9-D 10-D 11-D 12-D 13-D 14-D 2-S 3-S 4-S 5-S 6-S 7-S 8-S 9-S 10-S 11-S 12-S 13-S 14-S 2-C 3-C 4-C 5-C 6-C 7-C 8-C 9-C 10-C 11-C 12-C 13-C 14-C 2-H 3-H 4-H 5-H 6-H 7-H 8-H 9-H 10-H 11-H 12-H 13-H 14-H 2-D 3-D 4-D 5-D 6-D 7-D 8-D 9-D 10-D 11-D 12-D 13-D 14-D 2-S 3-S 4-S 5-S 6-S 7-S 8-S 9-S 10-S 11-S 12-S 13-S 14-S 2-C 3-C 4-C 5-C 6-C 7-C 8-C 9-C 10-C 11-C 12-C 13-C 14-C 2-H 3-H 4-H 5-H 6-H 7-H 8-H 9-H 10-H 11-H 12-H 13-H 14-H 2-D 3-D 4-D 5-D 6-D 7-D 8-D 9-D 10-D 11-D 12-D 13-D 14-D 2-S 3-S 4-S 5-S 6-S 7-S 8-S 9-S 10-S 11-S 12-S 13-S 14-S 2-C 3-C 4-C 5-C 6-C 7-C 8-C 9-C 10-C 11-C 12-C 13-C 14-C 2-H 3-H 4-H 5-H 6-H 7-H 8-H 9-H 10-H 11-H 12-H 13-H 14-H 2-D 3-D 4-D 5-D 6-D 7-D 8-D 9-D 10-D 11-D 12-D 13-D 14-D 2-S 3-S 4-S 5-S 6-S 7-S 8-S 9-S 10-S 11-S 12-S 13-S 14-S 2-C 3-C 4-C 5-C 6-C 7-C 8-C 9-C 10-C 11-C 12-C 13-C 14-C 2-H 3-H 4-H 5-H 6-H 7-H 8-H 9-H 10-H 11-H 12-H 13-H 14-H 2-D 3-D 4-D 5-D 6-D 7-D 8-D 9-D 10-D 11-D 12-D 13-D 14-D 2-S 3-S 4-S 5-S 6-S 7-S 8-S 9-S 10-S 11-S 12-S 13-S 14-S 2-C 3-C 4-C 5-C 6-C 7-C 8-C 9-C 10-C 11-C 12-C 13-C 14-C 2-H 3-H 4-H 5-H 6-H 7-H 8-H 9-H 10-H 11-H 12-H 13-H 14-H 2-D 3-D 4-D 5-D 6-D 7-D 8-D 9-D 10-D 11-D 12-D 13-D 14-D 2-S 3-S 4-S 5-S 6-S 7-S 8-S 9-S 10-S 11-S 12-S 13-S 14-S 2-C 3-C 4-C 5-C 6-C 7-C 8-C 9-C 10-C 11-C 12-C 13-C 14-C
+&DATA_PLAYER.TURN Blackjack Table Parent=0
+&DATA_DEALER.HAND Blackjack Table Parent=X
+think [ansi(hm,INSTALL:)] Downloading Blackjack ASCII-Art...
+&DRAW_CARD.FULL1 Blackjack Table Parent=.------------.
+&DRAW_CARD.HALF1 Blackjack Table Parent=.-------
+&DRAW_CARD.FULL2 Blackjack Table Parent=| [ljust(extract(2 3 4 5 6 7 8 9 10 J Q K A,dec(%0),1),11)]|
+&DRAW_CARD.HALF2 Blackjack Table Parent=| [ljust(extract(2 3 4 5 6 7 8 9 10 J Q K A,dec(%0),1),6)]
+&DRAW_CARD.FULL3 Blackjack Table Parent=|[switch(%1,C,[space(5)]__[space(5)],H,%b%b%b__%b%b__%b%b%b,S,[space(5)]/\\[space(5)],D,[space(5)]/\\[space(5)])]|
+&DRAW_CARD.HALF3 Blackjack Table Parent=|[switch(%1,C,[space(5)]__,H,%b%b%b__%b%b,S,[space(5)]/\\,D,[space(5)]/\\)]
+&DRAW_CARD.FULL4 Blackjack Table Parent=|[switch(%1,C,%b%b%b_\(%b%b\)_%b%b%b,H,%b%b/%b%b\\/%b%b\\%b%b,S,%b%b%b%b/%b%b\\%b%b%b%b,D,%b%b%b%b/%b%b\\%b%b%b%b)]|
+&DRAW_CARD.HALF4 Blackjack Table Parent=|[switch(%1,C,%b%b%b_\(%b%b,H,%b%b/%b%b\\/,S,%b%b%b%b/%b%b,D,%b%b%b%b/%b%b)]
+&DRAW_CARD.FULL5 Blackjack Table Parent=|[switch(%1,C,%b%b\(_.%b%b._\)%b%b,H,%b%b\\[space(6)]/%b%b,S,%b%b/'[space(4)]`\\%b%b,D,[space(4)]\\%b%b/[space(4)])]|
+&DRAW_CARD.HALF5 Blackjack Table Parent=|[switch(%1,C,%b%b\(_.%b%b,H,%b%b\\[space(4)],S,%b%b/'[space(3)],D,[space(4)]\\%b%b)]
+&DRAW_CARD.FULL6 Blackjack Table Parent=|[switch(%1,C,[space(5)]||[space(5)],H,%b%b%b`\\%b%b/'%b%b%b,S,%b|%b%b%b..%b%b%b|%b,D,[space(5)]\\/[space(5)])]|
+&DRAW_CARD.HALF6 Blackjack Table Parent=|[switch(%1,C,[space(5)]||,H,%b%b%b`\\%b%b,S,%b|%b%b%b..,D,[space(5)]\\/)]
+&DRAW_CARD.FULL7 Blackjack Table Parent=|[switch(%1,C,[space(5)]`^[space(5)],H,[space(5)]`'[space(5)],S,%b%b`-'||`-'%b%b,D,[space(12)])]|
+&DRAW_CARD.HALF7 Blackjack Table Parent=|[switch(%1,C,[space(5)]`^,H,[space(5)]`',S,%b%b`-'||,D,[space(7)])]
+&DRAW_CARD.FULL8 Blackjack Table Parent=|[rjust(extract(2 3 4 5 6 7 8 9 10 J Q K A,dec(%0),1),11)] |
+&DRAW_CARD.HALF8 Blackjack Table Parent=|[space(7)]
+&DRAW_CARD.LINE Blackjack Table Parent=[iter(%0,ifelse(eq(words(%0,~),#@),u(DRAW_CARD.Full%1,before(##,-),after(##,-)),u(DRAW_CARD.Half%1,before(##,-),after(##,-))),~,space(0))]
+&DRAW_CARD.FULL9 Blackjack Table Parent=`------------'
+&DRAW_CARD.HALF9 Blackjack Table Parent=`-------
+think [ansi(hm,INSTALL:)] Downloading Blackjack Error Messages...
+&ERR_OUT_OF_MONEY Blackjack Table Parent=The dealer does not have enough money to cover that bet. Please contact the Casino owner.
+&ERR_PLR_!AUTH Blackjack Table Parent=You are not authorized to use that command.
+&ERR_PLR_CANT-STAND Blackjack Table Parent=You cannot stand when a game is in progress.
+&ERR_PLR_!VALID Blackjack Table Parent=You are not a valid player.
+&ERR_PLR_BANNED Blackjack Table Parent=You are banned from playing Blackjack.
+&ERR_PLR_SITTING Blackjack Table Parent=But you are already sitting at the Blackjack Table!
+&ERR_!ENOUGH_SEATS Blackjack Table Parent=There are no empty seats at the Blackjack Table.
+&ERR_!ENOUGH_MONEY Blackjack Table Parent=You do not have enough money to do that.
+&ERR_PLR_!SITTING Blackjack Table Parent=But you are not sitting at the Blackjack Table!
+&ERR_BET_TOO_LOW Blackjack Table Parent=Your bet is below the minimum amount allowed of [v(DATA_BET.Min)] [lcstr(v(DATA_NAME.Plural))].
+&ERR_BET_TOO_HIGH Blackjack Table Parent=Your bet is above the maximum amount allowed of [v(DATA_BET.Max)] [lcstr(v(DATA_NAME.Plural))].
+&ERR_PLR_!ANTED Blackjack Table Parent=You must place a bet to start a game.
+&ERR_BUSY Blackjack Table Parent=There is already a game in progress.
+&ERR_!BUSY Blackjack Table Parent=But there is not a game in progress. Type 'bjack/start' to begin one.
+&ERR_HAND_!VALID Blackjack Table Parent=You either do not have a hand, or the hand you specified is not valid.
+&ERR_INSURANCE_!OK Blackjack Table Parent=You cannot get insurance at this point in the game.
+&ERR_PLR_!TURN Blackjack Table Parent=But it is not your turn! If the player whose turn it is has been idle for a long time\, please contact an Administrator.
+&ERR_PLR_!PLAYING Blackjack Table Parent=But you are not playing in this hand.
+&ERR_HIT_!OK Blackjack Table Parent=You cannot hit at this moment in the game.
+&ERR_STAY_!OK Blackjack Table Parent=You cannot stay at this moment in the game.
+&ERR_SPLIT_!VALID Blackjack Table Parent=You do not have a valid hand to split. Both cards must be the same \(except in suit\).
+&ERR_DOUBLE_!VALID Blackjack Table Parent=You do not have a valid hand to double-down on. You can only double-down on your original hand.
+think [ansi(hm,INSTALL:)] Downloading Blackjack Soft Flags...
+&FLAG_BUSY Blackjack Table Parent=0
+&FLAG_SHUFFLE Blackjack Table Parent=1
+&FLAG_INSURANCE Blackjack Table Parent=0
+&FLAG_NORMAL Blackjack Table Parent=0
+think [ansi(hm,INSTALL:)] Downloading Blackjack Fonts...
+&FONT_DESC.BORDER Blackjack Table Parent=hb
+&FONT_DESC.TITLE Blackjack Table Parent=hc
+&FONT_HAND.TOTAL Blackjack Table Parent=hc
+&FONT_HAND.ACCOUNT Blackjack Table Parent=hg
+&FONT_HAND.BORDER Blackjack Table Parent=hb
+&FONT_RULES.CMDS Blackjack Table Parent=hc
+&FONT_RULES.HEADER Blackjack Table Parent=hc
+&FONT_RULES.BORDER Blackjack Table Parent=hb
+&FONT_HELP.TITLE Blackjack Table Parent=hb
+&FONT_HELP.CMDS Blackjack Table Parent=hc
+&FONT_HELP.HEADER Blackjack Table Parent=hc
+&FONT_HELP.BORDER Blackjack Table Parent=hb
+&FONT_TABLE.TURN Blackjack Table Parent=hr
+&FONT_TABLE.INSURANCE Blackjack Table Parent=hg
+&FONT_TABLE.MONEY Blackjack Table Parent=hg
+&FONT_TABLE.NAMES Blackjack Table Parent=hc
+&FONT_TABLE.TITLE Blackjack Table Parent=hm
+&FONT_TABLE.BORDER Blackjack Table Parent=hb
+&FONT_BJACK.CMDS Blackjack Table Parent=hc
+think [ansi(hm,INSTALL:)] Downloading Blackjack Functions...
+&FUN_BJACK.ENOUGH-MONEY Blackjack Table Parent=[lte(add(%0,fold(FUN_ADD.Numbers,iter(v(LIST_BJACK.Players),trunc(extract(##,2,1)),|))),v(DATA_BJACK.Money))]
+&FUN_GET.DEALER-MONEY Blackjack Table Parent=[v(DATA_BJACK.Money)]
+&FUN_PLR.AUTH Blackjack Table Parent=[hasflag(%0,Wizard)]
+&FUN_TABLE.VALID Blackjack Table Parent=[isdbref(locate(%0,%1,Tn))]
+&FUN_PLR.VALID Blackjack Table Parent=[hastype(%0,PLAYER)]
+&FUN_PLR.BANNED Blackjack Table Parent=[not(not(member(v(LIST_BJACK.Banned),%0)))]
+&FUN_PLR.SITTING Blackjack Table Parent=[not(not(member(v(LIST_BJACK.Sitting),%0)))]
+&FUN_ENOUGH.SEATS Blackjack Table Parent=[lt(words(v(LIST_BJACK.Sitting)),v(DATA_SEATS.Max))]
+&FUN_ENOUGH.MONEY Blackjack Table Parent=[gte(u(FUN_GET.Plr-Money,%0),%1)]
+&FUN_GET.PLR-MONEY Blackjack Table Parent=[default(%0/[v(VAR_MONEY)],0)]
+&FUN_GET.GAME-MONEY Blackjack Table Parent=[ifelse(isnum(setr(5,extract(grab(v(LIST_BJACK.Players),%0 *,|),2,1)])),%q5,trunc(%q5))]
+&FUN_CARD.ABB2NAME Blackjack Table Parent=[extract(Two Three Four Five Six Seven Eight Nine Ten Jack Queen King Ace,dec(before(%0,-)),1)] of [extract(Hearts Spades Diamonds Clubs,match(h s d c,after(%0,-)),1)]
+&FUN_PLR.HAS-HAND Blackjack Table Parent=[lte(%1,words(edit(extract(grab(v(LIST_BJACK.Players),%0 *,|),4,1),X,space(0)),!))]
+&FUN_TURN.NEXT Blackjack Table Parent=[ifelse(eq(v(DATA_PLAYER.Turn),0),1.1,ifelse(gte(after(v(DATA_PLAYER.Turn),.),words(last(extract(v(LIST_BJACK.Players),before(v(DATA_PLAYER.Turn),.),1,|)),!)),[inc(before(v(DATA_PLAYER.Turn),.))].1,[before(v(DATA_PLAYER.Turn),.)].[inc(trunc(after(v(DATA_PLAYER.Turn),.)))]))]
+&FUN_TURN.LAST Blackjack Table Parent=[and(gte(before(v(DATA_PLAYER.Turn),.),dec(words(v(LIST_BJACK.Players),|))),gte(after(v(DATA_PLAYER.Turn),.),words(last(extract(v(LIST_BJACK.Players),before(v(DATA_PLAYER.Turn),.),1,|)),!)))]
+&FUN_PLAYER.TURN Blackjack Table Parent=[eq(before(v(DATA_PLAYER.Turn),.),match(v(LIST_BJACK.Players),%0 *,|))]
+&FUN_PLR.PLAYING Blackjack Table Parent=[not(not(match(v(LIST_BJACK.Players),%0 *,|)))]
+&FUN_PLR.TOTAL Blackjack Table Parent=[u(FUN_CARD.Total,edit(last(grab(v(LIST_BJACK.Players),%0 *,|)),~,space(1)))]
+&FUN_CARD.TOTAL Blackjack Table Parent=[setq(9,fold(me/FUN_ADD.Numbers,iter(%0,ifelse(eq(before(##,-),14),1,ifelse(gte(before(##,-),10),10,before(##,-))))))][ifelse(and(lte(add(%q9,10),21),match(%0,14-*)),add(%q9,10),%q9)]
+&FUN_ADD.NUMBERS Blackjack Table Parent=add(trunc(%0),trunc(%1))
+&FUN_SPLIT.VALID Blackjack Table Parent=[and(eq(words(%0,~),2),eq(before(first(%0,~),-),before(last(%0,~),-)))]
+&FUN_HAND.TOTAL Blackjack Table Parent=[u(FUN_CARD.Total,edit(extract(last(extract(v(LIST_BJACK.Players),before(%0,.),1,|)),after(%0,.),1,!),~,space(1)))]
+&FUN_GET.GAME-BET Blackjack Table Parent=[div(extract(grab(v(LIST_BJACK.Players),%0 *,|),2,1),words(last(grab(v(LIST_BJACK.Players),%0 *,|)),!))]
+&FUN_DOUBLE.VALID Blackjack Table Parent=[and(eq(words(%0,~),2),eq(words(%0,!),1))]
+think [ansi(hm,INSTALL:)] Downloading Blackjack Monitors...
+&LISTEN_DISCONNECT Blackjack Table Parent=^* has disconnected.:[u(TRI_AUTO.Stuff,%#,%0)]
+think [ansi(hm,INSTALL:)] Downloading Blackjack Locks...
+&LOCK_AT.TABLE Blackjack Table Parent=[member(%l,%!)]
+think [ansi(hm,INSTALL:)] Downloading Blackjack Game Messages...
+&MSG_PLR_SETUP Blackjack Table Parent=[name(%0)]\(%0\) has RESET the Blackjack Table.
+&MSG_AUTO.STANDS Blackjack Table Parent=[name(%0)]\(%0\) AUTO-STANDS from the Blackjack Table!
+&MSG_AUTO_FORFEIT Blackjack Table Parent=[name(%0)]\(%0\) has AUTO-FORFEITED [poss(%0)] hand!!!
+&MSG_PLAYER.STANDS Blackjack Table Parent=[name(%0)]\(%0\) stands up from the table.
+&MSG_PLR_!SITTING Blackjack Table Parent=But you are not sitting!
+&MSG_NO_PLAYERS Blackjack Table Parent=There are no players left. Place your bets for a new game now.
+&MSG_PLAYER.SITS Blackjack Table Parent=[name(%0)]\(%0\) takes a seat at the table.
+&MSG_BET Blackjack Table Parent=[name(%0)] makes a bet of %1 [lcstr(v(DATA_NAME.Plural))].
+&MSG_DEALER.SHUFFLES1 Blackjack Table Parent=The dealer begins to shuffle the cards by splitting it into piles.
+&MSG_DEALER.SHUFFLES2 Blackjack Table Parent=Swiftly the cards are intermixed amongst eachother and then split.
+&MSG_DEALER.SHUFFLES3 Blackjack Table Parent=An indicator card is placed randomly near the end of the deck.
+&MSG_DEALER.SHUFFLES4 Blackjack Table Parent=The dealer places the deck in the holder and burns the first card.
+&MSG_DEAL_SKIP Blackjack Table Parent=The dealer skips over [name(%0)] for lack of a bet.
+&MSG_DEAL_ONECARD Blackjack Table Parent=A card is DEALT to [name(%0)] -> [u(FUN_CARD.Abb2Name,%1)] \(Total: [u(FUN_HAND.Total,%2)]\)
+&MSG_DEAL_DEALER_UP Blackjack Table Parent=A card is DEALT to the Dealer -> [u(FUN_Card.Abb2Name,%0)].
+&MSG_DEAL_DEALER_DOWN Blackjack Table Parent=A card is DEALT to the Dealer -> face-down.
+&MSG_BET_REPLACE Blackjack Table Parent=[name(%0)] removes [poss(%0)] bet and makes a new one of %1 [lcstr(v(DATA_NAME.Plural))].
+&MSG_NEXT_INSURANCE Blackjack Table Parent=[name(first(extract(v(LIST_BJACK.Players),%0,1,|)))]\, choose 'bjack/insurance' or 'bjack/pass'.
+&MSG_PLR_INSURANCE Blackjack Table Parent=[name(%0)] buys INSURANCE for %1 [lcstr(u(DATA_NAME.Plural))].
+&MSG_DEALER_BLACKJACK Blackjack Table Parent=The dealer flips over a [u(FUN_CARD.Abb2Name,extract(v(DATA_DEALER.Hand),2,1,~))] and announces BLACKJACK!
+&MSG_BLACKJACK_DEALER_PASSED Blackjack Table Parent=[name(%0)] bought insurance or has blackjack so retains [poss(%0)] bet.
+&MSG_BLACKJACK_DEALER_FAILED Blackjack Table Parent=[name(%0)] didn't buy insurance, so loses [poss(%0)] bet.
+&MSG_PLR_!INSURANCE Blackjack Table Parent=[name(%0)] passes the chance to buy insurance.
+&MSG_DEALER_!BLACKJACK Blackjack Table Parent=The dealer peeks at the hole card but does NOT have Blackjack.
+&MSG_REMOVE_INSURANCE Blackjack Table Parent=All insurance bets are removed from the table.
+&MSG_NEXT_TURN Blackjack Table Parent=[name(first(extract(v(LIST_BJACK.Players),before(v(DATA_PLAYER.Turn),.),1,|)))]\, you have '[edit(iter(setr(7,extract(last(extract(v(LIST_BJACK.Players),before(v(DATA_PLAYER.Turn),.),1,|)),after(v(DATA_PLAYER.Turn),.),1,!)),first(u(FUN_CARD.Abb2Name,##)),~),%b,\,%b)]' totalling [u(FUN_CARD.Total,edit(%q7,~,space(1)))].%r[u(DATA_PREFIX.Game)][space(not(not(words(u(DATA_PREFIX.Game)))))][name(first(extract(v(LIST_BJACK.Players),before(v(DATA_PLAYER.Turn),.),1,|)))]\, you may now '[ansi(v(FONT_BJACK.Cmds),bjack/\[hit\,stay[ifelse(u(FUN_DOUBLE.Valid,last(extract(v(LIST_BJACK.Players),before(v(DATA_PLAYER.Turn),.),1,|))),\,doubledown,)][ifelse(u(FUN_SPLIT.Valid,extract(last(extract(v(LIST_BJACK.Players),before(v(DATA_PLAYER.Turn),.),1,|)),after(v(DATA_PLAYER.Turn),.),1,!)),\,split,)]\])]'.
+&MSG_SEPARATOR Blackjack Table Parent=[ansi(hg,repeat(=,40))]
+&MSG_PLR_BUSTED Blackjack Table Parent=[name(%0)] has BUSTED with a value of %1.
+&MSG_PLR_STAYS Blackjack Table Parent=[name(%0)] STAYS pat with a hand total of [u(FUN_HAND.Total,v(DATA_PLAYER.Turn))].
+&MSG_DEALER_BUST Blackjack Table Parent=The dealer BUSTS with a total of %0.
+&MSG_DEALER_STAY Blackjack Table Parent=The dealer STAYS pat with a total of %0.
+&MSG_SHOW_HOLE Blackjack Table Parent=The dealer flips over the hole card --> [u(FUN_CARD.Abb2Name,extract(v(DATA_DEALER.Hand),2,1,~))].
+&MSG_DEALER_HAND Blackjack Table Parent=The dealer has '[edit(iter(v(DATA_DEALER.Hand),first(u(FUN_CARD.Abb2Name,##)),~),%b,\,%b)]' totalling [u(FUN_CARD.Total,edit(v(DATA_DEALER.Hand),~,space(1)))].
+&MSG_PLR_SPLIT Blackjack Table Parent=[name(%0)] has SPLIT [poss(%0)] [first(u(FUN_CARD.Abb2Name,%1))]'s with a bet of %2 [lcstr(v(DATA_NAME.Plural))].
+&MSG_PLR_DOUBLE Blackjack Table Parent=[name(%0)] DOUBLES DOWN on [poss(%0)] hand\, costing [u(FUN_GET.Game-Money,%0)] [lcstr(v(DATA_NAME.Plural))].
+&MSG_HAND_LOSES Blackjack Table Parent=[name(first(extract(v(LIST_BJACK.Players),before(%0,.),1,|)))]'s [extract(1st 2nd 3rd 4th 5th 6th 7th 8th 9th 10th,after(%0,.),1)] hand LOSES with a total of %1.
+&MSG_HAND_WINS Blackjack Table Parent=[name(first(extract(v(LIST_BJACK.Players),before(%0,.),1,|)))]'s [extract(1st 2nd 3rd 4th 5th 6th 7th 8th 9th 10th,after(%0,.),1)] hand WINS with a total of %1.
+&MSG_HAND_PUSHES Blackjack Table Parent=[name(first(extract(v(LIST_BJACK.Players),before(%0,.),1,|)))]'s [extract(1st 2nd 3rd 4th 5th 6th 7th 8th 9th 10th,after(%0,.),1)] hand PUSHES with a total of %1.
+&MSG_AUTO_WIN Blackjack Table Parent=[name(%0)]'s [extract(one two three four five six seven eight nine,%1,1)] [ifelse(gt(%1,1),hands AUTOMATICALLY WIN,hand AUTOMATICALLY WINS)] due to dealer's bust.
+&MSG_HAND_BLACKJACK Blackjack Table Parent=[name(first(extract(v(LIST_BJACK.Players),before(%0,.),1,|)))]'s hand is a <<<***** BLACKJACK !!! *****>>> \(pays 3 to 2\)[beep(3)]
+&MSG_HAS_TWENTYONE Blackjack Table Parent=[name(first(extract(v(LIST_BJACK.Players),before(%0,.),1,|)))]'s [extract(1st 2nd 3rd 4th 5th 6th 7th 8th 9th 10th,after(%0,.),1)] hand is equal to TWENTY-ONE. Automatically skipping.
+think [ansi(hm,INSTALL:)] Downloading Blackjack Object Messages...
+@DESCRIBE Blackjack Table Parent=Type '[ansi(hc,enter [name(me)])]' to play a game.
+@IDESCRIBE Blackjack Table Parent=[u(ADD_DESC)][ansi(v(FONT_DESC.Border),%r--------------.[repeat(-,63)]%r)][ansi(v(FONT_DESC.Title),Players Seated)][ansi(v(FONT_DESC.Border),:)] [iter(v(LIST_BJACK.Sitting),name(##),,\,%b)]%r[ansi(v(FONT_DESC.Border),--------------')]%r[ansi(v(FONT_DESC.Title),Players Anted%b)][ansi(v(FONT_DESC.Border),:)] [iter(flip(after(flip(v(LIST_BJACK.Players)),|)),name(first(##)),|,\,%b)]%r[ansi(v(FONT_DESC.Border),--------------')]%r[ansi(v(FONT_DESC.Title),Min Bet:)] [ljust(v(DATA_BET.Min),53)][ansi(v(FONT_DESC.Title),Max Bet:)] [v(DATA_BET.Max)]%r[ansi(v(FONT_DESC.Border),repeat(-,78))]
+@FAILURE Blackjack Table Parent=It seems to be bolted to the ground.
+@ENTER Blackjack Table Parent=You approach [name(me)]'s area.
+@LEAVE Blackjack Table Parent=You depart [name(me)]'s area.
+@AENTER Blackjack Table Parent=[pemit(%#,* Type '[ansi(hc,bjack/help)]' for more information.)]
+@ALEAVE Blackjack Table Parent=[u(TRI_AUTO.Stuff,%#,%n)]
+@OENTER Blackjack Table Parent=approaches the Blackjack Table from [name(loc(me))].
+@OLEAVE Blackjack Table Parent=departs the Blackjack Table and heads back toward [name(loc(me))].
+@OXENTER Blackjack Table Parent=departs toward [name(me)]'s area.
+@OXLEAVE Blackjack Table Parent=approaches from [name(me)]'s area.
+think [ansi(hm,INSTALL:)] Downloading Blackjack Triggers...
+&TRI_SET.DEALER-MONEY Blackjack Table Parent=[set(me,DATA_BJACK.Money:%0)]
+&TRI_BJACK.SETUP Blackjack Table Parent=[lock(me,me)][lock(me/use,LOCK_AT.Table/1)][set(me,LISTEN_DISCONNECT:^* has disconnected.:\[u\(TRI_AUTO.Stuff\,\%#\,\%0\)\])][set(me,DATA_DEALER.Hand:X)][set(me,DATA_BET.Min:[v(DATA_BET.Min)])][set(me,DATA_BET.Max:[v(DATA_BET.Max)])][set(me,DATA_SEATS.Max:[v(DATA_SEATS.Max)])][set(me,FLAG_BUSY:0)][set(me,FLAG_SHUFFLE:1)][set(me,FLAG_BUSY:0)][set(me,FLAG_INSURANCE:0)][set(me,FLAG_NORMAL:0)][set(me,DATA_PLAYER.Turn:0)][set(me,DATA_DECK.Current:)][set(me,MONITOR)][set(me,ENTER_OK)][set(me,LIST_BJACK.Players:)][set(me,LIST_BJACK.Sitting:)][u(TRI_MESSAGE,PLR_SETUP,%0)]
+&TRI_AUTO.STUFF Blackjack Table Parent=[ifelse(and(match(pmatch(%1),%0),match(v(LIST_BJACK.Sitting),%0)),u(TRI_AUTO.Stand,%0),)][ifelse(and(match(pmatch(%0),%0),match(v(LIST_BJACK.Players),%0 *,|)),u(TRI_PLR.Remove,%0),)]
+&TRI_AUTO.STAND Blackjack Table Parent=[set(me,LIST_BJACK.Sitting:[remove(v(LIST_BJACK.Sitting),%0)])][u(TRI_MESSAGE,AUTO.Stands,%0)]
+&TRI_PLR.REMOVE Blackjack Table Parent=[ifelse(u(FLAG_BUSY),[u(TRI_MESSAGE,AUTO_FORFEIT,%0)][set(me,DATA_PLAYER.Turn:[switch(comp(before(v(DATA_PLAYER.Turn),.),match(v(LIST_BJACK.Players),%0 *,|)),1,[sub(v(DATA_PLAYER.Turn),1)][setq(2,0)],0,[dec(v(DATA_PLAYER.Turn))].1[setq(2,1)],-1,[v(DATA_PLAYER.Turn)][setq(2,0)])])][set(me,LIST_BJACK.Players:[ldelete(v(LIST_BJACK.Players),match(v(LIST_BJACK.Players),%0 *,|),|)])][ifelse(%q2,u(TRI_LOOP.Normal),)],[set(me,LIST_BJACK.Players:[ldelete(v(LIST_BJACK.Players),match(v(LIST_BJACK.Players),%0 *,|),|)])])]
+&TRI_BJACK.STAND Blackjack Table Parent=[set(me,LIST_BJACK.Sitting:[remove(v(LIST_BJACK.Sitting),%0)])][u(TRI_MESSAGE,PLAYER.Stands,%0)]
+&TRI_LIST.CARDS-2 Blackjack Table Parent=[ifelse(eq(v(DATA_PLAYER.Turn),%2),ansi(v(FONT_TABLE.Turn),*),%b)]%b[rjust(\(%1\),4)] [edit(iter(%0,[first(u(FUN_CARD.Abb2Name,##))],~),space(1),\,[space(1)])]
+&TRI_LIST.CARDS Blackjack Table Parent=[iter(%0,%r[u(TRI_LIST.Cards-2,##,u(FUN_CARD.Total,edit(##,~,space(1))),%1.#@)],!)]
+&TRI_BJACK.TABLE Blackjack Table Parent=[pemit(%0,[ansi(v(FONT_TABLE.Border),[repeat(-,78)]%r<<<<<)][ansi(v(FONT_TABLE.Title),center(BLACKJACK TABLE,68))][ansi(v(FONT_TABLE.Border),>>>>>%r[repeat(-,78)])]%r[ansi(v(FONT_TABLE.Names),Dealer's Cards:)] Face-Down\, [u(FUN_CARD.Abb2Name,first(v(DATA_DEALER.Hand),~))][iter(flip(after(flip(v(LIST_BJACK.Players)),|)),%r%r[ansi(v(FONT_TABLE.Names),ljust([name(first(##))]'s Cards:,25))] \(Total Money Bet - [ansi(v(FONT_TABLE.Money),extract(##,2,1))]\, Insurance - [ansi(v(FONT_TABLE.Insurance),ifelse(extract(##,3,1),YES,NO))]\)[u(TRI_LIST.Cards,last(##),#@)],|)]%r[ansi(v(FONT_TABLE.Border),repeat(-,78))]%r[ansi(v(FONT_TABLE.Turn),*)] indicates which hand's turn it is to perform an action.%r
+&TRI_ERROR Blackjack Table Parent=[pemit(%0,[u(DATA_PREFIX.Error)][space(not(not(words(u(DATA_PREFIX.Error)))))][u(ERR_%1,%2,%3,%4)])]
+&TRI_SYSERR Blackjack Table Parent=[pemit(%0,[ansi(hfr,SYSERR:)] There is a bug in the code. Report this to an Admin immediately.)]
+&TRI_BJACK.SIT Blackjack Table Parent=[set(me,LIST_BJACK.Sitting:[v(LIST_BJACK.Sitting)] %0)][u(TRI_MESSAGE,PLAYER.Sits,%0)]
+&TRI_BJACK.BET Blackjack Table Parent=[ifelse(match(v(LIST_BJACK.Players),%0 *,|),[u(TRI_SET.Plr-Money,%0,add(u(FUN_GET.Plr-Money,%0),u(FUN_GET.Game-Money,%0)))][u(TRI_SET.Game-Money,%0,%1)][u(TRI_SET.Plr-Money,%0,sub(u(FUN_GET.Plr-Money,%0),%1))][u(TRI_MESSAGE,BET_REPLACE,%0,%1)],[set(me,LIST_BJACK.Players:[v(LIST_BJACK.Players)]%0 %1 0 X|)][u(TRI_SET.Plr-Money,%0,sub(u(FUN_GET.Plr-Money,%0),%1))][u(TRI_MESSAGE,BET,%0,%1)])]
+&TRI_SET.PLR-MONEY Blackjack Table Parent=[ifelse(gte(%1,v(DATA_MAX.Money)),[set(%0,[v(VAR_MONEY)]:[v(DATA_MAX.Money)])][pemit(%0,[u(DATA_PREFIX.Warn)] You cannot carry any more money! Any money won from this point on will NOT be given to you.)][set(me,DATA_BJACK.Money:[add(v(DATA_BJACK.Money),sub(%1,v(DATA_MAX.Money)))])],set(%0,[v(VAR_MONEY)]:%1))]
+&TRI_SET.GAME-MONEY Blackjack Table Parent=[set(me,LIST_BJACK.Players:[replace(v(LIST_BJACK.Players),match(v(LIST_BJACK.Players),%0 *,|),replace(grab(v(LIST_BJACK.Players),%0 *,|),2,%1),|)])]
+&TRI_MESSAGE Blackjack Table Parent=[remit(me,[u(DATA_PREFIX.Game)][space(not(not(words(u(DATA_PREFIX.Game)))))][u(MSG_%0,%1,%2,%3)])]
+&TRI_BJACK.START Blackjack Table Parent=[set(me,DATA_PLAYER.Turn:0)][ifelse(v(FLAG_SHUFFLE),u(TRI_DECK.Shuffle),)][u(TRI_DECK.Deal)]
+&TRI_DECK.SHUFFLE Blackjack Table Parent=[set(me,FLAG_BUSY:1)][u(TRI_MESSAGE,SEPARATOR)][u(TRI_MESSAGE,DEALER.Shuffles1)][u(TRI_MESSAGE,DEALER.Shuffles2)][set(me,DATA_DECK.Current:[shuffle(shuffle(v(DATA_DECK.Default)))])][u(TRI_MESSAGE,DEALER.Shuffles3)][set(me,DATA_DECK.Current:[insert(v(DATA_DECK.Current),sub(words(v(DATA_DECK.Default)),add(rand(20),40)),STOP)])][u(TRI_MESSAGE,DEALER.Shuffles4)][set(me,DATA_DECK.Current:[rest(v(DATA_DECK.Current))])]
+&TRI_DECK.DEAL Blackjack Table Parent=[set(me,FLAG_BUSY:1)][set(me,FLAG_SHUFFLE:0)][u(TRI_MESSAGE,SEPARATOR)][iter(lnum(words(v(LIST_BJACK.Players),|)),ifelse(gte(#@,words(v(LIST_BJACK.Players),|)),u(TRI_DEAL.Dealer),ifelse(lt(trunc(extract(extract(v(LIST_BJACK.Players),#@,1,|),2,1)),v(DATA_BET.Min)),u(TRI_MESSAGE,DEAL_SKIP,first(extract(v(LIST_BJACK.Players),#@,1,|))),u(TRI_DEAL.OneCard,#@.1))))][u(TRI_MESSAGE,SEPARATOR)][iter(lnum(words(v(LIST_BJACK.Players),|)),ifelse(gte(#@,words(v(LIST_BJACK.Players),|)),u(TRI_DEAL.Dealer),ifelse(lt(trunc(extract(extract(v(LIST_BJACK.Players),#@,1,|),2,1)),v(DATA_BET.Min)),u(TRI_MESSAGE,DEAL_SKIP,first(extract(v(LIST_BJACK.Players),#@,1,|))),u(TRI_DEAL.OneCard,#@.1))))][ifelse(and(match(10 11 12 13,before(first(v(DATA_DEALER.Hand),~),-)),match(14,before(last(v(DATA_DEALER.Hand),~),-))),u(TRI_BLACKJACK.Dealer),ifelse(match(14,before(first(v(DATA_DEALER.Hand),~),-)),u(TRI_LOOP.Insurance),u(TRI_LOOP.Normal)))]
+&TRI_DEAL.ONECARD Blackjack Table Parent=[ifelse(match(STOP,first(v(DATA_DECK.Current))),[set(me,DATA_DECK.Current:[rest(v(DATA_DECK.Current))])][set(me,FLAG_SHUFFLE:1)],)][set(me,LIST_BJACK.Players:[replace(v(LIST_BJACK.Players),before(%0,.),replace(extract(v(LIST_BJACK.Players),before(%0,.),1,|),4,replace(last(extract(v(LIST_BJACK.Players),before(%0,.),1,|)),after(%0,.),edit(strcat(extract(extract(extract(v(LIST_BJACK.Players),before(%0,.),1,|),4,1),after(%0,.),1,!),strcat(~,setr(0,first(v(DATA_DECK.Current))))),X~,space(0)),!)),|)])][set(me,DATA_DECK.Current:[rest(v(DATA_DECK.Current))])][u(TRI_MESSAGE,DEAL_ONECARD,first(extract(v(LIST_BJACK.Players),before(%0,.),1,|)),%q0,%0)]
+&TRI_BJACK.HAND Blackjack Table Parent=[setq(1,extract(last(grab(v(LIST_BJACK.Players),%0 *,|)),setr(8,ifelse(or(not(words(%1)),eq(%1,0)),1,%1)),1,!))][pemit(%0,[ansi(v(FONT_HAND.BORDER),[repeat(=,78)]%r||||||)] [ansi(v(FONT_HAND.ACCOUNT),center(Your current account balance is: [xget(%0,v(VAR_MONEY))] [lcstr(v(DATA_NAME.Plural))],64))] [ansi(v(FONT_HAND.BORDER),||||||%r||||||)] [ansi(v(FONT_HAND.ACCOUNT),[ljust(Your current money bet is: [extract(grab(v(LIST_BJACK.Players),%0 *,|),2,1)],44)][rjust(Insurance: [ifelse(extract(grab(v(LIST_BJACK.Players),%0 *,|),3,1),YES,NO)],20)])] [ansi(v(FONT_HAND.BORDER),||||||%r[repeat(=,78)])]%r[iter(lnum(9),%r[u(DRAW_CARD.Line,%q1,#@)])]%r%r[ansi(v(FONT_HAND.BORDER),[repeat(-,78)]%r|||)] [ansi(v(FONT_HAND.TOTAL),[ljust(Your Card Total: [u(FUN_HAND.Total,[match(v(LIST_BJACK.Players),%0 *,|)].%q8)],30)][rjust(Dealer's Face-up Card: [u(FUN_CARD.Abb2Name,first(v(DATA_DEALER.Hand),~))],40)])] [ansi(v(FONT_HAND.BORDER),|||%r[repeat(-,78)])]%r)]
+&TRI_DEAL.DEALER Blackjack Table Parent=[ifelse(match(STOP,first(v(DATA_DECK.Current))),[set(me,DATA_DECK.Current:[rest(v(DATA_DECK.Current))])][set(me,FLAG_SHUFFLE:1)],)][set(me,DATA_DEALER.Hand:[edit(strcat(v(DATA_DEALER.Hand),strcat(~,setr(0,first(v(DATA_DECK.Current))))),X~,space(0))])][set(me,DATA_DECK.Current:[rest(v(DATA_DECK.Current))])][u(TRI_MESSAGE,ifelse(eq(words(v(DATA_DEALER.Hand),~),2),DEAL_DEALER_DOWN,DEAL_DEALER_UP),%q0)]
+&TRI_LOOP.INSURANCE Blackjack Table Parent=[set(me,FLAG_INSURANCE:1)][set(me,FLAG_NORMAL:0)][ifelse(u(FUN_TURN.Last),ifelse(match(10 11 12 13,before(last(v(DATA_DEALER.Hand),~),-)),u(TRI_BLACKJACK.Dealer),[set(me,DATA_PLAYER.Turn:1)][u(TRI_BLACKJACK.None)]),[set(me,DATA_PLAYER.Turn:[u(FUN_TURN.Next)])][u(TRI_MESSAGE,NEXT_INSURANCE,trunc(v(DATA_PLAYER.Turn)))])]
+&TRI_BJACK.INSURANCE Blackjack Table Parent=[set(me,LIST_BJACK.Players:[replace(v(LIST_BJACK.Players),match(v(LIST_BJACK.Players),%0 *,|),replace(grab(v(LIST_BJACK.Players),%0 *,|),3,setr(2,fdiv(u(FUN_GET.Game-Money,%0),2))),|)])][u(TRI_SET.Plr-Money,%0,sub(u(FUN_GET.Plr-Money,%0),%q2))][u(TRI_MESSAGE,PLR_INSURANCE,%0,%q2)][u(TRI_LOOP.Insurance)]
+&TRI_BLACKJACK.DEALER Blackjack Table Parent=[u(TRI_MESSAGE,DEALER_BLACKJACK)][iter(lnum(dec(words(v(LIST_BJACK.Players),|))),[u(TRI_SET.Dealer-Money,add(u(FUN_GET.Dealer-Money),extract(extract(v(LIST_BJACK.Players),#@,1,|),3,1)))][ifelse(or(gt(extract(setr(3,extract(v(LIST_BJACK.Players),#@,1,|)),3,1),0),and(eq(u(FUN_CARD.Total,edit(last(%q3),~,space(1))),21),eq(words(last(%q3),~),2))),[u(TRI_SET.Plr-Money,first(%q3),add(extract(%q3,2,1),u(FUN_GET.Plr-Money,first(%q3))))][u(TRI_MESSAGE,BLACKJACK_DEALER_PASSED,first(%q3))],[u(TRI_MESSAGE,BLACKJACK_DEALER_FAILED,first(%q3))][u(TRI_SET.Dealer-Money,add(u(FUN_GET.Dealer-Money),extract(%q3,2,1)))])])][u(TRI_RESET)]
+&TRI_RESET Blackjack Table Parent=[set(me,LIST_BJACK.Players:)][set(me,DATA_DEALER.Hand:X)][set(me,DATA_PLAYER.Turn:0)][set(me,FLAG_NORMAL:0)][set(me,FLAG_INSURANCE:0)][set(me,FLAG_BUSY:0)][ifelse(lt(words(v(DATA_DECK.Current)),30),set(me,FLAG_SHUFFLE:1),)]
+&TRI_BJACK.PASS Blackjack Table Parent=[u(TRI_MESSAGE,PLR_!INSURANCE,%0)][u(TRI_LOOP.Insurance)]
+&TRI_BLACKJACK.NONE Blackjack Table Parent=[u(TRI_MESSAGE,DEALER_!BLACKJACK)][u(TRI_MESSAGE,REMOVE_INSURANCE)][iter(lnum(dec(words(v(LIST_BJACK.Players),|))),[u(TRI_SET.Dealer-Money,add(u(FUN_GET.Dealer-Money),extract(extract(v(LIST_BJACK.Players),#@,1,|),3,1)))][set(me,LIST_BJACK.Players:[replace(v(LIST_BJACK.Players),#@,replace(extract(v(LIST_BJACK.Players),#@,1,|),3,0),|)])])][set(me,DATA_PLAYER.Turn:0)][u(TRI_LOOP.Normal)]
+&TRI_LOOP.NORMAL Blackjack Table Parent=[set(me,FLAG_INSURANCE:0)][set(me,FLAG_NORMAL:1)][u(TRI_MESSAGE,SEPARATOR)][ifelse(words(v(LIST_BJACK.Players),|),ifelse(u(FUN_TURN.Last),[u(TRI_MESSAGE,SHOW_HOLE)][u(TRI_MESSAGE,DEALER_HAND)][u(TRI_DEALER.Finish)],[set(me,DATA_PLAYER.Turn:[u(FUN_TURN.Next)])][ifelse(eq(u(FUN_HAND.Total,v(DATA_PLAYER.Turn)),21),[u(TRI_MESSAGE,HAS_TWENTYONE,v(DATA_PLAYER.Turn))][u(TRI_LOOP.Normal)],[u(TRI_MESSAGE,NEXT_TURN)][u(TRI_BJACK.Hand,first(extract(v(LIST_BJACK.Players),before(v(DATA_PLAYER.Turn),.),1,|)),after(v(DATA_PLAYER.Turn),.))])]),[u(TRI_MESSAGE,NO_PLAYERS)][u(TRI_RESET)])]
+&TRI_BJACK.HIT Blackjack Table Parent=[u(TRI_DEAL.OneCard,v(DATA_PLAYER.Turn))][ifelse(gt(setr(4,u(FUN_HAND.Total,v(DATA_PLAYER.Turn))),21),u(TRI_PLR.Bust,%0,%q4),ifelse(eq(%q4,21),u(TRI_LOOP.Normal),[u(TRI_MESSAGE,NEXT_TURN)][u(TRI_BJACK.Hand,first(extract(v(LIST_BJACK.Players),before(v(DATA_PLAYER.Turn),.),1,|)),after(v(DATA_PLAYER.Turn),.))]))]
+&TRI_PLR.BUST Blackjack Table Parent=[u(TRI_MESSAGE,PLR_BUSTED,%0,%1)][u(TRI_SET.Dealer-Money,add(u(FUN_GET.Dealer-Money),u(FUN_GET.Game-Bet,%0)))][ifelse(eq(words(last(grab(v(LIST_BJACK.Players),%0 *,|)),!),1),[set(me,LIST_BJACK.Players:[ldelete(v(LIST_BJACK.Players),before(v(DATA_PLAYER.Turn),.),|)])][set(me,DATA_PLAYER.Turn:[dec(v(DATA_PLAYER.Turn))].1)],[set(me,LIST_BJACK.Players:[replace(v(LIST_BJACK.Players),before(v(DATA_PLAYER.Turn),.),replace(setr(8,extract(v(LIST_BJACK.Players),before(v(DATA_PLAYER.Turn),.),1,|)),2,mul(div(extract(%q8,2,1),words(last(%q8),!)),dec(words(last(%q8),!)))),|)])][set(me,LIST_BJACK.Players:[replace(v(LIST_BJACK.Players),before(v(DATA_PLAYER.Turn),.),replace(grab(v(LIST_BJACK.Players),%0 *,|),4,ldelete(last(grab(v(LIST_BJACK.Players),%0 *,|)),after(v(DATA_PLAYER.Turn),.),!)),|)])][set(me,DATA_PLAYER.Turn:[before(v(DATA_PLAYER.Turn),.)].[dec(trunc(after(v(DATA_PLAYER.Turn),.)))])])][u(TRI_LOOP.Normal)]
+&TRI_DEALER.FINISH Blackjack Table Parent=[ifelse(gte(u(FUN_CARD.Total,edit(v(DATA_DEALER.Hand),~,space(1))),17),u(TRI_SETTLEMENT),[ifelse(match(STOP,first(v(DATA_DECK.Current))),[set(me,DATA_DECK.Current:[rest(v(DATA_DECK.Current))])],)][set(me,DATA_DEALER.Hand:[strcat(v(DATA_DEALER.Hand),strcat(~,setr(0,first(v(DATA_DECK.Current)))))])][set(me,DATA_DECK.Current:[rest(v(DATA_DECK.Current))])][u(TRI_MESSAGE,DEAL_DEALER_UP,%q0)][u(TRI_DEALER.Finish)])]
+&TRI_BJACK.STAY Blackjack Table Parent=[u(TRI_MESSAGE,PLR_STAYS,%0)][u(TRI_LOOP.Normal)]
+&TRI_SETTLEMENT Blackjack Table Parent=[u(TRI_MESSAGE,SEPARATOR)][ifelse(gt(setr(6,u(FUN_CARD.Total,edit(v(DATA_DEALER.Hand),~,space(1)))),21),[u(TRI_MESSAGE,DEALER_BUST,%q6)][u(TRI_DEALER.Bust)],[u(TRI_MESSAGE,DEALER_STAY,%q6)][u(TRI_SETTLE.Hands)])][u(TRI_RESET)]
+&TRI_BJACK.SPLIT Blackjack Table Parent=[u(TRI_SET.Game-Money,%0,add(u(FUN_GET.Game-Money,%0),setr(7,div(u(FUN_GET.Game-Money,%0),words(last(extract(v(LIST_BJACK.Players),before(v(DATA_PLAYER.Turn),.),1,|)),!)))))][u(TRI_SET.Plr-Money,%0,sub(xget(%0,v(VAR_MONEY)),%q7))][set(me,LIST_BJACK.Players:[replace(v(LIST_BJACK.Players),before(v(DATA_PLAYER.Turn),.),replace(extract(v(LIST_BJACK.Players),before(v(DATA_PLAYER.Turn),.),1,|),4,[replace(last(extract(v(LIST_BJACK.Players),before(v(DATA_PLAYER.Turn),.),1,|)),after(v(DATA_PLAYER.Turn),.),first(setr(6,extract(last(extract(v(LIST_BJACK.Players),before(v(DATA_PLAYER.Turn),.),1,|)),after(v(DATA_PLAYER.Turn),.),1,!)),~),!)]![last(%q6,~)]),|)])][u(TRI_MESSAGE,PLR_SPLIT,%0,first(%q6),%q7)][u(TRI_DEAL.OneCard,v(DATA_PLAYER.Turn))][u(TRI_DEAL.OneCard,[before(v(DATA_PLAYER.Turn),.)].[words(last(extract(v(LIST_BJACK.Players),before(v(DATA_PLAYER.Turn),.),1,|)),!)])][u(TRI_MESSAGE,NEXT_TURN)][u(TRI_BJACK.Hand,first(extract(v(LIST_BJACK.Players),before(v(DATA_PLAYER.Turn),.),1,|)),after(v(DATA_PLAYER.Turn),.))]
+&TRI_BJACK.DOUBLE Blackjack Table Parent=[u(TRI_MESSAGE,PLR_DOUBLE,%0)][u(TRI_SET.Plr-Money,%0,sub(xget(%0,v(VAR_MONEY)),u(FUN_GET.Game-Money,%0)))][u(TRI_SET.Game-Money,%0,mul(u(FUN_GET.Game-Money,%0),2))][u(TRI_DEAL.OneCard,v(DATA_PLAYER.Turn))][ifelse(gt(setr(4,u(FUN_HAND.Total,v(DATA_PLAYER.Turn))),21),u(TRI_PLR.Bust,%0,%q4),u(TRI_LOOP.Normal))]
+&TRI_SETTLE.HANDS Blackjack Table Parent=[iter(lnum(dec(words(v(LIST_BJACK.Players),|))),u(TRI_SETTLE.Hands2,#@))]
+&TRI_SETTLE.HANDS2 Blackjack Table Parent=[setr(4,u(FUN_CARD.Total,edit(v(DATA_DEALER.Hand),~,space(1))))][iter(last(extract(v(LIST_BJACK.Players),%0,1,|)),ifelse(and(eq(setr(3,u(FUN_CARD.Total,edit(##,~,space(1)))),21),and(eq(words(##,~),2),eq(words(##,!),1))),u(TRI_BLACKJACK,%0.#@,%q3),ifelse(eq(%q4,%q3),u(TRI_PUSH,%0.#@,%q3),ifelse(gt(%q3,%q4),u(TRI_WIN,%0.#@,%q3),u(TRI_LOSE,%0.#@,%q3)))),!)]
+&TRI_LOSE Blackjack Table Parent=[u(TRI_MESSAGE,HAND_LOSES,%0,%1)][u(TRI_SET.Dealer-Money,add(u(FUN_GET.Dealer-Money),u(FUN_GET.Game-Bet,first(extract(v(LIST_BJACK.Players),before(%0,.),1,|)))))]
+&TRI_PUSH Blackjack Table Parent=[u(TRI_MESSAGE,HAND_PUSHES,%0,%1)][u(TRI_SET.Plr-Money,setr(2,first(extract(v(LIST_BJACK.Players),before(%0,.),1,|))),add(xget(%q2,v(VAR_MONEY)),u(FUN_GET.Game-Bet,%q2)))]
+&TRI_WIN Blackjack Table Parent=[u(TRI_MESSAGE,HAND_WINS,%0,%1)][u(TRI_SET.Plr-Money,setr(2,first(extract(v(LIST_BJACK.Players),before(%0,.),1,|))),add(xget(%q2,v(VAR_MONEY)),mul(u(FUN_GET.Game-Bet,%q2),2)))][u(TRI_SET.Dealer-Money,sub(u(FUN_GET.Dealer-Money),u(FUN_GET.Game-Bet,%q2)))]
+&TRI_DEALER.BUST Blackjack Table Parent=[iter(ifelse(words(v(LIST_BJACK.Players),|),mid(v(LIST_BJACK.Players),0,dec(strlen(v(LIST_BJACK.Players)))),space(0)),[ifelse(and(eq(u(FUN_CARD.Total,edit(edit(last(##),~,space(1)),!,space(1))),21),eq(words(##,~),2)),u(TRI_BLACKJACK,#@.1),[u(TRI_SET.Plr-Money,first(##),add(xget(first(##),v(VAR_MONEY)),mul(2,extract(##,2,1))))][u(TRI_SET.Dealer-Money,sub(u(FUN_GET.Dealer-Money),extract(##,2,1)))][u(TRI_MESSAGE,AUTO_WIN,first(##),words(last(##),!))])],|)]
+&TRI_BLACKJACK Blackjack Table Parent=[u(TRI_MESSAGE,HAND_BLACKJACK,%0,%1)][u(TRI_SET.Plr-Money,setr(2,first(extract(v(LIST_BJACK.Players),before(%0,.),1,|))),add(xget(%q2,v(VAR_MONEY)),mul(fdiv(u(FUN_GET.Game-Bet,%q2),2),5)))][u(TRI_SET.Dealer-Money,sub(u(FUN_GET.Dealer-Money),mul(fdiv(u(FUN_GET.Game-Bet,%q2),2),3)))]
+think [ansi(hm,INSTALL:)] Downloading Blackjack Variables...
+&VAR_MONEY Blackjack Table Parent=Econ_Money
+think [ansi(hm,INSTALL:)] Downloading Blackjack Prefixes...
+&DATA_PREFIX.WARN Blackjack Table Parent=[ansi(hy,WARN:)]
+&DATA_PREFIX.GAME Blackjack Table Parent=[ansi(hg,GAME:)]
+&DATA_PREFIX.ERROR Blackjack Table Parent=[ansi(hr,ERROR:)]
+&DATA_PREFIX.SYSERR Blackjack Table Parent=[ansi(fhr,SYSERR:)]
+think [ansi(hm,INSTALL:)] [ansi(hr,Download is complete!  Now you must do the following:)]
+think [ansi(hm,INSTALL:)] %b%b%b- @create a blackjack table
+think [ansi(hm,INSTALL:)] %b%b%b- @parent the created object to the Blackjack Table Parent
+think [ansi(hm,INSTALL:)] %b%b%b- Enter the object and type bjack/setup
+think [ansi(hm,INSTALL:)] %b%b%b- Set the object WIZARD if others will be using it.
+think [ansi(hm,INSTALL:)] 
+think [ansi(hm,INSTALL:)] The Copyright must stay with this code.  If you have any questions
+think [ansi(hm,INSTALL:)] or complaints \(bug reports\) concerning this code\, please contact
+think [ansi(hm,INSTALL:)] me at: [ansi(hc,worldwar@bb6.betterbox.net)].  Thank you.
+@set me=!quiet

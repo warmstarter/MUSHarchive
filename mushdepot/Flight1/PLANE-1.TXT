@@ -1,0 +1,20 @@
+@create PARENT: Airplane
+@Desc PARENT: Airplane=%r[space(8)]This is the JET. It is capable of Xmph, has Xtechnology, and is extremely hard to detect on any kind of radar.
+@Idesc PARENT: Airplane=%r[space(8)]You are inside the JET and see a control panel with many dials and monitors. You also see a panel that says "DESTINATIONS." You figure it's worth a try. To your left is a RADAR to tell you your current location. Just say radar to use it. You should also look at the CONTROL PANEL.
+@VA PARENT: Airplane=$destinations:@pemit %n=%r[space(12)]Destinations%r%r1.%r2.%r3.%rput in whatever destinations you want. make sure destinations are jump ok
+@VB PARENT: Airplane=$dest1:@tel #1607=dbref of dest1
+@VC PARENT: Airplane=$dest2:@tel #1607=dbref of dest2
+@VD PARENT: Airplane=$dest3:@tel #1607=dbref of dest3
+@Aenter PARENT: Airplane=@pemit %n= @edit this however you need to. destinations will require dbrefs as well as simple names for each. hopefully htere will be clearings and an airport or something. descpriptions are up to owners, cuz this is a copy of the parent. after you have finished shining this up, get rid of this aenter, cuz it's not necessary.
+@VE PARENT: Airplane=$radar:@pemit %n=The jet is currently over [name(loc(me))].;@pemit contents/jet=%n checks the location on the radar.
+&DOORLOCK PARENT: Airplane=$lockup:@lock/leave me=me;@pemit/contents me=%N has locked the doors. You are now prepared for flight.;@lock/enter me=me
+&DOOR!LOCK PARENT: Airplane=$unlock:@unlock/leave me;@pemit/contents me=%N has unlocked the doors. You may now leave the [fullname(me)].;@unlock/enter me
+&ENGINEON PARENT: Airplane=$engine on:@pemit/contents [fullname(me)]=%N starts the engines of the [fullname(me)]. Prepare for take-off.;@wait 5=@pemit/contents [fullname(me)]=The [fullname(me)] starts moving and soon is tilted up to the air. You are now airborne.
+&ENGINEOFF PARENT: Airplane=$engine off:@pemit/contents me=The [fullname(me)] gently tilts downward and soon you are rolling on the ground as the [fullname(me)] comes to a stop.;@wait 5=@Pemit/contents me=The [fullname(me)] has now landed.;@edit me/radar=over
+@lock/Leave PARENT: Airplane=PARENT: Airplane
+@lock/Enter PARENT: Airplane=PARENT: Airplane
+&CONTPAN PARENT: Airplane=$control panel:@pemit %n=You look at the control panel.%r%r[space(8)]LOCKUP: Lock doors%r[space(8)]UNLOCK: Unlock doors%r[space(8)]ENGINE ON: Turn on engines and take off%r[space(8)]ENGINE OFF: Land and turn off engines%r[space(8)]RADAR: Gives you your current location%r[space(8)]DESTINATIONS: shows you the various places the jet can take you%r[space(8)]DEST1, DEST2, DEST3...: Tells the jet to fly to that destination
+@set PARENT: Airplane=VISUAL
+@set PARENT: Airplane=PARENT_OK
+@set PARENT: Airplane=ENTER_OK
+@set PARENT: Airplane=HALT

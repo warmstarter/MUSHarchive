@@ -1,0 +1,85 @@
+Bartender Parent(#164LVhn)
+Type: Thing Flags: LINK_OK VISUAL HALT NO_COMMAND
+To set up these tables, just parent a room to this. Set up tables by typing
+`&desc_table_<name> room=<small description>'.
+Owner: Maxx  Zone: *NOTHING*  Code Credits: 1
+Parent: *NOTHING*
+Basic Lock: Maxx
+Powers:
+Warnings checked: none
+Created: Thu Feb 22 03:58:55 1996
+Last Modification: Sat May 11 00:19:29 1996
+TABLEHELP [#10]: $tablehelp:@pemit/silent %#=%r[ansi(hy,Tables Help)]%r%r[ansi
+(hc,Tables)] shows the tables in the bar %r[ansi(hc,Sit)] chooses a table
+randomly%r[ansi(hc,Sit With *)] makes you sit with the person you type %r[ansi
+(hc,Sit at *)][space(1)]makes you sit at the table you enter %r[ansi(hc,TT)]
+makes you say something at your table%r[ansi(hc,TWHO)] displays who's at
+tables%r
+BARHELP [#3]: $barhelp:@pemit %#=%r[ansi(hy,Bar Help)]%r%r[ansi(hc,Tables)]
+lists the tables in the bar%r[ansi(hc,order *)] orders you a drink%r[ansi
+(hc,menu)] gives you the menu %r[ansi(hc,Drink)] takes a drink %r[ansi(hc,Sip)]
+takes a sip%r[ansi(hc,TableHelp)] gives special help for the tables. %r
+THANKS [#3]: Table code thanks to Trillian of SW1. I'm lazy today. Other code
+compliments of Shathis.
+CLEAR_TABLES [#3]: $clear tables:@switch [member(v(auth),%#)]=0,,{@pemit %#=
+Tables Cleared!;@dol lattr(me/TABLE_*)=&## me=;@dol lattr(me/sitting_*)=&##
+me=}
+HAS_DISCONNECTED [#3]: ^* has disconnected.:@select [u(hasattr,sitting_%#)]=1,
+{&table_[v(sitting_%#)] me=[setdiff(v(table_[v(sitting_%#)]),%#)];&sitting_%#
+me}
+TWHO [#3]: $twho:@select [u(hasattr,sitting_%#)]=0,{@pem %#=You are not sitting
+at a table. Sit down first.},@pemit %#=Sitting with you are: [setdiff(iter(v
+(table_[v(sitting_%#)]),name(##)),%n)].
+TALK2 [#3]: [switch(mid(%1,0,1),:,{%0 [mid(%1,1,strlen(%1))]},;,{%0[mid(%1,1,
+strlen(%1))]},{%0 says, "%1"})]
+TALK [#3]: $tt *:@switch [u(hasattr,sitting_%#)]=1,{@pem/list v(table_[v
+(sitting_%#)])=At your table, [u(talk2,%N,%0)]}
+STAND [#3]: $stand:@select [u(hasattr,sitting_%#)]=0,{@pemit %#=You are already
+standing.},{&table_[v(sitting_%#)] me=[setdiff(v(table_[v(sitting_%#)]),%#)];
+&sitting_%# me;@pemit %#=You stand up.;@oemit me/%#=%N stands up.}
+SIT_AT [#3]: $sit at *:@select [u(hasattr,desc_table_%0)][u(hasattr,
+sitting_%#)]=10,{@tr me/sit=%#,%0},0?,{@pemit %#=That table does not exist.},
+{@pemit %#=You are already sitting at a table.}
+SIT_RAND [#3]: $sit:@select [u(hasattr,sitting_%#)]=0,{@tr me/sit=%#,[extract
+(iter(lattr(me/desc_table_*),after(after(##,_),_)),add(rand(words(lattr(me/
+desc_table_*))),1),1)]},{@pemit %#=You are already sitting at a table.}
+SIT [#3]: @pemit %0=You sit at the %1 table.;@pem/list setdiff(lcon(me),
+setunion(v(table_%1),%0))=[name(%0)] sits at the %1 table.;@pem/list v
+(table_%1)=[name(%0)] sits at your table.;&table_%1 me=setunion(v(table_%1),
+%0);&sitting_%0 me=%1
+SIT_WITH [#3]: $sit with *:@select [u(hasattr,sitting_%#)][not(not(member(lcon
+(me),num(%0))))][u(hasattr,sitting_[num(%0)])]=00?,{@oemit me/%#=%N scans the
+tables.;@pemit %#=You can't find [capstr(lcstr(%0))] the room.},0?0,{@pemit
+%#=[name(%0)]is not sitting at any table.},011,{@tr me/sit=%#,v(sitting_[num
+(%0)])},{@pemit %#=You are already sitting at a table.}
+TABLES [#3]: $tables:@pemit %#=[repeat(=,79)]%R[center(TABLE VIEW,79)]%R[repeat
+(-,79)][iter(sort(lattr(me/desc_table_*)),%r%r[u(tlist,after(after(##,_),_))])]
+%R[repeat(=,79)]
+TLIST [#3]: [ucstr(%0)] -- [v(desc_table_%0)]%rSeated: [switch(strlen(v(table_
+%0)),>0,iter(v(table_%0),name(##)),* Empty *)]
+HASATTR [#3]: [switch(v(%0),,0,1)]
+ADISCONNECT [#3$]: @select [u(hasattr,sitting_%#)]=1,{&table_[v(sitting_%#)]
+me=[setdiff(v(table_[v(sitting_%#)]),%#)];&sitting_%# me;&drink_%N me=},
+{&drink_%N me=}
+ALEAVE [#3$]: @select [u(hasattr,sitting_%#)]=1,{&table_[v(sitting_%#)] me=
+[setdiff(v(table_[v(sitting_%#)]),%#)];&sitting_%# me;&drink_%N me=},{&drink_
+%N me=}
+DRINK [#3]: $drink:@switch [hasattr(me,drink_%N)]=1,{@pemit %#=You take a drink
+from your [get(me/drink_%N)].;@oemit %#=%N takes a drink from %p [get(me/drink_
+%N)].},{@pemit %#=You do not have a drink.}
+ORDER [#3]: $order *:@swi [match([u(me/list)],[capstr(%0)])]=>0,{@pemit %N= The
+Bartender whips up a %0 and hands it to you.;@oemit %N = The Bartender whips up
+a %0 and hands it to %N.;&drink_%N me= %0},{@pemit %N=The Bartender says,
+"Sorry, that hasn't been invented yet."}
+LIST [#3]: Beer Wine Water Juri_Juice Flaming_Jawa Whiskey Blue_Meanie
+Alderanian_Nectar Classic_Coke Corellian_Sunburn
+MENU [#3]: $menu:@pemit %N=Today's Menu contains:%r[get(me/list)]
+SIP [#3]: $sip:@switch [hasattr(me,drink_%N)]=1,{@pemit %#=You take a sip from
+your [get(me/drink_%N)].;@oemit %#=%N takes a sip from %p [get(me/drink_%N)].},
+{@pemit %#=You do not have a drink.}
+ADDDRINK [#3]: $+addbev *:&list me=[setunion([get(me/list)],[capstr(%0)])];
+@pemit %#=Okay, I hope that drink sells. Your beverage has been added to the
+menu.
+Home: Faction Nexus
+Location: Parent Room
+_______________________________________________________________________________

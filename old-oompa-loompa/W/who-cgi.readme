@@ -1,0 +1,60 @@
+NAME
+    who.cgi
+
+SYNOPSIS
+    http[s]://<parent-url>/who.cgi[?host=<host>[:<port> ||
+    &port=<port>]&quiet=1]
+
+DESCRIPTION
+    who.cgi is a *Perl5* CGI program (that is fully compatible with
+    Apache::Registry) that shows a highlighted list of players on a MUSH
+    (with any URLS automatically converted into links), or any type of
+    server that supports the WHO command at login. It recognizes PUEBLO
+    enhanced servers and can show a prettier PUEBLO login screen for them.
+
+USAGE
+    who.cgi
+
+    Will show a screen allowing the user to supply all the possible options.
+
+    who.cgi?host=mush.pennmush.org
+
+    Shows the login screen and WHO listing for M*U*S*H, my home MUSH. Since
+    I didn't give the port number 4201 (the default for PennMUSH) is
+    assumed. "quiet=1" would tell it not to show the whole login screen.
+
+    who.cgi?host=mush.pennmush.org:4201
+
+    Same thing, but the port is specified explicitly.
+
+    who.cgi?host=mush.pennmush.org:4201&quiet=1
+
+    Same, but the login screen is not shown.
+
+TODO
+    Add INFO command support with a header line that includes a telnet:/
+    link.
+
+    Support for RWHO and any other WHO formats is needed. And for
+    server-side bots is needed to support a greater number of functions
+    (such as finger), this might be better done in a separate system.
+
+HISTORY
+    0.5 06/01/2000 Started keeping track. Made non-blocking on socket more
+    portable, and improved the error messages. Released on SourceForge.
+
+    0.6 06/06/2000 Made "show login" and port 4201 the defaults. Highlights
+    ads in @doings as invokations of the script. Links highlighted in login
+    screen. Some very simple, but working ANSI support. Much more compatible
+    with other types of MU*s. Doesn't use POST for form anymore, works
+    better with history. SIGNIFICANTLY cleaner code.
+
+AUTHOR
+    Rafael Kitover <caelum@debian.org>
+
+COPYRIGHT
+    who.cgi Copyright (c) 2000 Rafael Kitover
+
+    This program is free software; you can distribute and/or modify it under
+    the same terms as Perl itself.
+

@@ -1,0 +1,42 @@
+@create Songkeg
+@lock/Basic Songkeg==me
+@lset Songkeg/Basic=no_inherit
+@set Songkeg = !NO_COMMAND
+@set Songkeg = COMMANDS
+&CRESETKEG Songkeg=$resetkeg:@switch owner(%#)=owner(me),@tr me/sresetkeg,@pemit owner(%#)=Sorry, you cannot reset the [name(me)].
+&CSING Songkeg=$kegsing *//*:@wait me/[v(dtimer)]=@tr me/sverse=%#,%0,%1;@pemit owner(%#)=Your verse is waiting to play, and will do so [u(fdelaymsg[v(dstate)])];@switch lt(add(v(semaphore),v(dstate)),v(dstartverse))=0,{@notify me;&dstate me=999}
+&CSINGERR1 Songkeg=$kegsing *:@switch pos(//,%0)=#1,@tr me/ekegsing=%#
+&CSINGERR2 Songkeg=$kegsing:@tr me/ekegsing=%#
+&DDELAY Songkeg=3
+@DESCRIBE Songkeg=%R%B%BA keg full of ale, about which people are gathered. They seem about to burst into song... Type 'Use [name(me)]' for help.%R
+@set Songkeg/DESCRIBE=no_command visual
+&DPREF0 Songkeg=coughs, to clear the throat
+&DPREF1 Songkeg=grins wickedly
+&DPREF2 Songkeg=draws a long breath
+&DPREF3 Songkeg=looks around the room
+&DPREF4 Songkeg=takes a step forward
+&DPREF5 Songkeg=notes a momentary pause
+&DPREF6 Songkeg=takes advantage of a lull
+&DPREF7 Songkeg=nods to a friend
+&DPREFNUM Songkeg=8
+&DSTATE Songkeg=0
+&DTIMER Songkeg=300
+&DVERB0 Songkeg=belts out
+&DVERB1 Songkeg=sings
+&DVERB2 Songkeg=silences the crowd
+&DVERB3 Songkeg=leans on the keg for support
+&DVERBNUM Songkeg=4
+&EKEGSING Songkeg=@pemit owner(%0)=The correct format of that command is:%r%tKEGSING <line1>//<line2>. %rPlease type 'Use [name(me)]' for further details.
+&FDELAYMSG0 Songkeg=after [sub(v(dstartverse),v(semaphore))] more are submitted, or in [v(dtimer)] seconds, whichever is sooner.
+&FDELAYMSG999 Songkeg=immediately.
+&FEATURE0 Songkeg=spigot
+&FEATURE1 Songkeg=markings
+&FEATURE2 Songkeg=staves
+&FEATURE3 Songkeg=braces
+@OUSE Songkeg=carefully studies the [v(feature[rand(4)])] on the keg.
+@set Songkeg/OUSE=no_command
+@STARTUP Songkeg=@drain me
+@set Songkeg/STARTUP=no_command
+&SVERSE Songkeg=@emit name(owner(%0)) [s(v(dpref[rand(v(dprefnum))]))], and [s(v(dverb[rand(v(dverbnum))]))]:%r%t%t%1;@wait [v(ddelay)]=@emit The crowd sings back: %tFie, man, Fie!;@wait [mul(v(ddelay),2)]=@emit name(owner(%0)) emphatically repeats:%r%t%t%1;@wait [mul(v(ddelay),3)]=@emit The crowd exclaims: %tWho's the fool now?;@wait [mul(v(ddelay),4)]=@emit name(owner(%0)) [s(v(dpref[rand(v(dprefnum))]))], and [s(v(dverb[rand(v(dverbnum))]))]:%r%t%t%1;@wait [mul(v(ddelay),5)]=@emit %t%t%2; @wait [mul(v(ddelay),6)]=@emit The crowd choruses in response:%r%t%tHush, you've well drunken, man, who's the fool now?!%r;@wait [mul(v(ddelay),8)]=@switch v(semaphore)=,{&dstate me=0;@emit The crowd cheers as the song runs down.},@notify me &DSTARTVERSE Songkeg=5
+@USE Songkeg=%R%B%BThis keg can be used to sing a song, usually to poke goodnatured, often sarcastic fun at someone's stronger personality traits...%r To write a verse, type "kegsing <line1>//<line2>".%r%r For instance:%r kegsing I saw a Sailor with nothing to do//Well, maybe just a thing or two! %r%r Will produce the verse: %r%t%tI saw a Sailor with nothing to do%r%t%t(Fie, man, Fie!)%r%t%tI saw a Sailor with nothing to do%r%t%t(Who's the fool, now?)%r%t%tI saw a Sailor with nothing to do%r%t%tWell, maybe jus t a thing or two!%r%t%t(Hush, you've well drunken, man, Who's the fool now!?)%R
+@set Songkeg/USE=no_command

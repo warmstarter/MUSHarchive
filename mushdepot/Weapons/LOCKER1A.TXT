@@ -1,0 +1,21 @@
+@create Weapons Locker Parent
+@link Weapons Locker Parent = #309
+@lock/Basic Weapons Locker Parent=#3
+@set Weapons Locker Parent = LINK_OK
+@set Weapons Locker Parent = OPAQUE
+@OXLEAVE Weapons Locker Parent=climbs out of the [name(me)].
+@OLEAVE Weapons Locker Parent=climbs out of the [name(me)].
+@LEAVE Weapons Locker Parent=You climb out of the [name(me)].
+@OXENTER Weapons Locker Parent=climbs into the [name(me)].
+@OENTER Weapons Locker Parent=climbs in from outside.
+@ENTER Weapons Locker Parent=You climb into the [name(me)].
+&LOCKER_LOCK Weapons Locker Parent=1
+@VA Weapons Locker Parent=$open locker:@switch [hasflag(me,enter_ok)][u(locker_lock)]=1*, {@pemit %#=The [name(me)] is already open.}, 00, {@pemit %#=The [name(me)] is locked.}, {@pemit %#=You open the [name(me)].;@oemit %#=%n opens the [name(me)].;@set me=enter_ok;@set me=!opaque}
+@VB Weapons Locker Parent=$close locker:@switch [hasflag(me,enter_ok)]=0, {@pemit %#=The [name(me)] is already closed.}, {@pemit %#=You close the [name(me)].;@oemit %#=%n closes the [name(me)];@set me=!enter_ok;@set me=opaque}
+&HELP Weapons Locker Parent=[ljust(%0,30)] - [indent(33,45,{%1})]
+@DESCRIBE Weapons Locker Parent=A [name(me)]. Type 'lhelp' for a list of commands.
+@IDESCRIBE Weapons Locker Parent=You are inside the [name(me)]. There are lots of weapons in here. Type 'leave' to get out of the locker.
+&LHELP Weapons Locker Parent=[u(help,open locker,{Opens the [name(me)].})]%r[u(help,close locker,{Closes the [name(me)].})]%r[u(help,give [name(me)]=<item>,{Puts an item in the [name(me)].})]%r[u(help,get [name(me)]'s <item>,{Takes <item> from [name(me)].})]%r[u(help,enter [name(me)],{Starts manipulating the [name(me)]'s contents.})]%r[u(help,leave,{Stops manipulating the [name(me)]'s contents.})]
+&LOCKER_HELP Weapons Locker Parent=$lhelp:@pemit %#=[u(line)]%r[center([name(me)] Help,79)]%r[u(line)]%r[u(lhelp)]%r[u(line)]
+&LINE Weapons Locker Parent=[repeat(=,79)]
+&DEVFLAGS Weapons Locker Parent=invincible

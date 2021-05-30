@@ -1,0 +1,30 @@
+#############################################################################
+# Command: +selfboot
+# 
+# Boots all but your most recent logon. 
+# Will refuse to boot if you are only on
+# once. Boots only yourself, takes no arguments.
+# CREDITS:  Mike Whitaker (Michael@Conspiracy!)
+#############################################################################
+# amolitor_mush_unformatter - Format 5/22/96 by Mark Hassman
+# Replace 'Globals Object' with the object you are adding the command to.
+# Remember, ports() is a wiz only function so the global object must be
+# wiz-inherit.
+
+&CMD-SELFBOOT Globals Object=$+selfboot:
+   @switch [words(ports(%#))]=1,
+      {
+# Only one connection. Display error message.
+      @pemit %#=\[GAME\] You only have one connection active. 
+                         To disconnect type 'QUIT'.
+      },
+# Multiple Connects. Notify and @boot all but the most recent.
+      {
+      @dolist [rest(ports(%#))]=
+        {
+         @pemit %#=\[GAME\] Booting port ##.;
+         @boot/port ##
+        }
+      }
+-
+# End of File

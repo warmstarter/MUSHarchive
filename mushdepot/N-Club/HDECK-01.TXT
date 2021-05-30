@@ -1,0 +1,39 @@
+@create HoloList
+@link HoloList = [owner(me)]
+@set HoloList = LINK_OK
+@set HoloList = VISUAL
+
+@create Holochip
+@link Holochip =[loc(owner(me))]
+@lock/Basic Holochip==[owner(me)]
+@set Holochip = LINK_OK
+@set Holochip = VISUAL
+&RDESC Holochip=A black room with yellow lines forming a grid of squares on all four walls, the ceiling, and the floor.%rType '[ansi(hr,HOLOHELP)]' for a commands list.
+&PROGNAME Holochip=*No Program*
+
+@create Federation Holodeck Parent
+@link Federation Holodeck Parent = [loc(owner(me))]
+@set Federation Holodeck Parent = LINK_OK
+@set Federation Holodeck Parent = VISUAL
+@DESCRIBE Federation Holodeck Parent=[ansi(hc,[center([name(zone(me))],79,=)]%r[eval(me,DESC-1)]%r[ansi(ch,repeat(=,79))]%r%r[ansi(bh,\[)][ansi(ch,Players)][ansi(bh,\])] [iter([lplayers(num(me))],[name(##)]%b[ansi(bh,-)])]%r[ansi(bh,\[)][ansi(ch,People)][ansi(bh,\])][switch(words(eval(me,vplayers)),0,,iter(eval(me,vplayers),[ansi(h,edit(##,_,%b))]%b[ansi(bh,-)]%b))]%r[ansi(bh,\[)][ansi(ch,Objects)][ansi(bh,\])] [iter(lcon(me),switch(type(##),THING,[name(##)]%b[ansi(bh,-)]%b), ,)]%r[ansi(bh,\[)][ansi(ch,Items)][ansi(bh,\])][switch(words(eval(me,vobj)),0,,iter(eval(me,vobj),[ansi(h,edit(##,_,%b))]%b[ansi(bh,-)]))]%r[ansi(bh,\[)][ansi(ch,Program)][ansi(bh,\])] [ansi(rh,get(v(chip)/PROGNAME))][switch(v(chip),#7188,%rObvious Exits:%r[iter(lexits(me),name(##))])]
+@set Federation Holodeck Parent/DESCRIBE=no_command visual
+&CMD_VIEW Federation Holodeck Parent=$view *:@pemit %#=[setq(2,squish([eval(me,vplayers)] [eval(me,vobj)]))][setq(0,strcat([edit(%0,%b,_)],*))][switch([inlist(ucstr(%q2),ucstr([edit(%0,%b,_)]))]_[words(matchall(ucstr(%q2),ucstr(%q0)))],0_0,I don't see that here.,0_1,You look at [extract(%q2,matchall(ucstr(%q2),ucstr(%q0)),1)]%r[u(look_at,extract(%q2,matchall(ucstr(%q2),ucstr(%q0)),1),%#)],1_*,You look at [extract(%q2,member(ucstr(%q2),ucstr([edit(%0,%b,_)])),1)].%r[u(look_at,extract(%q2,member(ucstr(%q2),ucstr([edit(%0,%b,_)])),1),%#)],Which one?)]
+&LOOK_AT Federation Holodeck Parent=[u(v(chip)/VDESC_%0,%1)]
+&VOBJ Federation Holodeck Parent=[eval(v(chip),vobj)]
+&VPLAYERS Federation Holodeck Parent=[eval(v(chip),vplayers)]
+@ADISCONNECT Federation Holodeck Parent=@tel %#=o
+@set Federation Holodeck Parent/ADISCONNECT=no_command
+&HOLOLOAD Federation Holodeck Parent=$holoload *:@pemit %#=[switch(and(gte(%0,1),lte(%0,words(lcon(#8097)))),1,[setq(0,extract(lcon(#8097),%0,1))][oemit(%#,%n loads program [get(%q0/PROGNAME)].)]You load program [get(%q0/PROGNAME)].[set(me,CHIP:%q0)][remit(me,Program Loaded.)],Invalid Program.)]
+&HH_PROGRAMS_LIST Federation Holodeck Parent=Holodeck Programs List:%r[iter(lcon(#8097),[ljust(#@,3)] - [left(get(##/PROGNAME),60)], ,%r)]%r[repeat(~,79)]%rType '[ansi(rh,HOLOLOAD <Program #>)]' to load a program.%r[ansi(uy,NOTE: Programs with '*' will NOT work without their owner's chip in the holodeck.)]
+&HOLOHELP Federation Holodeck Parent=$holohelp *:@pemit %#=[switch(hasattrp(me,hh_[edit(%0,%b,_)]),1,eval(me,hh_[edit(%0,%b,_)]),Invalid HoloHelp.)]
+&HH_CREATING_PROGRAMS Federation Holodeck Parent={@create Holochip%r&rdesc Holochip=<Room Description>%r&VPLAYERS Holochip=<Virtual Player List (Jane John_Doe Jack)>%r&VOBJ Holochip=<Virtual Object List (Gun Ammo Big_Elephant)>%r&VDESC_<VPlayer/VObject>=<Player/Object Description>}%r&PROGNAME Holochip=<Program Name>%rSet the objects visual and chown_ok.%rThen contact Spacedock-BC with the dbef of the holochip and he'll add it.%rIf your holochip has commands in attributes that have, $ in it requiring player input, ask for a clone of the chip to be made.
+&RDESC-1 Federation Holodeck Parent=This is a holo suite. The room is black, with a yellow line grid all round it's three dimensions.
+&DESC-1 Federation Holodeck Parent=[eval(v(chip),rdesc)]
+&ENDPROG Federation Holodeck Parent=$end program:@remit me=[set(me,CHIP:#7188)]Program Ended.
+&HOLOHELP1 Federation Holodeck Parent=$holohelp:@pemit %#=[eval(me,hh_.default)]
+&HH_.DEFAULT Federation Holodeck Parent=Topics List:%r[iter(remove(setunion(lattr(me/HH_*),lattr(parent(me)/HH_*)),HH_.DEFAULT),%t[left(edit(delete(##,0,3),_,%b),70)], ,%r)]%r[repeat(~,79)]%rType '[ansi(rh,HOLOHELP <Topic>)]' for more information on a topic.%rNOTE: <Topic> Must be typed in full.
+&CHIP Federation Holodeck Parent=#7188
+&HH_COMMANDS Federation Holodeck Parent=Avaliable Holodeck Commands:%r%t[left(HOLOHELP,20)] - Help Topics List%r%t[left(HOLOLOAD <Program>,20)] - Load Holodeck Program%r%t[left(END PROGRAM,20)] - Guess%r%t[left(VIEW <Object>,20)] - Look at Virtual <Player/Obj>%r%t[Left(Safety on/off,20)] - Turns the safeties on or off.
+&INSTRUCTIONS Federation Holodeck Parent=$instructions:@emit Follow these instructions to learn how to put this on your ship or station in the Federation. If you want to put this holodeck parent in another empire, just look over this parent and the objects in it and copy them to make your own parent for your empire.%rThis was created by Dion Starfire and Worf, the real credit goes to Dion though. :)%r%rFirst @dig your HoloDeck, or HoloSuite%r@parent here=#7195%r&chip here=#7188%rAnd that's it!
+&SAFETY_ON Federation Holodeck Parent=$safety on:@remit me=%n says, "Activate safeties."%rThe computer makes a click sound, and then states, "Safeties are engaged."[set(me,SAFETIES:ON)][set(me/SAFETIES,VISUAL)]
+&SAFETY_OFF Federation Holodeck Parent=$safety off:@remit me=%n says, "Disactivate safeties.";@emit The computer makes a click sound, and then states, "Safeties are disengaged."[set(me,SAFETIES:OFF)][set(me/SAFETIES,VISUAL)]

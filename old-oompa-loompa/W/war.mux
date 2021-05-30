@@ -1,0 +1,280 @@
+##############################################################
+#                       WAR.MUX                               	#
+# This file contains code that is meant to supplement and 
+# support the pre-built war gauntlet that has been set up on 
+# FiranMUX with fortresses and other places on which flags can 
+# be captured.
+###############################################################
+
+#=============================================================#
+#  Aenter for War Zones
+# 
+# YOU MUST LOAD THIS AENTER ON BOTH THE GENERIC INSIDE WAR ROOM 
+# AND THE GENERIC OUTSIDE WAR ROOM.  It ensures that if a shamibelian 
+# enters Firan territory that he will be attacked and that if a 
+# firan enters shamibelian territory, she will be attacked as 
+# appropriate.
+#=============================================================#
+
+&aenter here=
+ think setq(0, add(getaccount(%#,energy), getaccount(%#,energy reserves)));
+ @switch and(hastype(%#, player), not(hasflag(%#, dark)))=1, 
+   {@style %#=none; @fo %#=@battle; @fo %#=@battle}, 
+#else
+   {@@ do nothing @@};
+
+ @select [hastype(%#, player)]
+         [strmatch(default(%#/race, firan), 
+                   default(%L/controlled-by, shamibelian))]
+         [gte(%q0, default(%L/labor, 15))]
+         [hastag(%#, retreat)]=
+      
+  0???, {@@ do nothing since the object is not a player. @@},
+
+# Not in combat
+
+  ?1??, {@@do nothing not in combat @@},
+
+# Doesn't have enough energy, but is already in retreat
+  ??01, {@pemit %#=You're too exhausted to even retreat further.;
+        think settag(%#, !retreat)},
+   
+# Doesn't have enough energy and hasn't retreated yet
+
+   ??00, {think settag(%#, retreat);
+          @fo %#=unfollow;
+          @fo %#=retreat;
+          @pemit %#=%cm%chYou are too tired to march another step!%cn },
+   
+   ??1?, {think take_energy(%#, default(%L/labor, 15), both, r);
+         @pemit %#=
+              %ch%cmYou used up [default(%L/labor, 15)] energy points.%cn}
+-
+&cmd-retreat #5=$retreat:
+  @switch [hastag(%L, ellish)]=
+   0?, {@pemit %#=You're not on a battlefield.  You can't retreat.},
+       {think setq(0, default(%#/race, firan));
+        think setq(1, locate(%L, default(%L/%q0-retreat, out), c));
+        @fpose %#=retreats!;
+        @tel %#=loc(%q1)}
+ 
+-
+
+#=============================================================#
+# COMMAND: @battle
+#=============================================================#
+&cmd-@battle #7=$@battle:
+
+#--------------------------------------------------------------
+# %q0 = the race of the player
+# %q1 = who controls the room
+# %q3 = what weapon is the player wielding
+# %q4 = dbref of virtual opponent
+# %q5 = successes  of the player
+# %q6 = successes of the virtual opponent
+#--------------------------------------------------------------
+
+ think setq(0, switch(get(%#/race), shamibelian, shamibelian, firan));
+ think setq(1, default(%L/controlled-by, shamibelian));
+ think setq(2, default(%L/last-controlled-by, shamibelian));
+ think setq(3, u(#12/u-weapon-wielded, %#));
+ think setq(4, switch(%q0, firan, #3972, #1052));
+ think setq(5, u(#12/u-attack-success-defender, %q4,
+                                  u(#12/u-weapon-wielded, %q4)));
+ think setq(6, u(#12/u-attack-success-attacker, %#, 
+                              u(#12/u-weapon-wielded, %#)));
+ think setq(5, sub(%q6, %q5));
+ think setq(7, switch(%q1, firan,
+               weak Firan attacker|
+               would-be slave|
+               hated Firan foe|,
+               horned attacker|
+               hated Shamibelian enemy|
+               godless foe));
+ think setq(8, first(shuffle(bashing chopping slashing piercing)));              
+
+ @select [or(hastype(%#, player), hastag(%#, npc))]
+         [hastag(%L, ellish)]
+         [strmatch(%q0, %q1)]
+         [hastag(%#, medic)]=
+  
+  0???, {@@ do nothing, it's not a player. @@},
+  ?0??, {@pemit %#=You're not in the Ellish battle zone.},
+
+  ??1?, {@pemit %#=The [capstr(%q1)]s control this area, so you 
+                may travel safely here.},
+  ???1, {@pemit %#=Because you are a medic, soldiers on both sides 
+               tend not to attack you.},
+  ??00, {@pemit %#=You got %q5 successes.;
+       @remit %L=%ch%cr[first(shuffle(
+               A large [capstr(%q1)] soldier attacks %N!|
+               %N is attacked by a [capstr(%q1)] commander!|
+               A [capstr(%q1)] slashes at %N with a sword.|
+               %N is attacked by a [capstr(%q1)] spearman!, |),|)]%cn;
+        @switch %q5=
+          >3, {@remit %L=%cc%N handily slays %p [first(shuffle(%q7,|),|)] 
+                      with %p [name(u(#12/u-weapon-wielded, %#))] .},
+          >0, {@remit %L=%cc%N wounds %p [first(shuffle(%q7,|), |)] 
+                      with %p [name(u(#12/u-weapon-wielded, %#))] .},
+           0, {@remit %L=%cc%N grapples with %p enemy -- 
+                       neither gaining ground.},
+          <0, {@remit %L=%cc%N is wounded by %p attacker!;
+               @damage %#/[first(shuffle(hitlocs()))]=
+                       [udefault(%L/damage, 5)]x%q8 by %q4}}
+-
+####################################################################
+# COMMAND: CAPTURE FLAG
+####################################################################
+
+&cmd-capture-flag #8=$capture flag:
+  think setq(0, get(%#/race));
+  think setq(1, default(%L/controlled-by, shamibelian));
+  think setq(2, get(%L/%q0-captors));
+  think setq(3, default(%L/required-captors, 10));
+  think setq(4, not(and(not(hastag(%#,shock)),not(hastag(%#,dead)))));
+  think setq(9, [hastag(%L, flag)]
+                [not(strmatch(%q0, %q1))]
+                [not(t(member(%q2, %#)))]
+		%q4
+                [gte(inc(words(%q2)), default(%L/required-captors, 10))]);
+
+  @select %q9=
+   0????, {@pemit %#=There's no flag to capture here.},
+
+   ?0???, {@pemit %#=The [capstr(%q0)]s already captured this flag, idiot.},
+   ???1?, {@pemit %#=You can't capture the flag once you've been knocked out
+		or killed!},
+   ???01, {@remit %L=%N scrambles over the enemy and together with %p 
+                companions, captures the flag!;
+         @capture/flag %L=%#},
+   ??0??, {@pemit %#=You've already made your attempt.  You need 
+                   [sub(%q3, words(%q2))] more comrades to help you.},
+   ???00, {@remit %L=%N attempts to capture the flag, struggling 
+                 mightily, but %N needs [sub(sub(%q3, words(%q2)), 1)] more 
+                 companions to finish the job.;
+         &%q0-captors %L=%q2 %#}
+-
+#==================================================================#
+# COMMAND: @CAPTURE/FLAG <dbref of room>=<dbref of captor>         #
+#==================================================================#
+
+&cmd-@capture/flag #5=$@capture/flag *=*:
+  think setq(0, default(%1/race, firan));
+  
+  @wall/no_prefix/emit %ch%crNews from the Front:%cn [name(%0)] has 
+                       been captured by the [capstr(%q0)]s!;
+
+  @dolist get(%0/territory)={
+    &controlled-by ##=%q0;
+    &map ##=[ansi(ifelse(strmatch(%q0, firan), Gx, Wx),
+                        default(##/mapsymbol, + ))]}
+-
+
+#==============================================================#
+#               CRON JOB FOR CLEARING FLAG CAPTURES            #
+#                                                              #
+#==============================================================#
+
+&cron_time_findflags #63=||Mon|21|35|@@ every monday search for the
+flags @@
+-
+
+&cron_job_findflags #63=
+ think setq(0, search(eroom=hastag(##, flag)));
+ &flag-rooms me=%q0
+-
+
+&cron_time_clearcaptors #63=|||02 04 06 08 10 12 14 16 18 20 22
+ 24|17|@@ every two hours on the 17th minute mark @@
+-
+&cron_job_clearcaptors #63=
+ think setq(0, v(flag-rooms));
+ @dolist %q0=
+  {think pemit([get(##/firan-captors)][get(##/shamibelian-captors)],
+        A change in war conditions makes it so that all 
+        attempts to capture flags must be re-attempted.);
+   @wipe ##/firan-captors;
+   @wipe ##/shamibelian-captors}
+-
+
+
+#==============================================================#
+# Generic Wartime Firan Exit
+# Where the exit is #71
+#==============================================================#
+
+&can-pass #71=
+ [ifelse(or(strmatch(get(%#/race), firan), 
+            hastag(%#, ambassador),
+            hastag(%#, medic)),
+         1, 
+         strmatch(get(where(%!)/controlled-by), get(%#/race)))]
+
+-
+&can-pass #72=
+ [ifelse(or(strmatch(get(%#/race), shamibelian),
+            hastag(%#, ambassador),
+            hastag(%#, medic)),
+         1, strmatch(get(where(%!)/controlled-by), get(%#/race)))]
+-
+#================================================================#
+# COMMAND: CAMP
+# 
+# Resets a player's ic-home for the sleep and nap commands
+# if the player is in the war zone.
+#
+# %q0 = the dbref of the camper's ic home.
+#================================================================#
+
+&cmd-camp #8=$camp:
+  think setq(0, default(%#/ic-home, #2948));
+
+#----------------------------------------------------------------#
+# Has the camper already camped somewhere in the war zone?
+# Is the location the camper is trying to camp at in the war zone?
+#-----------------------------------------------------------------#
+
+   think setq(9, [not(hastag(%q0, ellish))]
+                 [hastag(%L, ellish)]);
+
+ 
+   @select %q9=
+      0?, {@pemit %#=I'm sorry but you've already made 
+                  camp at [name(%q0)].  You'll have to 'uncamp' 
+                  first.},
+      ?0, {@pemit %#=You can only make camp inside the 
+                  war zone outside of Ellish.},
+      11, {&old-ic-home %#=%q0;
+           &ic-home %#=%L;
+           @remit %L=%N makes camp.}
+-
+#==================================================================#
+# COMMAND: UNCAMP
+#
+# Undoes the effects of the camp command.
+#
+# %q0 = the old ic home of the camper
+#==================================================================#
+
+&cmd-uncamp #8=$uncamp:
+  
+  think setq(0, default(%#/old-ic-home, none));
+
+#------------------------------------------------------------------
+# Have they even camped before?
+#------------------------------------------------------------------
+
+  think setq(9, [isdbref(%q0)]);
+
+  @select %q9=
+     0, {@pemit %#=You haven't camped anywhere.},
+     1, {&ic-home %#=%q0;
+         @wipe %#/old-ic-home;
+         @pemit %#=Your IC Home has been set back to [name(%q0)]}
+  
+
+
+
+
+
+

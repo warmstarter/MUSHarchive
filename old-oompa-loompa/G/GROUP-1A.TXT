@@ -1,0 +1,11 @@
+@create PARENT: Group Communicator Object
+@lock PARENT: Group Communicator Object=[owner(me)]
+&GROUP-LIST PARENT: Group Communicator Object=[dbrefs of group members, including leader]
+&GROUP-HEAD PARENT: Group Communicator Object=[Leader's Dbref]
+&INSTRUCTIONS PARENT: Group Communicator Object=#1: Enter the dbrefs of your group onto an attribute called `%ch%cggroup-list%cn' on this object%R#2: @lock [num(me)]=me%R#3: Put the leader's dbref into the `%ch%cggroup-head%cn' attribute%R%TThen you can +com <message> away! Also, what you should do with all your objects is @link object=me, @lock/use object=me. One communicator per person is fine. If you are in more than one group, then just @cpattr the attributes Communicate,Group-list, and group-head into a different named attributes and rename the +com command for the second group, and then you have two communicators in one. No need to parent the communicator to anything or anysuch. Also, make sure its set INHERIT.
+&DO_+COM PARENT: Group Communicator Object=$+com *:@remit %l=%N speaks into %p communicator, then pushes a button to relay the message.;@pemit/list [u(GROUP-LIST)]=\[%ch%cgYour communicator beeps:%cn %N's says, "%0"\]
+@set PARENT: Group Communicator Object=DARK
+@set PARENT: Group Communicator Object=VISUAL
+@set PARENT: Group Communicator Object=PARENT_OK
+@set PARENT: Group Communicator Object=HALT
+@set PARENT: Group Communicator Object=SAFE

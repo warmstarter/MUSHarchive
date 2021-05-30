@@ -1,0 +1,14 @@
+@create Redescer
+@set Redescer=INHERIT
+@set Redescer=VISUAL
+@set Redescer=PARENT_OK
+@lock Redescer==me
+@Desc Redescer=[ifelse(hasflag(me,INHERIT),,Please type this: %ch%cr@set %!=INHERIT%cn%r%r)]This is the re-@descer. It allows you to change your @desc by a few simple commands:%r%r%b%ccredesc/list%cn - Shows the list of the descs.%r%b%ccredesc/list <keyword>%cn - Lists the desc associated with <keyword>%r%b%ccredesc <keyword>%cn - Changes your desc to the one associated with <keyword>%r%b%ccredesc/undo%cn - Restores your previous desc.%r%b%ccredesc/add <keyword>=<desc>%cn - Adds a new <desc> associated with <keyword>%r%b%ccredesc/add <keyword>%cn - Adds your current desc associated with <keyword>%r%b%ccredesc/del <keyword>%cn - Deletes the desc associated with <keyword>%r%b%ccredesc/temp%cn - Temporarily saves your @desc, so you can fiddle with it. Restore your desc with %ccredesc/undo%cn.%r%rRedescer created by Aranor@SluggyMUX.
+&CMD_REDESC_LIST Redescer=$redesc/list:@pemit %#=%ch%cb[repeat(-,3)]%cw>%cn%b%cmRe-@descer Descs%cn%b%ch%cw<%cb[repeat(-,3)]%cn[switch(words(lattr(me/DESC_*)),0,{%r%bNo descs have been stored.},{[iter(sort(lattr(me/DESC_*)),%r%b[capstr(lcstr(rest(##,_)))])]})]
+&CMD_REDESC_LIST_DESC Redescer=$redesc/list *:@switch words(lattr(me/DESC_%0*))=0,{@pemit %#=There is no desc associated with '[capstr(lcstr(%0))]'.},{@pemit %#=[capstr(lcstr(rest(setr(0,first(sort(lattr(me/DESC_%0*)))),_)))]:%r[u(%q0)]}
+&CMD_REDESC_DESC Redescer=$redesc *:@switch words(lattr(me/DESC_%0*))=0,{@pemit %#=There is no desc associated with '[capstr(lcstr(%0))]'.},{&TEMP_DESC me=[get(%#/DESC)];@desc %#=[get(me/[first(sort(lattr(me/DESC_%0*)))])];@pemit %#=Your desc is now:%r[u(%#/DESC)]%r%rType %ccredesc/undo%cn to restore your previous desc.}
+&CMD_REDESC_UNDO Redescer=$redesc/undo:@switch hasattr(me,TEMP_DESC)=0,{@pemit %#=You haven't changed your desc yet.},{@desc %#=[setq(0,[get(%#/DESC)])][get(me/TEMP_DESC)];&TEMP_DESC me=%q0;@pemit %#=Your desc is now:%r[get(%#/DESC)]%r%rType %ccredesc/undo%cn to restore your previous desc.}
+&CMD_REDESC_ADD Redescer=$redesc/add *=*:@switch hasattr(me,DESC_%0)=1,{@pemit %#=There is already a desc associated with '[capstr(lcstr(%0))]'.},{&DESC_%0 me=[translate(%1,1)];@pemit %#=Desc '[capstr(lcstr(%0))]' added.}
+&CMD_REDESC_DEL Redescer=$redesc/del *:@switch hasattr(me,DESC_%0)=0,{@pemit %#=There is no desc associated with '[capstr(lcstr(%0))]'.},{@wipe me/DESC_%0;@pemit %#='[capstr(lcstr(%0))]' wiped.}
+&CMD_REDESC_TEMP Redescer=$redesc/temp:&TEMP_DESC me=[get(%#/DESC)];@pemit %#=Your desc is saved. Type %ccredesc/undo%cn to restore it.
+&CMD_REDESC_ADD_CURRENT Redescer=$redesc/add *:@switch hasattr(me,DESC_%0)=1,{@pemit %#=There is already a desc associated with '[capstr(lcstr(%0))]'.},{&DESC_%0 me=[get(%#/DESC)];@pemit %#=Desc '[capstr(lcstr(%0))]' added as current desc.}

@@ -1,0 +1,586 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" dir="ltr">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta http-equiv="Content-Style-Type" content="text/css" />
+		<meta name="generator" content="MediaWiki 1.15.3" />
+		<meta name="keywords" content="Zallafar&#039;s Queue Array" />
+		<link rel="shortcut icon" href="/favicon.ico" />
+		<link rel="search" type="application/opensearchdescription+xml" href="/wiki/opensearch_desc.php" title="GwenWiki (en)" />
+		<link rel="alternate" type="application/rss+xml" title="GwenWiki RSS Feed" href="/wiki/index.php?title=Special:RecentChanges&amp;feed=rss" />
+		<link rel="alternate" type="application/atom+xml" title="GwenWiki Atom Feed" href="/wiki/index.php?title=Special:RecentChanges&amp;feed=atom" />
+		<title>Zallafar's Queue Array - GwenWiki</title>
+		<link rel="stylesheet" href="/wiki/skins/common/shared.css?207" type="text/css" media="screen" />
+		<link rel="stylesheet" href="/wiki/skins/common/commonPrint.css?207" type="text/css" media="print" />
+		<link rel="stylesheet" href="/wiki/skins/monobook/main.css?207" type="text/css" media="screen" />
+		<!--[if lt IE 5.5000]><link rel="stylesheet" href="/wiki/skins/monobook/IE50Fixes.css?207" type="text/css" media="screen" /><![endif]-->
+		<!--[if IE 5.5000]><link rel="stylesheet" href="/wiki/skins/monobook/IE55Fixes.css?207" type="text/css" media="screen" /><![endif]-->
+		<!--[if IE 6]><link rel="stylesheet" href="/wiki/skins/monobook/IE60Fixes.css?207" type="text/css" media="screen" /><![endif]-->
+		<!--[if IE 7]><link rel="stylesheet" href="/wiki/skins/monobook/IE70Fixes.css?207" type="text/css" media="screen" /><![endif]-->
+		<link rel="stylesheet" href="/wiki/index.php?title=MediaWiki:Common.css&amp;usemsgcache=yes&amp;ctype=text%2Fcss&amp;smaxage=18000&amp;action=raw&amp;maxage=18000" type="text/css" />
+		<link rel="stylesheet" href="/wiki/index.php?title=MediaWiki:Print.css&amp;usemsgcache=yes&amp;ctype=text%2Fcss&amp;smaxage=18000&amp;action=raw&amp;maxage=18000" type="text/css" media="print" />
+		<link rel="stylesheet" href="/wiki/index.php?title=MediaWiki:Monobook.css&amp;usemsgcache=yes&amp;ctype=text%2Fcss&amp;smaxage=18000&amp;action=raw&amp;maxage=18000" type="text/css" />
+		<link rel="stylesheet" href="/wiki/index.php?title=-&amp;action=raw&amp;maxage=18000&amp;gen=css" type="text/css" />
+		<!--[if lt IE 7]><script type="text/javascript" src="/wiki/skins/common/IEFixes.js?207"></script>
+		<meta http-equiv="imagetoolbar" content="no" /><![endif]-->
+
+		<script type= "text/javascript">/*<![CDATA[*/
+		var skin = "monobook";
+		var stylepath = "/wiki/skins";
+		var wgArticlePath = "/wiki/index.php/$1";
+		var wgScriptPath = "/wiki";
+		var wgScript = "/wiki/index.php";
+		var wgVariantArticlePath = false;
+		var wgActionPaths = {};
+		var wgServer = "http://www.gwen-morse.com";
+		var wgCanonicalNamespace = "";
+		var wgCanonicalSpecialPageName = false;
+		var wgNamespaceNumber = 0;
+		var wgPageName = "Zallafar\'s_Queue_Array";
+		var wgTitle = "Zallafar\'s Queue Array";
+		var wgAction = "view";
+		var wgArticleId = "67";
+		var wgIsArticle = true;
+		var wgUserName = null;
+		var wgUserGroups = null;
+		var wgUserLanguage = "en";
+		var wgContentLanguage = "en";
+		var wgBreakFrames = false;
+		var wgCurRevisionId = 283;
+		var wgVersion = "1.15.3";
+		var wgEnableAPI = true;
+		var wgEnableWriteAPI = true;
+		var wgSeparatorTransformTable = ["", ""];
+		var wgDigitTransformTable = ["", ""];
+		var wgRestrictionEdit = [];
+		var wgRestrictionMove = [];
+		/*]]>*/</script>
+
+		<script type="text/javascript" src="/wiki/skins/common/wikibits.js?207"><!-- wikibits js --></script>
+		<!-- Head Scripts -->
+		<script type="text/javascript" src="/wiki/skins/common/ajax.js?207"></script>
+		<script type="text/javascript" src="/wiki/index.php?title=-&amp;action=raw&amp;gen=js&amp;useskin=monobook"><!-- site js --></script>
+	</head>
+<body class="mediawiki ltr ns-0 ns-subject page-Zallafar_s_Queue_Array skin-monobook">
+	<div id="globalWrapper">
+		<div id="column-content">
+	<div id="content">
+		<a name="top" id="top"></a>
+				<h1 id="firstHeading" class="firstHeading">Zallafar's Queue Array</h1>
+		<div id="bodyContent">
+			<h3 id="siteSub">From GwenWiki</h3>
+			<div id="contentSub"></div>
+									<div id="jump-to-nav">Jump to: <a href="#column-one">navigation</a>, <a href="#searchInput">search</a></div>			<!-- start content -->
+			<pre>
+;;
+;; From Zallafar of Lusternia (Tim Fredenburg)
+;;
+
+###########################################################
+#
+# QUEUES
+#
+###########################################################
+
+# TinyFugue doesn't provide any data structures so we fabricate our own.
+# These &quot;queues&quot; end up being used as arrays, lists, etc.
+
+
+###########################################################
+# Prioritized queue
+#
+# The first field in each item is a number, a priority.  The items in the
+# queue are sorted by priority, highest to lowest.
+# The rest of the fields are the item itself.
+
+# The arguments are the queue name, the priority, and the item.
+# The item may have multiple fields.
+# Returns the position in the queue that the item went into.
+# Macro is invisible to make mecho output more understandable.
+/def -i pqueueAdd = \
+       /set pqueueAddSpot=1&nbsp;%; \
+       /while ( pqueueAddSpot &lt;= queueSize( {1} ) ) \
+               /eval /set pqueueAddQueueItem=$[queueAt( {1}, pqueueAddSpot)]&nbsp;%; \
+;               /eval /echo&nbsp;%pqueueAddSpot&nbsp;%pqueueAddQueueItem&nbsp;%; \
+               /if ( $( /phigher&nbsp;%{2}&nbsp;%pqueueAddQueueItem ) ) /break&nbsp;%; /endif&nbsp;%; \
+               /eval /set pqueueAddSpot=$[pqueueAddSpot + 1]&nbsp;%; \
+       /done&nbsp;%; \
+;       /eval /echo Goes in spot&nbsp;%pqueueAddSpot&nbsp;%; \
+       /queueInsert&nbsp;%{1}&nbsp;%pqueueAddSpot&nbsp;%{-1}
+
+; This macro is used so that in calling it we get the item parsed into its
+; separate fields.  Then {2} will be only the item's priority.
+; Uses &gt; rather then &gt;= so that the item added first has higher priority in a tie.
+/def -i phigher = /result  {1} &gt; {2}
+       
+
+###########################################################
+# Sorted queue
+#
+# When squeueAdd is called it will use the defined comparison routine to
+# determine where to insert the new item in the queue.  The comparison
+# routine must be named &lt;queuename&gt;Compare.  It will be passed two
+# strings, new item and existing item, and must return &gt;0 for greater than,
+# 0 for equal, and &lt;0 for less than.
+#
+# Sorts low to high, with a new equal item coming after other equal items.
+
+# The arguments are the queue name, the item to add.
+# The item may have multiple fields.
+# Returns the position in the queue that the item went into.
+# Macro is invisible to make mecho output more understandable.
+/def squeueAdd = \
+       /let spot=1&nbsp;%; \
+       /while ( spot &lt;= queueSize( {1} ) ) \
+               /let existingItem=$[queueAt( {1}, spot)]&nbsp;%; \
+               /let compareFunc=%{1}Compare&nbsp;%; \
+               /eval /test&nbsp;%{compareFunc}( {-1}, {existingItem} )&nbsp;%; \
+               /if ( {?} &lt; 0 ) /break&nbsp;%; /endif&nbsp;%; \
+               /let spot=$[spot + 1]&nbsp;%; \
+       /done&nbsp;%; \
+       /queueInsert&nbsp;%{1}&nbsp;%spot&nbsp;%{-1}
+
+/def stringCompare = /return $[ strcmp( {1}, {2} ) ]
+
+/def testCompare = /stringCompare $( /field1&nbsp;%1 ) $( /field1&nbsp;%2 )&nbsp;%; /return {?}
+
+
+###########################################################
+# Queues
+#
+# A queue is just a series of global variables.  E.g.:
+#       queueHerbsThing1
+#       queueHerbsThing2
+#       ...
+# Push means to add at the end of the queue.
+# Pop means to remove from the front of the queue.
+# The name of the queue (&quot;Herbs&quot; in the example) must always be specified.
+#       queuePush( &quot;Herbs&quot;, &quot;calamus&quot; )
+#       queuePush( &quot;Herbs&quot;, &quot;horehound&quot; )
+#       queueSize( &quot;Herbs&quot; )
+#       queuePop( &quot;Herbs&quot; )
+# It's OK to use a queue without ever having declared it ahead of time.
+# In fact, there is no way to declare a queue.
+
+# Arguments are queue name and thing to push.
+# Returns number of items in queue.
+# Macro is invisible to make mecho output more understandable.
+/def -i queuePush = \
+       /eval /eval /set queue%{1}Size $$[{queue%{1}Size} + 1]&nbsp;%; \
+       /eval /eval /set queue%{1}Thing%%{queue%{1}Size}&nbsp;%{-1}&nbsp;%; \
+       /return queue%{1}Size
+
+# Arguments are queue name and any number of things to push.
+/def -i queuePushMany = \
+       /set queuePushManyWhich 2&nbsp;%; \
+       /while ( queuePushManyWhich &lt;= {#} ) \
+               /eval /queuePush&nbsp;%1&nbsp;%%{%queuePushManyWhich}&nbsp;%; \
+               /set queuePushManyItem=$[queueAt( {1}, queuePushManyWhich )]&nbsp;%; \
+               /set queuePushManyWhich $[ queuePushManyWhich + 1 ]&nbsp;%; \
+       /done
+
+# Push an item onto the front of a queue (where it will be the first popped).
+; Args: queue name, item
+/def queuePushFront = /queueInsert&nbsp;%1 1 ${-1}
+
+# Args: queue name, regexp to parse items, # of Pn to sort on, comparison func, item
+# This is probably best called as a function, to avoid some quoting issues.
+# E.g. /test queuePushSorted( &quot;xx&quot;, &quot;(\\d+)&quot;, 1, &quot;sortDecreasing&quot;, &quot;299&quot; )
+/def -i queuePushSorted = \
+;/echo regexp |%2|&nbsp;%; \
+       /test regmatch( {2}, {-4} )&nbsp;%; \
+;/echo result&nbsp;%?, P1&nbsp;%P1&nbsp;%; \
+       /eval /test set( &quot;queuePushValue=%%P%3&quot; )&nbsp;%; \
+;/echo queuePushValue&nbsp;%queuePushValue&nbsp;%; \
+       /set queuePushSpot=1&nbsp;%; \
+       /while ( queuePushSpot &lt;= queueSize( {1} ) ) \
+               /eval /test set( &quot;queuePushQueueItem=$[queueAt( {1}, queuePushSpot)]&quot; )&nbsp;%; \
+               /test regmatch( {2}, {queuePushQueueItem} )&nbsp;%; \
+               /eval /test set( &quot;queuePushItemValue=%%P%3&quot; )&nbsp;%; \
+               /if ( $( /%4&nbsp;%queuePushValue&nbsp;%queuePushItemValue ) ) /break&nbsp;%; /endif&nbsp;%; \
+               /eval /set queuePushSpot=$[queuePushSpot + 1]&nbsp;%; \
+       /done&nbsp;%; \
+       /queueInsert&nbsp;%{1}&nbsp;%queuePushSpot&nbsp;%{-4}
+
+/def -i sortIncreasing = /result {1} &lt; {2}
+/def -i sortDecreasing = /result {1} &gt; {2}
+
+; This macro is used so that in calling it we get the item parsed into its
+; separate fields.  Then {2} will be only the item's priority.
+; Uses &gt; rather then &gt;= so that the item added first has higher priority in a tie.
+/def -i phigher = /result  {1} &gt; {2}
+
+# Argument is the queue name.
+# Returns the number of items in the queue.
+# Macro is invisible to make mecho output more understandable.
+/def -i queueSize = \
+       /eval /eval /set queueSizeSize $$[{queue%{1}Size} + 0]&nbsp;%; \
+       /return {queueSizeSize}
+
+# Argument is the queue name.
+# Removes the first item from the queue and returns it.
+# Macro is invisible to make mecho output more understandable.
+/def -i queuePop = \
+       /if ( queueSize( {1} ) &lt;= 0 ) \
+               /echo POPPING EMPTY QUEUE&nbsp;%1&nbsp;%; \
+               /return &quot;&quot;&nbsp;%; \
+       /endif&nbsp;%; \
+       /eval /eval /set queueThingPopped &nbsp;%%{queue%{1}Thing1}&nbsp;%; \
+       /if ( queueSize( {1} ) &gt; 1 ) \
+               /eval /for which 1 $[queueSize( {1} ) - 1] \
+                       /eval /set queue%{1}Thing%%%which&nbsp;%%%%queue%{1}Thing$$$[which + 1]&nbsp;%; \
+       /endif&nbsp;%; \
+       /eval /eval /set queue%{1}Size $$[{queue%{1}Size} - 1]&nbsp;%; \
+       /result &quot;%queueThingPopped&quot;
+
+# Argument is the queue name.
+# Macro is invisible to make mecho output more understandable.
+/def -i queueFlush = \
+       /eval /set queue%{1}Size 0
+
+# Arguments are the queue name and the spot in the queue to return.
+# Queue locations are numbered from 1.
+# Macro is invisible to make mecho output more understandable.
+/def -i queueAt = \
+       /if /test {2} &lt; 1  | {2} &gt; queue%{1}Size&nbsp;%; /then /result &quot;&quot;&nbsp;%; /endif&nbsp;%; \
+       /eval /set queueThingAt&nbsp;%%{queue%{1}Thing%{2}}&nbsp;%; \
+       /result {queueThingAt}
+
+# Arguments are the queue name, the spot to put the item and the
+# item itself.  The current item at that spot and all following items
+# are moved back one spot in the queue.
+# Macro is invisible to make mecho output more understandable.
+/def -i queueInsert = \
+       /if ( {2} &lt;= 0 ) \
+               /echo INVALID INSERTION POINT&nbsp;%2, FOR QUEUE&nbsp;%1&nbsp;%; \
+               /return&nbsp;%; \
+       /endif&nbsp;%; \
+       /if ( {2} &gt; queueSize( {1} ) + 1 ) \
+               /echo INSERTION AT&nbsp;%2 BEYOND END OF QUEUE&nbsp;%1&nbsp;%; \
+               /return&nbsp;%; \
+       /endif&nbsp;%; \
+       /if ( queueSize( {1} ) &gt;= {2} ) \
+               /eval /for which&nbsp;%{2} $[queueSize( {1} )] \
+                       /eval /set \
+                               queue%{1}Thing$$$[%{2} + queueSize( &quot;%{1}&quot; ) - which + 1] \
+                              &nbsp;%%%%queue%{1}Thing$$$[{2} + queueSize( &quot;%{1}&quot; ) - which]&nbsp;%; \
+;                               queue%{1}Thing$$$[%{2} + queueSize( &quot;%{1}&quot; ) -&nbsp;%%%which + 1] \
+;                              &nbsp;%%%%queue%{1}Thing$$$[%{2} + queueSize( &quot;%{1}&quot; ) -&nbsp;%%%which]&nbsp;%; \
+       /endif&nbsp;%; \
+       /eval /eval /set queue%{1}Thing%{2}&nbsp;%{-2}&nbsp;%; \
+       /eval /eval /set queue%{1}Size $$[{queue%{1}Size} + 1]
+
+# Arguments are the queue name, the spot of the existing the item and the
+# new value for the item.
+# Macro is invisible to make mecho output more understandable.
+/def -i queueReplace = \
+       /if ( {2} &lt;= 0 ) \
+               /echo INVALID REPLACEMENT POINT&nbsp;%2, FOR QUEUE&nbsp;%1&nbsp;%; \
+               /return&nbsp;%; \
+       /endif&nbsp;%; \
+       /if ( {2} &gt; queueSize( {1} ) ) \
+               /echo REPLACEMENT AT&nbsp;%2 BEYOND END OF QUEUE&nbsp;%1&nbsp;%; \
+               /return&nbsp;%; \
+       /endif&nbsp;%; \
+       /eval /eval /set queue%{1}Thing%{2}&nbsp;%{-2}&nbsp;%; \
+
+# Arguments: queue name, the spot of the existing the item, desired field in
+# item,  the new value for the field.
+# Macro is invisible to make mecho output more understandable.
+/def -i queueReplaceField = \
+       /if ( {2} &lt;= 0 ) \
+               /echo INVALID REPLACEMENT POINT&nbsp;%2, FOR QUEUE&nbsp;%1&nbsp;%; \
+               /return&nbsp;%; \
+       /endif&nbsp;%; \
+       /if ( {2} &gt; queueSize( {1} ) ) \
+               /echo REPLACEMENT AT&nbsp;%2 BEYOND END OF QUEUE&nbsp;%1&nbsp;%; \
+               /return&nbsp;%; \
+       /endif&nbsp;%; \
+       /eval /set replaceFieldItem&nbsp;%%{queue%{1}Thing%{2}}&nbsp;%; \
+       /set replaceFieldItem $(/replaceField&nbsp;%3&nbsp;%4&nbsp;%replaceFieldItem)&nbsp;%; \
+       /eval /eval /set queue%{1}Thing%{2}=%replaceFieldItem
+
+# Arguments: field number, new field value, all fields of item.
+# Result: entire item with field replaced
+/def -i replaceField = \
+       /if ( {1} &lt;= 0  |  {1} &gt; {#} - 2 ) \
+               /echo -e BAD FIELD NUMBER&nbsp;%1 FOR REPLACEFIELD&nbsp;%{*}&nbsp;%; \
+               /result &quot;&quot;&nbsp;%; \
+       /endif&nbsp;%; \
+; Walk through each field, concatenating.  Swap in the new field as we go.
+       /set replaceFieldWhich 3&nbsp;%; \
+       /while ( replaceFieldWhich &lt;= {#} ) \
+               /eval /set replaceFieldField&nbsp;%%{%replaceFieldWhich}&nbsp;%; \
+; Swap in new value for field.
+               /if ( replaceFieldWhich - 2 == {1} ) \
+                       /set replaceFieldField&nbsp;%2&nbsp;%; \
+               /endif&nbsp;%; \
+; Don't add a space separator for the first field.
+               /if ( replaceFieldWhich == 3 ) \
+                       /set replaceFieldResult&nbsp;%replaceFieldField&nbsp;%; \
+; All subsequent fields are prefaced by a space.
+               /else \
+                       /set replaceFieldResult $[strcat( replaceFieldResult, &quot; &quot;, replaceFieldField )]&nbsp;%; \
+               /endif&nbsp;%; \
+               /set replaceFieldWhich $[replaceFieldWhich + 1]&nbsp;%; \
+       /done&nbsp;%; \
+       /result {replaceFieldResult}
+
+# Arguments are the queue name, and the spot to delete the item from.
+# All following items are moved forward one spot in the queue.
+# Macro is invisible to make mecho output more understandable.
+/def -i queueRemove = \
+       /if ( {2} &lt;= 0 ) \
+               /echo INVALID REMOVAL POINT&nbsp;%2, FOR QUEUE&nbsp;%1&nbsp;%; \
+               /return&nbsp;%; \
+       /endif&nbsp;%; \
+       /if ( {2} &gt; queueSize( {1} )  ) \
+               /echo REMOVAL AT&nbsp;%2 BEYOND END OF QUEUE&nbsp;%1&nbsp;%; \
+               /return&nbsp;%; \
+       /endif&nbsp;%; \
+       /eval /eval /set queueThingRemoved &nbsp;%%{queue%{1}Thing%{2}}&nbsp;%; \
+       /if ( queueSize( {1} ) &gt; {2} ) \
+               /eval /for which&nbsp;%{2} $[queueSize( {1} ) - 1] \
+                       /eval /set \
+                               queue%{1}Thing%%%which \
+                              &nbsp;%%%%queue%{1}Thing$$$[which + 1]&nbsp;%; \
+;                              &nbsp;%%%%queue%{1}Thing$$$[%%%which + 1]&nbsp;%; \
+       /endif&nbsp;%; \
+       /eval /eval /set queue%{1}Size $$[{queue%{1}Size} - 1]&nbsp;%; \
+       /return {queueThingRemoved}
+
+# Searches a specific field of queue items for a matching string.
+# Args: queue name, field number, string to find
+# Returns item number of first matching entry, or zero on no match.
+# Macro is invisible to make mecho output more understandable.
+/def -i queueFindField = \
+       /set findQueueSpot=1&nbsp;%; \
+       /eval /set findQueueLength $[queueSize( {1} )]&nbsp;%; \
+       /while ( findQueueSpot &lt;= findQueueLength ) \
+               /eval /set findQueueItem=$[queueAt( {1}, findQueueSpot)]&nbsp;%; \
+;               /eval /echo&nbsp;%findQueueSpot&nbsp;%findQueueItem&nbsp;%; \
+               /eval /set findField $( /findItemField&nbsp;%2&nbsp;%findQueueItem )&nbsp;%; \
+               /if ( findField =~ {3} ) \
+                       /return findQueueSpot&nbsp;%; \
+               /endif&nbsp;%; \
+               /eval /set findQueueSpot=$[findQueueSpot + 1]&nbsp;%; \
+       /done&nbsp;%; \
+       /return 0
+
+# Searches items of a queue for a matching string.
+# Args: queue name, string to find
+# Returns item number of first matching entry, or zero on no match.
+# Macro is invisible to make mecho output more understandable.
+/def -i queueFind = \
+       /let spot=1&nbsp;%; \
+       /let qsize $[queueSize( {1} )]&nbsp;%; \
+       /while ( spot &lt;= qsize ) \
+               /let item=$[queueAt( {1}, spot )]&nbsp;%; \
+;               /echo&nbsp;%spot&nbsp;%item matches?&nbsp;%{-1}&nbsp;%; \
+               /if ( item =~ {-1} ) \
+                       /return spot&nbsp;%; \
+               /endif&nbsp;%; \
+               /let spot=$[spot + 1]&nbsp;%; \
+       /done&nbsp;%; \
+       /return 0
+
+/def findItemField = /eval /result {$[{1} + 1]}
+
+# Args: queue name, field number, string to find
+# Returns count of matching items in queue.
+# Note that called with same arguments as queueFindField.
+# Macro is invisible to make mecho output more understandable.
+/def -i queueCount = \
+       /set countCount 0&nbsp;%; \
+       /set countQueueSpot=1&nbsp;%; \
+       /eval /set countQueueLength $[queueSize( {1} )]&nbsp;%; \
+       /while ( countQueueSpot &lt;= countQueueLength ) \
+               /eval /set countQueueItem=$[queueAt( {1}, countQueueSpot)]&nbsp;%; \
+;               /eval /echo&nbsp;%countQueueSpot&nbsp;%countQueueItem&nbsp;%; \
+               /eval /set countField=$( /findItemField&nbsp;%2&nbsp;%countQueueItem )&nbsp;%; \
+               /if ( countField =~ {3} ) \
+                       /eval /set countCount=$[countCount + 1]&nbsp;%; \
+               /endif&nbsp;%; \
+               /eval /set countQueueSpot=$[countQueueSpot + 1]&nbsp;%; \
+       /done&nbsp;%; \
+       /return countCount
+
+
+# Argument is the queue name.
+# Macro is invisible to make mecho output more understandable.
+/def -i queueDump = \
+       /eval /for which 1 $[queueSize( {1} )] \
+               /eval /_echo&nbsp;%%%%queue%{1}Thing%%%which
+
+# Call a macro for each item in a queue.  Queue walked in forward direction.
+; Args: queue name, macro to call with each item
+; Arguments to the called macro: item number, item.
+; Macro returns true to continue looping, false to stop.
+/def -i queueForEach = \
+       /let queueForEachWhich 1&nbsp;%; \
+       /let queueForEachSize $[ queueSize( {1} ) ]&nbsp;%; \
+       /while ( queueForEachWhich &lt;= queueForEachSize ) \
+               /let queueForEachItem=$[queueAt( {1}, queueForEachWhich )]&nbsp;%; \
+               /test&nbsp;%2( queueForEachWhich, {queueForEachItem} )&nbsp;%; \
+               /if (&nbsp;! {?} ) /break&nbsp;%; /endif&nbsp;%; \
+               /let queueForEachWhich $[ queueForEachWhich + 1 ]&nbsp;%; \
+       /done
+
+# Call a macro for each item in a queue.  Queue walked in reverse direction.
+; Args: queue name, macro to call with each item
+; Arguments to the called macro: item number, item.
+; Macro returns true to continue looping, false to stop.
+/def -i queueForEachReverse = \
+       /let queueForEachWhich $[ queueSize( {1} ) ]&nbsp;%; \
+       /while ( queueForEachWhich &gt;= 1 ) \
+               /let queueForEachItem=$[queueAt( {1}, queueForEachWhich )]&nbsp;%; \
+               /test&nbsp;%2( queueForEachWhich, {queueForEachItem} )&nbsp;%; \
+               /if (&nbsp;! {?} ) /break&nbsp;%; /endif&nbsp;%; \
+               /let queueForEachWhich $[ queueForEachWhich - 1 ]&nbsp;%; \
+       /done
+
+; Simple macro to use with queueForEach to show each item in a queue.
+/def queueEchoItem = /echo&nbsp;%{2}&nbsp;%; /return 1
+
+# Convert a queue to a single string of all the items in the queue.
+; Args: queue, var to get list
+/def -i queueAsList = \
+       /set queueAsListList=%2&nbsp;%; \
+       /set&nbsp;%queueAsListList=&nbsp;%; \
+       /queueForEach&nbsp;%1 queueAsListAdd
+/def queueAsListAdd = \
+       /eval /set&nbsp;%queueAsListList&nbsp;%%{%queueAsListList}&nbsp;%{2}&nbsp;%; \
+       /return 1
+
+# Convert a queue to a single string of all the items in the queue, with each item
+# delimited by a bar.
+; Args: queue, var to get list
+/def -i queueAsDelimitedList = \
+       /set queueAsDelimitedListList=%2&nbsp;%; \
+       /set&nbsp;%queueAsDelimitedListList=|&nbsp;%; \
+       /queueForEach&nbsp;%1 queueAsDelimitedListAdd
+/def queueAsDelimitedListAdd = \
+       /eval /set&nbsp;%queueAsDelimitedListList&nbsp;%%{%queueAsDelimitedListList}%{2}|&nbsp;%; \
+       /return 1
+
+# Make a copy of a queue.
+; Args: queue to copy, queue to be the copy
+/def -i queueCopy = \
+       /set queueCopyDestination&nbsp;%2&nbsp;%; \
+       /queueFlush&nbsp;%queueCopyDestination&nbsp;%; \
+       /queueForEach&nbsp;%1 queueCopyOne
+/def queueCopyOne = \
+       /queuePush&nbsp;%queueCopyDestination&nbsp;%2&nbsp;%; \
+       /return 1
+
+# Parse out fields of a line.
+/def field1 = /result {1}
+/def field2 = /result {2}
+
+</pre>
+
+<!-- 
+NewPP limit report
+Preprocessor node count: 4/1000000
+Post-expand include size: 0/2097152 bytes
+Template argument size: 0/2097152 bytes
+Expensive parser function count: 0/100
+-->
+
+<!-- Saved in parser cache with key homesitewiki-mw_:pcache:idhash:67-0!1!0!!en!2!edit=0 and timestamp 20120421155312 -->
+<div class="printfooter">
+Retrieved from "<a href="http://www.gwen-morse.com/wiki/index.php/Zallafar%27s_Queue_Array">http://www.gwen-morse.com/wiki/index.php/Zallafar%27s_Queue_Array</a>"</div>
+						<!-- end content -->
+						<div class="visualClear"></div>
+		</div>
+	</div>
+		</div>
+		<div id="column-one">
+	<div id="p-cactions" class="portlet">
+		<h5>Views</h5>
+		<div class="pBody">
+			<ul>
+	
+				 <li id="ca-nstab-main" class="selected"><a href="/wiki/index.php/Zallafar%27s_Queue_Array" title="View the content page [c]" accesskey="c">Page</a></li>
+				 <li id="ca-talk" class="new"><a href="/wiki/index.php?title=Talk:Zallafar%27s_Queue_Array&amp;action=edit&amp;redlink=1" title="Discussion about the content page [t]" accesskey="t">Discussion</a></li>
+				 <li id="ca-viewsource"><a href="/wiki/index.php?title=Zallafar%27s_Queue_Array&amp;action=edit" title="This page is protected.&#10;You can view its source [e]" accesskey="e">View source</a></li>
+				 <li id="ca-history"><a href="/wiki/index.php?title=Zallafar%27s_Queue_Array&amp;action=history" title="Past revisions of this page [h]" accesskey="h">History</a></li>			</ul>
+		</div>
+	</div>
+	<div class="portlet" id="p-personal">
+		<h5>Personal tools</h5>
+		<div class="pBody">
+			<ul>
+				<li id="pt-login"><a href="/wiki/index.php?title=Special:UserLogin&amp;returnto=Zallafar%27s_Queue_Array" title="You are encouraged to log in; however, it is not mandatory [o]" accesskey="o">Log in / create account</a></li>
+			</ul>
+		</div>
+	</div>
+	<div class="portlet" id="p-logo">
+		<a style="background-image: url(/home/public/wiki/guestbook.jpg);" href="/wiki/index.php/Main_Page" title="Visit the main page [z]" accesskey="z"></a>
+	</div>
+	<script type="text/javascript"> if (window.isMSIE55) fixalpha(); </script>
+	<div class='generated-sidebar portlet' id='p-navigation'>
+		<h5>Navigation</h5>
+		<div class='pBody'>
+			<ul>
+				<li id="n-mainpage-description"><a href="/wiki/index.php/Main_Page">Main Page</a></li>
+				<li id="n-MUSH-Code"><a href="/wiki/index.php/MUSHcode">MUSH Code</a></li>
+				<li id="n-Tinyfugue-Client"><a href="/wiki/index.php/Tinyfugue">Tinyfugue Client</a></li>
+				<li id="n-Muby-Client"><a href="/wiki/index.php/Muby">Muby Client</a></li>
+				<li id="n-Roleplay"><a href="/wiki/index.php/Roleplay">Roleplay</a></li>
+				<li id="n-Realms-of-Despair"><a href="/wiki/index.php/Realms_of_Despair">Realms of Despair</a></li>
+				<li id="n-Sims"><a href="/wiki/index.php/Sims">Sims</a></li>
+				<li id="n-Linux"><a href="/wiki/index.php/Linux">Linux</a></li>
+				<li id="n-Health-and-Beauty"><a href="/wiki/index.php/HABA">Health and Beauty</a></li>
+			</ul>
+		</div>
+	</div>
+	<div class='generated-sidebar portlet' id='p-Wiki_Help'>
+		<h5>Wiki Help</h5>
+		<div class='pBody'>
+			<ul>
+				<li id="n-portal"><a href="/wiki/index.php/GwenWiki:Community_Portal" title="About the project, what you can do, where to find things">Community portal</a></li>
+				<li id="n-currentevents"><a href="/wiki/index.php/GwenWiki:Current_events" title="Find background information on current events">Current events</a></li>
+				<li id="n-recentchanges"><a href="/wiki/index.php/Special:RecentChanges" title="The list of recent changes in the wiki [r]" accesskey="r">Recent changes</a></li>
+				<li id="n-randompage"><a href="/wiki/index.php/Special:Random" title="Load a random page [x]" accesskey="x">Random page</a></li>
+				<li id="n-help"><a href="/wiki/index.php/Help:Contents" title="The place to find out">Help</a></li>
+			</ul>
+		</div>
+	</div>
+	<div id="p-search" class="portlet">
+		<h5><label for="searchInput">Search</label></h5>
+		<div id="searchBody" class="pBody">
+			<form action="/wiki/index.php" id="searchform"><div>
+				<input type='hidden' name="title" value="Special:Search"/>
+				<input id="searchInput" name="search" type="text" title="Search GwenWiki [f]" accesskey="f" value="" />
+				<input type='submit' name="go" class="searchButton" id="searchGoButton"	value="Go" title="Go to a page with this exact name if exists" />&nbsp;
+				<input type='submit' name="fulltext" class="searchButton" id="mw-searchButton" value="Search" title="Search the pages for this text" />
+			</div></form>
+		</div>
+	</div>
+	<div class="portlet" id="p-tb">
+		<h5>Toolbox</h5>
+		<div class="pBody">
+			<ul>
+				<li id="t-whatlinkshere"><a href="/wiki/index.php/Special:WhatLinksHere/Zallafar%27s_Queue_Array" title="List of all wiki pages that link here [j]" accesskey="j">What links here</a></li>
+				<li id="t-recentchangeslinked"><a href="/wiki/index.php/Special:RecentChangesLinked/Zallafar%27s_Queue_Array" title="Recent changes in pages linked from this page [k]" accesskey="k">Related changes</a></li>
+<li id="t-specialpages"><a href="/wiki/index.php/Special:SpecialPages" title="List of all special pages [q]" accesskey="q">Special pages</a></li>
+				<li id="t-print"><a href="/wiki/index.php?title=Zallafar%27s_Queue_Array&amp;printable=yes" rel="alternate" title="Printable version of this page [p]" accesskey="p">Printable version</a></li>				<li id="t-permalink"><a href="/wiki/index.php?title=Zallafar%27s_Queue_Array&amp;oldid=283" title="Permanent link to this revision of the page">Permanent link</a></li>			</ul>
+		</div>
+	</div>
+		</div><!-- end of the left (by default at least) column -->
+			<div class="visualClear"></div>
+			<div id="footer">
+				<div id="f-poweredbyico"><a href="http://www.mediawiki.org/"><img src="/wiki/skins/common/images/poweredby_mediawiki_88x31.png" alt="Powered by MediaWiki" /></a></div>
+			<ul id="f-list">
+					<li id="lastmod"> This page was last modified on 23 July 2010, at 21:26.</li>
+					<li id="viewcount">This page has been accessed 209 times.</li>
+					<li id="privacy"><a href="/wiki/index.php/GwenWiki:Privacy_policy" title="GwenWiki:Privacy policy">Privacy policy</a></li>
+					<li id="about"><a href="/wiki/index.php/GwenWiki:About" title="GwenWiki:About">About GwenWiki</a></li>
+					<li id="disclaimer"><a href="/wiki/index.php/GwenWiki:General_disclaimer" title="GwenWiki:General disclaimer">Disclaimers</a></li>
+			</ul>
+		</div>
+</div>
+
+		<script type="text/javascript">if (window.runOnloadHook) runOnloadHook();</script>
+<!-- Served in 0.230 secs. --></body></html>

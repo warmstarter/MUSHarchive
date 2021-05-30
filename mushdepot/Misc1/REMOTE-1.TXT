@@ -1,0 +1,23 @@
+@create PARENT: Basic Puppet Controller
+@lock PARENT: Basic Puppet Controller=*
+&WDO PARENT: Basic Puppet Controller=$wdo *:@force #[v(pupnumber)]=%0
+&WPS PARENT: Basic Puppet Controller=$wps *:@force #[v(pupnumber)]=:%0
+&WPN PARENT: Basic Puppet Controller=$wpn *:@force #[v(pupnumber)]=: %0
+&WCOME PARENT: Basic Puppet Controller=$wcome:@tel #[v(pupnumber)]=me;@force #[v(pupnumber)]=leave;@force #[v(pupnumber)]=:pads into the room and stops by [name(owner(me))]'s side.
+&WLOUD PARENT: Basic Puppet Controller=$wloud:@set #[v(pupnumber)]=puppet;@pemit [owner(me)]=[Name(#[v(pupnumber)])]> I am listening now.
+&WQUIET PARENT: Basic Puppet Controller=$wquiet:@set #[v(pupnumber)]=!puppet;@pemit [owner(me)]=[name(#[v(pupnumber)])]> I am no longer listening.
+&WHELP PARENT: Basic Puppet Controller=$whelp:@pemit %#=[repeat(-,78)]%r[space(31)]Controller Help%r[repeat(-,78)]%r%tWsetup <#####>%t%t%tSets up the controller for use with %r%t%t%t%t%tyour wolf, note: No # sign before the %r%t%t%t%t%tdatabase number of the wolf.%r%tWdo *%t%t%t%tTells your wolf to do *.%r%tWps *%t%t%t%tHas your wolf pose * with a space.%r%tWpn *%t%t%t%tHas your wolf pose * with no space.%r%tWcome%t%t%t%tBrings your wolf to you.%r%tWloud%t%t%t%tSets your wolf to listen.%r%tWquiet%t%t%t%tSets your wolf not to listen.%r%tWhelp%t%t%t%tThis screen.%r%b%bComments, questions, and suggestions for this code can be directed to%r%b%bMistWolf.%r[repeat(-,78)]
+&WSETUP PARENT: Basic Puppet Controller=$wsetup *:&pupnumber me=%0;@pemit %N=Setup complete - Controller ready to use.
+@Use PARENT: Basic Puppet Controller=Whelp for help on using this controller.
+@Desc PARENT: Basic Puppet Controller=This is a basic wolf controller for one wolf. 'Whelp' for instructions on how to use it.
+@Succ PARENT: Basic Puppet Controller=You pick up [name(me)].
+@Osucc PARENT: Basic Puppet Controller=tries to pick up [name(me)] and fails.
+@Drop PARENT: Basic Puppet Controller=You set down [name(me)].
+@Odrop PARENT: Basic Puppet Controller=sets down [name(me)].
+@Fail PARENT: Basic Puppet Controller=You can't pick that up!
+@Aclone PARENT: Basic Puppet Controller=@pemit %#={Please use the 'copy' command to create copies of objects in here, not @clone.}; @destroy/override me
+@set PARENT: Basic Puppet Controller=STICKY
+@set PARENT: Basic Puppet Controller=VISUAL
+@set PARENT: Basic Puppet Controller=PARENT_OK
+@set PARENT: Basic Puppet Controller=HALTED
+@set PARENT: Basic Puppet Controller=SAFE

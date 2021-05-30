@@ -1,0 +1,86 @@
+#  Author: Kristofer Cox (Kestral@Conspiracy!)
+#  Format: Mark Hassman (12/6/96)
+#
+############################################################################
+# You can enter rumours about YOURSELF, or RP YOU PARTICIPATED IN, or 
+# RUMOURS about IC matters you agree on with other players. To do this:
+#  
+#        +rumour[switches]
+# The switches are as follows:
+#  /add <rumour name>=<rumour>        Adds a <rumour> named <rumour name>.
+# /list                              Lists the names of all current rumours.
+# /read <rumour name>                Shows you <rumour name>.
+# /del <rumour name>                 Removes <rumour name>.
+# /edit <rumour name>=<old>,<new>    Similar to @edit.
+# <nothing>                          
+#
+# Note that '/del' and '/edit' are only valid for the posting player, or a 
+# wizard. Your dbref is recorded to enable this.
+# This version now allows puncutation in the name. Rumours can now be 
+# accessed by number. DO NOT USE + or | in the rumour name.
+#   Kestral@Conspiracy!
+#############################################################################
+#                     ATTENTION!!! Do the Following:
+#   The best way to set up this global is to determine what the dbref of
+# your global command object is.  Then replace all occurences of 
+# 'Globals Object' in this file with that dbref.  
+#   Next, create another object named 'Rumour: Text' and set if with
+# the flags listed below.  Replace all occurences of '#48' in this
+# file with the dbref of the new object
+#
+#@create Rumour: Text
+#@set Rumour: Text=HAVEN
+#@set Rumour: Text=HALTED
+#@set Rumour: Text=SAFE
+#
+
+# Set the commands on the global object
+&CMD-ADD-RUMOUR Globals Object=$+rumour/add *=*:@switch 
+member([Iter([lattr(#48/Data-Rumour-*)],[first(get(#48/##),|)],)],[capstr(%0)],+
+)=0,{&DATA-RUMOUR-[secs()]-%# #48=+[capstr(%0)]|%1%R[U(Ufun-time)];@pemit 
+*%N=Added rumour.;},{@pemit %#=Sorry a rumor by that name already exists.}
+-
+&CMD-LIST-RUMOURS Globals Object=$+rumour/list:@pemit 
+%#=[setq(3,[u(FUN-RUMOUR-+NAMELIST)])]Current 
+Rumours:[iter(lnum(words([r(3)],+)),[switch(mod(##,4),0,%r)][add(##,1)]{)}%B[Ext
+ract([r(3)],[add(##,1)],1,+)][space(sub(16,[strlen([add(##,1)]%B[extract([r(3)],
+[add(##,1)],1,+)])]))])]
+-
+&CMD-READ-RUMOURS Globals Object=$+rumour/read 
+*:switch([member([iter(lnum(words([u(FUN-RUMOUR-+NAMELIST)],+)),add(1,##))],%0)]
+,0,{[setq(9,[member([u(FUN-RUMOUR-+NAMELIST)],[capstr(%0)],+)])];},[setq(9,%0)]@
+@);@switch [r(9)]=0,@pemit %#={That rumour does not exist.},@pemit 
+%#=[rest(u(#48/[extract([lattr(#48/Data-Rumour-*)],[r(9)],1)]),|)]
+-
+&CMD-DEL-RUMOUR Globals Object=$+rumour/del 
+*:switch([member([iter(lnum(words([u(FUN-RUMOUR-+NAMELIST)],+)),add(1,##))],%0)]
+,0,{[setq(9,[member([u(FUN-RUMOUR-+NAMELIST)],[capstr(%0)],+)])];},[setq(9,%0)]@
+@);@switch [r(9)]=0,@pemit %#={That rumour does not exist.},{@switch 
+member([iter(get(#44/data-lock-list),num(*##))] 
+[extract([extract([lattr(#48/Data-Rumour-*)],[r(9)],1)],4,1,-)],%#)=0,@pemit 
+%#=Permission denied.,{&[extract([lattr(#48/Data-Rumour-*)],[r(9)],1)] 
+#48=;@pemit %#=Rumour Deleted.}}
+-
+&FUN-RUMOUR-+NAMELIST +commands 3 
+(R-Z)=[rest([edit([Iter([lattr(#48/Data-Rumour-*)],[trim([first(get(#48/##),|)])
+],)],%b+,+)],+)]
+-
+&CMD-EDIT-RUMOUR Globals Object=$+rumour/edit 
+*=*,*:switch([member([iter(lnum(words([u(FUN-RUMOUR-+NAMELIST)],+)),add(1,##))],
+%0)],0,{[setq(9,[member([u(FUN-RUMOUR-+NAMELIST)],[capstr(%0)],+)])];},[setq(9,%
+0)]@@);@switch [r(9)]=0,@pemit %#={That rumour does not exist.},{@switch 
+member([iter(get(#44/data-lock-list),num(*##))] 
+[extract([extract([lattr(#48/Data-Rumour-*)],[r(9)],1)],4,1,-)],%#)=0,@pemit 
+%#=Permission denied.,{&[extract([lattr(#48/Data-Rumour-*)],[r(9)],1)] 
+#48=+[extract([u(FUN-RUMOUR-+NAMELIST)],[r(9)],1,+)]|[edit([rest(get(#48/[extrac
+t([lattr(#48/Data-Rumour-*)],[r(9)],1)]),|)],%1,%2)];@wait 5;@pemit %#=Rumour 
+changed. Best to confirm changes with a read.}}
+-
+&CMD-GET-RUMOUR-POSTER Globals Object=$+rumour/who 
+*:switch([member([iter(lnum(words([u(FUN-RUMOUR-+NAMELIST)],+)),add(1,##))],%0)]
+,0,{[setq(9,[member([u(FUN-RUMOUR-+NAMELIST)],[capstr(%0)],+)])];},[setq(9,%0)]@
+@);@switch [r(9)]=0,@pemit %#={That rumour does not exist.},{@switch 
+member([iter(get(#44/data-lock-list),num(*##))],%#)=0,@pemit %#=Permission 
+denied.,{@pemit %#=That rumour was posted 
+by:%B[name(extract([extract([lattr(#48/Data-Rumour-*)],[r(9)],1)],4,1,-))]}}
+-

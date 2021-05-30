@@ -1,0 +1,26 @@
+Finger command: Somewhat sophisticated and obscure finger code.
+
+&CMD_FINGER Finger Object (FO)=$+finger *:@dolist [u(me/fn_col,u(me/fn_colsqz,edit(iter(lattr(me/fn_fingcol_*),cat(u(me/##,%0),|)),%b|%b,|)),2)]lattr(me/fn_finger_*)=@pemit %#=u(me/##,%0)
+&CMD_FINGERME Finger Object (FO)=$+finger:@fo %#=+finger [name(%#)]
+&FN_JOT Finger Object (FO)=switch(1,lt(%0,1),,eq(%0,1),1,cat(u(me/fn_jot,sub(%0,1)),%0))
+&FN_COL Finger Object (FO)=[setq(1,words(%0,|))][setq(2,div(sub(80,%1),%1))][setq(3,div(add(%q1,sub(%1,1)),%1))][setq(4,u(me/fn_jot,%q3))]list(%q4,u(me/fn_colaux,extract(%0,add(mul(sub(##,1),%1),1),%1,|),%q2))
+&FN_COLAUX Finger Object (FO)=[setq(5,words(%0,|))][setq(6,u(me/fn_jot,sub(%q5,1)))]switch(words(%0,|),1,trim(%0,%1),edit(cat(iter(%q6,trim(ljust(extract(%0,##,1,|),%1,|),%1)),trim(last(%0,|),%1)),|,%b))
+&FN_COLSQZ Finger Object (FO)=switch(1,strmatch(%0,*| *),u(me/fn_colsqz,edit(%0,|%b,|)),strmatch(%0,* |*),u(me/fn_colsqz,edit(%0,%b|,|)),strmatch(%0,*||*),u(me/fn_colsqz,edit(%0,||,|)),strmatch(%0,*|),edit(%0|,||,),%0)
+&CMD_FINGERME Finger Object (FO)=$+finger:@fo %#=+finger %#
+&FN_FINGCOL_01NAME Finger Object (FO)=Name: [name(*%0)]
+&FN_FINGCOL_02ALIAS Finger Object (FO)=[setq(0,get(*%0/alias))]switch(words(%q0),0,,Alias: %q0)
+&FN_FINGCOL_03FULLNAME Finger Object (FO)=[setq(0,get(*%0/fullname))]switch(words(%q0),0,,Full name: %q0)
+&FN_FINGCOL_04SEX Finger Object (FO)=[setq(0,get(*%0/sex))]switch(words(%q0),0,,Gender: %q0)
+&FN_FINGCOL_05RACE Finger Object (FO)=[switch(or(hasflag(%#,wizard),strmatch(%#,num(*%0))),0,,[setq(0,get(*%0/race))]switch(words(%q0),0,,Race: %q0))]
+&FN_FINGCOL_06WORLD Finger Object (FO)=[setq(0,get(*%0/world))]switch(words(%q0),0,,World: %q0)
+&FN_FINGCOL_07ORG Finger Object (FO)=[switch(or(hasflag(%#,wizard),strmatch(%#,num(*%0)),strmatch(get(*%0/org),get(%#/org))),0,,[setq(0,get(*%0/org))]switch(words(%q0),0,,Organization: %q0))]
+&FN_FINGCOL_08FYNAME Finger Object (FO)=[switch(or(or(hasflag(%#,wizard),strmatch(%#,num(*%0))),and(strmatch(get(*%0/world),get(%#/world)),strmatch(get(*%0/seishistatus),found))),1,[setq(0,get(*%0/starname))]switch(words(%q0),0,,Star name: %q0))]
+&FN_FINGCOL_09APPAGE Finger Object (FO)=[setq(0,get(*%0/appage))]switch(words(%q0),0,,Apparent Age: %q0)
+&FN_FINGCOL_10POSITION Finger Object (FO)=[setq(0,get(*%0/position))]switch(words(%q0),0,,Position: %q0)
+&FN_FINGCOL_11QUOTE Finger Object (FO)=[setq(0,get(*%0/quote))]switch(words(%q0),0,,Quote: %q0)
+&FN_FINGCOL_12REGION Finger Object (FO)=[setq(0,get(room(*%0)/region))]switch(words(%q0),0,,Region: [u(room(*%0)/region)])
+&FN_FINGCOL_13LOCATION Finger Object (FO)=[switch(or(or(hasflag(%#,wizard),strmatch(%#,num(*%0))),and(findable(%#,*%0),get(*%0/world))),1,[setq(0,loc(*%0))]switch(words(%q0),0,,Location: [name(%q0)]%(%q0[flags(%q0)]%)))]
+&FN_FINGER_98SHORTDESC Finger Object (FO)=[setq(0,get(*%0/shortdesc))]switch(words(%q0),0,,Shortdesc: %q0)
+&FN_FINGER_99WHEN Finger Object (FO)=Last: [get(*%0/last)][space(10)]When: [[setq(1,sub(secs(),convtime(u(*%0/last))))]switch(1,[gte(%q1,86400)],[div(%q1,86400)]d,[gte(%q1,3600)],[div(%q1,3600)]h [mod(div(%q1,60),60)]m,[gte(%q1,60)],[div(%q1,60)]m,%q1s)] ago
+
+

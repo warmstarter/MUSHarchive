@@ -1,0 +1,13 @@
+@create Player Statistics Device
+@link Player Statistics Device = #2
+@lock Player Statistics Device=#2
+@set Player Statistics Device = INHERIT
+@set Player Statistics Device = WIZARD
+@set Player Statistics Device = SAFE
+&FUN_POP Player Statistics Device=[mul([add([sub(v(count_%0),50)],210)],64)]
+&PLAYER_LIST Player Statistics Device=[lsearch(all,type,player)]
+@VA Player Statistics Device=$emp* stat*:@pemit %#=Calculating player statistics...;@dolist lattr(me/COUNT_*)=&## me=0;@dolist u(player_list)={&COUNT_[edit({[get(##/empire)]},%b,_)] me=[add([get(me/COUNT_[edit({[get(##/empire)]},%b,_)])],1)];&COUNT_TOTAL me=[add(v(COUNT_TOTAL),1)];&[edit({[get(##/empire)]},%b,_)]INACT me=0;&TOTALINACT me=0;@switch [gt([sub(convtime(time()),convtime(xget(##,last)))],2592000)]=1,{&[edit({[get(##/empire)]},%b,_)]INACT me=[add([get(me/[edit({[get(##/empire)]},%b,_)]INACT)],1)];&TOTALINACT me=[add([get(me/TOTALINACT)],1)]}};@pemit %#=Statistics calculated.;@wait 3={@pemit %#=[ansi(c,[center(Player Statistics,79)])]%r[ansi(b,repeat(-,79))]%r[ansi(hg,[ljust(Empire,15)])]%b%b%b%b[ansi(hy,[ljust(No.,3)])]%b%b%b[ansi(g,[ljust(Inact.,6)])]%b%b%b[ansi(hm,Percentage)]%r[ansi(b,repeat(-,6))][space(13)][ansi(b,repeat(-,3))][space(3)][ansi(b,repeat(-,6))]%b%b%b[ansi(b,repeat(-,10))];@dolist lattr(me/COUNT_*)=@pemit %#=[ansi(g,[ljust([switch(##,COUNT_,*NONESET*,[after(##,COUNT_)])],15)])]%b%b%b%b[ansi(y,[ljust([u(##)],3)])]%b%b%b[ansi(g,[switch([u([after(##,COUNT_)]INACT)],,[ljust(0,6)],[ljust([u([after(##,COUNT_)]INACT)],6)])]%b%b%b[ansi(m,[mul(fdiv([u(##)],get(me/COUNT_TOTAL)),100)]%%)]
+@VB Player Statistics Device=@pemit %#=[ansi(c,[center(Player Statistics,79)])]%r[ansi(b,repeat(-,79))]%r[ansi(hg,[ljust(Empire,15)])]%b%b%b%b[ansi(hy,[ljust(No.,3)])]%b%b%b[ansi(g,[ljust(Inact.,6)])]%b%b%b[ansi(hm,Percentage)]%r[ansi(b,repeat(-,6))][space(13)][ansi(b,repeat(-,3))][space(3)][ansi(b,repeat(-,6))]%b%b%b[ansi(b,repeat(-,10))];@dolist lattr(me/COUNT_*)=@pemit %#=[ansi(g,[ljust([switch(##,COUNT_,*NONESET*,[after(##,COUNT_)])],15)])]%b%b%b%b[ansi(y,[ljust([u(##)],3)])]%b%b%b[ansi(g,[switch([u([after(##,COUNT_)]INACT)],,[ljust(0,6)],[ljust([u([after(##,COUNT_)]INACT)],6)])]%b%b%b[ansi(m,[mul(fdiv([u(##)],get(me/COUNT_TOTAL)),100)]%%)]
+@DESCRIBE Player Statistics Device=Type `statistics' to calculate the Player Statistics.%rType `summary' to view them after they have been calculated.
+@set Player Statistics Device/DESCRIBE=no_command visual
+&RESET Player Statistics Device=$@reset empire stats:@pemit %#=Reseting Stats.;@dolist lattr(#8/count_*)=&## #8;@dol lattr(#8/*inact)=&## #8;@pemit %#=Reseted.

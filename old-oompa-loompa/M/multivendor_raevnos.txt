@@ -1,0 +1,32 @@
+@@ -*- mushcode -*- $Id: multivendor.txt 1.2 Wed, 02 Aug 2000 22:39:31 -0700 shawnw $
+@create MultiVendor
+@lock/Basic MultiVendor==me
+@lock/Parent MultiVendor=!#0
+@lock/Link MultiVendor=#0
+@set MultiVendor = LINK_OK
+@set MultiVendor = VISUAL
+@set MultiVendor = !NO_COMMAND
+@APAYMENT MultiVendor=@notify me;@trigger me/%va_buy=%#, %va;@@ To make the vendor do stuff when an item is bought, put the approriate code in <ITEM>_BUY. %0 is the dbref of the buyer. @@;@va me;@cost me;@payment me;@opayment me
+@set MultiVendor/APAYMENT=no_command
+@DESCRIBE MultiVendor=This is a vendor that sells multiple objects. To buy something, [ansi(h,ORDER <ITEM>)], where <ITEM> is one of [u(#1838/enumerate,u(#1838/capitalize,v(items)),,or)], and then give the vendor the requested amount of money ([ansi(h,GIVE MULTIVENDOR=<N>)]).%r%rSince this is an example object, it doesn't actually create objects, but it's easy to make your own copy do so. See [ansi(g,MultiVendor/Notes)] for information. It's visual, so you can copy the code to other mushes. Feel free to modify it as needed. Enjoy. -- Raevnos
+@set MultiVendor/DESCRIBE=no_command visual
+&ITEMS MultiVendor=SODA POPCORN
+@set MultiVendor/ITEMS=no_inherit
+&LICENSE MultiVendor=All code on this object (MultiVendor) is released under the Lesser Gnu Public License. A copy of that license is avaliable at [tagwrap(a, href="http://www.gnu.org/copyleft/lesser.html", http://www.gnu.org/copyleft/lesser.html)]
+@set MultiVendor/LICENSE=no_command visual
+&NOTES MultiVendor=To make your own: @create an object, @parent it to #3496, @set it=!no_command, and @cpattr #3496/startup=<dbref of your object>. The order command uses semaphores so that only one person can order at a time. It clears itself after 60 seconds, or the first time it's given enough money, and moves onto the next order in the queue, or waits for one to show up.%r%rThe attribute ITEMS contains a list of items the vendor sells (One word names only, though you can modify that fairly easily), and for each item, the attribute <ITEM>_COST is how much it costs, in MUSH Money, and the attribute <ITEM>_BUY contains code that's @triggered when it's bought, with the dbref of the buyer in \%0.%r%r\%1 contains the name of the current item being bought.
+&ORDER_CMD MultiVendor=$order *:@wait me={@switch t(member(v(items),ucstr(%0)))=1,{@pemit %#=[name(me)] says, "Thank you for ordering a [capstr(lcstr(%0))]. That'll be [v(%0_cost)], if you please.";@va me=[capstr(lcstr(%0))];@cpattr me/%0_cost=me/cost;@payment me=[name(me)] gives you a %va;@opayment me=is given a %va by [name(me)].;@wait me/60={@notify me;@cost me;@payment me;@opayment me}},{@pemit %#=[name(me)] says, "Sorry, I don't sell [capstr(lcstr(%0))]'s.";@notify me}
+&POPCORN_BUY MultiVendor=@@ Create [name(%0)]'s Bag of Popcorn @@;@@ Drop [name(%0)]'s bag of Popcorn @@;@@ This is how you would create an object. Just remove the comments, and add whatever other code is needed. @@
+@set MultiVendor/POPCORN_BUY=no_inherit
+&POPCORN_COST MultiVendor=20
+@set MultiVendor/POPCORN_COST=no_inherit
+@SEMAPHORE MultiVendor=-1
+@set MultiVendor/SEMAPHORE=no_inherit locked
+&SODA_BUY MultiVendor=@@ @pemit %0=If this wasn't a demo object, you would have gotten a real can of soda. @@
+@set MultiVendor/SODA_BUY=no_inherit
+&SODA_COST MultiVendor=10
+@set MultiVendor/SODA_COST=no_inherit
+@STARTUP MultiVendor=@drain me;@notify me;@va me;@cost me;@payment me;@opayment me
+@set MultiVendor/STARTUP=no_command
+
+

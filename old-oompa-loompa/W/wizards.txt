@@ -1,0 +1,36 @@
+#  Author: Mark Hassman (1/7/98
+#  Format: Mark Hassman (1/7/98)
+#############################################################################
+#
+# Command: +wizards
+#    List the current wizards and indicates if they are online
+#############################################################################
+#  Configuration Notes: Put this on a global command object.
+#   
+#  This code was reworked 1/7/98.  The code now uses objeval to
+#  reduce the number of switches.  Dates returned for disconnected
+#  or dark wizards displays day only without a specific time.
+#  
+#  Setup:  You should change the u(dat-wizards) call to get
+#  the list from a data object.  The list should be dbrefs.
+#  Eg: #1 #3 #7 #9 #721
+#
+#  The Command can be set on
+#  any object within the master room but it has to be able to
+#  read the LAST attribute on admins.
+#
+&cmd-wizard Globals Object=$+wizards:
+	@pemit %#=
+	{
+	  Wizards are:%r%b
+	  [iter(u(dat-wizards),
+	    switch(match(objeval(%#,lwho()),##),
+	    0,
+              [ljust([name(##)],24)]
+              [ljust([mid(get(##/last),0,10)]%, [extract(get(##/last),5,1)],30)]
+	      %r,
+	    [ljust([name(##)],24)][ljust(Currently Connected,30)]%r
+	    )
+          )]
+        }
+-

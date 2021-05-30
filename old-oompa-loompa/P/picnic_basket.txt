@@ -1,0 +1,16 @@
+@create Picnic Basket
+@lock/Basic Picnic Basket==me
+@set Picnic Basket = VISUAL
+&CMD.CLOSE Picnic Basket=$CLOSE BASKET:[ifelse(v(isopenned),{[pemit(%#, You close the basket.)] [oemit(%#, %N closes the basket.)] [set(me, isopenned:0)]},[pemit(%#, The basket is already closed.)])]
+&CMD.DISCARD Picnic Basket=$discard *:[ifelse(gte(match(v(unpacked), %0, |), 1), [pemit(%#, You discard of %0.)] [oemit(%#, %N discards of %0.)] [set(me, unpacked:[setdiff(v(unpacked), %0, |)])], [pemit(%#, That item is not unpacked.)])]
+&CMD.OPEN Picnic Basket=$OPEN BASKET:[ifelse(v(isopenned),[pemit(%#, The basket is already openned.)],{[pemit(%#, You open the basket.)][oemit(%#, %N opens the basket.)] [set(me, isopenned:1)]})]
+&CMD.PACK Picnic Basket=$pack *:[ifelse(v(isopenned),{[set(me, packed:[setunion(v(packed), %0, |)])] [set(me, unpacked:[setdiff(v(unpacked), %0, |)])][pemit(%#, You pack %0 into the basket.)][oemit(%#, %N packs %0 into the basket.)]},[pemit(%#, Ooops.. How can you pack something into the basket when it is closed?)])]
+&CMD.UNPACK Picnic Basket=$unpack *:[ifelse([and(gte(match(v(packed), %0, |), 1), v(isopenned))], {[set(me, unpacked:[setunion(v(unpacked), %0, |)])][set(me, packed:[setdiff(v(packed), %0, |)])] [pemit(%#, You remove %0 from the basket.)][oemit(%#, %N removes %0 from the basket.)]},{[pemit(%#, That item is not in the basket or the basket is closed.)]})]
+&CREDITS Picnic Basket=Raveness@M*U*S*H
+@DESCRIBE Picnic Basket=[ifelse(gte(words(v(unpacked)), 1), Just outside of the basket you can see [itemize(get(basket/unpacked), |, and, \,)]., A simple picnic basket.)] [ifelse(v(isopenned), The basket is openned.  [ifelse(gte(words(v(packed)), 1), Inside you can make out [itemize(v(packed), |, and, \,)]., There is nothing inside.)], The basket is closed.)]%r%r[ansi(hw,USE [name(me)])] -- for help.
+@set Picnic Basket/DESCRIBE=no_command visual
+&ISOPENNED Picnic Basket=1
+&PACKED Picnic Basket=2 chilled fruit cups|2 wine glasses|a banana|a bottle of sparkling champagne|a portable ant colony (just in case there isn't one at the picnic site)|a red checkered blanket|a small radio|A stamp that says 'F' in big red letters for that term paper.|a watermelon
+&UNPACKED Picnic Basket=2 sandwiches|glass|Walker's term paper
+@USE Picnic Basket=The commands on the basket are as follows:%r[iter(lattr(me/cmd.*), edit(ucstr(before(after(v(##), $), :)), *, <item>), , %r)]
+@set Picnic Basket/USE=no_command

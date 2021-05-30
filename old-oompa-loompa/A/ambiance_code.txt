@@ -1,0 +1,39 @@
+@@   Global Ambiance Code                               @@
+@@   This code will allow any room to emit a random     @@
+@@   set of messages into the room at random intervals. @@
+@@                                                      @@
+@@   The 'ambiance on' and 'ambiance off' commands will @@
+@@   allow individual users to choose not to hear       @@
+@@   ambiance, should they choose not to.               @@
+@@                                                      @@
+@@   The 'HELP_AMBIANCE' attribue is to place on your   @@
+@@   Global Help Text file. Reformat however you like,  @@
+@@   but keep the credit at the end, please.            @@
+@@                                                      @@
+@@   Forever King @ TalesMUSH (tales.net 6666)          @@
+@@        fk@tales.net                                  @@
+
+@create Ambiance Object=10
+
+@set Ambiance Object=Inherit
+
+@set Ambiance Object=safe
+
+@set Ambiance Object=commands
+
+&ADDROOM Ambiance Object=$add ambiance:@switch [owner(loc(%#))]=%#,{&room_list me=[setunion([v(room_list)],[loc(%#)])];@pemit %#=This room has been added to the Ambiance list. Please read +help ambiance for help.},{@pemit %#=Sorry. You do not have permission to set up ambiance in this room.}
+
+&REMOVEROOM Ambiance Object=$remove ambiance:@switch [owner(loc(%#))]=%#,{&room_list me=[setdiff([v(room_list)],[loc(%#)])];@pemit %#=This room has been removed from the Ambiance list.},{@pemit %#=Sorry. You do not have permission to remove the ambiance from this room.}
+
+&AMBOFF Ambiance Object=$ambiance off:&deaf_players me=[setunion(v(deaf_players),%#)];@pemit %#=You will no longer hear any ambiance messages. Type 'ambiance on' to start hearing it again.
+
+&AMBON Ambiance Object=$ambiance on:&deaf_players me=[setdiff(v(deaf_players),%#)];@pemit %#=You can now hear ambiance messages. Type 'ambiance off' to turn it off.
+
+&EMITTER Ambiance Object=@dolist [v(room_list)]=@pemit/list [setdiff([lcon(##)],[v(deaf_players)])]=[get_eval(##/ambiance[add([rand([words([lattr(##/ambiance*)])])],1)])]
+
+&LOOPER Ambiance Object=@wait [add(300,[rand(601)])]={@trigger me/emitter;@trigger me/looper}
+
+@trigger Ambiance Object/looper
+
+&HELP_AMBIANCE Global Help Text=%r%tCommand: add ambiance%r%t[space(9)]remove ambiance%r%r%tAdding ambiance to a room is a way to increase the atmosphere. Ambiance will cause a random message to be emitted into a room at random intervals. (It is currently set to anywhere between 5 and 15 minutes.) In order to use ambiance for your room first you must set messages into attributes in the room, naming them &ambiance#, where the # is a number, from 1 up.%r%rFor example:%r%t&ambiance1 here=The sound of crickets chirping can be heard all around.%r%r%tYou will then need to type 'add ambiance' to turn it on. 'Remove ambiance' will turn it off, but it will not remove the ambiance attributes from the room.%r%r%tIf you wish to stop hearing any ambiance anywhere you go, type 'ambiance off'. Typing 'ambiance on' will allow you to hear ambiance again.%r%r%tCoded by Forever King @ TalesMUSH. (fk@tales.net)
+

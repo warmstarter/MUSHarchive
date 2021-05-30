@@ -1,0 +1,26 @@
+@@ Basic Vendor 1.0
+@@
+@@ This is an example of a very basic vendor, which
+@@ creates an object, locks it to the purchaser, then
+@@ @parent's the object to #1234 (change this number to
+@@ the number of the object you wish to sell copies of),
+@@ it then drops the object and @pemit's the buyer with
+@@ instructions on GET'ting and @chown'ing the object.
+
+
+@create Basic Vendor
+@lock/Basic Basic Vendor==me
+@PAYMENT Basic Vendor=You give the vendor [get(me/cost)] pennies.
+@set Basic Vendor/PAYMENT=no_command
+@OPAYMENT Basic Vendor=gives the [name(me)] [get(me/cost)] pennies.
+@set Basic Vendor/OPAYMENT=no_command
+@APAYMENT Basic Vendor=think setr(1,create(%n's Product));@lock %q1==%#;@parent %q1=#1234;@set %q1=CHOWN_OK;@halt %q1;drop %q1;@pemit %#=Thank you for purchasing Product! To use it please type the following:%r%bget [name(%q1)]%r%b@chown %q1%r%b@set %q1=!halt%r%blook [name(%q1)]
+@set Basic Vendor/APAYMENT=no_command
+@FAILURE Basic Vendor=It's bolted to the ground.
+@set Basic Vendor/FAILURE=no_command
+@OFAILURE Basic Vendor=tries to lift the [name(me)], but it is too heavy.
+@set Basic Vendor/OFAILURE=no_command
+@DESCRIBE Basic Vendor=A basic vendor. Type '[ansi(g,give [name(me)]=[get(me/cost)])]' to purchase a product.
+@set Basic Vendor/DESCRIBE=no_command visual
+@COST Basic Vendor=11
+@set Basic Vendor/COST=no_command

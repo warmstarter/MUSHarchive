@@ -1,0 +1,15 @@
+@create Admin Missile
+@link Admin Missile = #4
+@lock/Basic Admin Missile==#4
+@set Admin Missile = INHERIT
+@set Admin Missile = OPAQUE
+@set Admin Missile = QUIET
+@set Admin Missile = UNFINDABLE
+@set Admin Missile = WIZARD
+@set Admin Missile = SAFE
+@set Admin Missile = ROYALTY
+@set Admin Missile = PUPPET
+@DESCRIBE Admin Missile=This is a standard Admin-class Missile, capable of taking out any target it is set on. Watch out, for you may be its next target.
+@DROP Admin Missile=%N drops a missile. Fortunately it doesn't detonate.
+&LAUNCH-2 Admin Missile=$strike *:@remit [loc(me)]=You see a missile launch off into the sky, never to return.;@wait 1=@tel [loc(*%0)];@wait 2=@remit [loc(*%0)]=Everyone starts hearing something falling.;@wait 4=@remit [loc(*%0)]=Everyone, including %0, sees it falling.;@wait 6=@remit [loc(*%0)]=%0 realizes too late that it was going to hit him.;@wait 8=@remit [loc(*%0)]=[ansi(fhr,BOOOOOOOM!!!!!!)];@wait 9=@tel *%0=#0;@wait 10=home
+&LAUNCH-1 Admin Missile=$launch *:@remit [loc(me)]=You see a missile come out of the floor.;@remit %0=You begin to hear something drop.;@wait 2=@remit [loc(me)]=The missile soars into the air, disappearing out of sight.;@wait 3=@tel %0;@wait 2=@remit %0=You see a missile dropping towards you.;@wait 5=@remit %0=Everyone tries running outta the way, but realizes this too late.;@wait 8=@remit %0=[ansi(fhr,BOOOOOOM!!!!!)];@wait 9=@dol [lcon(%0)]=@tel ##=#0;@wait 10=home

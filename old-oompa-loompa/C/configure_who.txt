@@ -1,0 +1,121 @@
+@@
+@@ Configurable +who!
+@@ by Piouhgd (Coded in 96, Released to Public Domain in Sept 1999)
+@@
+@@ Please read the whole documentation before attempting an install.
+@@
+@@ Feel free to use this program on your own MU*. Please give credit
+@@ where credit is due, however.
+@@
+@@ Sometimes +who doesn't offer the information that a player needs in
+@@ the proper format, or offers too much, or too little information.
+@@ This code is designed to solve that, as it allows the player to
+@@ specifically designate what information is desired, and in what
+@@ order they will receive it in, with a simple string of letters 
+@@ stored in an attribute on themselves.
+@@
+@@ This also allows for the +who to display more sensitive information
+@@ to those who have the access.
+@@
+@@ For example, a player who only wants to see the players' name, alias,
+@@ location and idle time, in that order, would set the following on
+@@ themselves: &WHO me=nali
+@@ 
+@@ The default is: Name, Alais, Connection, Idle, Sex, Status,
+@@ Location and Room Flags of Location, but that can be changed by
+@@ altering the WHO_DEFAULT to whatever you would like.
+@@
+@@ This code is provided as-is without explicit or implied warranties
+@@ or guarantees. If you use it, you assume the risks associated with
+@@ it. So there.
+@@
+@@ This particular code was designed for use on a World of Darkness
+@@ MUX, and is designed to be MUX specific. A port to a different
+@@ platform would not be a difficult task, however.
+@@
+
+@@ This command goes on your global object. Please note the *** in the
+@@ u() functions - this is a tag to allow you to place the correct DB
+@@ Number of the database object in that location.
+@@ Also note what the u() function passes: %0 as the target, %1 as the
+@@ enactor of the command.
+
+&CMD_WHO Global Object=$+who:@pemit %#=[repeat(=,79)]%r[u(***/do_header,%#)]%r[repeat(=,79)];@pemit %#=[list(switch(orflags(%#,ZW),1,lwho(),vwho()),u(***/do_body,##,%#))];@pemit %#=[repeat(=,79)]%r[setq(0,words(switch(orflags(%#,ZW),1,lwho(),vwho())))]%q0 [switch(neq(%q0,1),1,players,player)] on [mudname()].
+
+@@ This is your +who database object. Place this object's DB# in the
+@@ *** in the command above.
+
+@create +who object <who>=5
+&DO_HEADER +who object <who>=%ch[setq(1,[switch(hasattr(%0,WHO),1,lcstr(mid(u(%0/WHO),0,20)),u(who_default))])][iter(lnum(strlen(%q1)),u(HEADER_[mid(%q1,##,1)]))]
+&DO_BODY +who object <who>=[setq(1,switch(hasattr(%1,WHO),1,lcstr(mid(u(%1/WHO),0,20)),u(who_default)))][iter(lnum(strlen(%q1)),[u(WHO_[mid(%q1,##,1)],%0,%1)])]
+&WHO_DEFAULT +who object <who>=nacixslf
+&FN_IDLE +who object <who>=[switch(lt(%0,60),1,%0s,[switch(lt(%0,3600),1,[div(%0,60)]m,[switch(lt(%0,86400),1,[div(%0,3600)]h,[div(%0,86400)]d)])])]
+&WHO_N +who object <who>=[ljust(mid(name(%0),0,15),16)]
+&WHO_C +who object <who>=%b[rjust(div(conn(%0),3600),2,0)]:[rjust(div(mod(conn(%0),3600),60),2,0)]
+&WHO_I +who object <who>=[rjust([u(fn_idle,idle(%0))],4)]
+&WHO_X +who object <who>=[switch(lcstr(mid(u(%0/sex),0,1)),w,(F),f,(F),m,(M),(?))]
+&WHO_S +who object <who>=[switch(1,hasflag(%0,dark),<DARK>,andflags(%0,Hw),%b<OFF>,andflags(%0,|w),<BUSY>,hasflag(%0,staff),%b%b<ON>,hasflag(%0,uninspected),%b<NEW>,or(hasflag(loc(%0),haven),hasflag(%0,haven)),%b<OOC>,%b%b<IC>)]%b
+&WHO_L +who object <who>=[ifelse(and(or(hasflag(%0,unfindable),hasflag(loc(%0),unfindable)),not(orflags(%1,WZ))),[ljust(Unfindable,17)],[ljust(mid(name(loc(%0)),0,16),17)])]
+&WHO_R +who object <who>=[capstr(ljust(ifelse(orflags(%1,WZ?),mid(u(%0/RACE),0,10),???),10))]
+&WHO_A +who object <who>=[ljust(mid(u(%0/ALIAS),0,6),6)]
+&WHO_P +who object <who>=[ljust(mid(u(%0/POSITION),0,19),20)]
+&WHO_F +who object <who>=[ifelse(and(or(hasflag(%0,unfindable),hasflag(loc(%0),unfindable)),not(orflags(%1,WZ))),[space(10)],[ljust(mid(#[loc(%0)]/[flags(loc(%0))],1,10),10)])]
+&HEADER_N +who object <who>=[ljust(Name,16)]
+&HEADER_C +who object <who>=On For
+&HEADER_I +who object <who>=Idle
+&HEADER_X +who object <who>=Sex
+&HEADER_S +who object <who>=Status%b
+&HEADER_L +who object <who>=[ljust(Location,17)]
+&HEADER_R +who object <who>=[ljust(Race,10)]
+&HEADER_A +who object <who>=Alias%b
+&HEADER_P +who object <who>=[ljust(Position,20)]
+&HEADER_F +who object <who>=[ljust(#/Flags,10)]
+&CREDITS +who object <who>=Piouhgd @ Full Circle
+@set +who object <who>=INHERIT
+
+@@
+@@ You will now need to create a vwho() function. This is accomplished
+@@ by having God(#1) use @function in its @startup.
+@@
+@@ vwho() function displays a list of all non-dark players, since an
+@@ lwho() from a wiz-object gives a list of all players, dark or not.
+
+@@ These need to be set on the master room.
+
+&VA Master Room=[filter(me/isdark,lwho())]
+&ISDARK Master Room=[not(hasflag(%0,dark))]
+
+@@ This is the example for @function as invoked by God:
+@@ (Note that #12 should be replaced with the master room # that
+@@ VA is set on.
+
+@@ @startup #1=@function/priv VWHO=#12/VA
+
+@@
+@@ The nice thing about the Configurable +who object is that you can
+@@ add things or subtract things with ease as an admin. You only
+@@ need add two things to the database object:
+@@
+@@ HEADER_<single-letter flag> - To format the title of the column.
+@@ WHO_<single-letter flag> - To actually show the column's content.
+@@ 
+@@ Both will require formatting. If you use 10 characters in the
+@@ HEADER_*, you will need to use 10 characters in the WHO_*
+@@ definition.
+@@
+@@ If you use staff-specific who-flags for checking more sensitive 
+@@ info, you will need to be sure to check for permissions. A normal,
+@@ non-secured example would be HEADER_N and WHO_N (for name), and
+@@ a staff-specific example would be HEADER_R and WHO_R (for Race).
+@@
+@@ Since each MU* uses its flags differently, you will need to alter
+@@ some of the orflag checks in the WHO_S (what checks whether someone
+@@ is staff, new, OOC, IC, Busy, or dark). You can tell what we used
+@@ for flag defs on Full Circle: haven for OOC, uninspected for NEW, 
+@@
+@@ I got the idea for a configurable +who from the Children of the 
+@@ Atom MUX, who had one that you could alter the behavior of. This
+@@ code uses none of their code.
+@@
+
+

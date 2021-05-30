@@ -1,0 +1,18 @@
+@create Starship ZMO Parent
+@link Starship ZMO Parent=[owner(me)]
+@lock Starship ZMO Parent=#40
+@set Starship ZMO Parent=!NO_COMMAND
+@set Starship ZMO Parent=HAVEN
+@set Starship ZMO Parent=LINK_OK
+@set Starship ZMO Parent=WIZARD
+@set Starship ZMO Parent=SAFE
+@set Starship ZMO Parent=ROYALTY
+&OPEN Starship ZMO Parent=26
+&SETUP_SHIP Starship ZMO Parent=$+setup ship:@switch %#=[owner(me)],{@pem %#=Ship is setup.;@elock me==[owner(me)];@lock/zone me==[owner(me)];@dolist [get([v(room_parent)]/room_list)]={@lock ##;@chzone ##=me;@parent ##=[v(room_parent)];@set ##=!no_command;@set ##=!halt}},@pem %#=ACCESS DENIED!
+@ACONNECT Starship ZMO Parent=@pemit %#=[ansi(hb,<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>)]%r[v(motd)]%rType '+MOTD' to see this message again.%r[ansi(hb,<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>)]
+&SET_MOTD Starship ZMO Parent=$+setmotd *:@switch [get([v(room_parent)]/command)]=*%#*,{&motd me=%0;@pemit %#=MOTD Set.},@pemit %#=ACCESS DENIED.
+&LIST_MOTD Starship ZMO Parent=$+motd:@pemit %#=[ansi(hb,<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>)]%r[v(motd)]%rType '+MOTD' to see this message again.%r[ansi(hb,<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>*<*>)]
+&SEND Starship ZMO Parent=^* says, "*":@switch [get([loc(*%0)]/int)]=pa,{@dolist [get([loc(*%0)]/room_list)]=@remit ##=[ansi(hr,*<PA System>*)] From the [name([loc(*%0)])]%, %0 says%, "%1"},#*,{@remit [get([loc(*%0)]/int)]=[ansi(hr,*<Intercom>*)] From the [name([loc(*%0)])]%, %0 says%, "%1"}
+&LHELP1 Starship ZMO Parent=$+lhelp:@swi [hasattrp(loc(%#),lhelp_)]=1,@pemit %#=[ansi(hb,[repeat(<*>*,19)]<*>)]%r[ansi(hr,center(Customized Location Help for [name(loc(%#))],79))]%r[ansi(hb,[repeat(<*>*,19)]<*>)]%r[ansi(g,u(loc(%#)/lhelp_))]%r[ansi(hb,[repeat(<*>*,19)]<*>)],0,@pemit %#=There is no +lhelp at your location.
+&LHELP2 Starship ZMO Parent=$+lhelp *:@swi [hasattrp(loc(%#),lhelp_[edit(%0,%b,_)])]=1,@pemit %#=[ansi(hb,[repeat(<*>*,19)]<*>)]%r[ansi(hr,center(Customized Location Help for [name(loc(%#))],79)%r[center(Topic: [capstr(lcstr(%0))],79)])]%r[ansi(hb,[repeat(<*>*,19)]<*>)]%r[ansi(g,u(loc(%#)/lhelp_[edit(%0,%b,_)]))]%r[ansi(hb,[repeat(<*>*,19)]<*>)],0,@pemit %#=There is no +lhelp topic '%0' at your location.
+&VIEW Starship ZMO Parent=$view *:@switch [hasattr(loc(%#),inspect_%0)]=1,@force me=@pemit %#=%[ansi(h,capstr(lcstr(%0)))]%r[xget(loc(%#),inspect_%0)],@pemit %#=There is nothing here with that name for you to view.

@@ -1,0 +1,35 @@
+@create BFG - Brazil's Fat Globals=10
+&FAT.TITLE.U BFG - Brazil's Fat Globals=[space(12)]Lean%b%bBMR%b%b%bFat%b%b%bGoal%b%bLose%b%b%%
+&FAT.BMR.U BFG - Brazil's Fat Globals=round(add(mul(9.8,%0),370),0)
+&FAT.M1.U BFG - Brazil's Fat Globals=[rjust(setr(0,round(sub(add(mul(1.082,%0),98.42),mul(4.15,%1)),1)),5)]%b[rjust(u(fat.bmr.u,%q0),5)]%b[rjust(setr(1,round(sub(%0,%q0),1)),5)]%b[rjust(setr(2,round(fdiv(%q0,sub(1,v(fat.male.goal))),1)),5)]%b[rjust(round(sub(%0,%q2),1),5)]%b[rjust(round(mul(100,fdiv(%q1,%0)),1),4)]
+&FAT.M2.U BFG - Brazil's Fat Globals=[setq(3,sub(fdiv(4.95,sub(add(1.0324,mul(0.15456,log(mul(2.54,%3)))),mul(0.19077,log(mul(2.54,sub(%1,%2)))))),4.5))][setq(1,round(mul(%q3,%0),1))][rjust(setr(0,round(sub(%0,%q1),1)),5)]%b[rjust(u(fat.bmr.u,%q0),5)]%b[rjust(%q1,5)]%b[rjust(setr(2,round(fdiv(%q0,sub(1,v(fat.male.goal))),1)),5)]%b[rjust(round(sub(%0,%q2),1),5)]%b[rjust(round(mul(100,%q3),1),4)]
+&FAT.M3.U BFG - Brazil's Fat Globals=[setq(3,sub(add(mul(0.8601,log(sub(%1,%2))),0.3676),mul(0.70041,log(%3))))][setq(1,round(mul(%q3,%0),1))][rjust(setr(0,round(sub(%0,%q1),1)),5)]%b[rjust(u(fat.bmr.u,%q0),5)]%b[rjust(%q1,5)]%b[rjust(setr(2,round(fdiv(%q0,sub(1,v(fat.male.goal))),1)),5)]%b[rjust(round(sub(%0,%q2),1),5)]%b[rjust(round(mul(100,%q3),1),4)]
+&FAT.M2.CMD BFG - Brazil's Fat Globals=$^fat/male ([0-9.]+)/([0-9.]+)$:@pemit %#=u(fat.title.u)%rYMCA%b%b%b%b:%b%b[u(fat.m1.u,%1,%2)]
+@set BFG - Brazil's Fat Globals/FAT.M2.CMD = regexp
+&FAT.M4.CMD BFG - Brazil's Fat Globals=$^fat/male ([0-9.]+)/([0-9.]+)/([0-9.]+)/([0-9.]+)$:@pemit %#=u(fat.title.u)%rYMCA%b%b%b%b:%b%b[u(fat.m1.u,%1,%2)]%rNavy 1%b%b:%b%b[u(fat.m2.u,%1,%2,%3,%4)]%rNavy 2%b%b:%b%b[u(fat.m3.u,%1,%2,%3,%4)]
+@set BFG - Brazil's Fat Globals/FAT.M4.CMD = regexp
+&FAT.F1.U BFG - Brazil's Fat Globals=[rjust(setr(0,round(sub(add(mul(1.082,%0),76.76),mul(4.15,%1)),1)),5)]%b[rjust(u(fat.bmr.u,%q0),5)]%b[rjust(setr(1,round(sub(%0,%q0),1)),5)]%b[rjust(setr(2,round(fdiv(%q0,sub(1,v(fat.female.goal))),1)),5)]%b[rjust(round(sub(%0,%q2),1),5)]%b[rjust(round(mul(100,fdiv(%q1,%0)),1),4)]
+&FAT.F2.U BFG - Brazil's Fat Globals=[setq(3,sub(fdiv(4.95,sub(add(1.29579,mul(0.22100,log(mul(2.54,%4)))),mul(0.35004,log(mul(2.54,sub(add(%1,%2),%3)))))),4.5))][setq(1,round(mul(%q3,%0),1))][rjust(setr(0,round(sub(%0,%q1),1)),5)]%b[rjust(u(fat.bmr.u,%q0),5)]%b[rjust(%q1,5)]%b[rjust(setr(2,round(fdiv(%q0,sub(1,v(fat.female.goal))),1)),5)]%b[rjust(round(sub(%0,%q2),1),5)]%b[rjust(round(mul(100,%q3),1),4)]
+&FAT.F3.U BFG - Brazil's Fat Globals=[setq(3,sub(add(mul(1.0542,log(%0)),mul(0.004396,%1)),add(mul(0.01354,%2),mul(0.013085,%3),mul(0.03997,%4),mul(0.005086,%5),0.71938)))][setq(1,round(mul(%q3,%0),1))][rjust(setr(0,round(sub(%0,%q1),1)),5)]%b[rjust(u(fat.bmr.u,%q0),5)]%b[rjust(%q1,5)]%b[rjust(setr(2,round(fdiv(%q0,sub(1,v(fat.female.goal))),1)),5)]%b[rjust(round(sub(%0,%q2),1),5)]%b[rjust(round(mul(100,%q3),1),4)]
+&FAT.F4.U BFG - Brazil's Fat Globals=[setq(3,sub(mul(1.63205,log(sub(add(%1,%2),%3))),add(mul(0.97684,log(%4)),0.78387)))][setq(1,round(mul(%q3,%0),1))][rjust(setr(0,round(sub(%0,%q1),1)),5)]%b[rjust(u(fat.bmr.u,%q0),5)]%b[rjust(%q1,5)]%b[rjust(setr(2,round(fdiv(%q0,sub(1,v(fat.female.goal))),1)),5)]%b[rjust(round(sub(%0,%q2),1),5)]%b[rjust(round(mul(100,%q3),1),4)]
+&FAT.F2.CMD BFG - Brazil's Fat Globals=$^fat/female ([0-9.]+)/([0-9.]+)$:@pemit %#=u(fat.title.u)%rYMCA :%b%b[u(fat.f1.u,%1,%2)]
+@set BFG - Brazil's Fat Globals/FAT.F2.CMD = regexp
+&FAT.F5.CMD BFG - Brazil's Fat Globals=$^fat/female ([0-9.]+)/([0-9.]+)/([0-9.]+)/([0-9.]+)/([0-9.]+)$:@pemit %#=u(fat.title.u)%rYMCA%b%b%b%b:%b%b[u(fat.f1.u,%1,%2)]%rNavy 1%b%b:%b%b[u(fat.f2.u,%1,%2,%3,%4,%5)]%rNavy 2%b%b:%b%b[u(fat.f4.u,%1,%2,%3,%4,%5)]
+@set BFG - Brazil's Fat Globals/FAT.F5.CMD = regexp
+&FAT.F6.CMD BFG - Brazil's Fat Globals=$^fat/female ([0-9.]+)/([0-9.]+)/([0-9.]+)/([0-9.]+)/([0-9.]+)/([0-9.]+)$:@pemit %#=u(fat.title.u)%rTableFit:%b%b[u(fat.f3.u,%1,%2,%3,%4,%5,%6)]
+@set BFG - Brazil's Fat Globals/FAT.F6.CMD = regexp
+&FAT.M.CMD BFG - Brazil's Fat Globals=$fat/male:@pemit %#=Usage: fat/male <weight>/<waist>%r[space(7)]fat/male <weight>/<waist>/<neck>/<height>%r%r[space(5)]Measure waist horizontally at the navel.%r[space(5)]Measure neck below the adam's apple horizontally or (if necessary)%r[space(10)]at a slight downward angle.%r[space(5)]Measure height without shoes.%r%r[space(5)]All units are in pounds and inches.%r
+&FAT.F.CMD BFG - Brazil's Fat Globals=$fat/female:@pemit %#=Usage: fat/female <weight>/<waist>%r[space(7)]fat/female <weight>/<waist>/<hip>/<neck>/<height>%r[space(7)]fat/female <weight>/<hip>/<neck>/<height>/<forearm>/<wrist>%r%r[space(5)]Measure waist horizontally at the smallest point.%b%bIf there is%r[space(10)]no smallest point, then 1" above your navel.%r[space(5)]Measure hips horizontally at the widest point.%r[space(5)]Measure neck below the adam's apple horizontally or (if necessary)%r[space(10)]at a slight downward angle.%r[space(5)]Measure height without shoes.%r[space(5)]Measure forearm at the widest point while making a fist.%r[space(5)]Measure wrist at the narrowest part at the joint between the%r[space(10)]forearm and the hand.%r%r[space(5)]All units are in pounds and inches.%r
+&FAT.CMD BFG - Brazil's Fat Globals=$fat:@pemit %#=Usage: fat/%[male|female%] <arguments>%r[space(5)]Use /male or /female for more help.
+&FAT.MALE.GOAL BFG - Brazil's Fat Globals=0.15
+&FAT.FEMALE.GOAL BFG - Brazil's Fat Globals=0.22
+&PTS1.CMD BFG - Brazil's Fat Globals=$^pts ([0-9.]+)$:@pemit %#=Points [round(fdiv(%1,50),1)]
+@set BFG - Brazil's Fat Globals/PTS1.CMD = regexp
+&PTS3.CMD BFG - Brazil's Fat Globals=$^pts ([0-9.]+)/([0-9.]+)/([0-9.]+)$:@pemit %#=Points [round(add(fdiv(%1,50),fdiv(%2,12),-[fdiv(min(4,%3),5)]),1)]
+@set BFG - Brazil's Fat Globals/PTS3.CMD = regexp
+&PTS4.CMD BFG - Brazil's Fat Globals=$^pts ([0-9.]+)/([0-9.]+)/([0-9.]+)/([0-9.]+)$:@pemit %#=Points [round(add(fdiv(%1,55.6),fdiv(%2,79.4),fdiv(%3,-62.5),fdiv(min(4,%4),-5)),1)]
+@set BFG - Brazil's Fat Globals/PTS4.CMD = regexp
+&PTS.HELP.CMD BFG - Brazil's Fat Globals=$pts/help:@pemit %#=Usage: pts <cal>%r[space(7)]pts <cal>/<fat grams>/<fiber grams>%r[space(7)]pts <cal>/<fat grams>/<protein grams>/<fiber grams>%r
+@set BFG - Brazil's Fat Globals=SAFE
+@set BFG - Brazil's Fat Globals=UNFINDABLE
+

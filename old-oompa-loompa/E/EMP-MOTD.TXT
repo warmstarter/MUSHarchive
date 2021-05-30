@@ -1,0 +1,8 @@
+@create Empires MOTD Object
+@link Empires MOTD Object=#2
+@lock Empires MOTD Object=#3
+@set Empires MOTD Object=WIZARD
+@DESCRIBE Empires MOTD Object=Type @setmotd <empire>=<motd>.
+@ACONNECT Empires MOTD Object=@switch [v(MOTD_[edit(empire(%#),%b,_)])]=,, {@pemit %#=[u(line)]%r[center([edit(empire(%#),%b,_)] Empire MOTD:,79)]%r[u(line)]%r#$%r[u(line)]}
+&LINE Empires MOTD Object=[repeat(=,79)]
+@VA Empires MOTD Object=$@setmotd *=*:@switch [or(hasflag(%#,Wizard),and(hasempire(%#,edit(%0,_,%b)),hasrank(%#,16)))]=0, {@pemit %#=Only Fleet Admirals and up in that Empire (or Wizards) may change its MOTD.},{&MOTD_%0 me=%1;@pemit %#=MOTD for Empire %0 set.}

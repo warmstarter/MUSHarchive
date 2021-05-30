@@ -1,0 +1,17 @@
+@create PARENT: Beer Nut
+@lock PARENT: Beer Nut==*[owner(me)]
+&CHEW PARENT: Beer Nut=$eat nut:@emit [name(%#)] picks up the PARENT: Beer Nut and pops it in %p mouth.;@trigger me/rand[rand(3)];&lastate me=[get(me/currate)];&currate me=%#
+&RAND0 PARENT: Beer Nut=@emit [name(v(currate))] closes [poss(v(currate))] eyes and smiles from ear to ear as a heady mixture of opium, salt, and [name(v(lastate))]'s saliva brings [obj(v(currate))] closer to Universal Oneness.
+@set PARENT: Beer Nut/RAND0=no_command
+&RAND1 PARENT: Beer Nut=@emit [name(v(currate))]'s head pops off [poss(v(currate))] shoulders as [subj(v(currate))] accidentally triggers a nitrate explosion. *BOOM*!;kill [name(v(currate))]=100
+@set PARENT: Beer Nut/RAND1=no_command
+&RAND2 PARENT: Beer Nut=@emit [name(v(currate))] grasps [poss(v(currate))] throat and gasps "I've been poisoned by [name(v(lastate))]'s *cough* spit!" In a last-ditch attempt for revenge, [name(v(currate))] whips the [name(me)] at [name(v(lastate))].  [switch(eq(#0,loc(v(lastate))),1,The [name(me)] hits [name(v(lastate))] square in the stomach and the unstable nitroglycerides in the salt EXPLODE!,0,Fortunately [subj(v(currate))] only manages to wing the bartender.)];kill [name(v(lastate))]=100;kill [name(v(currate))]=100
+@set PARENT: Beer Nut/RAND2=no_command
+&CURRATE PARENT: Beer Nut=#315
+@set PARENT: Beer Nut/CURRATE=no_command
+&LASTATE PARENT: Beer Nut=#319
+@set PARENT: Beer Nut/LASTATE=no_command
+@Desc PARENT: Beer Nut=It's a PARENT: Beer Nut, and looks like most PARENT: Beer Nuts do except that you can tell that this is not composed of whatever PARENT: Beer Nuts are composed of. It seems to be made up of opium, nitroglycerin, [name(v(currate))]'s saliva, salt, and various corn by-products.  Type `eat nut' to eat it.
+@set PARENT: Beer Nut/Desc=no_command
+@Fail PARENT: Beer Nut=Type `eat nut' to eat it.
+@set PARENT: Beer Nut/Fail=no_command

@@ -1,0 +1,49 @@
+@@ REVISION/CHANGES Details
+@@
+@@ My changes include the use of the NOWATCH and WATCHPERMIT attributes to properly evaluate
+@@ wether or not +watch and +watch/who should show members of the enactor's FRIENDS attribute.
+@@ Just made sense to us - no sense in hiding from the code, if you're really not hiding. :)
+@@ I also changed the +watch/page command so it uses a @pemit from the Global +Watch Object,
+@@ instead of forcing the enactor to page each member in the list. In addition +watch/page also
+@@ now respects the NOWATCH and WATCHPERMIT attributes, so people hiding from the code cannot
+@@ be paged by +watch/page unless the enactor is a member of their WATCHPERMIT list. I also
+@@ removed the FN.WATCHALERT, since it is not called by any of the other code and it doesn't
+@@ need to be @function-ed with the code working as it does. However, I have included the
+@@ attribute in the comments below in case others do want it. The +watch/all command was
+@@ changed so only staff can use it (this is just our preference). And lastly I just touched
+@@ up a few of the other commands so that a different response is given if a player tries to
+@@ use the code in a way that doesn't make sense. For an example: +watch/hide when the player
+@@ is already hiding from the Watcher code. Since the AWATCH attribute isn't really triggered
+@@ with the code unless the function below is @function-ed and defined properly in the code
+@@ we have removed its mention from the +watch/help.
+@@
+@@ &FN.WATCHALERT Global +Watch Object=@pemit %1=[udefault(%1/friends,<Watch> [name(%0)](%0) has connected.,connected)];@trig/quiet %0/awatch=[name(%1)], %1
+@@
+@@ I hope you find these changes valuable. :)
+@@ Xelloss@ChaosMUX.net (unopened)
+
+
+@create Global +Watch Object=10
+&DO.ADDWATCHER Global +Watch Object=$+watch/add *:@swi [type(*%0)]=PLAYER,{&friends %#=[setunion(get(%#/friends),num(*%0))];@pemit %#=%ch%cg[mudname()] Watcher:%cn You have added [name(*%0)] to your watch list.},{@pemit %#=%ch%cg[mudname()] Watcher:%cn Sorry, %0 isn't a player.}
+&DO.DELWATCHER Global +Watch Object=$+watch/del *:@switch [match([get(%#/friends)],[num(*%0)])]=>0,{&friends %#=[remove(get(%#/friends),num(*%0))];@pemit %#=%ch%cg[mudname()] Watcher:%cn You have removed [Name(*%0)] from your watch list.},{@pemit %#=%ch%cg[mudname()] Watcher:%cn That name does not appear on your watch list.}
+&DO.HIDEWATCHER Global +Watch Object=$+watch/hide:@switch [match([get(me/nowatch)],[num(%#)])]=0,{&NOWATCH me=[setunion([get(me/NOWATCH)],[num(%#)])];@pemit %#=%ch%cg[mudname()] Watcher:%cn You are now hiding from the Watcher code.},{@pemit %#=%ch%cg[mudname()] Watcher:%cn You are already hiding from the Watcher code.}
+&DO.UNHIDEWATCHER Global +Watch Object=$+watch/unhide:@switch [match([get(me/nowatch)],[num(%#)])]=>0,{&NOWATCH me=[remove(get(me/NOWATCH),%#)];@pemit %#=%ch%cg[mudname()] Watcher:%cn Your logins and disconnects may now be monitored.},{@pemit %#=%ch%cg[mudname()] Watcher:%cn Cannot complete command. You have not been hiding from the Watch code.}
+&DO.WATCH Global +Watch Object=$+watch:@pemit %#=%ch%cg[mudname()] Watcher:%cn Watched players currently connected: [switch(words(setr(0,squish(iter(setinter(u(%#/friends),lwho()),[switch(and(andflags(##,Pc),or(member(get(##/watchpermit),%#),not(member(u(NOWATCH),##)))),1,[name(##)]%,,)])))),0,None,mid(r(0),0,sub(strlen(%q0),1)))]
+@Adisconnect Global +Watch Object=@dolist [lwho()]={@switch/first [hasflag(%#,DARK)]:[not(u(##/WATCHON))]:[udefault(##/watchall,0)]:[gt(match(u(##/friends),%#),0)]:[gt(match(u(NOWATCH),%#),0)]:[gt(match(u(%#/watchpermit),# #),0)]=0:1:1:*:0:*, {@pemit ##=[udefault(##/watchfmt,%ch%cg[mudname()] Watcher:%cn [name(%#)] has disconnected.,disconnected)]},0:1:0:1:0:*,{@pemit ##=[udefault(##/watchfmt,%ch%cg[mudname()] Watcher:%cn [name(%#)] has disconnected.,disconnected)]},0:1:0:1:1:1,{@pemit ##=[udefault(##/watchfmt,%ch%cg[mudname()] Watcher:%cn [name(%#)] has disconnected.,disconnected)]},}
+@Aconnect Global +Watch Object=@dolist [lwho()]={@switch/first [hasflag(%#,DARK)]:[not(u(##/WATCHON))]:[udefault(##/watchall,0)]:[gt(match(u(##/friends),%#),0)]:[gt(match(u(NOWATCH),%#),0)]:[gt(match(u(%#/watchpermit),# #),0)]=0:1:1:*:0:*, {@pemit ##=[udefault(##/watchfmt,%ch%cg[mudname()] Watcher:%cn [name(%#)] has connected.,connected)]},0:1:0:1:0:*,{@pemit ##=[udefault(##/watchfmt,%ch%cg[mudname()] Watcher:%cn [name(%#)] has connected.,connected)]},0:1:0:1:1:1,{@pemit ##=[udefault(##/watchfmt,%ch%cg[mudname()] Watcher:%cn [name(%#)] has connected.,connected)]},};
+&DO.WHOWATCHER Global +Watch Object=$+watch/who:@pemit %#=%ch%cg[mudname()] Watcher:%cn You are currently watching for [iter(u(%#/friends),{switch(type(##),PLAYER,{%r%t- [name(##)] ([get(##/alias)])[repeat(.,sub(28,add(strlen(name(##)),strlen(##))))][switch(and(or(not(member(u(NOWATCH),##)),member(get(##/watchpermit),%#)),hasflag(##,connected)),1,Online,Offline)]})})]
+&DO.HELPWATCHER Global +Watch Object=$+watch/help:@pemit %#=The following are commands available for +watch:%r%r+watch [space(11)]-- shows you who is connected that you are watching.%r+watch/on <default>- turns on the watch code after it has been turned off.%r+watch/off [space(7)]-- turns off the Watch without removing your list.%r+watch/who [space(7)]-- displays everyone on your watch list and connect status.%r+watch/hide [space(6)]-- hides you from the +watch.%r+watch/unhide [space(4)]-- allows others to watch your logins and disconnects.%r+watch/per <name> -- permits <name> to see you while hiding.%r+watch/rem <name> -- removes <name> from seeing you while hiding.%r+watch/add <name>[space(1)]-- adds <name> to your watch list.%r+watch/del <name>[space(1)]-- removes <name> from your watch list.%r+watch/page <message> -- sends <message> as a page to those on your watch list.%r+watch/all on [space(4)]-- allows you to watch all logins and disconnects.%r+watch/all off [space(3)]-- prevents you from watching all logins and disconnects.%r%rYou may also set the format by which you see logins and disconnects. To do this, set &WATCHFMT me=%%n has %%0. Other useful commands you might add could be %[time()], %%# or whatever.%r%rCREDITS: +watch was coded by Alton/Cedric@Tir Rauhd and Watchman@Haven. It was debugged and improved by Pennance@DenverMUSH, and further improved by Xelloss@ChaosMUX. It may be copied freely.
+&DO.ALLWATCHER Global +Watch Object=$+watch/all *:@switch [isstaff(%#)]=1,{@swi %0=ON,{&watchall %#=1;@pemit %#=%ch%cg[mudname()] Watcher:%cn You are now watching all logins and disconnects.},{&watchall %#;@pemit %#=%ch%cg[mudname()] Watcher:%cn You are no longer watching all logins and disconnects.}},{@pemit %#=%ch%cg[mudname()] Watcher:%cn You must be Staff in order to watch all connects/disconnects.}
+@@ NOTE: isstaff() is a functioned defined in our code to recognize staff members. It can be
+@@ easily replaced with an equivalent orflags() for your game.
+&DO.PERMITWATCH Global +Watch Object=$+watch/per *:@swi [type(*%0)]=PLAYER,{@switch [match([get(%#/watchpermit)],[num(*%0)])]=0,{&watchpermit %#=[setunion(get(%#/watchpermit),num(*%0))];@pemit %#=%ch%cg[mudname()] Watcher:%cn [name(*{%0})] has been added to your permission list, and will now see you even when you are hidden from the Watch code.},{@pemit %#=%ch%cg[mudname()] Watcher:%cn [name(*%0)] is already on your permission list.}},{@pemit %#=%ch%cg[mudname()] Watcher:%cn Sorry, '%0' doesn't appear as a valid player or player alias.}
+&DO.UNPERMWATCH Global +Watch Object=$+watch/rem *:@switch [type(*%0)]=PLAYER,{@switch [match([get(%#/watchpermit)],[num(*%0)])]=>0,{&watchpermit %#=[remove(get(%#/watchpermit),num(*%0))];@pemit %#=%ch%cg[mudname()] Watcher:%cn [name(*%0)] has been removed from your hidden permission list and will no longer see you when hiding from the Watch code.},{@pemit %#=%ch%cg[mudname()] Watcher:%cn [name(*%0)] already does not appear on your permission list.}},{@pemit %#=%ch%cg[mudname()] Watcher:%cn Sorry, '%0' does not appear as a valid player or player alias.}
+&DO.WPAGE Global +Watch Object=$+watch/page *:@pemit %#={%ch%cg[mudname()] Watcher:%cn [name(%#)] pages: %0};@dolist get(%#/friends)=@switch and(hasflag(##,connect),or(member(get(##/watchpermit),%#),not(member(u(NOWATCH),##))))=1,{@pemit ##=%ch%cg[mudname()] Watcher:%cn [name(%#)] pages: %0},0,
+&DO.WATCHON Global +Watch Object=$+watch/on:@switch [get(%#/watchon)]=1,{@pemit %#=%ch%cg[mudname()] Watcher:%cn Watcher code is now turned on.;&WATCHON %#=0},{@pemit %#=%ch%cg[mudname()] Watcher:%cn You have already turned on the Watcher code.}
+&DO.WATCHOFF Global +Watch Object=$+watch/off:@switch [get(%#/watchon)]=0,{@pemit %#=%ch%cg[mudname()] Watcher:%cn Watcher code is now turned off.;&watchon %#=1},{@pemit %#=%ch%cg[mudname()] Watcher:%cn You have already turned off the Watcher code.}
+&CREDITS Global +Watch Object=+watch was coded by Alton/Cedric@Tir Rauhd and Watchman@Haven. It was debugged and improved by Pennance@DenverMUSH, and further improved by Xelloss@[mudname()]. It may be copied freely.
+&NOWATCH Global +Watch Object=#1
+@Desc Global +Watch Object=%r%tGLOBAL +WATCH OBJECT. Handle with caution. :)%r%r[iter([setdiff([lattr(me)],desc)],ljust(##,18))]%r
+@set Global +Watch Object=INHERIT
+@set Global +Watch Object=SAFE
+

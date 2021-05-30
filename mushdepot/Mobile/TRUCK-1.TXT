@@ -1,0 +1,110 @@
+PARENT: Nissan Pathfinder(#1363MOVahs)
+Type: THING Flags: MONITOR OPAQUE VISUAL AUDIBLE HALTED SAFE
+This 1999, Nissan Pathfinder gives the impression of Luxury with extreme
+performance. It is the latest in the line of imported 4 x 4's. The first thing
+that strikes you is it's sleek silhoette and it's exhilarating show of luxury.
+The luminous white metallic gleam is as chilling as freah fallin snow as it is
+obvious the owner never lets a speck of dirty tarnish it. It's body is lifted
+high over BF Goodrich's Sandblasters, and the license plate reads, *PRINCESS*.
+Ebony white tinted windows hide the interior from your view.
+Owner: Eddy Tengel  Key: *UNLOCKED* Loonies: 1
+START:$start:@switch [get(me/engine)]=on,@pemit %#=The [name(me)]'s engine is
+already running.,off,{@switch %!=%l,{&engine me=on;@Pemit me=%N turns the key,
+and the ignition turns over.;@emit [name(me)]'s engine rumbles to life.}}
+Listen:*
+Prefix:From inside the [name(me)],
+Inprefix:From the outside,
+ENGINE:off
+STOP:$stop:@switch %!=%l,{@switch [get(me/engine)]=off,@pemit %#=The engine is
+already off.,on,{@pemit me=%N turns the key.;@emit [name(me)]'s engine comes to
+a halt.;&engine me=off;&speed me=0}}
+DRIVE:$dv *:@switch %!=%l,{@switch [get(me/engine)]=off,@pemit %#=The
+[name(me)]'s engine is not running.;@switch [get(me/speed)]=>0,go [v(0)] ,0 ,
+@pemit %#=The [name(me)] is not moving.}
+Oenter:sits down inside.
+Oxenter:opens a door of the [name(me)], and climbs inside.
+Enter:You open a door, and climb inside.
+Leave:You open a door, and climb outside.
+Oleave:gets out of the truck.
+Oxleave:steps out of the [name(me)].
+Idesc:You are in a beautiful [get(me/xcolor)] [name(me)]. The interior is made
+of [get(me/icolor)] leather. Nice, isn't it?%r
+%r --------------------------------------------------------------------------
+%r| Windows are [u(windows)] | Doors are [u(doors)] | Current Speed [u(speed)]
+Mph | Engine: [u(engine)] |
+%r --------------------------------------------------------------------------
+%r%t%t%t | Drive is [u(wheel)] |
+%r --------------------------------------------------------------------------
+%r%t%t%tType 'truckhelp' for help.
+ICOLOR:Grey
+XCOLOR:Black
+Fail:It's too heavy.
+HORN:$horn:@switch %!=%l,{@pemit me=%N honks the horn.;@emit The [name(me)]'s
+horn HONKS!}
+VIEW:$view:@force me=look
+HELP_TRUCK:$truckhelp:@switch [num(me)]=[loc([v(#)])],{@pemit [v(#)]
+==-=-=-=-=-=Truck Help=-=-=-=-=-=-=-=%rStart Engine (Start)%rView (View)%r
+TruckStats(TruckStats)%rStatus (Status)%rDrive (DV)<Direction>%rAccelerate
+(ACC) <amount>%rDecelerate (DEC) <amount>%rBrake (Brake)%rHorn (Horn)%rStop
+Engine (Stop)%rWindows (Windows Up or Down)%rDoors (Lock or Unlock Truck)%r
+Wheels (4 Wheel or 2 Wheel)%r=-=
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=}
+Ealias:drive
+SPEED:0
+ACCELERATE:$acc *:@switch [num(me)]=[loc([v(#)])],{@switch [get(me/engine)]=
+off,@pemit [v(#)]=Perhaps you should start the [name(me)] before trying to
+accelerate?,on,{@switch [gte([add([v(0)],[u(speed)])],[u(max_speed)])]=1,
+{@pemit [v(#)]=To accelerate that much would exceed the max speed of your[name
+(me)]. Max Speed: [u(max_speed)] MPH.},0,{@pemit me=[v(n)] pushes down on the
+accelerator.;&speed me=[add([get(me/speed)],[v(0)])];@emit [name(me)] speeds
+along at [get(me/speed)] MPH.}}}
+DECELERATE:$dec *:@switch [num(me)]=[loc([v(#)])],{@switch [get(me/engine)]=
+off,{@pemit [v(#)]=If the truck is off... it's not moving.},on,{@switch [lt(
+[sub([u(speed)],[v(0)])],0)]=1,{@pemit [v(#)]=You cannot decelerate to a speed
+less than zero.},0,{@pemit me=[v(n)] presses on the breaks to slow down.;&speed
+me=[sub([u(speed)],[v(0)])];@emit [name(me)] slows to [get(me/speed)] MPH.}}}
+BRAKE:2
+STATUS:$status:@switch [num(me)]=[loc([v(#)])],{@pemit me=[v(n)] examines the
+gauges closely.;@pemit [v(#)]=Engine: [get(me/engine)]%rSpeed: [get(me/speed)]
+MPH%rBattery: [get(me/battery)]%rOil: [get(me/oil)]%rFuel: [get(me/gas)]%r
+Wheel: [get(me/Wheel)]}
+GAS:full
+OIL:full
+BATTERY:full
+SPEED_SAFE:70
+MANUEVER:4 (2X4)/8 (4X4)
+TYPE:Truck
+SPEED_MAX:100
+Cost:$50k
+STATS_TRUCK:$truckstats:@switch [num(me)]=[loc([v(#)])],@pemit [v(#)]=-------
+[name(me)] Stats-------%rType: [get(me/type)]%rSafe Speed: [get(me/speed_safe)]
+%rMaximum Speed: [get(me/speed_max)]%rManuever: [get(me/manuever)]%rBrake:
+[get(me/brake)]%rCost: [get(me/cost)]
+Amove::rumbles in.
+BRAKES:$brake:@switch [num(me)]=[loc([v(#)])],{@pemit me=[v(N)] slams on the
+brakes.;@emit [name(me)] screeches to a halt.};&speed me=0
+CREDITS:PENTEX@ElysiumMUSH recode by Daniel@BloodlettingMUSH
+MANEUVER:Maneuverable
+LOCK:$lock truck:@set [name(me)]=!enter_ok;&doors [name(me)]=Locked;\\%n locks
+the doors to the truck.
+UNLOCK:$unlock truck:@set [name(me)]=enter_ok;&doors [name(me)]=Unlocked;\\%n
+unlocks the doors to the truck.
+SCAN:$scan *:@force me=l %0
+DOORS:Locked
+Filter:*has arrived.,*has left.,Dropped.,*whispers to*
+WINDOWS:Down
+VB:$windows down:&windows me=Down;\\The windows are rolled down to the truck.;
+@emit %n rolls down the windows.;@set me=!opaque
+VC:$windows up:&windows me=Up;\\The windows are rolled up on the truck.;@emit
+%n rolls down the windows.;@set me=opaque
+MAX_SPEED:100
+SAFE_SPEED:70
+WHEEL:4 Wheel Drive
+WHEEL4:$4 wheel:&Wheel [name(me)]=4 Wheel Drive;\\The truck shifts into four
+wheel drive.
+WHEEL2:$2 wheel:&Wheel [name(me)]=2 Wheel Drive;\\The truck shifts back into
+two wheel drive.
+No exits.
+Home: Eddy's Domicile
+Location: Free Coding Room(#502RFLh)
+_______________________________________________________________________________

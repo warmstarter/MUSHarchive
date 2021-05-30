@@ -1,0 +1,20 @@
+@create Jesse's Room Parent
+@link Jesse's Room Parent=[owner(me)]
+@set Jesse's Room Parent=INHERIT
+@set Jesse's Room Parent=OPAQUE
+@set Jesse's Room Parent=WIZARD
+@set Jesse's Room Parent=SAFE
+@set Jesse's Room Parent=ROYALTY
+@DESCRIBE Jesse's Room Parent=[ansi(hc,[center([name(zone(me))],79,=)]%r[ansi(hw,[eval(me,desc-1)])]%r[repeat([ansi(hc,=)],79)]%r%r[ansi(hb,\[)][ansi(hc,Players)][ansi(hb,\])] [squish([iter(lcon(me),switch(type(##),PLAYER,switch(idle(##),-1,,switch(hasflag(##,Dark),0,edit(name(##),Console,) [switch(hasflag(##,IC),1,(IC))] [switch(hasattr(##,CAPTION),1,{Brandishing: [get(##/CAPTION)]})] [ansi(hb,-)]))))])]%r[ansi(hb,\[)][ansi(hc,Objects)][ansi(hb,\])] [squish([iter(lcon(me),switch(type(##),THING,switch(hasflag(##,Dark),0,edit(name(##),Console,) [switch(hasflag(##,IC),1,(IC))] [switch(hasattr(##,CAPTION),1,{Brandishing: [get(##/CAPTION)]})] [ansi(hb,-)])))])]%r[ansi(hb,\[)][ansi(hc,Status%b)][ansi(hb,\])] [get([zone(me)]/salert)]%r[ansi(c,Obvious Exits:)]%b[iter([lexits(me)],[switch(hasflag(##,DARK),0,[ansi(r,[ljust(%r<[ucstr([extract([fullname(##)],2,1,;)])]>,8)] [ansi(hg,[ljust([name(##)],30)])])][switch(hasflag(##,TRANSPARENT),1,[ansi(hc,{[before([name([loc(##)])],<<<)]})], ,%r)])])]
+@SUCCESS Jesse's Room Parent=[switch([v(light_type)],alertlights,[eval(me,alert_lights)],torchlight,[eval(me,torchlight)],streetlights,[eval(me,street_lights)],buildinglights,[eval(me,Building_Lights)],lamplights,[eval(me,Lamp_Lights)],roomlights,[eval(me,Room_Lights)],turbolights,[eval(me,Turbo_lights)],daylight,[eval(me,Sun_Light)],hall-light,[eval(me,Hall_lights)],windowlight,[eval(me,Windows)],default,[eval(me,defaultlights)])]
+&BUILDING_LIGHTS Jesse's Room Parent=[ansi(c,Overhead lights illuminate the building well.)]
+&ROOM_LIGHTS Jesse's Room Parent=[ansi(c,An overhead light illuminates the room.)]
+&LAMP_LIGHTS Jesse's Room Parent=[ansi(c,A small lamp in the room illuminates it's surroundings.)]
+&HALL_LIGHTS Jesse's Room Parent=[ansi(c,The upper part of the ceiling are lights, illuminating the hallway.)]
+&TURBO_LIGHTS Jesse's Room Parent=[ansi(c,The turbolift lights illuminate the lift perfectly.)]
+&ALERT_LIGHTS Jesse's Room Parent=[ansi(c,Large panels that line the wall are [get(zone(me)/salert)].)]
+&STREETLIGHTS Jesse's Room Parent=[ansi(c,[switch([u(me/daylight)],1,The Street lights which line the sidewalks here are currently off.,0,The Street lights shine brightly on to the street below.)])]
+&WINDOWS Jesse's Room Parent=[ansi(c,switch([u(me/daylight)],1,{Sunlight shines through a window here, lighting the room.},0,{Pale moonlight shines darkly through a window, giving the room just enough illumination not to run in to anything.}))]
+&SUN_LIGHT Jesse's Room Parent=[ansi(c,[switch([u(me/daylight)],1,{The sun shines down from above, lighting the area up.},0,The pale moon shines its cold light here.)])]
+&DESC-1 Jesse's Room Parent=There is no currect Description set. Remember to Store the room description in &DESC-1, @set here=dark, and if you want the players to see where the exit leads to, set the exits TRANSPARENT.
+&TORCHLIGHT Jesse's Room Parent=[ansi(c,A torch on the wall burns brightly, lighting up the room.)]

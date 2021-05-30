@@ -1,0 +1,6 @@
+@create IC-OOC Object
+@link IC-OOC Object=#2
+@set IC-OOC Object=WIZARD
+@set IC-OOC Object=SAFE
+&DO_OOC IC-OOC Object=$ooc:@select [get(%#/playstatus)]=%bOOC,@pemit %#=You're already OOC!,{@remit %l=%N goes OOC.;&icloc %#=%l;@tel %#=#5;@remit %l=%N is now OOC.;&status %#=%bOOC}
+&DO_IC IC-OOC Object=$ic:@select [get(%#/playstatus)]=%b%bIC,@pemit %#=You're already IC!,{@remit %l=%N goes IC.;@tel %#=[get(%#/icloc)];@remit %l=%N is now IC.;&status %#=%b%bIC}

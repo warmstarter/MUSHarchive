@@ -1,0 +1,17 @@
+@create TV Parent
+@lock TV Parent=*Research Inc transmits to. 
+@Listen TV Parent
+&TRANS TV Parent=#564
+&INSTALL TV Parent=$install:@listen me=+*=* ;&install me=@@;@pemit %#={TV installed.};@pemit [u(trans)]={+ADD-[num(me)]}
+@Ahear TV Parent=@switch [v(tstat)]=off,@@,on,{@switch [v(channel)]=%0,{@emit From the TV> %1},all,{@emit From the TV|%0>%1},vcr,{@switch %0=VCR,{@emit From the TV> %1},@pemit [u(vcr)]=+%0=%1}}
+&CHANNEL TV Parent=0
+@Desc TV Parent=This a cool tv. Type `install' to install then use `tvhelp' for commands.%RThe TV is currently on channel '[v(channel)]'.
+@adesc TV Parent=@pemit %#=On the TV you see..%r[u(u(par)/desc_[v(channel)])]%r
+&TSTAT TV Parent=off
+&TVON TV Parent=$tvon:@switch [v(tstat)]=off,{@emit The TV screen begins to glow.;&tstat me=on},on,{@pemit %#=It's already on.},&tstat me=off
+&TVOFF TV Parent=$tvoff:@switch [v(tstat)]=on,{@emit The TV screen goes blank.;&tstat me=off},off,{@pemit %#=It's already off.},&tstat me=off
+&TVCHAN TV Parent=$tvch *:&channel me=%0;@pemit %#=You switch the channel to %0.
+&tvvcr tv parent=$svcr *:&vcr me=%0
+&TVHELP TV Parent=$tvhelp:@pemit %#=[u(help)]
+&HELP TV Parent=`tvon' - Turns TV on.%R`tvoff' - Turns TV off.%r`tvch <channel>' - Changes TV's channel.%r`svcr <num>' - Sets the number of a VCR or other auxillary. Change the channel to `vcr'to use.%rChannel `all' will monitor all channels.
+

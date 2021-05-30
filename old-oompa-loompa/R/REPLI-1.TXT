@@ -1,0 +1,80 @@
+PARENT: Beverage Replicator(#224HLVXh)
+Type: Thing Flags: HAVEN LINK_OK VISUAL SAFE HALT
+When properly installed, this replicator system allows users to order any kind
+of beverage they want and then walk around with it freely, drinking wherever
+they please. The code is flexible to allow you to customize the system to your
+needs. With a little effort you can even turn it into a food replicator.%r%rIn
+order to install your replicator system, follow these steps:%r1. Parent or copy
+the registers in this object to your room parent.%r2. Type '&order here=@@' in
+every room that should NOT have an actual replicator in it.%r3. Type
+'&inspect_replicator=%[eval(parent(me),replicator)]' in each room that DOES
+have a replicator in it.%r4. If there are rooms where you do not want people to
+be able to DRINK, DRAIN, or DITCH, then you must type '&drink here=@@',
+'&finish here=@@', '&check here=@@', and '&ditch here=@@' in those rooms. %r5.
+The remaining registers may be customized. The following explains what each
+register does:%r-- Dispenser: what kind of unit you have (replicator, drink
+dispenser, bar).%r-- Order_string: defines what the user sees after making an
+order.%r-- Imbibe_list1: a list of different strings the user sees when
+drinking.%r-- Imbibe_list2: a list of different strings the surrounding players
+see when the user drinks.%r-- Drink#: must equal the number of different
+messages in imbibe_list1/2.%r-- Drain_list1/2 and finish #: these correspond to
+the imbibe_list and drink# registers, but are applied to the 'finish' command.
+%r-- Replicator: this is what users see when they look at the replicator (under
+&inspect_replicator).
+Owner: Laolla  Key: Laolla  Credits: 1
+Parent: *NOTHING*
+Zone: *NOTHING*
+Use Key: *UNLOCKED*
+Enter Key: *UNLOCKED*
+Powers:
+REPLICATOR [#4801]: +-=<<(Replicator)>>=-+%r%rORDER <drinkname> gets you a
+beverage.%rDRINK your drink and try not to spill it.%rCHECK to see what drink
+you'recarrying.%rDRAIN your drink and have another.%rDITCH your drink in the
+plant where no one will see you.
+CHECK [#4801]: $CHECK:[switch(member(get(parent(me)/drinkers),v(#)),0,[pemit(v
+(#),You see that you are drinkless.)],[pemit(v(#),You see that you have [art
+(index(get(parent(me)/drinks),|,member(get(parent(me)/drinkers),v(#)),1))]
+[index(get(parent(me)/drinks),|,member(get(parent(me)/drinkers),v(#)),1)] in
+your hand.)])]
+FINISH# [#4801]: 3
+DRINK# [#4801]: 3
+DRAIN_LIST2 [#4801]: downs the rest of | finishes off | drains what's left of
+DRAIN_LIST1 [#4801]: down the rest of | finish off | drain what's left of
+DISPENSER [#4801]: replicator
+IMBIBE_LIST2 [#4801]: drinks some of | takes a few swallows from | swills down
+a couple gulps of
+IMBIBE_LIST1 [#4801]: drink some of | take a few swallows from | swill down a
+couple gulps of
+ORDER_STRING [#4801]: You make your request at the [v(dispenser)].%rA
+glimmering blue lights swirls in the receptacle.%rMoments later it solidifies
+into [art(v(0))] [v(0)] and you take it.
+DITCH [#4801]: $DITCH:[switch(member(get(parent(me)/drinkers),v(#)),0,[pemit(v
+(#),You don't have anything to get rid of.)],[pemit(v(#),You ditch your [index
+(get(parent(me)/drinks),|,member(get(parent(me)/drinkers),v(#)),1)] without
+anyone seeing.)] [set(parent(me),drinks:[delete(get(parent(me)/drinks),member
+(get(parent(me)/drinkers),v(#)),|)])] [set(parent(me),drinkers:[remove(get
+(parent(me)/drinkers),v(#))])])]
+FINISH [#4801]: $DRAIN:[switch(member(get(parent(me)/drinkers),v(#)),0,[pemit
+(v(#),You don't have anything to drink.)],[pemit(v(#),You [index(v
+(drain_list1),|,add(rand(v(finish#)),1),1)] your [index(get(parent(me)/drinks),
+|,member(get(parent(me)/drinkers),v(#)),1)].)] [pemit(setdiff(lcplayers(loc(v
+(#))),v(#)),[name(v(#))] [index(v(drain_list2),|,add(rand(v(finish#)),1),1)]
+%p [index(get(parent(me)/drinks),|,member(get(parent(me)/drinkers),v(#)),1)]
+.)]  [set(parent(me),drinks:[delete(get(parent(me)/drinks),member(get(parent
+(me)/drinkers),v(#)),|)])] [set(parent(me),drinkers:[remove(get(parent(me)/
+drinkers),v(#))])])]
+IMBIBE [#4801]: $DRINK:[switch(member(get(parent(me)/drinkers),v(#)),0,[pemit(v
+(#),You don't have anything to drink.)],[pemit(v(#),You [index(v(imbibe_list1),
+|,add(rand(v(drink#)),1),1)] your [index(get(parent(me)/drinks),|,member(get
+(parent(me)/drinkers),v(#)),1)].)] [pemit(setdiff(lcplayers(loc(v(#))),v(#)),
+[name(v(#))] [index(v(imbibe_list2),|,add(rand(v(drink#)),1),1)] %p [index(get
+(parent(me)/drinks),|,member(get(parent(me)/drinkers),v(#)),1)].)])]
+ORDER [#4801]: $ORDER *:[switch(member(get(parent(me)/drinkers),v(#)),0,[set
+(parent(me),drinkers:[get(parent(me)/drinkers)] [v(#)])] [set(parent(me),
+drinks:[get(parent(me)/drinks)] [v(0)] |)] [pemit(setdiff(lcplayers(loc(v(#))),
+v(#)),%N orders [art(v(0))] [v(0)] at the [v(dispenser)].)]  [pemit(v(#), [eval
+(me,order_string)])],[pemit(v(#),You haven't finished your [index(get(parent
+(me)/drinks),|,member(get(parent(me)/drinkers),v(#)),1)] yet.)])]
+Home: SNW Free Code Room
+Location: SNW Free Code Room
+_______________________________________________________________________________

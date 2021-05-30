@@ -1,0 +1,349 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Code: Moe&#39;s Mushkode Manual - Writing an IC time system.</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <!-- Apple devices fullscreen -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <!-- Apple devices fullscreen -->
+    <meta names="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <!-- Bootstrap -->
+	<link rel="stylesheet" href="../Theme/Flat/html/css/bootstrap.min.css">
+	<!-- Bootstrap responsive -->
+	<link rel="stylesheet" href="../Theme/Flat/html/css/bootstrap-responsive.min.css">
+	<!-- jQuery UI -->
+	<link rel="stylesheet" href="../Theme/Flat/html/css/plugins/jquery-ui/smoothness/jquery-ui.css">
+	<link rel="stylesheet" href="../Theme/Flat/html/css/plugins/jquery-ui/smoothness/jquery.ui.theme.css">
+	<!-- Theme CSS -->
+	<link rel="stylesheet" href="../Theme/Flat/html/css/style.css">
+	<!-- Color CSS -->
+	<link rel="stylesheet" href="../Theme/Flat/html/css/themes.css">
+
+
+    <link rel="stylesheet" href="../Content/site.css">
+
+    <!-- jQuery -->
+    <script src="../Theme/Flat/html/js/jquery.min.js"></script>
+    <!-- Nice Scroll -->
+    <script src="../Theme/Flat/html/js/plugins/nicescroll/jquery.nicescroll.min.js"></script>
+    <!-- jQuery UI -->
+    <script src="../Theme/Flat/html/js/plugins/jquery-ui/jquery.ui.core.min.js"></script>
+    <script src="../Theme/Flat/html/js/plugins/jquery-ui/jquery.ui.widget.min.js"></script>
+    <script src="../Theme/Flat/html/js/plugins/jquery-ui/jquery.ui.mouse.min.js"></script>
+    <script src="../Theme/Flat/html/js/plugins/jquery-ui/jquery.ui.resizable.min.js"></script>
+    <script src="../Theme/Flat/html/js/plugins/jquery-ui/jquery.ui.sortable.min.js"></script>
+    <!-- slimScroll -->
+    <script src="../Theme/Flat/html/js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+    <!-- Bootstrap -->
+    <script src="../Theme/Flat/html/js/bootstrap.min.js"></script>
+    <!-- Form -->
+    <script src="../Theme/Flat/html/js/plugins/form/jquery.form.min.js"></script>
+
+    <!-- Theme framework -->
+    <script src="../Theme/Flat/html/js/eakroko.min.js"></script>
+    <!-- Theme scripts -->
+    <script src="../Theme/Flat/html/js/application.min.js"></script>
+
+    <!--[if lte IE 9]>
+		<script src="js/plugins/placeholder/jquery.placeholder.min.js"></script>
+		<script>
+			$(document).ready(function() {
+				$('input, textarea').placeholder();
+			});
+		</script>
+	<![endif]-->
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="http://www.mushcode.com/File/img/favicon.ico" />
+    <!-- Apple devices Homescreen icon -->
+    <link rel="apple-touch-icon-precomposed" href="http://www.mushcode.com/File/img/apple-touch-icon-precomposed.png" />
+
+</head>
+
+<body class="theme-green">
+    <div id="navigation">
+        <div class="container-fluid">
+            <a href="../index.html" id="brand">MUSHCode.com</a>
+        </div>
+    </div>
+    <div class="container-fluid" id="content">
+        <div id="left">
+            <div class="subnav">
+                <div class="subnav-title">
+                    <a href="Moes-Mushkode-Manual---Writing-an-IC-time-system-.html#" class='toggle-subnav'>
+                        <i class="icon-angle-down"></i>
+                        <span>About</span>
+                    </a>
+                </div>
+                <ul class="subnav-menu">
+                    <li>
+                        <a href="../index.html">Overview</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="subnav">
+                <div class="subnav-title">
+                    <a href="Moes-Mushkode-Manual---Writing-an-IC-time-system-.html#" class='toggle-subnav'>
+                        <i class="icon-angle-down"></i>
+                        <span>Files</span>
+                    </a>
+                </div>
+                <ul class="subnav-menu">
+                    <li class='dropdown'>
+                        <a href="Moes-Mushkode-Manual---Writing-an-IC-time-system-.html#" data-toggle="dropdown">Code</a>
+                        
+<ul class="dropdown-menu">
+        <li>
+            <a href="../Category/Administration.html">Administration</a>
+        </li>
+        <li>
+            <a href="../Category/Building.html">Building</a>
+        </li>
+        <li>
+            <a href="../Category/Bulletin-Board.html">Bulletin Board</a>
+        </li>
+        <li>
+            <a href="../Category/Combat.html">Combat</a>
+        </li>
+        <li>
+            <a href="../Category/Dynamic-Space.html">Dynamic Space</a>
+        </li>
+        <li>
+            <a href="../Category/Fonts.html">Fonts</a>
+        </li>
+        <li>
+            <a href="../Category/Functions.html">Functions</a>
+        </li>
+        <li>
+            <a href="../Category/Games.html">Games</a>
+        </li>
+        <li>
+            <a href="../Category/Globals.html">Globals</a>
+        </li>
+        <li>
+            <a href="../Category/Mail-Systems.html">Mail Systems</a>
+        </li>
+        <li>
+            <a href="../Category/Other.html">Other</a>
+        </li>
+        <li>
+            <a href="../Category/Schedulers.html">Schedulers</a>
+        </li>
+        <li>
+            <a href="../Category/Time.html">Time</a>
+        </li>
+        <li>
+            <a href="../Category/Vehicles.html">Vehicles</a>
+        </li>
+        <li>
+            <a href="../Category/Vendors.html">Vendors</a>
+        </li>
+        <li>
+            <a href="../Category/Weather-Systems.html">Weather Systems</a>
+        </li>
+</ul>
+                    </li>
+                    <li class='dropdown'>
+                        <a href="Moes-Mushkode-Manual---Writing-an-IC-time-system-.html#" data-toggle="dropdown">Classes</a>
+                        
+<ul class="dropdown-menu">
+        <li>
+            <a href="../Category/Administration.html">Administration</a>
+        </li>
+        <li>
+            <a href="../Category/Building.html">Building</a>
+        </li>
+        <li>
+            <a href="../Category/Globals.html">Globals</a>
+        </li>
+        <li>
+            <a href="../Category/Hardcode.html">Hardcode</a>
+        </li>
+        <li>
+            <a href="../Category/Other.html">Other</a>
+        </li>
+        <li>
+            <a href="../Category/Softcode.html">Softcode</a>
+        </li>
+</ul>
+                    </li>
+                    <li>
+                        <a href="../Manuals.html">Manuals</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="subnav">
+                <div class="subnav-title">
+                    <a href="Moes-Mushkode-Manual---Writing-an-IC-time-system-.html#" class='toggle-subnav'>
+                        <i class="icon-angle-down"></i>
+                        <span>Misc</span>
+                    </a>
+                </div>
+                <ul class="subnav-menu">
+                    <li>
+                        <a href="../Ascii2Mu.html">ASCII To MUSHCode</a>
+                    </li>
+                    <li>
+                        <a href="../MushList.html">MUSH/MUX List</a>
+                    </li>
+                    <li>
+                        <a href="../MushRoom.html">MUSHRoom</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="subnav">
+                <div class="subnav-title">
+                    <a href="Moes-Mushkode-Manual---Writing-an-IC-time-system-.html#" class='toggle-subnav'>
+                        <i class="icon-angle-down"></i>
+                        <span>Contribute</span>
+                    </a>
+                </div>
+                <ul class="subnav-menu">
+                    <li>
+                        <a href="../Submit.html">Submit</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div id="main">
+            <div class="container-fluid">
+                <div class="breadcrumbs">
+                    <ul>
+                        
+    <li>
+        <a href="../index.html">Home</a>
+        <i class="icon-angle-right"></i>
+    </li>
+    <li>
+        <a href="../Category/Softcode.html">Softcode</a>
+        <i class="icon-angle-right"></i>
+    </li>
+    <li>
+        <a href="Moes-Mushkode-Manual---Writing-an-IC-time-system-.html#">Moe&#39;s Mushkode Manual - Writing an IC time system.</a>
+    </li>
+
+                    </ul>
+                </div>
+                <div class="row-fluid">
+                    <div class="span12">
+                        
+
+
+
+<div class="box">
+    <div class="box-title title">
+        <h2>
+            Moe&#39;s Mushkode Manual - Writing an IC time system.
+        </h2>
+    </div>
+    <div class="box-content">
+
+        <div class="description">
+            <p></p>
+        </div>
+
+        <div class="author">
+            <strong>Author:</strong>
+                <a href="../Author/Moe.html">Moe</a>
+        </div>
+
+        <div class="author">
+            <strong>Category:</strong>
+            <a href="../Category/Softcode.html">Softcode</a>
+        </div>
+
+            <div class="commands">
+            <strong>Commands:</strong>
+                    <a href="http://www.mushcode.com/Command/@pemit" class="command">@pemit</a>.
+            </div>
+
+            <div class="functions">
+                <strong>Functions:</strong>
+                        <a href="../Function/convtime.html" class="function">convtime&#40;&#41;</a>,
+                        <a href="../Function/div.html" class="function">div&#40;&#41;</a>,
+                        <a href="../Function/extract.html" class="function">extract&#40;&#41;</a>,
+                        <a href="../Function/first.html" class="function">first&#40;&#41;</a>,
+                        <a href="../Function/gt.html" class="function">gt&#40;&#41;</a>,
+                        <a href="../Function/ifelse.html" class="function">ifelse&#40;&#41;</a>,
+                        <a href="../Function/inc.html" class="function">inc&#40;&#41;</a>,
+                        <a href="../Function/last.html" class="function">last&#40;&#41;</a>,
+                        <a href="../Function/mod.html" class="function">mod&#40;&#41;</a>,
+                        <a href="../Function/mul.html" class="function">mul&#40;&#41;</a>,
+                        <a href="../Function/secs.html" class="function">secs&#40;&#41;</a>,
+                        <a href="../Function/setq.html" class="function">setq&#40;&#41;</a>,
+                        <a href="../Function/setr.html" class="function">setr&#40;&#41;</a>,
+                        <a href="../Function/sub.html" class="function">sub&#40;&#41;</a>,
+                        <a href="../Function/switch.html" class="function">switch&#40;&#41;</a>,
+                        <a href="../Function/u.html" class="function">u&#40;&#41;</a>,
+                        <a href="../Function/v.html" class="function">v&#40;&#41;</a>,
+                        <a href="../Function/vadd.html" class="function">vadd&#40;&#41;</a>.
+            </div>
+
+
+            <div class="servers">
+                <strong>Compatibility:</strong>
+                        <a href="../Server/CobraMUSH.html" class="server">CobraMUSH</a>,
+                        <a href="../Server/PennMUSH.html" class="server">PennMUSH</a>,
+                        <a href="../Server/RhostMUSH.html" class="server">RhostMUSH</a>,
+                        <a href="../Server/TinyBit.html" class="server">TinyBit</a>,
+                        <a href="../Server/TinyMUSH.html" class="server">TinyMUSH</a>,
+                        <a href="../Server/TinyMUX.html" class="server">TinyMUX</a>.
+            </div>
+
+    </div>
+</div>
+
+
+<div class="box box-bordered box-condensed">
+    <div class="box-title">
+        <h3>
+	        <i class="icon-reorder"></i>
+	        MUSHCode for Moe&#39;s Mushkode Manual - Writing an IC time system.
+        </h3>
+        <div class="actions">
+	        <a class="btn btn-mini select-all" href="Moes-Mushkode-Manual---Writing-an-IC-time-system-.html#">
+                    <i class="icon-resize-full"></i> Select Content
+            </a>
+        </div>
+    </div>
+    <div id="code" class="box-content content">
+        ~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*<br/>|\    /|       |\    /|         |\    /|<br/>| \  / |       | \  / |         | \  / |<br/>|  \/  |oe's   |  \/  |ushkode  |  \/  |anual<br/>~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*<br/><br/>LESSON 6 - WHAT TIME IS IT?<br/><br/>	In our previous five lessons, we have spent a lot of time<br/>establishing some basic guidelines for how to code. How to approach the<br/>construction of a command, how to store data, how to retrieve it, and how<br/>to cope with a set of commands that all work on the same data have been<br/>covered in this series of tutorials. What I'm going to do now is give you<br/>one method for how to make an IC time system.<br/>	Previously, we'd done a multiple-item vendor, which is for many<br/>coders the jumping-off point as far as skills and projects go. Once you<br/>have something that works locally, the next logical step is to make things<br/>that work globally. While I don't think I'll get to every standard code<br/>system that is used in these lessons, I want to show you some of the<br/>things I can do and hope that from there, you'll know enough to go out on<br/>your own and do your own stuff.<br/>	This lesson is going to be written a trifle differently than the<br/>previous five, because if you have read them, worked through the examples,<br/>and understood what I was talking about(no small task, particularly the<br/>last part.), you are going to have a more than functional lexicon of code<br/>knowledge. This lets me skim over a few of the general elements of the<br/>code logic I will present, and focus on some of the more precise details.<br/>	What this means for you is that if you either a) don't have a<br/>solid grasp of what mushcode is, b) found this link in a websearch, or c)<br/>you're currently quite chemically inconvenienced...this is going to make<br/>little to no sense to you. I suggest that you read at least lessons one,<br/>two, and three, as those lay out the fundamental principles by which I<br/>code, and give you a sense of how I build commands and u-functions.<br/>	The topic of this lesson is going to be the construction of an IC<br/>time system, that works on a faster-than-RL time scale. The one I am going<br/>to show you how to build has been used, successfully, on ten mushes so<br/>far, and easily accomodates a 2:1, 3:1, or higher(yipes) timescale. This<br/>particular system uses the vector math functions present in all of the<br/>major codebases, and is both easy to understand, and very easy to<br/>configure.<br/><br/>VECTOR? THAT'S A CEREAL!!<br/><br/>	What follows is going to be a very brief, very informal, and quite<br/>likely imprecise definition of what vector math is. The purpose of this<br/>tutorial is to teach you to code, not to teach you higher math. The vector<br/>functions are used in this system because they facilitate the result. The<br/>end justifies the means.<br/>	In science, specifically physics, there are two main kinds of<br/>physical quantities: Scalars and Vectors. A scalar is a quantity that is<br/>completely specified by a number with appropriate units. 10 degrees<br/>Fahrenheit. 4 inches. 100ml. Those are all scalar values. They completely<br/>specify the measurement. No direction is required.<br/>	Vectors are not just a current state. They are the displacement of<br/>a thing, defined as a change in position. A plane, flying at 500mph, is<br/>going in a direction. Because of its state, its position is changing from<br/>one place to another. The cumulative description of both its speed and<br/>direction is a vector.<br/>	How does this apply to time? Well, what we are going to do in our<br/>IC time system is establish a starting point, from which all IC time is<br/>calculated. Then, using the amount of RL time that has elapsed since then,<br/>we are going to determine how much change has occurred in the date. It is,<br/>in essence, a vector. We know that time will be passing at a measurable<br/>rate, and that it is going forward. A vector can be identified by<br/>isolating all of its components. We have now done this, and can move on.<br/>	If you didn't understand this, either at all or partially, don't<br/>worry. The actual mechanics of using the vector functions is MUCH easier<br/>than understanding the math theory. For once, coding is easier than math.<br/>Call Kodak, it's a moment.<br/><br/>IN THE BEGINNING....THERE WAS AN ATTRIBUTE. AND IT WAS GOOD.<br/><br/>	Like I said, we're going to establish a point in the past from<br/>which our IC time is calculated. This could be the point at which your<br/>game was first started, it could be your birthday. It's any arbitrary<br/>point in the past. For the purposes of this tutorial, I am going to pick<br/>Monday, January 1st, 2001. We'll start counting from noon, that day.<br/>	All MUSHes are based on the Unix time system, which counts time<br/>from Wednesday, December 31, 1969, at 7pm. On your mush of choice, if you<br/>type: think secs(), you will get a very large number. This is the number<br/>of seconds that has elapsed since that point in the past. We're going to<br/>build our IC time system on a very similar principle. Again, on your mush<br/>of choice, type: think convtime(Mon Jan 01 12:00:00 2001)<br/>	You will get the number: 978368400. This number is what we want to<br/>set as our starting point in time. Now, where do we set it? This is going<br/>to be a global system, and rather than getting into the theory of where<br/>global code should be kept, I am going to assume that it is all on the<br/>same object, which is in the master room. Please feel free to arrange<br/>things as you see fit.<br/><br/>&amp;start_time Object=978368400<br/><br/>	Now, that is one of two initial attributes that we need. The<br/>second one is the starting date for our time system. This is the IC date<br/>from which we are measuring. Again, it can be completely arbitrary. For<br/>the purposes of this tutorial, I am going to pick the date January 1,<br/>1200, at midnight. Midnight is chosen because it is the absolute start of<br/>the day. This date will be set a particular way, due to the math we are<br/>going to use to calculate elapsed time. I'll show you the syntax now, and<br/>explain why this is later.<br/><br/>&amp;start_date Object=1200 01 01 00 00 00<br/><br/>	At this point, believe it or not, our entire IC time system is<br/>only going to consist of four more attributes, and two of them are<br/>commands. We're going to keep the standard month names for the purposes of<br/>this tutorial, to show you how to convert the numerical to the full name,<br/>but you are free to do whatever months you would like. To do this<br/>conversion, we will construct a simple ufun that takes a number parameter<br/>passed to it, and returns the proper month name.<br/><br/>&amp;conv_month<br/>Object=[switch(%0,1,January,2,February,3,March,4,April,5,May,6,June,7,July,8,August,9,September,10,October,11,November,December)]<br/><br/>	December is the default month, because if it isn't 1-11, it should<br/>be 12, and if we wind up passing a number to this function that is larger<br/>than 12, we have bigger problems than returning the wrong month. Now, we<br/>have one ufunction and two commands to write. We could consolidate into<br/>one command, but the 'standard' is to have both a +date and +time command.<br/>So, that is what we shall do.<br/><br/>TIME IS WHAT YOU MAKE IT<br/><br/>	Now, here's where we get to the fun stuff. The actual meat and<br/>potatoes of the time code. The theory, as I stated above, is that we will<br/>measure the amount of time that has elapsed from our arbitrary starting<br/>point, and then convert that into IC years, months, days, hours, minutes,<br/>seconds. This is done by mathematically divining how many of each division<br/>exist in the amount of elapsed time, starting from greatest and working to<br/>the smallest.<br/>	This is why we set our start_date attr the way we did. That is the<br/>order we are going to be breaking down our time. Now, to do this, we need<br/>to know a couple bits of information. One, how much time has elapsed. This<br/>is relatively simple. The secs() function, referenced above, will tell you<br/>the current number of seconds that have elapsed since the system's start<br/>date. And we have, stored in our start_time attr, the number of seconds<br/>that existed when we started keeping track of time. We subtract the two,<br/>and voila...we have elapsed time.<br/>	The next thing we need to know is how much time there is in each<br/>of the divisions of IC time. This varies, depending on timescale. In a<br/>standard RL day, there are 86400 seconds. This is 60 seconds X 60 minutes<br/>= 3600 seconds X 24 hours = 86400 seconds. This means that on a 2:1<br/>timescale, there are 43200 RL seconds in one IC day. On a 3:1 timescale,<br/>there are 28800 RL seconds in one IC day.<br/>	Now, from this information, we can extrapolate a fair amount of<br/>information about our IC year. For the purposes of the tutorial, let's<br/>assume a 2:1 timescale. If we assume that there are 365 days in our year,<br/>then that means that there are 365 X 43200 = 15768000 seconds in one IC<br/>year. If we divide the number of seconds that has elapsed by the number of<br/>seconds in one IC year, we will know how many IC years have passed since<br/>we started measuring our time. Simple!<br/>	The next challenge is to compute the number of months, days, etc.<br/>from the remaining time. This is where we get into the math functions,<br/>themselves. There are two dividing functions in mushcode, div() and mod().<br/>They do the same thing, divide one number into another, but they return<br/>different answers. div() returns the integer division, aka whole-number<br/>division. mod() returns the remainder, or fractional division. Here's a<br/>quick example:<br/><br/>	div(4,2) = 2<br/>	mod(4,2) = 0<br/>	div(5,2) = 2<br/>	mod(5,2) = 1<br/><br/>	We would use div() to begin with on our year calculation. Now, we<br/>can use mod() on those same two numbers to get the remainder. This is the<br/>remainder of the time we have on which to calculate. Now we get to months.<br/>Some people may want to strive for exact chronological accuracy, with each<br/>month having the accurate number of days. This is easily doable, at the<br/>end of our calculations. For now, we should just calculate based on an<br/>average 30-day month. If one day is 43200 seconds, then 43200 X 30 =<br/>1296000 seconds.<br/>	So, we divide our elapsed time by the number of seconds in a year.<br/>Then, we divide the remainder of that division by the number of seconds in<br/>an IC month. The next division is a day, which we know the amount for,<br/>followed by an hour(1800 seconds), a minute(30 seconds), and the final<br/>remainder is the seconds on the clock. Technically, yes, the seconds will<br/>be one off, as one RL second = two IC seconds...but when you're at that<br/>point, don't get picky. If it bothers you, don't report seconds. Stop your<br/>calculations at minutes.<br/>	Once we have this list of numbers(years, months, days, hours,<br/>minutes, seconds), we will use the vadd() function to add that number as<br/>the vector to our start_date attribute. I've explained all this out, so<br/>now let's look at some actual code, to see how it's done.<br/><br/>&amp;make_time<br/>Object=[vadd(v(start_date),div(sub(secs(),v(start_time)),15768000)<br/>[div(mod(sub(secs(),v(start_time)),15768000),1296000)] &lt;further code&gt;)]<br/><br/>	This is the start of the make_time ufun, which will actually<br/>compute the new date. Already, we're starting to see some redundancy, so<br/>I'm going to start at this point to tell you that yes, you /should/ use a<br/>healthy number of setr()'s in this code. Otherwise, you will wind up<br/>having a huge string of nested math functions that will get extremely<br/>messy and exponentially increase your chance for parenthetical error.<br/>Let's look at the make_time code again, with that in mind:<br/><br/>&amp;make_time<br/>Object=[vadd(v(start_date),div(setr(0,sub(secs(),v(start_time))),15768000)<br/>[div(setr(0,mod(%q0,15768000)),1296000)]<br/>[div(setr(0,mod(%q0,1296000)),43200)] [div(setr(0,mod(%q0,43200)),1800)]<br/>[div(setr(0,mod(%q0,1800)),30)] [mod(%q0,30)])]<br/><br/>	Yes, I just kept reusing the %q0 register. We don't need to make 5<br/>different registers, if we don't have to. The old value is used each time<br/>before the new value is set, so it's a safe usage of one memory location.<br/>This looks like a lot of confusing code, but if you've followed so far, it<br/>should make at least nominal sense.<br/>	An analogy I will make to how this code works is if you had 1982<br/>pennies, what would be the largest denominations of bills and coin you<br/>could translate that into? 1982 pennies is $19.82, which translates into a<br/>ten-dollar bill, a five-dollar bill, four one-dollar bills(or coins,<br/>depending on nationality), three quarters, a nickel, and two pennies. And<br/>yes, a fifty-cent piece is a valid answer, though obscure and only put<br/>forth by those determined to find loopholes.<br/>	If we run the make_time function(a la: think u(object/make_time)<br/>), we will get back a list of numbers that represents the current date.<br/>From this list, we can further extrapolate our current date and time into<br/>displayable formats, using basic commands that would be on a global object<br/>in the master room.<br/><br/>HEY BUDDY, YA GOTS THE TIME?<br/><br/>	Let's start with the +time command, just because. We know that<br/>when we get our output from make_time, the last three numbers are going to<br/>represent the hours, minutes, and seconds. We'll probably want to format<br/>the hours to AM/PM notation, unless it's a military game that likes<br/>24-hour formats. This is easily doable, and gives us a neat little coding<br/>exercise, so we'll put it in. To begin with, we need basic command syntax.<br/>I suggest:<br/><br/>&amp;cmd_time Object=$+time:@pemit %#=The current time is: &lt;code&gt;<br/><br/>	Anyone who doesn't understand any part of that definitely needs to<br/>be reading Lessons 1, 2 and 3. The first thing we will do is take a<br/>q-register, and put the last three values of our make_time function into<br/>it. This should be done in a setq() to obscure the output, since we don't<br/>want to show these numbers /just/ yet. setq(0,extract(u(make_time),4,3))<br/>will do just what we want. There shouldn't be any conflict with the %q0 in<br/>make_time, because again, the values are being used before they are being<br/>set again.<br/>	A simple ifelse() on the first value in our %q0 will tell us<br/>whether we need to convert it to PM format or not:<br/><br/>ifelse(gt(setr(1,first(%q0)),12),setq(1,sub(%q1,12))[setq(2,PM)],setq(2,AM))<br/><br/>	What this does is tests to see if the hours is greater than 12,<br/>meaning it's after noon on the clock. If it is, it subtracts 12, sets that<br/>new value into %q1, and places PM in a memory register for use later. If<br/>it isn't, %q1 is already set, and AM is saved for later. Our minutes don't<br/>need to be reconfigured, nor do our seconds. All we need to do now is<br/>format our display.<br/><br/>&amp;cmd_time Object=$+time:@pemit %#=The current time is:<br/>[setq(0,extract(u(make_time),4,3))]<br/>[ifelse(gt(setr(1,first(%q0)),12),setq(1,sub(%q1,12))[setq(2,PM)],setq(2,AM))]<br/>%q1:[extract(%q0,2,1)]:[last(%q0)] %q2<br/><br/>	And yes, that's all there is to +time. Now for +date. Much the<br/>same, with again only minor manipulation of the data that we receive from<br/>make_time. We know that the first three elements of our make_time output<br/>are the year, month, and date, respectively. We've already coded a method<br/>for converting our numerical month to the fullname, and we will use that.<br/><br/>&amp;cmd_date Object=$+date:@pemit %#=The current date is:<br/>[setq(0,extract(u(make_time),1,3))][u(conv_month,extract(%q0,2,1))]<br/>[last(%q0)], [first(%q0)]<br/><br/>	Yes, that's all there is to +date. It's even easier than +time,<br/>because there's no math involved. Month, day, year, and voila, you have a<br/>date. For those that are interested in the chronological accuracy of<br/>February having 28 days, and the ones with 31, I suggest a variety of<br/>methods. You can have a lookup table in a ufunction that when you pass the<br/>month and day to it, tests for the validity of the date, and returns the<br/>adjusted values. You can base your month's calculations on a 31-day<br/>system, and adjust the date in the +date display, as you need to for the<br/>other months. There are five months that are not 31 days long. It would be<br/>up to you to accomodate for the extra dates. And, of course, you can use a<br/>different IC time system.<br/>	The best suggestion I can give, if you are pursuing this level of<br/>accuracy, is to have your make_time stop at or before the month level, and<br/>the last value returned is the remainder of seconds. From then, you may<br/>calculate the proper number of days each month should have, and the<br/>24-hour time from that point. It is a trifle more cumbersome, but if it<br/>achieves what you want, then it is worth the work.<br/>	To give you an idea of how to do that, I have included code where<br/>I achieved precisely that. This code was done on a 1:1 timescale. It<br/>could be used for any other timescale, you would just need to alter the<br/>mathematical values accordingly. For your studying pleasure:<br/><br/>&amp;ELAPSED_TIME Object=[sub(secs(),v(start_time))]<br/><br/>&amp;MAKE_TIME Object=[vadd(div(setr(0,u(elapsed_time)),31536000)  <br/>[first(setr(2,u(getmonth,div(setr(1,mod(%q0,31536000)),86400))),|)]<br/>[div(setr(0,sub(%q1,mul(last(%q2,|),86400))),86400)]<br/>[div(setr(0,mod(%q0,86400)),3600)] [div(setr(0,mod(%q0,3600)),60)]<br/>[mod(%q0,60)],v(start_date))]<br/><br/>	In this code, I took the elapsed time, and divided out the number<br/>of whole years that had passed. After that, I determined what my month was<br/>by discovering mathematically how many days had passed in my /current/<br/>year. Because there are a set number of days in each month(alterable every<br/>four years for leap year if you /really/ want or need to), the month is<br/>relatively easy to divine from this point. I used the getmonth ufunction:<br/><br/>&amp;GETMONTH<br/>Object=[switch(inc(%0),&gt;334,12|334,&gt;304,11|304,&gt;273,10|273,&gt;243,9|243,&gt;212,8|212,&gt;181<br/>,7|181,&gt;151,6|151,&gt;120,5|120,&gt;90,4|90,&gt;59,2|59,1|0)]<br/><br/>	What I do in this function is return both the month, and the<br/>number of days in the year that have passed UP TO this month. I use this<br/>to compute the precise date in that month. The method for doing this is to<br/>take the value of the mod of seconds in our current year, and subtract<br/>from that a number of seconds equal to the number of days that have passed<br/>before our current month. Please note the inc() used on %0. That<br/>guarantees that we are talking about the /current/ IC day, rather than the<br/>number of days that have passed /before/ today. What this leaves us with<br/>is a number of seconds that have passed in our /current/ month. This can<br/>easily be divided by 86400(number of seconds in a day), and it will give<br/>us the date for today.<br/>	The remainder of the above make_time code is identical to what<br/>we've discussed before, determining hour, minutes, and seconds of<br/>time. Because the game I did this on is set in a year other than our<br/>current one, I continually fought with the issue of how to determine what<br/>the accurate day of the week was. It came to me that because the weeks are<br/>a repeating cycle of seven days, then the modulo of dividing the number of<br/>days that had passed in the year would be an easy determination of what<br/>the day of the week was.<br/>	So, I developed the fun_day function, below, which does precisely<br/>this. This particular instance of it works for years in the 1905, 1916,<br/>1927, 1938, 1949, 1960, 1971, 1982, 1993, 2004, 2015, etc. sequence. The<br/>calendars repeat themselves every 11 years. If you wished to implement<br/>this on your own game, adjust the days according to the year you are on.<br/>	The logic works as I outlined above. I take the elapsed time in my<br/>IC time system, and divide out the number of whole years. From that, I<br/>determine how many IC days have passed in my current year, and divide it<br/>by seven. The inc() is done to accomodate a vaguary of the calendar. You<br/>can not have a day 0 of your year, therefore you must have a 1-based<br/>system. The adding of 1 to the number of days accomodates for this.<br/><br/>&amp;FUN_DAY<br/>Object=[switch(mod(inc(div(mod(u(elapsed_time),31536000),86400)),7),0,Friday,1,S<br/>aturday,2,Sunday,3,Monday,4,Tuesday,5,Wednesday,Thursday)]<br/><br/><br/><br/>SUMMARY<br/><br/>	I hope this tutorial has given you an insight into how to create a<br/>system like this. It could easily be used as 3:1, as well as a 60-day<br/>month, a 400-day year, or a 57-minute hour. It is up to you, as the coder,<br/>to plug in the divisions that represent /your/ game's IC time system. A<br/>version of this code that I have written uses a 3:1 timescale on a<br/>calendar that has eight major divisions, instead of 12 months. It's still<br/>a 24-hour day, but the dates are given as the ##th day of the Third<br/>Sabbat, for example.<br/>	There are other applications of vector math as well, and I invite<br/>you to explore them, because they can be used in a variety of ways. I have<br/>seen XP systems, weather systems, and econ/financial systems that all used<br/>vector math to reflect the changes from one point to another, given<br/>quantity and direction.<br/>	Lesson 7 of the MMM will cover debugging your code, and tracking<br/>down errors, and give you some basic things to look for that causes code<br/>to break, as well as the standard set of tools for debugging code. Quite<br/>often, the most magnificent-looking code doesn't work, and it falls on the<br/>coder to find the bugs and fix them. More often than that, a coder<br/>inherits something coded by someone else, that either a) wasn't done well,<br/>b) didn't port well, or c) never worked to begin with. And then the new<br/>coder has the onerous task of finding the bugs and fixing them.<br/>
+    </div>
+</div>
+<script type="text/javascript">
+    var selectText = function(element) {
+        var doc = document;
+        var text = doc.getElementById(element);
+
+        if (doc.body.createTextRange) { // ms
+            var range = doc.body.createTextRange();
+            range.moveToElementText(text);
+            range.select();
+        } else if (window.getSelection) { // moz, opera, webkit
+            var selection = window.getSelection();
+            var range = doc.createRange();
+            range.selectNodeContents(text);
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
+    }
+
+    $('a.select-all').click(function () {
+        selectText('code');
+    });
+</script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</body>
+
+</html>
+<script src="../Scripts/Google.js" type="text/javascript"></script>

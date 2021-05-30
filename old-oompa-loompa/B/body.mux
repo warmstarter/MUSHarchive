@@ -1,0 +1,105 @@
+#############################################################################
+# BODY.MUX -- @body command
+#############################################################################
+
+#12 is the Combat System object
+
+
+&cmd-body #12 = $@body * as "*" at * to *: 
+
+# %q0 is the dbref of the person to make a corpse of
+      think setq(0, locate(%#, %0, *P)); 
+
+# %q1 is the new name for the corpse
+      think setq(1, %1); 
+
+# %q2 is the dbref of the current location of the corpse
+      think setq(2, %2); 
+
+# %q3 is the dbref of the new location of the player
+      think setq(3, %3); 
+
+  think setq(9, 
+    [isdbref(%q0)]
+    [isdbref(%q2)]
+    [isdbref(%q3)]
+    [or(hastype(%q0, Player), hastag(%q0, NPC))]
+  ); 
+
+  @select %q9 = 
+
+# NOMINAL CASE:
+  1111, {
+#   create a new thing called [%q1] and save its dbref in %q4
+    think setq(4, create(%q1, 10, t)); 
+
+#   make the corpse look like the player
+    &weight %q4 = get(%q0/weight); 
+    &volume %q4 = get(%q0/volume); 
+    &tags   %q4 = get(%q0/tags); 
+    @sex    %q4 = get(%q0/sex); 
+
+    @parent %q4 = parent(%q0); 
+    @desc %q4 = \[desc(%q0)\]; 
+
+#   store the dbref of the body on the player so that it can be
+#   revived
+ 
+    &body %q0=%q4;
+    &sleeper %q0=%q4;
+
+#   interface for sleep/wake
+    &ic %q4 = %L; 
+    think settag(%q4, body); 
+    think switch(hastag(%q0, dead), 0, [settag(%q0, asleep)]);
+
+#   put the contents into the corpse
+    think setq(8, filter(filter-out-souls, lcon(%q0))); 
+    @dolist %q8 = {
+      @teleport ## = %q4; 
+      @set ## = !dark; 
+    }; 
+
+#   move the 'corpse' to the player's old location, 
+#   and move the player to the final destination
+    @tel %q4 = %q2; 
+    @tel %q0 = %q3; 
+  }, 
+
+# can't find the person
+  0???, {@error %# = locate %q0}, 
+
+# current location is not a dbref
+  ?0??, {@pemit %# = ERROR: Current location must be a dbref!}, 
+
+# destination location is not a dbref
+  ??0?, {@pemit %# = ERROR: Destination location must be a dbref!}, 
+
+# only works on players and NPCs -- no other objects (drops their objects though)
+  ???0, {
+    think setq(8, filter(filter-out-souls, lcon(%q0))); 
+    @dolist %q8 = {
+      @teleport ## = %q4; 
+      @set ## = !dark; 
+      @remit %L = [name(%q1)] drops [goodname(##)].; 
+    }; 
+    @pemit %# = That isn't a player or NPC... [switch(words(%q8), 0, Ignoring.)]; 
+  }, 
+
+# ERROR
+  *, {
+    @pemit %# = An error has occurred in the @body command. Notify the staff.; 
+
+    @qmail *Adam/BUG: #12/cmd-body=
+      Command: @body %0 as "%1" at %2 to %3 %r
+      %r
+      %%q9 = '%q9' -- illegal @select condition.; 
+  }
+
+-
+
+&filter-out-souls #12 = 
+  ifelse(strmatch(parent(%0), #-1), 1, not(strmatch(name(parent(%0)), *soul*)))
+-
+
+

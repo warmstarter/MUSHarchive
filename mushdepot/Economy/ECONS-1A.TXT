@@ -1,0 +1,6 @@
+@create Econ Commands
+@link Econ Commands=#2
+@lock Econ Commands=#3
+@set Econ Commands = WIZARD
+@VB Econ Commands=$egive *=*:@switch [or(hastype(%#,PLAYER),or(hasflag(%#,INHERIT),hasflag(%#,WIZARD)))]|[or(gte(%1,0),hasflag(%#,WIZARD))]|[or(lte(%1,get(owner(%#)/econs)),hasflag(%#,wizard))]|[setq(0,locate(%#,%0,nTP))]%q0=0*, @pemit %#=Only players and inherit objects may give out money., 1|0*, @pemit %#=You cannot give negative Econ Credits!, 1|1|0*, @pemit %#=You don't have that many Econ Credits., 1|1|1|#-1, @pemit %#=I don't see %0 here., 1|1|1|#-2, @pemit %#=I don't know which %0 you mean., {@@ OKAY;;&econs [owner(%q0)]=[add(get(owner(%q0)/econs),%1)];&econs [owner(%#)]=[sub(get(owner(%#)/econs),%1)];@pemit %q0=%n gave you %1 Econ Credits.;@verb %q0=%#,epay,You gave [name(%q0)] %1 Econ Credits.,oepay,gave [name(%q0)] %1 Econ Credits.,aepay,%1}
+@VA Econ Commands=$money:@pemit %#=You have [switch(or(hastype(%#,PLAYER),hasflag(%#,INHERIT)),1,get(owner(%#)/econs),0)] Econ Credits.

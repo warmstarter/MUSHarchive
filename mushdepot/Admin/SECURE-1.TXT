@@ -1,0 +1,132 @@
+@@ Just Do It:  +secure
+
+@@ This is +secure, version 1.0, by Glenn Crocker.  It checks objects
+@@ for common security problems.  It currently checks for:
+
+@@ Inherit players, unlocked, un-uselocked, locks non-'is', flags:
+@@ inherit, visual, abode, link_ok, jump_ok, parent_ok, enter_ok,
+@@ chown_ok, $commands that use user-supplied parameters, INHERIT objects
+@@ with non-INHERIT parents, objects parented to another player's object,
+@@ objects owned by wizards parented to objects owned by non-wizards,
+@@ INHERIT Wizards, INHERIT Wizard-owned objects, $commands that use
+@@ user-supplied parameters in @force.
+@@ Other checks are present but not listed above.
+
+@@ This code is Copyright 1995, Glenn Crocker.  You are free to use
+@@ it for any purpose, but you must mail any modifications you make
+@@ to:  mush-checker@chaco.com.  This code comes with no warranty.
+
+@@ (The above restriction is to prevent you from hoarding new checks.
+@@ We need to share to keep the hackers at bay.)
+
+@@ Revision log:
+
+@@ Version 1.0:  Initial release
+@@         1.1:  Added warning "Levels", and +secure[/cutoff] variant.
+@@               Thanks to Chris Siebenmann for the idea and prodding
+@@               Renamed to '+secure', because '+check' collided with others
+
+@@ Globals:
+@@  %q0 - lock message
+@@  %q1 - locate() of the $check parameter
+@@  %q2 - The contents of the attribute we're warning about
+@@  %q3 - %q2, with * converted to ~ for switch()ing
+
+@@ Setup
+@create Checker=10
+@lock Checker==#1
+@Desc Checker=This +command is designed to help users identify common security problems on their objects.  '+secure <object>' to check an object.
+&CHECKS Checker=Inherit players, unlocked, un-uselocked, locks non-'is', flags: inherit, visual, abode, link_ok, jump_ok, parent_ok, enter_ok, chown_ok, $commands that use user-supplied parameters, INHERIT objects with non-INHERIT parents, objects parented to another player's object, objects owned by wizards parented to objects owned by non-wizards, INHERIT Wizards, INHERIT Wizard-owned objects, $commands that @force using user-supplied parameters
+&CREDITS Checker=Created by Glenn Crocker, Wizard@TinyCWRU, glenn@chaco.com.  Thanks to Throck, God (Lord Max), LED, Norahs, Mike, Chaco Communications, Chris Siebenmann.
+@set Checker=INHERIT
+&VERSION Checker=+secure, version 1.1:  
+
+@@ +secure is the same as +secure/5
+&CHECK Checker=$+secure *:@switch [setq(1,locate(%#,%0,*))]%q1=#-1,@pemit %#=Unable to find [secure(%0)],{@switch controls(%#,%q1)=1,{page %#=[v(version)][u(u_check_all,%q1,5)]Security check done.},@pemit %#=You don't control %0!}
+@@ The user specifies a cutoff level:
+&check2 checker=$+secure/? *:@switch [setq(1,locate(%#,%1,*))]%q1=#-1,@pemit %#=Unable to find [secure(%1)],{@switch [controls(%#,%q1)]=1,{page %#=[v(version)][u(u_check_all,%q1,%0)]Security check done.},@pemit %#=You don't control %1!}
+
+@@ Check everything, call u_check_print() for each line of output.
+@@ u_check_all(#dbref,cutoff_level)
+&U_CHECK_ALL Checker=iter(u(u_check_all2,%0),u(u_check_print,%1,first(##),rest(##)),mid(%r,1,1))
+&U_CHECK_ALL2 Checker=Checking [u(u_name,%0)]:%r[cat(u(u_lockcheck_all,%0),u(u_flagscheck_all,%0),u(u_parentcheck_all,%0),u(u_checkattr_all,%0))]
+
+@@ Returns 'Level <level>: <message>' if cutoff <= level.
+@@ Returns the 'Checking...' line verbatim
+@@ u_check_print(cutoff,level,message)
+&u_check_print checker=switch(cat(words(%2),lte(%0,%1),%1),0 *,,* 1 *,Level %1: %2%r,* * Checking,%1 %2%r)
+
+@@ Check all kinds of locks
+@@ u_lockcheck_all(#dbref)
+&U_LOCKCHECK_ALL Checker=cat(u(u_lockcheck,lock(%0),,%0),u(u_lockcheck,lock(%0/use),use,%0))
+
+@@ Check 'default' or 'use' (based on %1) lock
+@@ u_lockcheck(lockval,{|use},#dbref)
+&U_LOCKCHECK Checker=[setq(0,switch(%0,,is not %1locked,=*,,uses a 'normal' %1lock instead of an 'is' %1lock.  See 'help @lock is'.))][switch(%q0,,,7 [u(u_name,%2)] %q0%r)]
+
+@@ Check all kinds of flags
+@@ u_flagscheck_all(#dbref)
+&U_FLAGSCHECK_ALL Checker=cat(u(u_flagcheck,%0,inherit,7),u(u_flagcheck,%0,visual,8),u(u_flagcheck,%0,abode,5),u(u_flagcheck,%0,link_ok,5),u(u_flagcheck,%0,jump_ok,5),u(u_flagcheck,%0,parent_ok,6),u(u_flagcheck,%0,enter_ok,5),u(u_flagcheck,%0,chown_ok,8),u(u_inheritplayercheck,%0),u(u_flaginherit_wizardowned,%0))
+
+@@ Check for a particular flag
+@@ u_flagcheck(#dbref,flag,warn_level)
+&U_FLAGCHECK Checker=switch(hasflag(%0,%1),1,%2 [u(u_name,%0)] is set %1%r)
+
+@@ Check for inherit players
+@@ u_inheritplayercheck(#dbref)
+&U_INHERITPLAYERCHECK Checker=switch(cat(owner(%0),hasflag(%0,inherit),hasflag(owner(%0),wizard)),%0 1 0,8 [u(u_name,%0)] is an INHERIT Player.%r,%0 1 1,9 [u(u_name,%0)] is an INHERIT Wizard!%r)
+
+@@ Check for inherit wizard-owned objects
+@@ u_flaginherit_wizardowned(#dbref)
+&U_FLAGINHERIT_WIZARDOWNED Checker=switch(and(hasflag(%0,inherit),hasflag(owner(%0),wizard)),1,8 [u(u_name,%0)] is INHERIT and owned by a WIZARD.%r)
+
+@@ Check all the attributes on the object.  First, find the "interesting"
+@@ attributes, then generate a message for each of those.
+@@ u_checkattr_all(#dbref)
+&U_CHECKATTR_ALL Checker=iter(filter(u_attr_interesting,iter(lattr(%0),%0/##)),u(u_attr_print,##))
+
+@@ Find "interesting" attributes.  They match these "regular" expressions:
+@@  $*~*:*%%[0-9n]*
+@@  $*~*:*v([0-9n])*
+@@ u_attr_interesting(#dbref/attr)
+@@ If the attribute doesn't start with '$', there's no way we're interested.
+&U_ATTR_INTERESTING Checker=[switch(get(%0),$*,[setq(3,edit(get(%0),*,~))][or(u(u_attr_interesting_1,%q3),u(u_attr_interesting_2,%q3))],0)]
+@@ These are split up because switch() can't handle them all at once.
+&U_ATTR_INTERESTING_1 Checker=switch(%0,$*~*:*%%0*,1,$*~*:*%%1*,1,$*~*:*%%2*,1,$*~*:*%%3*,1,$*~*:*%%4*,1,$*~*:*%%5*,1,$*~*:*%%6*,1,$*~*:*%%7*,1,$*~*:*%%8*,1,$*~*:*%%9*,1,$*~*:*%%n*,1,0)
+&U_ATTR_INTERESTING_2 Checker=switch(%0,$*~*:*v(0)*,1,$*~*:*v(1)*,1,$*~*:*v(2)*,1,$*~*:*v(3)*,1,$*~*:*v(4)*,1,$*~*:*v(5)*,1,$*~*:*v(6)*,1,$*~*:*v(7)*,1,$*~*:*v(8)*,1,$*~*:*v(9)*,1,$*~*:*v(n)*,1,0)
+
+@@ Format the output
+@@ u_attr_print(#dbref/attr)
+&U_ATTR_PRINT Checker=cat(u(u_attr_warning,%0),%0,get(%0),%r)
+
+@@ If the attribute needs a warning, give it one.
+@@ u_attr_warning(#dbref/attr)
+&U_ATTR_WARNING Checker=[setq(2,get(%0))][setq(3,edit(%q2,*,~))][switch(or(u(u_attr_force_param2,%q3),u(u_attr_force_param,%q3)),1,8 $command @force uses parameter: ,[switch(%q2,$*:*@fo*,7 $command uses @force:           ,[switch(%q2,$*:*%%n*,6 $command uses %%n instead of %%#: ,5 $command uses parameter:        )])])]
+
+@@ return 1 if %0 matches the regular expressions:
+@@  $*~*:*@fo* *=*%[0-9n]* or $*~*:*@fo* *=*v([0-9n])*
+@@ (Where '~' is really a '*'.
+&U_ATTR_FORCE_PARAM Checker=switch(%0,$*~*:*@fo* *=*%0*,1,$*~*:*@fo* *=*%1*,1,$*~*:*@fo* *=*%2*,1,$*~*:*@fo* *=*%3*,1,$*~*:*@fo* *=*%4*,1,$*~*:*@fo* *=*%5*,1,$*~*:*@fo* *=*%6*,1,$*~*:*@fo* *=*%7*,1,$*~*:*@fo* *=*%8*,1,$*~*:*@fo* *=*%9*,1,$*~*:*@fo* *=*%n*,1,0)
+&U_ATTR_FORCE_PARAM2 Checker=switch(%0,$*~*:*@fo* *=*v(3)*,1,$*~*:*@fo* *=*v(0)*,1,$*~*:*@fo* *=*v(1)*,1,$*~*:*@fo* *=*v(2)*,1,$*~*:*@fo* *=*v(4)*,1,$*~*:*@fo* *=*v(5)*,1,$*~*:*@fo* *=*v(6)*,1,$*~*:*@fo* *=*v(7)*,1,$*~*:*@fo* *=*v(8)*,1,$*~*:*@fo* *=*v(9)*,1,$*~*:*@fo* *=*v(n)*,1,0)
+
+@@ Check for all kinds of parenting problems, on objects that have parents.
+&U_PARENTCHECK_ALL Checker=switch(parent(%0),#-1,,cat(u(u_parentcheck_inherit,%0),u(u_parentcheck_owner,%0),u(u_parentcheck_wizard,%0)))
+
+@@ Check for inherit-related parent problems
+&U_PARENTCHECK_INHERIT Checker=switch(cat(parent(%0),hasflag(%0,inherit),hasflag(parent(%0),inherit)),#-1 * *,,* 1 0,8 [u(u_name,%0)] is INHERIT and has non-INHERIT parent.%r)
+
+@@ Check for owner-related parent problems
+&U_PARENTCHECK_OWNER Checker=switch(cat(parent(%0),owner(%0),owner(parent(%0))),#-1 * *,,* [owner(%0)] [owner(%0)],,9 [u(u_name,%0)] is parented to an object owned by another player.%r)
+
+@@ Check for Wizard-related parent problems
+&U_PARENTCHECK_WIZARD Checker=switch(cat(parent(%0),hasflag(owner(%0),wizard),hasflag(owner(parent(%0)),wizard)),#-1 * *,,* 1 0,9 [u(u_name,%0)] is owned by a WIZARD and is parented to an object owned by a non-WIZARD.%r)
+
+@@ An empty +secure gives info:
+@@ +help secure could be:
+@@ &secure_help checker=$+help secure:page %#=+secure <object>%r+secure/<cutoff level> <object>%r-------------------------------%r%rThis command checks <object> for common security problems, and gives you%rwarnings about those problems.  The warnings each have a "Level", which%rindicates how severe the problem is.  Level 0 warnings can safely be%rignored, level 9 warnings render your object vulnerable to hacking.%r%rExamples:%r---------%r+check toy        (Checks the object 'toy')%r+check #1234      (Checks object #1234)%r+check/7 thingie  (Checks 'thingie' for warnings rated level 7, 8, or 9)%r+check/0 bob      (Checks 'bob', returning all warnings (levels 0-9))
+
+@@ (+help check isn't on this object because that's not what we do on TinyCWRU)
+&CHECK_EMPTY Checker=$+secure:page %#=Type '+help secure' for info about +secure.
+
+@@ return the name of %0
+&u_name Checker=name(%0)(%0)

@@ -1,0 +1,396 @@
+@@ +tally system
+@@ Revision: 1999-03-11
+@@ Copyright (c) 1999 Alan Schwartz
+@@ Released under the same terms as PennMUSH
+@@
+@@ This is code that can keep track of win-lose-draw records of players
+@@ for an arbitrary set of 2-player games and provide standings and ratings.
+@@ It requires no permissions. It uses @mail.
+@@
+@@ To install it, upload this file piped through 'mpp', which is available
+@@ from ftp.pennmush.org
+@@
+@@ Each game that you want the system to track needs its own database
+@@ object, which should live inside the command object. In addition, the
+@@ @VD attribute on the command object should be a list of alternating
+@@ game names and their database dbrefs.
+@@ The system comes with a scrabble database already installed as an example. 
+@@
+@@ Once installed, use +tally/help for a command list.
+
+@fo me=@va me=[create(Tally Commands,10)]
+@fo me=@vf [v(va)]=[create(Tally Functions,10)]
+@fo me=@vc [v(va)]=[create(Confirmations,10)]
+@fo me=@vo [xget(v(va),VF)]=[v(va)]
+@cpattr [v(va)]/VF=me/VF
+
+@dol vf vc={ @lock [xget(v(va),##)]=me; @link [xget(v(va),##)]=[v(va)];
+	@tel [xget(v(va),##)]=[v(va)] }
+@fo me=@lock [v(va)]=me
+@fo me=@link [v(va)]=#2
+@set [v(va)]=!no_command
+@set [v(va)]=safe
+@set [v(vf)]=safe
+@desc [v(va)]=Commands for the tally/rating system.
+@desc [v(vf)]=Functions for the tally/rating system.
+
+@fo me=@vd me=[create(Scrabble Database,10)]
+@fo me=@vd [v(va)]=scrabble [v(vd)]
+@lock [v(vd)]=me
+@link [v(vd)]=[v(va)]
+@tel [v(vd)]=[v(va)]
+
+@@ Commands:
+@@  +tally <name> beat|tied <name> at <game>
+@@  +tally/confirm <conf#>
+@@  +tally/deny <conf#>
+@@  +tally/short <name> at <game>
+@@  +tally/long <name> at <game>
+@@  +tally/rating <name> at <game>
+@@  +tally/help
+@@ <name> can be a player name or *. <game> can be any registered game.
+@@
+
+@startup [v(va)]=@drain me; @notify me
+@tr [v(va)]/startup
+
+&do_tally_beat [v(va)] = $+tally * beat * at *:
+	@wait me = {@select 0 = [u(%VF/isgame,%2)],
+	  { @pemit %#=I don't know a game called %2.; @notify me },
+	 [comp(setr(1,pmatch(%0)),#-1)],
+	  { @pemit %#=I don't know a player named %0.; @notify me },
+	 [comp(setr(2,pmatch(%1)),#-1)],
+	  { @pemit %#=I don't know a player named %1.; @notify me },
+	 [member(%q1 %q2,%#)],
+	  { @pemit %#=You can only tally games you played in.; @notify me },
+	{ &C_[setr(3,secs())] %VC=%# %q1 %q2 W %2; 
+	  @pemit %#=You register the game. Waiting for confirmation.; 
+	  @mail [setdiff(%q1 %q2,%#)]=Confirmation request/
+		{ %N has reported that you played a game of %2 with %o 
+		  on or around [time()]. %S reports that [name(%q1)] 
+		  won the game. If you agree with this report, type:%r
+		  %t+tally/confirm %q3%rIf you don't agree, type:%r
+		  %t+tally/deny %q3 };
+	  @notify me
+	}}
+
+&do_tally_tied [v(va)] = $+tally * tied * at *:
+	@wait me = {@select 0 = [u(%VF/isgame,%2)],
+	  { @pemit %#=I don't know a game called %2.; @notify me },
+	 [comp(setr(1,pmatch(%0)),#-1)],
+	  { @pemit %#=I don't know a player named %0.; @notify me },
+	 [comp(setr(2,pmatch(%1)),#-1)],
+	  { @pemit %#=I don't know a player named %1.; @notify me },
+	 [member(%q1 %q2,%#)],
+	  { @pemit %#=You can only tally games you played in.; @notify me },
+	{ &C_[setr(3,secs())] %VC=%# %q1 %q2 D %2; 
+	  @pemit %#=You register the game. Waiting for confirmation.; 
+	  @mail [setdiff(%q1 %q2,%#)]=Confirmation request/
+		{ %N has reported that you played a game of %2 with %o 
+		  on or around [time()]. %S reports that the game was a tie. 
+		  If you agree with this report, type:%r
+		  %t+tally/confirm %q3%rIf you don't agree, type:%r
+		  %t+tally/deny %q3 };
+	   @notify me
+	}}
+
+&do_tally_confirm [v(va)] = $+tally/confirm *:
+	@wait me = { @select 0=[hasattr(%VC,C_%0)],
+	  { @pemit %#=I don't know that confirmation code.; @notify me },
+	[setq(0,get(%VC/C_%0))][setq(1,first(%q0))][setq(2,extract(%q0,2,2))]
+	[not(comp(%#,setdiff(%q2,%q1)))],
+	  { @pemit %#=You're not allowed to confirm that game.; @notify me },
+	[setq(3,last(%q0))][setq(4,extract(%VD,add(1,match(%VD,%q3)),1))]
+	[setq(5,first(%q2))][setq(6,last(%q2))]
+	[match(lcon(me),%q4)],
+	  { @pemit %#=Oops. Something's bad. Contact [name(owner(me))] 
+	    with your confirmation number.; @notify me },
+	{ &R_%q5 %q4 = 
+	   [ulocal(%VF/rating[extract(%q0,4,1)],%q3,%q5,%q6)] 
+	   [rest(xget(%q4,R_%q5))] [extract(%q0,4,1)]%q6;
+	  &R_%q6 %q4 = 
+	   [ulocal(%VF/rating[edit(extract(%q0,4,1),W,L)],%q3,%q6,%q5)] 
+	   [rest(xget(%q4,R_%q6))] [edit(extract(%q0,4,1),W,L)]%q5;
+	  @mail %q5 %q6=Confirmation notice/
+		{ %N has confirmed the results of the game of %q3 played 
+		  on or around [convsecs(%0)] between [name(%q5)] and 
+		  [name(%q6)] and standings have been updated. Thanks! };
+	  @wipe %VC/C_%0;
+	  @notify me
+	}}
+
+&do_tally_deny [v(va)] = $+tally/deny *:
+	@wait me = {@select 0=[hasattr(%VC,C_%0)],
+	  { @pemit %#=I don't know that confirmation code.; @notify me },
+	[setq(0,get(%VC/C_%0))][setq(1,first(%q0))][setq(2,extract(%q0,2,2))]
+	[setq(3,last(%q0))][setq(5,first(%q2))][setq(6,last(%q2))]
+	[not(comp(%#,setdiff(%q2,%q1)))],
+	  { @pemit %#=You're not allowed to deny that game.; @notify me },
+	{
+	  @mail %q5 %q6=Denial notice/
+		{ %N has denied the results of the game of %q3 played 
+		  on or around [convsecs(%0)] between [name(%q5)] and 
+		  [name(%q6)]. Standings have not been updated. };
+	  @wipe %VC/C_%0;
+	  @notify me
+	}}
+
+&do_tally_help [v(va)] = $+tally/help: @pemit %#={
+ The +tally commands maintain standings and ratings for MUSH games. 
+ Currently, +tally knows the following games: [ulocal(%vf/games)]%r
+ Commands to register a game result:%r
+ %t+tally <name> beat <name> at <game>%r
+ %t+tally <name> tied <name> at <game>%r
+ These commands send @mail to the other player asking them to confirm 
+ or deny the game result. If the result is confirmed, it is recorded.%r%r
+ Commands to see results:%r
+ %t+tally/short <name> at <game>%r
+ %t+tally/long <name> at <game>%r
+ %t+tally/rating <name> at <game>%r
+ These commands show the win-lose-draw standings, list of games played, 
+ and game rating of a player. Rating uses a simplified version of the 
+ Elo system used for chess ratings. A new player has rating 1000. 
+ You get more points for beating better players.
+ }
+  
+ 
+@@  +tally/short <name> at <game>
+@@  +tally/long <name> at <game>
+@@  +tally/rating <name> at <game>
+@@ <name> can be a player name or *. <game> can be any registered game.
+
+
+&do_tally_rating [v(va)] = $+tally/rating * at *:
+	@select 0 = [u(%VF/isgame,%1)],
+	  { @pemit %#=I don't know a game called %1. },
+	 [not(strmatch(%0,-))],
+	  { @pemit %#=Ratings at %1: [iter(ulocal(%VF/munge_rating,%1),
+		%r[ljust(#@.,3)] [ljust(name(##),15)] [ljust(ulocal(%VF/rating,%1,##),5)]
+		[ulocal(%VF/veryshort,%1,##)]
+		)]
+	  },
+	 [comp(setr(1,pmatch(%0)),#-1)],
+	  { @pemit %#=I don't know a player named %0. },
+	{ @pemit %#=[name(%q1)]'s rating at %1 
+	  ([ulocal(%VF/num_games,%1,%q1)] games played) is 
+	  [ulocal(%VF/rating,%1,%q1)]
+	}
+
+&do_tally_short [v(va)] = $+tally/short * at *:
+	@select 0 = [u(%VF/isgame,%1)],
+	  { @pemit %#=I don't know a game called %1. },
+	 [not(strmatch(%0,-))],
+	  { @pemit %#=Standings at %1: [iter(ulocal(%VF/munge_rating,%1),
+		%r[ljust(name(##),15)] [ulocal(%VF/short,%1,##)])]
+	  },
+	 [comp(setr(1,pmatch(%0)),#-1)],
+	  { @pemit %#=I don't know a player named %0. },
+	{ @pemit %#=[name(%q1)]'s record at %1 is [ulocal(%VF/short,%1,%q1)]
+	}
+
+
+
+&do_tally_long [v(va)] = $+tally/long * at *:
+	@select 0 = [u(%VF/isgame,%1)],
+	  { @pemit %#=I don't know a game called %1. },
+	 [comp(setr(1,pmatch(%0)),#-1)],
+	  { @pemit %#=I don't know a player named %0. },
+	{ @pemit %#=[name(%q1)]'s detailed record at %1 ([ulocal(%VF/veryshort,%1,%q1)]):%r
+		[ulocal(%VF/long,%1,%q1)]
+	}
+
+@@ Functions:
+@@  short - output short standings by counting w/l/d for a player %1
+@@	    at game %0
+@@  long - output long standings by sorting by w/l/d for player %1
+@@          at game %0 and reporting who they w/l/d'd with.
+@@  rating - extract rating for player %1 at game %0
+@@  competitors - list everyone who's played %0
+@@  isgame - is %0 a valid game we know?
+@@  games - list all games we know
+@@  num_games - how many games of %0 has %1 played?
+@@  rating_diff - Abs diff in ratings between player %1 and %2 at game %0
+@@  rating_prob - Convert an abs diff to a prob between .5 and 1
+@@  rating_mult - Multiplier for player %1 at game %0
+@@  rating_ge - Is %1's rating at game %0 >= %2's rating?
+@@  ratingW - Given players %1 and %2 at game %0, where %1 beat %2, compute
+@@	      %1's new rating.
+@@  ratingL - Given players %1 and %2 at game %0, where %1 lost to %2, compute
+@@	      %1's new rating.
+@@  ratingD - Given players %1 and %2 at game %0, where %1 tied %2, compute
+@@	      %1's new rating.
+
+&isgame [v(vf)]=[mod(match(get(%VO/VD),%0),2)]
+
+&games [v(vf)]=[filter(isgame,get(%VO/VD))]
+
+&competitors [v(vf)]=
+	[setq(9,get(%VO/VD))]
+	[setq(0,extract(%q9,add(1,match(%q9,%0)),1))]
+	[iter(lattr(%q0/R_*),after(##,R_))]
+
+&rating_diff [v(vf)]=
+	[setq(9,get(%VO/VD))]
+	[setq(0,extract(%q9,add(1,match(%q9,%0)),1))]
+	[setq(1,first(default(%q0/R_%1,1000)))]
+	[setq(2,first(default(%q0/R_%2,1000)))]
+	[abs(sub(%q1,%q2))]
+
+&rating_prob [v(vf)]=
+	[switch(%0,<50,.50,<100,.57,<150,.63,<200,.70,<250,.76,<300,.81,
+	           <400,.85,<500,.92,.96)]
+
+&num_games [v(vf)]=
+	[setq(9,get(%VO/VD))]
+	[setq(0,extract(%q9,add(1,match(%q9,%0)),1))]
+	[dec(words(default(%q0/R_%1,1)))]
+
+&veryshort [v(vf)]=
+	[setq(9,get(%VO/VD))]
+	[setq(0,extract(%q9,add(1,match(%q9,%0)),1))]
+	[setq(1,rest(get(%q0/R_%1)))]
+	[words(matchall(%q1,W*))]-[words(matchall(%q1,L*))]-
+	[words(matchall(%q1,D*))]
+
+&short [v(vf)]=
+	[setq(9,get(%VO/VD))]
+	[setq(0,extract(%q9,add(1,match(%q9,%0)),1))]
+	[setq(1,rest(get(%q0/R_%1)))]
+	[setr(3,words(matchall(%q1,W*)))] wins - 
+	[setr(4,words(matchall(%q1,L*)))] losses - 
+	[setr(5,words(matchall(%q1,D*)))] ties 
+	(won [setq(6,add(%q3,%q4,%q5))][round(mul(100,fdiv(add(%q3,fdiv(%q5,2)),%q6)),1)]\% of %q6 games)
+
+&LONG [v(vf)]=[setq(9,get(%VO/VD))]
+  [setq(0,extract(%q9,add(1,match(%q9,%0)),1))]
+  [setq(1,rest(get(%q0/R_%1)))]
+  [setq(2,)]
+  [trim(iter(%q1,if(strmatch(##,W*),switch(1,strmatch(%q2,*[after(##,W)]*),,setq(2,%q2 [after(##,W)])))))]
+  [switch(%q2,,,%r
+  Won against: [iter(%q2,[name(##)]
+  [switch(setr(3,words(matchall(%q1,W##))),>1,%b(x%q3))],%b,\,%b)]%r
+  )]
+  [setq(2,)]
+  [trim(iter(%q1,if(strmatch(##,L*),if(strmatch(%q2,*[after(##,L)]*),,setq(2,%q2 [after(##,L)])))))]
+  [switch(%q2,,,%r
+  Lost against: [iter(%q2,[name(##)]
+  [switch(setr(3,words(matchall(%q1,L##))),>1,%b(x%q3))],%b,\,%b)]%r
+  )]
+  [setq(2,)]
+  [trim(iter(%q1,if(strmatch(##,D*),if(strmatch(%q2,*[after(##,D)]*),,setq(2,%q2 [after(##,D)])))))]
+  [switch(%q2,,,%r
+  Tied against: [iter(%q2,[name(##)]
+  [switch(setr(3,words(matchall(%q1,D##))),>1,%b(x%q3))],%b,\,%b)])]
+
+&rating [v(vf)]=
+	[setq(9,get(%VO/VD))]
+	[setq(0,extract(%q9,add(1,match(%q9,%0)),1))]
+	[first(default(%q0/R_%1,unrated))]
+
+&rating_mult [v(vf)]=
+	[setq(9,get(%VO/VD))]
+	[setq(0,extract(%q9,add(1,match(%q9,%0)),1))]
+	[setq(1,dec(words(default(%q0/R_%1,1))))]
+	[setq(2,first(default(%q0/R_%1,1000)))]
+	[switch(%q1,<11,sub(70,%q1),
+		    <50,switch(%q2,<1800,30,<2000,24,20),
+		       ,switch(%q2,<1800,20,<2000,16,10))]
+
+&rating_ge [v(vf)]=
+	[setq(9,get(%VO/VD))]
+	[setq(0,extract(%q9,add(1,match(%q9,%0)),1))]
+	[setq(1,first(default(%q0/R_%1,1000)))]
+	[setq(2,first(default(%q0/R_%2,1000)))]
+	[gte(%q1,%q2)]
+
+@@ %1 beat %2. If %1 is better than %2, we do 1-p * mult. If worse,
+@@ we do p * mult
+@@
+&ratingW [v(vf)]=
+	[setq(9,get(%VO/VD))]
+	[setq(0,extract(%q9,add(1,match(%q9,%0)),1))]
+	[setq(1,first(default(%q0/R_%1,1000)))]
+	[setq(2,u(rating_prob,ulocal(rating_diff,%0,%1,%2)))]
+	[setq(3,ulocal(rating_mult,%0,%1))]
+	[add(%q1,if(ulocal(rating_ge,%0,%1,%2),
+            round(mul(sub(1,%q2),%q3),0),
+	    round(mul(%q2,%q3),0)))]
+
+@@ %1 lost to %2. If %1 is better than %2, we do p * mult. If worse,
+@@ we do 1-p * mult
+@@
+&ratingL [v(vf)]=
+	[setq(9,get(%VO/VD))]
+	[setq(0,extract(%q9,add(1,match(%q9,%0)),1))]
+	[setq(1,first(default(%q0/R_%1,1000)))]
+	[setq(2,u(rating_prob,ulocal(rating_diff,%0,%1,%2)))]
+	[setq(3,ulocal(rating_mult,%0,%1))]
+	[sub(%q1,if(ulocal(rating_ge,%0,%1,%2),
+	    round(mul(%q2,%q3),0),
+            round(mul(sub(1,%q2),%q3),0)))]
+
+@@ %1 tied with %2. If %1 is better than %2, we add (.5 - p) * mult, which will
+@@ be negative. If %1 is worse, we do (p - .5) * mult, which is positive
+@@
+&ratingD [v(vf)]=
+	[setq(9,get(%VO/VD))]
+	[setq(0,extract(%q9,add(1,match(%q9,%0)),1))]
+	[setq(1,first(default(%q0/R_%1,1000)))]
+	[setq(2,u(rating_prob,ulocal(rating_diff,%0,%1,%2)))]
+	[setq(3,ulocal(rating_mult,%0,%1))]
+	[add(%q1,if(ulocal(rating_ge,%0,%1,%2),
+	    round(mul(sub(.5,%q2),%q3),0),
+            round(mul(sub(%q2,.5),%q3),0)))]
+
+&sort_num [v(vf)] = [revwords(sort(%0))]
+&munge_rating [v(vf) = [setq(0,ulocal(competitors,%0))]
+	[munge(sort_num,iter(%q0,ulocal(rating,%0,##)),%q0)]
+
+@@ 
+@@ Technical notes:
+@@
+@@ The rating system, btw, works like this:
+@@ - Each player has a rating (400-2200), higher is better
+@@ - After a game, we compute the probability of a player winning, based
+@@   on difference in ratings:
+@@      0	.50
+@@	50	.57
+@@	100	.63
+@@	150	.70
+@@	200	.76
+@@	250	.81
+@@	300	.85
+@@	400	.92
+@@	500	.96
+@@   (We use the lowest rating diff, so a diff of 350 = 300)
+@@   If the result is in the expected direction (better beats worse),
+@@   we use 1-p(abs(rating diff)). In the opposite direction, (worse
+@@   beats better), we use p(abs(rating diff)). In a tie, we use
+@@   abs(rating diff) - .50.
+@@ - We multiply that probability by a multiplier based on how stable
+@@   a player's current rating is:
+@@	# games played	2000+		1800-1999	0-1799
+@@	0-10		70-# played	70-# played	70-# played
+@@	11-49		20		24		30
+@@	50-		10		16		20
+@@ - That many points are given to the winner, and taken from the loser
+@@ - We start everyone at 1000
+@@
+@@
+@@ Each player is represented by an attribute containing:
+@@  <rating> <game> <game> <game> ....
+@@ A <game> is represented by <W|L|D><dbref of opponent>
+@@ Ex: &R_#7 Database = 1100 W#79 W#23 T#46 L#400
+@@
+@@ The confirmation database keeps track of unconfirmed results:
+@@ &C_<conf#> Confirm = <initiating player> <p1> <p2> <W|D> <game>
+@@
+
+
+
+
+  
+
+
+
+

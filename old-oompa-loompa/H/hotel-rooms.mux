@@ -1,0 +1,177 @@
+########################################################
+#               HOTEL CODE                             #
+# By Stephanie Dray                                    #
+########################################################
+
+
+# @create hotel register
+-
+
+# @wipe hotel register
+-
+
+@set register=wizard
+-
+
+# Set up:
+# 
+# For each hotel room:
+#   &rm-#<dbref of room> register=
+#        <dbref of exit into room>|<dbref of exit out of room>
+#   &name-#<dbref of room> register=<name of the room, "The Ranivor's Suite">
+#   &monthly-#<dbref of room> register=<monthly cost>
+#   &daily-#<dbref of room> register=<daily cost>
+#   &status-#<dbref of room> register=unrented
+#   &key-#<dbref of room> register=<dbref of key>
+#
+# For the establishment:
+#   &can-rent register=day|month (one or the other or both)
+
+
+#================================================================#
+#			COMMAND: ROOM                            #
+#                                                                #
+# This command should be typed by patrons in order to rent a     #
+# room.                                                          #
+#                                                                #
+#================================================================#
+
+&cmd-room register=$room:
+
+  @fpose %#=inquires about obtaining a room.;
+  think setq(0, lattr(me/status-*));
+  think setq(0, filter(filter-unrented, %q0));
+
+  think setq(9, [gte(words(%q0), 1)]);
+
+  @switch %q9=1, {@program %#=me/prog-choose-room:%ch
+                     The clerk informs you that the following 
+                     rooms are available, and asks which one you 
+                     are interested in renting:%r%cg%r
+                    [columns(
+                      iter(%q0, get(me/name-[after(##,-)]), %b,\,%b), 
+                     25, \,)]
+                    %cn%r},
+              0, {@pemit %#=The clerk informs you that there are 
+                         no rooms available.}
+-
+# %# = potential renter
+# %0 = the name of a room to rent
+# %q0 = the &rm of available rooms
+
+&prog-choose-room register=
+
+  think setq(1, iter(%q0, get(me/name-[after(##,-)]), %b, |));
+  @pemit steph=prog-choose-room %q1;
+  @switch [t(match(%q1, %0, |))]=
+    0, {@program %#=me/prog-choose-room:%chYour only choices are:%r%r
+                 [columns(%q1, 25, |)]%r},
+    1, {@@ find out how long the player wants to rent the room @@;
+
+# Find the dbref of the room that the player wants to rent
+        think setq(1, grepi(me, name-*, %q1));
+        think setq(1, clip(%q1));
+        @pemit steph=redefined %q1;
+        think setq(2, v(can-rent));
+  
+        @switch %q2=
+           day, {@tr me/trig-daily-room-rent= %#, %q1 },
+           month, {@tr me/trig-monthly-room-rent= %#, %q1 },
+           {@program %#=me/prog-duration-of-stay:
+                     %chWill you be staying for one night, or a the month? 
+                     (You may only answer 'night' or 'month')%cn%r}}
+-
+
+# %# = the renter
+# %q0 = available rooms
+# %q1 = dbref of the room the player wants to rent
+
+&prog-duration-of-stay register=
+  @switch %0=
+    night, {@tr me/trig-daily-room-rent=%#, %q1 },
+    month, {@tr me/trig-monthly-room-rent=%#, %q1 },
+    {@program %#=me/prog-duration-of-stay:You must specify either 
+      'night' or 'month'.}
+
+-
+# %0 = renter
+# %1 = the dbref of the room to be rented
+
+&trig-daily-room-rent register=
+  think setq(1, %1);
+  @pemit steph=trig-daily-room-rent %q1;
+  think setq(2, default(me/daily-%1, price(shelter)));
+
+  @switch [gte(getaccount(%0, stenis), %q2)]=
+    1, {@program %0=me/prog-confirm-daily:%chThe clerk explains that 
+                 the room will cost %q2 stenis to 
+                 rent for the night.  Are you willing to pay?%cn},
+    0, {@pemit %#=The clerk informs you that the room runs for 
+               %q2 stenis a night.  You don't have that 
+               much money.}
+-
+# %# = renter
+# %q1 = dbref of room to be rented
+# %q2 = price of the room for the night
+
+&prog-confirm-daily register=
+
+  @switch %0=
+    n*, {@remit %L=A clerk nods to what [name(%#)] says.  "Perhaps 
+                we can help you another time."},
+    y*, {@money/transfer %q2 from %# to [num(me)];
+         @fpose %#=hands a clerk %q2 stenis for a room.;
+         @tr me/trig-rent=%#, %q1, daily},
+    {@prog %0=me/prog-confirm-daily:%chAre you willing to pay, 
+                 'yes' or 'no'?}
+            
+-
+
+# %0 the renter
+# %1 the room to be rented
+# %3 (daily/monthly)
+
+&trig-rent register=
+  think setq(0, get(me/key-%1));
+  think setq(1, scramble(secs()));
+  think setq(2, get(me/rm-%1));
+
+  @remit loc(%0)=A clerk searches for a key to give to [name(%0)].;
+  @tel %q0=me;
+  &key-code %q0=%q1;
+  @lock [first(%q2, |)]=locked/0;
+  @lock [last(%q2, |)]=locked/0;
+  &key-code [first(%q2, |)]=%q1;
+  &key-code [last(%q2, |)]=%q1;
+  @tel %q0=%0;
+  @remit loc(%0)=A clerk hands [name(%0)] a key.
+     
+
+-
+
+&filter-unrented register=
+ [strmatch(v(%0), unrented)]
+ 
+-
+
+# Where the Generic Door is #4250
+# Where the Generic Container code is #70
+
+&cmd-lock #4250=
+
+-
+&locked #4250=[hastag(me, locked)]
+
+  
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,69 @@
+@@ -*- mushcode -*-
+@create +CRON System
+@lock/Basic +CRON System==me
+@set +CRON System = WIZARD
+@set +CRON System = NO_COMMAND
+&CRON_ONHOUR +CRON System=@@ Remove garbage objects from the events lists @@; @dolist lattr(me/*_list)=&## me=[filterbool(isgoodobject, v(##))]
+&DAILY_LIST +CRON System=
+@DESCRIBE +CRON System=+CRON lists, code, and loop.
+&DISPLAY_EVENTS +CRON System=switch(v(%0), , if(%1, None.), ansi(h, setr(z, edit(ucstr(%0), _LIST, ))): Next triggered on [u(event_time, %qz)]%r[iter(#$, name(##)\(##[flags(##)]\)\, owned by [name(owner(##))]\([owner(##)][flags(owner(##))]\)., ,%r)]%r)
+&EQSPLIT_CMDS +CRON System=REGISTER REMOVE
+&EVENT_TIME +CRON System=timefmt($A at $I:$M $p, switch(%0, hourly, u(time_of_next_hour), hour*, u(event_time_hourly, after(%0, HOUR)), daily, u(event_time_block, 1), twicedaily, u(event_time_block, 2), quarterly, u(event_time_block, 4), fourhourly, u(event_time_block, 6)))
+&EVENT_TIME_BLOCK +CRON System=setq(0, u(time_of_next_hour))[u(event_time_hourly, switch(%0, 1, 0, 2, if(gt(timefmt($H, %q0), 12), 0, 12), 4, switch(timefmt($H, %q0), >16, 0, >8, 16, 8), 6, switch(timefmt($H, %q0), >20, 0, >16, 20, >12, 16, >8, 12, >4, 8, 4)))]
+&EVENT_TIME_HOURLY +CRON System=lmath(add, setr(x, u(time_of_next_hour)) [if(gt(setr(u, timefmt($H, %qx)), %0), mul(3600, %0) [mul(3600, sub(24, %qu))], mul(3600, sub(%0, %qu)))])
+&FOURHOURLY_LIST +CRON System=
+&HELP_FUN +CRON System=Syntax:%r+cron/register <interval>=<object>%r+cron/remove <interval>=<object>%r+cron/search <object>|mine%r+cron/list <interval>|all%r%rThe +cron system is a convenient way of scheduling events to happen at certain intervals. This is done by registering an object for an interval, after which a certain attribute on the object will be @triggered every time the interval is reached.%r%r+cron/register adds an object to the interval lists, to be @triggered at whatever interval is given.%r+cron/remove removes an object from an interval's trigger list.%r+cron/search tells you which intervals an object is @triggered on, or which of your objects is registered if 'mine' is used.%r+cron/list displays all objects registered with a given interval, or all intervals if 'all' is used.%r%rContinued in +cron/help2
+&HELP2_FUN +CRON System=Supported intervals are:%rDaily - Once a day, at midnight. @triggered: &CRON_DAILY%rTwicedaily - Twice a day, at midnight and noon. @triggered: &CRON_TWICEDAILY%rQuarterly - Four times a day, at midnight, 6 am, noon, and 6 pm. @triggered: &CRON_QUARTERLY%rFourhourly - Every four hours (Midnight, 4 am, 8 am, ...). @triggered: &CRON_FOURHOURLY%rHourly - Every hour. @triggered: &CRON_HOURLY%rHour<X> - At the X'th hour of the day, with 0 being midnight, going to 23, which is 11 pm. @triggered: &CRON_ONHOUR.%r%rAll triggered attributes have the hour (0-23) passed to them as %%0.%r%rPlease remember to +cron/remove objects when they no longer need to use the cron system or are destroyed. For those who forget to do so, garbage objects are periodically cleared from the interval lists.
+&HOUR0_LIST +CRON System=
+&HOUR10_LIST +CRON System=
+&HOUR11_LIST +CRON System=
+&HOUR12_LIST +CRON System=
+&HOUR13_LIST +CRON System=
+&HOUR14_LIST +CRON System=
+&HOUR15_LIST +CRON System=
+&HOUR16_LIST +CRON System=
+&HOUR17_LIST +CRON System=
+&HOUR18_LIST +CRON System=
+&HOUR19_LIST +CRON System=
+&HOUR1_LIST +CRON System=
+&HOUR20_LIST +CRON System=
+&HOUR21_LIST +CRON System=
+&HOUR22_LIST +CRON System=
+&HOUR23_LIST +CRON System=
+&HOUR2_LIST +CRON System=
+&HOUR3_LIST +CRON System=
+&HOUR4_LIST +CRON System=
+&HOUR5_LIST +CRON System=
+&HOUR6_LIST +CRON System=
+&HOUR7_LIST +CRON System=
+&HOUR8_LIST +CRON System=
+&HOUR9_LIST +CRON System=
+&HOURLY_LIST +CRON System=
+&ISGOODOBJECT +CRON System=member(PLAYER THING EXIT ROOM, type(%0))
+&LISTMEMBER +CRON System=member(v(%0), %q0)
+&LIST_FUN +CRON System=switch(0, cor(hasattr(me, %0_list), strmatch(%0, all)), No such event, strmatch(%0, all), Items registered for the [lcstr(%0)] event are:%r[u(display_events, %0_list)], All items registered with the cron system:%r[iter(sort(lattr(me/*_list)), u(display_events, ##), ,)])
+&LOOP +CRON System=@@ Loop first, using the function call to correct any drift that creeps in from queue delays and db saves. @@; @wait/until u(time_of_next_hour)=@trigger me/loop; @@ Log the time @@; &run_at me=[time()]; @@ Items for every hour @@; @dolist v(hourly_list)[setq(0, val(first(extract(time(), 4, 1), :)))]=@trigger ##/cron_hourly=%q0; @@ Items for this hour @@; @dolist v(hour[setr(0, val(first(extract(time(), 4, 1), :)))]_list)=@trigger ##/cron_onhour=%q0; @switch 0=[setr(0, val(first(extract(time(), 4, 1), :)))], {@@ Midnight @@; @dolist v(daily_list)=@trigger ##/cron_daily=%q0}, mod(%q0, 12), {@@ Noon and Midnight @@; @dolist v(twicedaily_list)=@trigger ##/cron_twicedaily=%q0}, mod(%q0, 6), {@@ Every six hours @@; @dolist v(quarterly_list)=@trigger ##/cron_quarterly=%q0}, mod(%q0, 4), {@@ Every four hours @@; @dolist v(fourhourly_list)=@trigger ##/cron_fourhourly=%q0}
+&QUARTERLY_LIST +CRON System=
+&REGISTER_FUN +CRON System=switch(0, isdbref(setr(1, locate(%#, %1, *N))), No such object., hasattr(me, %0_list), No such interval., name(%q1)\(%q1\) added to the [lcstr(%0)] event.[set(me, %0_list:[setunion(v(%0_list), %q1, %b, d)])])
+&REMOVE_FUN +CRON System=switch(0, isdbref(setr(1, locate(%#, %1, *N))), No such object., hasattr(me, %0_list), No such interval., member(v(%0_list), %q1), That object is not registered in the [lcstr(%0)] event., name(%q1)\(%q1\) removed from the [lcstr(%0)] event.[set(me, %0_list:[setdiff(v(%0_list), %q1, %b, d)])])
+&SEARCH_FUN +CRON System=switch(0, cor(isdbref(setr(0, locate(%#, %0, *N))), strmatch(%0, mine)), No such object, strmatch(%0, mine), if(setr(1, filterbool(listmember, grep(me, *_list, %q0))), name(%q0)\(%q0\) is registered in the [u(#1838/enumerate, u(#1838/capitalize, edit(%q1, _LIST, )))] events., name(%q0)\(%q0\) is not registered with the cron system.), if(setr(1, filterbool(setinter, setunion(iter(setr(2, lsearch(%#, none, none)), grep(me, *_list, ##)), , %b, d))), You own the following objects registered with the cron system:%r[table(setinter(iter(escape(%q1), v(##)), %q2, %b, d))], You have no objects registered with the cron system.))
+&SETINTER +CRON System=setinter(v(%0), %q2, %b, d)
+@STARTUP +CRON System=@@ Figure out how many seconds till the next hour, and @wait till then. @@; @wait/until u(time_of_next_hour)=@trigger me/loop
+&TIME_OF_NEXT_HOUR +CRON System=convtime(switch(replace(time(), 4, rjust(mod(inc(first(extract(time(), 4, 1), :)), 24), 2, 0):00:00), *00:00:00*, replace(#$, 3, rjust(inc(extract(#$, 3, 1)), 2, 0)), #$))
+&TWICEDAILY_LIST +CRON System=
+
+@@ Now that the object exists, start it looping
+@restart +Cron System
+
+@@ The $-command interface to +cron.
+
+@create Cron Command
+@lock/Basic Cron Command==me
+@switch version()=*1.7.5*, @lock/Use Cron Command=flag^wizard, @lock/Use Cron Command=wizard/1
+@set Cron Command = WIZARD
+@set Cron Command = !NO_COMMAND
+&+CRON_CMD Cron Command=$+cron/* *:@pemit %#=+CRON: [udefault(%vc/%0_fun, I don't understand switch [ucstr(%0)]., if(match(get(%vc/eqsplit_cmds), %0), before(%1, =), %1), if(match(get(%vc/eqsplit_cmds), %0), after(%1, =)))]
+&+CRON2_CMD Cron Command=$+cron/*:@break pos(%b, %0); @pemit %#=+CRON [udefault(%vx/%0_fun, I don't understand switch [ucstr(%0)].)]
+@DESCRIBE Cron Command=+cron command. Can go on an object locked to admins.
+&WIZARD Cron Command=hasflag(%#, wizard)
+@force me={@VC Cron Command=[num(+CRON System)]; +cron/register hour2=[num(+CRON System)]}

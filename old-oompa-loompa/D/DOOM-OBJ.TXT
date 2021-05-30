@@ -1,0 +1,43 @@
+@create DOOM Object Parent
+@link DOOM Object Parent = #1224
+@set DOOM Object Parent = OPAQUE
+@set DOOM Object Parent = SAFE
+@set DOOM Object Parent = HALT
+@set DOOM Object Parent = ROYALTY
+@DESCRIBE DOOM Object Parent=A nondescript DOOM object.
+&RECYCLE_ROOM DOOM Object Parent=#940
+&HOME DOOM Object Parent=:disappears in a blinding flash of white light!;home
+&REPOP_TIME DOOM Object Parent=300
+@ASUCCESS DOOM Object Parent=@wait [v(Repop_Time)]=@trigger me/Home;@trigger me/Action=%#
+
+@create DOOM Treasure Chest Parent
+@link DOOM Treasure Chest Parent=#1224
+@parent DOOM Treasure Chest Parent=#1242
+@set DOOM Treasure Chest Parent=OPAQUE
+@set DOOM Treasure Chest Parent=SAFE
+@set DOOM Treasure Chest Parent=HALT
+@DESCRIBE DOOM Treasure Chest Parent=A large treasure chest. Upon opening it you see [v(Gold)] gold coins inside!
+&GOLD DOOM Treasure Chest Parent=200
+@OSUCCESS DOOM Treasure Chest Parent=greedily opens the treasure chest and empties its contents into %p wallet.
+@SUCCESS DOOM Treasure Chest Parent=You greedily open the treasure chest and empty its contents into your wallet.
+&ACTION DOOM Treasure Chest Parent=give %0=[v(Gold)];@tel me=[v(Recycle_Room)]
+
+@create DOOM Keycard Parent
+@link DOOM Keycard Parent=#1224
+@parent DOOM Keycard Parent=#1242
+@set DOOM Keycard Parent=OPAQUE
+@set DOOM Keycard Parent=SAFE
+@set DOOM Keycard Parent=HALT
+@DESCRIBE DOOM Keycard Parent=A small piece of plastic, about the size of a credit card. There is a magnetic strip across one of the edges.
+@OSUCCESS DOOM Keycard Parent=picks up the [name(me)].
+@SUCCESS DOOM Keycard Parent=You pick up the [name(me)].
+
+@create DOOM Keycard Door Exit Parent
+@link DOOM Keycard Door Exit Parent=#1224
+@set DOOM Keycard Door Exit Parent=OPAQUE
+@set DOOM Keycard Door Exit Parent=SAFE
+@set DOOM Keycard Door Exit Parent=HALT
+@ASUCCESS DOOM Keycard Door Exit Parent=@unlock me;@wait 10={@lock me=DOOM_Cheat:1|[v(Keycard)];@remit [home(me)]=[name(me)] closes.}
+@STARTUP DOOM Keycard Door Exit Parent=@lock me=DOOM_Cheat:1|[v(Keycard)]
+@OFAILURE DOOM Keycard Door Exit Parent=is denied access to [name(me)] without [name(v(Keycard))].
+@FAILURE DOOM Keycard Door Exit Parent=Access Denied; [name(v(Keycard))] required.

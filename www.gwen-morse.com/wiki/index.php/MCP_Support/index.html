@@ -1,0 +1,454 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" dir="ltr">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta http-equiv="Content-Style-Type" content="text/css" />
+		<meta name="generator" content="MediaWiki 1.15.3" />
+		<meta name="keywords" content="MCP Support" />
+		<link rel="shortcut icon" href="/favicon.ico" />
+		<link rel="search" type="application/opensearchdescription+xml" href="/wiki/opensearch_desc.php" title="GwenWiki (en)" />
+		<link rel="alternate" type="application/rss+xml" title="GwenWiki RSS Feed" href="/wiki/index.php?title=Special:RecentChanges&amp;feed=rss" />
+		<link rel="alternate" type="application/atom+xml" title="GwenWiki Atom Feed" href="/wiki/index.php?title=Special:RecentChanges&amp;feed=atom" />
+		<title>MCP Support - GwenWiki</title>
+		<link rel="stylesheet" href="/wiki/skins/common/shared.css?207" type="text/css" media="screen" />
+		<link rel="stylesheet" href="/wiki/skins/common/commonPrint.css?207" type="text/css" media="print" />
+		<link rel="stylesheet" href="/wiki/skins/monobook/main.css?207" type="text/css" media="screen" />
+		<!--[if lt IE 5.5000]><link rel="stylesheet" href="/wiki/skins/monobook/IE50Fixes.css?207" type="text/css" media="screen" /><![endif]-->
+		<!--[if IE 5.5000]><link rel="stylesheet" href="/wiki/skins/monobook/IE55Fixes.css?207" type="text/css" media="screen" /><![endif]-->
+		<!--[if IE 6]><link rel="stylesheet" href="/wiki/skins/monobook/IE60Fixes.css?207" type="text/css" media="screen" /><![endif]-->
+		<!--[if IE 7]><link rel="stylesheet" href="/wiki/skins/monobook/IE70Fixes.css?207" type="text/css" media="screen" /><![endif]-->
+		<link rel="stylesheet" href="/wiki/index.php?title=MediaWiki:Common.css&amp;usemsgcache=yes&amp;ctype=text%2Fcss&amp;smaxage=18000&amp;action=raw&amp;maxage=18000" type="text/css" />
+		<link rel="stylesheet" href="/wiki/index.php?title=MediaWiki:Print.css&amp;usemsgcache=yes&amp;ctype=text%2Fcss&amp;smaxage=18000&amp;action=raw&amp;maxage=18000" type="text/css" media="print" />
+		<link rel="stylesheet" href="/wiki/index.php?title=MediaWiki:Monobook.css&amp;usemsgcache=yes&amp;ctype=text%2Fcss&amp;smaxage=18000&amp;action=raw&amp;maxage=18000" type="text/css" />
+		<link rel="stylesheet" href="/wiki/index.php?title=-&amp;action=raw&amp;maxage=18000&amp;gen=css" type="text/css" />
+		<!--[if lt IE 7]><script type="text/javascript" src="/wiki/skins/common/IEFixes.js?207"></script>
+		<meta http-equiv="imagetoolbar" content="no" /><![endif]-->
+
+		<script type= "text/javascript">/*<![CDATA[*/
+		var skin = "monobook";
+		var stylepath = "/wiki/skins";
+		var wgArticlePath = "/wiki/index.php/$1";
+		var wgScriptPath = "/wiki";
+		var wgScript = "/wiki/index.php";
+		var wgVariantArticlePath = false;
+		var wgActionPaths = {};
+		var wgServer = "http://www.gwen-morse.com";
+		var wgCanonicalNamespace = "";
+		var wgCanonicalSpecialPageName = false;
+		var wgNamespaceNumber = 0;
+		var wgPageName = "MCP_Support";
+		var wgTitle = "MCP Support";
+		var wgAction = "view";
+		var wgArticleId = "65";
+		var wgIsArticle = true;
+		var wgUserName = null;
+		var wgUserGroups = null;
+		var wgUserLanguage = "en";
+		var wgContentLanguage = "en";
+		var wgBreakFrames = false;
+		var wgCurRevisionId = 276;
+		var wgVersion = "1.15.3";
+		var wgEnableAPI = true;
+		var wgEnableWriteAPI = true;
+		var wgSeparatorTransformTable = ["", ""];
+		var wgDigitTransformTable = ["", ""];
+		var wgRestrictionEdit = [];
+		var wgRestrictionMove = [];
+		/*]]>*/</script>
+
+		<script type="text/javascript" src="/wiki/skins/common/wikibits.js?207"><!-- wikibits js --></script>
+		<!-- Head Scripts -->
+		<script type="text/javascript" src="/wiki/skins/common/ajax.js?207"></script>
+		<script type="text/javascript" src="/wiki/index.php?title=-&amp;action=raw&amp;gen=js&amp;useskin=monobook"><!-- site js --></script>
+	</head>
+<body class="mediawiki ltr ns-0 ns-subject page-MCP_Support skin-monobook">
+	<div id="globalWrapper">
+		<div id="column-content">
+	<div id="content">
+		<a name="top" id="top"></a>
+				<h1 id="firstHeading" class="firstHeading">MCP Support</h1>
+		<div id="bodyContent">
+			<h3 id="siteSub">From GwenWiki</h3>
+			<div id="contentSub"></div>
+									<div id="jump-to-nav">Jump to: <a href="#column-one">navigation</a>, <a href="#searchInput">search</a></div>			<!-- start content -->
+			<pre>
+; Source: Ben Jackson http://ben.com/MOO/mcp.tf
+; $Id: mcp.tf,v 1.4 1998/06/05 07:14:11 bj Exp $
+;
+; MCP 1.0 support for TinyFugue.  You'll need to enable local editing and
+; mcp editing on your MOO to take advantage of this.  You'll need a pretty
+; recent version of TF (available from ftp://tf.tcp.com/pub/tinyfugue/)
+; and you'll need to make sure you use a world type of tiny.moo for all
+; your moo worlds (ie /addworld -Ttiny.moo ...).
+;
+; The only builtin support is for the `edit' request.  Supporting other
+; requests is easy.  If you wanted to handle #$#gopher, you'd just define
+; a mcp_gopher macro.  This macro should use the variables mcp_tag_host,
+; mcp_tag_port, mcp_tag_path and mcp_tag_description which will have been
+; parsed out of the request.  For example, a simple implementation using
+; lynx:
+;
+;	/def mcp_gopher = /sh lynx gopher:///%{mcp_tag_host}:%{mcp_tag_port-70}/%{mcp_tag_path}
+;	/mcp_add_client_option gopher
+;
+; Note that we provide a default for the optional `port' tag and catered
+; to TF's desire to eat one of the slashes in gopher://.  If you do this
+; interactively, try /mcp_login to send the new client option string.
+;
+; Or how about using netscape to view URLs?
+;
+;	/def mcp_display-url = /sys netscape -remote &quot;openURL(%{mcp_tag_url})&quot;
+;	/mcp_add_client_option url
+;
+; The existing edit support will do background editing (TF continues to
+; run while your editor runs under X or in another screen window) and
+; foreground editing, where the editor runs on the same TTY as TF and TF
+; is suspended while the editor runs.  Most of this is completely automatic,
+; but you can play with the configuration below.  Stuff is uploaded after
+; you save and quit your editor.  You can re-edit the last thing that
+; was sent to a given world with /reedit.
+;
+; For more info on MCP, see http://jhm.ccs.neu.edu:7043/help/subject!mcp
+; For more info on TinyFugue, see http://tf.tcp.com/~hawkeye/tf/
+; For more info on me, see http://www.ben.com/~ben/
+;
+; Thanks to Hawkeye (Ken Keys) for his help and suggestions.  Thanks to
+; Crag (Robert de Forest) for alpha testing and giving me the opportunity
+; to fix all the quirks once instead of being flooded by email.
+;
+
+/require lisp.tf
+/~loaded mcp.tf
+
+; this is where unprefix.ed resides.  we need this file to strip @@@ prefixes
+;
+/set mcp_lib=.
+
+; if theres no unprefix.ed, create the minimal one.  watch out for those
+; slashes getting compacted.
+;
+/eval /sys test -f&nbsp;%{mcp_lib}/unprefix.ed || (echo ',s/^@@@///'; echo w) &gt;&nbsp;%{mcp_lib}/unprefix.ed
+
+; if you're editing in the foreground, we'll call this with /sh, which
+; suspends TF and runs this command on TF's tty.
+;
+/eval /set mcp_editor=%{EDITOR-%{VISUAL-vi}}
+
+; if you want to continue running TF while you edit things, turn on
+; mcp_bg_edit, and set mcp_bg_editor to something which doesn't require
+; your TF tty to edit (eg emacs with DISPLAY set, xterm -e pico).  This
+; command needs to run for the duration of the editing session and exit
+; when the text should be sent back to the server.  for commands that exit
+; immediately, see the async hack below.
+;
+/if (DISPLAY&nbsp;!~ &quot;&quot;) /set mcp_bg_edit=sync&nbsp;%;/endif
+/eval /set mcp_bg_sync_editor=xterm -e&nbsp;%{mcp_editor}
+
+; if you run TF under screen, you can use this grody hack to bring the
+; editor up in another screen window.  the problem with screen is that it
+; returns control immediately after starting the vi session, so we send tf
+; a SIGUSR1 to indicate that the editor has exited.  default screen
+; background editing runs mcp_editor (above) in another screen window.
+; I'm sure you could write some elisp that would work in concert
+; with emacslient to make emacs touch the name.done file after saving.
+; We try to grab TTY here if we have async editing, since screen needs to
+; know our tty, and /sh is ugly.  If this doesn't work for you, try using
+; /sh in the async case of /mcp_edit_invoke.
+;
+/if (STY&nbsp;!~ &quot;&quot; &amp; mcp_bg_edit =~ &quot;&quot;) /set mcp_bg_edit=async&nbsp;%;/endif
+/if (mcp_bg_edit =~ &quot;async&quot; &amp; TTY =~ &quot;&quot;) \
+	/echo&nbsp;% Using async background MCP editing with no TTY set.%;\
+	/echo&nbsp;% Try adding &quot;setenv TTY `tty`&quot; to your .login or &quot;TTY=`tty`; export TTY&quot; to your .profile.%;\
+	/echo&nbsp;% Trying to determine tty...%;\
+	/eval /sh tty &gt; /tmp/kludge.$[getpid()]%;\
+	/eval /quote -dexec -S /setenv TTY '/tmp/kludge.$[getpid()]%;\
+	/if (TTY =~ &quot;&quot;) \
+		/echo&nbsp;% Unable to determine tty.  Using /dev/tty -- screen won't switch automatically when you invoke the editor.%;\
+		/setenv TTY /dev/tty%;\
+	/endif%;\
+/endif
+; bash is broken and Linux uses it for /bin/sh, so use csh hand hope it's
+; more standard and here's a perl version, too
+;/eval /set mcp_bg_async_editor=\
+;	screen &lt;&nbsp;%{TTY} -t 'mcp edit' perl -e 'system(&quot;%{mcp_editor} $$ARGV[0]; touch $$ARGV[0].done&quot;);' 
+/eval /set mcp_bg_async_editor=\
+	screen &lt;&nbsp;%{TTY} -t 'mcp edit' csh -c '%{mcp_editor} $$1&nbsp;;  kill -USR1 $[getpid()]'
+
+;
+; check every this many seconds for new .done file
+;
+/set mcp_bg_async_poll_interval=5
+
+; delete edit files 5 minutes after we upload them.  nothing gets deleted
+; if it's the last thing to be uploaded (for /reedit)
+;
+/set mcp_edit_rm_delay=300
+
+;;
+;; END OF USER CONFIGURATION
+;;
+
+; generate an auth key named mcp_${world_name}_auth_key
+;
+/def mcp_gen_auth_key =\
+	/eval /set mcp_${world_name}_auth_key=&lt;$[rand()]&gt;
+/def mcp_show_auth_key =\
+	/eval /eval /echo \%{mcp_${world_name}_auth_key}
+/def mcp_check_auth_key =\
+	/eval /test {mcp_${world_name}_auth_key} =~ {1}
+
+; keep a unique list of client options we support.  we don't reset the
+; list here, because some other .tf may have provided mcp methods already
+; and we're just reloading mcp.tf.
+;
+/def mcp_add_client_option = \
+	/set mcp_client_options=$(/unique&nbsp;%{mcp_client_options}&nbsp;%1)
+
+; handle the login negotiation.  note that you can do this by hand if
+; you didn't have mcp.tf loaded when you connected to the MOO.
+;
+/def -Ttiny.moo -t'#\$#mcp version: 1.0' -p10001 -agG mcp_login =\
+	/mcp_gen_auth_key&nbsp;%;\
+	#\$#authentication-key $(/mcp_show_auth_key)%;\
+	#\$#client-options&nbsp;%{mcp_client_options}
+
+; take the end of a server request and parse the tag/value pairs per the
+; spec.  note that you can't use `\' to escape arbitrary characters in the
+; values, only `&quot;'.  The spec is ambiguous on this point.
+;
+/def mcp_extract_tags =\
+	/while (mcp_tags&nbsp;!~ &quot;&quot;) \
+		/eval /unset $(/car&nbsp;%{mcp_tags})%;\
+		/set mcp_tags=$(/cdr&nbsp;%{mcp_tags})%;\
+	/done%;\
+	/mcp_extract_tags_internal&nbsp;%{*}
+
+; watch out!  I'm recursive.  also be careful about eval'ing tag values,
+; since URLs (in particular) include&nbsp;%'s...
+;
+/def mcp_extract_tags_internal = \
+	/while ({#}) \
+		/test regmatch('(.*):', {1})%;\
+		/let name=mcp_tag_%{P1}%;\
+		/if (0 == strchr({2}, '&quot;')) \
+			/test regmatch('&quot;(([\\]&quot;|[^&quot;])*)&quot;(.*)', {-1})%;\
+			/let val=%{P1}%;\
+			/let rest=%{P3}%;\
+			/while (regmatch('(.*)\\\\&quot;(.*)', val)) \
+				/let val=%P1&quot;%P2%;\
+			/done%;\
+			/eval /set&nbsp;%{name}=\%{val}%;\
+			/eval /set mcp_tags=%{mcp_tags}&nbsp;%{name}%;\
+			/mcp_extract_tags_internal&nbsp;%{rest}%;\
+			/break%;\
+		/else \
+			/eval /set&nbsp;%{name}=\%2%;\
+			/eval /set mcp_tags=%{mcp_tags}&nbsp;%{name}%;\
+			/shift 2%;\
+		/endif&nbsp;%;\
+	/done
+
+; receive a line of oob data from the MOO.  check the authentication string,
+; parse the tag/value pairs into mcp_tag_*, then call a handler based on
+; the message request, eg #$#edit calls /mcp_edit.  At the moment we ignore
+; the server-supplied `*' to indicate additional lines of data.
+; 
+/def -Ttiny.moo -mregexp -t'^#\$#([^* ]*)\*? [^ ]* ' -agG -p10000 mcp_rec_oob =\
+	/let request=%{P1}%;\
+	/if /mcp_check_auth_key&nbsp;%2%;\
+	/then \
+		/mcp_extract_tags&nbsp;%-2%;\
+		/eval /mcp_%{request}%;\
+	/endif
+
+; make up a temporary file name.
+;
+/def mcp_gen_tempfile =\
+	/set mcp_tempfile_seq=$[mcp_tempfile_seq + 1]%;\
+	/eval /set mcp_tempfile=/tmp/.tfmcp$[getpid()].%{mcp_tempfile_seq}
+
+; probably a Bad Idea to use this on non-empty files.
+;
+/def mcp_edit_done_exists = /test '$(/load&nbsp;%1.done)' =/ '*Loading*'
+
+; wait for an async edit to complete (signaled by touching filename.done)
+;
+/def mcp_edit_wait_async = \
+	/eval /repeat -w${world_name} -%{mcp_bg_async_poll_interval} 1 \
+		/if /mcp_edit_done_exists&nbsp;%%{1}%%%;\
+		/then \
+			/mcp_edit_done&nbsp;%%{*}%%%;\
+		/else \
+			/mcp_edit_wait_async&nbsp;%%{*}%%%;\
+		/endif
+
+; Handle the generic #$#edit request.  All edit requests (regardless of
+; type) seem to work alike hence a single macro to handle them all.
+;
+; some rationale:
+;	must turn logging on on the first @@@ and not immediately because
+;	otherwise the #$#edit line gets logged.
+;	lots of use of eval to use macro names that include the world name
+;	use /quote to invoke the editor so tf doesn't block but we still
+;	notice when it exits. (for sync bg)
+;	use /sh to invoke async bg so screen will have a tty (boo, hiss)
+;	trigger of #$$$# because it gets expanded a few times, eww
+;
+/mcp_add_client_option mcp-edit
+/def mcp_edit =\
+	/mcp_gen_tempfile%;\
+	/eval /def -p10000 -F -n1 -t'@@@*' mcp_${world_name}_save_body_logstart = /log -w${world_name}&nbsp;%{mcp_tempfile}%;\
+	/eval /def -mregexp -p9999 -t'^@@@(.*)' -agG -w${world_name} mcp_${world_name}_save_body_trig =&nbsp;%;\
+	/eval /def -t'#$$$#END' -p10000 -w${world_name} -agG -n1 mcp_${world_name}_save_body_end =\
+		/eval /log -w${world_name} off%%%;\
+		/eval /purge mcp_${world_name}_save_body_*%%%;\
+		/sys ed -s&nbsp;%{mcp_tempfile} &lt;&nbsp;%{mcp_lib}/unprefix.ed&nbsp;%%%;\
+		/mcp_edit_invoke&nbsp;%{mcp_tempfile}&nbsp;%{mcp_tag_upload}
+
+; eval overdose here because this used to be entirely within an /eval
+;
+/def mcp_edit_invoke = \
+	/if (mcp_bg_edit =~ &quot;sync&quot;) \
+		/eval /quote -dexec -w${world_name} -0&nbsp;!sh -c &quot;%{mcp_bg_sync_editor}&nbsp;%1; echo '/mcp_edit_done&nbsp;%*'&quot;%;\
+	/elseif (mcp_bg_edit =~ &quot;async&quot;) \
+		/def -1 -hSIGUSR1 = /mcp_edit_done&nbsp;%*%;\
+		/sys&nbsp;%{mcp_bg_async_editor}&nbsp;%1%;\
+	/else \
+		/sh&nbsp;%{mcp_editor}&nbsp;%{mcp_tempfile}%;\
+		/mcp_edit_done&nbsp;%*%;\
+	/endif
+
+; upload the body, delete the tempfile in about 5 minutes unless it's
+; still the last re-edit
+;
+/def mcp_edit_done =\
+	/send&nbsp;%-1%;\
+	/eval /quote -0 -w${world_name}&nbsp;!sed -e 's/^[.]/../'&nbsp;%1; echo .                                                                                                                                                                                                   &nbsp;%;\
+	/set mcp_edit_reedit_${world_name}=%*%;\
+	/sys rm -f&nbsp;%{1}.done&nbsp;%;\
+	/if (mcp_edit_rm_delay) \
+		/eval /repeat -%{mcp_edit_rm_delay} 1 \
+			/if (mcp_edit_reedit_${world_name}&nbsp;!/ &quot;%1 *&quot;) \
+				/sys rm -f&nbsp;%1%%%;\
+			/endif%;\
+	/endif
+
+; re-edit the last thing we uploaded
+;
+/def mcp_reedit = \
+	/if /eval /test &quot;\%{mcp_edit_reedit_${world_name}}&quot;&nbsp;!~ &quot;&quot;&nbsp;%;\
+	/then \
+		/eval /mcp_edit_invoke \%{mcp_edit_reedit_${world_name}}%;\
+	/else \
+		/echo&nbsp;%% Nothing to re-edit in world ${world_name}.%;\
+	/endif
+; an alias
+/def reedit = /mcp_reedit
+
+</pre>
+
+<!-- 
+NewPP limit report
+Preprocessor node count: 4/1000000
+Post-expand include size: 0/2097152 bytes
+Template argument size: 0/2097152 bytes
+Expensive parser function count: 0/100
+-->
+
+<!-- Saved in parser cache with key homesitewiki-mw_:pcache:idhash:65-0!1!0!!en!2!edit=0 and timestamp 20120422200220 -->
+<div class="printfooter">
+Retrieved from "<a href="http://www.gwen-morse.com/wiki/index.php/MCP_Support">http://www.gwen-morse.com/wiki/index.php/MCP_Support</a>"</div>
+						<!-- end content -->
+						<div class="visualClear"></div>
+		</div>
+	</div>
+		</div>
+		<div id="column-one">
+	<div id="p-cactions" class="portlet">
+		<h5>Views</h5>
+		<div class="pBody">
+			<ul>
+	
+				 <li id="ca-nstab-main" class="selected"><a href="/wiki/index.php/MCP_Support" title="View the content page [c]" accesskey="c">Page</a></li>
+				 <li id="ca-talk" class="new"><a href="/wiki/index.php?title=Talk:MCP_Support&amp;action=edit&amp;redlink=1" title="Discussion about the content page [t]" accesskey="t">Discussion</a></li>
+				 <li id="ca-viewsource"><a href="/wiki/index.php?title=MCP_Support&amp;action=edit" title="This page is protected.&#10;You can view its source [e]" accesskey="e">View source</a></li>
+				 <li id="ca-history"><a href="/wiki/index.php?title=MCP_Support&amp;action=history" title="Past revisions of this page [h]" accesskey="h">History</a></li>			</ul>
+		</div>
+	</div>
+	<div class="portlet" id="p-personal">
+		<h5>Personal tools</h5>
+		<div class="pBody">
+			<ul>
+				<li id="pt-login"><a href="/wiki/index.php?title=Special:UserLogin&amp;returnto=MCP_Support" title="You are encouraged to log in; however, it is not mandatory [o]" accesskey="o">Log in / create account</a></li>
+			</ul>
+		</div>
+	</div>
+	<div class="portlet" id="p-logo">
+		<a style="background-image: url(/home/public/wiki/guestbook.jpg);" href="/wiki/index.php/Main_Page" title="Visit the main page [z]" accesskey="z"></a>
+	</div>
+	<script type="text/javascript"> if (window.isMSIE55) fixalpha(); </script>
+	<div class='generated-sidebar portlet' id='p-navigation'>
+		<h5>Navigation</h5>
+		<div class='pBody'>
+			<ul>
+				<li id="n-mainpage-description"><a href="/wiki/index.php/Main_Page">Main Page</a></li>
+				<li id="n-MUSH-Code"><a href="/wiki/index.php/MUSHcode">MUSH Code</a></li>
+				<li id="n-Tinyfugue-Client"><a href="/wiki/index.php/Tinyfugue">Tinyfugue Client</a></li>
+				<li id="n-Muby-Client"><a href="/wiki/index.php/Muby">Muby Client</a></li>
+				<li id="n-Roleplay"><a href="/wiki/index.php/Roleplay">Roleplay</a></li>
+				<li id="n-Realms-of-Despair"><a href="/wiki/index.php/Realms_of_Despair">Realms of Despair</a></li>
+				<li id="n-Sims"><a href="/wiki/index.php/Sims">Sims</a></li>
+				<li id="n-Linux"><a href="/wiki/index.php/Linux">Linux</a></li>
+				<li id="n-Health-and-Beauty"><a href="/wiki/index.php/HABA">Health and Beauty</a></li>
+			</ul>
+		</div>
+	</div>
+	<div class='generated-sidebar portlet' id='p-Wiki_Help'>
+		<h5>Wiki Help</h5>
+		<div class='pBody'>
+			<ul>
+				<li id="n-portal"><a href="/wiki/index.php/GwenWiki:Community_Portal" title="About the project, what you can do, where to find things">Community portal</a></li>
+				<li id="n-currentevents"><a href="/wiki/index.php/GwenWiki:Current_events" title="Find background information on current events">Current events</a></li>
+				<li id="n-recentchanges"><a href="/wiki/index.php/Special:RecentChanges" title="The list of recent changes in the wiki [r]" accesskey="r">Recent changes</a></li>
+				<li id="n-randompage"><a href="/wiki/index.php/Special:Random" title="Load a random page [x]" accesskey="x">Random page</a></li>
+				<li id="n-help"><a href="/wiki/index.php/Help:Contents" title="The place to find out">Help</a></li>
+			</ul>
+		</div>
+	</div>
+	<div id="p-search" class="portlet">
+		<h5><label for="searchInput">Search</label></h5>
+		<div id="searchBody" class="pBody">
+			<form action="/wiki/index.php" id="searchform"><div>
+				<input type='hidden' name="title" value="Special:Search"/>
+				<input id="searchInput" name="search" type="text" title="Search GwenWiki [f]" accesskey="f" value="" />
+				<input type='submit' name="go" class="searchButton" id="searchGoButton"	value="Go" title="Go to a page with this exact name if exists" />&nbsp;
+				<input type='submit' name="fulltext" class="searchButton" id="mw-searchButton" value="Search" title="Search the pages for this text" />
+			</div></form>
+		</div>
+	</div>
+	<div class="portlet" id="p-tb">
+		<h5>Toolbox</h5>
+		<div class="pBody">
+			<ul>
+				<li id="t-whatlinkshere"><a href="/wiki/index.php/Special:WhatLinksHere/MCP_Support" title="List of all wiki pages that link here [j]" accesskey="j">What links here</a></li>
+				<li id="t-recentchangeslinked"><a href="/wiki/index.php/Special:RecentChangesLinked/MCP_Support" title="Recent changes in pages linked from this page [k]" accesskey="k">Related changes</a></li>
+<li id="t-specialpages"><a href="/wiki/index.php/Special:SpecialPages" title="List of all special pages [q]" accesskey="q">Special pages</a></li>
+				<li id="t-print"><a href="/wiki/index.php?title=MCP_Support&amp;printable=yes" rel="alternate" title="Printable version of this page [p]" accesskey="p">Printable version</a></li>				<li id="t-permalink"><a href="/wiki/index.php?title=MCP_Support&amp;oldid=276" title="Permanent link to this revision of the page">Permanent link</a></li>			</ul>
+		</div>
+	</div>
+		</div><!-- end of the left (by default at least) column -->
+			<div class="visualClear"></div>
+			<div id="footer">
+				<div id="f-poweredbyico"><a href="http://www.mediawiki.org/"><img src="/wiki/skins/common/images/poweredby_mediawiki_88x31.png" alt="Powered by MediaWiki" /></a></div>
+			<ul id="f-list">
+					<li id="lastmod"> This page was last modified on 23 July 2010, at 07:54.</li>
+					<li id="viewcount">This page has been accessed 152 times.</li>
+					<li id="privacy"><a href="/wiki/index.php/GwenWiki:Privacy_policy" title="GwenWiki:Privacy policy">Privacy policy</a></li>
+					<li id="about"><a href="/wiki/index.php/GwenWiki:About" title="GwenWiki:About">About GwenWiki</a></li>
+					<li id="disclaimer"><a href="/wiki/index.php/GwenWiki:General_disclaimer" title="GwenWiki:General disclaimer">Disclaimers</a></li>
+			</ul>
+		</div>
+</div>
+
+		<script type="text/javascript">if (window.runOnloadHook) runOnloadHook();</script>
+<!-- Served in 0.281 secs. --></body></html>

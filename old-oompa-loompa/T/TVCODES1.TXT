@@ -1,0 +1,57 @@
+@create Transmitter Parent
+&install Transmitter parent=$install:@pemit %#={Install complete.};@Listen me=+*-*;@Ahear me=@switch %%0=TRANSMIT,{@tr me/transmit=%%1},DESC,{@pemit \[u(par)]\=+DESC_\[v(channel)]\-%%1}
+@ahear Transmitter Parent=@switch %0=ADD,{&tvlist me=[v(tvlist)] %1},DESC_*,{&%0 me=%1;@set me/%0=vis}
+&TRANSMIT Transmitter Parent=@pemit/list [v(tvlist)]=+[v(channel)]=%0
+@Desc Transmitter Parent=A TV station transmitter, `install' to install then set [num(me)] on your camera to use.
+&CREDITS Transmitter Parent=Coded by Paul L. McNeely (Drderail@phish.nether.net)
+
+@create TV Camera Parent
+@Desc TV Camera Parent=This is a TV camera, `install' to install and `camhelp' to operate.
+&INSTALL TV Camera Parent=$install:@ahear me={@pemit \[u(trans)]\=+TRANSMIT-%%0};@pemit %#=Install complete.
+&CAMON TV Camera Parent=$camon:@emit Camera is rolling.;@pemit [u(trans)]=+DESC-[u(here/desc)];@listen me=*
+&CAMOFF TV Camera Parent=$camoff:@listen me ;@pemit [u(trans)]=+DESC-STATIC;@emit Camera has stopped rolling.
+&CAMSET TV Camera Parent=$camset *:&trans me=%0;@pemit %#=Set.
+&TRANS TV Camera Parent=@@
+&CAMHELP TV Camera Parent=$camhelp:@pemit %#=[u(help)]
+&HELP TV Camera Parent=`camon' - Turns camera on for recording.%r`camoff'- Stops recording.%r`camset <transmitter number>' - Sets where camera send to ## transmitter.
+&CREDITS TV Camera Parent=Coded by Paul L. McNeely (Drderail@phish.nether.net)
+
+@create TV Parent
+@lock TV Parent=*[owner(me)]
+@Listen TV Parent
+&TRANS TV Parent=#564
+&INSTALL TV Parent=$install:@listen me=+*=* ;&install me=@@;@pemit %#={TV installed.};@pemit [u(trans)]={+ADD-[num(me)]}
+@Ahear TV Parent=@switch [v(tstat)]=off,@@,on,{@switch [v(channel)]=%0,{@emit From the TV> %1},all,{@emit From the TV|%0>%1},vcr,{@switch %0=VCR,{@emit From the TV> %1},@pemit [u(vcr)]=+%0=%1}}
+&CHANNEL TV Parent=0
+@Desc TV Parent=This a cool tv. Type `install' to install then use `tvhelp' for commands.%RThe TV is currently on channel '[v(channel)]'.
+@adesc TV Parent=@pemit %#=On the TV you see..%r[u(u(par)/desc_[v(channel)])]%r
+&TSTAT TV Parent=off
+&TVON TV Parent=$tvon:@switch [v(tstat)]=off,{@emit The TV screen begins to glow.;&tstat me=on},on,{@pemit %#=It's already on.},&tstat me=off
+&TVOFF TV Parent=$tvoff:@switch [v(tstat)]=on,{@emit The TV screen goes blank.;&tstat me=off},off,{@pemit %#=It's already off.},&tstat me=off
+&TVCHAN TV Parent=$tvch *:&channel me=%0;@pemit %#=You switch the channel to %0.
+&TVVCR TV Parent=$svcr *:&vcr me=%0
+&TVHELP TV Parent=$tvhelp:@pemit %#=[u(help)]
+&HELP TV Parent=`tvon' - Turns TV on.%R`tvoff' - Turns TV off.%r`tvch <channel>' - Changes TV's channel.%r`svcr <num>' - Sets the number of a VCR or other auxillary. Change the channel to `vcr'to use.%rChannel `all' will monitor all channels.
+&CREDITS TV Parent=Coded by Paul L. McNeely (Drderail@phish.nether.net)
+
+@create TV Bulletin Board
+@lock TV Bulletin Board==*[owner(me)]
+@Desc TV Bulletin Board=Get your note poted on TV! This bulletin board transmits on channel `bb'. Just `give [name(me)]=5'.
+@Cost TV Bulletin Board=5
+@Pay TV Bulletin Board=Now, type `post <message>' to get you message posted.
+@Apay TV Bulletin Board=&payed me=yes
+&PAYED TV Bulletin Board=no
+&POST TV Bulletin Board=$post *:@switch [u(payed)]=yes,{&nnum me=[add(v(nnum),1)];&m_[u(nnum)] me=%0;@switch [gt(u(nnum),u(top))]=1,{&top me=[u(nnum)]};&payed me=no;@pemit %#=Note posted.},no,@pemit %#=Try paying first.
+&DO TV Bulletin Board=@pemit/list [v(tvlist)]=+[u(channel)]=[u(m_[rand(add(u(top),1))])];@tr me/do2
+&CHANNEL TV Bulletin Board=bb
+@Adesc TV Bulletin Board=@@
+&NNUM TV Bulletin Board=3
+&M_1 TV Bulletin Board=The following channels are now transmitting: [u(chanlist)].
+&M_2 TV Bulletin Board=If you would like to run your own TV station @tel #40 and follow instructions there.
+&TOP TV Bulletin Board=3
+&M_0 TV Bulletin Board=Your watching channel `bb' the Bulletin Board channel.
+@Startup TV Bulletin Board=@tr me/do
+&CHANLIST TV Bulletin Board=0,bb
+&M_3 TV Bulletin Board=If you would like you message posted on this channel, go to the news room off the Town Square and look at out tv bulletin board.
+&DO2 TV Bulletin Board=@wait 20=@tr me/do
+&CREDITS TV Bulletin Board=Coded by Paul L. McNeely (Drderail@phish.nether.net)

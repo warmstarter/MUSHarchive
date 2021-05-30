@@ -1,0 +1,194 @@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@ WcWizard: Copyright, Chuc McGuire, 2002
+@@
+@@ SECTION 0: README.
+@@
+@@ Name of code: Delayed Rebroadcaster
+@@ Version: 0.1
+@@ Date of release: May 06, 2002
+@@
+@@ Description of the code: This is a remote rebroadcaster. It is intended
+@@ to be used in conjunction with a central monitoring room and a remote
+@@ viewing room. Basically, in rooms intended for publicly viewable RP,
+@@ you have dark, audible exits leading to a central monitoring room.
+@@ Place this object in that room, and define (see the DATA.* attribs for
+@@ instructions) a remote viewing room (i.e., where the 'audience' will
+@@ be), and start it. Whatever is heard (defined by the @listen pattern)
+@@ will be rebroadcast to the audience according to the delay interval.
+@@ When the event is over, simply halt the rebroadcaster.
+@@
+@@ SECTION 0: README -- First is the README section (this section). This,
+@@ and only this section, may be removed (to increase the quote speed, if
+@@ you're in a hurry). It contains general information about the package,
+@@ including system requirements.
+@@
+@@ SECTION 1: Script initiation section. DO NOT TOUCH.
+@@
+@@ SECTION 2: Reminders. (READ IT)
+@@
+@@ SECTION 3: Install method (for 'new' or 'from scratch' installs)
+@@
+@@ SECTION 4: Quiet Mode (do you want all the 'attribute set' msgs?)
+@@
+@@ SECTION 5: Universal (WARPEDcore info: author, version #, etc.)
+@@
+@@ SECTION 6: The Code
+@@
+@@ SECTION 7: Cleanup (basically that. post-script cleanup)
+@@
+@@ Number of objects: 1
+@@
+@@ Functions and purposes: Intended for delayed rebroadcasting of an 
+@@ RP event.
+@@
+@@ $commands it defines: None
+@@
+@@ Code Authors: Trispis @ M*U*S*H
+@@               Halatir @ M*U*S*H
+@@
+@@ "As used on" this MUSH: M*U*S*H
+@@
+@@ Server required: PennMUSH
+@@
+@@ Patchlevel/version of server required/tested on: 1.7.4
+@@
+@@ Configs required: side-effects MUST be ENABLED. (DO NOT USE THIS SCRIPT
+@@ WITHOUT SIDE-EFFECTS ENABLED. YOU HAVE BEEN WARNED.)
+@@
+@@ Privileges required: None
+@@
+@@ Other requirements: None
+@@
+@@ Terms of code use: Public Domain
+@@
+@@ Support policy: Trispis will provide 'best effort' support, but...
+@@ only online, and only at M*U*S*H.
+@@
+@@ Installation instructions: Read and follow the instructions in
+@@ SECTIONs 3&4, then quote the resulting file into your game.
+@@
+@@ Help instructions: None
+@@
+@@ 1 second script runtime: about 1 minute
+@@
+@@ Everything above this line may be removed. Do not remove anything else.
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@ WcWizard: Copyright, Chuc McGuire, 2002
+@pemit/silent me=WcWizard: Starting script. Please wait.
+@@
+@@ SECTION 1: Script initiation section. DO NOT TOUCH.
+@@
+@@ Tampering with anything in this section will break this script.
+@@
+@switch [hasattr(me,~.)]=0,,@mvattr me/~.=me/wctildedot
+@switch [hasattr(me,~~.)]=0,,@mvattr me/~~.=me/wcsecs
+@switch [hasattr(me,~~~.)]=0,,@mvattr me/~~~.=me/wcquiet
+@pemit/silent me=WcWizard: Started at [ansi(h,time())][set(me,~~.:[secs()])]
+@@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@ WcWizard: Copyright, Chuc McGuire, 2002
+@@
+@@ SECTION 2: Reminders
+@@
+@@ Reminder1: Requires ToolKit version 4.0.0 or newer to run as an update.
+@@            See the instructions in SECTIONS 2&3
+@@
+@@ Reminder2: This script, and the objects created by it, REQUIRE
+@@            side-effect functions to be ENABLED on your MUSH. If your
+@@            game does not have side-effects ENABLED, then DO NOT USE THIS
+@@            SCRIPT.  (You have been warned!)
+@@
+@pemit/silent me=WcWizard \([timestring(sub(secs(),v(~~.)))]\): Configuring for Selections. Please wait..
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@ WcWizard: Copyright, Chuc McGuire, 2002
+@@
+@@ SECTION 3: Installation Method. (default)
+@@
+@@ No changes required. There are no planned updates to this script, so
+@@ there is no 'update' option.
+@@
+@set me=~.:[create(Rebroadcaster,10)]
+@pemit/silent me=WcWizard \([timestring(sub(secs(),v(~~.)))]\): Installing [name(v(~.))].
+@@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@ WcWizard: Copyright, Chuc McGuire, 2002
+@@
+@@ SECTION 4: Quiet Mode
+@@
+@@ If you do not want to see all of the spam from the installation, you
+@@ do not need to make any further changes to this script.
+@@
+@@ However, if you actually prefer to see all of the spam, then change the
+@@ 1 to a 0 in the following line.
+@@
+&~~~. me=1
+@@
+@@ There are no further changes required for this script.
+@@
+@pemit/silent me=[setq(f,v(~~~.))][set(me,~~~.:[hasflag(me,quiet)])]WcWizard \([timestring(sub(secs(),v(~~.)))]\): Proceeding [if(%qf,set(me,quiet)muted,noisy)].
+@@ 
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@ WcWizard: Copyright, Chuc McGuire, 2002
+@@
+@@ SECTION 5: Universal
+@@
+@pemit/silent me=WcWizard \([timestring(sub(secs(),v(~~.)))]\): Setting WARPEDcore information.
+@@
+&~ [v(~.)]=~http://www.elsemu.net/~nemo/warpedcore/
+&~.author [v(~.)]=Trispis @ M*U*S*H, Halatir @ M*U*S*H
+&~.license [v(~.)]=Public Domain
+&~.update [v(~.)]=[time()]
+&~.url [v(~.)]=http://www.elsemu.net/~nemo/softcode/
+&~.version [v(~.)]=0.1
+@@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@
+@@ SECTION 6: The Code
+@@
+@pemit/silent me=WcWizard \([timestring(sub(secs(),v(~~.)))]\): Installing <Change>.
+@@
+@link [v(~.)] = me
+@lock/Basic [v(~.)] = =me
+@set [v(~.)] = VISUAL
+@set [v(~.)] = HALT
+@set [v(~.)] = NO_COMMAND
+@set [v(~.)] = MONITOR
+@AHEAR [v(~.)]=think [switch(gt(setr(0,secs()),%vb),1,[set(me,vb:%q0)][set(me,vc:0)],[set(me,vc:[inc(%vc)])])][set(me,[add(%va,%vb)].[rjust(%vc,3,0)]:%0)]
+@set [v(~.)]/AHEAR=no_command
+&~.AUTHOR [v(~.)]=Halatir and Trispis @ M*U*S*H
+&DATA.VA [v(~.)]=VA is the delay time (in seconds) for the rebroadcaster.
+&DATA.VB [v(~.)]=VB is the last time (recorded as a "secs()" number) of a heard emit. This is controlled by the code. DO NOT TOUCH.
+&DATA.VC [v(~.)]=VC is the subsecond increment. This is controlled by the code. DO NOT TOUCH.
+&DATA.VL [v(~.)]=VL is the recipient location (the audience). It should be a room #dbref. Set this appropriately.
+&DATA.VP [v(~.)]=VP is the PREFIX for the emits to the audience (VL). You'll want it to be short.
+@DESCRIBE [v(~.)]=This is a delayed rebroadcaster. To start '@set rebroadcaster=!halt'. To stop, '@halt rebroadcaster'.
+@set [v(~.)]/DESCRIBE=no_command visual
+&DO.PEMIT [v(~.)]=[if(hasattrval(me,%0),[remit(%vl,%vp: [v(%0)])])][wipe(me/%0)]][wipe(me/%0)]
+@LISTEN [v(~.)]=From *
+@set [v(~.)]/LISTEN=no_command
+&TRIG.1 [v(~.)]=@tr me/trig.rebroadcast=[secs()];@wait 1=@tr me/trig.1
+&TRIG.REBROADCAST [v(~.)]=think [iter(lnum(sub(%0,5),%0),[map(do.pemit,sort(lattr(me/##.*)))])]
+@VA [v(~.)]=300
+@VB [v(~.)]=972169301
+@VC [v(~.)]=1
+@VL [v(~.)]=#6857
+@VP [v(~.)]=LARP
+@@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@ WcWizard: Copyright, Chuc McGuire, 2002
+@@
+@@ SECTION 7: Cleanup
+@@
+@pemit/silent me=WcWizard \([timestring(sub(secs(),v(~~.)))]\): Cleaning up.
+@@
+@switch [v(~~~.)]=0,@set me=!quiet
+@switch [hasattr(me,wcquiet)]=0,{&~~~.me},{@mvattr me/wcquiet=me/~~~.}
+@@
+@switch [hasattr(me,wctildedot)]=0,{&~. me},{@mvattr me/wctildedot=me/~.}
+@@
+@pemit/silent me=WcWizard \([timestring(sub(secs(),v(~~.)))]\)[if(hasattr(me/wcsecs),set(me,~~.:[v(wcsecs()]))][wipe(me/~~.)]: Done at [ansi(h,time())].
+@@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@ WcWizard: Copyright, Chuc McGuire, 2002
+@@
+@@ The End.

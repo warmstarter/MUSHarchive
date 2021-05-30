@@ -1,0 +1,78 @@
+test child(#71I)
+Type: THING Flags: INHERIT
+Owner: Sue  Key: *UNLOCKED* Centes: 1
+Zone: *NOTHING*
+Powers:
+MAP_LINE16: .===================================================================.
+MAP_LINE15: |.................................|.................................|
+MAP_LINE14: |.................................|.................................|
+MAP_LINE13: |.................................|.................................|
+MAP_LINE12: |.................................|.................................|
+MAP_LINE11: |.................................|.................................|
+MAP_LINE10: |.................................|.................................|
+MAP_LINE09: |.................................|.................................|
+MAP_LINE08: |.................................|.................................|
+MAP_LINE07: |.................................|.................................|
+MAP_LINE06: |.................................|.................................|
+MAP_LINE05: |.................................|.................................|
+MAP_LINE04: |.................................|.................................|
+MAP_LINE03: |.................................|.................................|
+MAP_LINE02: |.................................|.................................|
+MAP_LINE01: |.................................|.................................|
+MAP_LINE00: |.................................[ansi(hr,+)].................................|
+MAP_LINE-01: |................................/.\\................................|
+MAP_LINE-02: |............................../.....\\..............................|
+MAP_LINE-03: |............................/.........\\............................|
+MAP_LINE-04: |........................../.............\\..........................|
+MAP_LINE-05: |......................../.................\\........................|
+MAP_LINE-06: |....................../.....................\\......................|
+MAP_LINE-07: |..................../.........................\\....................|
+MAP_LINE-08: |................../.............................\\..................|
+MAP_LINE-09: |................/.................................\\................|
+MAP_LINE-10: |............../.....................................\\..............|
+MAP_LINE-11: |............/.........................................\\............|
+MAP_LINE-12: |........../.............................................\\..........|
+MAP_LINE-13: |......../.................................................\\........|
+MAP_LINE-14: |....../.....................................................\\......|
+MAP_LINE-15: |..../.........................................................\\....|
+MAP_LINE-16: .===================================================================.
+CMD_SHOW_MAP: $=map:@dolist lattr(#71/map_LINE*)=@pemit %#=[eval(get(#71/##))]
+CMD_SHOW_MAP2: $=map2:@dolist lattr(me/map_LINE*)=@pemit %#=[eval(get(me/##))]
+SECTOR: 0
+TEST_LINE1: $test1:@pemit %#=iter( [get(#70/sector[get(#71/sector)])],[get(##/xcoord)]|[get(##/ycoord)]|[get(##/zcoord)])
+TEST_LINE2: $test2:@pemit %#=iter([get(#70/sector[get(#71/sector)])],[get(#22/xcoord)]|[get(#22/ycoord)]|[get(#22/zcoord)])
+TEST_LINE3: $test3:&temp_x #70=iter([get(#70/sector[get(#71/sector)])],[get(#22/xcoord)]|[get(#22/ycoord)]|[get(#22/zcoord)]); @pemit %#=ok
+TEST_LINE4: $test4:&temp_array #71=iter([get(#70/sector[get(#71/sector)])],[get(##/xcoord)]|[get(##/ycoord)]|[get(##/zcoord)]|[get(##/object_type)])
+TEMP_X: 1.024|0.0015|3.010 1.024|0.0015|3.010 1.024|0.0015|3.010 1.024|0.0015|3.010 1.024|0.0015|3.010 1.024|0.0015|3.010|#22 #68 #67 #23 #69 #53,#-1 NO MATCH
+TEMP_ARRAY: 1.024|0.0015|3.010| 3|0|3| 2|2|2| 1|0|1| 0|0|2| 0|0|0|sun
+TEMP_ARRAY2: 5|5|5|planet
+TEMP_ARRAY3: @swi [extract([get(#71/temp_array2)],4,1,|)]=ship,[ansi(c,~)],planet,[ansi(hg,0)],station,[ansi(y,@)],gate,[ansi(m,#)],sun,[ansi(hy,*)],asteroid,[ansi(r,#)],moon,[ansi(g,.)],@pemit %#=nope
+TEST5: $test5:&array_3 #71=[sub(extract([get(#71/temp_array2)],1,1,|),0)]|[sub(extract([get(#71/temp_array2)],2,1,|),0)]|[sub(extract([get(#71/temp_array2)],3,1,|),0)]|
+ARRAY_3: 5|5|5|elements(. [ansi(hr,+)] [ansi(c,~)] [ansi(hg,0)] [ansi(y,@)] [ansi(m,#)] [ansi(hy,*)] [ansi(r,")] [ansi(g,.)],4)
+TEST6: $test6:@pemit %# = elements([get(#51/sp&test_line7 #71=$test7:@pemit %#=iter([get(#70/sector[get(#71/sector)])],[get(##/xcoord)]|[get(##/ycoord)]|[get(##/zcoord)]|say elements([get(#51/space_icons)],match([get(#51/space_types)],[extract([get(#71/temp_array2)],4,1,|)]))]ace_icons)],match([get(#51/space_types)],[extract([get(#71/temp_array2)],4,1,|)])
+TEST_LINE7: $test7:@pemit %#=iter([get(#70/sector[get(#71/sector)])],[get(##/xcoord)]|[get(##/ycoord)]|[get(##/zcoord)]|elements([get(#51/space_icons)],match([get(#51/space_types)],[extract([get(#71/temp_array2)],4,1,|)])
+TEST8: $test8:@pemit %#=elements([get(#51/space_icons)],[match([get(#51/space_types)],[extract([get(#71/temp_array2)],4,1,|)])])
+TEST9: $test9:&array_3 #71=[sub(extract([get(#71/temp_array2)],1,1,|),0)]|[sub(extract([get(#71/temp_array2)],2,1,|),0)]|[sub(extract([get(#71/temp_array2)],3,1,|),0)]|elements([get(#51/space_icons)],[match([get(#51/space_types)],[extract([get(#71/temp_array2)],4,1,|)])])
+ARRAY3: 5|5|5|planet
+TEST_10: $test10:@pemit % #=iter([get(#70/sector[get(#71/sector)])],[get(##/xcoord)]|[get(##/ycoord)]|[get(##/zcoord)]|elements([get(#51/space_icons)],[match([get(#51/space_types)],[extract([get(#71/temp_array2)],4,1,|)])]))
+FINAL_ARRAY: iter([get(#70/sector[get(#71/sector)])],[get(##/xcoord)]|[get(##/ycoord)]|[get(##/zcoord)]|[elements([get(#51/space_icons)],[match([get(#51/space_types)],[get(##/object_type)])])])
+TEST_20: $test20:iter([get(#70/sector[get(#71/sector)])],&map_line[round([get(##/ycoord)],0)] #71=[replace(get[#51/map-line[round([get(##/ycoord)],0)]]
+TEST_21: $test21:@dol [get(#70/sector[get(#71/sector)])]=&map_line[round([get(##/ycoord)],0)] #71=[replace(get[#51/map_line[round([get(##/ycoord)],0)]],[round([get(##/xcoord)],0)],[elements([get(#51/space_icons)],[match([get(#51/space_types)],[get(##/object_type)])])])])
+MAP_LINE2: |.................................|.................................|
+TEST_22: $test22:@dol [get(#70/sector[get(#71/sector)])]=&map_line[round([get(##/ycoord)],0)] #71=[replace[get(#51/map_line[round([get(##/ycoord)],0)])]],[round([get(##/xcoord)],0)],[elements([get(#51/space_icons)],[match([get(#51/space_types)],[get(##/object_type)])])])])
+TEST_23: $test23:@dol [get(#70/sector[get(#71/sector)])]=&map_line[round([get(##/ycoord)],0)] #71=[replace([get(#72/map_line[round([get(##/ycoord)],0)])],[round([get(##/xcoord)],0)],[elements([get(#51/space_icons)],[match([get(#51/space_types)],[get(##/object_type)])])])]
+MAP_LINE1: |.................................|.................................|
+MAP_LINE-1: |................................/.\\................................|
+MAP_LINE-2: |............................../.....\\..............................|
+TEST_24: $test24:@dol [get(#70/sector[get(#71/sector)])]=&map_line[round([get(##/ycoord)],0)] #71=[replace([get(#72/map_line[round([get(##/ycoord)],0)])],[round([get(##/xcoord)],0)],[elements([get(#51/space_icons)],[match([get(#51/space_types)],[get(##/object_type)])])])]
+MAP_LINE0: |.................................[ansi(hr,+)].................................|
+No exits.
+Home: OOC(#0RJv)
+Location: Sue(#2PWXc012)
+Huh?  (Type "help" for help.)
+Huh?  (Type "help" for help.)
+
+TRIG_PLANETS: @dolist [get(#66/planet_list)]= @swi/first [ncomp([u(##/planet_max)],[u(##/xcoord)])]-[ncomp([u(##/planet_min)],[u(##/xcoord)])]|[ncomp([u(##/planet_max)],[u(##/zcoord)])]-[ncomp([u(##/planet_min)],[u(##/zcoord)])]=0--1|0--1,{&direction ##=sub ;&xcoord ##=[get(##/direction)](u(##/xcoord),u(##/planet_speed)); &zdirection ##=sub; &zcoord ##=[get(##/zdirection)](u(##/zcoord),u(##/planet_speed))},1-0|0--1,{&direction ##=add ;&xcoord ##=[get(##/direction)](u(##/xcoord),u(##/planet_speed));&zdirection ##=sub; &zcoord ##=[get(##/zdirection)](u(##/zcoord),u(##/planet_speed))},1-0|1-0,{&direction ##=add ;&xcoord ##=[get(##/direction)](u(##/xcoord),u(##/planet_speed)); &zdirection ##=add; &zcoord=## [get(##/zdirection)](u(##/zcoord),u(##/planet_speed))},0--1|1-0,{&direction ##=sub ;&xcoord ##=[get(##/direction)](u(##/xcoord),u(##/planet_speed));&zdirection ##=add; &zcoord ##=[get(##/zdirection)](u(##/zcoord),u(##/planet_speed))},1--1|0--1,{&xcoord ##=[get(##/direction)](u(##/xcoord),u(##/planet_speed)); &zdirection ##=sub; &zcoord ##=[get(##/zdirection)](u(##/zcoord),u(##/planet_speed))},1--1|1-0,{&xcoord ##=[get(##/direction)](u(##/xcoord),u(##/planet_speed)); &zdirection ##=add; &zcoord ##=[get(##/zdirection)](u(##/zcoord),u(##/planet_speed))},0--1|1--1,{&direction ##=sub ;&xcoord ##=[get(##/direction)](u(##/xcoord),u(##/planet_speed));&zcoord ##=[get(##/zdirection)](u(##/zcoord),u(##/planet_speed))},1-0|1--1,{&direction ##=add ;&xcoord ##=[get(##/direction)](u(##/xcoord),u(##/planet_speed)); &zcoord ##=[get(##/direction)](u(##/zcoord),u(##/planet_speed))},1--1|1--1,{&xcoord ##= [get(##/direction)](u(##/xcoord),u(##/planet_speed)) ;&zcoord ##=[get(##/zdirection)](u(##/zcoord),u(##/planet_speed))}, @pemit #2=failure
+
+
+

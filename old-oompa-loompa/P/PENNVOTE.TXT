@@ -1,0 +1,126 @@
+@set me=quiet
+@switch [isdbref(num(Voting Booth Globals))]=0,{think [ansi(hm,INSTALL:)] No "Voting Booth Globals" object found -- creating...;@create Voting Booth Globals},1,{think [ansi(hm,INSTALL:)] "Voting Booth Globals" object already exists... skipping creation.}
+think [ansi(hm,INSTALL:)] Setting Voting Booth Global Flags...
+@set Voting Booth Globals = SAFE
+@set Voting Booth Globals = !NO_COMMAND
+think [ansi(hm,INSTALL:)] Downloading Voting Booth Commands...
+&CMD_VOTE.HELP-OPTIONS Voting Booth Globals=$vote/help opt*:@pemit %#=[ansi(xget(v(PTR_VOTE.DB),FONT_HELP.Border),[repeat(-,78)]%r<<<<<)][ansi(xget(v(PTR_VOTE.DB),FONT_HELP.Header),center(VOTING BOOTH -- HELP OPTIONS SECTION,68))][ansi(xget(v(PTR_VOTE.DB),FONT_HELP.Border),>>>>>%r[repeat(-,78)])]%rSyntax: vote/option <Issue#>/<Letter>=<Description>%r%rThis vote switch has its own section because it requires some more detailed explanation. Whenever a new topic is posted, a list of options must be created that will be used by the voters when they cast their ballots. Here is what a sample issue might look like:%r%rWhat do you think of the Administration on this MUSH?%r%rA - They're the best ever!%rB - They're ok\, about average.%rC - I've seen better.%rD - Pathetic. MudNet could Administrate better than these bozos.%r%rIf this were issue #28, to create the first option 'A' \(using the syntax indicated at the top\)\, you would type:%r[space(5)][ansi(xget(v(PTR_VOTE.DB),FONT_VOTE.Cmds),vote/option 28/A=They're the best ever!)]%r%rIf you still have problems using this command\, contact Demonic or someone who has posted something successfully.%r[ansi(xget(v(PTR_VOTE.DB),FONT_HELP.Border),repeat(-,78))]
+&CMD_VOTE.ON Voting Booth Globals=$vote * on issue *:think [switch([u([v(PTR_VOTE.DB)]/FUN_PLR.Valid,%#)][u([v(PTR_VOTE.DB)]/FUN_PLR.Banned,%#)][u([v(PTR_VOTE.DB)]/FUN_VoteNum.Valid,trunc(secure(%1)))][u([v(PTR_VOTE.DB)]/FUN_OPTION.Valid2,secure(%0),trunc(secure(%1)))][u([v(PTR_VOTE.DB)]/FUN_PLR.AlreadyVoted,%#,trunc(secure(%1)))][u([v(PTR_VOTE.DB)]/FUN_VOTE.Time,trunc(secure(%1)))],0?????,u([v(PTR_VOTE.DB)]/TRI_ERROR,%#,PLR_!VALID),11????,u([v(PTR_VOTE.DB)]/TRI_ERROR,%#,PLR_BANNED),100???,u([v(PTR_VOTE.DB)]/TRI_ERROR,%#,VOTENUM_!VALID),1010??,u([v(PTR_VOTE.DB)]/TRI_ERROR,%#,OPTION_!VALID2,secure(%0),trunc(secure(%1))),10111?,u([v(PTR_VOTE.DB)]/TRI_ERROR,%#,ALREADY_VOTED,trunc(secure(%1))),101100,u([v(PTR_VOTE.DB)]/TRI_ERROR,%#,NOT_TIME,trunc(secure(%1))),101101,u([v(PTR_VOTE.DB)]/TRI_VOTE.On,%#,trunc(secure(%1)),secure(%0)),u([v(PTR_VOTE.DB)]/TRI_SYSERR,%#))]
+&CMD_VOTE.OPTION Voting Booth Globals=$vote/opt* */*=*:think [switch([u([v(PTR_VOTE.DB)]/FUN_VoteNum.Valid,trunc(secure(%1)))][u([v(PTR_VOTE.DB)]/FUN_PLR.Auth-Option,%#,trunc(secure(%1)))][u([v(PTR_VOTE.DB)]/FUN_NewStyle,trunc(secure(%1)))][u([v(PTR_VOTE.DB)]/FUN_VOTES.Notmade,trunc(secure(%1)))][u([v(PTR_VOTE.DB)]/FUN_OPTION.Valid,secure(%2))],0????,u([v(PTR_VOTE.DB)]/TRI_ERROR,%#,VOTENUM-OPT_!VALID),10???,u([v(PTR_VOTE.DB)]/TRI_ERROR,%#,PLR_!AUTH-Option),110??,u([v(PTR_VOTE.DB)]/TRI_ERROR,%#,ISSUE_!NEWSTYLE),1110?,u([v(PTR_VOTE.DB)]/TRI_ERROR,%#,VOTES_MADE),11110,u([v(PTR_VOTE.DB)]/TRI_ERROR,%#,OPTION_!Valid),11111,u([v(PTR_VOTE.DB)]/TRI_VOTE.Option,%#,secure(%1),secure(%2),secure(%3)),u([v(PTR_VOTE.DB)]/TRI_SYSERR,%#))]
+&CMD_VOTE.POST Voting Booth Globals=$vote/post *=*:think [switch([u([v(PTR_VOTE.DB)]/FUN_PLR.Valid,%#)][u([v(PTR_VOTE.DB)]/FUN_PLR.Auth,%#)][u([v(PTR_VOTE.DB)]/FUN_POSTS.Maxed)],0??,u([v(PTR_VOTE.DB)]/TRI_ERROR,%#,PLR_!VALID),10?,u([v(PTR_VOTE.DB)]/TRI_ERROR,%#,PLR_!AUTH),111,u([v(PTR_VOTE.DB)]/TRI_ERROR,%#,POSTS_MAXED),110,u([v(PTR_VOTE.DB)]/TRI_VOTE.Post,%#,%0,%1),u([v(PTR_VOTE.DB)]/TRI_SYSERR,%#))]
+&CMD_VOTE.LIST Voting Booth Globals=$vote/list:@pemit %#=[ansi(xget(v(PTR_VOTE.DB),FONT_LIST.Border),[repeat(-,78)]%r<<<<<)][ansi(xget(v(PTR_VOTE.DB),FONT_LIST.Header),center(VOTING BOOTH -- LIST OF ISSUES,68))][ansi(xget(v(PTR_VOTE.DB),FONT_LIST.Border),>>>>>%r[repeat(-,78)]%r|)] [ansi(xget(v(PTR_VOTE.DB),FONT_LIST.Title),*)] [setr(1,ansi(xget(v(PTR_VOTE.DB),FONT_LIST.Border),|))] [ansi(xget(v(PTR_VOTE.DB),FONT_LIST.Title),Num)] %q1 [ansi(xget(v(PTR_VOTE.DB),FONT_LIST.Title),ljust(Author,12))] %q1 [ansi(xget(v(PTR_VOTE.DB),FONT_LIST.Title),ljust(Subject,24))] %q1 [ansi(xget(v(PTR_VOTE.DB),FONT_LIST.Title),ljust(Date,8))] %q1 [ansi(xget(v(PTR_VOTE.DB),FONT_LIST.Title),Total Votes)] [ansi(xget(v(PTR_VOTE.DB),FONT_LIST.Border),|%r[repeat(-,78)])];@dol [xget(v(PTR_VOTE.DB),LIST_VOTE.Pointers)]=@pemit %#=%b[center(if(not(u([v(PTR_VOTE.DB)]/FUN_PLR.AlreadyVoted,%#,#@)),*),3)][rjust(#@,5)]%b%b%b[ljust(left(name(first(setr(2,xget(v(PTR_VOTE.DB),ISSUE_##)),|)),12),12)]%b%b%b[ljust(left(extract(%q2,3,1,|),24),24)]%b%b%b[u([v(PTR_VOTE.DB)]/FUN_CONVERT.Date,convsecs(extract(%q2,2,1,|)))]%b%b[rjust(u([v(PTR_VOTE.DB)]/FUN_CALC.Votes,##),7)];@wait 0=@wait 0=@pemit %#=%r* denotes you have not yet voted on the issue.%r%b%bType '[ansi(xget(v(PTR_VOTE.DB),FONT_VOTE.Cmds),vote/view <#>)]' to view a ballot sheet.
+&CMD_VOTE.VIEW Voting Booth Globals=$vote/view *:@switch [u([v(PTR_VOTE.DB)]/FUN_VoteNum.Valid,trunc(secure(%0)))]=0,think [u([v(PTR_VOTE.DB)]/TRI_ERROR,%#,VIEW_!VALID)],1,@pemit %#=[ansi(xget(v(PTR_VOTE.DB),FONT_VIEW.Border),[repeat(-,78)]%r<<<<<)][ansi(xget(v(PTR_VOTE.DB),FONT_VIEW.Header),center(VOTING BOOTH -- VIEW OF ISSUE [trunc(secure(%0))],68))][ansi(xget(v(PTR_VOTE.DB),FONT_VIEW.Border),>>>>>%r[repeat(-,78)])]%r[ansi(xget(v(PTR_VOTE.DB),FONT_VIEW.Title),Author :)] [name(first(setr(2,xget(v(PTR_VOTE.DB),ISSUE_[setr(3,extract(xget(v(PTR_VOTE.DB),LIST_VOTE.Pointers),trunc(secure(%0)),1))])),|))]%r[ansi(xget(v(PTR_VOTE.DB),FONT_VIEW.Title),Date%b%b%b:)] [convsecs(extract(%q2,2,1,|))]%r[ansi(xget(v(PTR_VOTE.DB),FONT_VIEW.Title),Subject:)] [extract(%q2,3,1,|)]%r%r[extract(%q2,4,1,|)]%r%r[ansi(xget(v(PTR_VOTE.DB),FONT_VIEW.Border),repeat(-,78))]%r[ansi(xget(v(PTR_VOTE.DB),FONT_VIEW.Header2),Votes)] [ansi(xget(v(PTR_VOTE.DB),FONT_VIEW.Border),|)] [ansi(xget(v(PTR_VOTE.DB),FONT_VIEW.Header2),Ltr)] [ansi(xget(v(PTR_VOTE.DB),FONT_VIEW.Border),|)] [ansi(xget(v(PTR_VOTE.DB),FONT_VIEW.Header2),Description)]%r[ansi(xget(v(PTR_VOTE.DB),FONT_VIEW.Border),repeat(-,78))][iter(iter(xget(v(PTR_VOTE.DB),LIST_OPTIONS),if(words(extract(%q2,add(4,#@),1,|)),##)),%r[rjust(words(setr(6,edit(edit(edit(rest(extract(%q2,add(4,match(xget(v(PTR_VOTE.DB),LIST_OPTIONS),##)),1,|)),!_,%b),_,%b),!,%b))),4)]%b%b[ansi(xget(v(PTR_VOTE.DB),FONT_VIEW.Border),|)]%b%b[ansi(ifelse(member(%q6,%#),xget(v(PTR_VOTE.DB),FONT_VOTED.For),n),ucstr(##))]%b%b-%b%b[edit(first(extract(%q2,add(4,match(xget(v(PTR_VOTE.DB),LIST_OPTIONS),##)),1,|)),_,%b)])]%r[ansi(xget(v(PTR_VOTE.DB),FONT_VIEW.Border),repeat(-,78))][ifelse(u([v(PTR_VOTE.DB)]/FUN_PLR.AlreadyVoted,%#,trunc(secure(%0))),%r* You have [ansi(xget(v(PTR_VOTE.DB),FONT_VOTE.Cmds),already voted)] on this issue. Contact an Admin if you voted wrong.%r* The option you voted for will be colored in [ansi(xget(v(PTR_VOTE.DB),FONT_VOTED.For),[switch(lcstr(xget(v(PTR_VOTE.DB),FONT_VOTED.For)),*h*,Bold-)][switch(lcstr(xget(v(PTR_VOTE.DB),FONT_VOTED.For)),*f*,Flashing-)][switch(lcstr(xget(v(PTR_VOTE.DB),FONT_VOTED.For)),*c*,Cyan,*r*,Red,*b*,Blue,*x*,Black,*y*,Yellow,*g*,Green,*m*,Magenta,*w*,White,Normal)])].,%r* Type '[ansi(xget(v(PTR_VOTE.DB),FONT_VOTE.Cmds),vote <Ltr> on issue [trunc(secure(%0))])]' to cast a vote.)]
+&CMD_VOTE.REMOVE Voting Booth Globals=$vote/rem* *:think [switch([u([v(PTR_VOTE.DB)]/FUN_PLR.Valid,%#)][or(u([v(PTR_VOTE.DB)]/FUN_PLR.Auth,%#),u([v(PTR_VOTE.DB)]/FUN_PLR.Author,%#,trunc(secure(%1))))][u([v(PTR_VOTE.DB)]/FUN_VoteNum.Valid,trunc(secure(%1)))],0??,u([v(PTR_VOTE.DB)]/TRI_ERROR,%#,PLR_!VALID),10?,u([v(PTR_VOTE.DB)]/TRI_ERROR,%#,PLR_!AUTH),110,u([v(PTR_VOTE.DB)]/TRI_ERROR,%#,REMOVE_!VALID),111,u([v(PTR_VOTE.DB)]/TRI_VOTE.Remove,%#,trunc(secure(%1))),u([v(PTR_VOTE.DB)]/TRI_SYSERR,%#))]
+&CMD_VOTE.HELP Voting Booth Globals=$vote/help:@pemit %#=[ansi(xget(v(PTR_VOTE.DB),FONT_HELP.Border),[repeat(-,78)]%r<<<<<)][ansi(xget(v(PTR_VOTE.DB),FONT_HELP.Header),center(VOTING BOOTH -- HELP SECTION,68))][ansi(xget(v(PTR_VOTE.DB),FONT_HELP.Border),>>>>>%r[repeat(-,78)])]%rIssues that may be somewhat controversial are posted on this system. You can vote once \(and ONLY once\) on each issue to proclaim your loyalties. These are all secret ballots\, so a listing of who voted which way is not available. If you have more than one character\, do NOT vote with all of them -- only use one.%r%r[ansi(xget(v(PTR_VOTE.DB),FONT_HELP.Title),Commands:%r--------)]%r%b%b[ansi(xget(v(PTR_VOTE.DB),FONT_HELP.Cmds),ljust(vote/post <subj>=<body>,23))] - Posts a new issue to be voted on.%r%b%b[ansi(xget(v(PTR_VOTE.DB),FONT_HELP.Cmds),ljust(vote/option <args>,23))] - Type '[ansi(xget(v(PTR_VOTE.DB),FONT_HELP.Cmds),vote/help options)]' for more info.%r%b%b[ansi(xget(v(PTR_VOTE.DB),FONT_HELP.Cmds),ljust(vote/rem <#>,23))] - Removes the specified issue.%r%b%b[ansi(xget(v(PTR_VOTE.DB),FONT_HELP.Cmds),ljust(vote/list,23))] - Lists all current issues.%r%b%b[ansi(xget(v(PTR_VOTE.DB),FONT_HELP.Cmds),ljust(vote/view <#>,23))] - For more detailed info about an issue.%r%r%b%b[ansi(xget(v(PTR_VOTE.DB),FONT_HELP.Cmds),ljust(vote <Ltr> on Issue <#>,23))] - Votes for an issue.%r%r%b%b[ansi(xget(v(PTR_VOTE.DB),FONT_HELP.Cmds),ljust(vote/copyright,23))] - Shows Copyright information.%r[ansi(xget(v(PTR_VOTE.DB),FONT_HELP.Border),repeat(-,78))]
+&CMD_VOTE.COPYRIGHT Voting Booth Globals=$vote/copy*:[pemit(%#,Voting Booth v2.2 -- Created By: Demonic \(2000\)%rUpdated versions of this code can be found on:%r%b%bhttp://www.mindspring.com/~loparo)]
+@ACONNECT Voting Booth Globals=@wait 2={think [u([v(PTR_VOTE.DB)]/TRI_MESSAGE.Priv,%#,ACONNECT,%#)][u([v(PTR_VOTE.DB)]/TRI_MESSAGE.Priv,%#,TYPE_HELP)]}
+@set Voting Booth Globals/ACONNECT=no_command
+@switch [isdbref(num(Voting Booth Database))]=0,{think [ansi(hm,INSTALL:)] No "Voting Booth Database" object found -- creating...;@create Voting Booth Database},1,{think [ansi(hm,INSTALL:)] "Voting Booth Database" object already exists... skipping creation.}
+think [ansi(hm,INSTALL:)] Setting Voting Booth Database Flags...
+@set Voting Booth Database = SAFE
+@set Voting Booth Database = NO_COMMAND
+think [ansi(hm,INSTALL:)] Downloading Voting Booth Fonts...
+&FONT_VOTED.FOR Voting Booth Database=hm
+&FONT_TIME.LEFT Voting Booth Database=hr
+&FONT_VOTE.PERFORMED Voting Booth Database=hm
+&FONT_NEW.SUBJ Voting Booth Database=hc
+&FONT_NEW.BODY Voting Booth Database=hc
+&FONT_LIST.BORDER Voting Booth Database=hb
+&FONT_LIST.HEADER Voting Booth Database=hc
+&FONT_LIST.TITLE Voting Booth Database=hm
+&FONT_VIEW.BORDER Voting Booth Database=hb
+&FONT_VIEW.HEADER Voting Booth Database=hc
+&FONT_VIEW.TITLE Voting Booth Database=hm
+&FONT_HELP.BORDER Voting Booth Database=hb
+&FONT_HELP.TITLE Voting Booth Database=hb
+&FONT_HELP.HEADER Voting Booth Database=hc
+&FONT_HELP.CMDS Voting Booth Database=hc
+&FONT_ACONNECT Voting Booth Database=hc
+&FONT_VOTE.CMDS Voting Booth Database=hc
+think [ansi(hm,INSTALL:)] Downloading Voting Booth Lists...
+&LIST_VOTE.POINTERS Voting Booth Database=
+&LIST_OPTIONS Voting Booth Database=A B C D E F G H I J
+think [ansi(hm,INSTALL:)] Downloading Voting Booth Errors...
+&ERR_NOT_TIME Voting Booth Database=You must wait another [ansi(xget(v(PTR_VOTE.DB),FONT_TIME.Left),u([v(PTR_VOTE.DB)]/FUN_TIME.Left,%0))] seconds before casting a vote. This gives time to the poster to make changes or add options.
+&ERR_OPTION_!VALID2 Voting Booth Database=That is not a valid option for that issue.
+&ERR_PLR_!AUTH-OPTION Voting Booth Database=Only the author of a voting issue may change its options.
+&ERR_VOTES_MADE Voting Booth Database=You cannot change the options on an issue which was already voted on.
+&ERR_ISSUE_!NEWSTYLE Voting Booth Database=That issue was created on an old version of this code and thus cannot use the '[ansi(v(FONT_VOTE.Cmds),options)]' switch.
+&ERR_OPTION_!VALID Voting Booth Database=That is not a valid option. You must use one of the following: [ansi(v(FONT_VOTE.Cmds),xget(v(PTR_VOTE.DB),LIST_OPTIONS))]
+&ERR_VOTENUM-OPT_!VALID Voting Booth Database=That is not a valid issue number. Type '[ansi(v(FONT_VOTE.Cmds),vote/list)]' for a current listing.
+&ERR_PLR_!VALID Voting Booth Database=You are not a valid player. If you feel you really ARE a valid player\, contact an Administrator.
+&ERR_PLR_!AUTH Voting Booth Database=You are not authorized to do that.
+&ERR_POSTS_MAXED Voting Booth Database=This Voting Booth has reached the maximum number of posts. First '[ansi(v(FONT_VOTE.Cmds),vote/remove)]' an item before continuing.
+&ERR_REMOVE_!VALID Voting Booth Database=That is not a valid issue number. [switch(words(v(LIST_VOTE.Pointers)),0,There are no issues to remove at this time.,1,There is only one issue to remove at this time.,You must indicate a value between 1 and #$.)]
+&ERR_VOTENUM_!VALID Voting Booth Database=That is not a valid issue number. [switch(words(v(LIST_VOTE.Pointers)),0,There are no issues to vote on at this time.,1,There is only one issue to vote on at this time.,You must indicate a value between 1 and #$.)]
+&ERR_VIEW_!VALID Voting Booth Database=That is not a valid issue number. [switch(words(v(LIST_VOTE.Pointers)),0,There are no issues to view at this time.,1,There is only one issue to view at this time.,You must indicate a value between 1 and #$.)]
+&ERR_ALREADY_VOTED Voting Booth Database=You have already voted on Issue %0.
+think [ansi(hm,INSTALL:)] Downloading Voting Booth Functions...
+&FUN_TIME.LEFT Voting Booth Database=[sub(add(extract(xget(v(PTR_VOTE.DB),ISSUE_[extract(xget(v(PTR_VOTE.DB),LIST_VOTE.Pointers),%0,1)]),2,1,|),xget(v(PTR_VOTE.DB),DATA_VOTE.Delay)),secs())]
+&FUN_VOTE.TIME Voting Booth Database=[gte(secs(),add(extract(xget(v(PTR_VOTE.DB),ISSUE_[extract(xget(v(PTR_VOTE.DB),LIST_VOTE.Pointers),%0,1)]),2,1,|),xget(v(PTR_VOTE.DB),DATA_VOTE.Delay)))]
+&FUN_CALC.VOTES Voting Booth Database=[words(edit(iter(xget(v(PTR_VOTE.DB),LIST_OPTIONS),edit(rest(extract(xget(v(PTR_VOTE.DB),ISSUE_%0),add(4,#@),1,|)),!,)),_,%b))]
+&FUN_OPTION.VALID2 Voting Booth Database=[and(u([v(PTR_VOTE.DB)]/FUN_OPTION.Valid,%0),words(extract(v(ISSUE_[extract(v(LIST_VOTE.Pointers),%1,1)]),add(4,match(v(LIST_OPTIONS),%0)),1,|)))]
+&FUN_VOTES.NOTMADE Voting Booth Database=[eq(words(iter(xget(v(PTR_VOTE.DB),LIST_OPTIONS),edit(rest(extract(xget(v(PTR_VOTE.DB),ISSUE_[extract(xget(v(PTR_VOTE.DB),LIST_VOTE.Pointers),%0,1)]),add(4,#@),1,|)),!,))),0)]
+&FUN_NEWSTYLE Voting Booth Database=1
+&FUN_PLR.AUTH-OPTION Voting Booth Database=[member(first(xget(v(PTR_VOTE.DB),ISSUE_[extract(xget(v(PTR_VOTE.DB),LIST_VOTE.Pointers),%1,1)]),|),%0)]
+&FUN_OPTION.VALID Voting Booth Database=[t(match(xget(v(PTR_VOTE.DB),LIST_OPTIONS),%0))]
+&FUN_PLR.VALID Voting Booth Database=[and(and(hastype(%0,PLAYER),not(haspower(%0,Builder))),not(haspower(%0,Guest)))]
+&FUN_PLR.AUTH Voting Booth Database=[hasflag(%0,Wizard)]
+&FUN_POSTS.MAXED Voting Booth Database=[gte(words(v(LIST_VOTE.Pointers)),v(DATA_MAX.Posts))]
+&FUN_SEPARATE Voting Booth Database=%0%b
+&FUN_CONVERT.DATE Voting Booth Database=[extract(01 02 03 04 05 06 07 08 09 10 11 12,match(January February March April May June July August September October November December,[extract(%0,2,1)]*),1)]/[extract(%0,3,1)]/[mid(last(%0),2,2)]
+&FUN_PLR.BANNED Voting Booth Database=[t(member(v(LIST_PLAYERS.Banned),%0))]
+&FUN_PLR.ALREADYVOTED Voting Booth Database=[t(member(edit(edit(edit(extract(v(ISSUE_[extract(v(LIST_VOTE.Pointers),%1,1)]),5,words(v(LIST_OPTIONS)),|),!_,%b),|,%b),_,%b),%0))]
+&FUN_VOTENUM.VALID Voting Booth Database=[not(or(gt(trunc(%0),words(v(LIST_VOTE.Pointers))),or(lt(trunc(%0),1),eq(words(v(LIST_VOTE.Pointers)),0))))]
+&FUN_PLR.AUTHOR Voting Booth Database=[member(first(v(ISSUE_%1),|),%0)]
+think [ansi(hm,INSTALL:)] Downloading Voting Booth Data...
+&DATA_VOTE.DELAY Voting Booth Database=600
+&DATA_MAX.POSTS Voting Booth Database=20
+&DATA_COUNTER Voting Booth Database=1
+&DATA_PREFIX.SYSERR Voting Booth Database=[ansi(fhr,SYSERR:)]
+&DATA_PREFIX.ERROR Voting Booth Database=[ansi(hr,ERROR:)]
+&DATA_PREFIX.GAME Voting Booth Database=[ansi(hg,GAME:)]
+think [ansi(hm,INSTALL:)] Downloading Voting Booth Triggers...
+&TRI_VOTE.ON Voting Booth Database=[set(me,ISSUE_[setr(4,extract(v(LIST_VOTE.Pointers),%1,1))]:[replace(v(ISSUE_%q4),setr(5,add(4,match(xget(v(PTR_VOTE.DB),LIST_OPTIONS),%2))),strcat(extract(v(ISSUE_%q4),%q5,1,|),_%0),|)])][u(TRI_MESSAGE.Priv,%0,VOTE_PERFORMED,%1,%2)]
+&TRI_VOTE.OPTION Voting Booth Database=[set(me,ISSUE_[setr(4,extract(v(LIST_VOTE.Pointers),%1,1))]:[replace(v(ISSUE_%q4),add(4,match(xget(v(PTR_VOTE.DB),LIST_OPTIONS),%2)),[edit(left(%3,60),%b,_)] !,|)])][u(TRI_MESSAGE.Priv,%0,OPTION_SET,%1,%2,%3)]
+&TRI_ERROR Voting Booth Database=[pemit(%0,[u(DATA_PREFIX.Error)][space(not(not(words(u(DATA_PREFIX.Error)))))][u(ERR_%1,%2,%3,%4)])]
+&TRI_SYSERR Voting Booth Database=[pemit(%0,[ansi(hfr,SYSERR:)] There is a bug in the code. Report this to an Admin immediately.)]
+&TRI_VOTE.POST Voting Booth Database=[set(v(PTR_VOTE.DB),ISSUE_[v(DATA_COUNTER)]:%0|[secs()]|[edit(%1,|,)]|[edit(%2,|,)][repeat(|,words(xget(v(PTR_VOTE.DB),LIST_OPTIONS)))])][u(TRI_MESSAGE.Priv,%0,NEW_POST,edit(%1,|,),edit(%2,|,))][u(TRI_MESSAGE.Glob,%0,ONEW_POST,%0,edit(%1,|,))][set(me,LIST_VOTE.Pointers:[trim(squish(cat(v(LIST_VOTE.Pointers),v(DATA_COUNTER))),%b,b)])][u(TRI_INCREASE.Counter)]
+&TRI_MESSAGE.PRIV Voting Booth Database=[pemit(%0,[u(DATA_PREFIX.Game)][space(not(not(words(u(DATA_PREFIX.Game)))))][u(MSG_%1,%2,%3,%4)])]
+&TRI_INCREASE.COUNTER Voting Booth Database=[set(me,DATA_COUNTER:[inc(v(DATA_COUNTER))])]
+&TRI_MESSAGE.GLOB Voting Booth Database=[pemit(setdiff(lwho(),%0),[u(DATA_PREFIX.Game)][space(not(not(words(u(DATA_PREFIX.Game)))))][u(MSG_%1,%2,%3,%4)])]
+&TRI_VOTE.REMOVE Voting Booth Database=[u(TRI_MESSAGE.Glob,%0,OISSUE_REMOVED,%0,%1)][u(TRI_MESSAGE.Priv,%0,ISSUE_REMOVED,%1)][wipe([v(PTR_VOTE.DB)]/ISSUE_[extract(v(LIST_VOTE.Pointers),%1,1)])][set(me,LIST_VOTE.Pointers:[ldelete(v(LIST_VOTE.Pointers),%1)])]
+think [ansi(hm,INSTALL:)] Downloading Voting Booth Messages...
+&MSG_OPTION_SET Voting Booth Database=Issue '%0'\, Option '[ucstr(%1)]' set to [left(%2,60)].
+&MSG_TYPE_HELP Voting Booth Database=\(Type '[ansi(v(FONT_VOTE.Cmds),vote/help)]' for more information.\)
+&MSG_NEW_POST Voting Booth Database=You have POSTED a new Voting Issue with the the following information:%r[ansi(v(FONT_NEW.Subj),SUBJ:)] %0%r[ansi(v(FONT_NEW.Body),BODY:)] %1
+&MSG_ONEW_POST Voting Booth Database=[name(%0)] \(%0\) has POSTED a new Voting Issue with the subject:%r[space(7)][ansi(v(FONT_NEW.Subj),%1)]
+&MSG_ACONNECT Voting Booth Database=[ifelse(words(setr(0,trim(squish(iter(v(LIST_VOTE.Pointers),ifelse(u(FUN_PLR.AlreadyVoted,%0,#@),,#@))),%b,b))),You have not voted on the following Issue[ifelse(eq(words(%q0),1),,s)]: [ansi(v(FONT_ACONNECT),%q0)],You have no issues to vote on -- you are current.)]
+&MSG_ISSUE_REMOVED Voting Booth Database=You have REMOVED Issue %0 concerning:%r[space(7)][ansi(v(FONT_NEW.Subj),extract(v(ISSUE_[extract(v(LIST_VOTE.Pointers),%0,1)]),3,1,|))]
+&MSG_VOTE_PERFORMED Voting Booth Database=You have voted [ansi(v(FONT_VOTE.Performed),'[ucstr(%1)] - [edit(first(extract(v(ISSUE_[extract(v(LIST_VOTE.Pointers),%0,1)]),add(4,match(xget(v(PTR_VOTE.DB),LIST_OPTIONS),%1)),1,|)),_,%b)])]' on Issue %0.
+&MSG_OISSUE_REMOVED Voting Booth Database=[name(%0)] \(%0\) has REMOVED Issue %1 concerning:%r[space(7)][ansi(v(FONT_NEW.Subj),extract(v(ISSUE_[extract(v(LIST_VOTE.Pointers),%1,1)]),3,1,|))]
+think [ansi(hm,INSTALL:)] Attempting To Set Pointers...
+@fo me=&PTR_VOTE.Main Voting Booth Globals=[num(Voting Booth Globals)]
+@fo me=&PTR_VOTE.Main Voting Booth Database=[num(Voting Booth Globals)]
+@fo me=&PTR_VOTE.DB Voting Booth Globals=[num(Voting Booth Database)]
+@fo me=&PTR_VOTE.DB Voting Booth Database=[num(Voting Booth Database)]
+think [ansi(hm,INSTALL:)] Cleaning Up Old Issues...
+@dol [lattr(Voting Booth Database/ISSUE_*)]=&## Voting Booth Database
+think [ansi(hm,INSTALL:)] [ansi(hr,Download is complete!  Now you must do the following:)]
+think [ansi(hm,INSTALL:)] Make sure the DATA_MAX.Posts attribute on the Voting Booth
+think [ansi(hm,INSTALL:)] Database is set to an appropriate amount. \(Default is 20\)
+think [ansi(hm,INSTALL:)] 
+think [ansi(hm,INSTALL:)] Next, you need to @teleport the 'Voting Booth Globals' object to
+think [ansi(hm,INSTALL:)] your Master Room \(usually #0 or #2\). This will make all commands on
+think [ansi(hm,INSTALL:)] the object accessible in any room on the game.  You then need to @tel
+think [ansi(hm,INSTALL:)] the 'Voting Booth Database' object to a safe place \(NOT in the Master
+think [ansi(hm,INSTALL:)] Room!\).  Keeping it in your inventory the recommended method.
+think [ansi(hm,INSTALL:)] 
+think [ansi(hm,INSTALL:)] Of course, the Copyright code should remain on the object AS IS -- it
+think [ansi(hm,INSTALL:)] should not be modified.  The only exception to this is IF you improve
+think [ansi(hm,INSTALL:)] the code or add to it, you may ADD 'Modified By: <your name>' after
+think [ansi(hm,INSTALL:)] the original text.  Type 'vote/help' for additional information.
+think [ansi(hm,INSTALL:)] 
+think [ansi(hm,INSTALL:)] If you have any problems with this code, e-mail:
+think [ansi(hm,INSTALL:)] %b%b[ansi(hc,worldwar@bb6.betterbox.net)]
+@set me=!quiet

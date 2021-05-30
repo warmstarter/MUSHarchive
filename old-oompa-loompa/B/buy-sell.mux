@@ -1,0 +1,801 @@
+####################################################################
+#		      BUY AND SELL COMMANDS                        #
+#                                                                  #
+# Stephanie Dray                                                   #
+#                                                                  #
+# These are tools to be used by the automated economy.             #
+# Where #99 is the Economic Command Object                         #
+####################################################################
+
+###################################################################
+#			SETTINGS				  #
+# #99 = The Economic Command Object                               #
+# #25 = The Market Object                                         #
+# #24 = Firan Demand Market                                       #
+# #26 = Firan Supply Market                                       #
+# #27 = Firan Cost Market                                         #
+###################################################################
+
+&representatives #99=the miner=#3290|the noble=#3881|
+                     the smith=#3306|the farmer=#3784
+-
+&rep-dbrefs #99=#3290 #3881 #3306 #3784
+
+-
+&special-groups #99=food clothing weaponry
+-
+
+####################################################################
+#		   COMMAND: @PRICES                                #
+# Displays current market prices for various demanded goods.       #
+####################################################################
+
+&cmd-prices #99=$@prices:
+ think setq(0, lattr(#24/demand-*));
+ think setq(0, iter(%q0, clip(##), %b, |));
+ @dolist/delimit | %q0=
+    {@pemit %#=[u(u-display, ##)]}
+-
+&u-display #99=[iter(%0, columns(##|[price(##)], 25, |), |)]
+-
+
+######################################################################
+#	    COMMAND: SELL <AMOUNT> <CURRENCY> TO <BUYER>             #
+######################################################################
+# %q0 = amount to sell
+# %q1 = currency/commodity to sell
+# %q2 = buyer
+
+# Command comment out until compleated
+#&cmd-sell #99=$sell * * to *:
+ 
+ think setq(0, trim(%0));
+ think setq(1, trim(%1));
+ think setq(2, locate(%#, %2, ainX));
+
+-
+
+#######################################################################
+#	           AUTOMATED BUYING ROUTINES                          #
+#######################################################################
+
+################## TRIG-BUYING-SPREE 
+# %0 = dbref of representative
+# %1 = priority list for buying
+#
+# %q0 = first priority
+# %q1 = rest of the buying priorities
+
+&trig-buying-spree #99=
+  @switch [gt(words(%1), 0)]=
+    0, {@fpose %0=finishes [poss(%0)] shopping for the day.;
+        @@ Buying Spree Complete -- nothing left to buy @@},
+    1, {think setq(0, first(%1));
+        think setq(1, rest(%1));
+        think setq(2, needed(%0, %q0));
+        @switch [gt(%q2, 0)]=
+          0,{@fpose %0=checks %q0 off [poss(%0)] shopping list 
+                    because [subj(%0)] has enough for the day.;
+             @@ skip buying this commodity because the Rep doesn't need any @@;
+             @tr me/trig-buying-spree = %0, %q1;
+             &result-%q0 %0 ;
+             @fpose %0=feels better about the %q0 situation.;
+             &discontent-%q0 %0 = 
+                [switch(1, gt(default(%0/discontent-%q0, 0), 0),
+                           dec(get(%0/discontent-%q0)),
+                           0)] },
+          1,{@fpose %0=goes to buy some %q0.;
+             @tr me/trig-remote-buy= %0, %q0, %q1}}
+-
+# %0 = dbref of rep
+# %1 = commodity to buy
+# %2 = rest of commodities to buy
+
+&trig-remote-buy #99=
+  think setq(0, %1);
+  @switch [t(match(v(special-groups), %q0))]=
+     1, {@tr me/trig-buy-%1 = %0, %2 },
+     0, {think setq(1, needed(%0, %q0));
+         think setq(2, excess(#26, %q0));
+         think setq(4, getaccount(%0, stenis));
+
+# How many of the commodity the rep can afford and should buy
+
+         think setq(5, div(%q4, price(%q0)));
+         think setq(5, switch(1, lte(%q1, %q5), %q1, %q5));
+
+# If the rep can afford any
+# If the market has enough in supply 
+# If the market has any in supply
+
+	think setq(9, [lte(%q5, 0)]
+                      [gte(%q2, %q5)]
+                      [gt(%q2, 0)]);
+
+        @switch/first %q9=
+          1??, {@fpose %0=finds that [subj(%0)] cannot afford to buy 
+                       %q0 at [price(%q0)] a piece.;
+                @@ rep can't afford any of the commodity @@;
+                @tr me/trig-insufficient-funds = %0, %q0;
+                &result-%q0 %0=insufficient funds;
+                @tr me/trig-buying-spree = %0, %2  },
+
+	  ?1?, {@@ buy as much of the supply as rep can afford @@;
+                @fpose %0=tries to buy as many %q0 as [subj(%0)] can 
+                       afford, which is %q5 at [price(%q0)] a piece.;
+                @money/transfer [mul(%q5, price(%q0))] from %0 to #26;
+                think ac_transfer(%q5, %q0, #26, %0);
+                @tr me/trig-buying-spree = %0, %2;
+                &result-%q0 %0=insufficient funds  },
+
+          ??1, {@@ buy as many of the supply as is available @@;
+                @fpose %0=tries to buy as many of %q0 as [subj(%0)] 
+                       finds available which is %q2.;
+                @money/transfer [mul(%q2, price(%q0))] from %0 to #26;
+                think ac_transfer(%q2, %q0, #26, %0);
+                @tr me/trig-buying-spree = %0, %2;
+                &result-%q0 %0=shortage },
+          
+          000, {@@ Shortage of commodity in market!  Sold out! @@;
+                @fpose %0=grumps because everyone is all sold out of 
+                       %q0.;
+                @trig me/trig-shortage = %0, %q0;
+                @tr me/trig-buying-spree = %0, %2;
+                &result-%q0 %0=shortage  },
+          
+          {@qmail steph/Bug-buy=Unexpected condition in 
+                 trig-remote-buy, second @switch, on [num(me)]: %q9}
+
+          
+-
+################## TRIG-BUY-FOOD 
+# %0 = dbref of representative
+# %1 = rest of priority list
+#
+# NOTE: FOODS() ARE ALREADY SORTED BY PRICE IN ASCENDING ORDER
+
+&trig-buy-food #99=
+  think setq(0, foods());
+  @tr me/trig-buy-food2 = %0, %1, %q0
+-
+
+
+################### TRIG-BUY-FOOD2 
+# %0 = dbref of representative
+# %1 = rest of buying priority list
+# %2 = pipe separated list of food currencies in order of price
+ 
+&trig-buy-food2 #99=
+
+ think setq(0, needed(%0, food));
+
+ @switch/first [lte(%q0, 0)]
+               [lt(words(%2, |), 1)] =
+  1?, {@fpose %0=decides [subj(%0)] has bought enough food today.;
+       @@ Rep doesn't need any more food -- buy other priorities @@;
+        @tr me/trig-buying-spree = %0, %1;
+        &result-food %0;
+        @fpose %0=is feeling better about the food situation.;
+        &discontent-food %0=
+           [switch(1, 
+              gt(default(%0/discontent-food, 0), 0), 
+              dec(get(%0/discontent-food)), 0)] },
+  01, {@fpose %0=still needs food and has tried to buy every kind of 
+              food [subj(%0)] can find to no avail!;
+       @@ Rep still needs food and has tried to buy every 
+          commodity to no avail @@;
+       &result-food %0= Shortage;
+       @tr me/trig-buying-spree = %0, %1},
+  
+  00, {@fpose %0=still needs %q0 food and tries to buy some more.;
+       @@ player still needs food -- try to buy some @@;
+       think setq(1, first(%2, |));
+       think setq(2, rest(%2, |));
+       
+# Figure out if the market has any to sell
+      
+       think setq(3, excess(#26, %q1));
+       @switch [gt(%q3, 0)]=
+         0, {@fpose %0=tries to buy some %q1 but the market is sold out.;
+             @@ Market has run out of commodity, go on to next one. @@;
+             @tr me/trig-buy-food2 = %0, %1, %q2},
+         1, {
+# how much of the commodity can the player buy
+
+             think setq(4, getaccount(%0, stenis));
+             think setq(5, div(%q4, price(%q1)));
+
+# how much of the commodity should the player try to buy  
+
+             think setq(6, switch(1, lte(%q5, %q0), %q5, %q0));  
+ 
+# If the rep can afford any
+# If the market has enough in supply 
+
+
+	think setq(9, [lte(%q6, 0)]
+                      [gte(%q3, %q6)]);
+
+        @switch/first %q9=
+          1?, {@fpose %0=finds that [subj(%0)] can't afford any %q1.;
+               @@ rep can't afford any of the commodity @@;
+                &result-food %0=insufficient funds;
+                @tr me/trig-buying-spree = %0, %1  },
+
+	  ?1, {@fpose %0=tries to buy as many %q1 as [subj(%0)] can 
+                      afford, which is %q6.;
+               @@ buy as many of the supply as rep can afford @@;
+                @money/transfer [mul(%q6, price(%q1))] from %0 to #26;
+                think ac_transfer(%q6, %q1, #26,  %0);
+                @tr me/trig-buy-food2 = %0, %1, %q2  },
+
+          
+          00, {@@ buy as many of the supply as market has to sell @@;
+               @fpose %0=can only find %q3 %q1 to buy and buys them 
+                      all.;
+                &result-food %0=shortage;
+                @money/transfer [mul(%q3, price(%q1))] from %0 to #26;
+                think ac_transfer(%q3, %q1, #26, %0);
+                @tr me/trig-buy-food2  = %0, %1, %q2  },
+          
+          {@qmail steph/Bug-buy-food2=Unexpected condition in
+                  second @switch, on [num(me)]: %q9}}}}
+ 
+-
+
+################## TRIG-BUY-CLOTHING 
+# %0 = dbref of representative
+# %1 = rest of priority list
+#
+# NOTE: CLOTHING() IS ALREADY SORTED BY PRICE IN ASCENDING ORDER
+
+&trig-buy-clothing #99=
+  think setq(0, clothing());
+  @tr me/trig-buy-clothing2 = %0, %1, %q0
+-
+
+
+
+################### TRIG-BUY-clothing2 
+# %0 = dbref of representative
+# %1 = rest of buying priority list
+# %2 = pipe separated list of clothing currencies in order of price
+ 
+&trig-buy-clothing2 #99=
+
+ think setq(0, needed(%0, clothing));
+
+ @switch/first [lte(%q0, 0)]
+               [lt(words(%2, |), 1)] =
+  1?, {@fpose %0=decides [subj(%0)] has bought enough clothing today.;
+       @@ Rep doesn't need any more clothing -- buy other priorities @@;
+        @tr me/trig-buying-spree = %0, %1;
+        &result-clothing %0;
+        @fpose %0=is feeling better about the clothing situation.;
+        &discontent-clothing %0=
+           [switch(1, 
+              gt(default(%0/discontent-clothing, 0), 0), 
+              dec(get(%0/discontent-clothing)), 0)] },
+  01, {@fpose %0=still needs clothing and has tried to buy every kind of 
+              clothing [subj(%0)] can find to no avail!;
+       @@ Rep still needs clothing and has tried to buy every 
+          commodity to no avail @@;
+       &result-clothing %0= Shortage;
+       @tr me/trig-buying-spree = %0, %1},
+  
+  00, {@fpose %0=still needs %q0 clothing and tries to buy some more.;
+       @@ player still needs clothing -- try to buy some @@;
+       think setq(1, first(%2, |));
+       think setq(2, rest(%2, |));
+       
+# Figure out if the market has any to sell
+      
+       think setq(3, excess(#26, %q1));
+       @switch [gt(%q3, 0)]=
+         0, {@fpose %0=tries to buy some %q1 but the market is sold out.;
+             @@ Market has run out of commodity, go on to next one. @@;
+             @tr me/trig-buy-clothing2 = %0, %1, %q2},
+         1, {
+# how much of the commodity can the player buy
+
+             think setq(4, getaccount(%0, stenis));
+             think setq(5, div(%q4, price(%q1)));
+
+# how much of the commodity should the player try to buy  
+
+             think setq(6, switch(1, lte(%q5, %q0), %q5, %q0));  
+ 
+# If the rep can afford any
+# If the market has enough in supply 
+
+
+	think setq(9, [lte(%q6, 0)]
+                      [gte(%q3, %q6)]);
+
+        @switch/first %q9=
+          1?, {@fpose %0=finds that [subj(%0)] can't afford any %q1.;
+               @@ rep can't afford any of the commodity @@;
+                &result-clothing %0=insufficient funds;
+                @tr me/trig-buying-spree = %0, %1  },
+
+	  ?1, {@fpose %0=tries to buy as many %q1 as [subj(%0)] can 
+                      afford, which is %q6.;
+               @@ buy as many of the supply as rep can afford @@;
+                @money/transfer [mul(%q6, price(%q1))] from %0 to #26;
+                think ac_transfer(%q6, %q1, #26,  %0);
+                @tr me/trig-buy-clothing2 = %0, %1, %q2  },
+
+          
+          00, {@@ buy as many of the supply as market has to sell @@;
+               @fpose %0=can only find %q3 %q1 to buy and buys them 
+                      all.;
+                &result-clothing %0=shortage;
+                @money/transfer [mul(%q3, price(%q1))] from %0 to #26;
+                think ac_transfer(%q3, %q1, #26, %0);
+                @tr me/trig-buy-clothing2  = %0, %1, %q2  },
+          
+          {@qmail steph/Bug-buy-clothing2=Unexpected condition in
+                  second @switch, on [num(me)]: %q9}}}}
+
+
+-
+
+&sortby-price #99=
+  [sign(sub(round(price(%0), 0), round(price(%1), 0)))]
+
+-
+
+######################################################################
+#			AUTOMATED SELLING ROUTINES                   #
+######################################################################
+# 
+# For each representative, the code must determine which of the 
+# accounts the representative has are products to be sold.  That is 
+# to say, a miner may have an account of clothing, but that's not a 
+# product that he made to sell at the market -- he's probably wearing 
+# them.  The products that the miner would want to sell at the market 
+# include mineable resources like gold, silver, ore, and so on.  A 
+# list of products must be stored on each rep in a | delineated list.
+# (ie.  &products the miner= gold|silver|ore)
+#
+
+################ TRIG-SELL-PRODUCTS 
+#
+# %0 = the representative's dbref
+# 
+# %q0 = list of products the rep sells delimited by a |
+# %q1 = list of accounts/things the rep has delimited by a |
+# %q2 = list of products that the rep has to sell delimited by a |
+
+&trig-sell-products #99=
+  think setq(0, get(%0/products));
+  think setq(1, iter(laccounts(%0), clip(##),%b, |));
+  think setq(2, filter(filter-is-product, %q1, |));
+
+# reorder the list by price so that the representative tries to sell
+# the most expensive product first.
+
+  think setq(2, sortby(sortby-price, %q2));
+  think setq(2, revwords(%q2, |));
+
+# Check to see if the representative has any products to sell
+#  0 = if not, end the transaction
+#  1 = if so, try to sell the excess the rep has of each product
+
+  @switch [gt(words(%q2, |), 0)]=
+
+    0, {@@ Representative has no products to sell @@},
+    1, {@dolist/delimit | {%q2}=
+
+#       check to see how much excess the representative has of the commodity
+#       to sell (ie.  A farmer sells food, but also needs to keep some to
+#       eat, thus he wouldn't sell all his food, just the excess)
+#
+#       %q3 = excess of the commodity to be sold
+
+            {think setq(3, excess(%0, ##));
+
+#        if the excess is greater than 0 try to sell it.  If not dont.
+           
+	     @switch [gt(%q3, 0)]=
+               1, {@tr #99/trig-remote-sell=%0, ##, %q3},
+               0, {@@ Rep has no excess supply of product to sell @@}}}
+
+-
+# This filter (when fed a list of accounts on a representative)
+# returns a list of those accounts that are also products for sale.
+#
+# where %q0 is a | delimited list of products the specific rep makes
+
+&filter-is-product #99=
+ [t(match(%q0, %0, |))] 
+
+-
+
+################### TRIG-REMOTE-SELL
+#
+# This is triggered by the trig-sell-products trigger for each 
+# representative and passes the following:
+# 
+# %0 = the representative's dbref
+# %1 = the commodity to be sold
+# %2 = the amount of the commodity to be sold
+# 
+# where #26 = the supply market
+
+&trig-remote-sell #99=
+
+# %q0 =  the going price for the commodity
+# %q1 = the total amount of stenis the rep would receive for # of
+#       commodity
+# %q2 = the total number of stenis in the marketplace
+
+  think setq(0, price(%1));
+  think setq(1, round(mul(%2, %q0),0)); 
+  think setq(2, getaccount(#26, stenis));
+
+# Check to see if the marketplace has greater than or equal number of
+# stenis as the number of stenis is would have to pay to the
+# representative.  That is, does the buyer (the market) have enough
+# money to buy all the seller's product?
+ 
+  @switch/first [gte(%q2, %q1)]=
+
+     1, {@@ Market has enough money to buy all of seller's product @@;
+         think ac_transfer(%2, %1, %0, #26);
+         @money/transfer %q1 from #26 to %0},
+
+     0, {@@ Market can't afford to buy all of seller's product @@;
+
+#        Determine how many the market can afford to buy.  If the 
+#        market has 0 or less stenis, return 0.  Otherwise, divide 
+#        the total number of stenis the market has by the price of
+#        just one of the commodity to see how many the market can
+#        afford to buy.  Since we've already determined above that the
+#        market can't afford to buy all of the product being offered,
+#        we know that the number the market can afford will be less
+#        than the number being offered.
+# 
+#        %q3 = number of commodity the market can buy
+#        %q4 = total amount of money that the market will pay
+
+         think setq(3, switch(1, lte(%q2, 0), 0, div(%q2, %q0)));
+         think setq(4, round(mul(%q3, %q0),0));
+
+#        Transfer products for money
+
+         think ac_transfer(%q3, %1, %0, #26);
+         @money/transfer %q4 from #26 to %0} 
+
+-
+
+#############################################################
+#          COMMAND: @SELL <QUANTITY>/<COMMODITY>            #
+#############################################################
+#
+#    make sure that <commodity> is a valid commodity
+#    make sure that <quantity> is a valid quantity (positive number)
+#    make sure that %# has enough <quantity> of the commodity 
+#    to sell
+#    make sure that the market has enough money to buy the commodity
+
+&cmd-sell-wholesale #99=$@sell/wholesale */*:
+
+
+# %q0 = discounted by 5%, how much the market will have to pay total
+
+  think setq(0, price(%1));
+  think setq(0, mul(%q0, .95));
+  think setq(0, mul(%q0, %0));
+  think setq(9, [iscurrency(%1)]
+                [and(isnum(%0), gt(%0, 0))]
+                [gte(getaccount(%#, %1), %0)]
+                [gte(getaccount(#26, stenis), %q0)]);
+
+  @switch/first %q9=
+    0???, {@pemit %#=Invalid Currency Specified;
+           @fpose %#=is told that the market doesn't know what %1 is. },
+    ?0??, {@pemit %#=Quantity to sell must be a positive number.;
+           @fpose %#=is told that [subj(%#)] will have to specify a positive 
+                  number of %1 to sell instead of %0. },
+    ??0?, {@pemit %#=You don't have that many %1 to sell.;
+           @fpose %#=is told that [subj(%#)] only has 
+                  [getaccount(%#, %1)] to sell, and not %0.  },
+    ???0, {@pemit %#=Cannot find buyer for %1.;
+           @fpose %#=cannot find a buyer for %0 %1.;
+           @fo %#=@sell/wholesale [round(mul(%0, .9), 0)]/%1 },
+
+# Error checking complete, we allow the product to be sold to the 
+# market unless the market doesn't have enough money to buy it. 
+
+    1111, {@money/transfer %q0 from #26 to %#;
+           @fpose %#=is paid %q0 stenis for [poss(%#)] %0 %1.;
+           think ac_transfer(%0, %1, %#, #26) }
+
+-
+
+
+################## TRIG-DEPLETE-SUPPLY #####################
+#                                      
+# This trigger is meant to represent the daily wear and tear 
+# on various commodities such as clothing, food, tools and so on
+#
+# Plan:
+#   a) Make all the representatives eat
+#   b) Wear out the representatives clothes
+#   c) Wear out the representatives tools
+#   d) engage in the fiction of needing to rent land every day
+#   e) engage in the fiction of needing to rent shelter every day
+#   f) wear out weapons
+#   g) wear out containers
+
+
+&trig-deplete-supply #99=
+
+# Get a list of the representatives
+# v(representatives) = <the representative>=<dbref>|<etc.>
+
+  think setq(0, iter(v(representatives), after(##, =), |));
+ 
+  @dolist %q0 =
+     {think setq(1, laccounts(##));
+      @tr #99/trig-deplete-food =##, %q1;
+      @tr #99/trig-deplete-clothing =##, %q1;
+      @tr #99/trig-deplete-land =##, %q1;
+      @tr #99/trig-deplete-tools = ##, %q1;
+      @tr #99/trig-deplete-weapons = ##, %q1;
+      @tr #99/trig-deplete-shelter =##, %q1;
+      @tr #99/trig-deplete-containers =##, %q1}
+
+
+-
+
+######################################################################
+#		FUNCTIONS
+######################################################################
+
+&filter-commodities #99=
+  [isdbref(paccount(%0))]
+
+-
+
+# Where %q2 = dbref of the rep
+# Where %0 = currency type
+
+&filter-needed #99=
+ [gt(needed(%q2, %0), 0)]
+-
+
+# mined()
+# returns a | delimited list of mine-able resources
+
+&function-mined #50=
+  [get(#1443/mined)]
+
+
+-
+# foods()
+# 
+# Returns a | separated list of foods in order of price
+
+&function-foods #50=
+ [get(#1796/foods)]
+ 
+-
+# supply(commodity/currency)
+# 
+# Returns aggregate daily supply for a given commodity
+# #26 = The Firan Supply Market
+
+&function-supply #50=
+  [switch(0, iscurrency(%0), #-1 Invalid Currency,
+             isdbref(paccount(%0)), #-2 Invalid Commodity,
+             trunc(default(#26/supply-[makeattr(%0)], getaccount(#26, %0))))]
+-
+
+# demand(<commodity/currency>)
+# 
+# Returns aggregate daily demand for a given commodity
+# #24 = the Firan Demand Market
+
+
+&function-demand #50=
+  [switch(0, iscurrency(%0), #-1 Invalid Currency,
+             isdbref(paccount(%0)), #-2 Invalid Commodity,
+             trunc(default(#24/demand-[makeattr(%0)], 0)))]    
+-
+# worth(<commodity/currency>)
+# 
+# Will return the current market average that the commodity should be selling
+# for
+# #25 = The Firan Marketplace
+# 
+# %q0 = supply
+# %q1 = demand
+# %q2 = surplus/shortage
+# %q4 = cost
+
+&function-worth #50=
+  [setq(0, supply(%0))]
+  [setq(1, demand(%0))]
+  [setq(2, sub(%q0, %q1))]
+  [setq(3, switch(1, not(iscurrency(%0)), #-1 Invalid Currency,
+
+# surplus then subtract from the cost the difference between supply
+# and demand multiplied by .01 thus reducing the price because there
+# are too many of the item and supply outstrips demand.
+
+             gt(%q2, 0), sub(cost(%0), mul(%q2, 0.01)),
+
+
+# deficit then add to the cost the difference times .10 to raise the
+# price since there are too few of the item and demand outstrips
+# supply.
+
+             lt(%q2, 0), add(cost(%0), abs(mul(%q2, 0.10))),
+# default
+             cost(%0)))]
+  [switch(1, not(isnum(%q3)), %q3, lt(%q3, 1), 1, %q3)]  
+
+-
+
+# price(<commodity/currency>)
+# 
+# Firan Cost Market = #27
+# Returns 
+&function-price #50=
+  [default(#27/price-[makeattr(%0)], cost(%0))]
+-
+
+
+# cost(<commodity/currency>)
+#
+# Firan Cost Market = #27
+# Returns the cost or base price of the item
+
+&function-cost #50=
+ [switch(0, iscurrency(%0), #-1 Invalid Currency,
+                            default(#27/cost-[makeattr(%0)], 1))]
+
+-
+
+# excess(<seller>, <currency/commodity>)
+#
+# Will return the number of extra <currency/commodity> <target> has to
+# sell.
+#
+# %q0 = dbref of the seller
+# %q1 = how much of the commodity the seller has
+# %q2 = how much of the commodity the seller needs for him/herself
+# %q3 = difference between how much he's got and how much he needs
+# %q9 = error code
+
+&function-excess #50=
+ [setq(0, locate(%#, %0, *X))]
+ [setq(1, getaccount(%q0, %1))]
+
+# Find out if the currency is a part of any special group
+
+ [switch(1, t(ulocal(#99/ul-member-group, %1)), 
+            [setq(2, needed(%q0, ulocal(#99/ul-member-group, %1)))],
+            [setq(2, needed(%q0, %1))])]
+ [setq(3, sub(%q1, %q2))]
+ [setq(9, [isdbref(%q0)][iscurrency(%1)])]
+ [switch(%q9, 0?, pemit(%#, #-1 Invalid Seller Supplied.),
+              ?0, pemit(%#, #-2 Invalid Currency/Commodity Supplied.),
+              switch(gt(%q3, 0), 1, %q3, 0))]
+
+-
+# Returns the name of the special group to which the thing belongs or 
+# a 0 if it doesn't belong to any
+#
+# ulocal(#99/ul-member-group, <currency>)
+&ul-member-group #99=
+  [setq(0, v(special-groups))]
+  [setq(1, iter(%q0, is##(%0)))]
+  [switch(1, t(match(%q1, 1)), extract(%q0, match(%q1, 1), 1), 0)]
+
+
+-
+# needed(<target>, <commodity>)
+# %q0 = 
+&function-needed #50=
+  [switch(1, 
+
+# First check to see if it's a special conglomerate group like 'food'
+
+             [t(member(get(#99/special-groups),%1))], 
+
+# If so, find all the accounts on the representative or player
+             
+             [setq(0, laccounts(%0))]
+
+# filter to see which one of these accounts is part of the
+# conglomerate group (ie. filter-is-food)
+
+             [setq(0, filter(#99/filter-is-%1, %q0))]
+
+# Add up the food accounts to see how much food the player/rep has
+             [setq(1, iter(%q0, getaccount(%0, ##)))]
+             [setq(1, switch(1, gt(words(%q1), 1), 
+                                fold(#50/fold-add-nums, %q1), %q1))]
+
+# If the player/rep has more than 0, return that number, otherwise 0
+
+             [setq(2, switch(1, gte(%q1, 0), %q1, 0))]
+
+# Multiply the population of the rep/player by the number of the 
+# group they need (ie. if they're a hundred people and they each need
+# three food, then the number returned should be 300)
+
+             [setq(3, mul(default(%0/population, 1),
+                          default(%0/needed-[makeattr(%1)], 0)))]
+
+# Subtract the amount the rep/player has, from how much they need
+             [setq(4, sub(%q3, %q2))]
+             [switch(1, lte(%q4, 0), 0, %q4)],
+
+# If the commodity is not part of a special group, then do the process
+# without any of the special case adding.
+
+             [setq(5, sub(mul(default(%0/population, 1),
+                             default(%0/needed-[makeattr(%1)], 0)),
+                            default(%0/ac-[makeattr(%1)], 0)))]
+              [switch(1, lte(%q5, 0), 0, %q5)])]
+-
+&fold-add-nums #50=[add(%0, %1)]
+-
+# isclothing(<currency>)
+# 
+# Returns a 1 if the dbref of the currency is clothing, and a 0 if not
+# Returns #-1 INVALID CURRENCY OR DBREF
+# Returns #-3 NO PARENT SET FOR CURRENCY
+
+&function-isclothing #50=
+ [setq(0, isdbref(%0))]
+ [setq(1, iscurrency(%0))]
+ [switch(1, not(or(%q0, %q1)), #-1 INVALID CURRENCY OR DBREF,
+            %q0, hastag(%0, clothing),
+            %q1, switch(0, isdbref(paccount(%0)),
+                           #-3 NO PARENT SET FOR CURRENCY,
+                           hastag(paccount(%0), clothing)))]
+-
+# isweaponry(<currency>)
+# 
+# Returns a 1 if the dbref of the currency is a weapon, and a 0 if not
+# Returns #-1 INVALID CURRENCY OR DBREF
+# Returns #-3 NO PARENT SET FOR CURRENCY
+
+&function-isweaponry #50=
+ [setq(0, isdbref(%0))]
+ [setq(1, iscurrency(%0))]
+ [switch(1, not(or(%q0, %q1)), #-1 INVALID CURRENCY OR DBREF,
+            %q0, hastag(%0, weapon),
+            %q1, switch(0, isdbref(paccount(%0)),
+                           #-3 NO PARENT SET FOR CURRENCY,
+                           hastag(paccount(%0), weapon)))]
+
+-
+&filter-is-food #99=
+  [isfood(%0)]
+-
+&filter-is-clothing #99=
+ [isclothing(%0)]
+-
+&filter-is-weaponry #99=
+ [isweaponry(%0)]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

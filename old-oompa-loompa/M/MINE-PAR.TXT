@@ -1,0 +1,38 @@
+@create PARENT: Mine
+@lock PARENT: Mine=#3490
+@set PARENT: Mine=WIZARD
+@set PARENT: Mine=!NO_COMMAND
+@set PARENT: Mine=HALT
+&CREDITS PARENT: Mine=Coded by D'derix@Aramut's MUSH
+&DEARM PARENT: Mine=$disarm mine:@emit The red light on the mine deactivates, as %n disarms the mine.;&status me=disarmed
+&DESTROY PARENT: Mine=@wait %0=@dol lexits(here)=@lock ##=mine;@wait %0=@dol lcon(here)=@set ##=fixed;@wait %0=@dol lcon(here)=@set ##=gagged;@wait %0=@dol entrances(here)=@lock ##=mine;@wait [add(%0,2)]=@nuke me;@wait [add(%0,2)]=@nuke me;@wait %0=@dol lexits(here)=@parent ##=#3470;@wait %0=@dol entrances(here)=@switch [type(##)]=EXIT,{@parent ##=#3564};@wait %0=&olddesc here=[get(here/rdesc)];@wait %0=&rdesc here=This room has been damaged by a high power explosive device.  There are burn marks on the wall, and a few broken items on the floor, along with dead bodies of people who were in here when it went off.
+@AHEAR PARENT: Mine=@swi [v(status)]=armed,{@emit %n walks in, and triggers a mine! There is a large explosion, causing major damage, and everyone in the room dies!;@wait 2=@dol lexits(here)=@lock ##=mine;@wait 2=@dol lcon(here)=@set ##=fixed;@wait 2=@dol entrances(here)=@lock ##=mine;@wait 2=@dol lcon(here)=@set ##=gagged;@wait 4=@nuke me;@wait 4=@nuke me;@wait 2=@dol lexits(here)=@parent ##=#3470;@wait 2=@dol entrances(here)=@parent ##=#3564;@wait %0=&olddesc here=[get(here/rdesc)];@wait 2=&rdesc here=This room has been damaged by a high power explosive device.  There are burn marks on the wall, and a few broken items on the floor, along with dead bodies of people who were in here when it went off.;@wait 2=@dol lcon(here)=@unlock ##}
+@LISTEN PARENT: Mine=* has arrived*
+&SELF_DESTRUCT_SEQ PARENT: Mine=@wait %0=@emit The mine beeps the final beep and detonates.  There is a large explosion causing major damage.;@tr me/destroy=%0
+&DESTRUCT_MINE PARENT: Mine=$destruct mine *:@emit Mine destruct sequence activated.  You have %0 seconds untill detonation.  This process is unstoppable.;&status me=self destruct;@tr me/self_destruct_seq=%0
+&ARM_MINE PARENT: Mine=$arm mine:&status me=armed;@emit The mine emits a small beep, and a red light activates, indicating that the mine is now armed.
+&LAYMINE PARENT: Mine=$lay mine:&status me=layed;@tel loc(%#);@wait 1=@emit %n lays a mine.
+
+@create PARENT: Outside Mine Exit
+@link PARENT: Outside Mine Exit=#86
+@lock/Basic PARENT: Outside Mine Exit=#3469
+@set PARENT: Outside Mine Exit=NO_COMMAND
+&CREDITS PARENT: Outside Mine Exit=Coded by D'derix@Aramut's MUSH
+@OSUCCESS PARENT: Outside Mine Exit=manages to push through the debris blocking the doorway.
+@SUCCESS PARENT: Outside Mine Exit=You manage to push through the debris blocking the doorway.
+@FAILURE PARENT: Outside Mine Exit=There is too much debris blocking the doorway!
+
+@create PARENT: Destroyed Entrance
+&CREDITS Mine Parent=Coded by D'derix@Aramut's MUSH
+@FAILURE PARENT: Destroyed Entrance=The door is blocked by a pile of debris.
+@OFAILURE PARENT: Destroyed Entrance=tries to push through the debris blocking [name(me)], but fails.
+@SUCCESS PARENT: Destroyed Entrance=You manage to push through the debris blocking [name(me)].
+@OSUCCESS PARENT: Destroyed Entrance=manages to push through the debris blocking [name(me)].
+@ODROP PARENT: Destroyed Entrance=pushes through the debris, and enters from [name([home(me)])]
+
+@create PARENT: Destroyed Exit
+&CREDITS Mine Parent=Coded by D'derix@Aramut's MUSH
+@FAILURE PARENT: Destroyed Exit=You are dead and can't move!
+@ODROP PARENT: Destroyed Exit=pushes through the debris, and enters from [name([home(me)])].
+@SUCCESS PARENT: Destroyed Exit=You manage to push through the debris blocking the door.
+@OSUCCESS PARENT: Destroyed Exit=manages to push through the debris blocking the door.

@@ -1,0 +1,24 @@
+@create Sub-Micro Terminal Parent
+@link Sub-Micro Terminal Parent = #64
+@set Sub-Micro Terminal Parent = LINK_OK
+@set Sub-Micro Terminal Parent = VISUAL
+@set Sub-Micro Terminal Parent = ROYALTY
+&COMMS Sub-Micro Terminal Parent=$shelp:@pe %#=[name(me)]%r%rSub Create <Filename>%t%t-%bCreates file named <Filename>%rSub Write <File>=<Text>%t%t-%bWrites Text under file.%rSub View <Filename>%t%t-%bViews current Files text.%rSub Del <Filename>%t%t-%bDeletes <File>%rSub List%t%t%t-%bList All Files available.%rAddaf <File>=<Text>%t%t-%bAdds more text after the other.%rAddbe <File>=<Text>%t%t-%bAdds more Text before your other text.%rSub Undel <File>%t%t-%bUndeletes File if it has been purged already.%rSub Purge <File>%t%t-%bPurges Certian File that hasn't been deleted.%rPurge All%t%t%t-%bPurges Every File Thats been deleted.%rDeleted Files%t%t%t-%bShows the files that are deleted and cab be undeleted.%rSub Owners%t%t%t-%bShowswho owns a Sub-Micro Terminal.%rRemote List <Player>%t%t-%bView a name from sub owners view files they have.%rRemote View <Player>=<File>%t-%bViews the Players selected file.%rDownload <Player>=<File>%t-%bDownloads a file from someone else to you.
+&SUBOWNERS Sub-Micro Terminal Parent=$sub owners:@swi [lattr(#95/#*)]=,{@pe %#=No body Owns a Sub-Micro Terminal.},{@pe %#=The Following People Have a Sub-Micro Terminal.%r%r[iter(lattr(#95/#*),[name(##)])]%r%rNOTE: You cna only download files from people who have Terminals.}
+&DELFILES Sub-Micro Terminal Parent=$deleted Files:@swi [match(v(del),%0)]=0,{@pe %#=There are no Deleted Files.},{@pe %#=The Following Are Deleted:%r%r[get(me/del)]}
+&PURGE Sub-Micro Terminal Parent=$sub purge *:@swi [match(v(files),%0)]=0,{@pe %#=That file Doesn't Exist.},{@dolist [v(files)]={&file_## me=};&files me;@pe %#=File Purged.}
+&PURGEALL Sub-Micro Terminal Parent=$purge all:@dolist [v(del)]={&file_## me};&del me;@pe %#=Purge Completed.
+&UNDELETE Sub-Micro Terminal Parent=$undel file *:@swi [match(v(del),%0)]=0,{@pe %#=File Hasn't Been Deleted.},{&files me=[v(files)] [extract(v(del),match(v(del),%0),1)];&del me=[remove(v(del),extract(v(del),match(v(del),%0),1))];@pe %#=File Undelete Successful.}
+&ADDBEFORE Sub-Micro Terminal Parent=$addbe *=*:@swi [match(v(files),%0)]=0,{@pe %#=File Doesn;t Exist %N},{&file_%0 me=%1 [v(file_%0)];@pe %#=Information Added Before.}
+&ADDAFTER Sub-Micro Terminal Parent=$addad *=*:@swi [match(v(files),%0)]=0,{@pe %#=File Doesn't Exist %N},{&file_%0 me=[v(file_%0)] %1;@pe %#=Information Added After.}
+&LIST Sub-Micro Terminal Parent=$sub list:@pe %#=[name(me)] File List:%r[ansi(hb,repeat(~*,39))]%r[iter(v(files),[##], ,%r)]%r[ansi(hb,repeat(~*,39))]
+&DELETE Sub-Micro Terminal Parent=$sub del *:@swi [match(v(files),%0)]=0,{@pe %#=File Doesn't Exist.},{&del me=[v(del)] [extract(v(files),match(v(files),%0),1)];&files me=[remove(v(files),extract(v(files),match(v(files),%0),1))];@pe %#=File Deleted.}
+&CREATE Sub-Micro Terminal Parent=$sub create *:@swi [match(ucstr(v(files)),ucstr(%0))]=0,{&files me=[v(files)] %0;@pe %#=[v(0)] File Created.},{@pe %#=File Already Exists.}
+&VIEW Sub-Micro Terminal Parent=$sub view *:@swi [match(v(files),%0)]=0,{@pe %#=File Doesn't Exist %N},{@pe %#=[ansi(hb,repeat(~*,39))]%rFilename: [extract(v(files),match(v(files),%0),1)]%r[ansi(hb,repeat(~*,39))]%r[v(file_%0)]%r[ansi(hb,repeat(~*,39))]
+&WRITE Sub-Micro Terminal Parent=$sub write *=*:@swi [match(v(files),%0)]=0,{@pe %#=File Doesn't exist, %N},{&file_%0 me=[v(file_%0)]%1;@pe %#=Text Written Down.}
+&REMLIST Sub-Micro Terminal Parent=$remote list *:@swi [get(#95/[num(*%0)])]=, {@pe %#=%0 does not have a Sub-Micro Terminal.}, {@pe %#=[u(fun_remlist,#$)]}
+&FUN_REMLIST Sub-Micro Terminal Parent=%r[ansi(hb,repeat(~*,39))]%r[iter([switch(get(%0/files),#-1 *,File Not Accessable., #$)],##%r)]%r[ansi(hb,repeat(~*,39))]
+&REMVIEW Sub-Micro Terminal Parent=$remote view *=*:@swi [get(#95/[num(*%0)])]=, {@pe %#=%0 does not have a Sub-Micro Terminal.}, {@pe %#=[u(fun_remview,#$,%1)]}
+&FUN_REMVIEW Sub-Micro Terminal Parent=[switch(member(lcstr(get(%0/files)),lcstr(%1)),0,File Does not exist., [ansi(hb,repeat(~*,39))]%rFilename: [grab(get(%0/files),%1)]%r[ansi(hb,repeat(~*,39))]%r[switch(get(%0/file_%1), #-1 *,File Not Accessable., #$)]%r[ansi(hb,repeat(~*,39))]
+&DOWNLOAD Sub-Micro Terminal Parent=$download *=*:@swi [get(%#/[num(*%0)])]=, {@pe %#=%0 does not have a Sub-Micro Terminal.}, {@switch [member(lcstr(get(#$/files)) ,lcstr(%1))]=0, {@pe %#=No such file.}, {&file_%1 me=[get(#$/file_%1)];&files me=[v(files)]%b[grab(lcstr(get(#$/files)),lcstr(%1))];@pe %#=File Downloaded.}
+@DESCRIBE Sub-Micro Terminal Parent=You see a Sub-Micro Terminal.%rCoded By Tari'Vor%rType' SHELP' for commands.

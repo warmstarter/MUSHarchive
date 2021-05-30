@@ -1,0 +1,59 @@
+Bar Parent(#1227VYn)
+Type: THING Flags: VISUAL PARENT_OK NO_COMMAND
+This Eisen's Bar/Bartender Parentable. Just a little thing you might find
+useful. Anyway, to get started, @create an object and @parent it to the Bar.
+Then type `bsetup' to get started.%rAny comments or suggestions, @mail Eisen !
+:)
+Owner: Paranoia  Key: *UNLOCKED* Barter Units: 1
+Zone: *NOTHING*
+Powers:
+DO_ORDER: $order *:@sel [match([lattr(me/drink_*)],drink_%0)]=0,{@pemit %# =
+The bartender shrugs, "Sorry, I don't know that drink, Maybe you should have a
+look at our drink list (type `list')";@oemit here/%#=[name(%#)] asks the
+bartender for %0, but since the drink is not on the bar list, [subj(%#)] is
+turned down.},{@pemit %#=The bartender turns to his bottles and after a few
+moments returns with your order. He smiles and says, "Here you are, your %0".;
+@oemit here/%#=The bartender brings [name(%#)] the ordered %0.}
+DO_UNAUTH: $unauth *:@sel [u(authcheckk,%#)]=0,@pemit %#=You are not authorized
+to do that!,{&access me=[remove([v(access)],[num(pmatch(%0))])];@pemit %#=You
+removed [name(%0)] from the access list.}
+DO_ADD_AUTH: $auth *:@sel [u(authcheck,%#)]=0,@pemit %# = You are not
+authorized to do that!,{@sel [type(pmatch(%0))]=player,{@pemit %#=You added
+[name(pmatch(%0))] to the authorization list;&access me=[v(access)]
+[num(pmatch(%0))];@lock me/access=me},{@pemit %#=%0 is not a valid player!}}
+DO_DESCRIBEDRINK: $desc* *:@sel [match([lattr(me/drink_*)],drink_%1)]=0,
+{@pemit %#=The bartender says, "Sorry, we don't carry %1"},{@pemit %#=The
+bartender says, "Well, what can I tell you about %1? Essentally, I could say:
+[v(drink_%1)]}
+DO_ADD_DRINK: $add *=*:@sel [u(authcheck,%#)] =0,@pemit %#=The bartender shrugs
+and says, "Sorry, we will take these requests only from special customers.",
+{&drink_%0 me=%1;@pemit %#=You request the bartender to add the drink %0 to the
+menu with the following description:%r%1%RThe bartender is happy to fullfill
+your wish.;@oemit me/%#=[name(%#)] asks the bartender to add %0 to the bar
+menu.}
+DO_LIST: $list:@pemit %#=You lean at the bar and say, "Hey, barkeep! What do
+you serve here?"%rThe bartender smiles at you and says,"[switch([get(%#/sex)],
+male,Noble Sir,female,My Lady,GentlePerson)], we offer the following drinks for
+consumption:"%r;@dolist [lattr(me/drink_*)] = {@pemit %# = [mid(##,6,20)]}
+DO_BMENU: $bmenu:@pemit %# = %r[repeat(=,78)]%r[center([ansi(h,BAR COMMANDS)],
+78)]%r%rLIST%t%t%t%tLists all available drinks%rORDER <DRINK>%t%T%tOrders
+drink%rDESCRIBE <DRINK>%t%tDescribes the contents and taste of the drink%rADD
+<DRINK>=<DESCRIPTION>%tAdds a drink with description to the list.%r%t%t%t%tFor
+special guests only!%rAUTH <NAME>%T%T%TAdds <NAME> to the special guest
+list%rUNAUTH <NAME>%T%T%tRemoves <NAME> from list%R%R[repeat(=,78)]
+INSPECT_BAR: $ins* bar*:@pemit %#=You take a closer look at the bar left of the
+entrance. A long wooden surface is neatly polished and shines in the dim light.
+A bartender works behind the bar in is sorting hundreds of bottles in front of
+a huge glass mirror. Most of the labels you cannot read and of those you can
+read, you know only a few.%rFeeling your glances on his back the bartender
+turns around, "Hello, my name is Jack, what is your toxin?" (Type `[ansi(h,
+bmenu)]' for a a list of bar commands)
+AUTHCHECK: [sign([match([v(access)],%0)]
+CREDITS: Coded by Eisen
+DO_SETUP: $bsetup:&credits me=Coded by Eisen !;@set me/credits=visual;@lock
+me/credits=#2537;@pemit/silent %#=The bar is ready for service. Type [ansi
+(h,BMENU)] for the list of commands.
+No exits.
+Home: Tavern -- Inn of the Silver Talon -- Highridge(#27RJMs)
+Location: Free Code Room
+_______________________________________________________________________________

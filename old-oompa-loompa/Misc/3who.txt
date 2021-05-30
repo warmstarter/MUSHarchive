@@ -1,0 +1,21 @@
+@create locator
+
+@set locator=!no_command
+
+&cmd-3who locator = $3who:@pemit v(#)=[u(fmt-begin_line)]%r[u(fmt-list_online,lwho())]
+
+&fmt-begin_line locator =PlayerName%b%b OnFor Idle[space(3)]PlayerName%b%b OnFor Idle[space(3)]PlayerName%b%b OnFor Idle
+
+&fmt-space_digit locator =[switch(lte(v(0),9),1,%b)][v(0)]
+
+&fmt-two_digit locator =[switch(lte(v(0),9),1,0)][v(0)]
+
+&fmt-one_online locator =[mid([mid([name(v(0))][space(12)],0,12)] [u(fmt-space_digit,trunc(div(conn(v(0)),3600)))]:[u(fmt-two_digit,trunc(div(mod(conn(v(0)),3600),60)))]%b%b[u(fmt-space_digit,switch(1,gt(idle(v(0)),3600),[trunc(div(idle(v(0)),3600))]h,gt(idle(v(0)),60),[trunc(div(idle(v(0)),60))]m,[idle(v(0))]s))][space(26)],0,26)]
+
+&fmt-list_online locator=[switch(words(v(0)),0,[u(fmt-end_line)],1,[u(fmt-one_online,v(0))]%r[u(fmt-end_line)],2,[u(fmt-one_online,first(v(0)))][u(fmt-one_online,rest(v(0)))]%r[u(fmt-end_line)],3,[u(fmt-one_online,first(v(0)))][u(fmt-one_online,first(rest(v(0))))][u(fmt-one_online,rest(rest(v(0))))]%r[u(fmt-end_line)],[u(fmt-one_online,first(v(0)))][u(fmt-one_online,first(rest(v(0))))][u(fmt-one_online,first(rest(rest(v(0)))))]%r[u(fmt-list_online,rest(rest(rest(v(0)))))])]
+
+@@ Below fixed by MUSHCODE.COM 8/23/2002 @@
+
+&fmt-end_line locator=There are [words(lwho())] player[switch(gt(words(lwho()),1),1,s)] connected.
+
+think Type '3who' to see the global.

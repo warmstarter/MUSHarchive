@@ -1,0 +1,100 @@
+###################################################################
+#                     COMBAT LITE FOR ANIMALS                     #
+#                                                                 #
+# These commands and attributes make sure that animals can        #
+# successfully defend themselves against players.  Where the      #
+# Generic Animal is #2089.  Note, animal's dbref is often set     #
+# as %q6 because of oddities in the way the tag functions dealt   #
+# with the word 'me' when it came from an animal object instead   #
+# of a player.                                                    #
+#                                                                 #
+# Stephanie Dray                                                  #
+#                                                                 #
+###################################################################
+
+@power #2089=!immutable
+-
+
+@tag #2089=animal combat quiet_wield wiz_groupable free_energy oocsay
+
+-
+
+&combat-wielded #2089=#4303
+-
+
+&aextract #2089=
+  @set %1=linewrap;
+  @lock %1=%2;
+  @set %1=monitor;
+  @set %1=wizard;
+  @sex %1=[first(shuffle(male female))];
+  @wait 0=@tr %1/trig-hostile=[u(u-pick-player, loc(%1))]
+-
+# %0 = attacker's dbref
+# %1 = dbref of attacker's weapon
+# %2 = Bonus, Success, Failure, etc.
+
+&aattack #2089=
+ @tr me/trig-hostile=%0
+-
+# %0 = attacker's dbref
+# %1 = attacker's weapon
+ 
+&aengage #2089=
+ @tr me/trig-hostile=%0
+-
+
+# %0 = the player to attack
+&trig-hostile #2089=
+
+#-------------------------------------------------------------------------
+# %q0 = what weapon is the player wielding 
+# %q1 = what weapon is the animal wielding
+# %q2 = successes of player defender
+# %q3 = successes of animal attacker
+# %q4 = random body location to hit
+# %q5 = type of damage to cause
+# %q6 = how much damage to cause
+#-------------------------------------------------------------------------
+ 
+ think setq(0, u(#12/u-weapon-wielded, num(me)));
+ think setq(1, u(#12/u-weapon-wielded, %0));
+ think setq(2, u(#12/u-attack-success-defender, %0, %q1));
+ think setq(3, u(#12/u-attack-success-attacker, num(me), %q0));
+ think setq(3, sub(%q3, %q2));
+ think setq(4, first(shuffle(hitlocs())));
+ think setq(5, default(%q1/damage-class, bashing));
+ think setq(6, u(#12/u-damage-amount, num(me), %q0, %q3));
+
+ @select [or(hastag(%!, dead), hastag(%!, shock))]
+         [gt(%q3, 0)]
+         [xor(hastag(%!, fly), hastag(%0, fly))]=
+  1??, {@@ do nothing.  I'm dead or in shock. Or the target is in the air.@@},
+  ??1, {@@ do nothing. target is in the air and I am not..@@},
+  ?0?, {@fo me=pose tries to attack [name(%0)], but fails.},
+  ?1?, {@fo me=pose attacks [name(%0)] with %p [goodname(%q0)] and 
+              [u(#12/u-verb-damage-class, %q0, %q5)] [name(%0)]'s 
+              %q4!;
+       @damage %0/%q4=%q6 x %q5 by %!}
+
+-
+# u(u-pick-player, <location of the animal>)
+
+&u-pick-player #2089=
+[first(shuffle(filter(filter-players-only, lcon(%0))))]
+
+-
+&filter-players-only #2089=
+ [hastype(%0, player)]
+
+-
+@power #2089=immutable
+-
+
+&adeath #2089=@dolist lcon(%!)=drop ##;@unlock %!
+
+
+
+
+
+

@@ -1,0 +1,24 @@
+@create Player Statistics Device
+@link Player Statistics Device=#3
+@lock Player Statistics Device=#3
+@set Player Statistics Device=INHERIT
+@set Player Statistics Device=WIZARD
+&COUNT_NEUTRAL Player Statistics Device=1
+&COUNT_BUILDER Player Statistics Device=1
+&COUNT_INDEPENDENT Player Statistics Device=18
+&COUNT_GUESTS Player Statistics Device=14
+&COUNT_OCAMPAN Player Statistics Device=37
+&COUNT_VIDIIAN Player Statistics Device=30
+&COUNT_BLACK_LANCE Player Statistics Device=59
+&COUNT_KAZON Player Statistics Device=64
+&COUNT_NONE Player Statistics Device=82
+&COUNT_FEDERATION Player Statistics Device=74
+&COUNT_DELTAMUSH Player Statistics Device=11
+&COUNT_TALLAXIAN Player Statistics Device=53
+&COUNT_TOTAL Player Statistics Device=445
+&COUNT_UNKNOWN Player Statistics Device=1
+&PLAYER_LIST Player Statistics Device=[lsearch(all,type,player)]
+@VA Player Statistics Device=$statistics:@pemit %#=Calculating player statistics...;@dolist lattr(me/COUNT_*)=&## me;@dolist u(player_list)={&COUNT_[edit(get(##/empire),%b,_)] me=[add(v(COUNT_[edit(get(##/empire),%b,_)]),1)];&COUNT_TOTAL me=[add(v(COUNT_TOTAL),1)]};@wait 0=@pemit %#=Statistics calculated. Type `summary'.
+@VB Player Statistics Device=$summary:@dolist lattr(me/COUNT_*)=@pemit %#=<[after(##,COUNT_)]> = [v(##)] - [mul(fdiv(v(##),v(COUNT_TOTAL)),100)]%%
+@DESCRIBE Player Statistics Device=Type `statistics' to calculate the Player Statistics.%rType `summary' to view them after they have been calculated.
+&EMPIRES Player Statistics Device=None|Ocampan|Kazon|Vidiian|Q-Continuum|Tallaxian|Federation|Black Lance

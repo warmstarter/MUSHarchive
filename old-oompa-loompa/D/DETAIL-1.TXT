@@ -1,0 +1,26 @@
+@create Detail Command
+@link Detail Command=#2
+@lock Detail Command=*Jesse
+@set Detail Command=INHERIT
+@set Detail Command=WIZARD
+@VA Detail Command=$det* *:@pemit %#=[switch(type(*%1),PLAYER,u(det,num(*%1)),%1 does not seem to exist.)]
+&LINE Detail Command=[repeat(-,79)]
+&DET Detail Command=[u(line)]%r[u(label,Name:)][u(field,[name(%0)] [u(showflags,%0)])][u(label,Alias:)][u(field,get(%0/alias))]%r[u(label,Sex:)][u(field,get(%0/sex))][u(label,Race:)][u(field,get(%0/race))]%r[u(label,Class:)][u(field,[get(%0/class)] <[get(%0/rank)]>)]%r[switch(u(seeconn,%#,%0),1,[u(label,On for:)][u(field,{[trim(u(onfor,%0))], idle [u(idle,%0)]})],[u(label,Last on:)][u(field,u(laston,%0))])]%r[switch(u(see_all,%#),1,[u(label,Lastsite:)][u(field,get(%0/lastsite))]%r)][u(label,Org:)][u(field,get(%0/organization))]%r[u(label,Division:)][u(field,get(%0/division))]%r[u(label,Empire:)][u(field,get(%0/empire))]%r[u(label,Idle:)][u(indlabel,u(%0/idle))]%r[u(label,Away:)][u(indlabel,u(%0/away))]%r[u(label,Info:)][u(indlabel,u(%0/info))]%r[u(line)]
+&SHOWFLAGS Detail Command=[trim([setq(0,1)][iter(v(flaglist),switch(r(0),1,switch(hasflag(%0,##),1,<##>[setq(0,0)])))])]
+&FLAGLIST Detail Command=Wizard Royalty
+&LABEL Detail Command=[ljust(%0,10)]
+&FIELD Detail Command=[ljust(%0,29)]
+&INDLABEL Detail Command=[indent(10,65,%0)]
+&CAN_SEE Detail Command=[or(u(see_all,%0),not(hidden(%1)))]
+&SEE_ALL Detail Command=[or(or(hasflag(%0,wizard),hasflag(%0,royalty)),haspower(%0,see_all))]
+&ONFOR Detail Command=[switch(gt(conn(name(%0)),86400),1,[u(days,conn(name(%0)))]d)] [u(hours,conn(name(%0)))]:[u(minutes,conn(name(%0)))]
+@IDLE Detail Command=[switch([setq(0,idle(name(%0)))][u(idlescale,r(0))],seconds,[r(0)]s,minutes,[div(r(0),60)]m,hours,[div(r(0),3600)]h,days,[div(r(0),86400)]d)]
+&RDISPLAY Detail Command=[setq(0, switch(grab(v(lengths),%0 *,|),,1,rest(#$)))][switch(gt(strlen(%1),r(0)),1,right(%1,r(0)),rjust(%1,r(0)))]
+&SEECONN Detail Command=[and(hasflag(%1,connected),u(can_see,%0,%1))]
+&IDLESCALE Detail Command=[switch(lt(%0,60),1,seconds,switch(lt(%0,3600),1,minutes,switch(lt(%0,86400),1,hours,days)))]
+&MINUTES Detail Command=[switch(lt(div(mod(%0,3600),60),10),1,0[div(mod(%0,3600),60)],div(mod(%0,3600),60))]
+&HOURS Detail Command=[switch(lt(div(mod(%0,86400),3600),10),1,0[div(mod(%0,86400),3600)],div(mod(%0,86400),3600))]
+&DAYS Detail Command=[div(%0,86400)]
+&DISPLAY Detail Command=[setq(0, switch(grab(v(lengths),%0 *,|),,1,rest(#$)))][switch(gt(strlen(%1),r(0)),1,left(%1,r(0)),ljust(%1,r(0)))]
+&LENGTHS Detail Command=onfor 9|idle 4
+&LASTON Detail Command=[get(%0/last)]

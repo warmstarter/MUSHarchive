@@ -1,0 +1,26 @@
+@create Power Plant Parent
+@lock/Use Power Plant Parent=canuse/1
+@set Power Plant Parent = WIZARD
+&SYSTEM_1 Power Plant Parent=#1295
+&CMD_UNSET_POWER Power Plant Parent=$unset power *:th [switch([hasflag(%#,Wiz)],1,[switch([hasattr(me,POWER_%0)],1,[wipe(me/power_%0)][pemit(%#,No longer able to send power to [name(%0)] %(%0%))],0,[pemit(%#,Not currently sending power to there.)])],0,[pemit(%#,Permission denied.)])]
+&CMD_SET_MAX_REACTOR Power Plant Parent=$set max reactor *:th [switch([hasflag(%#,Wiz)],1,[set(me,max_reactor:%0)][pemit(%#,[name(me)] can now generate up to %0 energy.)],0,[pemit(%#,Permission denied.)])]
+&FUN_SET_POWER Power Plant Parent=[set(me,power_%0:0)][pemit(%#,[name(me)] can now provide power to [name(%0)] %(%0%))]
+&CMD_SET_POWER Power Plant Parent=$set power *:th [switch([hasflag(%#,Wiz)],1,[switch([strmatch([zone([loc(%0)])],[zone([loc(me)])])],1,[u(fun_set_power,%0)],0,[pemit(%#,Error: Zones do not match.)])],0,[pemit(%#,Permission denied.)])]
+&SYSTEMS Power Plant Parent=1
+&CREDITS Power Plant Parent=Dave@GalacticMUSH (davemilford@home.com)
+&VERSION Power Plant Parent=2.1
+&FUN_CHECK_POWER Power Plant Parent=[iter([lattr(me/POWER_*)],[set(me,REMAINING_POWER:[sub([v(remaining_power)],[u(##)])])])]
+&FUN_TRANSFER_POWER Power Plant Parent=[set(me,POWER_[v(SYSTEM_%0)]:%1)][pemit(%#,System %0 %([name([v(SYSTEM_%0)])]%) now has %1 power.)][set(me,REMAINING_POWER:[v(reactor_setting)])][u(fun_check_power)][u([v(system_%0)]/power_sweep)]
+&FUN_ISSYSTEM Power Plant Parent=[hasattr(me,SYSTEM_%0)]
+&CMD_POWER Power Plant Parent=$power *=*:th [switch([u(fun_issystem,%0)][lte(%1,[add([v(remaining_power)],[v(POWER_[v(SYSTEM_%0)])])])][isnum(%1)],111,[switch([gte(%1,0)],1,[u(fun_transfer_power,%0,%1)],0,[pemit(%#,Number must be above 0.)])],011,[pemit(%#,That is not a system.)],101,[pemit(%#,You do not have that much free power.)],001,[pemit(%#,That is not a system.)],[pemit(%#,Argument must be a number.)])]
+&CURRENT_POWER_NUM Power Plant Parent=1
+&CMD_SET_REACTOR Power Plant Parent=$set reactor *:th [switch([lte(%0,[v(max_reactor)])][gte(%0,0)],01,{[pemit(%#,The reactor cannot produce that much output.%rPlease chose a number between 0 and [v(max_reactor)].)]},10,[pemit(%#,Reactor setting must be above 0.)],00,[pemit(%#,Reactor setting must be above 0.)],11,{[u(fun_set_reactor,%0)]})]
+&REMAINING_POWER Power Plant Parent=0
+&FUN_CALC_POWER Power Plant Parent=[set(me,REMAINING_POWER:[sub([v(remaining_power)],%0)])]
+&TYPE Power Plant Parent=Type VI
+&OWNER Power Plant Parent=Administration Power Corp.
+@DESCRIBE Power Plant Parent=[set(me,REMAINING_POWER:[v(reactor_setting)])][set(me,SYSTEMS:)]%b[ansi(v(border_color),[repeat(_,74)]%r/)]%b[ljust([ansi(v(name_color),[v(type)] Power Plant)],73)][ansi(v(border_color),\\%r|[repeat(-,74)]|%r|)]%b[ljust([ansi(v(title_color),Owner:)] [v(owner)],73)][ansi(v(border_color),|%r|)]%b[ljust([ansi(v(title_color),Maximum Output:)] [v(max_reactor)],73)][ansi(v(border_color),|%r|[repeat(-,74)]|%r|)]%b[ljust([ansi(v(title_color),Current Output:)] [v(reactor_setting)]%b%([mul([fdiv([v(reactor_setting)],[v(max_reactor)])],100)]%%%),73)][ansi(v(border_color),|%r|)]%b[ljust([ansi(v(title_color),Powering:)],73)][if([lattr(me/POWER_*)],{[ansi(v(border_color),|%r|%b)][iter([lattr(me/POWER_*)],[set(me,SYSTEM_[v(current_power_num)]:[edit(##,POWER_,)])][ljust({[ansi(v(subtitle_color),[v(current_power_num)]:)] [name([edit(##,POWER_,)])]},39)][ljust([ansi(nc,[u(##)])],4)][rjust([ansi(v(border_color),|%r|)],34)][u(fun_calc_power,[u(##)])][set(me,SYSTEMS:[v(systems)] [v(current_power_num)])][set(me,CURRENT_POWER_NUM:[inc([v(current_power_num)])])])]},{[ansi(v(border_color),|%r|%b)][ljust(None.,73)][ansi(v(border_color),|%b|)]})][ansi(v(border_color),[repeat(-,74)]|%r|)]%b[ljust([ansi(v(title_color),Remaining Power:)]%b[v(remaining_power)],73)][ansi(v(border_color),|%r\\[repeat(_,74)]/)][set(me,CURRENT_POWER_NUM:1)]
+@set Power Plant Parent/DESCRIBE=no_command visual
+&MAX_REACTOR Power Plant Parent=250
+&FUN_SET_REACTOR Power Plant Parent=[set(me,reactor_setting:%0)][pemit(%#,Reactor is now producing %0 energy.%rReactor output now at [mul([fdiv([v(reactor_setting)],[v(max_reactor)])],100)]%%.)][set(me,REMAINING_POWER:%0)][u(fun_check_power)][switch([lte([v(remaining_power)],0)],1,[iter([lattr(me/POWER_*)],[set(me,##:0)])][pemit(%#,Global energy shortage.  Resetting allocations.)][set(me,remaining_power:%0)])]
+&REACTOR_SETTING Power Plant Parent=0

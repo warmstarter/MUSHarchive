@@ -1,0 +1,21 @@
+@create Corpse of Parent
+@link Corpse of Parent=*[owner(me)]
+@lock Corpse of Parent==*[owner(me)]
+@set Corpse of Parent=!NO_COMMAND
+@set Corpse of Parent=ENTER_OK
+@set Corpse of Parent=HALT
+@set Corpse of Parent=WIZARD
+@set Corpse of Parent=ROYALTY
+&DEVFLAGS Corpse of Parent=corpse
+&STUN_PARENT Corpse of Parent=#857
+@AUSE Corpse of Parent=@dolist lcon(me)=@tel ##=[loc(%#)];@tel me=[v(garbage_room)];@destroy me
+@OUSE Corpse of Parent=buries [name(me)].
+@USE Corpse of Parent=You bury [name(me)].
+&GARBAGE_ROOM Corpse of Parent=#0
+&DEAD_ROOM Corpse of Parent=#854
+&KILL_PERSON Corpse of Parent=@name me=Corpse of [name(%0)];@set me=enter_ok;@pemit %0=You have been killed!;@oemit %0=[name(%0)] has been killed!;@dolist lcon(%0)=@switch [hasdevflag(##,nosteal)]=0, @tel ##=me;@tel me=[loc(%0)];@tel %0=[v(dead_room)];&VICTIM_NAME me=[name(%0)];&VICTIM_NUM me=%0;&VICTIM_SUBJ me=[subj(%0)]
+&WIZ_HELP Corpse of Parent=VICTIM_NAME is the name of the victim. VICTIM_SUBJ is subj(victim). WEAPON_STRING is something like "phaser blast", or "disruptor blast" etc.
+&HELP Corpse of Parent=[ljust(%0,30)] - [indent(33,45,{%1})]
+@DESCRIBE Corpse of Parent=The corpse of [v(victim_name)]. It looks like [v(victim_subj)] was killed by a [v(weapon_string)].%rCommands are:%r%r[u(help,get [after(name(me),Corpse of%b)],{Picks up the corpse.})]%r[u(help,drop [after(name(me),Corpse of%b)],{Drops the corpse.})]%r[u(help,get [after(name(me),Corpse of%b)]'s <item>,{Takes an item from the corpse.})]%r[u(help,give [after(name(me),Corpse of%b)]=<item>,{Puts an item in the corpse.})]%r[u(help,enter [after(name(me),Corpse of%b)],{Starts manipulating the corpse contents.})]%r[u(help,leave,{Stops manipulating the corpse contents.})]%r[u(help,use [after(name(me),Corpse of%b)],{Buries the corpse.})]
+&DEST_ROOM Corpse of Parent=#0
+&A_DESTROY Corpse of Parent=@nuke me

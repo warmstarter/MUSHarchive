@@ -1,0 +1,62 @@
+@create Jesse's Zone
+@link Jesse's Zone=here
+@lock Jesse's Zone==*[owner(me)]
+@lock/Zone Jesse's Zone==*[owner(me)]
+@set Jesse's Zone=INHERIT
+@set Jesse's Zone=LINK_OK
+@set Jesse's Zone=OPAQUE
+@set Jesse's Zone=WIZARD
+@set Jesse's Zone=SAFE
+@set Jesse's Zone=ROYALTY
+@set Jesse's Zone=MONITOR
+@DESCRIBE Jesse's Zone=[ansi(hb,----)] [edit(name(zone(me)),Zone,)][ansi(hb,[repeat(-,[sub(73,[sub([strlen(name(zone(me)))],5)])])])]%r[ansi(hc,[eval(me,desc-1)])]%r[ansi(hb,[repeat(-,79)])]%r%r[ansi(hb,%[)][ansi(hc,People)] [ansi(hb,%])] [squish([iter(lcon(me),switch(type(##),PLAYER,switch(idle(##),-1,,switch(hasflag(##,Dark),0,edit(name(##),Console,) [switch(hasflag(##,FIXED),1,(IC))] [switch(hasattr(##,CAPTION),1,{Brandishing: [get(##/CAPTION)]})] [ansi(hb,-)]))))])]%r[ansi(hb,%[)][ansi(hc,Objects)][ansi(hb,%])] [squish([iter(lcon(me),switch(type(##),THING,switch(hasflag(##,Dark),0,edit(name(##),Console,) [switch(hasflag(##,FIXED),1,(IC))] [switch(hasattr(##,CAPTION),1,{Brandishing: [get(##/CAPTION)]})] [ansi(hb,-)])))])][iter(v(Installed),[s(%r)][ansi(hc,There is a)] [ansi(g,edit(##,_,space(1)))] [ansi(hc,here.)])][iter([lexits(me)],[switch(hasflag(##,DARK),0,[ansi(r,[ljust(%r<[ucstr([extract([fullname(##)],2,1,;)])]>,8)] [ansi(hc,[ljust([name(##)],26)])][switch(hasflag(##,TRANSPARENT),1,[ansi(hg,{[before([name([loc(##)])],<<<)]})], ,%r)])])]
+&DESC-1 Jesse's Zone=There is no currect Description set. Remember to store the room description in &DESC-1, @set here=dark, and if you want people to see the destination of the exit, set exit TRANSPARENT.
+&INTERCOM-1 Jesse's Zone=$int *:@zemit %!=<Intercom> %n says, "%0"
+&OOC-1A Jesse's Zone=$ooc *:@emit [switch(mid(%0,0,1),:,[ansi(hg,%N)]%b[ansi(hr,[mid(%0,1,strlen(%0))])],;,[ansi(hg,%N)][ansi(hr,[mid(%0,1,strlen(%0))])],{[ansi(hg,%N)] [ansi(r,says ")][ansi(hr,%0)][ansi(r,")]})]
+@AENTER Jesse's Zone=@swi [xget(zone(me),security)]=1,{@swi [type(V(#))]=PLAYER,{@swi [or(strmatch([get(zone(me)/crew)] [get(zone(me)/guest)],*[v(#)]*),hasflag(%#,W))]=0,{@zemit [zone(me)]=[ansi(fhr,Intruder Alert!)] [ansi(hc,[class(V(#))])] [ansi(hr,[name(v(#))])] [ansi(hc,was last seen at)] [ansi(hr,[name(%l)])].;&intruders [zone(Me)]=[get([zone(me)]/intruders)] [v(#)];&intrudert [zone(me)]=[get(zone(me)/intrudert)]|[time()];&salert [zone(me)]=[ansi(fhr,Intruder Alert)]}}}
+@ASUCCESS Jesse's Zone=@switch [u(CrewAccess,%#)]=0,{&salert me=[ansi(hr,INTRUDER ALERT)];@zemit %!=[ansi(hr,=== INTRUDER ALERT === === INTRUDER ALERT ===)]%r[switch(type(%#),PLAYER,%n(%#[flags(%#)]) detected in [name(loc(%#))]([loc(%#)][flags(loc(%#))])!,%n(%#[flags(%#)]) owned by [name(owner(%#))]([owner(%#)][flags(owner(%#))]) detected in [name(loc(%#))]([loc(%#)][flags(loc(%#))])!)]%rAll security personnel please prepare for a possible combat situation.}
+&INTRUDER-1 Jesse's Zone=$intruder alert:@switch [u(CommandAccess,%#)]=0, {@pemit %#=[u(AccessDenied)]}, {@pemit %#=Initiating [ansi(hr,INTRUDER)] alert.;&salert me=[ansi(hr,INTRUDER ALERT)];@zemit %!=[ansi(hr,=== INTRUDER ALERT === === INTRUDER ALERT ===)]%rIntruder alert has been initiated by %n. Security personnel please prepare for a combat situation.}
+&RED-1 Jesse's Zone=$red alert:@switch [u(CommandAccess,%#)]=0, {@pemit %#=[u(AccessDenied)]}, {@pemit %#=Initiating [ansi(fhr,RED)] alert.;@zemit %!=[ansi(fhr,=== RED ALERT === === RED ALERT === === RED ALERT ===)]%rRed alert has been initiated by %n. All hands to battlestations!;&salert me=[ansi(fhr,RED ALERT)]}
+&BLUE-1 Jesse's Zone=$blue alert:@switch [u(CommandAccess,%#)]=0, {@pemit %#=[u(AccessDenied)]}, {@pemit %#=Initiating [ansi(hb,BLUE)] alert.;@zemit %!=[ansi(hb,=== BLUE ALERT ===)]%rBlue alert has been initiated by %n. All decks, prepare for atmospheric entry.;&salert me=[ansi(hb,BLUE ALERT)]}
+&YELLOW-1 Jesse's Zone=$yellow alert:@switch [u(CommandAccess,%#)]=0, {@pemit %#=[u(AccessDenied)]}, {@pemit %#=Initiating [ansi(hy,YELLOW)] alert.;@zemit %!=[ansi(hy,=== YELLOW ALERT === === YELLOW ALERT ===)]%rYellow alert has been initiated by %n. Please be prepared in the event that an emergency situation arises.;&salert me=[ansi(hy,YELLOW ALERT)]}
+&GREEN-1 Jesse's Zone=$green alert:@switch [u(CommandAccess,%#)]=0, {@pemit %#=[u(AccessDenied)]}, {@pemit %#=Initiating [ansi(hg,GREEN)] alert.;@zemit %!=[ansi(hg,=== GREEN ALERT ===)]%rGreen alert has been initiated by %n. Standing down from alert status.;&salert me=[ansi(hg,GREEN)]}
+&CREWACCESS Jesse's Zone=[or(or(member(v(crewlist),%0),member(v(commandlist),%0)),or(hasflag(%0,WIZARD),switch(get(%0/empire),Guests,1,0)))]
+&ACCESSDENIED Jesse's Zone=[ansi(r,ACCESS DENIED.)] That command is restricted to Command Personnel only.
+&COMMANDACCESS Jesse's Zone=[t(member(v(commandlist),%0))]
+&LIST_MOTD Jesse's Zone=$+motd:@pe %#=[ansi(hb,repeat(~*,39))]%r[v(motd)]%rType `+Motd' to see this message again.%r[ansi(hb,repeat(~*,39))]
+&SET_MOTD Jesse's Zone=$+setmotd *:@switch [get([v(room_parent)]/command)]=*%#*,{&motd me=%0;@pe %#=MOTD Changed.},{@pe %#=Access Denied, %N.}
+&CREW-LIST Jesse's Zone=$crew list:@switch [u(CommandAccess,%#)]=0,{@pemit %#=[u(AccessDenied)]}, {@pemit %#=Crew Access List for [name(me)] follows:[iter(v(crewlist),%r[get(##/class)] [name(##)](##[flags(##)]).)]%r--- end ---}
+&COMMAND-LIST Jesse's Zone=$command list:@switch [u(CommandAccess,%#)]=0,{@pemit %#=[u(AccessDenied)]}, {@pemit %#=Command Access List for [name(me)] follows:[iter(v(commandlist),%r[get(##/class)] [name(##)](##[flags(##)]).)]%r--- end ---}
+&COMMAND-ADD Jesse's Zone=$command add *:@switch [u(CommandAccess,%#)][locate(%#,%0,*)]=#-1,{@pemit %#=I don't see that here.},#-2,{@pemit %#=I don't know which one you mean!},0*,{@pemit %#=[u(AccessDenied)]},{&temp me=[locate(%#,%0,*)];&commandlist me=[switch(u(CommandAccess,v(temp)),1,[v(commandlist)][pemit(%#,[name(v(temp))] is already on the Command List.)],[v(commandlist)] [v(temp)][pemit(%#,[name(v(temp))] has been added to the Command List.)])]}
+&COMMAND-DEL Jesse's Zone=$command del *:@switch [u(CommandAccess,%#)][locate(%#,%0,*)]=#-1,{@pemit %#=I don't see that here.},#-2,{@pemit %#=I don't know which one you mean!},0*,{@pemit %#=[u(AccessDenied)]},{&temp me=[locate(%#,%0,*)];&commandlist me=[switch(u(CommandAccess,v(temp)),0,pemit(%#,[name(v(temp))] is not on the Command List.),pemit(%#,[name(v(temp))] has been removed from the Command List.))][remove(v(commandlist),v(temp))]}
+&CREW-ADD Jesse's Zone=$crew add *:@switch [u(CommandAccess,%#)][locate(%#,%0,*)]=#-1,{@pemit %#=I don't see that here.},#-2,{@pemit %#=I don't know which one you mean!},0*,{@pemit %#=[u(AccessDenied)]},{&temp me=[locate(%#,%0,*)];&crewlist me=[switch(u(CrewAccess,v(temp)),1,[v(crewlist)][pemit(%#,[name(v(temp))] is already on the Crew List.)],[v(crewlist)] [v(temp)][pemit(%#,[name(v(temp))] has been added to the Crew List.)])]}
+&CREW-DEL Jesse's Zone=$crew del *:@switch [u(CommandAccess,%#)][locate(%#,%0,*)]=#-1,{@pemit %#=I don't see that here.},#-2,{@pemit %#=I don't know which one you mean!},0*,{@pemit %#=[u(AccessDenied)]},{&temp me=[locate(%#,%0,*)];&crewlist me=[switch(u(CrewAccess,v(temp)),0,pemit(%#,[name(v(temp))] is not on the Crew List.),pemit(%#,[name(v(temp))] has been removed from the Crew List.))][remove(v(crewlist),v(temp))]}
+&CREWLIST Jesse's Zone=#8
+&COMMANDLIST Jesse's Zone=#3
+&ROOM_PARENT Jesse's Zone=#42
+&INTRUDER Jesse's Zone=^* has arrived.:@switch [u(CrewAccess,%#)]=0,{&salert me=[ansi(hr,INTRUDER ALERT)];@zemit %!=[ansi(hr,=== INTRUDER ALERT === === INTRUDER ALERT ===)]%r[switch(type(%#),PLAYER,%n(%#[flags(%#)]) detected in [name(loc(%#))]([loc(%#)][flags(loc(%#))])!,%n(%#[flags(%#)]) owned by [name(owner(%#))]([owner(%#)][flags(owner(%#))]) detected in [name(loc(%#))]([loc(%#)][flags(loc(%#))])!)]%rAll security personnel please prepare for a possible combat situation.}
+@VA Jesse's Zone=^* is now listening.:@zemit [v(cnum)]=WARNING: A listening device has been activated in [name(loc(%#))]
+@VB Jesse's Zone=^* says, "computer, * alert":@swi [strmatch(get(v(cnum)/comauth), *%#*)]={1},{@trig [v(cnum)]/va=[v(0)] [v(1)]};@VA Room Parent=^* is now listening.:@zemit [v(cnum)]=Warning: A listening device has been activated in [name(loc(%#))];&listenlist [v(cnum)]=[get([v(cnum)]/listenlist)] %#
+&CNUM Jesse's Zone=#46
+&SALERT Jesse's Zone=GREEN
+&LISTENLIST Jesse's Zone=[get([v(cnum)]/listenlist)] %#
+&COMAUTH Jesse's Zone=#3
+&DEVFLAGS Jesse's Zone=invincible
+@SUCCESS Jesse's Zone=[switch([v(light_type)],alertlights,[eval(me,alert_lights)],torchlight,[eval(me,torchlight)],streetlights,[eval(me,street_lights)],buildinglights,[eval(me,Building_Lights)],lamplights,[eval(me,Lamp_Lights)],roomlights,[eval(me,Room_Lights)],daylight,[eval(me,Sun_Light)],hall-light,[eval(me,Hall_lights)],windowlight,[eval(me,Windows)],default,[eval(me,defaultlights)])]
+&DOTRUST Jesse's Zone=[switch(strmatch([get([zone(me)]/strust)] [get([zone(me)]/trusted)],*[v(#)]*),0,0,1,1)]
+&LOCKEXIT Jesse's Zone=$sec lock exit *:@swi [get(zone(me)/security)]=1,{@switch [strmatch([get(zone(me)/seccrew)] [get(zone(me)/command)],*%#*)]=1,{@emit [name(v(#))] says, "Computer, lock exit [name(num(v(0)))]. Security clearance Alpha Three.";@lock [num(v(0))]=#0;@emit A forcefiled hums to life around the exit marked [before(name(num(v(0))),<)].}}
+&TURBOLIFT_CONSOLE_HELP Jesse's Zone=$turb*:@switch [v(turbo_console)]=0,@pemit [v(#)]=There is no Turbolift here.,1,@pemit [v(#)]=[space(1)]___________________________________________________[space(16)]__________%r(___________________________________________________|[ansi(hb,Turbolift Help)]|__________)%r[space(5)][ansi(hc,List[space(14)]: Lists the decks of the Turbolift)]%r[space(5)][ansi(hc,Deck <Deck Number>: Engages the turbolift to <Deck Number>)]%r[space(5)][ansi(hc,ABug <Bug>[space(8)]: Makes a log in the computer on any Bug in the)]%r[space(25)][ansi(hc,Turbolift)]%r ___________________________________________________[space(16)]_________%r(___________________________________________________|[ansi(hb,LCARS 96047.21)]|_________)%r
+&COMPAD_OPEN Jesse's Zone=$open intercom to *:@swi [v(compad)]=1,{@swi [v(v(0))]=,@pemit [v(#)]=There is no such persona in the System.,{&requestfrom [v(v(0))]=[v(My_ComPad)];@remit [v(v(0))]=The Compad beeps indicating a incoming call from [v(My_ComPad)]. Push Accept to initiate the call.;&requestto me=[v(0)];@wait 60=&requestfrom [v(v(0))]=;@wait 60=&requestto me=;}},@pemit [v(#)]=There is no ComPad at this location.
+&DORRCHIMECO Jesse's Zone=$come:@swi [strmatch(v(doorchime),*#*)]=1,{@emit %n says, "Come," and the door unlocks.;@unlock [v(doorchime)]=#0},@pemit [v(#)]=There is no door chime installed!
+&DAYLIGHT Jesse's Zone=[and(gt(mid(time(),11,2),6),lt(mid(time(),11,2),20))]
+&LIGHTLIST Jesse's Zone=$lightlist:@pemit %#=Current variables for &light_type are: alertlights streetlights buildinglights lamplights roomlights daylight and windowlight.
+&WINDOWS Jesse's Zone=[ansi(c,switch([u(me/daylight)],1,{Sunlight shines through a window here, lighting the room.},0,{Pale moonlight shines darkly through a window, giving the room just enough illumination not to run in to anything.}))]
+&TORCHLIGHT Jesse's Zone=[ansi(c,A torch on the wall burns brightly, lighting up the room.)]
+&ALERT_LIGHTS Jesse's Zone=[ansi(c,Large panels that line the wall are [get(zone(me)/salert)].)]
+&STREET_LIGHTS Jesse's Zone=[ansi(c,[switch([u(me/daylight)],1,The Street lights which line the sidewalks here are currently off.,0,The Street lights shine brightly on to the street below.)])]
+&LAMP_LIGHTS Jesse's Zone=[ansi(c,A small lamp in the room illuminates it's surroundings)]
+&SUN_LIGHT Jesse's Zone=[ansi(c,[switch([u(me/daylight)],1,{The sun shines down from above, lighting the area up.},0,The pale moon shines its cold light here.)])]
+&BUILDING_LIGHTS Jesse's Zone=[ansi(c,Overhead lights illuminate the building well.)]
+&HALL_LIGHTS Jesse's Zone=[ansi(c,The upper part of the ceiling are lights, illuminating the hallway.)]
+&ROOM_LIGHTS Jesse's Zone=[ansi(c,An overhead light illuminates the room.)]
+&TEMP Jesse's Zone=#8

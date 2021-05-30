@@ -1,0 +1,50 @@
+@create MUSH Exit Parent
+@set MUSH Exit Parent = INHERIT
+@set MUSH Exit Parent = LINK_OK
+@set MUSH Exit Parent = OPAQUE
+@set MUSH Exit Parent = SAFE
+@set MUSH Exit Parent = NO_COMMAND
+&EMPIRE MUSH Exit Parent=the MUSH
+@DESCRIBE MUSH Exit Parent=A Exit Parent for [get([num(me)]/empire)].
+@FAILURE MUSH Exit Parent=You hear a chime that tells you the room is [ansi(hr,locked)].
+@OFAILURE MUSH Exit Parent=runs into the door head-first.
+@ODROP MUSH Exit Parent=arrives from [ansi(hc,[name([home(me)])])].
+@OSUCCESS MUSH Exit Parent=heads into [ansi(hc,[name(num(loc(me)))])].
+@SUCCESS MUSH Exit Parent=You head into [ansi(hc,[name(num(loc(me)))])].
+&ROY MUSH Exit Parent=[hasflag(%#,ROYALTY)]
+&WIZ MUSH Exit Parent=[hasflag(%#,WIZARD)]
+&GUEST MUSH Exit Parent=[haspower(%#,Guest)]
+&BUILDER MUSH Exit Parent=[haspower(%#,Builder)]
+&PLAYER MUSH Exit Parent=[hastype(%#,Player)]
+&JUDGE MUSH Exit Parent=[hasflag(%#,JUDGE)]
+&JURY MUSH Exit Parent=[hasflag(%#,JURY_OK)]
+
+@create MUSH Room Parent
+@set MUSH Room Parent = INHERIT
+@set MUSH Room Parent = LINK_OK
+@set MUSH Room Parent = OPAQUE
+@set MUSH Room Parent = SAFE
+@set MUSH Room Parent = NO_COMMAND
+@DESCRIBE MUSH Room Parent=[ansi(hc,[center([edit(name(zone(me)),%bZone,)],79,=)])]%r[ansi(hw,[eval(me,desc-1)])]%r%r[ansi(hb,\[)][ansi(hc,Players)][ansi(hb,\])] [squish([iter(lcon(me),switch(type(##),PLAYER,switch(idle(##),-1,,switch(hasflag(##,Dark),0,edit(name(##),Console,) [switch(hasflag(##,IC),1,(IC))] [switch(hasattr(##,CAPTION),1,{Brandishing: [get(##/CAPTION)]})] [ansi(hb,-)]))))])]%r[ansi(hb,\[)][ansi(hc,Objects)][ansi(hb,\])] [squish([iter(lcon(me),switch(type(##),THING,switch(hasflag(##,Dark),0,edit(name(##),Console,)[switch(hasflag(##,IC),1,(IC))][switch(hasattr(##,CAPTION),1,{Brandishing: [get(##/CAPTION)]})] [ansi(hb,-)])))])]%r[switch([eval(me,light_type)],alertlights,[eval(me,alert_lights)],torchlight,[eval(me,torch_light)],streetlights,[eval(me,street_lights)],building_lights,[eval(me,Building_Lights)],lamplights,[eval(me,Lamp_Lights)],roomlights,[eval(me,Room_Lights)],turbolights,[eval(me,Turbolights)],daylight,[eval(me,Sun_Light)],stair_lights,[eval(me,Stair_Lights)],hall-light,[eval(me,Hall_lights)],viewport,[eval(me,Viewport_light)],star,[eval(me,Star_light)],sky,[eval(me,Sky_Light)],maglev,[eval(me,MagLev_Light)],corridor,[eval(me,Corridor_Light)],windowlight,[eval(me,Windows)],default,[eval(me,defaultlights)])]%r[ansi(c,Obvious Exits:)]%b[iter([lexits(me)],[switch(hasflag(##,DARK),0,[ansi(r,[ljust(%r<[ucstr([extract([fullname(##)],2,1,;)])]>,8)] [ansi(hg,[ljust([name(##)],30)])])][switch(hasflag(##,TRANSPARENT),1,[ansi(hc,{[before([name([loc(##)])],<<<)]})], ,%r)])])]
+&DESC-1 MUSH Room Parent=There is no currect Description set. Remember to Store the room description in &DESC-1, @set here=dark, and if you want the players to see where the exit leads to, set the exits TRANSPARENT.
+&LIGHTS MUSH Room Parent=[switch([v(light_type)],alertlights,[eval(me,alert_lights)],torchlight,[eval(me,torchlight)],streetlights,[eval(me,street_lights)],building_lights,[eval(me,Building_Lights)],lamplights,[eval(me,Lamp_Lights)],roomlights,[eval(me,Room_Lights)],turbolights,[eval(me,Turbolights)],daylight,[eval(me,Sunlight)],hall-light,[eval(me,Hall_lights)],windowlight,[eval(me,Windows)],default,[eval(me,defaultlights)])]
+&LIGHTTYPE-1 MUSH Room Parent=$light types:@pemit %#=The light types are: Torchlight, Daylight, Streetlights, AlertLights, turbolights, Hall-light, LampLights, RoomLights, Stair_Lights, Viewport_Light, Star_Light, Sky_Light, MagLev_Light, Corridor_Light, and Building_Lights.
+&LIGHT-1 MUSH Room Parent=$lset *:@switch %0=alert,{&light_type [loc(%#)]=alertlights},torch,{&light_type [loc(%#)]=torchlight},street,{&light_type [loc(%#)]=streetlights},building,{&light_type [loc(%#)]=building_lights},lamp,{&light_type [loc(%#)]=lamplights},stairs,{&light_type [loc(%#)]=stair_lights},room,{&light_type [loc(%#)]=roomlights},turbo,{&light_type [loc(%#)]=turbolights},day,{&light_type [loc(%#)]=daylight},hall,{&light_type [loc(%#)]=hall-light},window,{&light_type [loc(%#)]=windowlight},viewport,{&light_type [loc(%#)]=viewport},star,{&light_type [loc(%#)]=star},sky,{&light_type [loc(%#)]=sky},maglev,{&light_type [loc(%#)]=maglev},corridor,{&light_type [loc(%#)]=corridor},{@pemit/silent %#=The light type you have selected: %0, is invalid.}
+&LIGHT_TYPE MUSH Room Parent=roomlights
+&DAYLIGHT MUSH Room Parent=[and(gt(mid(time(),11,2),6),lt(mid(time(),11,2),20))]
+&BUILDING_LIGHTS MUSH Room Parent=[ansi(c,Overhead lights illuminate the building well.)]
+&ROOM_LIGHTS MUSH Room Parent=[ansi(c,An overhead light illuminates the room.)]
+&LAMP_LIGHTS MUSH Room Parent=[ansi(c,A small lamp in the room illuminates it's surroundings.)]
+&HALL_LIGHTS MUSH Room Parent=[ansi(c,The upper part of the ceiling are lights, illuminating the hallway.)]
+&TURBOLIGHTS MUSH Room Parent=[ansi(c,The turbolift lights illuminate the lift perfectly.)]
+&ALERT_LIGHTS MUSH Room Parent=[ansi(c,Large panels that line the wall are [get(zone(me)/alert)].)]
+&STREET_LIGHTS MUSH Room Parent=[ansi(c,[switch([u(me/daylight)],1,The Street lights which line the sidewalks here are currently off.,0,The Street lights shine brightly on to the street below.)])]
+&VIEWPORT_LIGHT MUSH Room Parent=[ansi(c,Faint starlight shines in thru the viewport.)]
+&STAR_LIGHT MUSH Room Parent=[ansi(c,The dark black void of space is dotted with tiny white stars.)]
+&SKY_LIGHT MUSH Room Parent=[ansi(c,[switch([u(me/daylight)],1,Bright sunlight shines through the skylight in the ceiling.,0,Through the ceiling skylight you can see the stars.)]
+&MAGLEV_LIGHT MUSH Room Parent=[ansi(c,Small light panels in the floor and in the ceiling light up the MAGLEV Transport.)]
+&CORRIDOR_LIGHT MUSH Room Parent=[ansi(c,Lights in the ceiling above illuminate the corridor.)]
+&WINDOWS MUSH Room Parent=[ansi(c,switch([u(me/daylight)],1,Sunlight shines through a window here%, lighting the room.,0,Pale moonlight shines darkly through a window, giving the room just enough illumination not to run in to anything.))]
+&SUN_LIGHT MUSH Room Parent=[ansi(c,[switch([u(me/daylight)],1,The sun shines down from above%, lighting the area up.,0,The pale moon shines its cold light here.)])]
+&TORCH_LIGHT MUSH Room Parent=[ansi(c,A torch on the wall burns brightly, lighting up the room.)]
+&STAIR_LIGHTS MUSH Room Parent=[ansi(c,A light illuminates the bottom of each stair perfectly.)]

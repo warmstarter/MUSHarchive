@@ -1,0 +1,48 @@
+@create Jesse's Code Container
+@link Jesse's Code Container = [loc(owner(me))]
+@lock/Basic Jesse's Code Container==[owner(me)]
+@set Jesse's Code Container = DARK
+@set Jesse's Code Container = INHERIT
+@set Jesse's Code Container = OPAQUE
+@set Jesse's Code Container = QUIET
+@set Jesse's Code Container = UNFINDABLE
+@set Jesse's Code Container = WIZARD
+@set Jesse's Code Container = SAFE
+@set Jesse's Code Container = !NO_COMMAND
+@SUCCESS Jesse's Code Container=%RYou pick up [art(name(me))] [name(me)].%R
+@set Jesse's Code Container/SUCCESS=no_command
+@OSUCCESS Jesse's Code Container=picks up [art(name(me))] [name(me)].
+@set Jesse's Code Container/OSUCCESS=no_command
+@DROP Jesse's Code Container=%RYou set down [art(name(me))] [name(me)].%R
+@set Jesse's Code Container/DROP=no_command
+@ODROP Jesse's Code Container=sets down [art(name(me))] [name(me)].
+@set Jesse's Code Container/ODROP=no_command
+@FAILURE Jesse's Code Container=%RWARNING: You are not authorized to pick that up.%RInforming [name(owner(me))] of your attempt.)]%R
+@set Jesse's Code Container/FAILURE=no_command
+@OFAILURE Jesse's Code Container=tries to pick up [art(name(me))] [name(me)] but jumps back as if stunned.
+@set Jesse's Code Container/OFAILURE=no_command
+@AFAILURE Jesse's Code Container=@pemit [owner(me)]=%RALERT!)]%R%R%N)] just tried to take [name(me)]([num(me)][flags(me)])%R%Tfrom [name(%L)](%L)%R
+@set Jesse's Code Container/AFAILURE=no_command
+@IDESCRIBE Jesse's Code Container=%RALERT:)]%R%RIf you can read this, you are not suppossed to be inside this item.%R
+@set Jesse's Code Container/IDESCRIBE=no_command
+@DESCRIBE Jesse's Code Container=[s(v(desc1))]%R
+@set Jesse's Code Container/DESCRIBE=no_command visual
+&DO_CONTENTS Jesse's Code Container=$cont*:@pemit %#=%R%B[u(func_cpull)][ljust([mid(CONTENTS OF [ucstr(name(me))],0,47)],47)][rjust(Total : [mid(words(lcon(me)),0,3)],11)]%R%B[u(lineshow2,-)]%R%B[iter([lcon(me)],[ljust([mid(name(##),0,32)]<##[flags(##)]>,61)][get(me/##)]%R)]%B[u(lineshow2,-)]%R%BLast: ([v(action)]) [mid([v(lastitem)],0,28)] - [v(lastuse)]%R
+&DO_PULL Jesse's Code Container=$pull *:@sel [match(lcon(me),num(%0))]=0,{@pemit %#=[u(msg_warnmsg,%0)]},{@tel [num(%0)]=here;@sel [or([hasflag(%#,dark)],[hasflag(%0,dark)])]=1,{@pemit %#=[u(msg_darkpull,%0)];@tr me/set_lastuse=%0,PULL;&[num(%0)] me},{@oemit %L/%#=[u(msg_pullothers,%0,%N,%p)];@pemit %#=[u(msg_pullself,%0)];@tr me/set_lastuse = %0,PULL;&[num(%0)] me}}
+&DO_OPULL Jesse's Code Container=$opull *:@sel [match(lcon(me),num(%0))]=0,{@pemit %#=[u(msg_warnmsg,%0)]},{@fo me=drop %0;@sel [or([hasflag(%#,dark)],[hasflag(%0,dark)])]=1,{@pemit %#=[u(msg_darkpull,%0)];@tr me/set_lastuse=%0,OPULL;&[num(%0)] me},{@oemit %L/%#=[u(msg_pullothers,%0,%N,%p)];@pemit %#=[u(msg_pullself,%0)];@tr me/set_lastuse = %0,OPULL;&[num(%0)] me}}
+&DO_PUT Jesse's Code Container=$put *:@tel [num(%0)]=me;@sel [match(lcon(me),num(%0))]=0,{@pemit %#=[u(msg_warnmsg,%0)]},{@sel [or([hasflag(%#,dark)],[hasflag(%0,dark)])]=1,{@pemit %#=[u(msg_darkput,%0)];@tr me/set_lastuse=%0,PUT;&[num(%0)] me=[mid(time(),4,16)]},{@oemit %L/%#=[u(msg_putothers,%0,%N,%p)];@pemit %#=[u(msg_putself,%0)];@tr me/set_lastuse = %0,PUT;&[num(%0)] me=[mid(time(),4,16)]}}
+&DO_OPUT Jesse's Code Container=$oput *:@fo me=get [num(%0)];@wait 1=@sel [match(lcon(me),num(%0))]=0,{@pemit %#=[u(msg_warnmsg,%0)]},{@sel [or([hasflag(%#,dark)],[hasflag(%0,dark)])]=1,{@pemit %#=[u(msg_darkput,%0)];@tr me/set_lastuse=%0,OPUT;&[num(%0)] me=[mid(time(),4,16)]},{@oemit %L/%#=[u(msg_putothers,%0,%N,%p)];@pemit %#=[u(msg_putself,%0)];@tr me/set_lastuse = %0,OPUT;&[num(%0)] me=[mid(time(),4,16)]}}
+&MSG_WARNMSG Jesse's Code Container=%RWARNING: "[capstr(%0)]" is not a valid item.%R
+&MSG_DARKPULL Jesse's Code Container=You take [art(name(%0))] "[name(%0)]" (DARK) from your [name(me)].
+&MSG_DARKPUT Jesse's Code Container=You put [art(name(%0))] "[name(%0)]" (DARK) into your [name(me)].
+&MSG_PUTSELF Jesse's Code Container=You put [art(name(%0))] "[name(%0)]" into your [name(me)].
+&MSG_PUTOTHERS Jesse's Code Container=%1 puts [art(name(%0))] "[name(%0)]" into %1 [name(me)].
+&MSG_PULLSELF Jesse's Code Container=You pull [art(name(%0))] "[name(%0)]" from your [name(me)].
+&MSG_PULLOTHERS Jesse's Code Container=%1 pulls [art(name(%0))] "[name(%0)]" from %1 [name(me)].
+&SET_LASTUSE Jesse's Code Container=&lastitem me=[name(%0)];&lastuse me=[mid([time()],4,15)];&action me = %1
+&DESC1 Jesse's Code Container=%RThis item is useful in carrying any excess things in your inventory. It can be used IC or OOC but should be given a name and description to reflect this. It will also keep track of your items (recallable in a report) and is useful in keeping certain things from the view of prying eyes.%R%RTo start using this item.. type the following commands:%R@CREATE <CONTAINER>%R@PARENT <CONTAINER>=[num(me)]%R@SET <CONTAINER>=!NO_COMMAND%R%RNow just type CSETUP and you are all set.%R%RNOTE <11/17/94> The latest version of this item can be found on Bret's new Mush - Battlestar Mush (ALLMUSIC.FERRIS.EDU #4201)%R
+&DO_SETUP Jesse's Code Container=$csetup:@set me=opaque;@set me=safe;@lock me=[owner(me)];@ulock me=[owner(me)];&credits me=Designed and Coded by Bret Prichard 9/25/94 (Last Revision);@lock me/credits=#0;@set me/credits=visual;@set me=enter_ok;@pemit %#=%RSETUP COMPLETED%R%RTo see the main menu type CMENU%R;&do_setup me=Completed;@lock me/do_setup=#0
+&FUNC_CPULL Jesse's Code Container=[setq(1,[first(shuffle(r g y m c))])]
+&LINESHOW Jesse's Code Container=[repeat(%0,70)]
+&LINESHOW2 Jesse's Code Container=[repeat(%0,58)]
+&DO_MENU Jesse's Code Container=$cmenu:@pemit %#=[u(func_cpull)]%R[u(lineshow,=)]%R[center([name(me)],74)]%R[u(lineshow,-)]%RPULL <ITEM>%T%T- Take an item out of the container%RPUT <ITEM>%T%T- Put an item into the container%ROPUT <ITEM>%T%T- Override Put (Use if regular 'Put' fails)%ROPULL <ITEM>%T%T- Override Pull (Use if regular 'Pull' fails)%RCONTENTS%T%T- Show a report of all items in the container%RCSETUP%T%T%T- Run this before you use your container item%R[u(lineshow,=)]

@@ -1,0 +1,83 @@
+SGP Bug Tracking -- Open Issues
+
+Bugs that have been recieved, but haven't been fixed. Bug will remain
+listed on this page for about a month after we close them, then they are
+removed to the listing for closed bugs. Closed bugs can be found here.
+
+#17 Bug: Multipaging doesn't obey DARK/pagelock combination.
+Reported by: Cheetara@Granite
+Description: Multipaging code ignores a lot of important stuff and can't be
+fixed with softcode in anything like a rational fashion.
+The fix:
+This will need a hardcode modification to be effective in the long term.
+Platforms: TinyMUSH 2.2.x
+Opened: 6 Nov 00
+Closed:
+  ------------------------------------------------------------------------
+
+#25 Bug: SGP needs +emit and +pemit.
+Reported by: Audumla
+Description: +emit for staffers and +pemit for everyone. Penn already echos
+@pemit, but we need to check the full extent of that functionality.
+The fix:
+
+Platforms: All
+Opened: 29 Nov 00
+Closed:
+  ------------------------------------------------------------------------
+
+#27 Bug: The Installers are failing.
+Reported by: Audumla
+Description: The installers for the main code and the +version patch failed
+big time. The problem was that @edit doesn't evaluate code in Penn and it
+blew sky high as a result. Building installers is a pain in the butt, BTW.
+The fix:
+Fixed the installers themselves on 08 Jan and will issue a patch to correct
+the other problems in games that may have used the files between 04 Jan and
+09 Jan.
+
+Platforms: All
+Opened: 07 Jan 01
+Closed: 10 Jan 01 by Audumla
+  ------------------------------------------------------------------------
+
+#29 Bug: TWODIGCONN
+Reported by: Hilikiradi
+Description: The %0s inside the mod after the rjust ... where it says
+'mod(%0s,60)' shoudl be 'mod(%0,60)s' The s makes the %0 a non-integer and
+causes mod to barf on Penn.
+The fix:
+
+Platforms: All
+Opened: 08 Jan 01
+Closed:
+  ------------------------------------------------------------------------
+
+#31 Bug: Misplaced Brace in PLACES
+Reported by: Fang@Masq
+Description: The PLACES code on the SGP website has a misplaced closing
+}-bracket in the attribute PLACEFUNCTION. The final } should be at the very
+end, not half-way through.
+The fix:
+
+@switch/first 0=[lte(%2, get(%0/PLACESMAX))], @pemit %1=Invalid Place Number '%2'.,[setq(1, extract(get(%0/PLACENUMS), %2, 1, |))][gt(ulocal(GETINFO, %0, %2, CURPLACES), words(r(1)))], {@pemit %1=There aren't any free spaces there.},{@verb %1=[setq(0,ulocal(getinfo,%0,%2,NAME))]%1,eval_msg,[edit([U(GETINFO, %0, %2, JOIN)] [r(0)].,%,,%%%,)],oeval_mesg,[edit([U(GETINFO, %0, %2, OJOIN)] [r(0)].,%,,%%%,)];@pemit/list [r(1)]= [name(%1)] joins you. ;&PLACENUMS %0=[replace(get(%0/PLACENUMS), %2, [r(1)]%1%b, |)]}
+
+Platforms: All
+Opened: 08 Jan 01
+Closed: 08 Jan 01 by Audumla
+  ------------------------------------------------------------------------
+
+#32 Bug: Faulty +help for PLACES
+Reported by: Fang@Masq
+Description: The code and +help refer interchangably to MAXPLACES and
+PLACESMAX and this needs to be consistent throughout.
+The 'description' field of the place is referred interchangably throughout
+the code as 'DESCRIBE' and 'DESCRIPTION'; for example the GETINFO function
+uses 'DESCRIPTION' and thus cannot return the desc which is actually set in
+DO_UPDATE as 'DESCRIBE'.
+The fix:
+
+Platforms: All
+Opened: 08 Jan 01
+Closed: 08 Jan 01 by Audumla
+  ------------------------------------------------------------------------

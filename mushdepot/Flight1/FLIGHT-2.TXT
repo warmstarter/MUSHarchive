@@ -1,0 +1,23 @@
+@create Flightpack Prototype
+@link Flightpack Prototype=me
+@lock/Use Flightpack Prototype==*[owner(me)]
+@lock Flightpack Prototype==*[owner(me)]
+@set Flightpack Prototype=WIZARD
+@set Flightpack Prototype=DARK
+@set Flightpack Prototype=INHERIT
+@set Flightpack Prototype=OPAQUE
+@set Flightpack Prototype=STICKY
+@set Flightpack Prototype=SAFE
+@set Flightpack Prototype=ROYALTY
+&LAND-1 Flightpack Prototype=$land:@remit [loc(owner(me))]=%N presses a button, and the mini-rockets start powering down. As they do so, %N lands on %p feet safely.
+&RETRACT-2 Flightpack Prototype=$rrec:@remit loc(owner(me))=%N pushes a button on the control arm, and you see the mini-rockets on the flightpack retract.
+&EXTEND-2 Flightpack Prototype=$rext:@remit loc(owner(me))=%N pushes a button on the control arm, and you see mini-rockets extend from either side of the flightpack.
+&RETRACT-1 Flightpack Prototype=$retract:@remit loc(owner(me))=%N presses a button on the control arm of his flightpack, and the wings retract back into the flightpack.
+&EXTEND-1 Flightpack Prototype=$extend:@remit loc(owner(me))=%N presses a button on the control arm of his flightpack, and wings extend out.
+@DESCRIBE Flightpack Prototype=This is a design of what will hopefully become a IC flightpack.
+&AIM-1 Flightpack Prototype=$aim *:@pemit %#=You aim your laser at [name(*%0)].;@remit loc(owner(me))=%N aims a unfamiliar laser at [name(*%0)].
+&FLY-1 Flightpack Prototype=$fly *:@remit [loc(owner(me))]=%N flies off into the sky.;@force owner(me)=@tel #%0;@wait 1=@remit [loc(owner(me))]=%N comes in from the sky, and lands on the ground.
+&FIRE-1 Flightpack Prototype=$fire *:@pemit %#=You stun [name(*%0)] with your laser!;@remit loc(owner(me))=%N stuns [name(*%0)] with the unfamiliar laser.
+&HOVER-1 Flightpack Prototype=$hover:@remit loc(owner(me))=%N presses a button, and 2 mini-rockets extend out. They fire, putting him about 20 feet in the air, then holding him there.
+&WHEREIS-1 Flightpack Prototype=$where *:@pemit %N=[name(*%0)] is currently at: [name(loc(*%0))] - <[loc(*%0)]>
+&CREDITS Flightpack Prototype=Coded by Jesse@DeltaMUSH

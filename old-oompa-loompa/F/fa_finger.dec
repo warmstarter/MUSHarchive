@@ -1,0 +1,186 @@
+@@ Faraday's +finger System
+@@ Coded by Linda Naughton (http://www.wordsmyth.org)
+@@
+@@ DISCLAIMERS:
+@@ - Permission is given to use and distribute this code, providing the 
+@@   credits entry in the help file remains intact.
+@@ - Although every effort has been made to test and debug this code, no warranty 
+@@   is provided for its use.
+@@   By using this code, you agree that the author is not responsible for any ill 
+@@   effects on your MUSH.
+@@ - I will support the code as far as I can, but I make no guarantees that I will 
+@@   have time to do everything.  RL comes first.  Please report any bugs or 
+@@   suggestions through http://www.wordsmyth.org
+@@
+@@ FEATURES:
+@@ This system allows admin to set up their own customized +finger display in
+@@ minutes.  Just pick which fields you want to show, and you're on your way.
+@@ If you want to, you can edit the field functions to alter the display
+@@ or where they get their data, and create new fields.
+@@
+@@ REQUIREMENTS:
+@@ This code is designed for PennMUSH only.  As long as PennMUSH stays backwards compatible,
+@@ it will work on version 1.7.2 patchlevel 19 or higher.  You're welcome to try it on older
+@@ versions of Penn, or on TinyMUX, but I make no guarantees that it will work.
+@@
+@@ INSTALLATION:
+@@ This install script will handle everything for you. Simply save it as a TEXT file and
+@@ /quote it (or equivalent) to your MUSH as your Wizard character.
+@@
+@@ There is no need to create objects ahead of time.  You do not even have to edit this 
+@@ file by hand unless your globals room is not #2 (in which case replace #2 with the 
+@@ appropriate DB# throughout this file)
+@@
+@@ If you do not have /quote in your MUSH client, you can copy and paste, but beware of 
+@@ linebreaks inserted when copying!!
+@@
+@@ SETUP:
+@@ The finger database object comes pre-set with certain default fields, and
+@@ a default +finger display configuration.  You can edit the attributes on this
+@@ object to your heart's content.  Help is available with the +fingerconfig command.
+@@ 
+@@ USAGE:
+@@ You can use the following text in your main help system:
+@@
+@@ ------------------------------------------------------------------------------
+@@ HELP_+FINGER
+@@ The +finger command allows you to get information about a character.
+@@ See +help +FINGER_FIELDS for instructions on configuring your +finger fields.
+@@
+@@ Usage: [ansi(h,+finger <player name or alias>)]
+@@
+@@ +finger system coded by Faraday (http://www.wordsmyth.org)
+@@ ------------------------------------------------------------------------------
+@@
+@@ ------------------------------------------------------------------------------
+@@ HELP_+FINGER_FIELDS
+@@ Some information in +finger is automatically set, but others you can configure.
+@@ Below are instructions for setting the +finger fields.
+@@
+@@ NAME  - already set when you created your character
+@@ ALIAS - @alias me=<your alias>
+@@ FULLNAME - &fullname me=<your full name>
+@@ SEX - @sex me=<male or female>
+@@ AGE - &age me=<your age>
+@@ POSITION - &position me=<your position>
+@@ TIMEZONE - &timezone me=<your timezone>
+@@ ALTS - &alts me=<your alternate characters>
+@@ MAIL - &showmail me=<1 to show unread mail, 0 not to show it>
+@@ STATUS - use the +set command
+@@ VACATION - &vacation me=<when you'll be back>
+@@ NOTES - &notes me=<notes that don't fit in other fields>
+@@ QUOTE - &quote me=<quote>
+@@ CONCEPT - &concept me=<1-line desc of your character>
+@@ BACKGROUND - &public_bg me=<info about your char's background others would know>
+@@
+@@ +finger system coded by Faraday (http://www.wordsmyth.org)
+@@ --------------------------------------------------------------------------------
+@@
+@@ UPDATES:
+@@ A mailing list is available if you wish to be notified of bugfixes or other updates to this code.  
+@@ Visit my webpage: http://www.wordsmyth.org/faraday to find out more.
+@@
+@@ --------------------------------------------------------------------------------
+
+
+@set me=quiet
+
+@pemit/silent %#=[ansi(hr,Beginning +finger Installation.  Please wait until the Installation Complete message appears...)]%R
+
+@pemit/silent %#=[ansi(hr,Creating Objects...)]%R
+
+@create +finger Commands
+
+@set +finger Commands = WIZARD
+@set +finger Commands = SAFE
+@set +finger Commands = !NO_COMMAND
+@startup +finger Commands = @set me=!NO_COMMAND
+
+@DESCRIBE +finger Commands=This object contains the commands used in the +finger system.   It must reside in the Globals room (usually #2). Use the +fingerconfig command to see information about configuring the system. +finger system coded by Faraday (http://www.wordsmyth.org)
+
+&CMD-+FINGERCONFIG +finger Commands=$+fingerconfig*:think switch(0,orflags(%#,Wr),pemit(%#,ansi(hr,Sorry this command is restricted to staff.)),pemit(%#,[u(#18/topline)]%R[switch(%0,,u(#17/help_config1),u(#17/help_config%0))]%R[u(#18/bottomline)])
+
+&CMD-+FINGER +finger Commands=$+finger *:think switch(0,t(pmatch(%0)),pemit(%#,ansi(hr,There is no such player.)),[setq(0,pmatch(%0))][pemit(%#,[u(#18/topline)][iter(xget(#18,top_fields),[switch(xget(#18,break_top_fields),1,%r)][u(#18/##,%q0)])][switch(gt(max(words(xget(#18,left_fields)),words(xget(#18,right_fields))),0),1,iter(switch(max(words(xget(#18,left_fields)),words(xget(#18,right_fields))),1,1,repeat(|,sub(max(words(xget(#18,left_fields)),words(xget(#18,right_fields))),1))),%R[u(#18/left_divider)][u(#17/fun_align_left_field,u(#18/[extract(xget(#18,left_fields),#@,1)],%q0),u(#17/fun_get_left_space))][u(#18/center_divider)][u(#17/fun_align_right_field,u(#18/[extract(xget(#18,right_fields),#@,1)],%q0),u(#17/fun_get_right_space))][u(#18/right_divider)],|))][iter(xget(#18,bottom_fields),[switch(xget(#18,break_bottom_fields),1,%r)][u(#18/##,%q0)])]%R[u(#18/bottomline)])]
+
+@create +finger Functions
+@set +finger Functions = WIZARD
+@set +finger Functions = SAFE
+@set +finger Functions = NO_COMMAND
+&HELP_CONFIG5 +finger Functions=[ansi(r,Fields Continued)]%R%RThe following fields are used for spacing:%R%RBLANK - this is used when you want to put extra blank lines between two other fields.%RSECTIONLINE - this can be used if you want to make a clear division between the top and middle, or middle and bottom sections. Just add it at the end of the "top fields" or the beginning of the "bottom fields". You can also use it to divide your top or bottom fields from one another. Don't use it to divide left or right fields.%RSHORTLINE - like sectionline, only it works for dividing fields in the left or right sections. %R%RThe following fields are meant to be displayed in the bottom section only.  If you want to display them in the left, right, or top, you will need to modify them.%R%RNOTES - this displays the character's misc. notes, from their NOTES attribute.%RQUOTE - many players like to display a pithy quote for their character. Data is obtained from the QUOTE attribute.%RCONCEPT - meant to be a short description of the character's concept, from their CONCEPT attribute.%RBACKGROUND - some MUSHes like players to display their backgrounds, or at least a trimmed-down public version. This field gets its data from a PUBLIC_BG attribute.
+&HELP_CONFIG6 +finger Functions=[ansi(r,Custom Fields)]%R%RYou can add new fields, or edit existing ones, any time you want.  Each field has an attribute (with the same name as the field) on the finger database object #18.  This attribute gets the data for a player and formats it for display.  All field functions use \%0 for the player's DB#.%R%RFor example, maybe you don't want the NAME field to display "Name:" before the character's name.  You could edit #18/NAME and remove that text from the field function.   Take another example - there is no Rank field currently.  If you wanted one, and a character's rank was stored in their RANK attribute, you would type: &rank #18=Rank: \[xget(\%0,rank)\]  (you can add whatever formatting to the function you desire (ansi colors, blank spaces, whatever).%R%RYou can even make combo-fields like NAME_AND_ALIAS which display two things on the same line.  It's all up to you.%R%RThe only caveat is with linebreaks.  You can configure the system to NOT automatically insert line breaks between top and bottom fields (see +fingerconfig2) but if you do this, be sure to include the \%R's at the [ansi(h,beginning)] of ALL field descriptions that appear in that section. examine #18/concept to see an example of this for a bottom field.
+&HELP_CONFIG4 +finger Functions=[ansi(r,Fields Continued)]%R%RMAIL - shows the number of unread mail messages the player has. Players can choose whether to show this field in +finger or not by setting a      SHOWMAIL attribute on themselves to either 1 (to show the # of unread messages) or 0 (to hide it). If the field is hidden, it is not shown at all, not even the "Mail:" prefix.%RSTATUS - shows a character's +set status (IC, OOC, etc) from the STATUS attribute if they're connected, or their last connect time if they're online or set DARK or HIDDEN.%RVACATION - can be used to tell that you're going to be away, and is often integrated with idlenuke systems. Gets its data from the VACATION attribute. If the vacation attribute is empty, nothing is shown at all.%RAWARDS - shows any awards a character has received, from their AWARDS attribute. If the player has not received any awards, the field is not shown at all, not even the "Awards:" prefix.%RLOCATION - shows the name of the room the character is currently in. If they have set the unfindable flag on themselves, it will display "UNFINDABLE" for their location.%R[ansi(h,Continued in +fingerconfig5)]
+&HELP_CONFIG3 +finger Functions=[ansi(r,Finger Fields)]%R%RThese are the basic fields included in the +finger system automatically.%R%RNAME%RALIAS%RNAME_AND_ALIAS - combines NAME and ALIAS on one line. If the character has no alias, it will just show his name by itself.%RFULLNAME - obtained from the FULLNAME attribute%RSEX%RRACE - obtained from the RACE attribute%RAGE - obtained from the AGE attribute %RPOSITION - obtained from the POSITION attribute. Meant to be an IC position (such as a job title or rank) but you could use it for an OOC position (Newbie, Player, Staff, etc.) %RTIMEZONE - obtained from the TIMEZONE attribute. %RALTS - obtained from the ALTS attribute. Assumes that the attribute stores db#'s of alternate characters (not their actual names) separated by spaces. If the character has no alts, the field is not shown at all, not even the "Alts:" prefix.%R[ansi(h,Continued in +fingerconfig4)]
+&HELP_CONFIG2 +finger Functions=[ansi(r,Special Fields)]%RThere are a couple special attributes on the fingerDB which are not fields per-se but which affect the display:%R%RLEFT_ALIGN - Set this to LEFT RIGHT or CENTER to determine the justification/alignment of the left section.%RRIGHT_ALIGN - same as LEFT_ALIGN but for the right%RLEFT_DIVIDER - Set this to a string (maybe === or ==-) if you want a border on the left side of your left section.  The length of the left fields will be trimmed accordingly.  You can leave it blank for no border.%RRIGHT_DIVIDER - Set this to a string (maybe === or ==-) if you want a border on the right side of your right section. The length of the right fields will be trimmed accordingly.  You can leave it blank for no border.%RCENTER_DIVIDER - Set this to divide the right and left sections.  It is recommended that you at the very least set this to a blank space, if not an actual string (maybe --).  The length of the right and left fields will be trimmed accordingly.%RENABLE_EVAL - Set this to a 1 if you want characters to be able to evaluate functions in their notes/concept/background attribute (such as for ansi or linebreaks).  Set it to 0 if you do not trust PennMUSH's security (+finger is usually pretty safe on Penn, in my experience) or run on MUX or TinyMUSH.%RBREAK_TOP_FIELDS - Set to 1 to automatically put a linebreak between each field in the top  section.  Set to a 0 if you want to embedd \%r's inside your top fields to separate them.%RBREAK_BOTTOM_FIELDS - same as break top, but for the bottom section%R%R[ansi(h,Continued in +fingerconfig3)]
+&HELP_CONFIG1 +finger Functions=All +finger config data is stored on a single object, which should have been created (with default values, on object #18) when you first installed this system.%R%RTo set up your +finger display, you must first decide which fields will appear in which sections.  The fields are described in [ansi(h,+fingerconfig3)].%R%RThere are four sections: top, left, right, and bottom.  If you used all four sections, your display would look like:%R%B%B%B%BTOP%RLEFT%B%B%BRIGHT%R%B%BBOTTOM%Rbut you don't have to use them all.  You could have all your fields in the top, and not even show the middle or bottom at all.%R%RNote that most fields (excluding ones like Name and Alias which apply to all players) will automatically disappear if the player does not have the attribute set.  In other words you won't see "Awards: <empty>" you'll just see nothing at all.%R%RSet up four attributes: TOP_FIELDS LEFT_FIELDS RIGHT_FIELDS BOTTOM_FIELDS on your finger database object.  In each attribute, list which fields you want to show in that section.  For example:  &top_fields #18=NAME ALIAS RACE, &bottom_fields #18=NOTES%R%R[ansi(h,Continued in +fingerconfig2)]
+&HELP_+FINGER +finger Functions=The +finger command allows you to get information about a character.%RSee +help +FINGER_FIELDS for instructions on configuring your +finger fields.%R%RUsage: [ansi(h,+finger <player name or alias>)]%R%R+finger system coded by Faraday (http://www.wordsmyth.org)
+&HELP_+FINGER_FIELDS +finger Functions=Some information in +finger is automatically set, but others you can configure.  Below are instructions for setting the +finger fields.%R%RNAME  - already set when you created your character%RALIAS - @alias me=<your alias>%RFULLNAME - &fullname me=<your full name>%RSEX - @sex me=<male or female>%RAGE - &age me=<your age>%RPOSITION - &position me=<your position>%RTIMEZONE - &timezone me=<your timezone>%RALTS - &alts me=<your alternate characters>%RMAIL - &showmail me=<1 to show unread mail, 0 not to show it>%RSTATUS - use the +set command%R VACATION - &vacation me=<when you'll be back>%RNOTES - &notes me=<notes that don't fit in other fields>%RQUOTE - &quote me=<quote>%RCONCEPT - &concept me=<1-line desc of your character>%RBACKGROUND - &public_bg me=<info about your char's background others would know>%R%R+finger system coded by Faraday (http://www.wordsmyth.org)
+@DESCRIBE +finger Functions=This object contains the functions and help files for the +finger command.  You can copy HELP_+FINGER and HELP_+FINGER_FIELDS to your global help system.
+&FUN_ALIGN_RIGHT_FIELD +finger Functions=[switch(xget(#18,right_align),left,ljust,right,rjust,center)](mid(%0,0,%1),%1)
+&FUN_ALIGN_LEFT_FIELD +finger Functions=[switch(xget(#18,left_align),left,ljust,right,rjust,center)](mid(%0,0,%1),%1)
+&FUN_GET_RIGHT_SPACE +finger Functions=sub(sub(39,strlen(u(#18/right_divider))),div(strlen(u(#18/center_divider)),2))
+&FUN_GET_LEFT_SPACE +finger Functions=sub(sub(sub(39,strlen(u(#18/left_divider))),div(strlen(u(#18/center_divider)),2)),mod(strlen(u(#18/center_divider)),2))
+
+@create +finger Database
+@set +finger Database = WIZARD
+@set +finger Database = SAFE
+@set +finger Database = NO_COMMAND
+@DESCRIBE +finger Database=This object contains the fields and formatting information used in displaying +finger output.  See the +fingerconfig command for information about configuring these attributes.
+&RIGHT_FIELDS +finger Database=STATUS VACATION BLANK ALTS MAIL BLANK AWARDS
+&BREAK_TOP_FIELDS +finger Database=1
+&BREAK_BOTTOM_FIELDS +finger Database=0
+&LEFT_FIELDS +finger Database=NAME_AND_ALIAS FULLNAME BLANK SEX AGE RACE BLANK POSITION
+&BOTTOM_FIELDS +finger Database=CONCEPT BACKGROUND NOTES
+&TOP_FIELDS +finger Database=
+&RIGHT_ALIGN +finger Database=CENTER
+&LEFT_ALIGN +finger Database=CENTER
+&FACTION +finger Database=Faction: [xget(%0,faction)]
+&TIMEZONE +finger Database=Timezone: [xget(%0,timezone)]
+&QUOTE +finger Database=[switch(hasattr(%0,quote),1,[u(#18/sectionline)]%R[center(Quote,78)]%R[switch(v(enable_eval),1,u(%0/quote),xget(%0,quote))])]
+&SHORTLINE +finger Database=---------------------------------------
+&SECTIONLINE +finger Database=%R[repeat(-,78)]
+&RIGHT_DIVIDER +finger Database=%B-==
+&CENTER_DIVIDER +finger Database=%B-%B
+&LEFT_DIVIDER +finger Database===-%B
+&ENABLE_EVAL +finger Database=1
+&FULLNAME +finger Database=xget(%0,fullname)
+&AWARDS +finger Database=switch(gt(words(xget(%0,awards)),0),1,Awards: [xget(%0,awards)])
+&MAIL +finger Database=switch(xget(%0,showmail),1, Mail: [extract(mail(%0),2,1)] Unread)
+&ALTS +finger Database=switch(hasattr(%0,alts),1,Alts: [iter(xget(%0,alts),name(##))])
+&BLANK +finger Database=
+&CONCEPT +finger Database=[switch(hasattr(%0,concept),1,[u(#18/sectionline)]%R[center(Concept,78)]%R[switch(v(enable_eval),1,u(%0/concept),xget(%0,concept))])]
+&POSITION +finger Database=Position: [xget(%0,position)]
+&AGE +finger Database=Age: [xget(%0,age)]
+@SEX +finger Database=Sex: [xget(%0,sex)]
+@ALIAS +finger Database=switch(hasattr(%0,alias),1,Alias: [xget(%0,alias)])
+&NAME +finger Database=name(%0)
+&NAME_AND_ALIAS +finger Database=[name(%0)] [switch(hasattr(%0,alias),1,\([xget(%0,alias)]\))]
+&RACE +finger Database=Race: [xget(%0,race)]
+&VACATION +finger Database=xget(%0,vacation)
+&LOCATION +finger Database=Location: [switch(hasflag(%0,unfindable),1,UNFINDABLE,[name(loc(%0))])]
+&STATUS +finger Database=switch(1,not(hasflag(%0,connected)),Last On:  [xget(%0,last)],hasflag(%0,dark),Last On: [xget(%0,last)],CONNECTED and set [xget(%0,status)])
+&BACKGROUND +finger Database=[switch(hasattr(%0,public_bg),1,[u(#18/sectionline)]%R[center(Background,78)]%R[switch(v(enable_eval),1,u(%0/public_bg),xget(%0,public_bg))])]
+&NOTES +finger Database=[switch(hasattr(%0,notes),1,[u(#18/sectionline)]%R[center(Notes,78)]%R[switch(v(enable_eval),1,u(%0/notes),xget(%0,notes))])]
+&BOTTOMLINE +finger Database=repeat(=,78)
+&TOPLINE +finger Database=repeat(=,78)
+
+@pemit/silent %#=[ansi(hr,Setting up database numbers...)]%R
+
+@fo me=@edit +finger Commands/*=#17,[num(+finger Functions)]
+@fo me=@edit +finger Commands/*=#18,[num(+finger Database)]
+
+@fo me=@edit +finger Functions/*=#17,[num(+finger Functions)]
+@fo me=@edit +finger Functions/*=#18,[num(+finger Database)]
+
+@fo me=@edit +finger Database/*=#17,[num(+finger Functions)]
+@fo me=@edit +finger Database/*=#18,[num(+finger Database)]
+
+@wait 5=@pemit/silent %#=[ansi(hr,Moving objects to their appropriate places...)]%R
+
+@wait 5=@tel +finger Functions=+finger Commands
+@wait 5=@tel +finger Database=+finger Commands
+@wait 5=@tel +finger Commands=#2
+
+@wait 5=@pemit/silent %#=%R%R[ansi(hr,Installation Complete!!)]%R
+
+@wait 5=@set me=!quiet
+

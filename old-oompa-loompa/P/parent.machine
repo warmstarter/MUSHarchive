@@ -1,0 +1,33 @@
+
+@@ +parent/list [<name>]
+@@ +parent/add <object>
+@@ +parent/delete <object>
+@@ +parent <object>=<parent object name>
+@@ +parent/ex <object> ?
+
+@@ Parent Objects:
+@@ - Must be controlled by the person +parent/adding them
+@@ - Must be set visual
+
+@@ List:
+@@ - Stored as a simple space-separated list of dbrefs as @forwardlist
+
++help/add parent=The +parent command can be used to set the Parent Object of a given object, similar to @parent.  (See 'help parent'.)  +Parent maintains a list of objects that can be used as parents; to set a parent on a new object, simply use the name of the Parent you desire.\%r\%rUsage:\%r\[space(8)\]+parent/list\[space(15)\]List the parent objects\%r\[space(8)\]+parent <obj>=<parent>\[space(5)\]Set the parent of <obj>\%r\[space(8)\]+parent/add <obj>\[space(10)\]Add a new parent to the list\%r\[space(8)\]+parent/delete <parent>\[space(4)\]Delete a parent from the list\%r\%rObjects to be added to the Parent Object list must be VISUAL.  You may only add or delete objects you control. If there is a 'PARENT_INFO' attribute on the parent object, this will be displayed when an object is +parent'ed to it.
++help/cf parent=help PARENT OBJECTS, help @parent
++help/syntax parent=+parent <obj>=<parent>\%r\[space(8)\]+parent/switches (see below)
+
+@@ @create Parent Machine
+
+&cmd-parent_add Parent Machine=$+parent/add *:@switch 1=[setq(0,locate(%#,%0,*V))][match(r(0),#-*)],,[not(controls(%#,r(0)))],{@pemit %#=You don't own that!},[not(hasflag(r(0),visual))],{@pemit %#=The object must be set VISUAL.},{@pemit %#=[name(r(0))] added to the list of Parent Objects.;@forwardlist me = [setunion(v(forwardlist),r(0))]}
+
+&cmd-parent_list Parent Machine =$+parent/list:@pemit %#=[u(topline-parent_list)][map(fmt-parent_list,v(forwardlist))]
+&cmd-parent_list_arg Parent Machine = $+parent/list *:@pemit %#=[u(topline-parent_list)][map(fmt-parent_list,iter(v(forwardlist),switch(strmatch(name(##),%0*),0,,##)))]
+&cmd-parent_alone_arg Parent Machine = $+parents *:@pemit %#=[u(topline-parent_list)][map(fmt-parent_list,iter(v(forwardlist),switch(strmatch(name(##),%0*),0,,##)))]
+&cmd-parent_alone Parent Machine =$+parents:@pemit %#=[u(topline-parent_list)][map(fmt-parent_list,v(forwardlist))]
+
+&topline-parent_list parent machine = [ljust(Parent Object,40)][ljust(Owner,20)]Number/Flags%r
+
+&fmt-parent_list parent machine = %r[ljust(mid(name(%0),0,35),35)][space(5)][ljust(name(owner(%0)),20)](%0[flags(%0)])
+
+&cmd-parent_delete parent machine = $+parent/delete *:@switch 1=[setq(1,iter(v(forwardlist),switch(or(match(##,%0),match(name(##),%0*),strmatch(name(##),%0*)),1,##)))][not(eq(words(r(1)),1))],{@pemit %#=I don't know which Parent Object you mean. (Type +parent/list for a list.)},[not(controls(%#,r(1)))],{@pemit %#=Permission denied.},{@pemit %#=[name(r(1))] removed from the list of Parent Objects.;@forwardlist me = [setdiff(v(forwardlist),r(1))]}
+&cmd-parent parent machine = $+parent *=*:@switch 1=[setq(0,locate(%#,%0,*V))][match(r(0),#-*)],,[setq(1,iter(v(forwardlist),switch(or(match(##,%1),match(name(##),%1*),strmatch(name(##),%1*)),1,##)))][not(eq(words(r(1)),1))],{@pemit %#=I don't know which Parent Object you mean. (Type +parent/list for a list.)},[not(controls(%#,r(0)))],{@pemit %#=Permission denied.},{@pemit %#=Parent of [name(r(0))] set to [name(r(1))].[switch(get(r(1)/parent_info),,,%r[u(r(1)/parent_info,r(0))])];@parent [r(0)]=[r(1)]}

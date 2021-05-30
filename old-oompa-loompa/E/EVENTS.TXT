@@ -1,0 +1,87 @@
+
+@create Events Machine
+
+@create Events Database
+
+@parent Events Machine = Events Database
+
+@@ Commands:
+
+@@ +events (done)
+@@ +events *
+@@ +events/today (done)
+@@ +events/search *=*
+@@ +events/around * *
+@@ +events/all (done)
+@@ +events/expire (done)
+
+@@ +event/add * * *@*=* (done)
+@@ +event/info *=* (done)
+@@ +event * (done)
+@@ +event/delete * (done)
+
+@@ Data:
+
+@@ Per each event:
+@@ - Secs
+@@ - Date
+@@ - Time
+@@ - Place
+@@ - Event
+@@ - Poster
+@@ - Info
+@@ Stored in &DATA-<secs>_<rnum 20>
+
+@@ One attribute to hold list in:
+
+@@ - Data of the form: <secs>_<rnum 20>
+
+@@ Help for +events/+event
+
++help/add events=These commands are designed to make the events database accessable to everyone on the MUSH.  The +events command deals with the entire database or a subset of it, while the +event command is for adding/reading one specific entry in the events DB.\%r\%rFor information on how to read upcoming events, see +help events1.\%rFor information on adding or deleting entries, see +help events2.
++help/credits events=Written by Grev Mallor @ LegionMUSH (a.k.a. Malachite @ Pern, Opalene @ DawnSisters, and Janar @ Zakhara)
++help/syntax events=+events\%r\[space(8)\]+event
+
++help/add events1=The following commands can be used to list upcoming events:\%r\%r\[ljust(+events,20)\]List events in the coming week\%r\[ljust(+events/all,20)\]List all events\%r\[ljust(+events/today,20)\]List today's events\%r\[ljust(+event <number>,20)\]Give details on one event\%r\%r\%r+events/today is designed to be placed in an @aconnect, and will not produce output if there are no events scheduled for "today".
++help/dark events1
++help/add events2=The following commands can be used to add or delete events:\%r\%r\+event/add <time> <month> <day> @ <location> = <event>\%r+event/delete <number>\%r+event/info <number> = <additional information>\%r\%rExample:\%r> +event/add 12:30 Apr 8 @ Kynn's Secret Hideout(#777)=Picnic Lunch!\%r> +event/info 7=Bring your own sack lunch, come eat with everyone!\%r> +event/delete 7
++help/dark events2
++wizhelp/add events=Wizards can, of course, delete any +events, even if they are not the poster.  Additionally, the command '+events/expire' will remove 'old' events from the database.
+
+@@ Here's the code:
+
+&fnc-assign_new_number Events Database=[setq(0,%0_[rand(100)])][switch(v(event-[r(0)]),,r(0),u(fnc-assign_new_number,%0))]
+
+&fnc-convtime Events Database = [convtime(XXX %0 %2:00 1994)]
+
+&cmd-event_add Events Machine = $+event/add * *@*=*:@pemit %#=[setq(0,trim(before(%0,:)))][setq(1,trim(after(%0,:)))][setq(2,trim(mid([first(%1)]XXX,0,3)))][setq(3,trim(first(rest(%1))))][setq(4,mid(trim(%2),0,25))][setq(5,mid(trim(%3),0,30))][setq(6,convtime(XXX [r(2)] [r(3)] [r(0)]:[r(1)]:00 1994))][switch(r(6),-1,u(error-event_add),Event Added![setq(7,u(fnc-assign_new_number,r(6)))])];@switch [r(6)]=-1,,{&event-[r(7)] [parent(me)]=[r(5)];&place-[r(7)] [parent(me)]=[r(4)];&poster-[r(7)] [parent(me)]=%#;&info-[r(7)] [parent(me)]=No additional information.;&data-events [parent(me)]=sort([v(data-events)] [r(7)])}
+
+&error-event_add Events Database = Error: Invalid date for event!
+
+&cmd-events Events Machine = $+events:@pemit %#=[setq(0,filter(flt-one_week,v(data-events)))][switch(r(0),,No events are scheduled for the next week.%r(See +events/all for later events.),[mudname()] Upcoming Events:%r[u(fmt-topline_eventlist)][u(fnc-display_eventlist,r(0))])]
+
+&cmd-events_all Events Machine = $+events/all:@pemit %#=[switch(v(data-events),,No events are currently scheduled.,[mudname()] Events:%r[u(fmt-topline_eventlist)][u(fnc-display_eventlist,v(data-events))])]
+
+&fmt-topline_eventlist Events Database=%rNum Day Date%b%b Time%b [ljust(Location,25)] Event%r--- --- [repeat(-,6)] ----- [repeat(-,25)] [repeat(-,30)]
+
+&fnc-display_eventlist Events Database=[setq(0,%0)][iter(lnum(words(r(0))),%r[setq(1,extract(r(0),add(##,1),1))][setq(2,before(r(1),-))][setq(3,convsecs(r(2)))][rjust(member(v(data-events),r(2)),3)]%b[ljust(extract(r(3),1,3),10)]%b[rjust(index(extract(r(3),4,1),:,1,2),5)]%b[ljust(v(place-[r(1)]),25)]%b[ljust(v(event-[r(1)]),30)])]
+
+&flt-one_week Events Database = [setq(0,sub(before(%0,-),secs()))][and(gt(r(0),0),lt(r(0),604800))]
+
+&cmd-event_delete Events Machine = $+event/delete *:@pemit %#=[switch(or(gt(%0,words(v(data-events))),lte(%0,0),not(isnum(%0))),1,Invalid Event number.,[setq(0,extract(v(data-events),%0,1))][setq(1,or(hasflag(%#,wizard),match(%#,v(poster-[r(0)]))))][switch(r(1),1,Event %0 ([v(event-[r(0)])]) deleted.,Permission denied.)])];@switch [r(1)]=1,{&poster-[r(0)] [parent(me)];&event-[r(0)] [parent(me)];&place-[r(0)] [parent(me)];&info-[r(0)] [parent(me)];&data-events [parent(me)]=[setdiff(v(data-events),r(0))]}
+
+&cmd-event Events Machine = $+event *:@pemit %#=[switch(or(gt(%0,words(v(Data-events))),lte(%0,0),not(isnum(%0))),1,Invalid Event number.,u(fmt-event_details,extract(v(data-events),%0,1),%0))]
+
+&fmt-event_details Events Database = +Events Entry %1 -- [v(event-%0)]%r%rPosted By: [name(v(poster-%0))]%rLocation: [v(place-%0)]%rDate: [extract(convsecs(before(%0,-)),1,3)]%rTime: [index(extract(convsecs(before(%0,-)),4,1),:,1,2)]%r%r[v(info-%0)]
+
+&cmd-event_info Events Machine = $+event/info *=*:@pemit %#=[switch(or(gt(%0,words(v(data-events))),lte(%0,0),not(isnum(%0))),1,Invalid Event number.,[setq(0,extract(v(data-events),%0,1))][setq(1,or(hasflag(%#,wizard),match(%#,v(poster-[r(0)]))))][switch(r(1),1,Info on Event %0 ([v(event-[r(0)])]) set.,Permission denied.)])];@switch [r(1)]=1,{&info-[r(0)] [parent(me)]=%1}
+
+&cmd-events_today Events Machine = $+events/today:@switch [setq(0,filter(flt-today,v(data-events)))][r(0)]=,,{@pemit %#=Today's Events:[u(fnc-display_eventlist,r(0))]}
+
+&flt-today Events Database = [setq(0,sub(before(%0,-),convtime([extract(time(),1,3)] 00:00:01 1994)))][and(gt(r(0),0),lt(r(0),86400))]
+
+&cmd-events_expire Events Machine = $+events/expire:@switch hasflag(%#,wizard)=1,{@pemit %#=Expiring old events now...;@dolist [setq(0,filter(flt-expired_events,v(data-events)))][r(0)]={&event-## [parent(me)];&poster-## [parent(me)];&info-## [parent(me)];&place-## [parent(me)]};&data-events [parent(me)]=[setdiff(v(data-events),r(0))]},{@pemit %#=Permission denied.}
+
+&flt-expired_events Events Database = [lt(sub(before(%0,-),secs()),0)]
+
+

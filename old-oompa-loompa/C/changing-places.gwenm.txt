@@ -1,0 +1,57 @@
+@@ Changing descs for changing Places
+@@ This works with any number of versions of "Places" code out there, including the SGP version.
+@@
+@@ What it allows you to do is create variable 'descs' in the room, based on what place any player
+@@ is in.
+@@ 
+@@ The key is setting the @succ attribute to be: @Succ here=[u(me/desc_place[match(get(me/PLACENUMS), *%#%b*, |)])]
+@@
+@@ Set a desc_0 for the 'main room' (what you see when you're not at *any* place).
+@@ Set a desc_# for each place. This is what you'd see when at that desc. 
+@@
+@@ This allows those with creative tendencies to desc areas to their heart's content, without filling the DB with lots
+@@ of extra rooms.
+@@
+@@ I worked this code out all by my self, but, it's really not all that brilliant a concept. I'm sure other people
+@@ have some similar things.
+@@
+@@
+
+@Desc here=%r[space(5)]The second floor of the house is laid out in an open design like a studio loft. This house was clearly built many decades ago, but modernized fairly recently. A few of the more interesting architectural elements were salvaged in the redecoration.
+&PLACESMAX here=5
+&PLACENUMS here=|||||
+&PLACE1 here=Living Room|10|10||I'm sorry, there's no room in the Living Room.|I'm sorry, there's no place to move there.|You move into the |moves into the |You leave the |leaves the |In the Living Room
+&PLACE2 here=Kitchen|10|10||I'm sorry, there's no room in the Kitchen.|I'm sorry, there's no place to move there.|You move into the |moves into the |You leave the |leaves the |In the Kitchen
+&PLACE3 here=Bedroom|10|10||I'm sorry, there's no room in the Bedroom.|I'm sorry, there's no place to move there.|You move into the |moves into the |You leave the |leaves the |In the Bedroom
+&PLACE4 here=Home Gym|10|10||I'm sorry, there's no room in the Home Gym.|I'm sorry, there's no place to move there.|You move into the |moves into the |You leave the |leaves the |In the Home Gym
+&PLACE5 here=Bathroom|5|5||I'm sorry, there's no room in the Bathroom.|I'm sorry, there's no place to move there.|You move into the |moves into the |You leave the |leaves the |In the Bathroom
+&PLACESCLEANUP1 here=^* has left.:placescleanup(%#)
+&PLACESCLEANUP2 here=^* has disconnected.:placescleanup(%#)
+@Succ here=[u(me/desc_place[match(get(me/PLACENUMS), *%#%b*, |)])]
+&DESC_PLACE0 here=%r[space(5)]The central living area is focused around a small greyish-blue speckled granite fireplace. On the far side of the living area is a galley-sized kitchen featuring a breakfast nook with three chairs. Down the hall is a bedroom and down another hall is the bathroom. In the basement is a home gym.
+&DESC_PLACE1 here=%r[space(5)]The central living area is focused around a small greyish-blue speckled granite fireplace. At the hearth is a fur throw made from dozens of rabbit pelts pieced together. It looks large enough for two people to recline on comfortably. 
+&DESC_PLACE2 here=%rThis is the kitchen area of the house. 
+&DESC_PLACE3 here=%r[space(5)]This is the bedroom area of the house. 
+&desc_PLACE4 here=%r[space(5)]THis is the home gym, down in the basement.
+&DESC_PLACE5 here=%r[space(5)]This is the bathroom area of the house. 
+
+
+@@ Code Bonus:
+@@ How to link places and +views
+@@ 
+@@ You can make your +views variable based on whether you're in a particular place, or not.
+@@
+@@ The main bit of code is using the function switch to determine if you're in the specific place: 
+@@ [switch(neq(match(u(placenums),*%#*,|),5),1,{Not in place desc},{Yes in place desc})]
+@@
+@@ In this example, you're checking if you're in place #5 (which has no relation to the place 5, above). 
+@@ This simulates entering and leaving a greenhouse, and what you see when being outside it, 
+@@ and then inside it. You would change '5' to be whatever place number you want to configure the view
+@@ to read.
+@@
+@@ I worked this out all by myself, but, it's not really all that brilliant a concept. I do think it's a little
+@@ more clever than the changing descs for places, above.
+@@
+
+&VIEW_GLASSHOUSE here=[switch(neq(match(u(placenums),*%#*,|),5),1,{%r[space(5)]The exterior of this building is an aluminum frame supporting sheets of tempered glass. Moisture from inside the glasshouse has beaded into a fog on the glass making it impossible to see inside. Please enter the glasshouse ('join #5') to '+view' inside it.%r},{%r[space(5)]The interior is warm to the point of hot, and wet no matter what the weather is outside, almost assaulting to the senses. There's a cornucopia of smells, some bitter, some sweet, some heavy and cloying, other so light as to be barely noticed. This is an orderly green house. The wood chip floor covers raw dirt. Plants grow in neatly arranged raised rows of wood boxes. There seems to be a wide selection of everything: flowers, herbs, grasses, small trees, and representatives of every other sort. To one end is a small desk which holds several journals, probably for tracking growths and strains, and equipment for drying, harvesting, cross-pollinating, and other esoteric uses.%r})]
+

@@ -1,0 +1,11 @@
+@create Translocator
+@set Translocator Parent=INHERIT
+@set Translocator Parent=MONITOR
+@set Translocator Parent=!NO_COMMAND
+@lock Translocator==me
+@Desc Translocator=Type %crtel <name>%cn, replacing <name> with a name listed below, to teleport there!%r[repeat(-,78)][switch([words([lattr(#4657/T_*)])],0,{%rThere are no destinations.},{[iter([iter([sort([setdiff([iter([lattr(#4657/T_*)],[switch([strmatch([get(#4657/##)],[loc(me)])],0,{##})])],[iter([get(me/EXCLUDE)],T_[ucstr([edit(##,\%b,_)])])])],a)],%r[capstr([lcstr([edit([rest(##,_)],_,%b)])])])],[capstr(##)])]})]%r[repeat(-,78)]%rTo add places to this list, type %crtel/add <place name>=<DB>%cn. I reserve the right to delete any places from this list.[switch([hasattrp(me,CREDITS)],1,{%r[get_eval(me/CREDITS)]})]
+&CMD_TEL Translocator=$tel *:@switch [strmatch([lattr(#4657/T_*)],*T_[edit(%0,%b,_)]*)]=1,{@oemit The Translocator teleports %n away.;@pemit %#=The Translocator teleports you away.;@tel %#=[get(#4657/[first([sort([lattr(#4657/T_[edit(%0,%b,_)]*)],a)])])]},{@pemit %#=There is no such destination.}
+&CMD_TEL_ADD Translocator=$tel/add *=*:@switch [isdbref(%1)]=0,{@pemit %#=That isn't a real DB.},{@switch [or([hasattr(#4657,T_[edit(%0,%b,_)])],[match([iter([lattr(#4657/T_*)],[get(#4657/##)])],%1)])]=1,{@pemit %#=That place already exists.},{@switch hasflag(%1,JUMP_OK)=0,{@pemit %#=That place is not JUMP_OK.},{@pemit #4657=DESTINATION ADD|[edit(%0,%b,_)]|%1;@pemit %#=Destination added.}}}
+&CMD_TEL_DEL Translocator=$tel/del *:@switch [owner(#4657)]=%#,{@switch [hasattr(#4657,T_[edit(%0,%b,_)])]=0,{@pemit %#=Bad destination.},{@wipe #4657/T_[edit(%0,%b,_)];@pemit %#=Destination wiped.}}
+&CREDITS Translocator=%rOriginal Idea: Gambit%rCoded by: Aranor
+&HEAR_DESTINATION_ADD Translocator=^DESTINATION ADD|*|*:@switch [isdbref(%1)]=1,{@switch [or([hasattr(#4657,T_%0)],[match([iter([lattr(#4657/T_*)],[get(#4657/##)])],%1)])]=0,{@switch hasflag(%1,JUMP_OK)=1,{&T_%0 #4657=%1}}}

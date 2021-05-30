@@ -1,0 +1,100 @@
+@@
+@@ Data cache for PennMUSH v1.0
+@@  - by Javelin, 2002. Released under the GPL v2.
+@@
+@@ This is an object that provides a set of @functions to cache data for a 
+@@ time period under a given name on a per-caller basis. 
+@@
+@@ What's the point, you say?
+@@   Consider a MUSH where characters have a 0-100 'perception' statistic,
+@@   and a room with a secret door. The secret door will be noticed
+@@   when the person look at the room if we roll a number under their
+@@   perception score (on a 100-sided die). If it's noticed, it stays
+@@   noticed. If it's not noticed, we want to check again every hour to see 
+@@   if it's noticed.
+@@
+@@   You might do something like this in the room's @desc, assuming that
+@@   the DOORCHECKRESULT ufun returns 1 if they should see the door:
+@@     [switch(1,
+@@             t(member(v(FOUNDTHEDOOR),%#)), 
+@@                Show the door,
+@@             cache(secretdoor,60m,u(DOORCHECKRESULT,%#)),
+@@                Show the door and put them on the FOUNDTHEDOOR list,
+@@             Don't show the door)]
+@@ 
+@@ What you need to configure:
+@@ 1. Make sure the CANUSE function reflects who you want to be allowed
+@@    to use these functions. If you want everyone to use it,
+@@    set CANUSE to '1'
+@@ 2. Do whatever you need to to insure that the cache, flush, and refresh
+@@    attributes get turned into @functions on startup.
+@@
+@@
+@@ Here's how you use it:
+@@
+@@ cache(tag, ttl, value)
+@@
+@@ If the cache has an entry for 'tag' that is younger than 'ttl',
+@@ that entry is returned. Otherwise, value is stored in the cache
+@@ and returned. ttl may be a number (of seconds) or a number followed
+@@ by 'm' (minutes), 'h' (hours), or 'd' (days).
+@@
+@@ flush(tag)
+@@
+@@ Clear the cache entry for 'tag', and return the last value.
+@@
+@@ refresh(tag, ttl)
+@@
+@@ Update the ttl associated with the tag
+@@
+@@
+@@ We can only cache about 2000 different things, so if we hit that
+@@ limit, we force cleanup of all tags that are expired. We do
+@@ that anyway, on a regular basis, just to be tidy.
+@@ 
+@@ If we still can't store anything in the cache, we still behave
+@@ nicely and return the value to our caller.
+@@
+@@
+
+@create Data cache 
+
+@desc cache=Implements the cache, flush, and refresh @functions
+
+@lock cache==me
+
+&CANUSE cache=[orflags(owner(%0),Wr)]
+
+&CACHE data cache=[switch(0,u(canuse,%#),#-1 PERMISSION DENIED,
+       u(validtag,%0),#-1 INVALID TAG,
+       setr(0,ulocal(parsettl,%1)),#-1 INVALID TTL,
+       u(expired,C_%0_%#),rest(v(C_%0_%#)),
+       [u(addcache,%0,%q0,%2,%#)]%2)]
+
+&FLUSH data cache=[switch(0,u(canuse,%#),#-1 PERMISSION DENIED,
+        u(validtag,%0),#-1 INVALID TAG,
+	[rest(v(C_%0_%#))][wipe(me/C_%0_%#)])]
+
+&REFRESH data cache=[switch(0,u(canuse,%#),#-1 PERMISSION DENIED,
+       u(validtag,%0),#-1 INVALID TAG,
+       setr(0,ulocal(parsettl,%1)),#-1 INVALID TTL,
+       hasattr(me,C_%0_%#),#-1 NO SUCH TAG,
+       [u(addcache,%0,%q0,rest(v(C_%0)),%#)])]
+      
+&validtag data cache=[regmatch(%0,^\[\\w~!@#%&:\\./\]+$)]
+
+&parsettl data cache=[switch(1,
+	regmatch(%0,^(\\d+)(|s|m|h|d)$,-1 0 1),
+		mul(%q0,switch(%q1,d,84600,h,3600,m,60,1)),
+	0)]
+
+&expired data cache=[gt(secs(),first(default(%0,0)))]
+
+&addcache data cache=[switch(nattr(me),>2000,u(cleanup))][switch(nattr(me),>2000,,set(me,C_%0_%3:[add(secs(),%1)] %2))]
+
+&cleanup data cache=[iter(lattr(me/C_*),if(u(expired,itext(0)),wipe(me/[itext(0)])))]
+
+@startup cache=@tr me/tr_cleanup
+
+&tr_Cleanup cache=think [u(cleanup)]; @wait [switch(nattr(me),>1500,300,>1000,600,>500,1200,3600)]=@tr me/tr_cleanup
+

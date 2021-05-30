@@ -1,0 +1,22 @@
+@create Room parent
+@link Room parent=#0
+@set Room parent=LINK_OK
+@set Room parent=OPAQUE
+@set Room parent=SAFE
+@set Room parent=AUDIBLE
+@set Room parent=NO_COMMAND
+@DESCRIBE Room parent=[switch(hasattr(me,desc1),0,{Description not set.  Please set by using &desc1 here=<description>.  Colors of the room may be changed via the &concolor1/2 &playercolor1 &oexitcolor1 &oexitcolor2 &leadcolor1 and &leadcolor2 attributes.  If you have a set color pattern a room parent with these specifics may be made for you.  Be sure to set each room DARK.},{[eval(me,desc1)]})]%r[switch([strlen([lcon(me)])],<5,{},{[ansi([xget(me,concolor1)],Contents:)]})][ljust({[iter([lcon(me)],[switch([type(##)],PLAYER,{[switch([not([hasflag(##,DARK)])],0,{},{[switch(%#,##,{},{[switch([idle(##)],-1,,{[ansi([xget(me,playercolor1)],%r[title(##)] [name(##)])] [switch(xget(##,status),IC,[ansi(r,<IC>)],OOC,[ansi(hb,<OOC>)])]})]})]})]},[switch(hasflag(##,DARK),1,,[ansi([xget(me,concolor2)],%r[name(##)])])])])]},35)]%r%r[ljust({[ansi([xget(me,oexitcolor1)],Obvious Exits:)]},%xq)][ansi([xget(me,leadcolor1)],Leads To:)][iter([lexits(me)],[switch(hasflag(##,DARK),0,[ansi([xget(me,oexitcolor2)],[ljust(%r<[ucstr([extract([fullname(##)],2,1,;)])]>,8)] [ansi(xget(me,oexitcolor3),[ljust([name(##)],30)])])][switch(hasflag(##,TRANSPARENT),1,[ansi([xget(me,leadcolor2)],{[before([name([loc(##)])],<<<)]})], ,%r)])])]
+&OEXITCOLOR2 Room parent=r
+&PLAYERCOLOR1 Room parent=hc
+&OEXITCOLOR1 Room parent=g
+&LEADCOLOR1 Room parent=x
+&CONCOLOR1 Room parent=g
+&CONCOLOR2 Room parent=c
+&PLAYERCOLOR Room parent=hb
+&OEXITCOLOR Room parent=g
+&OEXITCOLOR3 Room parent=hg
+&OEXITCOLOR4 Room parent=hb
+&LEADCOLOR Room parent=x
+&LEADCOLOR2 Room parent=hc
+@VA Room parent=47
+@XQ Room parent=47

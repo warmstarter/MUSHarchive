@@ -1,0 +1,90 @@
+@@ Object: Economy Commands
+@@ Version: 1.0
+@@ Author: Jonathan A. Booth
+@@ E-mail: kamikaze@N0$PAMimsa.edu
+@@ Web: http://www.N0$PAMimsa.edu/~kamikaze/
+@@ (remove N0$PAM from hostnames to use them)
+@@ Date: March 31, 1999
+@@ Written for: PennMUSH 1.7.2 pl22
+@@ Author is willing to support: Yes
+@@
+@@ Creates a wizard object with all the economy commands on it. Put
+@@ this object in the master room.
+@@
+@@ See the help files included in the same directory as this file is
+@@ for help on how to use the economy commands.
+@@ 
+@@ See the object's COPYRIGHT attribute for copyright information.
+@@
+@@ See the object's CHANGES attribute for a list of changes in each
+@@ version.
+@@
+
+@create Economy Commands 28
+@link Economy Commands 28 = #2
+@lock/Use Economy Commands 28=is_locked/1
+@lock/Basic Economy Commands 28==#0
+@set Economy Commands 28 = STICKY
+@set Economy Commands 28 = WIZARD
+@set Economy Commands 28 = SAFE
+@SEMAPHORE Economy Commands 28=
+@set Economy Commands 28/SEMAPHORE=no_inherit locked
+&LOCK_+ECON Economy Commands 28=hasflag(%#,wizard)
+&CMD_INV Economy Commands 28=$+inv:@pemit %#=u(func_inv,%#)
+&FUNC_INV Economy Commands 28=if(cor(elock(%0/ECON_INV,%#),orflags(%#,WrJ)),{[header([name(%0)]'s economic goods matching %1*)]%r[rjust(ansi(hu,Units),9)]%b[ljust(ansi(hu,Good),20)]%b[ansi(hu,Type)][iter(get(%0/ECON_DATA),if(cand(not(isnum(##)),strmatch(ucstr(before(get(Econ Data/TYPE_[edit(db_name(ECON_DATA,##),%b,_)]),&)),ucstr(%1)*)),{%r[rjust(db_get(%0,ECON_DATA,##),9)]%b[ljust(db_name(ECON_DATA,##),20)]%b[capstr(before(get(Econ Data/TYPE_[edit(db_name(ECON_DATA,##),%b,_)]),&))]}))]%r[trailer(End of Goods)]},{You can't look at [name(%0)]'s economic goods.})
+&IS_IC Economy Commands 28=cor(is_ic(%#),orflags(%#,WJ))
+@set Economy Commands 28/IS_IC=no_command
+&IS_LOCKED Economy Commands 28=switch(hasattr(me,setr(0,LOCK_[ucstr(before(first(secure(%c)),/))])),1,switch(u(%q0,first(after(secure(%c),/)),rest(secure(%c))),1,1,0[pemit(%#,Permission Denied. (The following "Huh?" is to be expected. Disreguard it.))]),0,1)
+@set Economy Commands 28/IS_LOCKED=no_command
+&LOCK_+TAKE Economy Commands 28=u(is_ic)
+@set Economy Commands 28/LOCK_+TAKE=no_command
+&LOCK_+GIVE Economy Commands 28=u(is_ic)
+@set Economy Commands 28/LOCK_+GIVE=no_command
+&LOCK_+PAY Economy Commands 28=u(is_ic)
+@set Economy Commands 28/LOCK_+PAY=no_command
+@DESCRIBE Economy Commands 28=[table(sort(lattr(me/*)),25,78)]
+@set Economy Commands 28/DESCRIBE=no_command visual
+&FUNC_INV_ADD Economy Commands 28=add(%0,after(%1,+))
+@set Economy Commands 28/FUNC_INV_ADD=no_command
+&FUNC_INV_COMPONENTS Economy Commands 28=iter(%0,before(##,+))
+@set Economy Commands 28/FUNC_INV_COMPONENTS=no_command
+&CMD_INV_SPECIFIC Economy Commands 28=$+inv/*:@pemit %#=u(func_inv,%#,secure(%0))
+&FUNC_INV_FMT_SPECIFIC Economy Commands 28=iter(%0,%r[rjust(after(##,+),7)]%b[ljust(capstr(lcstr(before(##,+))),20)])
+@set Economy Commands 28/FUNC_INV_FMT_SPECIFIC=no_command
+&CMD_GIVE Economy Commands 28=$^\+give (.+)=([0-9]+) (.+)$:think setq(0,switch(orflags(%#,WJ),1,locate(%#,secure(%1),PTnihap),locate(%#,secure(%1),PTnih)))[setq(3,secure(%3))];@select [isdbref(%q0)]:[not(strmatch(db_name(ECON_DATA,%q3),#-*))]:[setq(9,%2)][cor(elock(%q0/econ_give,%#),orflags(%#,WJ))]:[cor(gte(db_get(%#,ECON_DATA,%q3),%2),orflags(%#,WJ))]=0:*:*:*,{@pemit %#=I don't see that here.},*:0:*:*,{@pemit %#=I don't see what good giving %q3 would do.},*:*:0:*,{@pemit %#=You can't give stuff to %1.},*:*:*:0,{@pemit %#=You don't have %2 %q3 to give.},{@verb %q0=%#,ECON_GIVE,{You give %2 %q3 to [name(%q0)].},ECON_OGIVE,{%N gives %2 %q3 to [name(%q0)].},ECON_AGIVE,{};think [db_set(%#,ECON_DATA,%q3,sub(db_get(%#,ECON_DATA,%q3),%2))][db_set(%q0,ECON_DATA,%q3,add(db_get(%q0,ECON_DATA,%q3),%2))];@cemit <EconBabble [extract(time(),4,1)]> GIVE: %N(%#) gives %2 %3 to [name(%q0)](%q0).}
+@set Economy Commands 28/CMD_GIVE=regexp
+&CMD_TAKE Economy Commands 28=$^\+take (.+)=([0-9]+) (.+)$:think setq(0,switch(orflags(%#,WJ),1,locate(%#,secure(%1),PTnihap),locate(%#,secure(%1),PTnih)))[setq(3,secure(%3))];@select [isdbref(%q0)]:[not(strmatch(db_name(ECON_DATA,%q3),#-*))]:[setq(9,%2)][cor(elock(%q0/econ_take,%#),orflags(%#,WJ))]:[cor(gte(db_get(%q0,ECON_DATA,%q3),%2),orflags(%#,WJ))]=0:*:*:*,{@pemit %#=I don't see that here.},*:0:*:*,{@pemit %#=I don't see what good taking %q3 would do.},*:*:0:*,{@pemit %#=You can't take stuff from %1.},*:*:*:0,{@pemit %#=There aren't %2 %q3 for you to take.},{@verb %q0=%#,ECON_TAKE,{You take %2 %q3 from [name(%q0)].},ECON_OTAKE,{%N takes %2 %q3 from [name(%q0)].},ECON_ATAKE,{};think [db_set(%#,ECON_DATA,%q3,add(db_get(%#,ECON_DATA,%q3),%2))][db_set(%q0,ECON_DATA,%q3,sub(db_get(%q0,ECON_DATA,%q3),%2))];@cemit <EconBabble [extract(time(),4,1)]> TAKE: %N(%#) takes %2 %3 from [name(%q0)](%q0).}
+@set Economy Commands 28/CMD_TAKE=regexp
+&CMD_PAY Economy Commands 28=$+pay *:think setq(0,locate(%#,before(secure(%0),=),TPnih))[setq(1,switch(after(secure(%0),=),,,_#$))];@select [isdbref(%q0)]:[elock(%q0/econ_pay,%#)]:[u(func_pay_valid_cost,%q0,ECOST%q1)]:[u(func_pay_can_pay,%#,%q0,ECOST%q1)]=0:*:*:*,{@pemit %#=I don't see that here.},*:0:*:*,{@pemit %#=You aren't allowed to pay [before(secure(%0),=)].},*:*:0:*,{@pemit %#=The vendor is messed up, please contact [name(owner(me))] about this problem via @mail.},*:*:*:0,{@pemit %#=You don't have enough to pay [before(secure(%0),=)] for that.},{think [u(func_pay_transfer,%#,%q0,ECOST%q1)];@verb %q0=%#,EPAY%q1,You pay [name(%q0)].,EOPAY%q1,pays [name(%q0)],EAPAY%q1,%#;@cemit EconBabble=<EconBabble [extract(time(),4,1)]> PAY: %N(%#) pays [name(%q0)](%q0) for [switch(%q1,,<default>,after(%q1,_))].}
+&FUNC_PAY_VALID_COST Economy Commands 28=not(strmatch(iter(get(%0/%1),not(strmatch(db_name(ECON_DATA,rest(##)),#-*)),&),*0*))
+@set Economy Commands 28/FUNC_PAY_VALID_COST=no_command
+&FUNC_PAY_CAN_PAY Economy Commands 28=not(strmatch(iter(get(%1/%2),gte(db_get(%0,ECON_DATA,rest(##)),first(##)),&),*0*))
+@set Economy Commands 28/FUNC_PAY_CAN_PAY=no_command
+&FUNC_PAY_TRANSFER Economy Commands 28=iter(get(%1/%2),[db_set(%0,ECON_DATA,rest(##),sub(db_get(%0,ECON_DATA,rest(##)),first(##)))][db_set(%1,ECON_DATA,rest(##),add(db_get(%1,ECON_DATA,rest(##)),first(##)))],&)[iter(get(%1/EUSE[after(%2,ECOST)]),[db_set(%1,ECON_DATA,rest(##),sub(db_get(%1,ECON_DATA,rest(##)),first(##))))],&)]
+@set Economy Commands 28/FUNC_PAY_TRANSFER=no_command
+&CMD_COST Economy Commands 28=$+cost *:think setq(0,locate(%#,secure(%0),TPnih))[setq(1,lattr(%q0/ECOST*))];@select [isdbref(%q0)]:[strlen(%q1)]=0:*,{@pemit %#=I don't see that here.},0:0,{@pemit %#=There isn't anything to buy on [name(%q0)].},{@pemit %#=[header(Economic transactions with [name(%q0)])]%r[ljust(ansi(hu,Name),20)]%b[ljust(ansi(hu,Cost),55)][iter(%q1,%r[ljust(switch(##,ECOST,<default>,lcstr(after(##,ECOST_))),20)]%b[ljust(get(%q0/##),55)])]%r[trailer(End of List)]}
+&CMD_INV_OTHER Economy Commands 28=$+inv *:think setq(0,locate(%#,before(secure(%0),/),PTnihmp))[setq(1,after(secure(%0),/))];@pemit %#=switch(%q0:%q1/[cor(strmatch(%L,loc(%q0)),orflags(%#,WrJ))],*:*/0,Permission denied.,#-*:*/*,I don't see that here.,#*:/*,u(func_inv,%q0),u(func_inv,%q0,%q1))
+&CMD_GOODS Economy Commands 28=$+goods:@pemit %#=[header(Economic Goods Types)]%rThe economy currently contains the following types of goods:%r%r[table(get(Econ Data/data_goods_classes),18,78,|)]%r[trailer(End of List)]
+&CMD_GOODS_SPECIFIC Economy Commands 28=$+goods *:@select hasattr(Econ Data,data_goods_%0)=1,{@pemit %#=[header(Economic Goods of Type %0)]%rThe economy currently contains the following goods in type %0:%r%r[table(get(Econ Data/data_goods_%0),18,78,|)]%r[trailer(End of List)]},{@pemit %#=Unknown type of goods, '%0'.}
+&CMD_REBUILD Economy Commands 28=$+econ/rebuild:@tr Econ Data/rebuild;@pemit %#=Rebuilding the goods lists.
+&COMMENT_REBUILD Economy Commands 28=The rebuild command calls some rebuild code on the econ data object. That's the same object that is loaded into the data.tcl system via @data. It is also included in the distribution that included this object. I suggest you run +econ/rebuild at least at every startup through someone (god?)'s @startup attribute.
+@set Economy Commands 28/COMMENT_REBUILD=no_command
+&COMMENT_GOODS Economy Commands 28=This is extracting data that was built on the econ data object for the data.tcl system last time a +econ/rebuild was run.
+@set Economy Commands 28/COMMENT_GOODS=no_command
+&COMMENT_INV Economy Commands 28=Shows a player another person's inventory. Admin can do this to anyone, anywhere. Respects the ECON_INV lock except for admin as described in the helpfile.
+@set Economy Commands 28/COMMENT_INV=no_command
+&COMMENT_COST Economy Commands 28=Shows what you can pay an object for. Nothing is terribly hard on this command.
+@set Economy Commands 28/COMMENT_COST=no_command
+&COMMENT_PAY Economy Commands 28=Possibly the most complex command. It's got to check that the thing you're trying to pay has that sort of thing to pay for, that what it costs is valid, and that you have enough to pay it, that you're allowed to pay it. Then it can go on to transfering the goods, having the vendor use up stuff, and doing the @verb (it's hacker-safe) to have the vendor take some commands. Plus a channel notification on top of all that.
+@set Economy Commands 28/COMMENT_PAY=no_command
+&COMMENT_TAKE Economy Commands 28=Take uses regexp command matching to start with. Look it up in unix man pages or 'help regexp' if you don't know what that is. It then has to do a bunch of checks (it has enough stuff, you can take from it, it's a valid thing to take) before it does the transfer and gives messages (and a channel-log).
+@set Economy Commands 28/COMMENT_TAKE=no_command
+&COMMENT_GIVE Economy Commands 28=Give works just about like take, but in reverse.
+@set Economy Commands 28/COMMENT_GIVE=no_command
+&VERSION Economy Commands 28=1.0
+@set Economy Commands 28/VERSION=visual
+&COPYRIGHT Economy Commands 28=Copyright 1998-1999, Jonathan A. Booth (kamikaze@imsa.edu). There is no warrenty on this code, if it breaks you get to keep all the peices. It is free for non-profit use; contact me for info reguarding commercial use. You may redistribute this code provided it is unmodified and this COPYRIGHT notice is retained. Don't rip off this code and claim it as your own, that's lame. Bugs should be reported to me, as well as suggestions.
+@set Economy Commands 28/COPYRIGHT=visual
+&CHANGES Economy Commands 28=Version 1.0 - Initial public release
+@set Economy Commands 28/CHANGES=visual
+&COMMENT_GENERAL Economy Commands 28=The system needs my db.tcl script to function. Get it at my web site: http://www.imsa.edu/~kamikaze/mush/code

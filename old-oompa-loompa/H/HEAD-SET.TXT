@@ -1,0 +1,39 @@
+Headset Comlink(#3054LV)
+Type: Thing Flags: LINK_OK VISUAL
+This is a Headset Comlink, with a voice activated mic. and a buzzer to let you
+know when a call is coming in, subtly.%R%Ttype [ansi(h,comhelp)] for
+instructions.
+Owner: Thomas  Zone: New Republic ZMO  Code Credits: 1
+Parent: *NOTHING*
+Basic Lock: Headset Comlink(#3054LV)
+Powers:
+Warnings checked: none
+Created: Sat Apr 20 11:22:52 1996
+Last Modification: Mon Jun 10 18:28:32 1996
+COMLISTS [#1338]:  Leaders
+LEADERS [#1338]: Chilo Thurston Mori Wedge Striker
+COMLIST [#1338]: $comlist:;@pemit [num(*%N)]=<[ansi(h,Comlink)]> Comlists
+define d: ([ansi(hc,[get(me/comlists)])])
+ADDCOM [#1338]: $addcom *=*:;&%0 me=%1;&comlists me=[get(me/comlists)]%b%0%b;
+@pemit [num(*%N)]=<[ansi(h,Comlink)]> Comlist <[ansi(hb,%0)]> added.
+COM2 [#1338]: $c2 *=*:;@dolist [get_eval(chan-%0)] =@pemit ##=[ansi(h,
+<*comlink*>)] [ansi(hr,%N says:)] "%1";@pemit *%N=You say "[ansi(h,%1)]" into
+the comlink to %0;@lemit %N mumbles into the comlink
+COM1 [#1338]: $c1 *=*:;@pemit *%0=[ansi(h,<*comlink*>)] [ansi(hr,%N says:)]
+"%1";@pemit *%N=You say "[ansi(h,%1)]" into the comlink to %0;@lemit %N mumbles
+into the comlink
+COMHELP [#1338]: $comhelp:;@pemit *%N=[repeat([ansi(hb,-=)], 39)]%R%Ttype [ansi
+(h,buzz <name>)] to call a person%R%Ttype [ansi(h,c1 <name>=<message>)] to talk
+to 1 person%R%Ttype [ansi(h,c2 <channel>=<message>)] to talk to channel%R%Ttype
+[ansi(h,addcom <channel>=<name1> <name2> <etc...>)] to add a com-channel%R%T
+type[ansi(h,comlist)] to list channels%R%Ttype [ansi(h,end <name>)] to hang up
+%R[repeat([ansi(hb,-=)], 39)]
+END [#1338]: $end *:;@pemit *%0=[ansi(h,%N breaks the connection and hangs
+up)];@pemit *%N=[ansi(h,You hang up the comlink)];@lemit %N deactivates the
+Comlink
+BUZZ [#1338]: $buzz *:;@pemit *%N=%T[ansi(h,You just buzzed %0)];@pemit *%0=
+[repeat([ansi(hb,-=)], 39)]%R%T[ansi(hg,---Your comlink just buzzed, please
+respond to %N--%R[repeat([ansi(hb,-=)], 39)]
+Home: KiMax Productions Presents...
+Location: Parent Room
+_______________________________________________________________________________

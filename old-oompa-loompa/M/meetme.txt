@@ -1,0 +1,63 @@
+#  Author: Ellan West (Ellan@Lost Tribes [lost.strange.com 1066])
+#  Format: Mark Hassman (12/6/96)
+#
+############################################################################
+# +meetme was inspired by a similar global on mucks. The premise is the  
+#  same.. in a place where the majority of the rooms are publicly owned, 
+#  and deliberately set not-jump-ok to preserve a sense of privacy and 
+#  realism, nevertheless, it is useful for roleplay to be able to .invite. 
+#  people to where you are, and move them quickly 'onstage'. Unlike 
+#  jump_ok, no one will ever arrive without at least .one. party in the 
+#  room knowing in advance.
+#  
+#  To use this command: type +meetme
+#  
+#	[Playername] has offered to 'meet' you.
+#	To go where they are: Type +Mjoin [Playername]
+#	To bring them here:   Type +Msummon [Playername]
+#	To decline:           Type +Mdecline [Playername]
+#	This offer will expire in 60 seconds.
+#############################################################################
+@create MEETME
+-
+# Set up the flags (add inherit if your global code owner is not a 
+#   wizard with the inherit flag set)
+@set MEETME=STOP
+-
+@set MEETME=SAFE
+-
+@set MEETME=COMMANDS
+-
+# Set up the commands. (And message which should be on a data object)
+#
+&CMD-MEET-OFFER MEETME=$+meetme *:&meetme *%0=%#;@pemit %#=You offer to meet 
+%0.;@pemit *%0=[u(msg-meetme,%N)];@wait 60=&meetme *%0=
+-
+# This is the message sent to the player whose presence is requested.
+# Edit to your liking.
+&MSG-MEETME MEETME=%r%0 has offered to 'meet' you.%r[ljust(To go where they 
+are:,22)]Type +Mjoin %0%r[ljust(To bring them here:,22)]Type +Msummon 
+%0%r[ljust(To decline:,22)]Type +Mdecline %0%rThis offer will expire in 60 
+seconds.%rThis is an OOC service of your local wizcorps.
+-
+&CMD-MJOIN MEETME=$+mjoin *:@switch [u(%#/meetme)]=[num(*%0)],@tel 
+%#=[loc(*%0)],@pemit %#={You have no meetme attribute, perhaps the invitation 
+ran out of time or you misspelled the name.}
+-
+&CMD-MSUMMON MEETME=$+msummon *:@switch [u(%#/meetme)]=[num(*%0)],@tel 
+*%0=%l,@pemit %#={You have no meetme attribute, perhaps the invitation ran out 
+of time or you misspelled the name.}
+-
+&CMD-MDECLINE MEETME=$+mdecline *:@switch [u(%#/meetme)]=[num(*%0)],@pemit 
+*%0=%N declines your invitation to meet.,@pemit %#={You have no meetme 
+attribute, perhaps the invitation ran out of time or you misspelled the name.}
+-
+
+# Set up the locks!  Attribute has to be set first, then the object can
+# be locked properly.
+&AUDITION-LOCK MEETME=[hasflag(%#, suspect)]
+-
+@lock MEETME=AUDITION-LOCK/1
+-
+@lock/UseLock MEETME=AUDITION-LOCK/0
+-

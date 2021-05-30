@@ -1,0 +1,11 @@
+@create ToDo Pad v1.3m=10
+@lock ToDo Pad v1.3m=ISOWNER/1
+&CMD-TODO ToDo Pad v1.3m=$+todo *:@pemit %#='%0' added to your ToDo list.;&todo_%# me=[v(todo_%#)] [edit(%0,%b,_)]
+&CMD-DONE ToDo Pad v1.3m=$+done *:@switch [neq(0,match(v(todo_%#),edit(%0,%b,_)))].[isnum(%0)]=1.0,{@pemit %#='%0' removed from your ToDo list.;&todo_%# me=[remove(v(todo_%#),edit(%0,%b,_))]},0.1,{&todo_%# me=[remove(v(todo_%#),extract(v(todo_%#),%0,1))];@pemit %#=Item number %0 removed from your ToDo list.},@pemit %#='%0' is not on your ToDo list.
+@Desc ToDo Pad v1.3m=[switch(hasattr(me,todo_%#),0,Nothing to do.,To Do:%r%b[setq(6,1)][iter(v(todo_%#),%q6. [edit(##,_,%b)][setq(6,add(%q6,1))]%r)])]
+&CREDITS ToDo Pad v1.3m=Coded by High Overlord at SpaceAceMUSH (spork.com 6251)
+&CMD-PADHELP ToDo Pad v1.3m=$+padhelp:@pemit %#=\[ToDo Pad Help]%r+todo <item> - adds <item> to your ToDo list.%r+done <item> - removes <item> from your ToDo list.%r+td <name> - shows the ToDo list for <name>.%rItems may be more than one word, but you must type the whole item to remove it. Alternately, the numeric position number may be used.%rTo view your ToDo list, simply look at the pad.
+&ISOWNER ToDo Pad v1.3m=[strmatch(%#,owner(me))]
+&CMD_TDCHECK ToDo Pad v1.3m=$+td *:@pemit %#=[switch(words(lattr(me/todo_[num(*%0)])),1,{\[ToDo List for '[name(*%0)]':]%r%b[setq(6,1)][iter(v(todo_%#),%q6.[edit(##,_,%b)][setq(6,add(%q6,1))]%r)]},No list for "%0.")]
+@set ToDo Pad v1.3m=VISUAL
+@set ToDo Pad v1.3m=SAFE

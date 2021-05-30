@@ -1,0 +1,45 @@
+@@ +help Machine
+
+@@ Create the machine
+
+@@ @create Globals Help Machine
+@@ @lock Globals Help Machine = #1
+
+@@ Commands:
+@@
+@@ +help
+@@ +help <subject>
+@@ +help/add <subject>=<help>
+@@ +help/syntax <subject>=<syntax>
+@@ +help/cf <subject>=<cf>
+@@ +help/dark <subject>
+@@ +help/!dark <subject>
+@@ +help/list
+
+&fnc-encode globals help=[lcstr(edit(edit(v(0),%b,$b),',$a))]
+&fnc-decode globals help=[lcstr(edit(edit(v(0),$b,%b),$a,'))]
+
+&cmd-help_help globals help =$+help:@pemit v(#)=[mudname()] Global Commands:%r%r+Help is available on the following topics or commands:%r%r[u(command-list)]%r%rFor more help on a topic, type +help <topic>.
+
+&command-list globals help = [space(8)][iter(v(data-commands),[mid([u(fnc-decode,##)][space(20)],0,20)][switch(mod(member(v(data-commands),##),3),0,%r[space(7)])])]
+
+@@ &data-commands globals help = help
+@@ &data-commands_dark globals help = wizhelp
+
+&cmd-help globals help = $+help *:@pemit v(#)=[switch(member([v(data-commands)] [v(data-commands_dark)],[u(fnc-encode,v(0))]),0,[u(msg-no_help)],[u(fmt-help,v(0),u(fnc-encode,v(0)))])]
+
+&msg-no_help globals help = No +help available on that topic.
+
+&fnc-help_part globals help = [switch(strlen(v(1)),0,,[s(v(0))]: [v(1)])]
+
+&fmt-help globals help = [mudname()] Global Commands: [ucstr(v(0))][u(fnc-help_part,%r%rSyntax,get_eval(con(me)/syntax-[v(1)]))]%r%r[get_eval(con(me)/help-[v(1)])][u(fnc-help_part,%r%rAlso See,get_eval(con(me)/cf-[v(1)]))]%r
+
+&cmd-help_add globals help = $+help/add *=*:@switch hasflag(v(#),wizard)=0,{@pemit v(#)=Sorry, you can't add to the +help.},{&help-[u(fnc-encode,v(0))] [con(me)]=[v(1)];&data-commands me = [sort([remove(v(data-commands),u(fnc-encode,v(0)))] [u(fnc-encode,v(0))])];&data-commands_dark me [remove(v(data-commands_dark),u(fnc-encode,v(0)))];@pemit v(#)=+help added for [v(0)].}
+
+&cmd-help_cf globals help = $+help/cf *=*:@switch hasflag(v(#),wizard)=0,{@pemit v(#)=Sorry, you can't add to the +help.},{&cf-[u(fnc-encode,v(0))] [con(me)]=[v(1)];@pemit v(#)=Crossreference added for [v(0)].}
+
+&cmd-help_syntax globals help = $+help/syntax *=*:@switch hasflag(v(#),wizard)=0,{@pemit v(#)=Sorry, you can't add to the +help.},{&syntax-[u(fnc-encode,v(0))] [con(me)]=[v(1)];@pemit v(#)=Syntax added for [v(0)].}
+
+&cmd-help_dark globals help = $+help/dark *:@switch hasflag(v(#),wizard)=0,{@pemit v(#)=Sorry, you can't add to the +help.},{&data-commands me = [remove(v(data-commands),u(fnc-encode,v(0)))];&data-commands_dark me = [remove(v(data-commands_dark),u(fnc-encode,v(0)))] [u(fnc-encode,v(0))];@pemit v(#)=Topic '[v(0)]' set dark.}
+
+&cmd-help_list globals help = $+help/list:@pemit v(#)=Normal topics: | [iter(v(data-commands),[u(fnc-decode,##)] |)]%rDark topics: | [iter(v(data-commands_dark),[u(fnc-decode,##)] |)]

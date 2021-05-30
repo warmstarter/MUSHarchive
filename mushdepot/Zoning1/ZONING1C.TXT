@@ -1,0 +1,32 @@
+@create BLV Renegade Zone
+@link BLV Renegade Zone=#2
+@lock/Zone BLV Renegade Zone==*[owner(me)]
+@lock BLV Renegade Zone==*[owner(me)]
+@set BLV Renegade Zone=LINK_OK
+@set BLV Renegade Zone=VISUAL
+@set BLV Renegade Zone=WIZARD
+@set BLV Renegade Zone=SAFE
+@set BLV Renegade Zone=MONITOR
+@DESCRIBE BLV Renegade Zone=This is a zone for the Black Lance Vessel Renegade.
+&SET_MOTD BLV Renegade Zone=$+setmotd *:@switch [get([v(room_parent)]/command)]=*%#*,{&motd me=%0;@pe %#=MOTD Changed.},{@pe %#=Access Denied, %N.}
+&VIEW_MOTD BLV Renegade Zone=$+motd:@pe %#=[ansi(hb,repeat(~*,39))]%r[v(motd)]%rType `+Motd' to see this message again.%r[ansi(hb,repeat(~*,39))]
+@VM BLV Renegade Zone=$chelp:@pemit %#=[repeat(=,79)]%r[center(Unnamed BLV Commands Help,79)]%r[repeat(=,79)]%r[u(chelp,<alert> ALERT,{Initiates <alert> alert, where <alert> is RED, YELLOW, GREEN, BLUE, or INTRUDER.})]%r[u(chelp,INT <message>,Sends <message> throughout the ship using the Intercom system.)]%r[u(chelp,CREW LIST,Displays the list of people with crew access.)]%r[u(chelp,COMMAND LIST,Displays the list of people with command access.)]%r[u(chelp,CREW ADD <person>,Adds <person> to the crew list.)]%r[u(chelp,CREW DEL <person>,Deletes <person> from the crew list.)]%r[u(chelp,COMMAND ADD <person>,Adds <person> to the crew list.)]%r[u(chelp,COMMAND DEL <person>,Deletes <person> from the crew list.)]%r%rAll commands except for INT are restricted to personnel with Command Access%ronly.%r[repeat(=,79)]
+@VL BLV Renegade Zone=$green alert:@switch [u(CommandAccess,%#)]=0, {@pemit %#=[u(AccessDenied)]}, {@pemit %#=Initiating [ansi(hg,GREEN)] alert.;@zemit %!=[ansi(hg,=== GREEN ALERT ===)]%rGreen alert has been initiated by %n. Standing down from alert status.;&salert me=[ansi(hg,GREEN ALERT)]}
+@VK BLV Renegade Zone=$command del *:@switch [u(CommandAccess,%#)][locate(%#,%0,*)]=#-1,{@pemit %#=I don't see that here.},#-2,{@pemit %#=I don't know which one you mean!},0*,{@pemit %#=[u(AccessDenied)]},{&temp me=[locate(%#,%0,*)];&commandlist me=[switch(u(CommandAccess,v(temp)),0,pemit(%#,[name(v(temp))] is not on the Command List.),pemit(%#,[name(v(temp))] has been removed from the Command List.))][remove(v(commandlist),v(temp))]}
+@VJ BLV Renegade Zone=$crew del *:@switch [u(CommandAccess,%#)][locate(%#,%0,*)]=#-1,{@pemit %#=I don't see that here.},#-2,{@pemit %#=I don't know which one you mean!},0*,{@pemit %#=[u(AccessDenied)]},{&temp me=[locate(%#,%0,*)];&crewlist me=[switch(u(CrewAccess,v(temp)),0,pemit(%#,[name(v(temp))] is not on the Crew List.),pemit(%#,[name(v(temp))] has been removed from the Crew List.))][remove(v(crewlist),v(temp))]}
+@VI BLV Renegade Zone=$command add *:@switch [u(CommandAccess,%#)][locate(%#,%0,*)]=#-1,{@pemit %#=I don't see that here.},#-2,{@pemit %#=I don't know which one you mean!},0*,{@pemit %#=[u(AccessDenied)]},{&temp me=[locate(%#,%0,*)];&commandlist me=[switch(u(CommandAccess,v(temp)),1,[v(commandlist)][pemit(%#,[name(v(temp))] is already on the Command List.)],[v(commandlist)] [v(temp)][pemit(%#,[name(v(temp))] has been added to the Command List.)])]}
+@VH BLV Renegade Zone=$crew add *:@switch [u(CommandAccess,%#)][locate(%#,%0,*)]=#-1,{@pemit %#=I don't see that here.},#-2,{@pemit %#=I don't know which one you mean!},0*,{@pemit %#=[u(AccessDenied)]},{&temp me=[locate(%#,%0,*)];&crewlist me=[switch(u(CrewAccess,v(temp)),1,[v(crewlist)][pemit(%#,[name(v(temp))] is already on the Crew List.)],[v(crewlist)] [v(temp)][pemit(%#,[name(v(temp))] has been added to the Crew List.)])]}
+@VG BLV Renegade Zone=$command list:@switch [u(CommandAccess,%#)]=0, {@pemit %#=[u(AccessDenied)]}, {@pemit %#=Command Access List for [name(me)] follows:[iter(v(commandlist),%r[get(##/class)] [name(##)](##[flags(##)]).)]%r--- end ---}
+@VF BLV Renegade Zone=$crew list:@switch [u(CommandAccess,%#)]=0, {@pemit %#=[u(AccessDenied)]}, {@pemit %#=Crew Access List for [name(me)] follows:[iter(v(crewlist),%r[get(##/class)] [name(##)](##[flags(##)]).)]%r--- end ---}
+@VE BLV Renegade Zone=$int *:@zemit %!=<Intercom> %n says, "%0"
+@VD BLV Renegade Zone=$intruder alert:@switch [u(CommandAccess,%#)]=0,{@pemit %#=[u(AccessDenied)]},{@pemit %#=Initiating [ansi(hr,INTRUDER)] alert.;&salert me=[ansi(hr,INTRUDER ALERT)];@zemit %!=[ansi(hr,=== INTRUDER ALERT === === INTRUDER ALERT ===)]%rIntruder alert has been initiated by %n. Security personnel please prepare for a combat situation.}
+@VC BLV Renegade Zone=$blue alert:@switch [u(CommandAccess,%#)]=0,{@pemit %#=[u(AccessDenied)]},{@pemit %#=Initiating [ansi(hb,BLUE)] alert.;@zemit %!=[ansi(hb,=== BLUE ALERT ===)]%rBlue alert has been initiated by %n. All decks, prepare for atmospheric entry.;&salert me=[ansi(hb,BLUE ALERT)]}
+@VB BLV Renegade Zone=$yellow alert:@switch [u(CommandAccess,%#)]=0,{@pemit %#=[u(AccessDenied)]},{@pemit %#=Initiating [ansi(hy,YELLOW)] alert.;@zemit %!=[ansi(hy,=== YELLOW ALERT === === YELLOW ALERT ===)]%rYellow alert has been initiated by %n. Please be prepared in the event that an emergency situation arises.;&salert me=[ansi(hy,YELLOW ALERT)]}
+@VA BLV Renegade Zone=$red alert:@switch [u(CommandAccess,%#)]=0,{@pemit %#=[u(AccessDenied)]},{@pemit %#=Initiating [ansi(fhr,RED)] alert.;@zemit %!=[ansi(fhr,=== RED ALERT === === RED ALERT === === RED ALERT ===)]%rRed alert has been initiated by %n. All hands to battlestations!;&salert me=[ansi(fhr,RED ALERT)]}
+&ACCESSDENIED BLV Renegade Zone=[ansi(r,ACCESS DENIED.)] That command is restricted to Command Personnel only.
+&COMMANDACCESS BLV Renegade Zone=[t(member(v(commandlist),%0))]
+&CREWACCESS BLV Renegade Zone=[or(or(member(v(crewlist),%0),member(v(commandlist),%0)),or(hasflag(%0,WIZARD),switch(get(%0/empire),Federation,1,0)))]
+&CHELP BLV Renegade Zone=[ljust(%0,20)] - [indent(23,56,{%1})]
+&SALERT BLV Renegade Zone=GREEN
+&LIGHT_TYPE BLV Renegade Zone=alertlights
+&ROOM_PARENT BLV Renegade Zone=[num(me)]

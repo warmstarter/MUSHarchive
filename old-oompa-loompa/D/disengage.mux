@@ -1,0 +1,57 @@
+#=============================================================================
+# DISENGAGE.MUX -- @disengage command for admin / coders
+#=============================================================================
+
+# @disengage <object>
+#
+# Forces <object> to disengage from all other objects, and forces all other
+# objects to stop engaging <object>.  Works silently, emitting a message
+# only to the person (or object) running the @disengage command.
+# 
+# If you need to inform players that they disengaged, you'll need to tell
+# them yourself.
+#
+&cmd-@disengage #12 = $@disengage *: 
+
+  think setq(0, locate(%#, %0, *P)); 
+
+  think setq(9, 
+    [hasflag(%#, wizard)]
+    [isdbref(%q0)]
+  ); 
+
+
+  @select %q9 = 
+  
+  11, {
+#   if the player's engaged TO someone, he should stop
+    @dolist get(%q0/combat-engaged-to) = {
+      &combat-engaged-by ## = setdiff(get(##/combat-engaged-by), %q0); 
+      think res_return(engagedto-##, immobile, %q0);
+      think res_return(engagedto-##, engaged,  %q0);
+      think res_return(engagedby-%q0, immobile, ##);
+      think res_return(engagedby-%q0, engaged,  ##);
+    }; 
+
+#   if the player's engaged BY someone, they should stop
+    @dolist get(%q0/combat-engaged-by) = {
+      &combat-engaged-to ## = setdiff(get(##/combat-engaged-to), %q0); 
+      think res_return(engagedto-%q0, immobile, ##);
+      think res_return(engagedto-%q0, engaged,  ##);
+      think res_return(engagedby-##, immobile, %q0);
+      think res_return(engagedby-##, engaged,  %q0);
+    }; 
+
+#   clear engaged status on captured player
+    &combat-engaged-to %q0; 
+    &combat-engaged-by %q0; 
+
+    @pemit %# = @disengage: [name(%q0)] (%q0) disengaged.; 
+
+  }, 
+
+  0?, { @pemit %# = Only wizards may use the @disengage command. }, 
+  ?0, { @error %# = locate %q0 }, 
+  *,  { @combat/error #12/cmd-@disengage, @disengage %0, Q9=%q9 Q0=%q0 }
+-
+

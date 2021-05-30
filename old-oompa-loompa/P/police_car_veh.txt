@@ -1,0 +1,45 @@
+@create PARENT: Police Car
+@lock PARENT: Police Car=[owner(me)]
+@Desc PARENT: Police Car=%TTo set up your police car, @desc it, @link it to you,@listen <name>=*, (@inprefix name=From outside, ) without the ()'s, @lock it to you,%R%B@indesc <message> for the inside desc, and make sure Jazz has you on the%R%Broster. Don't change -anything- else. Good luck!
+&INDESC PARENT: Police Car=Inside a police vehicle.
+@Idesc PARENT: Police Car=%r[get_eval(me/indesc)]%r%r%TThe [name(me)] is currently at [name(here)]. [setq(0,iter(lcon(here),switch(type(##),player,switch(hasflag(##,connected),1,##))))][setq(1,setdiff(iter(lcon(here),switch(and(strmatch(type(##),T*),not(hasflag(##,DARK))),1,##)),%!))]You can see [switch(words(r(0)),0,nobody,1,name(r(0)),iter(rest(r(0)),name(##)%vz) and [name(first(r(0)))])] walking the area, and see [switch(words(r(1)),0,nothing important,1,name(r(1)),iter(rest(r(1)),name(##)%vz)and [name(first(r(1)))])] around you.%r%r(`+PChelp' gives options and instructions.)%r
+@Adesc PARENT: Police Car=@pemit %N=The siren is currently [get(me/siren_msg)], and is moving at [get(me/stat_speed)]mph.
+&SIREN_STAT PARENT: Police Car=1
+@Enter PARENT: Police Car=You climb into the [fullname(me)].
+@Oenter PARENT: Police Car=climbs into the [fullname(me)].
+@Leave PARENT: Police Car=You climb out of the [fullname(me)].
+@Oleave PARENT: Police Car=climbs out of the [fullname(me)].
+@Fail PARENT: Police Car=You can't pick that up.
+@Ofail PARENT: Police Car=tries to pick up the car, but it's to heavy.
+@Efail PARENT: Police Car=You try to open the door, but it's locked.
+@Oefail PARENT: Police Car=tries to open the [fullname(me)]'s door, but it's locked.
+@Lfail PARENT: Police Car=You try to leave, but the door's securely locked.
+@Olfail PARENT: Police Car=tries to leave, but the door is securely locked.
+@Omove PARENT: Police Car=screeches in, moving at [get(me/stat_speed)]mph.
+@Listen PARENT: Police Car=*
+@Inprefix PARENT: Police Car=From outside,%B
+&CMD_SIREN PARENT: Police Car=$siren:@switch [get(me/stat)]=1,{@switch [get(me/siren_stat)]=0,{@emit [fullname(me)]'s siren starts wailing, and a strobed red and blue light starts flashing.;@dolist [lexits(here)]=@pemit/contents [loc(##)]=From the direction of [name(loc(me))], a police siren starts wailing.;&siren_msg me=wailing, the lights are strobing crazily;@pemit/contents me=%N turns the siren on.;&siren_stat me=1},1,{@emit The [fullname(me)]'s siren shuts off abruptly.;@dolist [lexits(here)]=@pemit/contents [loc(##)]=From the direction of [name(loc(me))], a police siren starts wailing.;&siren_msg me=off;&siren_stat me=0;@pemit/contents me=%N turns the siren off.}},0,{@pemit %N=The engine's not turned on.}
+&CMD_LOCK PARENT: Police Car=$switch lock:@switch [get(me/lock_stat)]=1,{@unlock/enter me;@unlock/leave me;@pemit/contents me=%N unlocks the [fullname(me)].},0,{@pemit/contents me=%N unlocks the [fullname(me)].;@lock/enter me=#602;@lock/leave me=#602}
+&CMD_TURN PARENT: Police Car=$turn:@switch [get(me/stat_speed)]=0,{@switch [get(me/stat)]=1,{@pemit/contents me=%N turns the key and removes it. The motor dies slowly.;@emit The [fullname(me)]'s motor dies.;&stat_speed me=0;&stat me=0},0,{@pemit/contents me=%N inserts the key and turns it. The motor purrs.;@emit The [fullname(me)]'s motor starts up, and purrs.;&stat me=1}},@pemit %N=You're MOVING!
+&CMD_SPEED PARENT: Police Car=$speed *:@switch [gte(%0, [get(me/stat_speed)])]=1,{@pemit/contents me=%N speeds the [fullname(me)] to %0mph.;:speeds up to %0mph.},0,{@pemit/contents me=%N slows the [fullname(me)] to %0mph.;:slows down to %0mph.};&stat_speed me=%0
+&CMD_MOVE PARENT: Police Car=$drive *:@switch [get(me/stat)]=0,{@pemit %N=The engine isn't turned on.},1,{go %0}
+&CMD_BREAK PARENT: Police Car=$break:@switch [get(me/stat_speed)]=0,{@pemit %N=You're not moving.},{@pemit/contents me=%N slams on the breaks.;:squeels to a halt quickly.;&stat_speed me=0}
+&CMD_HORN PARENT: Police Car=$horn *:@emit %N jams onto the [fullname(me)]'s horn, blasting it at %0.
+&CMD_OUTSPEAK PARENT: Police Car=$+outsay *:@emit The [fullname(me)]'s speaker booms: "%0"
+&CMD_OUTPOSE PARENT: Police Car=$+outpose *:@emit [fullname(me)] %0
+&CMD_CONTROL PARENT: Police Car=$,*:@force me=%0
+&CMD_PCHELP PARENT: Police Car=$+pchelp:@pemit %N=%BSiren: Turns the siren off if it's on and vice versa.%R%BSwitch Lock: Locks the car if it's unlocked and unlocks it if it's locked.%R[space(13)]Nobody can enter or leave, including the owner.%R%BTurn: Turns the car on or off, respectively.%R%BSpeed <speed>: Slows up or speeds down to <speed>.%R%BDrive <direction>: This is rather obvious.%R%BBreak: Stops you abruptly.%R%BHorn <target>: Blows the horn at <target>.%R%B+Outsay <say>: Speaks to the outside on your loudspeaker, saying <say>%R%B+Outpose <pose>: Makes the car pose <pose>.%R%B,<command>: @forces the car to do <command>
+&STAT PARENT: Police Car=1
+&STAT_SPEED PARENT: Police Car=Ford Bronco chasing speed
+&SIREN_MSG PARENT: Police Car=wailing, the lights are strobing crazily
+&INDESC_CMD PARENT: Police Car=$@indesc *:&indesc here=%0;@pemit %N=The inside description is set.
+&CMD_STAT PARENT: Police Car=$+stasis:@switch [get(me/stat)]=1,@pemit %N=Motor Stasis: On%R,0,{@pemit %N=Motor Stasis: Off%R};@pemit %%N=Speed: [get(me/stat_speed)]mph%R;@switch [get(me/siren_stat)]=0,@pemit %N=Siren: Off,1,@pemit %N=Siren: On;@pemit %N=Owner: [name(owner(me))]
+&LOCK_STAT PARENT: Police Car=1
+@set PARENT: Police Car=DARK
+@set PARENT: Police Car=MONITOR
+@set PARENT: Police Car=QUIET
+@set PARENT: Police Car=VISUAL
+@set PARENT: Police Car=PARENT_OK
+@set PARENT: Police Car=ENTER_OK
+@set PARENT: Police Car=HALT
+@set PARENT: Police Car=SAFE

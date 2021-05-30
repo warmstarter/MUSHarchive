@@ -1,0 +1,52 @@
+Jesse's Shuttle(#8651pLeIK)
+This is Jesse's personal Shuttle to the Nightclub and other Destinations....
+Owner: Jesse_Krug  Credits: 1
+Status: Thing      Org: StarFleet <USS Normandy>(#386)
+Type: Thing        Flags: puppet link_ok enter_ok inherit key
+Vc:$land:/Jesse_Krug/[if(match(v(vz),ok),@remit #8651=You see the shuttle land
+at one of its destinations. The Shuttle Door opens to reveal a long tunnel. The
+Door opens to your destination. You hear music playing over the shuttle's
+hidden speakers.;@elock #8651;@llock #8651]
+Wc:$play *:@remit #8651=The Computer chimes, and you start to hear %n's song,
+%0, over the shuttle's hidden speakers
+Wb:$replicator *:@remit #8651=The Computer chimes, and you hear the replicator
+starting to work. As the sound fades, a door opens, and you see %n's %0.
+Wa:$lights *:@remit #8651=The Computer chimes, and you see the shuttle's lights
+go %0.
+Xd:$out1:@force #8651=leave
+Obeamout:Takes off for the sea of Space.
+Obeamin:Appears from out of the Sky, and lands on the ground.
+Vf:$peep:@force #8651=l
+Xc:$hom1:@link #8651=#14503;home
+Xb:$ni1:@link #8651=#14061;home
+Xa:$hm1:@link #8651=#4561;home
+Beamout:Jesse's Shuttle takes off for its destination(s).
+Doomsday:-1
+Idesc:This is the shuttle of Jesse E. Krug, that takes him and about 40
+passengers to the Spam Club HeadQuarters. There are 10 couches in here, and a
+pilot's seat at the front.
+Vd:$sit on couch:@remit #8651=%n sits on a couch(sofa).
+Adesc:@npe %#=Contents:[iter(lcon(me),{%r[name(v(0))]})]
+Aenter:@npe %#=Contents:[iter(lcon(me),{%r[name(v(0))]})]
+Va:$sit at con:/Jesse_Krug/@remit #8651=The control console activates as %n
+sits down at it.;@vz #8651=ok
+Vb:$preflight:/Jesse_Krug/[if(match(v(vz),ok),@remit #8651=The Pre-Flight
+Sequence has been activated. Please brace yourselves for take-off.;@elock
+#8651=Jesse_Krug;@llock #8651=Jesse_Krug]
+Vi:$speak *:@emit %n says "%0"
+Vj:$action *:@emit %n %0
+Vg:$lock:@elock #8651=#14503;@llock #8651=#14503;@remit #8651=The shuttle is
+now LOCKED.
+Vh:$unlock:@elock #8651;@llock #8651;@remit #8651=The shuttle is now UNLOCKED.
+Vk:$stardate:@remit #8651=The current Star-Date is: [stardate()]
+Vl:$time:@remit #8651=The current Time is: [time()]
+Lock:Jesse_Krug(#14503PDc)|Jeanette_Krug
+Vz:ok
+Vm:$eject *:@force #8651=drop [v(0)];@remit #4561=The shuttle has let [v(0)]
+out to his/her destination(s).
+Vn:$kick:@dol lcon(#8651)=drop ##
+Beamin:Jesse's Shuttle is landing on the ground.
+Xe:$hub:@force #8651=@tel #175
+It:#14503
+Home: Zan's Nightclub(#14061RLCIf)
+_______________________________________________________________________________

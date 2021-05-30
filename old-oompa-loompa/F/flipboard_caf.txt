@@ -1,0 +1,36 @@
+@create %ch%cbFlip%cyblend%cn game board
+@lock Flipblend game board==me
+@Desc Flipblend game board=A 7x7 square game board for Flipblend, with 49 circular pieces that are white on one side and black on the other. Type %ch%ccboard%cn to see the current status of the game. Type %ch%ccflipblend%cn to see the commands to play.%r%r[switch(add(hasattr(me,player_1),hasattr(me,player_-1)),0,There is no game being played at the moment.,%ch%cb[name(v(player_1))]%cn and %ch%cy[name(v(player_-1))]%cn are playing a game at the moment.)]
+&TURN Flipblend game board=1
+&LASTMOVE Flipblend game board=Game has not started.
+&TILE_1 Flipblend game board=1 0 0 0 0 0 -1
+&TILE_2 Flipblend game board=0 0 0 0 0 0 0
+&TILE_3 Flipblend game board=0 0 0 0 0 0 0
+&TILE_4 Flipblend game board=0 0 0 0 0 0 0
+&TILE_5 Flipblend game board=0 0 0 0 0 0 0
+&TILE_6 Flipblend game board=0 0 0 0 0 0 0
+&TILE_7 Flipblend game board=-1 0 0 0 0 0 1
+&X_BOARD Flipblend game board=$board:@pemit %#=%cn %b a %b b %b c %b d %b e %b f %b g %b%r [v(sepbar)]%r1[u(x_boardline,1)] %b It is [switch(v(turn),1,%ch%cbblue,-1,%ch%cyyellow)]%cn's turn.%r [v(sepbar)]%r2[u(x_boardline,2)] %b Blue player: %b %ch%cb[name(v(player_1))]%cn%r [v(sepbar)]%r3[u(x_boardline,3)] %b Yellow player: %ch%cy[name(v(player_-1))]%cn%r [v(sepbar)]%r4[u(x_boardline,4)] %b Blue score: %b %ch%cb[u(y_count1)]%cn%r [v(sepbar)]%r5[u(x_boardline,5)] %b Yellow score: %ch%cy[u(y_count-1)]%cn%r [v(sepbar)]%r6[u(x_boardline,6)] %b Remaining squares: %ch%cw[u(y_count0)]%cn%r [v(sepbar)]%r7[u(x_boardline,7)] %b Last move: [switch(v(turn),1,%ch%cy[v(lastmove)],-1,%ch%cb[v(lastmove)])]%cn%r [v(sepbar)]
+&SEPBAR Flipblend game board=+---+---+---+---+---+---+---+
+&X_BOARDSUB Flipblend game board=[switch(%0,1,%ch%cb@%cn,-1,%ch%cy@%cn,%b)]
+&X_BOARDLINE Flipblend game board=%cn| [u(x_boardsub,extract(v(tile_%0),1,1))]%cn | [u(x_boardsub,extract(v(tile_%0),2,1))]%cn | [u(x_boardsub,extract(v(tile_%0),3,1))]%cn | [u(x_boardsub,extract(v(tile_%0),4,1))]%cn | [u(x_boardsub,extract(v(tile_%0),5,1))]%cn | [u(x_boardsub,extract(v(tile_%0),6,1))]%cn | [u(x_boardsub,extract(v(tile_%0),7,1))]%cn |
+&X_FLIPBLEND Flipblend game board=$flipblend:@pemit %#=%ch%cbFlip%cyblend%cn Instructions%r----------------------%r%cgboard%cn = look at the board%r%cgjoinb%cn = join game as blue player%r%cgjoiny%cn = join game as yellow player%r%cglgame%cn = leave game%r%cgreset%cn = reset the game, including players%r%cgfb <1> <2>%cn = move from square <1> to square <2> (when it is your turn)%r%tExpress squares using <number><letter>. For example, 4a, 3c.%r%cgflipblend%cn = show this%r%cgrules%cn = show the rules of the game%r%cgcredits%cn = credits and other legal stuff
+&X_RESET Flipblend game board=$reset:@emit %ch%cbFlip%cyblend%cn reset by %n.;&temporarytile me=0 0 0 0 0 0 0;@mvattr me=temporarytile,tile_2,tile_3,tile_4,tile_5,tile_6;&tile_1 me=1 0 0 0 0 0 -1;&tile_7 me=-1 0 0 0 0 0 1;&turn me=1;&lastmove me=Game has not started.;@wipe me/player_*
+&Y_FLIPONE Flipblend game board=[switch(add(lt(%0,1),lt(%1,1),gt(%0,7),gt(%1,7)),0,set(me,tile_%0:[extract(v(tile_%0),1,dec(%1))] [switch(extract(v(tile_%0),%1,1),mul(-1,%2),mul(-1,extract(v(tile_%0),%1,1)),extract(v(tile_%0),%1,1))] [extract(v(tile_%0),inc(%1),sub(7,%1))]))]
+&Y_CONVERTCOL Flipblend game board=[switch(%0,a,1,b,2,c,3,d,4,e,5,f,6,g,7,-666)]
+&Y_COUNT1 Flipblend game board=[fold(y_countsub1,cat(v(tile_1),v(tile_2),v(tile_3),v(tile_4),v(tile_5),v(tile_6),v(tile_7)),0)]
+&Y_COUNT-1 Flipblend game board=[fold(y_countsub-1,cat(v(tile_1),v(tile_2),v(tile_3),v(tile_4),v(tile_5),v(tile_6),v(tile_7)),0)]
+&Y_COUNT0 Flipblend game board=[fold(y_countsub0,cat(v(tile_1),v(tile_2),v(tile_3),v(tile_4),v(tile_5),v(tile_6),v(tile_7)),0)]
+&Y_COUNTSUB1 Flipblend game board=[switch(%1,1,inc(%0),%0)]
+&Y_COUNTSUB-1 Flipblend game board=[switch(%1,-1,inc(%0),%0)]
+&Y_COUNTSUB0 Flipblend game board=[switch(%1,0,inc(%0),%0)]
+&X_JOINB Flipblend game board=$joinb:@switch [hasattr(me,player_1)]=0,{@emit %N joins the game as %ch%cbblue%cn.;&player_1 me=%#},{@pemit %#=[name(v(player_1))] is already playing as %ch%cbblue%cn.}
+&X_JOINY Flipblend game board=$joiny:@switch [hasattr(me,player_-1)]=0,{@emit %N joins the game as %ch%cyyellow%cn.;&player_-1 me=%#},{@pemit %#=[name(v(player_-1))] is already playing as %ch%cyyellow%cn.}
+&X_RULES Flipblend game board=$rules:@pemit %#=%ch%cbFlip%cyblend%cn Rules%r---------------%rThe rules of %ch%cbFlip%cyblend%cn are simple. The objective of the game is to have the most pieces at the end of the game.%r%rPlayers take turns moving, with the %ch%cbblue%cn player going first. Each player moves %chfrom%cn a certain square %chto%cn another square. They must have a piece at the former square, and the new square must be empty. If the square is one space away (horizontally, vertically, or diagonally), the old piece is %chpreserved%cn. If it is two spaces away, the old piece is %chremoved%cn. You can only move up to two spaces away. After this move, any pieces of the opposing player that are adjacent (horizontally, vertically, or diagonally) to the new location will flip to your color.%r%rThe game ends when either one player has no pieces left, or the board is completely filled.
+&X_CREDITS Flipblend game board=$credits:@pemit %#=%ch%cbFlip%cyblend%cn Credits%r-----------------%rThis game was coded into MUX by Caffeinator@SluggyMUX. Based on LINUX GNU WindowManager's gataxx, or something like that.
+&Y_INSONE Flipblend game board=[set(me,tile_%0:[extract(v(tile_%0),1,dec(%1))] %2 [extract(v(tile_%0),inc(%1),sub(7,%1))])]
+&Y_DELONE Flipblend game board=[set(me,tile_%0:[extract(v(tile_%0),1,dec(%1))] 0 [extract(v(tile_%0),inc(%1),sub(7,%1))])]
+&X_FB Flipblend game board=$fb ?? ??:think [setr(0,%0)][setr(1,u(y_convertcol,%1))][setr(2,%2)][setr(3,u(y_convertcol,%3))] [setr(4,max(abs(sub(r(0),r(2))),abs(sub(r(1),r(3)))))];@switch [gt(r(4),0)]=1,{@switch [lt(r(4),3)]=1,{@switch [extract(v(tile_[r(0)]),r(1),1)]=[v(turn)],{@switch [extract(v(tile_[r(2)]),r(3),1)]=0,{@switch [add(lt(r(0),1),gt(r(0),7),lt(r(1),1),gt(r(1),7),lt(r(2),1),gt(r(2),7),lt(r(3),1),gt(r(3),7))]=0,{@switch [v(player_[v(turn)])]=%#,{@emit %N makes a move from [switch(v(turn),1,%ch%cb%0%1,-1,%ch%cy%0%1)]%cn to [switch(v(turn),1,%ch%cb%2%3,-1,%ch%cy%2%3)]%cn. It is now [switch(v(turn),1,%ch%cyyellow,-1,%ch%cbblue)]%cn's turn.;@tr me/y_insone=[r(2)],[r(3)],[v(turn)];@switch [r(4)]=2,{think [u(y_delone,r(0),r(1))]};think [u(y_insone,r(2),r(3),v(turn))] [u(y_flipone,dec(r(2)),dec(r(3)),v(turn))] [u(y_flipone,dec(r(2)),inc(r(3)),v(turn))] [u(y_flipone,inc(r(2)),dec(r(3)),v(turn))] [u(y_flipone,inc(r(2)),inc(r(3)),v(turn))] [u(y_flipone,dec(r(2)),r(3),v(turn))] [u(y_flipone,inc(r(2)),r(3),v(turn))] [u(y_flipone,r(2),dec(r(3)),v(turn))] [u(y_flipone,r(2),inc(r(3)),v(turn))];&lastmove me=%0%1 %2%3;&turn me=[mul(-1,v(turn))]},{@pemit %#=Either it is not your turn, or you are not in the game.}},@pemit %#=You can't move off the board.},@pemit %#=Illegal move.},@pemit %#=Illegal move.},@pemit %#=Illegal move.},@pemit %#=Illegal move.
+&X_LGAME Flipblend game board=$lgame:@switch %#=[v(player_1)],{&player_1 me;@emit %N leaves the game.},[v(player_-1)],{&player_-1 me;@emit %N leaves the game.},@pemit %#=You're not even in the game.
+@set Flipblend game board=VISUAL
+@set Flipblend game board=!NO_COMMAND

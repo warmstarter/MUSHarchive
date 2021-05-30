@@ -1,0 +1,17 @@
+@create Turbo-Lift Parent
+@link Turbo-Lift Parent = #0
+@chzone Turbo-Lift Parent = #1556
+@lock/Basic Turbo-Lift Parent=#182
+@set Turbo-Lift Parent = LINK_OK
+@set Turbo-Lift Parent = VISUAL
+&INSTALL Turbo-Lift Parent=$installhelp:@pemit %#=[eval(me,elevhelp)]
+&ELHELP Turbo-Lift Parent=$elhelp:@pemit %#=[repeat(-,79)]%r[center([ansi(hc,E's Elevator Parent)],79)]%r[repeat(-,79)]%r[ljust([ansi(h,LIST FLOORS)],25)] - [ansi(c,List available floors.)]%r[ljust([ansi(h,PUSH <FLOORNUM>)],25)] - [ansi(c,Go to floor <FLOORNUM>.)]%r[center([ansi(hr,This is yet another one of E's Contraptions.)],79,-)]%r[repeat(-,79)]
+@DESCRIBE Turbo-Lift Parent=A nice Elevator Panel, installed at [v(location)].%r[center([ansi(h,OOC)]: Type '[ansi(hc,ELHELP)]' for help,79)]
+&ELEVHELP Turbo-Lift Parent=Instructions for setting up E's elevator:%rDig an elevator and teleport into it.%r@create Console%r@lock Console=me%r@set console=!no_command%r@parent console=#1070%r&location console=<where the Elevator is at>%r&floors console=<Space-seperated list of floors>%r&what_<floor> console=<For each floor, what is at that floor.>%r&linked_<Floor> console=<For each floor, the room that Out should be linked to.>%r@open <O>ut;o;out%RYer done :)
+&PUSH Turbo-Lift Parent=$push *:@swi [match([v(floors)],%0)]=0,{@pemit %#=[ansi(hr,That's not a valid floor.)]},{@pemit %#=You punch in %0.;@oemit %n=%n pushes floor %0.;@unlink o;@wait 1=@emit The elevator quickly goes to level %0.;@wait 2=@emit The doors open.;@link o=[v(linked_%0)]}
+&WHAT_3 Turbo-Lift Parent=jimland
+&WHAT_2 Turbo-Lift Parent=fredland
+&WHAT_1 Turbo-Lift Parent=bobland
+&FLOORS Turbo-Lift Parent=1 2 3
+&LOCATION Turbo-Lift Parent=parent
+&DESTS Turbo-Lift Parent=$list floors:@pemit %#=[repeat(-,79)]%r[center([ansi(hc,[v(location)] Floors)],79)]%r[repeat(-,79)]%r[iter([v(floors)],%r##. [v(what_##)])]%r[repeat(-,79)]

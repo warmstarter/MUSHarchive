@@ -1,0 +1,121 @@
+@@ Faraday's Staff Notice System
+@@ Coded by Linda Naughton O'Meara (http://www.wordsmyth.org)
+@@
+@@ DISCLAIMERS:
+@@ - Permission is given to use and distribute this code, providing the 
+@@   credits entry in the help file remains intact.
+@@ - Although every effort has been made to test and debug this code, no warranty 
+@@   is provided for its use.
+@@   By using this code, you agree that the author is not responsible for any ill 
+@@   effects on your MUSH.
+@@ - I will support the code as far as I can, but I make no guarantees that I will 
+@@   have time to do everything.  RL comes first.  Please report any bugs or 
+@@   suggestions through http://www.wordsmyth.org
+@@
+@@ FEATURES:
+@@ The staff notice system allows you to keep track of items requiring the staff's 
+@@ attention. It provides a global function, [staff_notice(Subject,Text)] that you 
+@@ can use in any coded +command. For example, in the +bg/submit command you might 
+@@ want to send a staff notice with the code:
+@@       [staff_notice(BG Submit - %N,%N has submitted %p background.)]
+@@
+@@ +notices have an advantage over @mail in that you can mark them as 'handled' to 
+@@ indicate that you're taking care of one, and you can add a note right to the notice 
+@@ itself to let other people know what its status is.
+@@
+@@ Once all activities on a notice are completed, you can mark it as 'complete' and 
+@@ it will be moved to the old notice archive. Every so often (probably each month) you 
+@@ should move the archived notices to a file on disk and clear the archive.
+@@
+@@ REQUIREMENTS:
+@@ This code is designed for PennMUSH only.  As long as PennMUSH stays backwards compatible,
+@@ it will work on version 1.7.4 patchlevel 15 or higher.  You're welcome to try it on older
+@@ versions of Penn, or on TinyMUX, but I make no guarantees that it will work.
+@@
+@@ INSTALLATION:
+@@ This install script will handle everything for you. Simply save it as a TEXT file and
+@@ /quote it (or equivalent) to your MUSH as your Wizard character.
+@@
+@@ There is no need to create objects ahead of time.  You do not even have to edit this 
+@@ file by hand unless your globals room is not #2 (in which case replace #2 with the 
+@@ appropriate DB# throughout this file)
+@@
+@@ If you do not have /quote in your MUSH client, you can copy and paste, but beware of 
+@@ linebreaks inserted when copying!!
+@@
+@@ SETUP:
+@@ The system itself requires no setup, but you can edit the FUN_TOP_LINE and FUN_BOTTOM_LINE
+@@ attributes if you want to customize the look of the border lines. I do ask that you
+@@ leave the '+notice/help' prompt in the bottom line somewhere though, so it's always displayed.
+@@
+@@ You can also edit the FUN_ISSTAFF attribute if you need to modify the way it determines who's
+@@ on the staff.  By default, it looks for the Wiz, Roy, or Judge flags.
+@@ 
+@@ USAGE:
+@@ See +notice/help for instructions.
+@@
+@@ UPDATES:
+@@ A mailing list is available if you wish to be notified of bugfixes or other updates to this code.  
+@@ Visit my webpage: http://www.wordsmyth.org/faraday to find out more.
+@@
+@@ Version 1.1:
+@@    - Widened the space allocated to the notice number, in +notice.  It can now handle up to 9999
+@@      notices before suffering wrapping issues.
+@@    - Added a pemit() to connected staff when a new notice is received.
+@@
+@@ --------------------------------------------------------------------------------
+
+@set me=quiet
+
+@pemit/silent %#=[ansi(hr,Beginning Staff Notice System Installation.  Please wait until you see the 'Installation Complete' message...)]%R
+
+@pemit/silent %#=[ansi(hr,Creating Objects...)]%R
+@create Staff Notice System
+@set Staff Notice System=!NO_COMMAND
+@set Staff Notice System=WIZARD
+@set Staff Notice System=SAFE
+@lock/Basic Staff Notice System=ISSTAFF/1
+@lock/Use Staff Notice System=ISSTAFF/1
+&CMD-+NOTICE Staff Notice System=$+notice:think pemit(%#,[u(fun_top_line)]%R#[space(5)][ljust(Subject,30)][ljust(Date,26)]Handled By%R[repeat(-,78)][iter(sortby(sort_notices,lattr(#650/notice_*)),%R[ljust([after(##,_)].,6)][ljust(extract(xget(#650,##),2,1,|),30)][ljust(convsecs(extract(xget(#650,##),1,1,|)),26)][setq(1,extract(xget(#650,##),3,1,|))][switch(%q1,,ansi(hr,**Unhandled**),%q1)])]%R[u(fun_bottom_line)])
+&CMD-+NOTICE-ARCHIVE Staff Notice System=$+notice/archive:@pemit %#=Archiving notices...;@dolist sortby(sort_old_notices,lattr(#650/old_notice_*))=@wait #@=think pemit(%#,%R%R[u(fun_top_line)]%R[setq(0,u(#650/##))][u(fun_top_line)]%R[ansi(h,Archived Staff Notice [after(after(##,_),_)])]%R%R[ansi(h,Date:)] [convsecs(extract(%q0,1,1,|))]%R[ansi(h,Handled By:)] [extract(%q0,3,1,|)]%R[ansi(h,Subject:)] [extract(%q0,2,1,|)]%R[repeat(-,78)]%R[extract(%q0,4,1,|)]%R[u(fun_bottom_line)])
+&CMD-+NOTICE-CLEARARCHIVE Staff Notice System=$+notice/cleararchive:think pemit(%#,ansi(hg,You clear out all old notices in the archive.))[iter(lattr(#650/old_notice_*),wipe(#650/##))]
+&CMD-+NOTICE-COMPLETE Staff Notice System=$+notice/complete *:think pemit(%#,switch(hasattr(#650,notice_%0),0,ansi(hr,That is not a valid notice number.),ansi(hg,You mark staff notice %0 as complete.  It has been moved to the archive.)[set(#650,old_notice_%0:[xget(#650,notice_%0)])][wipe(#650/notice_%0)]))
+&CMD-+NOTICE-HANDLE Staff Notice System=$+notice/handle *:think pemit(%#,switch(hasattr(#650,notice_%0),0,ansi(hr,That is not a valid notice number.),ansi(hg,You handle staff notice %0.)[set(#650,notice_%0:[replace(xget(#650,notice_%0),3,%N,|)])]))
+&CMD-+NOTICE-HELP Staff Notice System=$+notice/help:think pemit(%#,[u(fun_top_line)]%R%RThe staff notice system allows you to keep track of items requiring the staff's attention.  It provides a global function, [ansi(h,\[staff_notice(Subject,Text)\])] that you can use in any coded +command.  For example, in the +bg/submit command you might want to send a staff notice with the code:%R%T\[staff_notice(BG Submit - \%N,\%N has submitted \%p background.)\]%R%R+notices have an advantage over @mail in that you can mark them as 'handled' to indicate that you're taking care of one, and you can add a note right to the notice itself to let other people know what its status is.%R%ROnce all activities on a notice are completed, you can mark it as 'complete' and it will be moved to the old notice archive.  Every so often (probably each month) you should move the archived notices to a file on disk and clear the archive.%R%R[ansi(h,+notice)] - Views all notices.%R[ansi(h,+notice <#>)] - Views the details of a particular notice.%R%R[ansi(h,+notice/handle <#>)] - "Handles" a notice.%R[ansi(h,+notice/status <#>=<text>)] - Adds a status note to the notice.%R[ansi(h,+notice/complete <#>)] - Marks an item as completed and moves it to the archive.%R%R[ansi(h,+notice/archive)] - Prints out a report of completed notices from the archive, suitable for logging to a file for safekeeping.  This can be spammy if there are a lot of old notices.%R[ansi(h,+notice/cleararchive)] - Clears out all old notices in the archive.  You should use the +notice/archive command to save them be fore doing this!%R%R--Staff Notice System coded by Faraday (http://www.wordsmyth.org)--%R[ansi(hg,Version [v(Version)])]%R[u(fun_bottom_line)])
+&CMD-+NOTICE-STATUS Staff Notice System=$+notice/status *=*:think pemit(%#,switch(hasattr(#650,notice_%0),0,ansi(hr,That is not a valid notice number.),ansi(hg,You add a note to staff notice %0.)[setq(0,xget(#650,notice_%0))][set(#650,notice_%0:[replace(%q0,4,[extract(%q0,4,1,|)]\%R\%R-+- Note from %N at [time()]:\%R\%B%1,|)])]))
+&CMD-+NOTICE-VIEW Staff Notice System=$+notice *:think pemit(%#,switch(hasattr(#650,notice_%0),0,ansi(hr,That is not a valid notice number.),[setq(0,u(#650/notice_%0))][u(fun_top_line)]%R[ansi(h,Staff Notice %0)]%R%R[ansi(h,Date:)] [convsecs(extract(%q0,1,1,|))]%R[ansi(h,Handled By:)] [extract(%q0,3,1,|)]%R[ansi(h,Subject:)] [extract(%q0,2,1,|)]%R[repeat(-,78)]%R[extract(%q0,4,1,|)]%R[u(fun_bottom_line)]))
+@DESCRIBE Staff Notice System=This object contains the global commands for the Staff Notice System.  See +notice/help for a list of commands.%R%RYou can configure the two line functions: FUN_TOP_LINE and FUN_BOTTOM_LINE on this object if your MUSH uses custom lines.%R%R-- Staff Notice System coded by Faraday (http://www.wordsmyth.org) --
+@set Staff Notice System/DESCRIBE=no_command visual
+&FUN_BOTTOM_LINE Staff Notice System=ansi(h,[repeat(-,32)] +notice/help [repeat(-,32)])
+&FUN_TOP_LINE Staff Notice System=ansi(h,[repeat(-,29)] Staff Notice System [repeat(-,28)])
+&ISSTAFF Staff Notice System=u(#650/fun_isstaff,%#)
+&SORT_NOTICES Staff Notice System=sub(after(%0,_),after(%1,_))
+&SORT_OLD_NOTICES Staff Notice System=sub(after(after(%0,_),_),after(after(%1,_),_))
+&VERSION Staff Notice System=1.1
+@startup Staff Notice System=@set me=!no_command;@function staff_notice=#650,fun_staff_notice
+
+@create Staff Notice DB
+@set Staff Notice DB = NO_COMMAND
+@set Staff Notice DB = SAFE
+@DESCRIBE Staff Notice DB=This object is the database for the Staff Notice system.
+@set Staff Notice DB/DESCRIBE=no_command visual
+&fun_isstaff Staff Notice DB=orflags(%0,WrJ)
+&FUN_STAFF_NOTICE Staff Notice DB=[set(#650,notice_[xget(#650,next_notice)]:[secs()]|%0||%1)][set(#650,next_notice:[inc(xget(#650,next_notice))])][iter(lwho(),switch(u(#650/fun_isstaff,##),1,pemit(##,ansi(hg,New Staff Notice submitted.))))]
+&NEXT_NOTICE Staff Notice DB=2
+&NOTICE_1 Staff Notice DB=1016992624|Test||This is an example notice.
+
+@pemit/silent %#=[ansi(hr,Setting up database numbers...)]%R
+
+@fo me=@edit Staff Notice System/*=#650,[num(Staff Notice DB)]
+@fo me=@edit Staff Notice DB/*=#650,[num(Staff Notice DB)]
+
+@wait 4=@tr Staff Notice System/startup
+@wait 5=@pemit/silent %#=[ansi(hr,Moving objects to their appropriate places...)]%R
+
+@wait 6=@tel Staff Notice DB=Staff Notice System
+@wait 7=@tel Staff Notice System=#2
+
+@wait 9=@pemit/silent %#=%R%R[ansi(hr,Installation Complete!!)]%R
+
+@wait 10=@set me=!quiet
+

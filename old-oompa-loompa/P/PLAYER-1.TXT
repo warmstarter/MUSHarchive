@@ -1,0 +1,24 @@
+@create Master Demo Player
+@link Master Demo Player=[owner(me)]
+@set Master Demo Player=!NO_COMMAND
+@set Master Demo Player=INHERIT
+@set Master Demo Player=OPAQUE
+@set Master Demo Player=WIZARD
+@set Master Demo Player=SAFE
+&PERIOD-1 Master Demo Player=$wait *:&wait [num(me)]=%0;@pemit %#=You now have to wait %0 seconds in-between commands.
+&NEXTATTR Master Demo Player=@dolist lnum(11)=@wait [add([get([num(me)]/wait)],mul(##,[get([num(me)]/wait)]))]=@tr me/##
+@DESCRIBE Master Demo Player=This is the Master Demo Player. It is meant for information/demonstartion uses.
+&PLAY-1 Master Demo Player=$play:@emit Now Playing.;@tr me/wait-1
+&1 Master Demo Player=@emit Test1
+&2 Master Demo Player=@emit Test2
+&3 Master Demo Player=@emit Test3
+&4 Master Demo Player=@emit Test4
+&5 Master Demo Player=@emit Test5
+&6 Master Demo Player=@emit Test6
+&7 Master Demo Player=@emit Test7
+&8 Master Demo Player=@emit Test8
+&9 Master Demo Player=@emit Test9
+&10 Master Demo Player=@emit Test10
+&WAIT Master Demo Player=4
+&WAIT-1 Master Demo Player=@tr me/nextattr
+&CREDITS Master Demo Player=Coded by Jesse@ATS TrekMUSH

@@ -1,0 +1,41 @@
+@create mud location machine=10
+&CMD-MUDS mud location machine=$+muds:@pemit v(#)=Sites are known for the following MU*s:%r%r[ljust(MU*,25)]Location%r[iter(sort(lattr(con(me))),u(fmt-muds,get(con(me)/##)))]
+&FMT-MUDS mud location machine=%r[ljust(index(v(0),|,1,1),25)][index(v(0),|,3,1)]
+&CMD-ADDMUD mud location machine=$+addmud *=*:@switch 1=[not(member(lattr(con(me)),u(fnc-conv,v(0))))],{@pemit v(#)=MU* added to the list.;&[u(fnc-conv,v(0))] [con(me)]=[v(0)] | [num(v(#))] | [v(1)] | [secs()]},{@pemit v(#)=There's already a listing for that MU*.}
+&CMD-DELMUD mud location machine=$+delmud *:@switch 1=[not(member(lattr(con(me)),u(fnc-conv,v(0))))],{@pemit v(#)=There's not a MU* by that name listed.},{@pemit v(#)=MU* deleted from the list.;&[u(fnc-conv,v(0))] [con(me)]}
+&CMD-MUD mud location machine=$+mud *:@switch [words(lattr(con(me)/[u(fnc-conv,v(0))]*))]=0,{@pemit v(#)=There's not a MU* by that name listed.},1,{@pemit v(#)=[u(fmt-mud,get(con(me)/[lattr(con(me)/[u(fnc-conv,v(0))]*)]))]},{@pemit v(#)=Please be more specific, I'm not sure which MU* you mean.}
+&FMT-MUD mud location machine=MU* Name: [index(v(0),|,1,1)]%rCurrent Location: [index(v(0),|,3,1)]%rEntered: [convsecs(index(v(0),|,4,1))] by [name(index(v(0),|,2,1))]
+&FNC-CONV mud location machine=[ucstr(edit(edit(v(0),%b,$B),',$A))]
+&CMD-MUDS_ARG mud location machine=$+muds *:@pemit v(#)=Sites are known for the following MU*s:%r%r[ljust(MU*,25)]Location%r[iter(sort(lattr(con(me)/[u(fnc-conv,v(0))]*)),u(fmt-muds,get(con(me)/##)))]
+@set mud location machine=VISUAL
+@create Mud Database=10
+&LEGIONMUSH Mud Database=LegionMUSH | #86 | arms.gps.caltech.edu 2995
+&JUSTICE$BMUSH Mud Database=Justice MUSH | #86 | st6000.sct.edu 6250 | 739650584
+&TWOMOONS Mud Database=TwoMoons | #86 | durrance.colorado.edu 4201 | 739650625
+&REDSTAR Mud Database=RedStar | #86 | kyriath.cygnus.com 6666 | 739651442
+&SPACE$BMADNESS Mud Database=Space Madness | #86 | muds.okstate.edu 6250 | 739652227
+&TOOMUSH Mud Database=TooMUSH | #86 | lodestar.gb.nrao.edu 4201 | 739652327
+&FURRYMUCK Mud Database=FurryMUCK | #86 | 138.74.0.10 8888 | 739693622
+&STARWARSMUSH$B Mud Database=StarWarsMUSH  | #110 |  durrance.colorado.edu 4402 | 740150131
+&NEVERENDINGSTORY Mud Database=NeverEndingStory | #115 | jove.cs.pdx.edu 9999 | 740280108
+&MASQ Mud Database=Masq | #86 | cheops.acusd.edu 4444 | 740726735
+&AMBER Mud Database=Amber | #2085 | muds.okstate.edu 5150 | 741064889
+&SHARDS Mud Database=Shards | #357 | cs.weber.edu 7777 | 741201929
+&DAWNSISTERS Mud Database=DawnSisters | #86 | (currently awaiting a new site) | 741460522
+&ROBOTECH Mud Database=Robotech | #2394 | csa.bu.edu 4201 | 741460930
+&TELA$BMAGICA Mud Database=Tela Magica | #46 | blegga.cac.washington.edu 6250 | 741586551
+&NARNIA Mud Database=Narnia | #2251 | osiris.cs.sfu.ca 6250 | 741718104
+&DRAGONDAWN Mud Database=DragonDawn | #546 | elof.iit.edu 2508 | 741740922
+&INCARNATIONS Mud Database=Incarnations | #86 | zippy.sonoma.edu 4201 | 742070390
+&PERNMUSH Mud Database=PernMUSH | #2251 | cesium.clock.org 4201 | 742183001
+&TINYCWRU Mud Database=TinyCWRU | #4473 | 129.22.24.22 4201 | 742232221
+&C-CMD Mud Database=TinyTIM | #83 | yay.mdc.com 5440 | 742831532
+&S-SWP Mud Database=DragonsFire | #2250 | netman.widener.edu 4444 | 742977874
+&TOONMUSH$BII Mud Database=ToonMush II | #4510 | Nimitz.Mit.edu 1940 | 743236032
+&MYSTIC Mud Database=Mystic | #46 | ts3-06.upenn.edu 3000 | 743679283
+&MIDNIGHT$BECTASY Mud Database=Midnight Ectasy | #46 | sun3140r.ccs.northeastern.edu 3000 | 743679295
+&CHIVALRYMUSH Mud Database=ChivalryMUSH | #1 | 128.205.3.103 5440 | 743710869
+&DREAMLANDS Mud Database=Dreamlands | #4736 | eskinews.eskimo.com 12057 or 162.148.13.44 12057 | 743893145
+&KINGDOMS$BPAST Mud Database=Kingdoms Past | #9 | quadra.gb.nrao.edu 8080 | 744190853
+&SOUCON Mud Database=SouCon | #2251 | kyriath.cygnus.com 4201, but looking for a new one | 744355771
+&ELYSIUM Mud Database=Elysium | #86 | polaris.unm.edu 1963 | 744510984

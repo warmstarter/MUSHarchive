@@ -1,0 +1,40 @@
+#!/usr/local/bin/perl
+# 
+# ascii2mush - convert ascii art to a mush attribute
+# By Javelin
+#
+# Usage: ascii2mush < ascii.txt > mush.txt
+# (Or as a pipe with tinyfugue's /quote, etc.)
+#
+# If you use tabs in your art, use 'expand' to turn them into spaces
+# first before piping to this.
+#
+# If you use the -e switch, brackets, parens, and %'s are not escaped,
+# so you can insert mush functions/subs
+#
+for ($i = 80; $i > 3; $i--) {
+  $spaces = " " x $i;
+  $prog .= "s/$spaces/[space($i)]/g;";
+}
+my $evals = 0;
+while ($ARGV[0] =~ /^-/) {
+  my $sw = shift(@ARGV);
+  $evals = 1 if $sw eq "-e";
+}
+while (<>) {
+  chop;		# Remove the newline
+  s/\\/\\\\/g;  # Escape backslashes
+  s/\[/\\[/g unless $evals;   # Escape brackets
+  s/\]/\\]/g unless $evals;   # Escape brackets
+  s/\)/\\)/g unless $evals;   # Escape parens
+  s/\(/\\(/g unless $evals;   # Escape parens
+  s/%/\\%/g unless $evals;	# Escape percent signs
+  s/^\$/\\\$/;  # Escape leading $
+  s/^\^/\\\^/;  # Escape leading ^
+  eval $prog;   # Change multiple spaces to space() calls
+  s/ /%b/g;	# Change spaces to %b's
+  $output .= $_ . "%r";		# Add the line, with a %r at the end
+}
+print "&ATTRIBUTE OBJECT = $output\n";
+
+

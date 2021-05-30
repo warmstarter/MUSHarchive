@@ -1,0 +1,27 @@
+@create Who Command
+@link Who Command=[owner(me)]
+@set Who Command=WIZARD
+@set Who Command=SAFE
+@set Who Command=!NO_COMMAND
+&ON_DUTY Who Command=[iter([get_eval(#80/onduty)],[ansi(c,[name(##)][switch([hasflag(##,Wizard)],1,[ansi(hr,(W))],0,[ansi(b,(R))],)]
+&EMPIRE_FILTER Who Command=[switch(get(%0/Empire),get(%#/Empire),1,0)]
+&EENTRY Who Command=[ansi(switch(u(Flag,%0),WIZARD,r,ROYALTY,y,BUILDER,b,c),ljust(Name(%0),15))] [ansi(y,ljust(get(%0/Alias),7))] [ansi(r,rjust(u(Onfor,%0),9))] [ansi(m,rjust(u(Idle,%0),4))] [ansi(g,ljust(get(%0/Class),15))] [ansi(hr,ljust(get(%0/Organization),28))]
+&EHEADER Who Command=[ansi(hb,repeat(*,79))]%r[center(Dark Skies TrekMUSH,79)]%r[center(Connected Players,79)]%r[ansi(hb,repeat(*,79))]%r[ansi(c,Name%b%b%b%b%b%b%b%b%b%b%b%bAlias%b%b%b%b%b%bOn For Idle Class%b%b%b%b%b%b%b%b%b%b%bOrganization)]%r[ansi(hr,repeat(=,79))]
+&ENTRY Who Command=[switch(ucstr(get(%0/Sex)),M*,ansi(hb,M),F*,ansi(hm,F),ansi(hx,O))]%b%b%b[ansi(switch(u(Flag,%0),WIZARD,r,ROYALTY,y,BUILDER,b,c),ljust(Name(%0),16))][ansi(y,ljust(get(%0/Alias),6))] [ansi(r,rjust(u(Onfor,%0),10))][ansi(m,rjust(u(Idle,%0),5))] [ansi(g,ljust(get(%0/Class),16))][ansi(hc,ljust(get(%0/Empire),16))]
+&HEADER Who Command=[ansi(hb,repeat(*,79))]%r[center(Dark Skies TrekMUSH,79)]%r[center(Connected Players,79)]%r[ansi(hb,repeat(*,79))]%r[ansi(c, Sex Name%b%b%b%b%b%b%b%b%b%b%b%bAlias%b%b%b%b%b%bOn For Idle Class%b%b%b%b%b%b%b%b%b%b%bEmpire)]%r[ansi(hr,repeat(=,79))]
+&SEE_ALL Who Command=[or(or(hasflag(%0,wizard),hasflag(%0,royalty)),haspower(%0,see_all))]
+&RDISPLAY Who Command=[setq(0, switch(grab(v(lengths),%0 *,|),,1,rest(#$)))][switch(gt(strlen(%1),r(0)),1,right(%1,r(0)),rjust(%1,r(0)))]
+&IDLESCALE Who Command=[switch(lt(%0,60),1,seconds,switch(lt(%0,3600),1,minutes,switch(lt(%0,86400),1,hours,days)))]
+@IDLE Who Command=[switch([setq(0,idle(name(%0)))][u(idlescale,r(0))],seconds,[r(0)]s,minutes,[div(r(0),60)]m,hours,[div(r(0),3600)]h,days,[div(r(0),86400)]d)]
+&CAN_SEE Who Command=[or(u(see_all,%0),not(hidden(%1)))]
+&DAYS Who Command=[div(%0,86400)]
+&MINUTES Who Command=[switch(lt(div(mod(%0,3600),60),10),1,0[div(mod(%0,3600),60)],[div(mod(%0,3600),60)]
+&HOURS Who Command=[switch(lt(div(mod(%0,86400),3600),10),1,0[div(mod(%0,86400),3600)],div(mod(%0,86400),3600))]
+&ONFOR Who Command=[switch(gt(conn(name(%0)),86400),1,[u(days,conn(name(%0)))]d)] [u(hours,conn(name(%0)))]:[u(minutes,conn(name(%0)))]
+@SEX Who Command=[switch(poss(%0),his,M,her,F,its,O)]
+&LENGTHS Who Command=sex 3|name 15|alias 7|onfor 9|idle 4|class 15|empire 11|org 19
+&DISPLAY Who Command=[setq(0, switch(grab(v(lengths),%0 *,|),,1,rest(#$)))][switch(gt(strlen(%1),r(0)),1,left(%1,r(0)),ljust(%1,r(0)))]
+@VA Who Command=$who:@pemit %#=[u(Header)][iter(lwho(),switch(u(Can_See,%#,##),1,%r[u(Entry,##)]))]%r[ansi(hb,repeat(*,79))]%r[ansi(hy,ADMIN ON DUTY)][ansi(hw,:)] [u(on_duty)]%r[ansi(hb,repeat(*,79))][ansi(hm,%rThere are [words(lwho())] players connected.)]%r[ansi(r,Wizard)] - [ansi(y,Royalty)] - [ansi(b,Builder)] - [ansi(c,Player)] - [ansi(hy,Empire Head)]{
+&SECONDS Who Command=[mod(%0,60)]
+@VB Who Command=$ewho:@pemit %#=[u(EHeader)][iter(filter(Empire_Filter,lwho()),switch(u(Can_See,%#,##),1,%r[u(EEntry,##)]))]%r[ansi(hm,There are [words(filter(Empire_Filter,lwho()))] players in Empire [get(%#/Empire)] connected.)]%r[ansi(r,Wizard)] - [ansi(y,Royalty)] - [ansi(b,Builder)] - [ansi(c,Player)]
+&FLAG Who Command=[switch(get(%0/Class),Builder,BUILDER,switch(hasflag(%0,WIZARD),1,WIZARD,switch(hasflag(%0,Royalty),1,ROYALTY,OTHER)))]

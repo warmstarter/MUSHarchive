@@ -1,0 +1,14 @@
+@create Backpack
+@set Backpack = OPAQUE
+@set Backpack = VISUAL
+@set Backpack = !NO_COMMAND
+@lock Backpack == me
+@ARECEIVE Backpack=@emit [u(describe)]
+@set Backpack/ARECEIVE=no_command
+&BACKPACK_DESC Backpack=[ansi(hy,This is a new feature of the Endumikan Backpack! You can now add your own description to your backpack! Just set)] [ansi(g,&backpack_desc)] [ansi(hy,to whatever you want\, and it will appear in place of this message! It evaluates\, so you can even use commands!)]
+&CMD_BACKPACK_HELP Backpack=$backpack help:@pemit %#=[ansi(b,repeat(-=-+-=,13))]%RCongratulations on purchasing an Endumikan backpack.%RThese high quality backpacks are made to last. Here are some special commands you can use with them.%R%R[ljust([ansi(hg,-)] [ansi(y,remove <thing>)],50,.)]Get something out of the backpack.%R[ljust([ansi(hg,-)] [ansi(y,give backpack=<thing>)],50,.)]Put something into the backpack.%R%RIf you need any help with this backpack, or would like to see a feature added, please @mail Kawika.%R[ansi(b,repeat(-=-+-=,13))]
+&CMD_BGET Backpack=$remove *:drop %0;@pem %#=[u(describe)]
+&CMD_BPUT Backpack=
+&CREDITS Backpack=This backpack was created by Kawika at Dynamix. He is also at Star Wars: Galactic Troubles as Scott. Please leave this attribute on the backpack.
+@DESCRIBE Backpack=[u(backpack_desc)]%R%R[ansi(b,repeat(-=-+-=,13))]%R[ljust([ansi(hr,Name)],50)][ljust([ansi(hr,DBref )],10)]%r[iter([lcon(me)],[ljust([ansi(y,[name(##)])],46)][ljust(\([num(##)]\) ,10)],,%r)]%r[ansi(b,repeat(-=-+-=,13))]%RType '[ansi(g,backpack help)]' for help.
+@set Backpack/DESCRIBE=no_command visual

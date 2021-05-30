@@ -1,0 +1,288 @@
+@@ Roulette 1.5 by Javelin <dunemush@pennmush.org>
+@@ Released under the same license terms as the PennMUSH server.
+@@ (I.e. no commercial use without prior permission from me,
+@@ you must return improvements to me, you must maintain the
+@@ credit line in the help text).
+@@
+@@ This code is in mpp format. It is known to work on PennMUSH 1.7.3
+@@ and probably will need a little modification for other versions/servers
+@@ It requires a server that supports @break.
+@@
+@@ This code provides a single-zero roulette table. Features include:
+@@ * Automated croupier spins wheel after 10 seconds of no betting.
+@@ * All legal roulette bets are supported, standard European odds
+@@ * Colorful table display, including showing what's bet on
+@@
+@@ Currently assumes that you track player chips by using a bank object
+@@ (dbref in table/BANK) that records chips in attributes named by
+@@ player dbrefs. You'll probably have to modify these attributes
+@@ to work with your money system:
+@@  MONEY, RESULT2, and CMD_BET_* attributes
+@@ If you prefer a male croupier, set SUBJ to 'He'
+@@ 
+@@ Legal bets and odds table:
+@@ straight up (1 number) 35-1
+@@ split bet (2 adjacent) 17-1
+@@ street bet (3 in a row) 11-1
+@@ corner bet (4 in a square) 8-1
+@@ Line bet (2 adjacent street bets) 5-1
+@@ Column bet (12 in a column) 2-1
+@@ Dozen bet (1st, 2nd, 3rd 12) 2-1
+@@ Red/black, even/odd, low/high 1-1
+@@ Interface:
+@@ bet <money> on <bet>
+
+@create Roulette table
+
+@DESCRIBE Roulette table=
+   You glance from the well-coiffed croupier down to the felt of the table.
+   %r[u(table)]%rType 'use table' for play instructions.
+
+@use roulette table=
+       ROULETTE by Javelin
+        [wrap(
+	[space(2)]Roulette is played by laying a bet on one or more numbers. 
+	If the wheel lands on a number you've bet on\, you win. 
+	The amount you win depends on the bet (betting more numbers 
+	at once results in smaller winnings).,72,72,%r[space(2)])]%r
+	BET COMMAND:%r%b%bbet <amount> on <type of bet>%r
+	TYPES OF BET:%r%b%b"Straight up": A single number, pays 35:1 (bet 10 on 3)%r
+	%b%b"Split bet": Two adjacent (horiz or vert) numbers, pays 17:1 (bet 10 on 1-4)%r
+	%b%b"Street bet": Three numbers in a vertical row, pays 11:1 (bet 10 on 1-2-3)%r
+	%b%b"Corner bet": Four numbers in a square, pays 8:1 (bet 10 on 1-2-4-5)%r
+	%b%b"Line bet": Six numbers (two adjacent streets), pays 5:1  (bet 10 on 1-2-3-4-5-6)%r
+	%b%b"Column bet": Twelve numbers in a horiz column, pays 2:1 (bet 10 on col1)%r
+	%b%b"Dozen bet": Twelve numbers in a group, pays 2:1 (bet 10 on 1st)%r
+	%b%b"Even money bets": (bet 10 on \[high|low|red|black|even|odd\]%r
+	Note: 0 loses on all bets except a bet specifically on 0.
+
+
+&nextbet roulette table=1
+&bank roulette table=#255
+&ok_to_bet roulette table=1
+
+&wheel table = 0 32 15 19 4 21 2 25 17 34 6 27 13 36 11 30 8 23 10 5 24 16 33 1 20 14 31 9 22 18 29 7 28 12 35 3 26
+&colors roulette table=GRXRXRXRXRXXRXRXRXRRXRXRXRXRXXRXRXRXR
+@startup roulette table=@drain me; @wipe me/bet_*; &nextbet me=1
+&spin roulette table=@drain me;
+	@wait 1 = { @emit [v(subj)] spins the roulette wheel and drops the ball onto the wheel.;
+	  @wait 2 = { @emit The wheel slows.;
+            @wait me = { @wipe me/bet_*; @emit The croupier says, "Place your bets."; 
+                         &ok_to_bet me = 1 };
+            @tr me/result2 }}
+&colattr roulette table=[switch(%0,0,G,[mid(v(colors),%0,1)]w)]
+&colname roulette table=[switch(mid(v(colors),%0,1),G,green,R,red,X,black)]
+&number roulette table=[ansi(u(colattr,%0),[switch(%0,0,,<10,%b)][switch(u(isbet,%0),>1,$,%b)]%0[switch(u(isbet,%0),>0,$,%b)])]
+&plainnum roulette table=[ansi(u(colattr,%0),[switch(%0,0,,<10,%b)]%b%0%b)]
+&blank roulette table=[ansi(u(colattr,%0),[switch(%0,0,,<10,%b)]%b%b[switch(%0,>9,%b)]%b)]
+@@ Report results
+@@ Pay bets
+&subj roulette table=She
+&sort_result_once roulette table=
+	[switch(1,cand(regmatch(%0,\[a-z\]),not(regmatch(%1,\[a-z\]))),1,
+		regmatch(%0,\[a-z\]),comp(%0,%1),
+		not(regmatch(%1,\[a-z\])),comp(%0,%1),
+		-1)]
+
+&sort_result roulette table=[sortby(SORT_RESULT_ONCE,%0)]
+
+@@ Given a number from the wheel (%0), what are all winning bets?
+@@ We'd like to return their attribute names
+&fil_winners roulette table=[gt(ulocal(compute_result2,%0),0)]
+&winners roulette table=[iter(lattr(me/bet_*),if(u(fil_winners,[v(##)] %0),
+	##))]
+
+@@ Separate bets into winners and losers.
+@@ Announce each winner individual, but all the losers together.
+&result2 roulette table=@emit The ball bounces into a slot: [setq(0,first(shuffle(v(wheel))))][u(plainnum,%q0)], [u(colname,%q0)]; 
+  @dol/notify [setr(3,u(winners,%q0))] = 
+     { @emit The croupier looks at [name(setr(1,extract(v(##),4,1)))]. 
+      "[ulocal(fullname,first(v(##)))], winner." 
+       [v(subj)] passes [obj(%q1)] [u(count,setr(2,ulocal(compute_result,%q0,v(##))))].;
+       &%q1 [v(bank)] = [add(xget(v(bank),%q1),%q2)]
+      };
+  @emit [setq(5,u(listformat,setunion(iter(munge(sort_result,iter(setr(4,setdiff(lattr(me/bet_*),%q3)),first(v(itext(0)))),%q4),ulocal(fullname,first(v(itext(0)))), ,|),,|),and,|))][switch(%q5,,,"%q5\, no good\," the croupier announces.)]
+
+&fullname table=[switch(%0,col*,edit(%0,col,Column%b),1st,1st dozen,2nd,2nd dozen,3rd,3rd dozen,capstr(%0))]
+
+&listformat table=switch(words(%0,%2),0,,1,,2,first(%0,%2) %1%b,edit(extract(%0,1,dec(#$),%2),%2,\,%b)\, %1%b)[last(%0,%2)]
+
+@@ Given a list composed of number and a bet attribute (%0)
+@@ determine if the bet's a winner. 
+@@ If so, return the amount won. If not, return 0
+@@ Call with ulocal. %q0 is the bet's name. %q1 is the number
+&compute_result2 roulette table=
+	[setq(1,last(%0))]
+	[setq(0,first(%0))][setq(9,extract(%0,3,1))]
+	[switch(1,eq(%q0,%q1),%q9,eq(%q1,0),0,regmatch(%q0,^%q1-|-%q1-|-%q1$),%q9,
+	  cand(regmatch(%q0,col(\\d),-1 2),eq(mod(%q1,3),mod(%q2,3))),%q9,
+	  cand(regmatch(%q0,(\\d)\[snr\],-1 2),gt(%q1,mul(dec(%q2),12)),
+		lte(%q1,mul(%q2,12))),%q9,
+	  cand(strmatch(%q0,odd),eq(mod(%q1,2),1)),%q9,
+	  cand(strmatch(%q0,even),eq(mod(%q1,2),0)),%q9,
+	  cand(strmatch(%q0,high),gt(%q1,18)),%q9,
+	  cand(strmatch(%q0,low),lte(%q1,18)),%q9,
+	  cand(strmatch(%q0,red),strmatch(u(colname,%q1),red)),%q9,
+	  cand(strmatch(%q0,black),strmatch(u(colname,%q1),black)),%q9,
+	0)]
+
+@@ Given a number (%0) and a bet attribute (%1), determine if the bet's a 
+@@ winner. If so, return the amount won. If not, return 0
+@@ Call with ulocal. %q0 is the bet's name.
+&compute_result roulette table=
+	[setq(0,first(%1))][setq(9,extract(%1,3,1))]
+	[switch(1,eq(%q0,%0),%q9,eq(%0,0),0,regmatch(%q0,^%0-|-%0-|-%0$),%q9,
+	  cand(regmatch(%q0,col(\\d),-1 1),eq(mod(%0,3),mod(%q1,3))),%q9,
+	  cand(regmatch(%q0,(\\d)\[snr\],-1 1),gt(%0,mul(dec(%q1),12)),
+		lte(%0,mul(%q1,12))),%q9,
+	  cand(strmatch(%q0,odd),eq(mod(%0,2),1)),%q9,
+	  cand(strmatch(%q0,even),eq(mod(%0,2),0)),%q9,
+	  cand(strmatch(%q0,high),gt(%0,18)),%q9,
+	  cand(strmatch(%q0,low),lte(%0,18)),%q9,
+	  cand(strmatch(%q0,red),strmatch(u(colname,%0),red)),%q9,
+	  cand(strmatch(%q0,black),strmatch(u(colname,%0),black)),%q9,
+	0)]
+
+&isbet roulette table=[words(regrep(me,BET_*,^%0\\s))]
+&isyourbet roulette table=[words(regrep(me,BET_*,^%0\\s+\\d+\\s+\\d+\\s+%1$))]
+
+@@ u(betmark,high,%#,%b)
+&betmark roulette table=[switch(0,u(isbet,%0),%2,u(isyourbet,%0,%1),$,ansi(hg,$))]
+
+&table roulette table=
+	[space(4)][iter(lnum(12),[center(u(betmark,[setr(9,add(1,mul(##,3)))]-[inc(%q9)]-[add(2,%q9)],%#,%b),4)][u(betmark,lnum(%q9,add(5,%q9),-),%#,%b)],%b,)]
+	%r[space(4)][iter(lnum(12),[ljust(u(blank,add(1,mul(##,3))),4)])] \\
+	%r[space(4)][iter(lnum(12),[ljust(u(number,setr(9,add(1,mul(##,3)))),4)][u(betmark,%q9-[add(%q9,3)],%#,%b)],%b,)] |-col1 [u(betmark,col1,%#)]
+	%r[space(4)][iter(lnum(12),ljust(u(blank,add(1,mul(##,3))),4))] /
+	%r[space(4)][iter(lnum(12),[center(%b[u(betmark,[setr(9,add(1,mul(##,3)))]-[inc(%q9)],%#)],4)][u(betmark,%q9-[inc(%q9)]-[add(%q9,3)]-[add(%q9,4)],%#,%b)],%b,)]
+             %r[u(blank,0)]%b[iter(lnum(12),[ljust(u(blank,add(2,mul(##,3))),4)])] \\
+	%r[u(number,0)]%b[iter(lnum(12),[ljust(u(number,setr(9,add(2,mul(##,3)))),4)][u(betmark,%q9-[add(%q9,3)],%#,%b)],%b,)] |-col2 [u(betmark,col2,%#)]
+             %r[u(blank,0)]%b[iter(lnum(12),[ljust(u(blank,add(2,mul(##,3))),4)])] /
+	%r[space(4)][iter(lnum(12),[center(%b[u(betmark,[setr(9,add(2,mul(##,3)))]-[inc(%q9)],%#)],4)][u(betmark,%q9-[inc(%q9)]-[add(%q9,3)]-[add(%q9,4)],%#,%b)],%b,)]
+	%r[space(4)][iter(lnum(12),[ljust(u(blank,add(3,mul(##,3))),4)])] \\
+	%r[space(4)][iter(lnum(12),[ljust(u(number,setr(9,add(3,mul(##,3)))),4)][u(betmark,%q9-[add(%q9,3)],%#,%b)],%b,)] |-col3 [u(betmark,col3,%#)]
+	%r[space(4)][iter(lnum(12),[ljust(u(blank,add(3,mul(##,3))),4)])] /
+	%r%b%b%b|--[center(1st 12,15,-)][u(betmark,1st,%#,-)]-
+	|--[center(2nd 12,15,-)][u(betmark,2nd,%#,-)]-
+	|--[center(3rd 12,15,-)][u(betmark,3rd,%#,-)]-|
+	%r%b%b%b|---Low-[u(betmark,low,%#,-)]-
+	|--Even-[u(betmark,even,%#,-)]-
+	|---[ansi(r,Red)]-[u(betmark,red,%#,-)]-
+	|--Black[u(betmark,black,%#,-)]-
+	|---Odd-[u(betmark,odd,%#,-)]-
+	|--High-[u(betmark,high,%#,-)]-|
+
+&money roulette table=[default([v(bank)]/%0,0)]
+&minimum roulette table=1
+@@ Check that bet is legal
+@@ Check that player has money
+@@ Place the bet - an attribute containing the bet type, the amount bet,
+@@ the amount to be returned on a win, and the player
+&cmd_bet_nums roulette table=$^bet (\d+) on ((\d+)(-\d+)*)$:
+  @break [switch(0,
+	lte(v(minimum),%1),
+	 1[pemit(%#,The table minimum is [v(minimum)].)], 
+	[setq(0,sort(%2,n,-,-))][ulocal(okgroup,%q0)],
+	 1[pemit(%#,You can't bet on that.)], 
+	v(ok_to_bet),
+         1[pemit(%#,Your bet is too late for this spin.)],
+        gte(u(money,%#),%1),
+         1[pemit(%#,You can not afford that bet.)],
+       0)];
+      @emit %N places [u(count,%1)] on %q0.;
+      &%# [v(bank)] = [sub(u(money,%#),%1)];
+      &bet_[v(nextbet)] me = %q0 %1 [mul(div(36,words(%q0,-)),%1)] %#;
+      &nextbet me = [inc(v(nextbet))];
+      @drain me;
+      @wait me/10={
+	@emit "No more bets, please," says the croupier. "Les joues sont fait."; &ok_to_bet me=0; @tr me/spin}
+
+@set table/cmd_bet_nums=regexp
+
+@@ What's a legal group? Call with ulocal
+@@ A single number 0-36
+@@ A number N 1-33 and N+3
+@@ A number N 1-35 where N mod 3 > 0, and N+1
+@@ A number N 1-34 where N mod 3 = 1, and N+1 and N+2
+@@ A number N 1-32 where N mod 3 > 0, N+1, N+3, N+4
+@@ A number N 1-31 where N mod 3 = 1, and N+1, N+2, N+3, N+4, N+5
+&okgroup roulette table=
+	[iter(%0,setq(#@,##),-,)]
+	[switch(words(%0,-),
+	  1,
+	   cand(gte(%0,0),lte(%0,36)),
+	  2,
+	   cor(cand(gte(%q1,1),lte(%q1,33),eq(%q2,add(%q1,3))),
+	       cand(gte(%q1,1),lte(%q1,35),gt(mod(%q1,3),0),eq(%q2,inc(%q1)))),
+	  3,
+	   cand(gte(%q1,1),lte(%q1,34),eq(mod(%q1,3),1),eq(%q2,inc(%q1)),eq(%q3,inc(%q2))),
+	  4,
+	   cand(gte(%q1,1),lte(%q1,32),gt(mod(%q1,3),0),eq(%q2,inc(%q1)),
+		eq(%q3,add(%q1,3)),eq(%q4,inc(%q3))),
+	  6,
+	   cand(gte(%q1,1),lte(%q1,31),eq(mod(%q1,3),1),eq(%q2,inc(%q1)),
+	 	eq(%q3,inc(%q2)),eq(%q4,inc(%q3)),eq(%q5,inc(%q4)),
+		eq(%q6,inc(%q5))),
+	0)]
+
+&cmd_bet_cols roulette table=$^bet (\d+) on col([123]):
+  @break [switch(0,
+	lte(v(minimum),%1),
+	 1[pemit(%#,The table minimum is [v(minimum)].)], 
+	v(ok_to_bet),
+         1[pemit(%#,Your bet is too late for this spin.)],
+        gte(u(money,%#),%1),
+         1[pemit(%#,You can not afford that bet.)],
+      0)];
+      @emit %N places [u(count,%1)] on column %2.;
+      &%# [v(bank)] = [sub(u(money,%#),%1)];
+      &bet_[v(nextbet)] me = col%2 %1 [mul(3,%1)] %#;
+      &nextbet me = [inc(v(nextbet))];
+      @drain me;
+      @wait me/10={
+	@emit "No more bets, please," says the croupier. "Les joues sont fait."; &ok_to_bet me=0; @tr me/spin}
+
+@set table/cmd_bet_cols=regexp
+
+&cmd_bet_dozen roulette table=$^bet (\d+) on (1st|2nd|3rd):
+  @break [switch(0,
+	lte(v(minimum),%1),
+	 1[pemit(%#,The table minimum is [v(minimum)].)], 
+	v(ok_to_bet),
+         1[pemit(%#,Your bet is too late for this spin.)],
+        gte(u(money,%#),%1),
+         1[pemit(%#,You can not afford that bet.)],
+      0)];
+      @emit %N places [u(count,%1)] on the %2 dozen.;
+      &%# [v(bank)] = [sub(u(money,%#),%1)];
+      &bet_[v(nextbet)] me = %2 %1 [mul(3,%1)] %#;
+      &nextbet me = [inc(v(nextbet))];
+      @drain me;
+      @wait me/10={
+	@emit "No more bets, please," says the croupier. "Les joues sont fait."; &ok_to_bet me=0; @tr me/spin}
+
+@set table/cmd_bet_dozen=regexp
+
+&cmd_bet_half roulette table=$^bet (\d+) on (red|black|odd|even|high|low):
+  @break [switch(0,
+	lte(v(minimum),%1),
+	 1[pemit(%#,The table minimum is [v(minimum)].)], 
+	v(ok_to_bet),
+         1[pemit(%#,Your bet is too late for this spin.)],
+        gte(u(money,%#),%1),
+         1[pemit(%#,You can not afford that bet.)],
+      0)];
+      @emit %N places [u(count,%1)] on %2.;
+      &%# [v(bank)] = [sub(u(money,%#),%1)];
+      &bet_[v(nextbet)] me = %2 %1 [mul(2,%1)] %#;
+      &nextbet me = [inc(v(nextbet))];
+      @drain me;
+      @wait me/10={
+	@emit "No more bets, please," says the croupier. "Les joues sont fait."; &ok_to_bet me=0; @tr me/spin}
+
+@set table/cmd_bet_half=regexp
+
+&count roulette table=[switch(%0,1,a chip,%0 chips)]
+
+
+

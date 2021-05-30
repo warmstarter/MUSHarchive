@@ -1,0 +1,70 @@
+Bartender Parent(#71!LVhnM)
+Type: Thing Flags: COMBAT_OK LINK_OK VISUAL HALT NO_COMMAND MONITOR
+Owner: Oderus  Zone: *NOTHING*  OOC Credits: 1
+Parent: *NOTHING*
+Basic Lock: Oderus
+Powers:
+Warnings checked: none
+Created: Thu Jul 20 04:27:41 1995
+Last Modification: Thu May  2 21:45:03 1996
+HASLEFT [#6]: ^*has left.:@select [u(FUN_HASATTR,PLACE_%#)]=1,{&PLACE_PEOPLE_[v
+(PLACE_%#)] me=[setdiff(v(PLACE_PEOPLE_[v(PLACE_%#)]),%#)];&PLACE_%# me}
+HASDISCONNECT [#6]: ^*has disconnected.:@select [u(FUN_HASATTR,PLACE_%#)]=1,
+{&PLACE_PEOPLE_[v(PLACE_%#)] me=[setdiff(v(PLACE_PEOPLE_[v(PLACE_%#)]),%#)];
+&PLACE_%# me}
+AHEAR [#6$]: @sel %1=left.,@tr me/gone_do=%0,disconnected.,@tr me/discon_do=%0
+LISTEN [#6$]: * has *
+COMMENT_0 [#6]: If you decided to steal this code from this mush, Please give
+credit where credit is due. - Oderus.
+DESCRIBE [#6$v]: Simply @parent to your bartender object, set the object
+LISTENER, and edit the &DRINKS attr to the list of drinks you wish to serve.
+The menu will be nicely formatted. Don't forget to change this @desc too. %r
+Comments / Flames / Ideas to : Oderus
+DRINKS [#6]: Ale Beer Vodka Scotch Bourbon Rye Rum Sambuka Tequila Ceasar
+Paralyser
+DO_MENU [#6]: $menu:@pemit %#=[ansi(m,repeat(-,78))]%r[ansi(g,center(Beverage
+Menu,78))]%r[ansi(m,repeat(-,78))]%r[column(v(drinks))]
+DISCON_DO [#6]: @swi [hasflag(*%0,Connected)]=1,{@pemit %#=Spam monkey.},
+{&DRINK_[num(*%0)] me=;&DRINK_[num(*%0)]_LEFT me=;:quickly cleans up after %0
+as he shows [obj(*%0)] to the door.;@tel *%0=Out}
+GONE_DO [#6]: @swi [loc(*%0)]=[num(here)],{@pemit %#=Spam monkey.},{&DRINK_[num
+(*%0)] me=;&DRINK_[num(*%0)]_LEFT me=;:quickly cleans up after %0.}
+DOWN [#6]: $down:@swi [v(DRINK_%#)]=,{@pemit %#=You don't have a drink. Mabye
+yo u should 'buy <drink>' first.},{@tr me/DRINKING=%#,down}
+CHUG [#6]: $chug:@swi [v(DRINK_%#)]=,{@pemit %#=You don't have a drink. Mabye
+you should 'buy <drink>' first.},{@tr me/DRINKING=%#,chug}
+DOWN_NUM [#6]: 10
+CHUG_NUM [#6]: 5
+SIP_NUM [#6]: 1
+SIP [#6]: $sip:@swi [v(DRINK_%#)]=,{@pemit %#=You don't have a drink. Mabye you
+should 'buy <drink>' first.},{@tr me/DRINKING=%#,sip}
+BUY_DRINK [#6]: $buy *:@sel [hasattr(me,DRINK_%#)]|[gte(member(v(DRINKS),capstr
+(lcstr(%0))),1)]=0|1,{&DRINK_%# me=%0;@pemit %#=[name(me)] makes a [capstr
+(lcstr(%0))] and hands it to you.;@oemit here/%#=[name(me)] makes a [capstr
+(lcstr(%0))] and hands it to %n.;&DRINK_%#_LEFT me=10},1|*,{@pemit %#=You
+already have a drink. Finish it first.},*|0,{@pemit %#=That drink is not on the
+menu.  Type 'menu' for the list of available beverages.}
+DO_DRINK [#6]: $drink:@swi [v(DRINK_%#)]=,{@pemit %#=You don't have a drink.
+Mabye you should 'buy <drink>' first.},{@tr me/DRINKING=%#,drink}
+DRINK_NUM [#6]: 1
+DRINKING [#6]: @oemit here/%0 = [name(%0)] %1s [poss(%0)] [v(DRINK_%0)].;@pemit
+%0=You %1 your [v(DRINK_%0)].;&DRINK_%0_LEFT me=[sub(v(drink_%0_left),[v
+(%1_NUM)])];@swi [lte(v(DRINK_%0_LEFT),0)]=0,{},1,{@oemit here/%0= [name(%0)]
+finishes off [poss(%0)] [v(DRINK_%0)].;@pemit %0=You finish off your [v
+(DRINK_%0)].;&DRINK_%0 me=;&DRINK_%0_LEFT me=}
+ADESCRIBE [#6$]: @pemit %#=%r[name(me)] says, "To buy a drink, type 'buy
+<drinkname>'. You can 'drink' 'sip' 'chug' or 'down' your drink. Type 'menu'
+for a list of drinks."%r[ansi(h,NOTE:)] This bartender will soon charge for
+drinks.
+BUY_DRINK_FOR [#6]: $order * for *:@sel [pmatch(%1)]=#-1,{@pemit %#=No such
+player.},#-2,{@pemit %#=Be more specific.},{@sel [hasattr(me,DRINK_[pmatch
+(%1)])]|[gte(member(v(DRINKS),capstr(lcstr(%0))),1)]=0|1,{&DRINK_[pmatch(%1)]
+me=%0;@pemit %#=[name(me)] makes a [capstr(lcstr(%0))] and hands it to [name
+(pmatch(%1))].;@pemit [pmatch(%1)]=[name(me)] makes a [capstr(lcstr(%0))] and
+hands it to you\, compliments of %N.;@oemit here/%#=[name(me)] makes a [capstr
+(lcstr(%0))] and hands it to %n.;&DRINK_[pmatch(%1)]_LEFT me=10},1|*,{@pemit
+%#=That person already has a drink.},*|0,{@pemit %#=That drink is not on the
+menu.  Type 'menu' for the list of available beverages.}}
+Home: Coding Parent Room
+Location: Coding Parent Room
+_______________________________________________________________________________

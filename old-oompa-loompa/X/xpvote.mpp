@@ -1,0 +1,113 @@
+@@ Votes for XPs
+@@
+@@ An eligible (registered) player may cast up to N votes each week
+@@ for different other eligible players, optionally specifying
+@@ reasons. Votes may be changed until they are finalized
+@@ (typically triggered by cron once per week). After finalization,
+@@ each vote is converted to X xps for the recipient, who receives
+@@ @mail notification of their total votes and the list of reasons.
+@@
+@@ Copyright 2002 by Alan ("Javelin") Schwartz <dunemush@pennmush.org>.
+@@ This code released under the GNU Public License version 2 or later
+@@ (see http://www.gnu.org). If you fix something, please let me know.
+@@
+@@ Assumptions:
+@@   - PennMUSH w/side-effect functions on
+@@   - Player XPs stored on a wiz-only XP attribute on the player.
+@@   - A cron system to trigger the FINALIZE attribute weekly
+@@   - A function called sql()
+@@      If you don't use the PennMySQL patch, replace the call to SQL() 
+@@        in this code with @@()
+@@      If you do (and it's at least the 1.7.4 version), you probably 
+@@        want to build this table in your db:
+@@
+@@ create table votes (
+@@   id		INTEGER NOT NULL AUTO_INCREMENT,
+@@   PRIMARY KEY (id),
+@@   voter	INTEGER NOT NULL,
+@@   INDEX	(voter),
+@@   votee 	INTEGER NOT NULL,
+@@   INDEX 	(votee),
+@@   reason 	TEXT,
+@@   date 	TIMESTAMP
+@@ ) ;
+
+@@
+@@ Setup and configurable stuff
+@@
+
+@create Votes
+@create VoteData
+@set Votes=VD:[num(VoteData)]
+@tel VoteData=Votes
+
+&VOTES_PER_PLAYER votes = 7
+
+&XP_PER_VOTE votes = 0.25
+
+&ELIGIBLE votes = [not(hasflag(%0,unregistered))]
+
+@@
+@@ The main commands: +vote <p>[=<r>], +vote, +unvote <p>
+@@
+
+&DO_VOTE votes = $^\+vote ([^=|]+)\s*(=\s*([^|]+))?:
+  @switch/first 1=[strmatch(setr(0,pmatch(%1)),#-*)],
+	{ @pemit %#=I can't figure out who you mean. },
+    [strmatch(%#,%q0)],
+	{ @pemit %#=You can't vote for yourself. },
+    [not(u(eligible,%q0))],
+	{ @pemit %#=That player isn't eligible to receive votes. },
+    [gte(u(votesused,%#),v(VOTES_PER_PLAYER))],
+	{ @pemit %#=You've already used all your votes. You must wait until the next voting cycle or remove one of your votes with +unvote. },
+    [t(match(get(%VD/%#),%q0-*,|))],
+	{ @pemit %#=You've already voted for that player. },
+    { &%# %VD = [setunion(get(%VD/%#),%q0-%3,|)]; 
+      @pemit %#=You register a vote for [name(%q0)]. }
+
+&DO_UNVOTE votes = $^\+unvote (.+):
+  @switch/first 1=[strmatch(setr(0,pmatch(%1)),#-*)],
+	{ @pemit %#=I can't figure out who you mean. },
+    [strmatch(setr(1,grab(get(%VD/%#),%q0-*,|)),)],
+	{ @pemit %#=You haven't voted for that player yet. List votes with +vote. },
+    { &%# %VD = [setdiff(get(%VD/%#),%q1,|)]; 
+      @pemit %#=You remove your vote for [name(%q0)]. }
+
+&DO_VOTE_LIST votes=$^\+vote$:
+  @pemit %#=You may vote for up to [v(VOTES_PER_PLAYER)] players. You have voted for:%r
+	[iter(get(%VD/%#),[ansi(h,name(first(itext(0),-)))]
+	  [switch(setr(0,after(itext(0),-)),,,%r[wrap([space(4)]%q0,70,70,%r[space(4)])])],|,%r)]
+
+@@
+@@ Finalization (trigger via cron)
+@@
+@@ Lock the system, process all votes, unlock.
+@@ To process the votes, we invert the data.
+
+&finalize votes=
+  &VOTES_PER_PLAYER me=0; 
+  @wait me={ @wipe %VD; &VOTES_PER_PLAYER me=7 };
+  @dol [lattr(%VD/#*)] = 
+    think [iter(get(%VD/##),
+       [setq(0,R[first(itext(0),-)])][setq(1,get(%VD/%q0))]
+       [SQL(u(SQL_INSERT_VOTE,[after(##,#)],[after(first(itext(0),-),#)],[rest(itext(0),-)]))]
+       [set(%VD,%q0:[inc(first(%q1,|))]|[setunion(rest(%q1,|),after(itext(0),-),|)])],|)];
+  @wait 0={
+    @dol/notify [lattr(%VD/R#*)]= {
+      &XP [setr(0,after(##,R))] = [add(get(%q0/XP),mul(v(XP_PER_VOTE),setr(1,first(get(%VD/##),|))))];
+      @mail %q0=Votes/Congratulations! You have received %q1 +votes from other players this week.[switch(rest(get(%VD/##),|),,,%rReasons given included:%r[iter(rest(get(%VD/##),|),wrap(itext(0),72),|,%r%r)])]
+    }
+  }
+
+&sql_insert_vote votes=INSERT votes SET voter=%0, votee=%1[switch(%2,,,\, reason='[sqlescape(%2)]')]
+
+@@ Supporting stuff
+
+&votesused votes=[words(get(%VD/%#),|)]
+
+&lockeligible votes=[u(eligible,%#)]
+@lock/use Votes = lockeligible/1
+@set votes=wizard
+@set votes=!no_command
+
+@dol lattr(votes/DO_*)=@set votes/##=regexp

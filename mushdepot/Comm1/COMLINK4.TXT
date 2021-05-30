@@ -1,0 +1,23 @@
+@create Parent Cool Comlink(tm) v1.0
+@link Parent Cool Comlink(tm) v1.0=[owner(me)]
+@lock Parent Cool Comlink(tm) v1.0==[owner(me)]
+@set Parent Cool Comlink(tm) v1.0=!NO_COMMAND
+@set Parent Cool Comlink(tm) v1.0=LINK_OK
+@set Parent Cool Comlink(tm) v1.0=VISUAL
+@set Parent Cool Comlink(tm) v1.0=SAFE
+@set Parent Cool Comlink(tm) v1.0=HALT
+@set Parent Cool Comlink(tm) v1.0=MONITOR
+@VF Parent Cool Comlink(tm) v1.0=$setup:@switch [hasflag(me,inherit)]=0, {@pemit %#=You must type @set %!=INHERIT first.}, {@pemit %#=Setting up your Cool Comlink(tm) v1.0.;@name me=[name(owner(me))]'s Cool Comlink(tm) v1.0;@lock me=[owner(me)];@lock/use me=[owner(me)];@link me=[owner(me)];@set me=safe;@set me=monitor;@listen me=[v(listen)]}
+&OWNER Parent Cool Comlink(tm) v1.0=[switch(%#,owner(me),1,0)]
+&PAD Parent Cool Comlink(tm) v1.0=[switch(gte(strlen(%0),%1),1,left(%0,%1),%0[space(sub(%1,strlen(%0)))])]
+@VE Parent Cool Comlink(tm) v1.0=$prefix *=*:@pemit %#=[switch(v(alias_%0),,Comlink alias '%0' does not exist.,Prefix for alias '%0' ([v(alias_%0)]) set to '%1'.)];&title_%0 me=%1
+&SEMICOLON Parent Cool Comlink(tm) v1.0=;
+&ISPOSE Parent Cool Comlink(tm) v1.0=[switch(left(%0,1),:,10,;,01,00)]
+@VD Parent Cool Comlink(tm) v1.0=$listcom:@pemit %#={Alias[space(5)]%bChannel Name[space(8)]%bPrefix%r[repeat(=,75)][iter(lattr(me/alias_*),%r[u(pad,after(lcstr(##),alias_),10)] [u(pad,v(##),20)] [u(pad,v(title_[after(lcstr(##),alias_)]),45)])]%r[repeat(=,75)]}
+@VC Parent Cool Comlink(tm) v1.0=$.* *:@fo %#={[switch(v(alias_%0),,think Comlink alias '%0' does not exist.)];[switch(%1,on,@chan/on [v(alias_%0)],off,@chan/off [v(alias_%0)],who,@chan/who [v(alias_%0)],@chat [v(alias_%0)]=[escape([switch(u(ispose,%1),00,[v(semicolon)]: [switch(v(title_%0),,%1,[u(title_%0)] %1)],10,%1,01,[v(semicolon)][after(%1,;)])])])]}
+@VB Parent Cool Comlink(tm) v1.0=$delcom *:@fo %#={[switch(v(alias_%0),,think Comlink alias '%0' does not exist.,think Comlink alias '%0' deleted.)]};@switch [v(alias_%0)]=,,{&alias_%0 me;&title_%0 me}
+@VA Parent Cool Comlink(tm) v1.0=$addcom *=*:@fo %#={[switch(v(alias_%0),,think Comlink alias '%0' added for channel '%1'.,think Comlink alias '%0' already exists for channel [v(alias_%0)].)]};@switch [v(alias_%0)]=,{&alias_%0 me=%1}
+@DESCRIBE Parent Cool Comlink(tm) v1.0=A cool comlink, coded by Philip. Commands are:%r%r%tsetup - Sets up your comlink.%r%tsend <player>=<message> - Sends a message to <player> using your %r%t%t%t%t%b%bcomlink.%r%taddcom <alias>=<channel> - Adds an alias for a channel.%r%tdelcom <alias> - Deletes an alias.%r%tprefix <alias>=<title> - Sets your title for an alias.%r%tlistcom - Lists all aliases with their channels and titles.%r%t.<alias> <message> - Sends <message> on channel with <alias>.%r%rNote: This comlink must be owned by you and must be @set INHERIT to work.
+@VG Parent Cool Comlink(tm) v1.0=$send *:@pemit %#=Please use the +send command. Same syntax\, but more IC.
+@LISTEN Parent Cool Comlink(tm) v1.0=I'm sorry, but * wishes to be left alone now.
+@AMHEAR Parent Cool Comlink(tm) v1.0=@pemit [owner(me)]=%0's comlink is not activated.

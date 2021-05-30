@@ -1,0 +1,14 @@
+@create Econ Admin Tool
+@lock/Use Econ Admin Tool==me
+@lock/Basic Econ Admin Tool==me
+@set Econ Admin Tool = WIZARD
+@set Econ Admin Tool = SAFE
+@set Econ Admin Tool = !NO_COMMAND
+&DAT_ECV_AHEAR Econ Admin Tool=th [if(not(hasattr(me,building)),[switch([strmatch([num(*%0)],[v(driver)])],1,[switch([strmatch([zone(here)],[zone([loc([v(driver)])])])],1,[tel(me,[loc([v(driver)])])],0,[pemit([v(driver)],[name(me)] can't go there.%rYou stop driving the [name(me)].)][wipe(me/driver)])])])]
+&DAT_ECV_LISTEN Econ Admin Tool=* has left.
+@DESCRIBE Econ Admin Tool=Econ Administration Tools.
+@set Econ Admin Tool/DESCRIBE=no_command visual
+&NEW_MERCHANT Econ Admin Tool=$newmerchant *=*,*:th [setq(0,[create(%0 %(Merchant%))])][set(%q0,wiz)][set(%q0,!no_c)][parent(%q0,[v(merchant)][lock(%q0,=me)][set(%q0,NPC:yes)][set(%q0,sex:%1)][set(%q0,dat_store_inventory:%2)][tel(%q0,[loc(loc(me))])][pemit(%#,Done.)]
+&NEW_SUPPLIER Econ Admin Tool=$newsupplier *=*,*:th [setq(0,[create(%0 %(Supplier%))])][set(%q0,wiz)][set(%q0,!no_c)][parent(%q0,[v(supplier)])][set(%q0,NPC:yes)][lock(%q0,=me)][set(%q0,sex:%1)][set(%q0,dat_producing:%2)][tel(%q0,[loc(loc(me))])][pemit(%#,Done.)][iter(%2,[if(hasattr(v(npcdb),##_suppliers),[set(v(npcdb),##_suppliers:[get(v(npcdb)/##_suppliers)] %q0)],[set(v(npcdb),##_suppliers:%q0)])])]
+&SPAWN_ECV Econ Admin Tool=$spawn ecv:th [setq(0,[create(Econ Construction Vehicle)])][set(%q0,!no_command)][set(%q0,monitor)][set(%q0,wizard)][lock(%q0,=*dave)][lock(%q0/use,canuse/1)][parent(%q0,[v(ecv)])][set(%q0,listen:[v(dat_ecv_listen)])][set(%q0,ahear:[v(dat_ecv_ahear)])][tel(%q0,[loc(loc(me))])][pemit(%#,ECV spawned successfully.)]
+&VERSION Econ Admin Tool=3.0

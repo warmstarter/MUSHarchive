@@ -1,0 +1,62 @@
+
+@@ @create Master Inspection Object MIO
+@wipe MIO
+
+@@ Commands:
+@@ +inspect <target>                        *
+@@ +inspect/comment <target>=<comment>      *
+@@ +inspect/scan <builder>                  *
+@@ +inspect/board <builder>                 **
+@@ +inspect/list                            *
+@@ +inspect/purge <builder>                 **
+@@ +inspect/vis <object>=<duration>         *
+
+@@ ** = Wizard only
+@@ *  = Immortal only
+
+&fnc-can_inspect MIO=[and(not(match(%1,#-*)),or(hasflag(%0,wizard),and(hasflag(%0,immortal),hasflag(owner(%1),builder))))]
+
+&fnc-inspector MIO=[or(hasflag(%0,wizard),hasflag(%0,immortal))]
+
+&cmd-inspect MIO=$+inspect *:@pemit %#=[switch(u(fnc-can_inspect,%#,locate(%#,%0,*)),0,Permission denied.,u(fmt-inspect,locate(%#,%0,*)))]
+
+&fmt-inspect MIO=[name(%0)]([num(%0)][flags(%0)])%r[ljust([ljust(Type:,10)][type(%0)],30)][ljust(Owner:,10)][name(owner(%0))]%r[ljust(Lock:,10)][switch(lock(%0),,<none>,lock(%0))]%r[ljust(Parent:,10)][switch(parent(%0),#-1,<none>,[name(parent(%0))] ([parent(%0)][flags(parent(%0))]))]%r[ljust(Desc:,10)][get(%0/desc)]%r[u(fmt-inspect_[type(%0)],%0)]%r[ljust(Comments:,10)][get([con(me)]/Comment-[owner(%0)]_[num(%0)])]
+
+&fmt-inspect_EXIT MIO=[ljust(Dest:,10)][switch(owner(%0),owner(loc(%0)),,[name(owner(loc(%0)))]'s%b)][name(loc(%0))]([num(loc(%0))][flags(loc(%0))])%r[ljust(Succ:,10)][get(%0/succ)]%r[ljust(OSucc:,10)][get(%0/osucc)]%r[ljust(ODrop:,10)][get(%0/odrop)][switch(lock(%0),,,%r[ljust(Fail:,10)][get(%0/fail)]%r[ljust(OFail:,10)][get(%0/ofail)])][switch(hasflag(%0,audible),1,%r[ljust(Prefix:,10)][get(%0/prefix)]%r[ljust(Filter:,10)][get(%0/filter)]
+
+&fmt-inspect_ROOM MIO=[ljust(Succ:,10)][get(%0/succ)]%r[ljust(Exits:,10)][iter(lexits(%0),%r[space(10)][name(##)]([num(##)][flags(##)]) to [switch(owner(loc(##)),owner(%0),,[name(owner(loc(##)))]'s%b)][name(loc(##))]([num(loc(##))][flags(loc(##))]))]
+
+&fmt-inspect_PLAYER MIO=[ljust(From:,10)][get(%0/lastsite)]
+
+&fmt-inspect_THING MIO=[ljust(Succ:,10)][get(%0/succ)]%r[ljust(OSucc,10)][get(%0/osucc)]%r[ljust(Drop:,10)][get(%0/drop)]%r[ljust(ODrop:,10)][get(%0/odrop)][switch(lock(%0),,,%r[ljust(Fail:,10)][get(%0/fail)]%r[ljust((Ofail:,10)][get(%0/ofail)])]
+
+&cmd-inspect_comment MIO=$+inspect/comment *=*:@switch [u(fnc-can_inspect,%#,[setq(0,locate(%#,%0,*))][r(0)])]=0,{@pemit %#=Permission denied.},{@pemit %#=Adding your comment about [name(r(0))]...;&comment-[owner(r(0))]_[r(0)] [con(me)]=[switch([setq(1,get([con(me)]/comment-[owner(r(0))]_[r(0)]))][r(1)],,%1 (%n/[extract(time(),2,2)]),[r(1)] // %1 (%n/[extract(time(),2,2)]))]}
+
+&cmd-inspect_scan MIO=$+inspect/scan *:@pemit %#=[switch(u(fnc-can_inspect,%#,num(*%0)),0,Permission denied.,Checking [name(*%0)]:[map(map-inspect_scan,[setq(0,lattr([con(me)]/COMMENT-[num(*%0)]_*))][r(0)])]%r[words(r(0))] objects inspected.)]
+
+&map-inspect_scan MIO=%r[type(after(%0,_))] [name(after(%0,_))]([after(%0,_)][flags(after(%0,_))])
+
+&cmd-inspect_clear MIO=$+inspect/clear *:@switch [u(fnc-can_inspect,%#,[setq(0,locate(%#,%0,*))][r(0)])]=0,{@pemit %#=Permission denied.},{@pemit %#=Clearing comments about [name(r(0))]...;&comment-[owner(r(0))]_[r(0)] [con(me)]}
+
+&cmd-inspect_list MIO=$+inspect/list:@pemit %#=[switch(u(fnc-inspector,%#),0,Permission denied.,map(map-inspect_list,search(flags=PB)))]
+
+&map-inspect_list MIO=%rBUILDER [ljust(name(%0),20)] [words(lattr([con(me)]/COMMENT-%0*))] comments.
+
+&cmd-inspect_vis MIO=$+inspect/vis *=*:@switch [u(fnc-can_inspect,%#,[setq(0,locate(%#,%0,*))][r(0)])]=0,{@pemit %#=Permission denied.},{@pemit %#=[type(r(0))] [name(r(0))] will be set VISUAL for [setq(1,min(600,add(%1,0)))][r(1)] seconds.  ([fdiv(r(1),60)] minutes);@set [r(0)]=VISUAL;@wait [r(1)]={@set [r(0)]=!VISUAL;@pemit %#=[name(r(0))] ([num(r(0))][flags(r(0))]) is no longer VISUAL.}}
+
+&cmd-inspect_board MIO=$+inspect/board *:@switch [hasflag(%#,wizard)] [num(*%0)]=0 *,{@pemit %#=Permission denied.},* #-1,{@pemit %#=No such player.},{@pemit %#=Creating inspection board for [name(*%0)].;@fo [con(me)]={@create Inspection Board for [name(*%0)]};@wait 1={@desc [con(con(me))]=This is an inspection board for [name(*%0)]'s building, dated [time()].;@set [con(con(me))]=VISUAL;@dolist [lattr([con(me)]/COMMENT-[num(*%0)]*)]={&## [con(con(me))]=[get(con(me)/##)]}};@wait 10={@pemit %#=Inspection board has been delivered to [name(*%0)].;@chown [con(con(me))]=[num(*%0)];@link [con(con(me))]=[num(*%0)];@tel [con(con(me))]=[num(*%0)]}}
+
+&cmd-inspect_purge MIO=$+inspect/purge *:@switch [hasflag(%#,wizard)] [num(*%0)]=0 *,{@pemit %#=Permission denied.},* #-1,{@pemit %#=No such player.},{@pemit %#=Purging inspection comments for [name(*%0)].;@wipe [con(me)]/COMMENT-[num(*%0)]*}
+
+&cmd-inspect_quota MIO=$+inspect/quota *:@pemit %#=[switch(u(fnc-can_inspect,%#,num(*%0)),0,Permission denied.,Quota Usage for [name(*%0)]:%r[ljust(Total: [get(*%0/quota)],20)]Used: [setq(0,stats(name(*%0)))][first(r(0))]%r([extract(r(0),2,1)] rooms, [extract(r(0),3,1)] exits, [extract(r(0),4,1)] things, [extract(r(0),5,1)] players))]
+
+@@ Commands:
+@@ X +inspect <target>                        *
+@@ X +inspect/comment <target>=<comment>      *
+@@ X +inspect/scan <builder>                  *
+@@ X +inspect/quota <builder>                 *
+@@ X +inspect/board <builder>                 **
+@@ X +inspect/list                            *
+@@ X +inspect/clear <target>=<comment>        *
+@@ X +inspect/purge <builder>                 **
+@@ X +inspect/vis <object>=<duration>         *

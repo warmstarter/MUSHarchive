@@ -1,0 +1,158 @@
+# Craps Table
+#  A simple craps table with configurable bet amounts.
+# Author: Mark Hassman
+# Format: Mark Hassman (11/11/97)
+-
+@create Craps Table
+-
+@lock Craps Table=me
+-
+@set Craps Table= INHERIT
+-
+# Default starting bet/cost.
+@COST Craps Table=10
+-
+# Most servers require objects to use the money of their owner so
+# we'll use this function as a uselock (@lock/use)  If you want
+# to set a lower limit change 1000 to another number.
+&FUN-CASH Craps Table=[or(gte(money(owner(me)),1000),hasflag(owner(me),wizard))]
+-
+&TR-INITIAL-ROLL 
+Craps Table=[setq(0,[u(func-die)])][setq(1,[u(func-die)])][setq(2,[add(r(0),r(1))])][s
+etq(3,[u(func-initial-msg,[add(r(0),r(1))])])][setq(4,[u(func-initial-trigger,[r
+(2)])])];@switch [and(or(eq(r(2),7),eq(r(2),11)),eq(0,rand(4)))]=1,{@tr 
+me/tr-initial-roll},{@tr me/tr-go=%0,r(0),r(1),r(2),r(3),r(4)}
+-
+&IS-GOOD Craps Table=1
+-
+&CMD-ADJ-BET Craps Table=$set bet=*:@switch 
+and(gte([floor(%0)],[v(dat-min-bet)]),lte([floor(%0)],[v(dat-max-bet)]))=[v(dat-
+min-bet)],{@cost me=[floor(%0)];@pemit %#=Wagers now set to [floor(%0)] 
+gelm.;@oemit %N=[name(me)] says "Wager now at [floor(%0)] gelm."},{@pemit 
+%#=Bet limits are between [v(dat-min-bet)] and [v(dat-max-bet)] gelm. Try 
+again.}
+-
+&DATA-CRAPS-RULES Craps Table=Craps Rules:%rCraps uses two dice. On the initial roll, 
+a 7 or 11 wins double your money. If you roll a 2, 3, or 12 on the first roll, 
+you crap out and lose your money. If the roll is not a 2,3,7,11,12 then the 
+player sets his point and continues to roll until he rolls his point and wins 
+or a 7 which craps out and loses the bet.
+-
+&DATA-CRAPS-HELP Craps Table=%tThe craps game is fully automated. To initate a game, 
+just place a bet by giving [name(me)]  [v(cost)] gelm. Eg, 'give 
+[name(me)]=[v(cost)].%r%tThe current wager is [v(cost)].  To adjust the 
+wager, 'set bet=*' where * is a whole number between [v(dat-min-bet)] 
+and [v(dat-max-bet)]. %r[center(To report problems to
+[name(owner(me))],78)]
+-
+&CMD-BRETT Craps Table=$reset craps:@tr me/tr-clear
+-
+# Clean up anything in case of a crash
+@STARTUP Craps Table=@tr me/tr-clear
+-
+# Gotta have more than one verb for our output.
+&FUNC-GET-VERB 
+Craps Table=[extract([v(data-roll-verbs)],[add([rand(words([v(data-roll-verbs)]))],1)]
+,1)]
+-
+# Various verbs similiar to 'rolls'
+&DATA-ROLL-VERBS Craps Table=rolls tosses tumbles throws chucks hurls lofts pitches 
+flings slings casts launches
+-
+&CMD-CRAPS-RULES Craps Table=$craps rules:@pemit %#=[u(data-craps-rules)]
+-
+@DESCRIBE Craps Table=[name(me)] is seated at the craps table. Apparently, he runs a 
+craps game in a corner of the bar. If you need help, just type 'craps 
+help' or for rules, try 'craps rules'.%bA small sign at the corner 
+of the table indicates betting is currently at [v(cost)] gelm per toss.
+-
+&DATA-POINT Craps Table=5
+-
+&TR-CONTINUE-GO Craps Table=@pemit %0=%0 [u(func-get-verb)] the dice again. The black 
+is a %1 and the white a %2.;@pemit %0=[u(%4,%0,%3)];@tr me/%5=%0
+-
+&FUNC-CNT-TRIGGER 
+Craps Table=[switch(%0,7,tr-clear,[v(data-point)],tr-pay,tr-continue)]
+-
+&FUNC-CNT-MSG 
+Craps Table=[switch(%0,[v(data-point)],msg-win-point,7,msg-lose-craps,msg-missed-point
+)]
+-
+&TR-GO Craps Table=&data-point me=%3;@pemit %0=%0 [u(func-get-verb)] the bones. The 
+black die is a %1 and the white a %2.;@pemit %0=[u(%4,%0,%3)];@tr me/%5=%0
+-
+&FUNC-INITIAL-TRIGGER 
+Craps Table=[switch(%0,2,tr-clear,3,tr-clear,12,tr-clear,7,tr-pay,11,tr-pay,tr-continu
+e)]
+-
+&MSG-LOSE-BOXCARS Craps Table=%0 [u(func-get-verb)] boxcars and loses. [name(me)] 
+collects the bet of [v(cost)] gelm
+-
+&FUNC-INITIAL-MSG 
+Craps Table=[switch(%0,2,msg-lose-snake-eyes,3,msg-lose-craps,7,msg-win,11,msg-win,12,
+msg-lose-boxcars,msg-point)]
+-
+&TR-PAY Craps Table=[setq(0,[mul([v(cost)],2)])];@fo me={give %0=[r(0)]};@oemit 
+%0=[name(me)] congratulates %0 on the winning roll.;@wait [v(data-wait)]=@tr 
+me/tr-clear
+-
+&CMD-CRAPS-HELP Craps Table=$craps help:@pemit %#=[u(data-craps-help)]
+-
+@AUFAIl Craps Table="Sorry, %N, I'm out of gelm. No games today.
+-
+@uFAIL Craps Table=[name(me)] informs you that [v(data-player)] currently
+has a 
+game underway and that you will have to wait your turn.
+-
+&TR-CLEAR Craps Table=&data-player me;@emit [name(me)] gathers up the dice until the 
+next bet is placed.
+-
+&TR-CONTINUE 
+Craps Table=[setq(0,[u(func-die)])][setq(1,[u(func-die)])][setq(2,[add(r(1),r(0))])][s
+etq(3,[u(func-cnt-msg,[add(r(0),r(1))])])][setq(4,[u(func-cnt-trigger,r(2))])];@
+tr me/tr-continue-go=%0,r(0),r(1),r(2),r(3),r(4)
+-
+@APAYMENT Craps Table=@switch [u(fun-cash)]=1,{&data-player me=%N;@Tr 
+me/tr-initial-roll=%N;},{"Sorry, %N, I'm out of gelm. No games today.;give 
+%N=[v(cost)];}
+-
+@OPAYMENT Craps Table=bets [v(cost)] gelm and tosses the dice.
+-
+@PAYMENT Craps Table=You bet [v(cost)] gelm and toss the dice.
+-
+# returns 1 - 6
+&FUNC-DIE Craps Table=[add([rand(6)],1)]
+-
+&MSG-WIN-POINT Craps Table=%0 hits the point of %1!. [name(me)] pays off the bet of 
+[v(cost)] gelm.
+-
+&MSG-WIN Craps Table=%0 [u(func-get-verb)] a %1 and wins! [name(me)] pays off the bet 
+of [v(cost)] gelm.
+-
+&MSG-LOSE-CRAPS Craps Table=%0 craps out. [name(me)] collects the bet of [v(cost)] 
+gelm.
+-
+&MSG-LOSE-SNAKE-EYES Craps Table=%0 [u(func-get-verb)] snake-eyes! [name(me)] 
+collects the bet of [v(cost)] gelm.
+-
+&MSG-LOSE Craps Table=%0 [u(func-get-verb)] a %1. [name(me)] collects the bet of 
+[v(cost)] gelm.
+-
+&MSG-POINT Craps Table=%0 [u(func-get-verb)] a %1. [name(me)] notes the point and 
+awaits the next roll.
+-
+&MSG-MISSED-POINT Craps Table=%0 misses the point of [v(data-point)] with a %1. 
+[name(me)] watches the next roll.
+-
+&DATA-WAIT Craps Table=3
+-
+# Minimum bet is 1 coin
+&DAT-MIN-BET Craps Table=1
+-
+# Maximum bet is 250 coins
+&DAT-MAX-BET Craps Table=250
+-
+# Due to the nature of this lock, we do it last as the attrib needs
+# to exist.
+@lock/Use Craps Table=fun-cash/1
+-

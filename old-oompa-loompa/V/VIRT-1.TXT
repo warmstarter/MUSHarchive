@@ -1,0 +1,108 @@
+PARENT: Virtual Room(#15483VYh)
+Type: THING Flags: VISUAL PARENT_OK HALTED
+[switch(type(me),THING*,To use the Virtual Room Parent type:%r%t@dig <room>%r%t
+@set <room>=dark%r%t@parent <room>=#15483%r%tvr help%rEnjoy!,ROOM*,[switch
+(words(v(pos%#)),0*,[u(room_one_desc)][u(room_one_contents)][switch(words(v
+(room_one_exits)),0*,,%rObvious exits:%r[u(room_one_exits)])],[u(v(pos%#)_
+desc)][u(v(pos%#)_contents)][switch(words(v(v(pos%#)_exits)),0*,,%rObvious
+exits:%r[u(v(pos%#)_exits)])])])]
+Owner: Volcheka  Key: Volcheka Loonies: 1
+Aenter:@fo me=&people me=[get(me/people)][space()]%#;&rooms me=[get(me/rooms)]
+[space()][switch(strlen(v(last%#)),0*,room_one,v(last%#))];&[switch(strlen(v
+(last%#)),0*,room_one,v(last%#))]_ppl me=[get(me/[switch(strlen(v(last%#)),0*,
+room_one,v(last%#))]_ppl)][space()]%#;&pos%# me=[switch(strlen(v(last%#)),0*,
+room_one,v(last%#))]
+EXIT_CMD:$?-?:@switch [v(pos[switch(%#,[num(me)]*,%2,%#)])]=room_[switch(%0,1*,
+one,2*,two,3*,three,4*,four,5*,five,6*,six,7*,seven,8*,eight,9*,nine)],{@switch
+[member(v(exitlist),%0-%1)]=0,{@pemit [switch(%#,[num(me)]*,%2,%#)]=Huh?[space
+(2)]\(Type "help" for help.\)},{&room_[switch(%0,1*,one,2*,two,3*,three,4*,
+four,5*,five,6*,six,7*,seven,8*,eight,9*,nine)]_ppl me=[edit([v(room_[switch
+(%0,1*,one,2*,two,3*,three,4*,four,5*,five,6*,six,7*,seven,8*,eight,9*,nine)]
+_ppl)],[switch(%#,[num(me)]*,%2,%#)],space(0))];@dolist [v(room_[switch(%0,1*,
+one,2*,two,3*,three,4*,four,5*,five,6*,six,7*,seven,8*,eight,9*,nin,%0)]_ppl)]
+= @pemit ##=%N has left.;@dolist [v(room_[switch(%1,1*,one,2*,two,3*,three,4*,
+four,5*,five,6*,six,7*,seven,8*,eight,9*,nine,%1)]_ppl)] = @pemit ##=%N has
+arrived.;&room_[switch(%1,1*,one,2*,two,3*,three,4*,four,5*,five,6*,six,7*,
+seven,8*,eight,9*,nine)]_ppl me=[v(room_[switch(%1,1*,one,2*,two,3*,three,4*,
+four,5*,five,6*,six,7*,seven,8*,eight,9*,nine)]_ppl)][space()][switch(%#,[num
+(me)]*,%2,%#)];&rooms me=[extract(v(rooms),1,sub(member(v(people),[switch(%#,
+[num(me)]*,%2,%#)]),1))][space()]room_[switch(%1,1*,one,2*,two,3*,three,4*,
+four,5*,five,6*,six,7*,seven,8*,eight,9*,nine)][space()][extract(v(rooms),add
+(member(v(people),[switch(%#,[num(me)]*,%2,%#)]),1),words(v(rooms)))];@pemit
+[switch(%#,[num(me)]*,%2,%#)]=[u(room_[switch(%1,1*,one,2*,two,3*,three,4*,
+four,5*,five,6*,six,7*,seven,8*,eight,9*,nine)]_desc)][u(room_[switch(%1,1*,
+one,2*,two,3*,three,4*,four,5*,five,6*,six,7*,seven,8*,eight,9*,nine)]_
+contents)]%rObvious exits:%r[u(room_[switch(%1,1*,one,2*,two,3*,three,4*,four,
+5*,five,6*,six,7*,seven,8*,eight,9*,nine)]_exits)];&pos[switch(%#,[num(me)]*,
+%2,%#)] me=room_[switch(%1,1*,one,2*,two,3*,three,4*,four,5*,five,6*,six,7*,
+seven,8*,eight,9*,nine)]}},{@pemit [switch(%#,[num(me)]*,%2,%#)]=Huh?[space
+(2)]\(Type "help" for help.\)}
+DESC_CMD:$desc *=*:@fo me=&room_[switch(%0,1*,one,2*,two,3*,three,4*,four,5*,
+five,6*,six,7*,seven,8*,eight,9*,nine,%0)]_desc me=%1;@pemit %#=Description
+set.
+MAKEEXIT_CMD:$exit *-*:@fo me=&exitlist me=[v(exitlist)][space()]%0-%1;&room_
+[switch(%0,1*,one,2*,two,3*,three,4*,four,5*,five,6*,six,7*,seven,8*,eight,9*,
+nine,%0)]_exits me=[v(room_[switch(%0,1*,one,2*,two,3*,three,4*,four,5*,five,
+6*,six,7*,seven,8*,eight,9*,nine,%0)]_exits)][switch(strlen(v(room_[switch(%1,
+1*,one,2*,two,3*,three,4*,four,5*,five,6*,six,7*,seven,8*,eight,9*,nine,%1)]
+_exits)),0*,,\\[space(2)\\])]Room [switch(%1,1*,One,2*,Two,3*,Three,4*,Four,5*,
+Five,6*,Six,7*,Seven,8*,Eight,9*,Nine,%0)] <%0-%1>;@pemit %#=Exit added.
+HELP_CMD:$VR help:@pemit %#=Virtual Room Help File:%r-----------------------
+%rdesc <room#>=<description>%rexit <source>-<target>%ralias <source>-<target>=
+<alias>
+ALIAS_CMD:$alias ?-?=*:&alias%0-%1 me=$%2:@tr me/exit_cmd=%0,%1,%%#;@pemit
+%#=Alias defined.
+ROOM_ONE_CONTENTS:[switch(sub(words(v(room_one_ppl)),1),0*,,%rContents:[iter(v
+(room_one_ppl),[switch(##,%#*,,[switch(type(##),PLAYER*,[switch(member(lwho(),
+##),0*,,%r[name(##)][switch(words(flags(##)),0*,,\([num(##)][flags(##)]\))])],
+%r[name(##)][switch(words(flags(##)),0*,,\([num(##)][flags(##)]\))])])])])]
+Aleave:@fo me=&room_one_ppl me=[edit(get(me/room_one_ppl),%#,space(0))];
+&room_two_ppl me=[edit(get(me/room_two_ppl),%#,space(0))];&rooms me=[extract
+(get(me/rooms),1,sub(member(get(me/people),%#),1))][space()][extract(get
+(me/rooms),add(member(get(me/people),%#),1),words(get(me/rooms)))];&people me=
+[edit(get(me/people),%#,space(0))];@mvattr me=pos%#,last%#
+ROOM_TWO_CONTENTS:[switch(sub(words(v(room_two_ppl)),1),0*,,%rContents:[iter(v
+(room_two_ppl),[switch(##,%#*,,[switch(type(##),PLAYER*,[switch(member(lwho(),
+##),0*,,%r[name(##)][switch(words(flags(##)),0*,,\([num(##)][flags(##)]\))])],
+%r[name(##)][switch(words(flags(##)),0*,,\([num(##)][flags(##)]\))])])])])]
+ROOM_THREE_CONTENTS:[switch(sub(words(v(room_three_ppl)),1),0*,,%rContents:
+[iter(v(room_three_ppl),[switch(##,%#*,,[switch(type(##),PLAYER*,[switch(member
+(lwho(),##),0*,,%r[name(##)][switch(words(flags(##)),0*,,\([num(##)][flags(##)]
+\))])],%r[name(##)][switch(words(flags(##)),0*,,\([num(##)][flags(##)]\))])])]
+)])]
+ROOM_FOUR_CONTENTS:[switch(sub(words(v(room_four_ppl)),1),0*,,%rContents:[iter
+(v(room_four_ppl),[switch(##,%#*,,[switch(type(##),PLAYER*,[switch(member(lwho
+(),##),0*,,%r[name(##)][switch(words(flags(##)),0*,,\([num(##)][flags(##)]\))]
+)],%r[name(##)][switch(words(flags(##)),0*,,\([num(##)][flags(##)]\))])])])])]
+ROOM_FIVE_CONTENTS:[switch(sub(words(v(room_five_ppl)),1),0*,,%rContents:[iter
+(v(room_five_ppl),[switch(##,%#*,,[switch(type(##),PLAYER*,[switch(member(lwho
+(),##),0*,,%r[name(##)][switch(words(flags(##)),0*,,\([num(##)][flags(##)]\))]
+)],%r[name(##)][switch(words(flags(##)),0*,,\([num(##)][flags(##)]\))])])])])]
+ROOM_SIX_CONTENTS:[switch(sub(words(v(room_six_ppl)),1),0*,,%rContents:[iter(v
+(room_six_ppl),[switch(##,%#*,,[switch(type(##),PLAYER*,[switch(member(lwho(),
+##),0*,,%r[name(##)][switch(words(flags(##)),0*,,\([num(##)][flags(##)]\))])],
+%r[name(##)][switch(words(flags(##)),0*,,\([num(##)][flags(##)]\))])])])])]
+ROOM_SEVEN_CONTENTS:[switch(sub(words(v(room_seven_ppl)),1),0*,,%rContents:
+[iter(v(room_seven_ppl),[switch(##,%#*,,[switch(type(##),PLAYER*,[switch(member
+(lwho(),##),0*,,%r[name(##)][switch(words(flags(##)),0*,,\([num(##)][flags(##)]
+\))])],%r[name(##)][switch(words(flags(##)),0*,,\([num(##)][flags(##)]\))])])]
+)])]
+ROOM_EIGHT_CONTENTS:[switch(sub(words(v(room_eight_ppl)),1),0*,,%rContents:
+[iter(v(room_eight_ppl),[switch(##,%#*,,[switch(type(##),PLAYER*,[switch(member
+(lwho(),##),0*,,%r[name(##)][switch(words(flags(##)),0*,,\([num(##)][flags(##)]
+\))])],%r[name(##)][switch(words(flags(##)),0*,,\([num(##)][flags(##)]\))])])]
+)])]
+ROOM_NINE_CONTENTS:[switch(sub(words(v(room_nine_ppl)),1),0*,,%rContents:[iter
+(v(room_nine_ppl),[switch(##,%#*,,[switch(type(##),PLAYER*,[switch(member(lwho
+(),##),0*,,%r[name(##)][switch(words(flags(##)),0*,,\([num(##)][flags(##)]\))]
+)],%r[name(##)][switch(words(flags(##)),0*,,\([num(##)][flags(##)]\))])])])])]
+SAY_TRG:^* says "*":@switch warn%#=1,{@tel %#=home;&warn%# me=},{@pemit %#=You
+have violated the rules. Use `vs <message>' to talk. Using say will cause you
+be heard by everyone in the virtual complex and will cause your eviction.
+Sorry, dem's da rules. You will not be warned again.;&warn%# me=1}
+VS_CMD:$vs *:@dolist [v(v(pos%#)_ppl)]=@pemit ##=[switch(##,%#*,You say "%0",
+%n says "%0")]
+No exits.
+Home: Virtual
+Location: Free Coding Room(#502RFLh)
+_______________________________________________________________________________

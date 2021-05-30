@@ -1,0 +1,14 @@
+@set here = DARK
+@set here = INHERIT
+@set here = WIZARD
+@set here = SAFE
+@set here = TRANSPARENT
+@set here = FLOATING
+@set here = Z_TEL
+&BUGROOMS here=
+&MESSAGE-1 here=$message *=*:@switch [v(0)]=all,{@dol [v(bugrooms)]=@remit ##=[ansi(r,%[)][ansi(hw,Heaven)][ansi(r,%])] [switch(mid(%1,0,1),:,[ansi(hb,%N)]%b[ansi(c,[mid(%1,1,strlen(%1))])],;,[ansi(hb,%N)][ansi(c,[mid(%0,1,strlen(%1))])],{[ansi(hb,%N)] [ansi(c,says ")][ansi(hc,%1)][ansi(c,")]})]},{@swi [t([member([v(bugrooms)],#%0)])]=1,{@remit #%0=[ansi(r,%[)][ansi(hw,Heaven)][ansi(r,%])] [switch(mid(%1,0,1),:,[ansi(hb,%N)]%b[ansi(c,[mid(%1,1,strlen(%1))])],;,[ansi(hb,%N)][ansi(c,[mid(%1,1,strlen(%1))])],{[ansi(hb,%N)] [ansi(c,says ")][ansi(hc,%1)][ansi(c,")]})]},{@pemit %#=That room is not bugged.}}
+&REMOVE-1B here=$remove all bugs:@dol [v(bugrooms)]=@set ##=!monitor;@dol [v(bugrooms)]=@wipe ##/buglisten;@wipe me/bugrooms
+&REMOVE-1A here=$remove bug *:@swi [t([member([v(bugrooms)],#%0)])]=1,{@set #%0=!monitor;&buglisten #%0;&bugrooms me=[remove([v(bugrooms)],#%0)]},{@pemit %#=That room is not bugged.}
+&BUG-1 here=$bug *:@swi [t([member([v(bugrooms)],#%0)])]=0,{@set #%0=monitor;&buglisten #%0=^*:@rem #111=%[ansi(hr,From %[name(%%l)] %(%%l%)\:)] %[ansi(hb,%%0)];@set #%0/buglisten=mortal_dark;&bugrooms me=[v(bugrooms)] #%0},{@pemit %#=That room is already bugged.}
+&BUGLIST-1 here=$list bugs:@pemit %#=Rooms Currently Bugged:[v(bugrooms)]
+&DESC-1 here=Jesse's Observation Tower.

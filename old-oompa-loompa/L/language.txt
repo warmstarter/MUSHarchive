@@ -1,0 +1,208 @@
+# Multiple Language Support for MUSH 
+#  +language / +say
+#
+#  Author:  Mike Whitaker
+#
+#  Formatting:  Mark Hassman
+#
+#
+#  Attributes Set on Players:
+#   1) LANGUAGES - List of all languages know to that player.
+#   2) SPEAKING  - The current language being spoken.
+#
+#
+# Commands
+###########################################################################
+#   Player Level
+#   -------------
+#     +say <text>  : Says text in default language.  Speaks of that
+#			language hear the full string.  Non-speakers
+#			hear garbage.
+#     +"	   : Same as +say
+#
+#     +speak <language>
+#		   :  Sets the language to be used as the current
+#			default used by +say.
+#     +speak	   :  Shows the current default language (no argument).
+#     +language/list:
+#		      Lists the allowed languages for the game.  
+#     +teach <language> to <player>:
+#		      Allows players to teach one another languages up to
+#			a pre-defined limit (data-max-languages).
+#
+###########################################################################
+#  Wizard Level
+#  ------------
+#    +language/add <language>:  Adds <language> to the list of allowed 
+#				languages.
+#    +language/del <language>:  Removes <language> from the list of
+#				allowed languages.  This does NOT remove
+#				the language from the languages attrib on
+#				players.
+#
+#    +language/set <language> on <player>:  Adds <language> to the list
+#				list of known languages on <player>.
+###########################################################################
+#
+# A Wizard (typically God) with @attribute access needs to do the
+# following:
+#
+# Uncomment the following lines if you want the @attrib permissions set
+#@switch hasattr(%#,speaking)=
+#	0,{
+#	   &speaking me=english;
+#	   @attribute/access speaking=wizard;
+#	   &speaking me;
+#  	  },
+#	  { 
+#	    @attribute/access speaking=wizard;
+#	  }
+#-       
+#@switch hasattr(%#,languages)=
+#	0,{
+#	   &languages me=english;
+#	   @attribute/access languages=wizard;
+#	   &languages me;
+#         },
+#	  {
+#	    @attributes/access languages=wizard;
+#	  }
+#-
+#  End comment removal for @attribute permissions setting.
+#
+#
+@create LANGUAGE
+-
+@set LANGUAGE=INHERIT
+-
+@set LANGUAGE=STICKY
+-
+@set LANGUAGE=SAFE
+-
+@set LANGUAGE=COMMANDS
+-
+&CAN-SPEAK LANGUAGE=[u(fn-speaks,%0,%q2)]
+-
+&FN-LANG LANGUAGE=
+  [switch(gt(words(%0),10),0,extract(v(data-words),words(%0),1,|),something)]
+-
+&CMD-SAY LANGUAGE=$+say *:
+	@switch [u(fn-speaking,%#)]=
+		,@pemit %#=You don't have a default language set.
+		,{@remit %l=%N
+		   [setq(0,mid(%0,0,1))]
+		   [setq(1,delete(%0,0,1))]
+		   [setq(2,u(fn-speaking,%#))]
+		   [switch(%q0,
+			:,%b[u(fn-parse,%q1)],
+			;,[u(fn-parse,%q1)],
+			%bsays [u(fn-lang,%0)] in %q2.)];
+		@pemit/list  [filter(can-speak,lcon(%l))]=
+			%N[switch(%q0,:,%b%q1,;,%q1,%bsays "%0")]}
+-
+&FN-SPEAKS LANGUAGE=[gt(member(get(*%0/LANGUAGES),capstr(lcstr(%1))),0)]
+-
+&FN-PARSE LANGUAGE=
+	[setq(3,first(%0,"))]
+	[setq(5,last(%0,"))]
+	[setq(4,remove(remove(%0,%q5,"),%q3,"))]
+	[%q3
+	  [switch(mid(%q3,sub(strlen(%q3),2),1),.,%S says%b)]
+	  [u(fn-lang,%q4)] in %q2
+	  [setq(6,mid(%q4,sub(strlen(%q4),1),1))]
+	  [switch(%q6,.,.)]
+	  [switch(%q5,,switch(%q6,.,,.),%q5)]
+	]
+-
+&FN-SPEAKING LANGUAGE=[get(%0/SPEAKING)]
+-
+&CMD-SPEAK LANGUAGE=
+	$+speak *:
+	  @switch [u(fn-speaks,%#,%0)]=
+	    0,@pemit %#=I'm  sorry. You can't speak [capstr(lcstr(%0))].,
+	      {
+		@pemit %#=Your default language  is now [capstr(lcstr(%0))].;
+		&SPEAKING %#=[capstr(lcstr(%0))]
+	      }
+-
+&CMD-SAY-ALT LANGUAGE=$+"*:
+	@switch [u(fn-speaking,%#)]=,
+	  @pemit %#=You don't have a default language set.,
+ 	  {
+	    @remit %l=%N[setq(0,mid(%0,0,1))][setq(1,delete(%0,0,1))][setq(2,u(fn-speaking,%#))]
+		[switch(%q0,:,%b[u(fn-parse,%q1)],;,[u(fn-parse,%q1)],%bsays
+[u(fn-lang,%0)] in %q2.)];@pemit/list [filter(can-speak,lcon(%l))]=%N[switch(%q0,:,%b%q1,;,%q1,%bsays "%0")]}
+-
+&CMD-SPEAK0 LANGUAGE=
+	$+speak:@pemit %#=
+		[setq(0,get(%#/SPEAKING))]
+		[switch(%q0,,You have no default language set.,
+			Your default language is %q0.)]
+-
+&CMD-SET-LANGUAGE LANGUAGE=
+  $+language/set * on *:@switch [hasflag(%#,wizard)]=
+    0,@pemit %#=Sorry - you are not authorized to set a language.,
+      {
+         @switch/first 0=[member(v(data-language-list),%0)],
+  	   @pemit %#=%0 is not a valid language. You may have to add it first.,
+	   {
+	      @pemit *%1=%N adds  %0 to your language list.;
+	      @pemit %#=You add %0 to %1's language list.;
+	      &LANGUAGES *%1=[setunion([u(*%1/LANGUAGES)], %0)]
+	   }
+      }
+-
+&CMD-ADD-LANGUAGE LANGUAGE=$+language/add *:@switch [hasflag(%#, 
+  wizard)]=0,@pemit %#=Sorry - You are not authorized to add a new 
+  language.,{&data-language-list me=[sort([setunion(v(data-language-list), 
+  [capstr(%0)])])];@pemit %#=You added %0 to the language list!}
+-
+&CMD-DEL-LANGUAGE LANGUAGE=$+language/del *:@switch [hasflag(%#, 
+  wizard)]=0,@pemit %#=Sorry - you are not authorized to delete a 
+  language.,{@switch/first 0=[member(v(data-language-list),%0)],@pemit %#=%0 
+  was not on the language list.,{@pemit %#=You remove %0 from the language 
+  list.;&DATA-LANGUAGE-LIST me=[setdiff([v(DATA-LANGUAGE-LIST)], 
+  [capstr(%0)])]}}
+-
+&CMD-LIST-LANGUAGE LANGUAGE=$+language/list:@pemit %#=The following languages 
+  are available for spoofing on [mudname()]. They do not actually translate 
+  anything, only add to the ambiance by identifying certain private pemits to 
+  non-speakers as being said in a foreign language. They are not entirely 
+  private and can be understood by any other character that has the language 
+  at their disposal.%r%r[iter(v(data-language-list),## --)]
+-
+&CMD-TEACH-LANGUAGE LANGUAGE=$+teach * to *:@switch 
+  [gte([words([u(*%1/languages)])],v(data-max-languages))]=1,@pemit
+  %#=Credibility warning: The 
+  pupil already knows [v(data-max-languages)] languages. A wizard will
+  have to add any further
+  languages and the pupil may be asked to IC forget fluency in a less used 
+  language in exchange for each.,{@switch/first 
+  0=[hasattr(%#/languages)],@pemit %#=Sorry - you don't have any teachable 
+  languages.,[member(u(%#/languages),[capstr(%0)])],@pemit %#=Sorry - you are 
+  not a registered speaker of %0.,{@pemit *%1=%N teaches you some %0;@pemit 
+  %#=You teach some %0 to %1.;&LANGUAGES 
+  *%1=[setunion([u(*%1/LANGUAGES)],[capstr(%0)])]}}
+-
+&DATA-+HELP LANGUAGE=+say|+" <message>%r+speak \[<language>\]%r%r+speak 
+  <language> sets you're default langue - +speak on its own tells you what it 
+  is.%r%r+say/+" <messsage> allow you to use that language, and only be 
+  understood by those who speak it (though everyone knows what language you 
+  speak).
+-
+# List of Languages:  Change this list to suit your taste.  Language names
+#	are currently restricted to a single word (no spaces).
+&DATA-LANGUAGE-LIST LANGUAGE=Cant Chinese Danish Dutch English French Gaelic 
+  German Greek Gypsy Italian Latin Mongol Russian Saracen Sign Spanish Turkish 
+  Welsh
+-
+&DATA-WORDS LANGUAGE=a single word|a soft word|a couple of words|a brief 
+  phrase|a few words|a few words|something quickly|something hasty|something 
+  brief|something brief
+-
+# Players can know a max of 5 languages -- change this value to suit.
+&data-max-languages language=5
+-
+&credits-language LANGUAGE=Mike Whitaker
+-
+

@@ -1,0 +1,177 @@
+& recon
+& econ
+  REcon, a simple economic simulation system for PennMUSH.
+  Copyright 1998-1999, Jonathan A. Booth (kamikaze@imsa.edu).
+
+  Please see 'help econ design' for the design of the system.
+  Please see 'help econ license' for licensing information.
+  Please see 'help econ setup' for installation instructions.
+
+  The REcon system supports the following commands; use
+  'help econ <name>' to access the help on them:
+
+  +cost		+give		+goods		+inv
+  +pay		+take
+    
+  The REcon system has the following informational topics; use
+  'help econ <name>' to access the help on them:
+
+  design	license		locks		setup
+  system reqs	vendors
+& econ design
+  REcon was originally designed for an original themed fantasy
+  PennMUSH, and is structured around player-to-player and
+  player-to-vendor interactions. Such things as a global or
+  planetary economic system are not directly supported by this code.
+
+  A Global economic system could be implemented by vendors with
+  roybits so that they could do remote economic interactions between
+  each other, and most likely the author will release such code when
+  he has coded, tested, and finished it.
+
+  See also: 'help econ'
+& econ license
+  REcon non-profit license:
+  * You may redistribute the REcon code, provided that the code is
+    unmodified and that the help files (specifically the copyright
+    and license notices) are distributed along with the code.
+  * There is no warranty (express or implied) on the REcon code or
+    help-files. If something breaks, you get to keep all the pieces.
+  * You may use the code for free for an unlimited about of time and
+    users provided that the license and copyright notice are retained
+    and unmodified.
+  * Any changes you make to the help-files or REcon code should be
+    resubmitted to the author in a timely manner.
+
+  REcon commercial license:
+  * Please contact the author for commercial licensing information.
+
+  See also: 'help econ'
+& econ locks
+  There are multiple locks available to players that effect how the
+  econ system works on them. They are all user-definable @locks (see
+  'help @lock' if you don't know what a user definable @lock is and
+  want to know), and are listed as follows:
+
+    econ_give     Lock that controls who can give goods to an object
+    econ_take     Lock that controls who can take goods from an object
+    econ_pay      Lock that controls who can pay an object
+    econ_inv      Lock that controls who can +inv an object
+
+  To set these locks on an object, you would '@lock/user:<lockname>
+  <object>=<lock key>'. For example, to allow god to take econ goods
+  from an object, you would '@lock/user:econ_take <obj>==#1'.
+
+  Note that wizards and judges pass all these locks and royalty pass
+  the inventory lock no matter what it's key is.
+
+  See also: 'help econ'
+& econ setup
+  Steps to follow to setup the REcon system:
+
+  0) Have your site admin install the help-file that came with this
+     system in your game/txt/hlp directory, and rebuild the text
+     files via a 'make' in game/txt.
+  1) Check out 'help econ system reqs' and make sure you fill those
+     requirements.
+  2) Install and test the DataBase System
+     (you'll need god or god access to do this)
+  3) /quote the econ code object into your mush,
+     and install it in the master room
+  4) /quote the example objects into your mush,
+     and install them inside the econ code object
+  5) Reboot the MUSH, and see if the sample econ goods load
+     correctly. If they do, try trading them to make sure they trade.
+  6) If that worked, start defining your own types of goods and have
+     fun. It's installed.
+
+  See also: 'help econ'
+& econ system reqs
+  To use the REcon system, you will need the following files,
+  obtained from my web page (http://www.imsa.edu/~kamikaze/mush/code/)
+  * Everything under REcon/
+  * The DataBase System, under DB/
+
+  You will also need to define to functions in your mush, called
+  'header' and 'trailer' that take a single argument, and output
+  some sort of "table of information header" and "table of
+  information trailer", such as:
+
+    header(Some Info) => -- Some Info -------------------------------
+    trailer(End Info) => -- End Info --------------------------------
+
+  They should be about 78 columns wide, or else the system will look
+  funny.
+
+  See also: 'help econ'
+& econ vendors
+  Vendor objects can easily be coded for this econ system. All you
+  need to do to make an object a vendor is set some E* attributes on
+  it. The list of attributes you can set is:
+
+    ECOST[_selection]       What it costs to +pay the object
+    EPAY[_selection]        Message to display to actor on +pay
+    EOPAY[_selection]       Message to display to others on +pay.
+    EAPAY[_selection]       Action to take on +pay
+    EUSE[_selection]        Amount of goods used up (Note*)
+
+  Where the '_selection' is optional, allowing the player to choose
+  among several choices to buy, and the attributes work just like
+  their @-counterparts (@cost, @pay, @opay, @apay) with the exception
+  of EUSE, (Note*) which is the amount of goods that are "used" up by
+  the object -- the econ system removes these goods from play. For
+  example, a bartender would use up a drink when it served up a drink
+  "object" to a player.
+
+  See also: 'help econ'
+& econ +cost
+  +cost <object>
+
+  This command tells you what is available for purchase on <object>
+  and how much that will cost you to purchase. If there is nothing to
+  buy, it will simply output "name ... cost" with nothing below it.
+& econ +econ
+  +econ/rebuild
+
+  This command rebuilds the goods list tables. Use it after adding or
+  removing things from the economy. This is only available to wizards.
+& econ +give
+  +give <object>=<number> <type>
+
+  This command allows you to give <object> some economy goods.
+  <number> should be a whole integer, and <type> should be one of the
+  Subclasses listed in +inv.
+
+  The user-lock called 'ECON_GIVE' controls who can give to that object.
+& econ +goods
+  +goods [<class>]
+
+  This command will provide you with a list of the goods that are
+  available in the economy system in the MUSH. With no arguments, it
+  will tell you the superclasses of goods that exist, and with an
+  argument, it will detail what subclasses that superclass contains.
+& econ +inv
+  +inv[/<type>]
+  +inv <object>[/<type>]
+
+  The first +inv command will show you your own econ goods. The
+  second will show you the econ goods of another object. If you
+  specify the '/<type>' switch, then <type> should be one of the
+  'Goods Class'es listed in +inv.
+& econ +pay
+  +pay <object>[=<selection>]
+
+  The pay command allows you to buy goods and services from NPC
+  vendor objects. <object> should be a valid object name in your
+  location. If <selection> is not specified, the default will be
+  bought. Selections are listed in the '+cost' command, see 'help
+  +cost' for more info on it.
+& econ +take
+  +take <object>=<number> <type>
+
+  This command allows you to take some economy goods from <object>.
+  <number> should be a whole integer, and <type> should be one of the
+  Subclasses listed in +inv.
+
+  The user-lock called 'ECON_TAKE' controls who can take economy
+  goods from the object.

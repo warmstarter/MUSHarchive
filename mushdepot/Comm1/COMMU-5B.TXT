@@ -1,0 +1,29 @@
+@create $transmitter
+@link $transmitter=#25
+@chzone $transmitter=#57
+@lock/Basic $transmitter=#25
+@lock/Zone $transmitter=#25
+@lock/Enter $transmitter=#25
+@set $transmitter=VISUAL
+@set $transmitter=SAFE
+@set $transmitter=HALT
+@set $transmitter=!NO_COMMAND
+@AHEAR $transmitter=@pemit #4=%0 %1 %2 %3 %4 %5 %6
+@LISTEN $transmitter=<*> *|*|*|*|*
+&SEND $transmitter=$+* *:@swi [setq(0,match(v(frequencies),*[secure(%0)]*))][setq(1,extract(v(frequencies),%q0,1))][setq(2,[v(identity)]%b[ifelse(match(:,mid(%1,0,1)),[mid(%1,1,strlen(%1))],transmits "%1")])][v(active)][true(%q0)]=10,{@pem %#=No frequency open with title "[secure(%0)]".},11,{@pem %#=<[first(%q1,|)]> %[[rest(%q1,|)]%] %q2;@chat [v(channel)]=[strcat(;,|)][first(%q1,|)]|[v(range)]|%!|%q2},1?,{@oemit loc(%#)/%#=%n speaks into %p [name(me)].}
+&CLOSE $transmitter=$clo* fre* *:@swi [setq(0,match(v(frequencies),*[secure(%2)]*))][setq(1,extract(v(frequencies),%q0,1))][v(active)][true(%q0)]=10,{@pem %#=No frequency open with title "[secure(%2)]".},11,{@pem %#=You have closed frequency [first(%q1,|)] %[[rest(%q1,|)]%].;&frequencies %!=ldelete(v(frequencies),%q0)},1?,{@oemit %l/%#=%n tunes %p [name(%!)].}
+&OPEN $transmitter=$ope* fre* * as *:@swi [setq(0,round(fabs(secure(%2)),2))][true(v(active))][lt(words(v(frequencies)),10)][and(gte(%q0,1),lte(%q0,1000))][not(match(v(frequencies),%q0|*))]=10??,{@pem %#=You may only have 10 frequencies open at once.},110?,{@pem %#=%q0 is not valid a valid frequency. Use 1.00 to 1000.00.},1110,{@pem %#=Frequency %q0 is already open.},1111,{&frequencies %!=squish(cat(v(frequencies),%q0|[secure(%3)]));@pem %#=You have opened frequency %q0 as %[[secure(%3)]%].},1???,{@oemit %l/%#=%n tunes %p [name(%!)].}
+&PING $transmitter=$pin* mod*:@swi [v(active)][v(pinging)]=10,{@pem %#=Your [name(%!)] is now on pinging mode.;&pinging %!=1},11,{@pem %#=Your [name(%!)] is no longer on pinging mode.;&pinging %!=0},1?,{@oemit %l/%#=%n adjusts %p [name(me)].}
+@DESCRIBE $transmitter=This is a standard [name(org(%!))] [name(%!)].%rItis currently switched [ifelse(v(active),on,off)].%rIt [ifelse(v(pinging),is,is not)] on pinging mode.%rSee: `$help [name(%!)]'
+&TOUCH $transmitter=$tou* *:@swi [match(name(%!),secure(%1)*)][v(active)]=10,{@pem %#=Your [name(%!)] is now active.;&active %!=1;@channel/on v(channel)},11,{@pem %#=Your [name(%!)] is now inactive.;&active %!=0;@channel/off v(channel)},1?,{@oemit %l/%#=%n touches %p [name(%!)].}
+&TOGGLE $transmitter=$tog* *:@swi [match(name(%!),secure(%1)*)][v(active)]=10,{@pem %#=Your [name(%!)] is now active.;&active %!=1;@channel/on v(channel)},11,{@pem %#=Your [name(%!)] is now inactive.;&active %!=0;@channel/off v(channel)},1?,{@oemit %l/%#=%n toggles %p [name(%!)].}
+&IDENTITY $transmitter=(Unidentified)
+&PINGING $transmitter=0
+&HELP_MSG $transmitter=Usage is as follows:%rtou*ch/tog*ggle [name(%!)]%r%tThis toggles your [name(%!)] on and off.%rope*n fre*quency <frequency (0.01 to 999.99)> <title>%r%tThis opens frequency <frequency> with title <title>.%rclo*se fre*quency <frequency>%r%tThis closes frequency <frequency>.%rsca*n fre*quency <frequency>%r%tThis shows anyone in range and pinging on <frequency>.%rbro*adcast ide*ntity <identity>%r%tThis changes your broadcast ID to <identity>.%rlis*t fre*quencies%r%tThis will list all frequencies that you have open.%rpin*g mod*e%r%tThis toggles pinging, or a homing beacon. You show on frequency scans.%r+frequency <message>%r%tThis allows you to speak or pose <message> on <frequency>.%rtit*le <frequency> <title>%r%tThis changes the title of <frequency> to <title>.%rThis [name(%!)] has a range of [v(range)] parsecs.
+&ID $transmitter=$bro* ide* *:@swi v(active)=1,{&identity %!=%2;@pem %#=Your broadcast identity is now "%2".;@oemit %l/%#=%n adjusts %p [name(%!)].}
+&ACTIVE $transmitter=0
+&RANGE $transmitter=100
+&TAP $transmitter=$tap *:@swi [match(name(%!),secure(%0)*)][v(active)]=10,{@pem %#=Your [name(%!)] is now active.;&active %!=1;@channel/on v(channel)},11,{@pem %#=Your [name(%!)] is now inactive.;&active %!=0;@channel/off v(channel)},1?,{@oemit %l/%#=%n taps %p [name(%!)].}
+&PARENT $transmitter=#6787
+&CHANNEL $transmitter=Tiravellian-OOC
+&KEY $transmitter=[v(active)]

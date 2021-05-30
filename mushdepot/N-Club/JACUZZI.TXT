@@ -1,0 +1,45 @@
+Jacuzzi(#725MOQVe)
+Type: THING Flags: MONITOR OPAQUE QUIET VISUAL ENTER_OK
+This is a large jacuzzi. It is closed from plain view by a large curtain that
+runs around the length.
+Owner: Eddy Tengel  Key:  Loonies: 1
+Listen:*
+Leave:You step out of the warm water of the jacuzzi and place your feet on the
+cold floor outside. You leave feeling invigorated, renewed.
+Oenter:steps into the jacuzzi.
+Oxleave:steps out of the jacuzzi, dripping wet.
+Oxenter:steps into the jacuzzi.
+Oleave:steps out of the jacuzzi.
+Filter:{* has arrived.},{* has left.}
+Infilter:{* has arrived.},{* has left.}
+Enter:You enter the jacuzzi and sit in the bubbling water. Warm water caresses
+you all over, soothing and refreshing your tired body.
+Idesc:The jacuzzi looks like it could contain about six people. Along the side
+of the jacuzzi is a sponge. There are many air jets within it, as well as
+temperature and pressure controls against the wall. You can "part" or "close"
+the curtains to let people outside hear and see what's going on inside. Now,
+the curtain is [get(me/curtain)].
+PART:$part:@switch [u(curtain)]=closed,{@set me=audible;@remit [loc(%#)] =%N
+parts the curtain that goes around the jacuzzi so that everyone can see and
+hear %o and everyone else inside the jacuzzi.;@set me=!opaque;&prefix me=From
+the jacuzzi,;&curtain me=open;&desc me=[get(me/idesc)]},open,{@pemit %n=Erm?
+The curtains are already open!}
+CLOSE:$close:@switch [u(curtain)]=open,{@set me=opaque;&prefix me=;@remit
+[loc(%#)] =%N closes the curtain around the Jacuzzi so you cannot see %o or
+anyone else.;@set me=!audible;&curtain me=closed;&desc me=[get(me/out_desc)]},
+closed,{@pemit %n=The curtains are already closed.}
+CURTAIN:closed
+Inprefix:From outside the jacuzzi,
+CREDITS:Designed by Kristofer@VoS
+OUT_DESC:This is a large jacuzzi. It is closed from plain view by a large
+curtain that runs around the length.
+Lalias:o;ou;out
+Fail:You cannot take this free code!
+OUT:$outside:l/outside
+Aclone:@set me=!halted;@set me=monitor;@set me=!visual;@name me=Jacuzzi
+BOOT:$boot *:@tel %0={#4)
+SPLASH:$splash *:@pemit/contents me=%N splashes water all over %0!
+No exits.
+Home: Free Coding Room(#502RFLh)
+Location: Free Coding Room(#502RFLh)
+_______________________________________________________________________________

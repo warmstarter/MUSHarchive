@@ -1,0 +1,335 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Code: An introduction to MUSH security</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <!-- Apple devices fullscreen -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <!-- Apple devices fullscreen -->
+    <meta names="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <!-- Bootstrap -->
+	<link rel="stylesheet" href="../Theme/Flat/html/css/bootstrap.min.css">
+	<!-- Bootstrap responsive -->
+	<link rel="stylesheet" href="../Theme/Flat/html/css/bootstrap-responsive.min.css">
+	<!-- jQuery UI -->
+	<link rel="stylesheet" href="../Theme/Flat/html/css/plugins/jquery-ui/smoothness/jquery-ui.css">
+	<link rel="stylesheet" href="../Theme/Flat/html/css/plugins/jquery-ui/smoothness/jquery.ui.theme.css">
+	<!-- Theme CSS -->
+	<link rel="stylesheet" href="../Theme/Flat/html/css/style.css">
+	<!-- Color CSS -->
+	<link rel="stylesheet" href="../Theme/Flat/html/css/themes.css">
+
+
+    <link rel="stylesheet" href="../Content/site.css">
+
+    <!-- jQuery -->
+    <script src="../Theme/Flat/html/js/jquery.min.js"></script>
+    <!-- Nice Scroll -->
+    <script src="../Theme/Flat/html/js/plugins/nicescroll/jquery.nicescroll.min.js"></script>
+    <!-- jQuery UI -->
+    <script src="../Theme/Flat/html/js/plugins/jquery-ui/jquery.ui.core.min.js"></script>
+    <script src="../Theme/Flat/html/js/plugins/jquery-ui/jquery.ui.widget.min.js"></script>
+    <script src="../Theme/Flat/html/js/plugins/jquery-ui/jquery.ui.mouse.min.js"></script>
+    <script src="../Theme/Flat/html/js/plugins/jquery-ui/jquery.ui.resizable.min.js"></script>
+    <script src="../Theme/Flat/html/js/plugins/jquery-ui/jquery.ui.sortable.min.js"></script>
+    <!-- slimScroll -->
+    <script src="../Theme/Flat/html/js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+    <!-- Bootstrap -->
+    <script src="../Theme/Flat/html/js/bootstrap.min.js"></script>
+    <!-- Form -->
+    <script src="../Theme/Flat/html/js/plugins/form/jquery.form.min.js"></script>
+
+    <!-- Theme framework -->
+    <script src="../Theme/Flat/html/js/eakroko.min.js"></script>
+    <!-- Theme scripts -->
+    <script src="../Theme/Flat/html/js/application.min.js"></script>
+
+    <!--[if lte IE 9]>
+		<script src="js/plugins/placeholder/jquery.placeholder.min.js"></script>
+		<script>
+			$(document).ready(function() {
+				$('input, textarea').placeholder();
+			});
+		</script>
+	<![endif]-->
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="http://www.mushcode.com/File/img/favicon.ico" />
+    <!-- Apple devices Homescreen icon -->
+    <link rel="apple-touch-icon-precomposed" href="http://www.mushcode.com/File/img/apple-touch-icon-precomposed.png" />
+
+</head>
+
+<body class="theme-green">
+    <div id="navigation">
+        <div class="container-fluid">
+            <a href="../index.html" id="brand">MUSHCode.com</a>
+        </div>
+    </div>
+    <div class="container-fluid" id="content">
+        <div id="left">
+            <div class="subnav">
+                <div class="subnav-title">
+                    <a href="An-introduction-to-MUSH-security.html#" class='toggle-subnav'>
+                        <i class="icon-angle-down"></i>
+                        <span>About</span>
+                    </a>
+                </div>
+                <ul class="subnav-menu">
+                    <li>
+                        <a href="../index.html">Overview</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="subnav">
+                <div class="subnav-title">
+                    <a href="An-introduction-to-MUSH-security.html#" class='toggle-subnav'>
+                        <i class="icon-angle-down"></i>
+                        <span>Files</span>
+                    </a>
+                </div>
+                <ul class="subnav-menu">
+                    <li class='dropdown'>
+                        <a href="An-introduction-to-MUSH-security.html#" data-toggle="dropdown">Code</a>
+                        
+<ul class="dropdown-menu">
+        <li>
+            <a href="../Category/Administration.html">Administration</a>
+        </li>
+        <li>
+            <a href="../Category/Building.html">Building</a>
+        </li>
+        <li>
+            <a href="../Category/Bulletin-Board.html">Bulletin Board</a>
+        </li>
+        <li>
+            <a href="../Category/Combat.html">Combat</a>
+        </li>
+        <li>
+            <a href="../Category/Dynamic-Space.html">Dynamic Space</a>
+        </li>
+        <li>
+            <a href="../Category/Fonts.html">Fonts</a>
+        </li>
+        <li>
+            <a href="../Category/Functions.html">Functions</a>
+        </li>
+        <li>
+            <a href="../Category/Games.html">Games</a>
+        </li>
+        <li>
+            <a href="../Category/Globals.html">Globals</a>
+        </li>
+        <li>
+            <a href="../Category/Mail-Systems.html">Mail Systems</a>
+        </li>
+        <li>
+            <a href="../Category/Other.html">Other</a>
+        </li>
+        <li>
+            <a href="../Category/Schedulers.html">Schedulers</a>
+        </li>
+        <li>
+            <a href="../Category/Time.html">Time</a>
+        </li>
+        <li>
+            <a href="../Category/Vehicles.html">Vehicles</a>
+        </li>
+        <li>
+            <a href="../Category/Vendors.html">Vendors</a>
+        </li>
+        <li>
+            <a href="../Category/Weather-Systems.html">Weather Systems</a>
+        </li>
+</ul>
+                    </li>
+                    <li class='dropdown'>
+                        <a href="An-introduction-to-MUSH-security.html#" data-toggle="dropdown">Classes</a>
+                        
+<ul class="dropdown-menu">
+        <li>
+            <a href="../Category/Administration.html">Administration</a>
+        </li>
+        <li>
+            <a href="../Category/Building.html">Building</a>
+        </li>
+        <li>
+            <a href="../Category/Globals.html">Globals</a>
+        </li>
+        <li>
+            <a href="../Category/Hardcode.html">Hardcode</a>
+        </li>
+        <li>
+            <a href="../Category/Other.html">Other</a>
+        </li>
+        <li>
+            <a href="../Category/Softcode.html">Softcode</a>
+        </li>
+</ul>
+                    </li>
+                    <li>
+                        <a href="../Manuals.html">Manuals</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="subnav">
+                <div class="subnav-title">
+                    <a href="An-introduction-to-MUSH-security.html#" class='toggle-subnav'>
+                        <i class="icon-angle-down"></i>
+                        <span>Misc</span>
+                    </a>
+                </div>
+                <ul class="subnav-menu">
+                    <li>
+                        <a href="../Ascii2Mu.html">ASCII To MUSHCode</a>
+                    </li>
+                    <li>
+                        <a href="../MushList.html">MUSH/MUX List</a>
+                    </li>
+                    <li>
+                        <a href="../MushRoom.html">MUSHRoom</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="subnav">
+                <div class="subnav-title">
+                    <a href="An-introduction-to-MUSH-security.html#" class='toggle-subnav'>
+                        <i class="icon-angle-down"></i>
+                        <span>Contribute</span>
+                    </a>
+                </div>
+                <ul class="subnav-menu">
+                    <li>
+                        <a href="../Submit.html">Submit</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div id="main">
+            <div class="container-fluid">
+                <div class="breadcrumbs">
+                    <ul>
+                        
+    <li>
+        <a href="../index.html">Home</a>
+        <i class="icon-angle-right"></i>
+    </li>
+    <li>
+        <a href="../Category/Softcode.html">Softcode</a>
+        <i class="icon-angle-right"></i>
+    </li>
+    <li>
+        <a href="An-introduction-to-MUSH-security.html#">An introduction to MUSH security</a>
+    </li>
+
+                    </ul>
+                </div>
+                <div class="row-fluid">
+                    <div class="span12">
+                        
+
+
+
+<div class="box">
+    <div class="box-title title">
+        <h2>
+            An introduction to MUSH security
+        </h2>
+    </div>
+    <div class="box-content">
+
+        <div class="description">
+            <p></p>
+        </div>
+
+        <div class="author">
+            <strong>Author:</strong>
+                <span>
+                    <a href="../Author/Algol@NarniaGolden.html">Algol</a>@<a href="../Source/NarniaGolden.html">NarniaGolden</a>
+                </span>
+        </div>
+
+        <div class="author">
+            <strong>Category:</strong>
+            <a href="../Category/Softcode.html">Softcode</a>
+        </div>
+
+
+            <div class="functions">
+                <strong>Functions:</strong>
+                        <a href="../Function/add.html" class="function">add&#40;&#41;</a>,
+                        <a href="../Function/controls.html" class="function">controls&#40;&#41;</a>,
+                        <a href="../Function/lock.html" class="function">lock&#40;&#41;</a>,
+                        <a href="../Function/member.html" class="function">member&#40;&#41;</a>,
+                        <a href="../Function/name.html" class="function">name&#40;&#41;</a>,
+                        <a href="../Function/owner.html" class="function">owner&#40;&#41;</a>,
+                        <a href="../Function/search.html" class="function">search&#40;&#41;</a>,
+                        <a href="../Function/v.html" class="function">v&#40;&#41;</a>.
+            </div>
+
+
+            <div class="servers">
+                <strong>Compatibility:</strong>
+                        <a href="../Server/CobraMUSH.html" class="server">CobraMUSH</a>,
+                        <a href="../Server/PennMUSH.html" class="server">PennMUSH</a>,
+                        <a href="../Server/TinyBit.html" class="server">TinyBit</a>,
+                        <a href="../Server/TinyMUX.html" class="server">TinyMUX</a>.
+            </div>
+
+    </div>
+</div>
+
+
+<div class="box box-bordered box-condensed">
+    <div class="box-title">
+        <h3>
+	        <i class="icon-reorder"></i>
+	        MUSHCode for An introduction to MUSH security
+        </h3>
+        <div class="actions">
+	        <a class="btn btn-mini select-all" href="An-introduction-to-MUSH-security.html#">
+                    <i class="icon-resize-full"></i> Select Content
+            </a>
+        </div>
+    </div>
+    <div id="code" class="box-content content">
+        <br/><br/>An introduction to MUSH security<br/>~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~<br/><br/>This is targetted at administrators, but non-Gods/ Wizards/<br/>Helpers/ Royalty should realize that they are administrators of<br/>their own object and their own commands, and that while security<br/>breaches of Wizard-empowered objects can be disasterous for a<br/>MUSH, security holes in player objects can be equally devastating<br/>for the player. Thus, all players who code or build should read<br/>this. <br/><br/><br/>The first thing any administrator should do is recognize that<br/>everything is a potential security hole. It is not possible to<br/>construct a totally secure system that is at all usable. But<br/>there are steps you should take to increase the security of a<br/>system to reasonable levels.<br/><br/><br/>For MUSH security, the worst possible hole is the God<br/>character. God should own *nothing*, should have no unnecessary<br/>attributes on him, no unnecessary flags (especially not INHERIT)<br/>and should be uselocked (@lock/use me==me). If an object requires<br/>God priviledges to run it is most likely either a result of a bad<br/>configuration of the MUSH, or an object which can muck with<br/>wizards; the first can be solved (a typical example is the<br/>default permissions of the @attribute command, which should be<br/>made wizard-runnable) and the second is probably not necessary.<br/><br/><br/>The God character is a special case, and easily handled. The most<br/>common potential holes are wizard-empowered objects, those that<br/>control every other object on the MUSH. To get an idea of how<br/>many of these exist, type:<br/><br/>	@create TestObject<br/>	@set TestObject=INHERIT<br/>	@search eval=controls(##,TestObject)<br/><br/>Every listed object has the potential to destroy the entire MUSH<br/>in a few seconds. <br/><br/><br/>How an object becomes wiz-powered:<br/>~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~<br/><br/>An object has wizard powers if:<br/><br/>	It is set WIZARD (by the God character)<br/>	It is owned by someone set WIZARD and is set INHERIT<br/>	It is owned by someone set WIZARD *who* is set INHERIT<br/><br/>Note carefully the third option. Any wizard who is set INHERIT<br/>makes everything they own wizard-powered and thus a potential<br/>security hole of gargantual proportions.<br/><br/>	==== WIZARDS SHOULD NEVER BE SET INHERIT ====<br/><br/>Wizards are humans, and prone to make mistakes; this includes<br/>creating insecure objects. If a wizard is set INHERIT, any<br/>insecure object they create is wizard-powered. If they are not<br/>set INHERIT, they have to explicitly grant wizard powers to the<br/>objects they create one by one. Thus, wizards should never be set<br/>INHERIT. If a wizard is set INHERIT, they should remove the flag<br/>immediately. If they complain about being too lazy, ask them if<br/>they are willing to reconstruct the entire MUSH from scratch if<br/>it should be damaged due to a potential security hole in their<br/>objects. <br/><br/><br/>Next and fairly obviously, only objects which need to perform<br/>wizard-power operations should be set INHERIT. If something<br/>doesn't need to perform wizard operations (and if you have<br/>creative players, you know how much you can get away with sans<br/>wizbit) remove the INHERIT flag.<br/><br/>I estimate that if the average MUSH follows the steps outlined in<br/>this section, the number of wizard-powered objects will be cut in<br/>half.<br/><br/><br/>Security holes: Locks<br/>~~~~~~~~~~~~~~~~~~~~~<br/><br/>(This applies to objects who's use you want to restrict;<br/>obviously, public globals won't be uselocked in this manner)<br/><br/>	@lock/use object=me<br/><br/>Only I can use the object now, right?<br/><br/>	==== WRONG ====<br/><br/>Ignoring @averb attributes for now, this is one of the most<br/>common security holes seen on MUSHes. The syntax of that lock<br/>sets what is known as an is-or-carry lock. <br/><br/>	@lock/use Foo = Fizbin<br/>	<br/>This means:<br/><br/>	A can use Foo if A *is* Fizbin<br/><br/>		AND<br/><br/>	A can use Foo if A *carries* Fizbin<br/><br/>(that is, Fizbin is in A's contents list)<br/><br/>Consider a wizard that does:<br/><br/>	@create WizToys<br/>	@set WizToys=INHERIT<br/>	@lock/use WizToys=me<br/>	&amp;FAB_CMD WizToys=$fab:@do some wonderful stuff<br/><br/>If a player can convince the wizard to drop WizToys in a room<br/>that the player owns, the room can run the fab command, since the<br/>room passes the "carries" part of the lock.<br/><br/><br/>	==== CORRECT SYNTAX ====<br/><br/>	@lock/use object = =me<br/><br/>The "=me" is an *is* lock ONLY. This is the secure way to lock<br/>objects.<br/><br/>Now do:<br/><br/>	@dolist search(me eval=controls(##,TestObject))=<br/>		@pemit me=[name(##)](##) - [lock(##/use)]<br/><br/>This will show you the UseLock of every wiz-powered object you own.<br/>You should make sure that all of your own objects have the<br/>correct lock usage. Then run do:<br/><br/>	@dolist search(eval=controls(##,TestObject))=<br/>		@pemit me=[name(owner(##))]: [name(##)](##) - [lock(##/use)] <br/><br/>This checks everyone's wiz objects. If you find insecurely<br/>locked ones, send mail to the wizard and let them know, or fix<br/>the lock yourself.<br/><br/><br/>Security holes: Commands<br/>~~~~~~~~~~~~~~~~~~~~~~~~<br/><br/>Now that you've made sure that only those who need access to<br/>commands can run them, what about commands that everyone should<br/>be able to run, like globals?<br/><br/>Here's the nastiest command possible:<br/><br/>	&amp;SOME_CMD Global object=$+do *:@fo me={%0}<br/><br/>This lets anyone run any command, fairly obviously, and you're<br/>not going to find this on many MUSHes (at least, I hope not).<br/><br/>But here's a similar example that's equally nasty:<br/><br/>	&amp;SOME_CMD2 Global object=$+do2 *:@fo me={@pemit %#=You +do2'd: %0}<br/>	<br/>It looks harmless enough at first, but<br/><br/>	==== @force evaluates its 2nd argument ====<br/>	==== before enqueuing the results ====<br/><br/>What's that mean in English? If I do:<br/><br/>	@force me={@pemit me=test: %va}<br/><br/>And my @va attribute is:<br/><br/>	haha! ; @destroy me<br/><br/>Then the 2nd argument of @force becomes, on substitution:<br/><br/>	@pemit me=test: haha! ; @destroy me<br/><br/>And *both* of these commands are run. Adios, amigo.<br/><br/>	==== AVOID @force IN GLOBALS LIKE THE PLAGUE ====<br/><br/>At the very least, be extremely careful. Test it with arguments<br/>with semicolons. One way to secure an @force is:<br/><br/>	@force me={@pemit me=test: {%va}}<br/><br/>This should work properly. The {} around the %va delay its<br/>evaluation, so that the 2nd argument of the @force evaluates to:<br/><br/>	@pemit %#=You +do3'd: {haha!; @destroy me}<br/><br/>This runs just fine.<br/><br/><br/>Security holes: Attributes<br/>~~~~~~~~~~~~~~~~~~~~~~~~~~<br/><br/>Players should beware of this one especially; on Narnia, I had a<br/>public bulletin board (non-wiz, non-global) which did pretty much<br/>what I'm about to say is a big mistake. It patched it before<br/>anyone exploited the hole, however.<br/><br/><br/>A potential mail editing system might look like this:<br/><br/>	$-*:@switch member(v(EDITING),%#)=<br/>		0,{@pemit %#=You're not editing a message!},<br/>		{<br/>			&amp;MESSAGE-%# me=[v(MESSAGE-%#)]%r%0;<br/>			@pemit %#=(message continued)<br/>		}<br/>	<br/>Danger! Danger Will Robinson! If a user (#1234) types:<br/><br/>	-$breakin *:@force me={%0}<br/><br/>Then MESSAGE-#1234 on the object becomes:<br/><br/>	$breakin *:@force me={%0}<br/><br/>This should look familiar. Ways to avoid this:<br/><br/>	- Never set arbitrary attributes (user input) on <br/>	objects which are publicly accessable. For example,<br/>	store the actual text strings comprising a bulletin<br/>	board on a data object, not the global object.<br/><br/>	- Set any attribute thus created NO_COMMAND:<br/><br/>		@set obj/attrib=NO_COMMAND<br/><br/>	- Never allow a prefix to start with user input, e.g.<br/>	<br/>		&amp;BBPOST bboard=$post *:<br/>			@vn me=add(%vn,1);<br/>			&amp;POST-%vn me=%n -- %r %0;<br/>			<br/>Setting attributes with arbitrary names is also a major no-no,<br/>but that's less common.<br/>	<br/><br/>Security holes: @averbs<br/>~~~~~~~~~~~~~~~~~~~~~~~<br/><br/>Anyone can potentially run these, so watch out. If you want to<br/>restrict their use, put an explicit check into the code. <br/><br/><br/>--<br/>Joshua, aka Algol@NarniaGolden<br/>
+    </div>
+</div>
+<script type="text/javascript">
+    var selectText = function(element) {
+        var doc = document;
+        var text = doc.getElementById(element);
+
+        if (doc.body.createTextRange) { // ms
+            var range = doc.body.createTextRange();
+            range.moveToElementText(text);
+            range.select();
+        } else if (window.getSelection) { // moz, opera, webkit
+            var selection = window.getSelection();
+            var range = doc.createRange();
+            range.selectNodeContents(text);
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
+    }
+
+    $('a.select-all').click(function () {
+        selectText('code');
+    });
+</script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</body>
+
+</html>
+<script src="../Scripts/Google.js" type="text/javascript"></script>

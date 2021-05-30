@@ -1,0 +1,119 @@
+# #########################################################################
+# Language System for FiranMUX						  #
+# Created by Jonathan Evans (Jon)					  #
+# Last revised 2/11/99							  #
+###########################################################################
+#                      ********************				  #
+#                      * Version 2.6 Beta *				  #
+#                      ********************				  #
+#									  #
+# Reasons for version designation:					  #
+#   2: Second total design of system					  #
+#   .6: Many revisions performed and many bugs removed. 		  #
+#	 New commands added too.					  #
+#   Beta: The code has a reputation for having some component break every #
+#	   time I think it finally all works perfectly. Therefore, I'm    #
+#	   letting it be tested quite a bit before I declare it 'stable'. #
+#	   Anyway, I promised myself that I wouldn't stop adding new      #
+#	   things to it until I have all the language commands on the MUX #
+#	   working with it. And of course, the number 1 reason for        #
+#	   designating it Beta...					  #
+#	   It sounds so cool to have a 3-part version name. :)		  #
+###########################################################################
+#		     Definitions of Terms Used in File			  #
+#									  #
+# Core: The main code, the Languify function. Any truly important update  #
+#	 is at the very basis a change to this code.			  #
+#									  #
+# Speaker: The user of the language command, who is seen as the one 	  #
+#	    saying or performing the text.				  #
+#									  #
+# Listener: One or more objects that see the speaker's text. In commands  #
+#	     like say or pose, everyone in the room (and the audible      #
+#            rooms) is a listener. In ones such as whisper, only the	  #
+#	     one object talked to is the listener.			  #
+#									  #
+# Uninvolveds: Those present in the room (and audible rooms) of the 	  #
+# 	        speaker but are not involved with the speaker's text	  #
+#	        directly but rather they receive a message describing     #
+#	        what is going on without seeing the spoken text.	  #
+#									  #
+# Audible room: Rooms referenced by the AUDIBLE-ROOMS attribute in any    #
+#		 location on which it has been placed. If there are	  #
+#		 listeners or uninvolveds in the rooms in that list	  #
+#		 then they are counted as listeners and uninvolveds for   #
+#		 the command the speaker uses as well. Useful for jail    #
+#		 cells and the like.					  #
+#									  #
+# Successes: What was returned from the successes() call.		  #
+#									  #
+# Success id: The successes translated to words (Bonus/Pass/Fail/Botch)   #
+#									  #
+###########################################################################
+# 			   Revision History				  #
+#									  #
+# (Unfortunately, I have been recording the revision history only since   #
+#  Version 2.5 Beta)							  #
+#									  #
+# 2.5 -- Fairly stable system. Everything works more or less like it's    #
+#	  supposed to. Only room-wide commands such as say and pose are   #
+#	  available. Whisper and mutter have been attempted but failed    #
+# 	  due to lack of support in Core (languify code) for commands     #
+#	  that have a single speaker saying something to a single 	  #
+#	  listener.							  #
+#									  #
+# 2.6 -- Altered the Core to work well with commands such as whisper and  #
+#         mutter (see 2.5). Also, cleaned up code in a lot of places,	  #
+#	  replacing switch()es with ifelse()s. In addition, because of    #
+#	  the Core changes, Whisper was added (Mutter and Shout coming    #
+#	  soon!). Some ufunctions were fixed up besides the switch()      #
+#	  substitution, primarily U-LANG-SUCCESSES which hadn't been	  #
+#	  changed since Version 1! (Well, except for that Faltering 1 bug #
+#	  which turned out to be from that ufun.) Oh yeah, and I changed  #
+#	  the ugly intro comment section to this new pretty and useful	  #
+#	  format! (Hey, I was bored!)					  #
+###########################################################################
+# 			  Important DBrefs				  #
+#									  #
+# #2541 -- Language System Code						  #
+# #1771 -- Language Database						  #
+###########################################################################
+# Includes the following commands:					  #
+#   say									  #
+#   pose								  #
+#   whisper								  #
+#   '									  #
+#   speak								  #
+#   languages								  #
+#   " 									  #
+#   :									  #
+#   ;									  #
+#   dsay								  #
+#   mutter								  #
+#   shout								  #
+###########################################################################
+#			 External Code Needed				  #
+#			 (Not included here)				  #
+#									  #
+# successes()								  #
+# skill() 								  #
+# 									  #
+###########################################################################
+#			Thanks go out to...				  #
+#									  #
+#   Adam and Steph, for FiranMUX					  #
+###########################################################################
+#			 Success States					  #
+#									  #
+# Bonus: Listeners understand at least a little, raising their level by 1.#
+# Pass: No change in their level of understanding.			  #
+# Fail: Listeners understand at a level less.				  #
+# Botch: People understand at level 1. (Basically mumbling.)		  #
+###########################################################################
+#			   ON TO THE CODE!!! 				  #
+###########################################################################
+
+#include /home/jon/cvs/softcode/language/ufuns.mux
+#include /home/jon/cvs/softcode/language/cmds.mux
+#include /home/jon/cvs/softcode/language/newlanguify.mux
+-

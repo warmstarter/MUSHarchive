@@ -1,0 +1,142 @@
+@@ MUSH language system by Javelin
+@@
+@@ This code used to work, but no promises (or support) now.
+@@ Released under GPL.
+@@
+@@ Features:
+@@  1. Ability to speak and understand any number of languages
+@@     at 6 fluency levels (none - perfect)
+@@  2. Speaker and listener fluency relevant
+@@  3. @functional forms to aid in implementation of written language
+@@
+@@ Implementation:
+@@  1. Languages known are stored in player's LANGUAGES attribute,
+@@     in the following format: langname:level langname:level etc.
+@@     Levels range from 1-5; not having the language listed is level 0.
+@@  2. Command interface:
+@@      +lang <lang>    - Make <lang> your default language
+@@      +lang           - List languages known
+@@      +speak <words>  - Speak words in default language (also ')
+@@      +speak/<lang> <words> - Speak words in the given language
+@@  3. Function interface:
+@@      speak(<lang>,<words>) - Return words spoken in language for a player
+@@
+
+@@
+@@ The user interface
+@@
+
+@create Language Commands
+@set language=wizard
+@set language=safe
+
+&do_lang_list language=$+lang: @pemit %#=You know the following languages:
+    [iter(xget(%#,LANGUAGES),%r[ljust(before(##,:),40)] [extract(v(levelnames),after(##,:),1)])]
+    %rThe first language listed is your current default language.
+
+&do_lang_set language=$+lang *: @switch 0=[u(level,%#,%0)],
+    {@pemit %#=You don't know that language at all!},
+    {&languages %#=[setq(0,ulocal(getlang,%#,%0))]%q0 [remove(xget(%#,LANGUAGES),%q0)];
+     @pemit %#=Default language set to %0.}
+
+
+&do_speak_default language=$+speak *:
+    @pemit %#=You say in [u(deflang,%#)], '%0';
+  @pemit/list [remove(lcon(%l),%#)]=[setq(2,capstr(ulocal(deflang,%#)))][setq(0,ulocal(level,##,%q2))][setq(1,ulocal(level,%#,%q2))]
+    [switch(0,or(%q0,ulocal(islinguist,##)),%N says something in %q2.,
+              %q0,%N speaks in a language you don't recognize.,
+              %N says in %q2, '[ulocal(garble,%q0,ulocal(garble,%q1,%0))]'
+
+&do_speak language=$+speak/* *: @switch 0=[u(level,%#,%0)],
+    {@pemit %#=You don't know that language at all!},
+    {@pemit %#=You say in [capstr(%0)], '%1';
+  @pemit/list [remove(lcon(%l),%#)]=[setq(0,ulocal(level,##,%0))][setq(1,ulocal(level,%#,%0))]
+    [switch(0,or(%q0,ulocal(islinguist,##)),%N says something in [capstr(%0)].,
+              %q0,%N speaks in a language you don't recognize.,
+              %N says in [capstr(%0)], '[ulocal(garble,%q0,ulocal(garble,%q1,%1))]'
+            )]
+    }
+
+@@
+@@ Utility functions
+@@
+
+@create Language fluency functions
+@set functions = safe
+@parent commands=functions
+
+&deflang functions=[before(first(xget(%0,LANGUAGES)),:)]
+&getlang functions=[setq(1,xget(%0,LANGUAGES))][setq(0,match(%q1,%1:*))][switch(%q0,#-1,,0,,extract(%q1,%q0,1))]
+&level functions=[setq(0,ulocal(getlang,%0,%1))][switch(%q0,,0,after(%q0,:))]
+&levelnames functions=novice high-school college near-fluent native
+
+@@ Given a level and a string, garble it appropriately
+&garble functions=[setq(9,%1)][iter(v(filters%0),setq(9,ulocal(##,%q9,%0)))]%q9
+
+@@ Fluency:
+@@ Each word in the message is passed through a function which
+@@ possibly changes it based on speaker (and later listener) fluency.
+@@ Changes include:
+@@  1. mistaking questions for statements
+@@  2. mistaking one word for another (esp. grammatically)
+@@  3. mistaking tense of the copula and other simple verbs
+@@  4. failing to understand long (> fluency*2 letters) words
+@@  5. sound changes in consonants
+@@
+@@ At level 0 fluency, speech is impossible
+@@ At level 1 fluency, all of the above are possible
+@@ At level 2 fluency, 2-5 are possible
+@@ At level 3 fluency, 3-4 are possible
+@@ At level 4 fluency, 4 is possible
+@@ At level 5 fluency, speech is perfect
+
+@@ For each fluency level of interest, list the garbling functions
+@@ that should apply. Levels 0 and 5 are special
+
+&filters1 fluency=g_questions g_words g_tenses g_long g_sound
+&filters2 fluency=g_words g_tenses g_long g_sound
+&filters3 fluency=g_tenses g_long
+&filters4 fluency=g_long
+&filters5 fluency=
+
+
+@@ The actual garbling functions
+@@ Each takes a single word as input and output
+
+&g_questions fluency=[edit(%0,?,.)]
+
+&g_words fluency=[first(iter(v(parts),
+                  switch(setq(0,member(v(##),%0))%q0,0,,u(randword,v(##)))
+                  ))]
+
+&randword fluency=[extract(%0,add(1,rand(words(%0))),1)]
+&parts fluency=articles conjunctions pronouns prepositions
+&articles fluency=the a an
+&conjunctions fluency=or and but yet thus however although if not
+&pronouns fluency=I me mine he him his she her they them their it its it's we us our ours
+&prepositions fluency=to for of from by on in over across under near at about
+
+&g_tenses fluency=[first(iter(v(verbs),
+                  switch(setq(0,member(v(##),%0))%q0,0,,u(randword,v(##)))
+                  ))]
+
+&verbs fluency=tobe todo togo tospeak tocome tosee tohave
+&tobe fluency=is|are|was|were|will be|have been|has been|will have been|had been|is being|would be
+&tohave fluency=has|had|have|will have|has had|is having|was having|will have had|would have
+&todo fluency=do|does|did|has done|will do|will have done|had done|is doing|was doing|would do
+&togo fluency=go|goes|went|has gone|will go|will have gone|had gone|is going|was going|would go
+&tospeak fluency=speaks|spoke|has spoken|will speak|is speaking|would speak|says|said|will say|has said|will have said|is saying|would say|talks|talked|talk|will talk|have talked|had talked|is talking|are talking
+&tocome fluency=comes|come|came|will come|has come|have come|had come|is coming|are coming|would come|would have come|
+&tosee fluency=sees|saw|see|will see|has seen|had seen|have seen|will have seen|is seeing|are seeing|would see
+
+&g_long fluency=[switch(gt(strlen(%0),mul(2,%1)),0,%0,repeat(*,strlen(%0)))]
+
+&g_sound fluency=[setq(0,%0)][iter(v(changes),switch(gt(%1,rand(4)),,setq(0,u(changesound,##,%q0))))]%q0
+
+&changes fluency=bp pb dt td kg gk jz zj mn nm lr rl
+&changesound fluency=[edit(%0,mid(%1,0,1),mid(%1,1,1))]
+
+
+
+
+

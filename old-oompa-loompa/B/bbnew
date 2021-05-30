@@ -1,0 +1,9 @@
+@@
+@@ The attribute below, added to a Myrddin BBS (4.0.6), will
+@@ create a +bbnew command that shows a player the next unread
+@@ message available.
+@@
+@@ Written by Javelin, but really just hacked from Myrddin's great system
+@@
+
+&CMD_+BBNEW BBS - Myrddin's Global BBS v4.0.6=$+bbnew:@switch [setq(0,first(iter(u(valid_groups,%#,read),switch(trim(u(unreadnums,%#,##)),,,none-unread,,##))))][words(%q0)]=0,@nspemit %#=No unread messages on any board.,{think [setq(4,member(v(groups),%q0))][setq(5,first(u(unreadnums,%#,%q0)))];@switch [and(lte(%q5,words(get(%q0/MESS_LST))),isnum(%q5))]=0,{@nspemit %#=No new messages beyond %q4/[setr(6,add(after(%0,/),0))] ([name(%q0)]/%q6).},{@nspemit %#=[center(= [name(%q0)] =,78,=)]%r[ljust(Message: %q4/%q5[switch(u(fn_timeout_close,index(setr(3,get(%q0/HDR_[extract(get(%q0/MESS_LST),%q5,1)])),|,5,1)),1,{%b(timeout warning)})],35)]Posted[space(10)]Author%r[ljust(index(%q3,|,1,1),35)][ljust(index(%q3,|,2,1),16)][left([index(%q3,|,3,1)]%b[ifelse(and(hasattr(%q0,anonymous),hasflag(%#,wizard)),%b\([name(index(%q3,|,4,1))]\),)],29)]%r[repeat(-,78)]%r[get(%q0/BDY_[extract(get(%q0/MESS_LST),%q5,1)])]%r[repeat(=,78)]; &bb_read %#=[setunion(get(%#/bb_read),[extract(get(%q0/MESS_LST),%q5,1)])]}}

@@ -1,0 +1,24 @@
+@create PARENT: IBM 486-66mhz Computer
+@lock PARENT: IBM 486-66mhz Computer=*Jesse
+@Desc PARENT: IBM 486-66mhz Computer=A standard minitower style IBM 486-66mhz computer, with SVGA Monitor and built %bin 14.4 HST modem.
+&DIR PARENT: IBM 486-66mhz Computer=$+dir:@pemit %#=%RDIRECTORY%R[v(line)];@dolist [v(context)]=@pemit %#=##
+&LINE PARENT: IBM 486-66mhz Computer=<>================================== FILE ==================================<>
+&EDIT PARENT: IBM 486-66mhz Computer=$+edit *=*=*:@switch [member(v(context),%0)]=0,{@pemit %#=You can't revise something that isn't there. Check +dir to find the correct filename.},{@emit %N rapidly hits the keys on %p computer.};@edit me/page_%0={%1},{%2}
+&DELETE PARENT: IBM 486-66mhz Computer=$+del *:@switch [member(v(context),%0]=0,{@pemit %#=You can't delete something that isn't there. Check +dir to find the correct filename.},{@remit %1=[u(erase_mesg)];&page_%0 me=;&context me=[remove(v(context),%0)]}
+&WRITE_MESG PARENT: IBM 486-66mhz Computer=[name(owner(me))] types something into the computer.
+&ERASE_MESG PARENT: IBM 486-66mhz Computer=[name(owner(me))] rapidly hits the keys on the computer.
+&HELP PARENT: IBM 486-66mhz Computer=$+comhelp:@pemit %#=%t%t%t<*> COMHELP <*>%r%r+dir%t%t%t%twill list the files in the computer.%r+write%b<TITLE>=<TEXT>%t%twill enter TEXT in a file called TITLE.%R+load%b<TITLE>%t%t%twill display the filecalled TITLE.%r+edit%b<TITLE>=<TEXTA>=<TEXTB>%t%will replace TEXTA with TEXTB in file TITLE%r+del%b<TITLE>%t%t%twill delete file TITLE.
+@Adesc PARENT: IBM 486-66mhz Computer=@pemit %#=%rType <+comhelp> for help
+&CREDIT PARENT: IBM 486-66mhz Computer=Orginal code by Boone@Masq, Improved and typed by Peter Ross@DamnedMUSH and brought to you here by Jade@CitadelMUSH and brought to YOU here by dimyzoe@Dark Metal.
+&WRITE PARENT: IBM 486-66mhz Computer=$+write *=*:@remit %1=[u(write_mesg)];&page_%0 me=%1;&context me=[v(context)] %0
+&READ PARENT: IBM 486-66mhz Computer=$+load *:@switch [member(v(context),%0)]=0,{@pemit %#=That is not a file in the dir. Check +dir for correct filename, Filename must be spelt EXCATLY as written.},{@pemit %#=%R[ucstr(%0)]%R[v(line)];(;@pemit %#=[s(v(page_%0))]})
+&CONTEXT PARENT: IBM 486-66mhz Computer=TEST more
+&PAGE_TEST PARENT: IBM 486-66mhz Computer=This is only a test of this computer system, again this is only a test.
+&PAGE_MORE PARENT: IBM 486-66mhz Computer=kjngeouhg
+@lock/TeloutLock PARENT: IBM 486-66mhz Computer==#0
+@Tfail PARENT: IBM 486-66mhz Computer=This object is set jump_OK so as to make it's muber clear. It is not set up to b teleported to.
+@lock/TportLock PARENT: IBM 486-66mhz Computer=PARENT: IBM 486-66mhz Computer
+@set PARENT: IBM 486-66mhz Computer=VISUAL
+@set PARENT: IBM 486-66mhz Computer=PARENT_OK
+@set PARENT: IBM 486-66mhz Computer=HALTED
+@set PARENT: IBM 486-66mhz Computer=SAFE

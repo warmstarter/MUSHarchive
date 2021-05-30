@@ -1,0 +1,41 @@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@ Eithelnar's +FINGER v1.1 by Manwe@Amanquelle    @@
+@@ This is a simple +finger system used for OOC    @@
+@@ purposes, written for PennMUSH 1.7.5            @@ 
+@@ It may/may not work on other codebases.         @@
+@@ If you have any questions, send me an email to  @@
+@@ liam@firdeloth.net                              @@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@ You must keep the copyright notice in, even if  @@
+@@ you modify the code.  You can ADD Modified by:  @@
+@@ but you cannot take my name out.                @@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+@create +FINGER OBJECT
+@@ You may need a wizard flag for this
+
+@set +FINGER OBJECT=wizard
+
+@set +FINGER OBJECT=!no_command
+
+@DESCRIBE +Finger Object=
+
+@set +Finger Object/DESCRIBE=no_command visual prefixmatch
+
+&FIELDS +Finger Object=OOCDESC NOTE PLAN PROJECT QUOTES
+
+&SHOW.FINGER +Finger Object=[ansi(hc,[center([ansi(hy,%1)]'s +finger,80,=)])]%R[ansi(hc,REAL NAME)][ansi(hw,:)][ljust({[ansi(hg,[switch(hasattr(pmatch(%1),realname),1,get(pmatch(%1)/realname),0,None-set)])]},31)][rjust({[ansi(hc,CULTURE)][ansi(hw,:)][ansi(hg,[switch(hasattr(pmatch(%1),culture),1,get(pmatch(%1)/culture),None-set)])]},39)]%R[rjust([ansi(hc,SEX)],9)][ansi(hw,:)][ljust({[ansi(hg,[switch(hasattr(pmatch(%1),sex),1,get(pmatch(%1)/sex),0,None-set)])]},30)][rjust({[switch(hasflag(pmatch(%1),CONNECTED),1,[ansi(hc,IDLE)][ansi(hw,:)][ansi(hg,[timestring(idle(pmatch(%1)))])],0,[ansi(hc,LAST-CONNECTED)][ansi(hw,:)][ansi(hg,[get(pmatch(%1)/last)])])]},40)]%R[rjust([ansi(hc,EMAIL)],9)][ansi(hw,:)][ljust({[ansi(hg,[switch(hasattr(pmatch(%1),email),1,get(pmatch(%1)/email),0,None-set)])]},30)][rjust({[switch(hasattr(pmatch(%1),position),1,[ansi(hc,POSITION)][ansi(hw,:)][ansi(hg,[get(pmatch(%1)/position)])],0,[ansi(hc,POSITION)][ansi(hw,:)][ansi(hg,Player)])]},40)]%R[ansi(hc,[center([ansi(hy,SPAM)],80,=)]%R[switch(hasattr(#27, [pmatch(%1)].use.oocdesc),1,{[wrap({[ansi(hc,OOCDESC)][ansi(hw,:)][ansi(hg,[get([pmatch(%1)].oocdesc)])]},80)]%R},0,[ansi(hc,)])]{[switch(hasattr(#27, [pmatch(%1)].use.note),1,[wrap({[ansi(hc,NOTE)][ansi(hw,:)][ansi(hg,[get([pmatch(%1)].note)])]},80)]%R,0,[ansi(hc,)])]}[switch(hasattr(#27,[pmatch(%1)].use.plan),1,[wrap({[ansi(hc,PLAN)][ansi(hw,:)][ansi(hg,[get([pmatch(%1)].plan)])]},80)]%R,0,[ansi(hc,)])][switch(hasattr(#27, [pmatch(%1)].use.project),1,[wrap({[ansi(hc,PROJECT)][ansi(hw,:)][ansi(hg,[get([pmatch(%1)].project)])]},80)]%R,0,[ansi(hc,)])][switch(hasattr(#27, [pmatch(%1)].use.quotes),1,[wrap({[ansi(hc,QUOTES)][ansi(hw,:)][ansi(hg,[get(#27[pmatch(%1)].quotes)])]},80)]%R,0,[ansi(hc,)])]%R[ansi(hc,[center([ansi(hy,[mudname()] +Finger)],80,=)])])][switch(hasattr([pmatch(%1)], afinger),1,[nspemit([pmatch(%1)], [ansi(hc,%[)][ansi(hg,+FINGER)][ansi(hc,%])] [ansi(hy,name(%#))] just +finger'ed you)])]
+
+&CMD.CONFIG.FINGER +finger object=$+finger/config *:[wipe(%#.use.*)];[setq(0,%0)];[nspemit(%#,{[switch([gte([match(%0,OOCDESC)],1)],1,[switch(hasattr(#27, %#.oocdesc),1,{[set(#27,%#.use.oocdesc:[get(%#.oocdesc)])][set(%#.use.oocdesc, visual)]},0,You don't have an OOCDESC)],0,[@@(hello)])][switch([gte([match(%0,NOTE)],1)],1,[switch(hasattr(#27, %#.note),1,{[set(#27,%#.use.note:[get(%#.note)])][set(%#.use.note, visual)]},0,You don't have a NOTE)],0,[@@(hello)])][switch([gte([match(%0,PLAN)],1)],1,[switch(hasattr(#27, %#.plan),1,{[set(#27,%#.use.plan:[get(%#.plan)])][set(%#.use.plan, visual)]},0,You don't have a PLAN)],0,[@@(hello)])][switch([gte([match(%0,PROJECT)],1)],1,[switch(hasattr(#27, %#.project),1,{[set(#27,%#.use.project:[get(%#.project)])][set(%#.use.project, visual)]},0,You don't have a PROJECT)],0,[@@(hello)])][switch([gte([match(%0,QUOTE)],1)],1,[switch(hasattr(#27, %#.quotes),1,{[set(#27,%#.use.quotes:[get(%#.quotes)])][set(%#.use.quotes, visual)]},0,You don't have a QUOTES)],0,[@@(hello)])]}%R%[+FINGER%] CONFIG/Set)]
+
+&CMD.PLUS.FINGER +finger object=$+finger *:[setq(0,type(pmatch(%0)))];[setq(1,name(pmatch(%0)))];[nspemit(%#,[switch(%q0,PLAYER,[u(show.finger,%q0,%q1)],#-1,[u(#8/error.not.player)],#-2,[u(#8/error.ambiguous)])])]
+
+&CMD.SET.FINGER +finger object=$+finger/set *=*:[setq(0,lcstr(%0))];[nspemit(%#,[switch(%q0,oocdesc,{[set(#27, %#.oocdesc:%1)]%[+FINGER%] OOCDESC set},note,{[set(#27, %#.note:%1)]%[+FINGER%] NOTE set},plan,{[set(#27, %#.plan:%1)]%[+FINGER%] PLAN set},project,{[set(#27, %#.project:%1)]%[+FINGER%] PROJECT set},quotes,{[set(#27, %#.quotes:%1)]%[+FINGER%] QUOTES set},{%[+FINGER%] That is not a valid field.})]
+
+&credits.finger +finger object=All original code by Manwe@Amanquelle aka Eithelnar@Elendor|M*U*S*H.
+
+&cmd.finger.help +finger object=$+finger/help:@nspemit %#=[wrap({[ansi(hc,[center([ansi(hy,+FINGER HELP)],80,=)])]%R[ansi(hc,Syntax)]: [ansi(hy,+FINGER [ansi(hg,<NAME>)])]%R[space(8)][ansi(hy,+FINGER/SET [ansi(hg,<FIELD NAME>)]=[ansi(hg,<CONTENT>)])]%R[space(8)][ansi(hy,+FINGER/CONFIG [ansi(hg,<FIELD NAMES>)])]%R%RSyntax 1 retrieves +finger information for <player name>.  It will accept aliases.  If the other player has an afinger (explained further down), they will receive a notification you +finger'd them.%R%RSyntax 2 sets <Field name> information for you.  Possible fields are OOCDESC NOTE PLAN PROJECT QUOTES.  Other fields which are shown are REAL NAME, SEX, EMAIL, CULTURE, IDLE|LAST-CONNECT TIME, POSITION.  You may choose which of the first group of fields to show, but not the second.  If you do not want people to see your real name|email etc...store them as arealname|aemail etc...%R%RSyntax 3 sets which of the configurable fields to show.  The list can be in any order, but +finger will show them in a set order.  e.g [ansi(hc,+finger/config oocdesc plan project)] is the same as typing  [ansi(hc,+finger/config plan oocdesc project)]%R%RIf you wish to receive a message when someone +finger's you, type [ansi(hy,&afinger me=1)].  This will then notify you when you are +finger'd.},80)]%R[ansi(hc,[center([ansi(hy,+FINGER HELP)],80,=)])]
+
+@pemit %#=%[+FINGER%] INSTALL COMPLETE.  Type +finger/help for help on using +finger.  The object created must go in the master room.
+

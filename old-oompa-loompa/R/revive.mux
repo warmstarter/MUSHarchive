@@ -1,0 +1,146 @@
+# REVIVE.MUX
+#
+# The @revive command is used for returning the health of characters.
+# The command has numerous switches which return various parts of their
+# health.
+
+
+&cmd-revive/death #16 = $@revive/death *: 
+  think setq(0, locate(%#, %0, *P)); 
+  think setq(9, 
+    [isdbref(%q0)]
+    [hastag(%q0, dead)]
+  ); 
+
+  @select %q9 = 
+
+  11, {
+    think settag(%q0, !dead); 
+    think setq(1, get(%q0/realname)); 
+    @alias %q0; 
+    @name %q0 = [u(u-dead-name, %q0, %q1)]; 
+
+    think res_return(damage, immobile, %q0); 
+    think res_return(damage, gagged,   %q0); 
+    @pemit %# = You revive [name(%q0)] (%q0) from the dead.
+  }, 
+
+  0?, {@error %# = locate %q0}, 
+  ?0, {@pemit %# = That person ([name(%q0)]) isn't dead.}, 
+  *   {@pemit %# = Logic error in @revive/death command: %q9}
+-
+
+# As a side-effect, pemits a message to %# if the name couldn't be set.
+# 
+&u-dead-name #16 = 
+  switch(%1,,
+    switch(name(%0), 
+      Corpse of *, after(name(%0), Corpse of%b), 
+      Body of *,   after(name(%0), Body of%b), 
+                   [name(%0)]
+                   [pemit(%#, Could not rename [name(%0)]!)]
+    ), 
+    %1
+  )
+-
+
+
+
+&cmd-revive/shock #16 = $@revive/shock *: 
+  think setq(0, locate(%#, %0, *P)); 
+  think setq(9, 
+    [isdbref(%q0)]
+    [hastag(%q0, shock)]
+  ); 
+
+  @select %q9 = 
+
+  11, {
+    think settag(%q0, !shock); 
+    think setq(1, get(%q0/realname)); 
+    @alias %q0; 
+    @name %q0 = [u(u-unconscious-name, %q0, %q1)]; 
+
+    think res_return(damage, immobile, %q0); 
+    think res_return(damage, gagged,   %q0); 
+    @pemit %# = You revive [name(%q0)] (%q0) from [poss(%q0)] shock.
+  }, 
+
+  0?, {@error %# = locate %q0}, 
+  ?0, {@pemit %# = That person ([name(%q0)]) isn't in shock.}, 
+  *   {@pemit %# = Logic error in @revive/shock command: %q9}
+-
+
+# As a side-effect, pemits %# if it could not rename the player
+&u-unconscious-name #16 = 
+  switch(%1,,
+    switch(name(%0), 
+      Unconscious *, after(name(%0), Unconscious%b), 
+                     [name(%0)]
+                     [pemit(%#, Could not rename [name(%0)]!)]
+    ), 
+    %1
+  )
+-
+
+
+&cmd-revive/damage #16 = $@revive/damage *: 
+  think setq(0, locate(%#, %0, *P)); 
+  think setq(9, 
+    [isdbref(%q0)]
+    [gt(words(lattr(%q0/damage*)), 0)]
+  ); 
+
+  @select %q9 = 
+
+  11, {
+    @wipe %q0/damage*; 
+    @pemit %# = You heal all of [name(%q0)]'s (%q0) damage.
+  }, 
+
+  0?, {@error %# = locate %q0}, 
+  ?0, {@pemit %# = That person ([name(%q0)]) isn't damaged.}, 
+  *   {@pemit %# = Logic error in @revive/damage command: %q9}
+-
+
+
+
+&cmd-revive/all #16 = $@revive/all *: 
+  think setq(0, locate(%#, %0, *P)); 
+  think setq(9, 
+    [isdbref(%q0)]
+  ); 
+
+  @select %q9 = 
+
+  1, {
+    think settag(%q0, !dead); 
+    think settag(%q0, !shock); 
+    think setq(1, get(%q0/realname)); 
+    @alias %q0; 
+    @name %q0 = [u(u-dead-or-uncon-name, %q0, %q1)]; 
+
+    think res_return(damage, immobile, %q0); 
+    think res_return(damage, gagged,   %q0); 
+    @wipe %q0/damage*; 
+    @pemit %# = You revive [name(%q0)] (%q0) totally.
+  }, 
+
+  0, {@error %# = locate %q0}, 
+  *  {@pemit %# = Logic error in @revive/all command: %q9}
+-
+
+# %0 = dbref, %1 = old name/realname
+#
+&u-dead-or-uncon-name #16 = 
+  switch(%1,,
+    switch(name(%0), 
+      Corpse of *,   after(name(%0), Corpse of%b), 
+      Body of *,     after(name(%0), Body of%b), 
+      Unconscious *, after(name(%0), Unconscious%b), 
+                     [name(%0)]
+                     [pemit(%#, Could not rename player!)]
+    ), 
+    %1
+  )
+-

@@ -1,0 +1,1261 @@
+@@ System: ThunderCombat V2.1
+@@ Author: Jonathan A. Booth
+@@ Email: kamikaze@N0$PAMimsa.edu
+@@ URL: http://www.N0$PAMimsa.edu/~kamikaze/
+@@ (remove NOSPAM from hostnames)
+@@ Date: April 17, 1999
+@@ Written for: PennMUSH 1.7.2p24
+@@ Author is willing to support: Yes(*: see Note)
+@@
+@@ License/Copyright info:
+@@   Copyright 1998-1999, Jonathan A. Booth (kamikaze@imsa.edu).
+@@   There is no warrenty on this code, if it breaks you get to
+@@   keep all the peices. It is free for non-commercial use;
+@@   contact me for info reguarding commercial use. You may
+@@   redistribute this code provided it is unmodified and this
+@@   copyright notice is retained. Don't rip off this code and
+@@   claim it as your own, that's lame. Bugs should be reported
+@@   to me, the author, as well as suggestions.
+@@
+@@ (*) Note: The author is willing to support the unmodified combat
+@@ system when used in conjunction with the character data system also
+@@ in this directory. The author will help you some for integrating
+@@ combat with another char data system insofar as he will explain
+@@ what the functions combat calls are expected to do.
+@@
+@@ What the author will not do:
+@@  * Login to your MUSH and install the system
+@@  * Fix a system that someone else has modified
+@@  * Be combatwiz for your mush. Don't ask, don't try to sneak me
+@@    into being such
+@@
+@@ What this file will do:
+@@  * After a very long time creating all the objects, it will install
+@@    the fully functional and setup combat system in #2.
+@@
+@@ For best results:
+@@  * Start with nothing in your inventory, and no objects around you in
+@@    the room you are in so naming confusion doesn't become a problem.
+@@  * Quote the entire system, and backend chargen functions as
+@@    combatwiz, and don't try to chown them to someone else later.
+@@  * Allocate a large block of time to quote the files, and
+@@    dedicate a connection to it; it's going to take a loooong time
+@@    (1300 lines * 1 sec/line * 1 min/60 sec ~= 22 minutes)
+@@  * Raise your function_invocation_limit in mush.cnf up from 2500
+@@    to around 5000 unless you want +sheets to start getting cut
+@@    off
+@@  * Set null_eq_zero to be 'yes' in mush.cnf
+
+think Create the master room object
+
+think Beginning creation of the thundercombat system.
+@create ThunderCombat V2.1
+@fo me={&CS_THUNDERCOMBAT me=[num(ThunderCombat V2.1)]}
+@link ThunderCombat V2.1 = #2
+@set ThunderCombat V2.1 = WIZARD
+@set ThunderCombat V2.1 = SAFE
+@set ThunderCombat V2.1 = !NO_COMMAND
+&FUNC_IS_IC ThunderCombat V2.1=strmatch(get(%#/playstatus),IC)
+@ALEAVE ThunderCombat V2.1=@select [and(hasattr(%#,first(lattr(%#/cmd*))),hastype(%#,thing))]=1,{@dolist [lattr(%#/cmd*)]={&## me};@cemit [v(log_channel)]=<[v(log_channel)]> [ansi(ch,Commands from %N(%#) [iter(lattr(%#/cmd*),+[after(lcstr(##),_)])] removed...)]}
+@AENTER ThunderCombat V2.1=@select [and(hasattr(%#,first(lattr(%#/cmd*))),hastype(%#,thing))]=1,{@link %#=me;@dolist [lattr(%#/cmd*)]={@cpattr %#/##=me/##};@cemit [v(log_channel)]=<[v(log_channel)]> [ansi(ch,Commands from %N(%#) [iter(lattr(%#/cmd*),+[after(lcstr(##),_)])] added...)]}
+&COPYRIGHT ThunderCombat V2.1=Copyright 1998-1999, Jonathan A. Booth (kamikaze@imsa.edu). There is no warrenty on this code, if it breaks you get to keep all the peices. It is free for non-commercial use; contact me for info reguarding commercial use. You may redistribute this code provided it is unmodified and this copyright notice is retained. Don't rip off this code and claim it as your own, that's lame. Bugs should be reported to me, the author, as well as suggestions.
+@set ThunderCombat V2.1/COPYRIGHT=visual
+&DEAD_ROOM ThunderCombat V2.1=#0
+@DESCRIBE ThunderCombat V2.1=Player IC Commands:%r[table(iter(lattr(me/cmd_*),after(##,_)),13)]%rAdministration Commands:%r[table(iter(lattr(me/cmdjo_*),after(##,_)),13)]%rCombatwiz or God only Commands:%r[table(iter(lattr(me/cmdco_*),after(##,_)),13)]%r[ansi(rh,Please see [num(me)]/copyright for copyright information.)]
+@set ThunderCombat V2.1/DESCRIBE=visual
+&LOG_CHANNEL ThunderCombat V2.1=CombatBabble
+&IS_SETUP ThunderCombat V2.1=u(player data/is_setup,%#)
+&LOG ThunderCombat V2.1=1
+&VERSION ThunderCombat V2.1=2.1
+
+think Creating the commands objects to go inside ThunderCombat.
+
+@create Look
+@link Look = ThunderCombat V2.1
+@set Look = INHERIT
+@set Look = STICKY
+@set Look = SAFE
+@set Look = ROYALTY
+&LOG Look=0
+&CMD_LOOK_DEFAULT Look=$+look:@cemit [v(log_channel)]=u(messages/channel_message,u(look/code_look,%#,%l,here),%#,%l,look,here,get(look/log))
+&CMD_LOOK_OBJECT Look=$+look *:@cemit [v(log_channel)]=u(messages/channel_message,u(look/code_look,%#,setr(0,switch(and(orflags(%#,WrJ),isdbref(secure(%0))),1,secure(%0),locate(%#,secure(%0),TPmhni))),secure(%0)),%#,%q0,look,secure(%0),get(look/log))
+&CODE_LOOK Look=switch(u(handle_look_error,%0,%1,%2),~*,pemit(%0,u(error database/#$,%0,%2,look))#$,1,pemit(%0,u(do_look,%0,%1))1,pemit(%0,u(messages/unknown_error))-1)
+&HANDLE_LOOK_ERROR Look=switch(0,not(strmatch(loc(parent(%1)),num(Combat Items))),~050,or(hastype(%1,room),and(u(player data/is_setup,%1),hasflag(%1,connected),not(andflags(%1,DW)))),~051,or(hastype(%1,player),and(strmatch(loc(%0),%1),hastype(%1,room)),orflags(%0,WD)),~051,not(or(u(player data/get_flag,%0,no_look),u(player data/get_flag,loc(%0),no_look))),~054,1)
+&DO_LOOK Look=switch(1,hastype(%1,room),u(print_room,%1),u(print_object,%1,switch(%0,%1,self,other)))
+&VERSION Look=2.1.2
+&AUTHOR Look=Rhysem
+&PRINT_ROOM Look=[u(messages/header,Player Combat Stuff for [name(%0)])]%r%b[ansi(mh,ljust(Name,21))]%b[ansi(rh,ljust(Wielding,15))]%b[ansi(yh,ljust(Wearing,15))]%b[ansi(gh,Status)][iter(lcon(%0),switch(and(and(u(player data/is_setup,##),hasflag(##,connected)),not(and(hasflag(##,dark),orflags(##,WrJ)))),1,%r%b[ansi(m,ljust(left(name(##),21),21))]%b[ansi(r,ljust(left(name(first(u(player data/get_data,##,weapon))),15),15))]%b[ansi(y,ljust(left(name(first(u(player data/get_data,##,armor))),15),15))]%b[u(print_hp,get_char_data(##,Life))]), ,)]%r[u(messages/trailer,End of Info)]
+&PRINT_OBJECT Look=[switch(%1,self,You are,[name(%0)] is)] wielding [art(first(setr(9,u(player data/get_data,%0,weapon))))] [ansi(hr,name(first(%q9)))][ansi(r,switch(words(%q9),1,,%b(as well as [iter(rest(%q9),name(##), ,-)])))] and wearing [art(first(setr(9,u(player data/get_data,%0,armor))))] [ansi(hy,name(first(%q9)))][ansi(y,switch(words(%q9),1,,%b(as well as [iter(rest(%q9),name(##), ,-)])))].%r[switch(%1,self,You are,[name(%0)] is)] feeling [u(print_hp,get_char_data(%0,Life))].
+@DESCRIBE Look=foo
+&PRINT_HP Look=switch(secure(%0),5,ansi(gh,Normal),4,ansi(ch,Stunned),3,ansi(bh,Wounded),2,ansi(mh,Incapacitated),1,ansi(rh,Mortally Wounded),ansi(yhu,Killed))
+@tel Look=ThunderCombat V2.1
+
+@create Error Database
+@link Error Database = ThunderCombat V2.1
+@set Error Database = DARK
+@set Error Database = STICKY
+@set Error Database = SAFE
+&TYPE_~073 Error Database=can't search d/c
+&~073 Error Database=ansi(yh,That player is disconnected and beyond your reach.)
+&~124_TYPE Error Database=no sense cover
+&~124 Error Database=ansi(yh,You can not be attacked at the moment; why would you take cover?)
+&~134_TYPE Error Database=no ammo
+&~134 Error Database=ansi(yh,You have no more shorts left in your thrown weapon.)
+&~086_TYPE Error Database=must be throw
+&~086 Error Database=ansi(yh,You can not attack with that, it must be thrown.)
+&~133_TYPE Error Database=not attackable
+&~132_TYPE Error Database=can not throw
+&~131_TYPE Error Database=not setup
+&~130_TYPE Error Database=invalid target
+&~133 Error Database=ansi(yh,One of '%1' is not attackable.)
+&~132 Error Database=ansi(yh,You can not throw your weapon.)
+&~131 Error Database=ansi(yh,One of '%1' is not setup for combat.)
+&~130 Error Database=ansi(yh,One of '%1' is an invalid target.)
+&~112_TYPE Error Database=already on that set
+&~112 Error Database=ansi(yh,Your weapon is already on that setting!)
+&~111_TYPE Error Database=not real setting
+&~111 Error Database=ansi(yh,That is not a valid setting for that weapon.)
+&~110_TYPE Error Database=can not set
+&~110 Error Database=ansi(yh,You can not set that weapon to something different at the moment.)
+&~105_TYPE Error Database=can not unparry
+&~105 Error Database=ansi(yh,You can not cease parrying!)
+&~104_TYPE Error Database=useless to parry
+&~104 Error Database=ansi(yh,You can not parry with that weapon. It just doesn't work.)
+&~103_TYPE Error Database=can not parry
+&~103 Error Database=ansi(yh,You can not parry.)
+&~102_TYPE Error Database=not start parry
+&~102 Error Database=ansi(yh,You can't stop parrying when you haven't started.)
+&~101_TYPE Error Database=already parry
+&~101 Error Database=ansi(yh,You are already parrying.)
+&~100_TYPE Error Database=no use parry
+&~100 Error Database=ansi(yh,I don't see how you plan on parrying with that weapon.)
+&~013_TYPE Error Database=are aprrying
+&~013 Error Database=ansi(yh,You cannot wield another weapon while parrying.)
+&~022_TYPE Error Database=are parrying
+&~022 Error Database=ansi(yh,You may not unwield a weapon while parrying with it.)
+&~091_TYPE Error Database=no switch while parry
+&~091 Error Database=ansi(yh,You may not switch weapons while parrying.)
+&~012 Error Database=ansi(yh,You can not wield your %1.)
+&~011_TYPE Error Database=are_wielding_that
+&~011 Error Database=ansi(hy,You are already wielding [art(%1)] %1!)
+&~010_TYPE Error Database=hands full
+&~010 Error Database=ansi(yh,You cannot wield %1 and [name(u(player data/get_data,%0,weapon))]  at the same time.)
+&~000_TYPE Error Database=DNE
+&~000 Error Database=ansi(yh,You do not have '%1' on you or it is not useful in the specefied context.)
+@DESCRIBE Error Database=List of all error codes from handle_*_error, and their messages. %0 should be the user, the rest are arguments of whatever flavor.%r[table(iter(sort(lattr(me/*_type)),[ljust(before(##,_),3)] [v(##)], ,|),25,78,|)]
+@set Error Database/DESCRIBE=visual
+&~020 Error Database=ansi(hy,You stuff your %1 in your pockets in an attempt to unwield them.)
+&~021 Error Database=ansi(yh,You can not unwield your %1.)
+&~020_TYPE Error Database=unwield hands
+&~021_TYPE Error Database=cannot unwield
+&~030 Error Database=ansi(yh,You can not wear any more armor.)
+&~030_TYPE Error Database=no more armor
+&~031 Error Database=ansi(yh,It seems you are already wearing %1.)
+&~031_TYPE Error Database=already wearing that
+&~032 Error Database=ansi(yh,You find you can not wear %1.)
+&~040 Error Database=ansi(yh,Your %1 seems to be concealed already.)
+&~040_TYPE Error Database=that already concealed
+&~041 Error Database=ansi(yh,You can not conceal your %1.)
+&~041_TYPE Error Database=cannot conceal
+&~042 Error Database=ansi(yh,Your %1 does not seem to be concealed.)
+&~042_TYPE Error Database=that not concealed
+&~043 Error Database=ansi(yh,You can not unconceal your %1.)
+&~043_TYPE Error Database=cannot unconceal
+&~032_TYPE Error Database=cannot wear
+&~033 Error Database=ansi(yh,You consider stripping all your clothes off in an attempt to remove your skin, but decide that it might not be a wise idea.)
+&~034_TYPE Error Database=cannot unwear
+&~034 Error Database=ansi(yh,You can not unwear your %1.)
+&~033_TYPE Error Database=no unwear skin
+&~050 Error Database=ansi(yh,You can not +look at a weapon or armor. You should just 'look' at it.)
+&~050_TYPE Error Database=no +look wep/arm
+&~051 Error Database=ansi(yh,I don't see what good looking at %1 will do you.)
+&~051_TYPE Error Database=no use look there
+&~054 Error Database=ansi(yh,You can not look at %1.)
+&~054_TYPE Error Database=can not look
+&~060 Error Database=ansi(yh,The player you want to do that do does not exist.)
+&~060_TYPE Error Database=player dne
+&~061 Error Database=ansi(yh,The player or thing you want to do that to does not exist or is not in your location.)
+&~061_TYPE Error Database=obj not here
+&~062 Error Database=ansi(yh,'%1' is not a settable combat attribute.)
+&~062_TYPE Error Database=not combat attrib
+&~063 Error Database=ansi(yh,Value to set to must be a number.)
+&~063_TYPE Error Database=Must be number
+&~064 Error Database=ansi(yh,No such flag '%2'.)
+&~064_TYPE Error Database=no such flag
+&~070 Error Database=ansi(yh,I don't see the [secure(%1)] you want to search.)
+&~070_TYPE Error Database=dne for search
+&~071 Error Database=ansi(yh,You can not search [name(%1)].)
+&~071_TYPE Error Database=cannot search
+&~072 Error Database=ansi(yh,I don't see what good searching [art(name(%1))] [name(%1)] will do.)
+&~072_TYPE Error Database=no use search
+&~080 Error Database=ansi(yh,I don't see the %1 that you want to attack.)
+&~080_TYPE Error Database=dne 2 attack
+&~081 Error Database=ansi(yh,Your weapon no longer has any shots/charges.)
+&~081_TYPE Error Database=no ammo
+&~082 Error Database=ansi(yhfu,Suicide is not the answer.)
+&~082_TYPE Error Database=no suicide
+&~083 Error Database=ansi(yh,I don't see what good attacking a %1 would do.)
+&~083_TYPE Error Database=no use attack
+&~084 Error Database=ansi(yh,You can not attack %1.)
+&~085 Error Database=ansi(yh,You can't attack that player. (they aren't setup for combat -- call a judge!))
+&~085_TYPE Error Database=not attackable
+&~001 Error Database=ansi(hc,The combat in this room has been forced into rounds-only mode. Please use the appropraite rounds command to join the battle.)
+&~001_TYPE Error Database=rounds_only
+&~002 Error Database=ansi(rhf,You hear Combatwiz's booming voice in your head, "I am displeased at your attempt to hack the combat system. Prepare to be eliminated.")
+&~002_TYPE Error Database=Hack found
+&~090 Error Database=ansi(yh,No next weapon available. What else are you going to attack with, your hair?)
+&~090_TYPE Error Database=no next wep
+&~120 Error Database=ansi(yh,You are already under cover!)
+&~120_TYPE Error Database=already under cover
+&~121 Error Database=ansi(yh,You can not take cover.)
+&~121_TYPE Error Database=can not cover
+&~122 Error Database=ansi(yh,You must be under cover before you can exit it.)
+&~122_TYPE Error Database=not in cover to uncover
+&~123 Error Database=ansi(yh,You can not get out from your cover.)
+&~123_TYPE Error Database=can not uncover
+@tel Error Database=ThunderCombat V2.1
+
+@create Player Data
+@fo me={&CS_PLAYER_DATA me=[num(Player Data)]}
+@link Player Data = ThunderCombat V2.1
+@set Player Data = DARK
+@set Player Data = STICKY
+@set Player Data = SAFE
+@power Player Data = See_All
+&SET_FLAG Player Data=combat_set(%0,switch(%1,!*,setdiff(combat_get(%0),grab(combat_get(%0),right(%1,dec(strlen(%1)))*,|),|),setunion(combat_get(%0),%1,|)))
+&GET_FLAG Player Data=gt(strlen(grab(combat_get(%0),%1*,|)),0)
+&SET_DATA Player Data=combat_set(%0,switch(setr(9,match(combat_get(%0),%1*,|)),0,combat_get(%0)|%1 %2,replace(combat_get(%0),%q9,%1 %2,|)))
+&GET_DATA Player Data=rest(grab(combat_get(%0),%1*,|))
+&DEFAULT_COMBAT_DATA Player Data=armor [u(weapon data/racial_armor,%0)]|weapon [u(weapon data/racial_weapon,%0)]
+&CHAR_SETUP Player Data=combat_set(%0,u(default_combat_data,%0))
+&CALC_PERCENT Player Data=add(%0,mul(abs(%0),extract(v(look_up_table),max(1,min(words(v(look_up_table)),%1)),1)))
+&LOOK_UP_TABLE Player Data=-1 -1 -1 -1 -0.99 -0.96 -0.94 -0.91 -0.89 -0.86 -0.83 -0.8 -0.75 -0.69 -0.6 0 0.6 0.68 0.74 0.79 0.82 0.85 0.88 0.9 0.93 0.95 0.96 0.98 1
+&GET_NAME Player Data=first(grab(combat_get(%0),%1*,|))
+&MAX_HP Player Data=mul(shr(add(extract(grab(get(%0/char_data),*strength*),2,1,:),extract(grab(get(%0/char_data),*constitution*),2,1,:)),2),switch(strlen(grab(combat_get(%0),*hp_factor*)),0,1,rest(grab(combat_get(%0),*hp_factor*,|))))
+&IS_SETUP Player Data=or(and(hasattrval(%0,char_data),hasattrval(%0,combat_data)),strmatch(%l,%0))
+@DESCRIBE Player Data=This object contains the routines for getting data from players.%r[table(lattr(me/*),20)]
+@set Player Data/DESCRIBE=visual
+&IS_BODY_FREE Player Data=switch(u(get_data,%0,armor),u(weapon data/racial_armor,%0),1,,1,0)
+&IS_HAND_FREE Player Data=switch(u(get_data,%0,weapon),u(weapon data/racial_weapon,%0),1,0)
+@tel Player Data=ThunderCombat V2.1
+
+@create Combat Messages
+@fo me={&CS_MESSAGES me=[num(Combat Messages)]}
+@link Combat Messages = ThunderCombat V2.1
+@set Combat Messages = DARK
+@set Combat Messages = STICKY
+@set Combat Messages = SAFE
+@power Combat Messages = See_All
+&ADMIN_ONLY Combat Messages=Only admin may use that command.
+@DESCRIBE Combat Messages=Messages shared by all of the different commands. Each command should be parented to the messages object, so it's location is unimportant. Set the 'log' attribute on the object with the code to be:%r%t-1: Log nothing%r%t0: Log only critical errors%r%t1: Log critical errors and successes%r%t2: Log criical errors, successes, and stupid-user errors.
+&UNKNOWN_ERROR Combat Messages=[ansi(h,An unknown error has occured within the combat system. Please inform CombatWiz of the situation and command that has caused this error message to be shown!)]
+&NOT_SETUP Combat Messages=%0 [switch(%0,You,are,is)] not setup to use the combat system. (+setup to setup)
+&HEADER Combat Messages=header(%0)
+&TRAILER Combat Messages=trailer(%0)
+&CHANNEL_MESSAGE Combat Messages=<[get(here/log_channel)][switch(gt(%5,0),1,%b[extract(time(),4,1)])]> [switch(%0,~*,[ansi(yh,[name(%1)](%1):)] [u(error database/%0,%1,%4)],1,ansi(gh,[name(%1)](%1)@[name(loc(%1))]([loc(%1)]) %3ed [name(%2)](%2[switch(hastype(%2,player),1,/[timestring(idle(%2))])]).),ansi(rh,FAILED: [name(%1)](%1) with unknown error. '%0'))]
+&NEXT_WEAPON Combat Messages=ansi(gh,You will now attack with your [name(%0)].)
+@tel Combat Messages=ThunderCombat V2.1
+
+@create Weapon Data
+@fo me={&CS_WEAPON_DATA me=[num(Weapon Data)]}
+@link Weapon Data = ThunderCombat V2.1
+@set Weapon Data = DARK
+@set Weapon Data = STICKY
+@set Weapon Data = SAFE
+@power Weapon Data = See_All
+@DESCRIBE Weapon Data=QUIT SPAMMING ME DAMNIT! I DON"T CARE IF YOU AREN"T DESCRIBED
+&LOSE_AMMO Weapon Data=u(set_data,%0,%1,max(-1,dec(u(weapon data/get_data,%0,%1))))
+&GET_DATA Weapon Data=get(%0/combat_%1)
+&SET_DATA Weapon Data=set(%0,combat_%1:%2)
+&HAS_DATA Weapon Data=eq(get(%0/combat_%1),1)
+&RACIAL_WEAPON Weapon Data=switch(and(hasattr(%0,race),isdbref(num([get(%0/race)] Hand))),1,num([get(%0/race)] Hand),num(Generic Hand))
+&RACIAL_ARMOR Weapon Data=switch(and(hasattr(%0,race),isdbref(num([get(%0/race)] Body))),1,num([get(%0/race)] Body),num(Generic Body))
+&LOCK Weapon Data=[link(%0,%1)][lock(%0/give,#0)][lock(%0/drop,#0)][lock(%0,#0)]
+&UNLOCK Weapon Data=[lock(%0/give,)][lock(%0/drop,)][lock(%0,)]
+&WEAPONS_OWNER Weapon Data=owner(me)
+
+@create Master Weapon
+@fo me={&CS_MASTER_WEAPON me=[num(Master Weapon)]}
+@link Master Weapon = Weapon Data
+@set Master Weapon = STICKY
+@set Master Weapon = SAFE
+&COMBAT_SETTINGS Master Weapon=kill stun
+&MESSAGE_SET Master Weapon=ansi(gh,[name(%0)] flips [poss(%0)] [name(me)] to %1.)
+&CODE_SET Master Weapon=[u(v(dbref_weapon_data)/set_data,num(me),setting,%1)][remit(%l,u(message_set,%0,%1))][set_modifier(%0,@Modifier/@Actions/,-3)]
+&HANDLE_SET_ERROR Master Weapon=switch(0,not(u(v(dbref_weapon_data)/has_data,num(me),no_set)),~110,gt(match(u(v(dbref_weapon_data)/get_data,num(me),settings),%1),0),~111,lte(match(u(v(dbref_weapon_data)/get_data,num(me),setting),%1),0),~112,1)
+&CODE_PARRYING Master Weapon=[setq(0,add(u(check_to_hit,%0,first(u(v(dbref_player_data)/get_data,%1,armor))),%2))][setq(1,u(check_to_hit,%1,first(u(v(dbref_player_data)/get_data,%0,armor))))][switch(%q0:[gt(%q0,%q1)],-1:*,u(code_failed,%0,%1,sub(u(check_damage,%0),u(u(v(dbref_player_data)/get_data,%1,armor)/check_protection,%1))),*:1,[u(code_hit,%0,%1,setr(9,sub(u(check_damage,%0),u(u(v(dbref_player_data)/get_data,%1,armor)/check_protection,%1))))][u(u(v(dbref_player_data)/get_data,%1,armor)/code_hit,%0,%1,%q9)],[u(code_miss,%0,%1,setr(9,sub(u(check_damage,%0),u(u(v(dbref_player_data)/get_data,%1,armor)/check_protection,%1))))][u(u(v(dbref_player_data)/get_data,%1,armor)/code_miss,%0,%1,%q9)])]
+&MESSAGE_UNPARRY Master Weapon=ansi(gh,[name(%0)] brings [poss(%0)] [name(me)] down from a defensive position.)
+&CODE_UNPARRY Master Weapon=[u(v(dbref_player_data)/set_flag,%0,!parry)][remit(%l,u(message_unparry,%0))][set_modifier(%0,@Modifier/@Actions/,-3)]
+&HANDLE_UNPARRY_ERROR Master Weapon=switch(0,u(v(dbref_player_data)/get_flag,%0,parry),~102,not(or(u(v(dbref_player_data)/get_flag,%0,no_unparry),u(v(dbref_weapon_data)/has_data,num(me),no_parry))),~105,1)
+&HANDLE_PARRY_ERROR Master Weapon=switch(0,not(u(v(dbref_player_data)/get_flag,%0,parry)),~101,not(or(u(v(dbref_player_data)/get_flag,%0,no_parry),u(v(dbref_weapon_data)/has_data,num(me),no_parry))),~103,1)
+&MESSAGE_PARRY Master Weapon=ansi(gh,[name(%0)] brings [poss(%0)] [name(me)] to a defensive position.)
+&CODE_PARRY Master Weapon=[u(v(dbref_player_data)/set_flag,%0,parry)][remit(%l,u(message_parry,%0))][set_modifier(%0,@Modifier/@Actions/,-3)]
+&CODE_FAILED Master Weapon=pemit(%0,Disasterous failure)
+&CODE_MISS Master Weapon=[remit(%l,u(message_miss,%0,%1))]
+&FUNC_AMT_DAMAGE Master Weapon=[switch(1,lt(%0,0),0,lte(%0,3),1,lte(%0,8),2,lte(%0,12),3,lte(%0,15),4,5)]
+&CODE_HIT Master Weapon=[remit(%l,u(message_hit,%0,%1,%2))][switch(1 2,*[u(func_amt_damage,%2)]*,set_modifier(%1,@Modifier/@Actions/,-3))][set_char_data(%1,Life,switch(u(v(dbref_weapon_data)/get_data,num(me),setting):[get(%1/playstatus)],kill:IC,sub(0,u(func_amt_damage,%2)),stun:IC,sub(lte(get_char_data(%1,Life),4),1),0))][switch(gt(get_char_data(%1,Life),0),0,[pemit(%1,u(message_killed_you,%0))][remit(%l,u(message_killed_player,%0,%1))][cemit(get(v(DBREF_THUNDERCOMBAT)/log_channel),u(v(messages)/channel_message,1,%0,kill,%1))][u(v(dbref_player_data)/set_data,%1,no_attackable)][u(v(dbref_player_data)/set_data,%1,no_attack)][u(v(dbref_player_data)/set_data,%1,no_throw)],[pemit(%1,u(message_hurt,%0,%1,%2))])]
+&CODE_UNCONCEAL Master Weapon=[set(num(me),!dark)][u(v(dbref_weapon_data)/set_data,num(me),no_wield,0)][u(v(dbref_weapon_data)/set_data,num(me),no_unwield,0)][u(v(dbref_weapon_data)/set_data,num(me),no_conceal,0)][pemit(%0,u(message_unconcealed_you))][setq(0,name(num(me),[rest(name(me))]))][setq(1,sw_die(get_char_data(%0,Sneak)))][pemit(iter(lcon(loc(%0)),switch(gt(sw_die(get_char_data(##,Perception),%q1)),1,##)),u(message_unconceal_other,%0))][set_modifier(%0,@Modifier/@Actions/,-3)]
+&HANDLE_UNCONCEAL_ERROR Master Weapon=switch(0,hasflag(num(me),dark),~042,not(or(u(v(dbref_player_data)/get_flag,%0,no_unconceal),u(v(dbref_weapon_data)/has_data,num(me),no_unconceal))),~043,1)
+&HANDLE_CONCEAL_ERROR Master Weapon=switch(0,not(hasflag(num(me),dark)),~040,not(or(u(v(dbref_player_data)/get_flag,%0,no_conceal),u(v(dbref_weapon_data)/has_data,num(me),no_conceal))),~041,1)
+&CODE_CONCEAL Master Weapon=[set(num(me),dark)][u(v(dbref_weapon_data)/set_data,num(me),no_conceal,1)][u(v(dbref_weapon_data)/set_data,num(me),no_wield,1)][u(v(dbref_weapon_data)/set_data,num(me),no_unwield,1)][pemit(%0,u(message_concealed))][setq(1,name(num(me),Concealed [name(me)]))][setq(1,sw_die(get_char_data(%0,Sneak)))][pemit(iter(lcon(loc(%0)),switch(gt(sw_die(get_char_data(##,Perception)),%q1),1,##)),u(message_conceal_other,%0))][set_modifier(%0,@Modifier/@Actions/,-3)]
+&COMBAT_NUM_HANDS Master Weapon=2
+&HANDLE_UNWIELD_ERROR Master Weapon=switch(0,not(strmatch(num(me),u(v(dbref_weapon_data)/racial_weapon,%0))),~020,not(or(u(v(dbref_player_data)/get_flag,%0,no_unwield),u(v(dbref_weapon_data)/has_data,num(me),no_unwield))),~021,not(u(v(dbref_player_data)/get_flag,%0,parry)),~022,1)
+&HANDLE_WIELD_ERROR Master Weapon=switch(0,not(match(u(v(dbref_player_data)/get_data,%0,weapon),num(me))),~011,lte(add(fold(func_sum,iter(u(v(dbref_player_data)/get_data,%0,weapon),get(##/combat_size)),0),v(combat_size)),2),~010,not(or(u(v(dbref_player_data)/get_flag,%0,no_wield),u(v(dbref_weapon_data)/has_data,num(me),no_wield))),~012,not(u(v(dbref_player_data)/get_flag,%0,parry)),~013,1)
+&CODE_UNWIELD Master Weapon=[u(v(dbref_player_data)/set_data,%0,weapon,[remove(u(v(dbref_player_data)/get_data,%0,weapon),num(me))])][u(v(dbref_weapon_data)/unlock,num(me))][u(v(dbref_weapon_data)/set_data,num(me),no_conceal,0)][u(v(dbref_player_data)/set_flag,%0,!no_wield)][u(v(dbref_player_data)/set_flag,%0,!no_wear)][remit(loc(%0),u(message_unwield,%0))][set_modifier(%0,@Modifier/@Actions/,-3)]
+&MESSAGE_MISS_STUN Master Weapon=ansi(hg,[name(%0)] tries to stun [name(%1)] with [poss(%0)] [name(me)].)
+&MESSAGE_HIT_STUN Master Weapon=ansi(hg,[name(%0)] stuns [name(%1)] with [poss(%0)] [name(me)].)
+&MESSAGE_STUN Master Weapon=ansi(hg,[name(%1)] collapses as [subj(%1)] is stunned by [name(%0)]'s attack.)
+&MESSAGE_KILLED_PLAYER Master Weapon=ansi(hg,[name(%1)] dies as [name(%0)] attacks [obj(%1)].)
+&MESSAGE_NO_AMMO Master Weapon=ansi(hg,Your [name(me)] is out of shots/charges. You will have to reload/recharge it before attacking with it again.)
+&MESSAGE_KILLED_YOU Master Weapon=ansi(hc,You feel your life slip away as [name(%0)] attacks you...)%r%r[ansi(rhf,YOU ARE NOW DEAD. YOU ARE STILL HERE ONLY TO RP YOUR DEATH. YOU THEN MUST GO +OOC AND CONTACT A JUDGE OR WIZARD.)]%r
+&COMBAT_MAX_SHOTS Master Weapon=-1
+&MESSAGE_UNCONCEALED_OTHER Master Weapon=ansi(hg,You notice [name(%0)] unconcealing [poss(%0)] [name(me)])
+&MESSAGE_UNCONCEALED_YOU Master Weapon=ansi(hg,You unconceal your [rest(name(me))].)
+&MESSAGE_CONCEALED Master Weapon=ansi(hg,Your [name(me)] is [switch(v(combat_conceal),0,completely,1,very well,2,well,3,pretty well,4,adequatly,5,mostly,6,nearly,7,sorta,8,almost,9,barely,10,not,@@ERROR@@)] concealed.)
+&MESSAGE_CONCEAL_OTHER Master Weapon=ansi(hg,You notice [name(%0)] concealing [poss(%0)] [rest(name(me))])
+&MESSAGE_CONCEAL_YOU Master Weapon=ansi(hg,You conceal your [name(me)].)
+&COMBAT_SHOTS Master Weapon=-1
+&COMBAT_SPEED Master Weapon=1.0
+&COMBAT_DAMAGE_TYPE Master Weapon=Melee
+&COMBAT_CONCEAL Master Weapon=1
+&COMBAT_SETTING Master Weapon=kill
+&COMBAT_AVAIL Master Weapon=-
+&COMBAT_RESTR Master Weapon=-
+@DESCRIBE Master Weapon=[u(combat_description)]%r[u(weapon_stats)]%r[u(restr-avail)]
+&COMBAT_DESCRIPTION Master Weapon=You see another player's hand. It isn't even remarkable in size or strength.
+&MESSAGE_WIELD Master Weapon=ansi(hg,[name(%0)] wields [poss(%0)] [name(me)].)
+&MESSAGE_UNWIELD Master Weapon=ansi(hg,[name(%0)] ceases to wield [poss(%0)] [name(me)].)
+&MESSAGE_HIT Master Weapon=ansi(hg,[name(%0)] hits [switch(u(v(dbref_weapon_data)/get_data,num(me),setting),stun,to stun%b)][name(%1)] with [poss(%0)] [name(me)].)
+&MESSAGE_MISS Master Weapon=ansi(hg,[name(%0)] misses [name(%1)] with [poss(%0)] [name(me)].)
+&MESSAGE_DISARM Master Weapon=ansi(hg,[name(%0)] disarms [name(%1)] using [poss(%0)] [name(me)].)
+&CODE_WIELD Master Weapon=[u(v(dbref_player_data)/set_data,%0,weapon,[num(me)] [u(v(dbref_player_data)/get_data,%0,weapon)])][u(v(dbref_weapon_data)/lock,num(me))][u(v(dbref_weapon_data)/set_data,num(me),no_conceal,1)][u(v(dbref_player_data)/set_flag,%0,no_wield)][u(v(dbref_player_data)/set_flag,%0,no_wear)][remit(loc(%0),u(message_wield,%0))][set_modifier(%0,@Modifier/@Actions/,-3)]
+@fo me={&DBREF_PLAYER_DATA Master Weapon=[v(CS_PLAYER_DATA)]}
+@fo me={&DBREF_WEAPON_DATA Master Weapon=[v(CS_WEAPON_DATA)]}
+@fo me={&DBREF_THUNDERCOMBAT Master Weapon=[v(CS_THUNDERCOMBAT)]}
+&HANDLE_ATTACK_ERROR Master Weapon=switch(0,isdbref(%1),~080,u(v(dbref_weapon_data)/get_data,num(me),shots),~081,not(strmatch(%0,%1)),~082,u(v(dbref_player_data)/is_setup,%1),~083,not(or(u(v(dbref_player_data)/get_flag,%0,no_attack),u(v(dbref_weapon_data)/has_data,num(me),no_attack))),~084,not(u(v(dbref_player_data)/get_flag,%1,no_attackable)),~085,1)
+&CODE_ATTACK Master Weapon=[setq(0,add(u(check_to_hit,%0,first(u(v(dbref_player_data)/get_data,%1,armor))),%2))][setq(1,fold(func_sum,iter(u(v(dbref_player_data)/get_data,%1,armor),u(##/check_to_dodge,%1,num(me))),0))][setq(2,fold(func_sum,iter(u(v(dbref_player_data)/get_data,%1,armor),u(##/check_protection,%1,num(me))),0))][switch(%q0:[gt(%q0,%q1)],-1:*,u(code_failed,%0,%1,sub(u(check_damage,%0),%q2)),*:1,[u(code_hit,%0,%1,setr(9,sub(u(check_damage,%0),%q2)))][u(u(v(dbref_player_data)/get_data,%1,armor)/code_hit,%0,%1,%q9)],[u(code_miss,%0,%1,setr(9,sub(u(check_damage,%0),%q2)))][u(u(v(dbref_player_data)/get_data,%1,armor)/code_miss,%0,%1,%q9)])][u(v(dbref_weapon_data)/set_data,num(me),shots,max(dec(u(v(dbref_weapon_data)/get_data,num(me),shots)),-1))]
+&CHECK_TO_HIT Master Weapon=sw_die(get_char_data(%0,Dexterity))
+&CHECK_DAMAGE Master Weapon=sw_die(get_char_data(%0,Strength))
+&RESTR-AVAIL Master Weapon=%b[ansi(h,Restrictions:)] [ljust(v(combat_restr),25)]%b%b[ansi(h,Availability:)] [v(combat_avail)]
+&WEAPON_STATS Master Weapon=Weapon Stats:%r%b%b[ansi(h,Damage Type:)] [v(combat_damage_type)]%r%b%b[ansi(h,Damage:)] [switch(isnum(before(after(v(check_damage),%(),%))),1,fmt_die(before(after(v(check_damage),%(),%))),v(combat_damage))]%r%b%b[ansi(h,Setting:)] [v(combat_setting)] (possible: [v(combat_settings)])%r%b%b[ansi(h,Concealibility:)] [v(combat_conceal)]%r%b%b[ansi(h,Speed:)] [v(combat_speed)]%r%b%b[ansi(h,Shots:)] [switch(v(combat_shots),-1,not used by this weapon,#$ ([v(combat_max_shots)]))]%r%b%b[ansi(h,Hands to use:)] [v(combat_size)]
+&COMBAT_SIZE Master Weapon=2
+&FUNC_SUM Master Weapon=add(%0,%1)
+&MESSAGE_HURT Master Weapon=[ansi(gh,[name(%0)]'s attack has left you feeling)] [u(print_hp,get_char_data(%1,Life))][ansi(gh,.)]
+&PRINT_HP Master Weapon=switch(secure(%0),5,ansi(gh,Normal),4,ansi(ch,Stunned),3,ansi(bh,Wounded),2,ansi(mh,Incapacitated),1,ansi(rh,Mortally Wounded),ansi(bhuf,Dead))
+@fo me={&MESSAGES Master Weapon=[v(CS_MESSAGES)]}
+
+@create Master Armor
+@fo me={&CS_MASTER_ARMOR me=[num(Master Armor)]}
+@link Master Armor = Weapon Data
+@set Master Armor = STICKY
+@set Master Armor = SAFE
+&COMBAT_EXPLOSION Master Armor=0
+&COMBAT_NUM_BODY Master Armor=2
+@fo me={&DBREF_WEAPON_DATA Master Armor=[v(CS_WEAPON_DATA)]}
+@fo me={&DBREF_PLAYER_DATA Master Armor=[v(CS_PLAYER_DATA)]}
+@fo me={&DBREF_THUNDERCOMBAT Master Armor=[v(CS_THUNDERCOMBAT)]}
+&CODE_UNWEAR Master Armor=[u(v(dbref_weapon_data)/unlock,num(me))][u(v(dbref_player_data)/set_flag,%0,!no_wear)][u(v(dbref_player_data)/set_data,%0,armor,[remove(u(v(dbref_player_data)/get_data,%0,armor),num(me))])][remit(loc(%0),u(message_unwear,%0))][set_modifier(%0,@Modifier/@Actions/,3)]
+&CODE_WEAR Master Armor=[u(v(dbref_player_data)/set_data,%0,armor,[num(me)] [u(v(dbref_player_data)/get_data,%0,armor)])][u(v(dbref_weapon_data)/lock,num(me))][u(v(dbref_player_data)/set_flag,%0,no_wear)][remit(loc(%0),u(message_wear,%0))][set_modifier(%0,@Modifier/@Actions/,-3)]
+&HANDLE_WEAR_ERROR Master Armor=switch(0,lt(words(u(v(dbref_player_data)/get_data,%0,armor)),v(combat_num_body)),~030,not(strmatch(num(me),u(v(dbref_player_data)/get_data,%0,weapon))),~031,not(or(u(v(dbref_player_data)/get_flag,%0,no_wear),u(v(dbref_weapon_data)/has_data,num(me),no_wear))),~032,1)
+&HANDLE_UNWEAR_ERROR Master Armor=switch(0,not(strmatch(num(me),u(v(dbref_weapon_data)/racial_armor,%0))),~033,not(or(u(v(dbref_player_data)/get_flag,%0,no_unwear),u(v(dbref_weapon_data)/has_data,num(me),no_unwear))),~034,1)
+&MESSAGE_TRASH_ARMOR Master Armor=ansi(rh,Your armor hands in pieces about you, useless.)
+&COMBAT_DESCRIPTION Master Armor=You see another player's body. It's probably covered by their clothes.
+&COMBAT_RESTR Master Armor=-
+&COMBAT_AVAIL Master Armor=-
+@DESCRIBE Master Armor=[u(combat_description)]%r[u(armor_stats)]%r[u(restr-avail)]
+&MESSAGE_WEAR Master Armor=ansi(gh,[name(%0)] puts on [poss(%0)] [name(me)].)
+&MESSAGE_UNWEAR Master Armor=ansi(gh,[name(%0)] takes off [poss(%0)] [name(me)].)
+&COMBAT_NO_CONCEAL Master Armor=1
+&COMBAT_NO_UNCONCEAL Master Armor=1
+&CHECK_TO_DODGE Master Armor=sw_die(get_char_data(%0,Dodge))
+&CHECK_PROTECTION Master Armor=sw_die(get_char_data(%0,Strength))
+&RESTR-AVAIL Master Armor=%b[ansi(h,Restrictions:)] [ljust(v(combat_restr),25)]%b%b[ansi(h,Availability:)] [v(combat_avail)]
+&ARMOR_STATS Master Armor=Armor stats:%r%b%b[ansi(h,Physical Strength:)] [fmt_die(v(combat_physical))]%r%b%b[ansi(h,Energy Strength:)] [fmt_die(v(combat_energy))]%r%b%b[ansi(h,Notes:)] [v(combat_notes)]
+&COMBAT_NOTES Master Armor=No penalties or bonuses from this armor.
+
+@create Generic Body
+@link Generic Body = Weapon Data
+@parent Generic Body=Master Armor
+@set Generic Body = STICKY
+@set Generic Body = SAFE
+@set Generic Body = NO_WARN
+@tel Generic Body=Weapon Data
+
+@create Generic Hands
+@link Generic Hands = Weapon Data
+@parent Generic Hands=Master Weapon
+@set Generic Hands = STICKY
+@set Generic Hands = SAFE
+@set Generic Hands = NO_WARN
+&COMBAT_SIZE Generic Hands=0
+&COMBAT_NO_WIELD Generic Hands=1
+&COMBAT_NO_UNWIELD Generic Hands=1
+&COMBAT_SETTING Generic Hands=kill
+&COMBAT_SHOTS Generic Hands=-1
+&COMBAT_SETTINGS Generic Hands=kill
+@tel Generic Hands=Weapon Data
+
+@create Master Grenade
+@fo me={&CS_MASTER_GRENADE me=[num(Master Grenade)]}
+@link Master Grenade = Weapon Data
+@parent Master Grenade=Master Weapon
+@set Master Grenade = STICKY
+@set Master Grenade = SAFE
+&COMBAT_DESCRIPTION Master Grenade=It's a grenade. You aren't sure what type or such.
+&CODE_UNWIELD Master Grenade=[u(v(dbref_player_data)/set_data,%0,weapon,[remove(u(v(dbref_player_data)/get_data,%0,weapon),num(me))])][u(v(dbref_weapon_data)/unlock,num(me))][u(v(dbref_weapon_data)/set_data,num(me),no_conceal,0)][u(v(dbref_player_data)/set_flag,%0,!no_wield)][u(v(dbref_player_data)/set_flag,%0,!no_wear)][remit(loc(%0),u(message_unwield,%0))]
+&HANDLE_ATTACK_ERROR Master Grenade=switch(0,isdbref(%1),~080,u(v(dbref_weapon_data)/get_data,num(me),shots),~081,not(strmatch(%0,%1)),~082,u(v(dbref_player_data)/is_setup,%1),~083,not(u(v(dbref_player_data)/get_flag,%0,no_attack)),~084,not(u(v(dbref_player_data)/get_flag,%1,no_attackable)),~085,not(u(v(dbref_weapon_data)/has_data,num(me),no_attack)),~086,1)
+&COMBAT_NO_ATTACK Master Grenade=1
+&COMBAT_NO_UNPARRY Master Grenade=1
+&COMBAT_NO_PARRY Master Grenade=1
+&MESSAGE_USED Master Grenade=ansi(yh,You have now used [name(me)]. I am useless to you, please @recycle me.)
+&CODE_THROW_AT_PERSON Master Grenade=[setq(0,add(u(check_to_hit,%0,first(u(v(dbref_player_data)/get_data,%1,armor))),%2))][setq(1,fold(func_sum,iter(u(v(dbref_player_data)/get_data,%1,armor),u(##/check_to_dodge,%1,num(me))),0))][setq(2,fold(func_sum,iter(u(v(dbref_player_data)/get_data,%1,armor),u(##/check_protection,%1,num(me))),0))][switch(%q0:[gt(%q0,%q1)],-1:*,u(code_failed,%0,%1,sub(u(check_damage,%0),%q2)),*:1,[u(code_hit,%0,%1,setr(9,sub(u(check_damage,%0),%q2)))][u(u(v(dbref_player_data)/get_data,%1,armor)/code_hit,%0,%1,%q9)],[u(code_miss,%0,%1,setr(9,sub(u(check_damage,%0),%q2)))][u(u(v(dbref_player_data)/get_data,%1,armor)/code_miss,%0,%1,%q9)])]
+&CODE_THROW Master Grenade=[iter(%1,u(code_throw_at_person,%0,##,%2), ,)][set(me,destroy_ok)][u(v(dbref_weapon_data)/set_flag,num(me),no_attack)][pemit(%0,u(message_used))][u(v(dbref_weapon_data)/set_data,num(me),shots,max(dec(u(v(dbref_weapon_data)/get_data,num(me),shots)),0))][u(code_unwield,loc(me))]
+&HANDLE_THROW_ERROR Master Grenade=switch(0,isdbref(%1),~130,u(v(dbref_player_data)/is_setup,%1),~131,not(or(u(v(dbref_player_data)/get_flag,%0,no_throw),u(v(dbref_weapon_data)/has_data,num(me),no_throw))),~132,not(u(v(dbref_player_data)/get_flag,%1,no_attackable)),~133,u(v(dbref_weapon_data)/get_data,num(me),shots),~134,1)
+@tel Master Grenade=Weapon Data
+
+@create Generic Claws
+@link Generic Claws = Weapon Data
+@parent Generic Claws=Master Weapon
+@set Generic Claws = STICKY
+@set Generic Claws = SAFE
+@set Generic Claws = NO_WARN
+&COMBAT_SETTINGS Generic Claws=kill
+&COMBAT_SHOTS Generic Claws=-1
+&COMBAT_SETTING Generic Claws=kill
+&COMBAT_NO_UNWIELD Generic Claws=1
+&COMBAT_NO_WIELD Generic Claws=1
+&COMBAT_SIZE Generic Claws=0
+@tel Generic Claws=Weapon Data
+
+@tel Master Weapon=Weapon Data
+@tel Master Armor=Weapon Data
+@tel Weapon Data=ThunderCombat V2.1
+
+@create Search
+@link Search = ThunderCombat V2.1
+@set Search = STICKY
+@set Search = SAFE
+@power Search = See_All
+@DESCRIBE Search=Search must be inherit to use it's check().
+&HANDLE_SEARCH_ERROR Search=switch(0,isdbref(%1),~070,not(u(player data/get_flag,%0,no_search)),~071,u(player data/is_setup,%1),~072,hasflag(%1,connected),~073,1)
+&CODE_SEARCH Search=switch(u(handle_search_error,%0,%1,%2),~*,pemit(%0,u(error database/#$,%0,%2))#$,1,[pemit(%0,u(search,%0,%1))][pemit(%1,u(were_searched,%0,%1))][set_modifier(%0,@Modifier/@Actions/,-3)]1,pemit(%0,u(messages/unknown_error))-1)
+&CMD_SEARCH Search=$+search *:@cemit [v(log_channel)]=u(messages/channel_message,u(search/code_Search,%#,setr(0,locate(%#,secure(%0),TPn)),secure(%0)),%#,%q0,search,secure(%0),get(search/log))
+&AUTHOR Search=Rhysem
+&SEARCH_FAILED Search=You notice nothing concealed on [name(%0)].
+&SEARCH_FOUND Search=[iter(%1,[switch(#@,1,,%r)]You notice that [name(%0)] has a [name(##)] on [obj(%0)].)]
+&VERSION Search=2.1.1
+&SEARCH Search=[setq(1,sw_die(get_char_data(%0,Perception)))][setq(2,sw_die(get_char_data(%1,Hide)))][setq(3,iter(lcon(%1),switch(and(or(gt(mul(%q1,u(weapon data/get_data,##,conceal)),max(%q2,0)),not(hasflag(##,dark))),strmatch(loc(parent(##)),num(Combat Items))),1,##)))][switch(gt(words(%q3),0),1,u(search_found,%1,%q3),u(search_failed,%1))]
+&LOG Search=1
+&WERE_SEARCHED Search=ansi(gh,You were searched by [name(%0)]. If you think you would ICly have seen this search, please +check your Perception and see if you make a difficult success or not. If you do, then you see the search.)
+@tel Search=ThunderCombat V2.1
+
+@create Administration
+@link Administration = ThunderCombat V2.1
+@set Administration = STICKY
+@set Administration = SAFE
+@set Administration = ROYALTY
+&CMDJO_PROFILE Administration=$+profile:@select [orflags(%#,WJ)]=1,{@pemit %#=[header(Profile of logged in players)]%r%b[ljust(ansi(mh,Name),17)][ljust(ansi(rh,Weapon),17)][ljust(ansi(yh,Wearing),17)][ljust(ansi(gh,Status),17)]STA CG[iter(lwho(),%r%b[ljust(ansi(m,name(##)),17)][ljust(ansi(r,left(name(first(u(player data/get_data,##,weapon))),16)),17)][ljust(ansi(y,left(name(first(u(player data/get_data,##,armor))),16)),17)][ljust(u(look/print_hp,get_char_data(##,life)),17)][switch(get(##/playstatus),IC,ansi(ch,IC%b%b),OOC%b)][switch(hasattrval(##,chargen_finished),1,ansi(ch,YES),NO)])]%r[trailer(End of Profile)]},{@pemit %#=Don't think about it.}
+&AUTHOR Administration=Rhysem
+&VERSION Administration=2.1.1
+@DESCRIBE Administration=Must be wizard to be able to rename the stuff.
+&LOG Administration=1
+&CODE_FLAG Administration=switch(u(handle_flag_error,%0,%1,%2),~*,pemit(%0,u(error database/#$,%0,%1,%2))#$,1,[u(player data/set_flag,%1,%2)][pemit(%0,[switch(%2,!*,Clearing,Setting)] [name(%1)]<%1>'s [trim(%2,!)] flag.)]1,pemit(%0,u(messages/unknown_error))-1)
+&CMDJO_FLAG Administration=$+flag *=*:@select orflags(%#,WJ)=0,{@pemit %#=u(messages/admin_only)},{@cemit [v(log_channel)]=u(messages/channel_message,u(administration/code_flag,%#,setr(0,locate(%#,secure(%0),TPni)),secure(%1),secure(%0)),%#,%q0,judge flaged,secure(%0),secure(%1),get(administration/log))}
+&HANDLE_FLAG_ERROR Administration=switch(0,isdbref(%1),~060,gt(strlen(grab(v(combat_flags),trim(%2,!))),0),~064,1)
+&COMBAT_FLAGS Administration=no_wield no_unwield no_wear no_unwear no_conceal no_unconceal no_reload no_look no_attack no_attackable no_stun no_parry no_cover no_uncover rounds_only parry under_cover no_throw
+&COMBAT_ATTRIBS Administration=armor weapon
+&HANDLE_SET_ERROR Administration=switch(0,isdbref(%1),~060,strmatch(v(combat_attribs),*%2*),~062,isnum(%3),~063,1)
+&CODE_SET Administration=switch(u(handle_set_error,%0,%1,%2,%3),~*,pemit(%0,u(error database/#$,%0,%5,%3,%4))#$,1,[u(player data/set_data,%1,%2,switch(%3,+*,add(u(player data/get_data,%1,%2),%3),-*,add(u(player data/get_data,%1,%2),%3),%3))][pemit(%0,Setting [name(%1)]<%1>'s %2 to [u(player data/get_data,%1,%2)].)]1,pemit(%0,u(messages/unknown_error))-1)
+&CMDJO_SET Administration=$+jset */*=*:@select orflags(%#,WJ)=0,{@pemit %#=u(messages/admin_only)},{@cemit [v(log_channel)]=u(messages/channel_message,u(administration/code_set,%#,setr(0,locate(%#,secure(%0),TPni)),secure(%1),secure(%2),secure(%0)),%#,%q0,judge set,secure(%0)/secure(%1) to secure(%2),get(administration/log))}
+&CMDJO_WCHECK Administration=$+wcheck *:@select orflags(%#,WJ)=1,{@pemit %#=[setq(0,locate(Combat Items,secure(%0),Ti))][setq(1,lsearch(owner(me),eval,\[strmatch(parent(##),%q0)\]))][u(messages/header,Checking for weapon with name containing '[secure(%0)]')]%r%b[ljust(Name,30)]%b[ljust(Conn,5)][ljust(Faction,25)]Suspect?[iter(%q1,%r%b[ljust(name(loc(##)),30)]%b[ljust(switch(hasflag(loc(##),connected),1,Conn,D/c),5)][ljust(get(loc(##)/faction),25)][switch(hasattr(loc(##),suspect),1,Suspect)])]%rTotal this type - [words(%q1)] of [words(lsearch(owner(me),type,object))]. End of list.},{@pemit %#=u(messages/admin_only)}
+&CMDJO_SETUP Administration=$+setup *:think setq(0,switch(isdbref(pmatch(secure(%0))),1,pmatch(secure(%0)),locate(%#,secure(%0),TPni)));@select orflags(%#,WJ)=1,{@select [isdbref(%q0)]:[hasattr(%q0,char_data)]=0:*,{@pemit %#=u(error database/~061,%0,secure(%0))},1:0,{@pemit %#=[name(%q0)](%q0) must have gone through chargen before being setup for combat.},1:1,{@pemit %#=Setting [name(%q0)] up for combat...[u(player data/char_setup,%q0)] Done.;@pemit %q0=%N has re-setup you for combat...}},{@pemit %#=u(messages/admin_only)}
+&CMDJO_JKILL Administration=$+jkill *:@select orflags(%#,WJ)=0,{@pemit %#=u(admin_only)},{@cemit [v(log_channel)]=u(messages/channel_message,u(administration/code_judge_kill,%#,setr(0,locate(%#,secure(%0),TPn)),secure(%0)),%#,%q0,judge-kill,secure(%0),get(administration/log))}
+&CODE_JUDGE_KILL Administration=switch(u(handle_judge_kill_error,%0,%1,%2),~*,pemit(%#,u(error database/#$,%0,%2))#$,1,[set_char_data(%1,Life,0)][setq(0,name(%1,[name(%1)]_DEAD))][tel(%1,get(here/dead_room))][remit(loc(%1),COMBAT: [name(%1)] is +jkilled by %N.)][pemit(%0,COMBAT: You +jkill [name(%1)](%1).%r[ansi(h,Do not forget to post in the BBS about this or you're in *big* trouble.)])]1,pemit(%0,u(messages/unknown_error))-1)
+&HANDLE_JUDGE_KILL_ERROR Administration=switch(0,isdbref(%1),~060,1)
+&CODE_LIFE Administration=switch(u(handle_life_error,%0,%1,%2),~*,pemit(%0,u(error database/#$,%0,%3,%2))#$,1,[set_char_data(%1,Life,%2)][pemit(%0,Setting [name(%1)](%1)'s Life to [get_char_data(%1,Life)].)]1,pemit(%0,u(messages/unknown_error))-1)
+&HANDLE_LIFE_ERROR Administration=switch(0,isdbref(%1),~060,isnum(%2),~063,1)
+&CMDJO_LIFE Administration=$+jlife *=*:@select orflags(%#,WJ)=0,{@pemit %#=u(messages/admin_only)},{@cemit [v(log_channel)]=u(messages/channel_message,u(administration/code_life,%#,setr(0,locate(%#,secure(%0),TPni)),secure(%1),secure(%0)),%#,%q0,judge liv,secure(%0) to secure(%1),get(administration/log))}
+@tel Administration=ThunderCombat V2.1
+
+@create Version
+@link Version = ThunderCombat V2.1
+@set Version = STICKY
+@set Version = SAFE
+@power Version = See_All
+&CMD_VERSION Version=$+version:@pemit %#=[u(messages/header,Thunder Combat - Version [u(version/system_version)])]%r%b%b[ljust(Object,23)]%b[center(Version,7)]%b[ljust(Coder,11)]%bLast Updated On[iter(lcon(me),switch(hasattr(##,version),1,%r%b%b[ljust(name(##),23)]%b[center(get(##/version),7)]%b[ljust(get(##/author),11)]%b[mtime(##)]))]%r[u(messages/header,Credits and stuff)]%r[u(version/list_credits)]%r[u(messages/trailer,End of Info)]
+@DESCRIBE Version=Gives the versions of combat
+&LIST_CREDITS Version=[ansi(h,%bCredits:)] [u(credits)]
+&CREDITS Version=Thunder Combat, copyright 1998-1999, Jonathan A. Booth (kamikaze@imsa.edu / Rhysem@M*U*S*H). Source code is available at request, or on my web page for the major versions. Details are in: [num(here)]/COPYRIGHT
+&SYSTEM_VERSION Version=2.1a
+@tel Version=ThunderCombat V2.1
+
+@create Un-Conceal
+@link Un-Conceal = ThunderCombat V2.1
+@set Un-Conceal = STICKY
+@set Un-Conceal = SAFE
+&AUTHOR Un-Conceal=Rhysem
+&VERSION Un-Conceal=2.1.1
+&CODE_UNCONCEAL Un-Conceal=switch(switch([isdbref(%1)]:[hasattrp(%1,handle_unconceal_error)]:[strmatch(owner(%1),u(Weapon Data/weapons_owner))],1:1:1,u(%1/handle_unconceal_error,%0),1:*:0,~002,~000),~*,pemit(%0,u(error database/#$,%0,%2))#$,1,u(%1/code_unconceal,%0)1,pemit(%0,u(messages/unknown_error))-1)
+&CMD_UNCONCEAL Un-Conceal=$+unconceal *:@cemit [v(log_channel)]=u(messages/channel_message,u(un-conceal/code_Unconceal,%#,setr(0,locate(%#,secure(%0),Ti)),secure(%0)),%#,%q0,unconceal,secure(%0),get(conceal/log))
+&CODE_CONCEAL Un-Conceal=switch(switch([isdbref(%1)]:[hasattrp(%1,handle_conceal_error)]:[strmatch(owner(%1),u(Weapon Data/weapons_owner))],1:1:1,u(%1/handle_conceal_error,%0),1:*:0,~002,~000),~*,pemit(%0,u(error database/#$,%0,%2))#$,1,u(%1/code_conceal,%0)1,pemit(%0,u(messages/unknown_error))-1)
+&CMD_CONCEAL Un-Conceal=$+conceal *:@cemit [v(log_channel)]=u(messages/channel_message,u(conceal/code_Conceal,%#,setr(0,locate(%#,secure(%0),Ti)),secure(%0)),%#,%q0,conceal,secure(%0),get(conceal/log))
+&LOG Un-Conceal=1
+@DESCRIBE Un-Conceal=foo
+@tel Un-Conceal=ThunderCombat V2.1
+
+@create Un-Wear
+@link Un-Wear = ThunderCombat V2.1
+@set Un-Wear = STICKY
+@set Un-Wear = SAFE
+&CODE_UNWEAR Un-Wear=switch(switch([isdbref(%1)]:[hasattrp(%1,handle_unwear_error)]:[strmatch(owner(%1),u(Weapon Data/weapons_owner))],1:1:1,u(%1/handle_unwear_error,%0),1:*:0,~002,~000),~*,pemit(%0,u(error database/#$,%0,name(%1)))#$,1,u(%1/code_unwear,%0)1,pemit(%0,u(here/unknown_error))-1)
+&CMD_UNWEAR Un-Wear=$+unwear*:@cemit v(log_channel)=u(messages/channel_message,u(un-wear/code_Unwear,%#,setr(0,first(u(player data/get_data,%#,armor)))),%#,%q0,takes off,armor,get(wear/log))
+&CODE_WEAR Un-Wear=switch(switch([isdbref(%1)]:[hasattrp(%1,handle_wear_error)]:[strmatch(owner(%1),u(Weapon Data/weapons_owner))],1:1:1,u(%1/handle_wear_error,%0),1:*:0,~002,~000),~*,pemit(%0,u(error database/#$,%0,%2))#$,1,u(%1/code_wear,%0)1,pemit(%0,u(messages/unknown_error))-1)
+&CMD_WEAR Un-Wear=$+wear *:@cemit [v(log_channel)]=u(messages/channel_message,u(wear/code_Wear,%#,locate(%#,secure(%0),Ti),secure(%0)),%#,locate(%#,secure(%0),Ti),wear,secure(%0),wear,get(wear/log))
+&AUTHOR Un-Wear=Rhysem
+&VERSION Un-Wear=2.1.1
+@DESCRIBE Un-Wear=Must be set wizard to be able to link() the objects.
+&LOG Un-Wear=1
+@tel Un-Wear=ThunderCombat V2.1
+
+@create Un-Wield
+@link Un-Wield = ThunderCombat V2.1
+@set Un-Wield = STICKY
+@set Un-Wield = SAFE
+&HANDLE_NEXT_WEAPON_ERROR Un-Wield=switch(0,gt(words(%1),1),~090,not(u(player data/get_flag,%0,parry)),~091,1)
+&CODE_LAST_WEAPON Un-Wield=switch(u(handle_next_weapon_error,%0,%1),~*,pemit(%0,u(error database/#$,%0))#$,1,[u(player data/set_data,%0,weapon,[last(%1)] [remove(%1,last(%1))])][pemit(%0,u(messages/next_weapon,first(rest(%1))))]1,pemit(%0,u(messages/unknown_error))-1)
+&CODE_NEXT_WEAPON Un-Wield=switch(u(handle_next_weapon_error,%0,%1),~*,pemit(%0,u(error database/#$,%0))#$,1,[u(player data/set_data,%0,weapon,[rest(%1)] [first(%1)])][pemit(%0,u(messages/next_weapon,first(rest(%1))))]1,pemit(%0,u(messages/unknown_error))-1)
+&CMD_NEXT Un-Wield=$+next:think [setq(0,u(player data/get_data,%#,weapon))];@cemit [v(log_channel)]=u(messages/channel_message,u(wield/code_next_weapon,%#,%q0),%#,first(%q0),next weapon)
+&CMD_LAST Un-Wield=$+last:think [setq(0,u(player data/get_data,%#,weapon))];@cemit [v(log_channel)]=u(messages/channel_message,u(wield/code_last_weapon,%#,%q0),%#,last(%q0),last weapon)
+&CMD_UNWIELD_OLDSTYLE Un-Wield=$+unwield:@cemit [v(log_channel)]=u(messages/channel_message,u(wield/code_unwield,%#,setr(0,first(u(player data/get_data,%#,weapon))),name(%q0)),%#,%q0,unwield-old,name(%q0),get(wield/log))
+@DESCRIBE Un-Wield=It must be set wizard to be able to link() the objects.
+&AUTHOR Un-Wield=Rhysem
+&CODE_UNWIELD Un-Wield=switch(switch([isdbref(%1)]:[hasattrp(%1,handle_unwield_error)]:[strmatch(owner(%1),u(Weapon Data/weapons_owner))],1:1:1,u(%1/handle_unwield_error,%0),1:*:0,~002,~000),~*,pemit(%0,u(error database/#$,%0,name(first(u(player data/get_data,%0,weapon)))))#$,1,u(%1/code_unwield,%0)1,pemit(%0,u(messages/unknown_error))-1)
+&CMD_UNWIELD Un-Wield=$+unwield *:@cemit [v(log_channel)]=u(messages/channel_message,u(wield/code_unwield,%#,setr(0,locate(%#,secure(%0),Ti)),secure(%0)),%#,%q0,unwield,secure(%0),get(wield/log))
+&CODE_WIELD Un-Wield=switch(switch([isdbref(%1)]:[hasattrp(%1,handle_wield_error)]:[strmatch(owner(%1),u(Weapon Data/weapons_owner))],1:1:1,u(%1/handle_wield_error,%0),1:*:0,~002,~000),~*,pemit(%0,u(error database/#$,%0,%2))#$,1,u(%1/code_wield,%0)1,pemit(%0,u(messages/unknown_error))-1)
+&CMD_WIELD Un-Wield=$+wield *:@cemit [v(log_channel)]=u(messages/channel_message,u(wield/code_Wield,%#,setr(0,locate(%#,secure(%0),Ti)),secure(%0)),%#,%q0,wield,secure(%0),get(wield/log))
+&VERSION Un-Wield=2.1.1
+&LOG Un-Wield=1
+@tel Un-Wield=ThunderCombat V2.1
+
+@create Attack
+@link Attack = ThunderCombat V2.1
+@set Attack = STICKY
+@set Attack = SAFE
+&CODE_THROW Attack=switch(switch(hasattrp(%4,handle_throw_error),1,setq(4,1)[iter(%1,setq(4,and(%q4,u(%4/handle_throw_error,%0,##,%2))), ,)]%q4,~000),*~*,pemit(%0,u(error database/[grab(#$,~*)],%0,%3,%2))[grab(#$,~*)],1,u(%4/code_throw,%0,%1,%2)1,pemit(%0,u(messages/unknown_error))-1)
+&CMD_THROW Attack=$+throw *:think [setq(3,iter(before(secure(%0),=),locate(%#,##,TPn)))][setq(4,after(secure(%0),=))];@cemit [v(log_channel)]=u(messages/channel_message,u(attack/code_throw,%#,%q3,%q4,secure(%0),first(u(player data/get_data,%#,weapon))),%#,%q3,throw,secure(%0),get(attack/log))
+&CODE_SET Attack=switch(switch(hasattrp(%1,handle_set_error),1,u(%1/handle_set_error,%0,%2),~000),~*,pemit(%0,u(error database/#$,%0))#$,1,u(%1/code_set,%0,%2)1,pemit(%0,u(messages/unknown_error))-1)
+&CMD_SET Attack=$+set *:@cemit [v(log_channel)]=u(messages/channel_message,u(attack/code_set,%#,first(u(player data/get_data,%#,weapon)),secure(%0)),%#,first(u(player data/get_data,%#,weapon)),set to [secure(%0)],get(attack/log))
+&CODE_UNPARRY Attack=switch(switch(hasattrp(%1,handle_unparry_error),1,u(%1/handle_unparry_error,%0),~000),~*,pemit(%0,u(error database/#$,%0))#$,1,u(%1/code_unparry,%0)1,pemit(%0,u(messages/unknown_error))-1)
+&CMD_UNPARRY Attack=$+unparry:@cemit [v(log_channel)]=u(messages/channel_message,u(attack/code_unparry,%#,first(u(player data/get_data,%#,weapon))),%#,first(u(player data/get_data,%#,weapon)),unparry,get(attack/log))
+&CODE_PARRY Attack=switch(switch(hasattrp(%1,handle_parry_error),1,u(%1/handle_parry_error,%0),~000),~*,pemit(%0,u(error database/#$,%0))#$,1,u(%1/code_parry,%0)1,pemit(%0,u(messages/unknown_error))-1)
+&CMD_PARRY Attack=$+parry:@cemit [v(log_channel)]=u(messages/channel_message,u(attack/code_parry,%#,first(u(player data/get_data,%#,weapon))),%#,first(u(player data/get_data,%#,weapon)),parry,get(attack/log))
+&CODE_ATTACK Attack=switch(switch(hasattrp(%4,handle_attack_error),1,u(%4/handle_attack_error,%0,%1,%2),~000),~*,pemit(%0,u(error database/#$,%0,%3,%2))#$,1,switch(u(player data/get_flag,%1,parry),1,u(first(u(player data/get_data,%1,weapon))/code_parrying,%0,%1,%2,%4),u(%4/code_attack,%0,%1,%2))1,pemit(%0,u(messages/unknown_error))-1)
+&VERSION Attack=2.1.1
+&AUTHOR Attack=Rhysem
+&CMD_ATTACK Attack=$+attack *:think [setq(3,locate(%#,before(secure(%0),=),TPn))][setq(4,after(secure(%0),=))];@cemit [v(log_channel)]=u(messages/channel_message,u(attack/code_attack,%#,%q3,%q4,secure(%0),first(u(player data/get_data,%#,weapon))),%#,%q3,attack,secure(%0),get(attack/log))
+@DESCRIBE Attack=foo
+&LOG Attack=1
+@tel Attack=ThunderCombat V2.1
+
+@create Cover
+@link Cover = ThunderCombat V2.1
+@set Cover = STICKY
+@set Cover = SAFE
+&LOG Cover=1
+@DESCRIBE Cover=not foo
+&CMD_COVER Cover=$+cover:@cemit [v(log_channel)]=u(messages/channel_message,u(cover/code_cover,%#),%#,%#,cover,bar,get(Cover/log))
+&CODE_COVER Cover=switch(u(handle_cover_error,%0,%l),~*,pemit(%0,u(error database/#$,%0,cover))#$,1,[u(player data/set_flag,%0,under_cover)][u(player data/set_flag,%0,no_attack)][u(player data/set_flag,%0,no_attackable)][remit(%l,u(message_cover,%#))][set_modifier(%0,@Modifier/@Actions/,-3)]1,pemit(%0,u(messages/unknown_error))-1)
+&HANDLE_COVER_ERROR Cover=switch(0,not(u(player data/get_flag,%0,under_cover)),~120,not(or(u(player data/get_flag,%0,no_attack),u(player data/get_flag,%0,no_attackable))),~124,not(u(player data/get_flag,%0,no_cover)),~121,1)
+&MESSAGE_COVER Cover=ansi(gh,[name(%0)] dives behind some convienent cover. You cannot shoot and hit them.)
+&CMD_UNCOVER Cover=$+uncover:@cemit [v(log_channel)]=u(messages/channel_message,u(cover/code_uncover,%#),%#,%#,cover,bar,get(cover/log))
+&CODE_UNCOVER Cover=switch(u(handle_uncover_error,%0,%l),~*,pemit(%0,u(error database/#$,%0,uncover))#$,1,[u(player data/set_flag,%0,!under_cover)][u(player data/set_flag,%0,!no_attack)][u(player data/set_flag,%0,!no_attackable)][remit(%l,u(message_uncover,%#))][set_modifier(%0,@Modifier/@Actions/,-3)]1,pemit(%0,u(messages/unknown_error))-1)
+&MESSAGE_UNCOVER Cover=ansi(gh,[name(%0)] comes out from behind [subj(%0)] cover.)
+&HANDLE_UNCOVER_ERROR Cover=switch(0,u(player data/get_flag,%0,under_cover),~122,not(u(player data/get_flag,%0,no_uncover)),~123,1)
+@tel Cover=ThunderCombat V2.1
+
+@create Combat Items
+@link Combat Items = ThunderCombat V2.1
+@set Combat Items = DARK
+@set Combat Items = STICKY
+@set Combat Items = SAFE
+@DESCRIBE Combat Items=This object holds all the parent-items for combat as well as two commands to create items (combatwiz and god only)%r[table(lattr(me/*),20)]
+&CMDCO_DESTROY Combat Items=$+destroy *:@select [switch(%#,owner(me),1,#1,1,0)]:[setr(0,locate(%#,secure(%0),Tni))]=0:*,{@pemit %#=Only [name(owner(me))] or God may use that command.},1:#-*,{@pemit %#=u(error database/~1,secure(%0),to destroy)},{@pemit %#=Destroying combat object [name(%q0)](%q0)...;@tel %q0=Weapons Drop;@link %q0=Weapons Drop;@dest %q0}
+&CMDCO_CREATE Combat Items=$+create *:@select [switch(%#,owner(me),1,#1,1,0)]:[switch(setr(0,locate(Combat Items,secure(%0),Ti)),#-*,setr(0,locate(Combat Items,[secure(%0)] Parent,Ti)))]=0:*,{@pemit %#=Only [name(owner(me))] or God may use that command.},1:#-*,{@pemit %#=u(error database/~1,secure(%0),to create)},{@pemit %#=Creating combat object '[before(name(%q0),%bParent)]'...;think [setq(1,create([before(name(%q0),%bParent)],10))];@name %q1=[name(%q1)] [trim(%q1,#)];@parent %q1=%q0;@tel %q1=%#;@link %q1=%#;@pemit %#=Creation of '[before(name(%q0),%bParent)]' done.}
+&CMD_ITEMS Combat Items=$+items:@pemit %#=[header(List of combat items)]%r%b[ljust(Name,30)][ljust(Dam,6)]%b[ljust(Shot,5)][ljust(Restr,6)][ljust(Avail,6)][iter(lcon(Combat Items),%r%b[ljust(before(name(##),Parent),30)][ljust(switch(isnum(setr(4,before(last(get(##/check_damage),%(),%)))),1,fmt_die(%q4),Varies),6)]%b[ljust(get(##/combat_shots),5)][ljust(get(##/combat_restr),6)][ljust(get(##/combat_avail),6)])]%r[trailer(End of List)]
+
+@create Corellian Powersuit Parent
+@fo me={&CS_CORELLIAN_POWERSUIT me=[num(Corellian Powersuit Parent)]}
+@link Corellian Powersuit Parent = Combat Items
+@parent Corellian Powersuit Parent=[v(CS_MASTER_ARMOR)]
+@set Corellian Powersuit Parent = STICKY
+@set Corellian Powersuit Parent = SAFE
+@set Corellian Powersuit Parent = NO_WARN
+@COST Corellian Powersuit Parent=2500
+&COMBAT_NOTES Corellian Powersuit Parent=-1D Dexterity, +1D Lifting
+&CODE_UNWEAR Corellian Powersuit Parent=[u(v(dbref_weapon_data)/unlock,num(me))][u(v(dbref_player_data)/set_flag,%0,!no_wear)][u(v(dbref_player_data)/set_data,%0,armor,[remove(u(v(dbref_player_data)/get_data,%0,armor),num(me))])][remit(loc(%0),u(message_unwear,%0))][set_modifier(%0,@Modifier/@Actions/,3)][set_modifier(%0,@Modifier/Dexterity/,3)][set_modifier(%0,@Modifier/Lifting/,-3)]
+&CODE_WEAR Corellian Powersuit Parent=[u(v(dbref_player_data)/set_data,%0,armor,[num(me)] [u(v(dbref_player_data)/get_data,%0,armor)])][u(v(dbref_weapon_data)/lock,num(me))][u(v(dbref_player_data)/set_flag,%0,no_wear)][remit(loc(%0),u(message_wear,%0))][set_modifier(%0,@Modifier/@Actions/,-3)][set_modifier(%0,@Modifier/Dexterity/,-3)][set_modifier(%0,@Modifier/Lifting/,3)]
+&COMBAT_PHYSICAL Corellian Powersuit Parent=6
+&COMBAT_ENERGY Corellian Powersuit Parent=3
+&COMBAT_RESTR Corellian Powersuit Parent=r
+&COMBAT_AVAIL Corellian Powersuit Parent=3
+&COMBAT_DESCRIPTION Corellian Powersuit Parent=Bounty Hunter Armor. Yay.
+@tel Corellian Powersuit Parent=Combat Items
+
+@create Stormtrooper Armor Parent
+@link Stormtrooper Armor Parent = Combat Items
+@parent Stormtrooper Armor Parent=[v(CS_MASTER_ARMOR)]
+@set Stormtrooper Armor Parent = STICKY
+@set Stormtrooper Armor Parent = SAFE
+@set Stormtrooper Armor Parent = NO_WARN
+&COMBAT_NOTES Stormtrooper Armor Parent=-1D Dexterity, +1D Blaster
+&COMBAT_DESCRIPTION Stormtrooper Armor Parent=White Stormtrooper armor. You know the stuff.
+&COMBAT_AVAIL Stormtrooper Armor Parent=3
+&COMBAT_RESTR Stormtrooper Armor Parent=X
+&COMBAT_ENERGY Stormtrooper Armor Parent=3
+&COMBAT_PHYSICAL Stormtrooper Armor Parent=6
+&CODE_UNWEAR Stormtrooper Armor Parent=[u(v(dbref_weapon_data)/unlock,num(me))][u(v(dbref_player_data)/set_flag,%0,!no_wear)][u(v(dbref_player_data)/set_data,%0,armor,[remove(u(v(dbref_player_data)/get_data,%0,armor),num(me))])][remit(loc(%0),u(message_unwear,%0))][set_modifier(%0,@Modifier/@Actions/,3)][set_modifier(%0,@Modifier/Dexterity/,3)][set_modifier(%0,@Modifier/Perception/,-3)][set_modifier(%0,@Modifier/Blaster/,-3)]
+&CODE_WEAR Stormtrooper Armor Parent=[u(v(dbref_player_data)/set_data,%0,armor,[num(me)] [u(v(dbref_player_data)/get_data,%0,armor)])][u(v(dbref_weapon_data)/lock,num(me))][u(v(dbref_player_data)/set_flag,%0,no_wear)][remit(loc(%0),u(message_wear,%0))][set_modifier(%0,@Modifier/@Actions/,-3)][set_modifier(%0,@Modifier/Dexterity/,-3)][set_modifier(%0,@Modifier/Perception/,3)][set_modifier(%0,@Modifier/Blaster/,3)]
+@tel Stormtrooper Armor Parent=Combat Items
+
+@create Fragmentation Grenade Parent
+@link Fragmentation Grenade Parent = Combat Items
+@parent Fragmentation Grenade Parent=[v(CS_MASTER_GRENADE)]
+&COMBAT_AVAIL Fragmentation Grenade Parent=1
+&COMBAT_RESTR Fragmentation Grenade Parent=R
+&COMBAT_SHOTS Fragmentation Grenade Parent=1
+&CHECK_TO_HIT Fragmentation Grenade Parent=sw_die(get_char_data(%0,Thrown Weapons))
+&COMBAT_CONCEAL Fragmentation Grenade Parent=4
+&COMBAT_MAX_SHOTS Fragmentation Grenade Parent=1
+&COMBAT_HANDS Fragmentation Grenade Parent=0
+&COMBAT_SETTINGS Fragmentation Grenade Parent=kill
+&CHECK_DAMAGE Fragmentation Grenade Parent=sw_die(15)
+@tel Fragmentation Grenade Parent=Combat Items
+
+@create Thermal Detonator Parent
+@link Thermal Detonator Parent = Combat Items
+@parent Thermal Detonator Parent=[v(CS_MASTER_GRENADE)]
+&COMBAT_AVAIL Thermal Detonator Parent=4
+&COMBAT_RESTR Thermal Detonator Parent=X
+&CHECK_DAMAGE Thermal Detonator Parent=sw_die(24)
+&COMBAT_SETTINGS Thermal Detonator Parent=kill
+&COMBAT_HANDS Thermal Detonator Parent=0
+&COMBAT_MAX_SHOTS Thermal Detonator Parent=1
+&COMBAT_CONCEAL Thermal Detonator Parent=4
+&COMBAT_SHOTS Thermal Detonator Parent=1
+@tel Thermal Detonator Parent=Combat Items
+
+@create Staff Parent
+@link Staff Parent = Combat Items
+@parent Staff Parent=[v(CS_MASTER_WEAPON)]
+@set Staff Parent = STICKY
+@set Staff Parent = SAFE
+@set Staff Parent = NO_WARN
+&COMBAT_SETTINGS Staff Parent=stun kill
+&MESSAGE_MISS Staff Parent=ansi(gh,[name(%0)] swats at the air by [name(%1)] with [poss(%0)] [name(me)].)
+&MESSAGE_HIT Staff Parent=ansi(gh,[name(%0)] smacks [name(%1)] with [poss(%0)] [name(me)].)
+&MESSAGE_UNWIELD Staff Parent=ansi(gh,[name(%0)] ceases to wield [poss(%0)] [name(me)].)
+&MESSAGE_WIELD Staff Parent=ansi(gh,[name(%0)] wields [poss(%0)] [name(me)].)
+&COMBAT_SHOTS Staff Parent=-1
+&COMBAT_SPEED Staff Parent=1.0
+&COMBAT_CONCEAL Staff Parent=9
+&COMBAT_SETTING Staff Parent=kill
+&COMBAT_DAMAGE_TYPE Staff Parent=Melee
+&CHECK_DAMAGE Staff Parent=sw_die(min(add(get_char_data(%0,Strength),3),18))
+&CHECK_TO_HIT Staff Parent=sw_die(get_char_data(%0,Melee Combat))
+&COMBAT_DAMAGE Staff Parent=Str + 1D (Maximum 6D)
+&COMBAT_RESTR Staff Parent=-
+&COMBAT_AVAIL Staff Parent=1
+&COMBAT_DESCRIPTION Staff Parent=You see a long staff. Solidly constructed out of wood or metal, it looks like it's been used for a while.
+@tel Staff Parent=Combat Items
+
+@create Sniper Rifle Parent
+@link Sniper Rifle Parent = Combat Items
+@parent Sniper Rifle Parent=[v(CS_MASTER_WEAPON)]
+@set Sniper Rifle Parent = STICKY
+@set Sniper Rifle Parent = SAFE
+@set Sniper Rifle Parent = NO_WARN
+&CHECK_DAMAGE Sniper Rifle Parent=sw_die(13)
+&CHECK_TO_HIT Sniper Rifle Parent=sw_die(add(get_char_data(%0,Blaster),3))
+&COMBAT_SETTING Sniper Rifle Parent=kill
+&COMBAT_CONCEAL Sniper Rifle Parent=10
+&COMBAT_MAX_SHOTS Sniper Rifle Parent=50
+&COMBAT_SHOTS Sniper Rifle Parent=50
+&COMBAT_DAMAGE_TYPE Sniper Rifle Parent=Energy
+&COMBAT_SPEED Sniper Rifle Parent=2.0
+&MESSAGE_HIT Sniper Rifle Parent=ansi(gh,[name(%0)] takes careful aim with [poss(%0)] [before(name(me),%b[last(name(me))])] and shoots [name(%1)].)
+&MESSAGE_MISS Sniper Rifle Parent=ansi(gh,[name(%0)] takes aim with [poss(%0)] [before(name(me),%b[last(name(me))])] and misses [name(%1)].)
+&MESSAGE_UNWIELD Sniper Rifle Parent=ansi(gh,[name(%0)] holsters [poss(%0)] [before(name(me),%b[last(name(me))])].)
+&MESSAGE_WIELD Sniper Rifle Parent=ansi(gh,[name(%0)] draws [poss(%0)] [before(name(me),%b[last(name(me))])].)
+&COMBAT_RESTR Sniper Rifle Parent=x
+&COMBAT_AVAIL Sniper Rifle Parent=3
+&COMBAT_DESCRIPTION Sniper Rifle Parent=This weapon appears to be a modified blaster rifle. It has a high-power laser-sighted scope, and an attachment point for a tripod stand. It doesn't look any more powerful than a normal blaster rifle, only more accurate. Becuase of this, the rifle does have a slower rate of fire, and is slightly less powerful.%r%r(OOC) Raises shot accuracy by 1D -- NOT SHOWN ON WIELDER'S +SHEET.
+@tel Sniper Rifle Parent=Combat Items
+
+@create Modified Corellian Powersuit Parent
+@link Modified Corellian Powersuit Parent = Combat Items
+@parent Modified Corellian Powersuit Parent=[v(CS_CORELLIAN_POWERSUIT)]
+@set Modified Corellian Powersuit Parent = STICKY
+@set Modified Corellian Powersuit Parent = SAFE
+@set Modified Corellian Powersuit Parent = NO_WARN
+&COMBAT_RESTR Modified Corellian Powersuit Parent=x
+&COMBAT_DESCRIPTION Modified Corellian Powersuit Parent=Bounty Hunter Armor. Yay.%r%rIt's been modified, it has a jet pack, and what looks like a stormtrooper's helmet on the top.
+&CODE_UNWEAR Modified Corellian Powersuit Parent=[u(v(dbref_weapon_data)/unlock,num(me))][u(v(dbref_player_data)/set_flag,%0,!no_wear)][u(v(dbref_player_data)/set_data,%0,armor,[remove(u(v(dbref_player_data)/get_data,%0,armor),num(me))])][remit(loc(%0),u(message_unwear,%0))][set_modifier(%0,@Modifier/@Actions/,3)][set_modifier(%0,@Modifier/Dexterity/,3)][set_modifier(%0,@Modifier/Lifting/,-3)][set_modifier(%0,@Modifier/Blaster/,-3)][set_modifier(%0,@Modifier/Search/,-3)]
+&CODE_WEAR Modified Corellian Powersuit Parent=[u(v(dbref_player_data)/set_data,%0,armor,[num(me)] [u(v(dbref_player_data)/get_data,%0,armor)])][u(v(dbref_weapon_data)/lock,num(me))][u(v(dbref_player_data)/set_flag,%0,no_wear)][remit(loc(%0),u(message_wear,%0))][set_modifier(%0,@Modifier/@Actions/,-3)][set_modifier(%0,@Modifier/Dexterity/,-3)][set_modifier(%0,@Modifier/Lifting/,3)][set_modifier(%0,@Modifier/Blaster/,3)][set_modifier(%0,@Modifier/Search/,3)]
+@tel Modified Corellian Powersuit Parent=Combat Items
+
+@create E-web Mount Parent
+@link E-web Mount Parent = Combat Items
+@parent E-web Mount Parent=[v(CS_MASTER_WEAPON)]
+@set E-web Mount Parent = STICKY
+@set E-web Mount Parent = SAFE
+@set E-web Mount Parent = NO_WARN
+&COMBAT_DESCRIPTION E-web Mount Parent=You see an E-web blaster cannon. It sits on its tripod mount and has an attached power generator. It can only mean one thing, and that's trouble for anyone who causes the operators to anger.
+&COMBAT_AVAIL E-web Mount Parent=4
+&COMBAT_RESTR E-web Mount Parent=X
+&MESSAGE_UNWIELD E-web Mount Parent=[name(%0)] powers the [rest(name(me))] down.
+&MESSAGE_WIELD E-web Mount Parent=[name(%0)] grabs the controls of the [rest(name(me))] and powers it up.
+&MESSAGE_HIT E-web Mount Parent=[name(%0)] points the [rest(name(me))] at [name(%1)] and blasts away.
+&MESSAGE_MISS E-web Mount Parent=[name(%0)] points the [rest(name(me))] at [name(%1)] and blasts away at everything but [name(%1)].
+&COMBAT_CONCEAL E-web Mount Parent=10
+&COMBAT_SHOTS E-web Mount Parent=-1
+&COMBAT_SETTING E-web Mount Parent=kill
+&CHECK_DAMAGE E-web Mount Parent=sw_die(24)
+&CHECK_TO_HIT E-web Mount Parent=sw_die(get_char_data(%0,Blaster))
+&COMBAT_SPEED E-web Mount Parent=0.5
+&COMBAT_DAMAGE_TYPE E-web Mount Parent=Energy
+@tel E-web Mount Parent=Combat Items
+
+@create Blaster Pistol Parent
+@link Blaster Pistol Parent = Combat Items
+@parent Blaster Pistol Parent=[v(CS_MASTER_WEAPON)]
+@set Blaster Pistol Parent = STICKY
+@set Blaster Pistol Parent = SAFE
+@set Blaster Pistol Parent = NO_WARN
+@COST Blaster Pistol Parent=250
+&COMBAT_DESCRIPTION Blaster Pistol Parent=The Blastech DL-18 pistol. The standard weapon throughout the Known Galaxy. The pistol is small enough to be concealable yet large enough to deal decent damage. On the large padded grip of the pistol there is a slot for a standard power pack. Atop the weapon there is a selector allowing for either stun or full settings.
+&COMBAT_AVAIL Blaster Pistol Parent=1
+&COMBAT_RESTR Blaster Pistol Parent=frx
+&CHECK_DAMAGE Blaster Pistol Parent=sw_die(12)
+&MESSAGE_HIT Blaster Pistol Parent=ansi(gh,[name(%0)] takes careful aim with [poss(%0)] [before(name(me),%b[last(name(me))])] and shoots [name(%1)].)
+&MESSAGE_MISS Blaster Pistol Parent=ansi(gh,[name(%0)] takes aim with [poss(%0)] [before(name(me),%b[last(name(me))])] and misses [name(%1)].)
+&COMBAT_SETTING Blaster Pistol Parent=kill
+&COMBAT_CONCEAL Blaster Pistol Parent=4
+&COMBAT_DAMAGE_TYPE Blaster Pistol Parent=Energy
+&COMBAT_SPEED Blaster Pistol Parent=1.0
+&COMBAT_SHOTS Blaster Pistol Parent=100
+&COMBAT_MAX_SHOTS Blaster Pistol Parent=100
+&MESSAGE_UNWIELD Blaster Pistol Parent=ansi(gh,[name(%0)] holsters [poss(%0)] [before(name(me),%b[last(name(me))])].)
+&MESSAGE_WIELD Blaster Pistol Parent=ansi(gh,[name(%0)] draws [poss(%0)] [before(name(me),%b[last(name(me))])].)
+&CHECK_TO_HIT Blaster Pistol Parent=sw_die(get_char_data(%0,Blaster))
+@tel Blaster Pistol Parent=Combat Items
+
+@create Heavy Blaster Pistol Parent
+@link Heavy Blaster Pistol Parent = Combat Items
+@parent Heavy Blaster Pistol Parent=[v(CS_MASTER_WEAPON)]
+@set Heavy Blaster Pistol Parent = STICKY
+@set Heavy Blaster Pistol Parent = SAFE
+@set Heavy Blaster Pistol Parent = NO_WARN
+&COMBAT_AVAIL Heavy Blaster Pistol Parent=2
+&COMBAT_RESTR Heavy Blaster Pistol Parent=rx
+&MESSAGE_WIELD Heavy Blaster Pistol Parent=ansi(gh,[name(%0)] draws [poss(%0)] [before(name(me),%b[last(name(me))])].)
+&MESSAGE_UNWIELD Heavy Blaster Pistol Parent=ansi(gh,[name(%0)] holsters [poss(%0)] [before(name(me),%b[last(name(me))])].)
+&MESSAGE_MISS Heavy Blaster Pistol Parent=ansi(gh,[name(%0)] takes aim with [poss(%0)] [before(name(me),%b[last(name(me))])] and misses [name(%1)].)
+&MESSAGE_HIT Heavy Blaster Pistol Parent=ansi(gh,[name(%0)] takes careful aim with [poss(%0)] [before(name(me),%b[last(name(me))])] and shoots [name(%1)].)
+&COMBAT_SPEED Heavy Blaster Pistol Parent=1.0
+&COMBAT_SHOTS Heavy Blaster Pistol Parent=25
+&COMBAT_MAX_SHOTS Heavy Blaster Pistol Parent=25
+&COMBAT_SETTING Heavy Blaster Pistol Parent=kill
+&COMBAT_CONCEAL Heavy Blaster Pistol Parent=4
+&COMBAT_DAMAGE_TYPE Heavy Blaster Pistol Parent=Energy
+&CHECK_DAMAGE Heavy Blaster Pistol Parent=sw_die(15)
+&CHECK_TO_HIT Heavy Blaster Pistol Parent=sub(sw_die(get_char_data(##)),3)
+&COMBAT_DESCRIPTION Heavy Blaster Pistol Parent=A heavy blaster pistol.
+@tel Heavy Blaster Pistol Parent=Combat Items
+
+@create Blaster Rifle Parent
+@link Blaster Rifle Parent = Combat Items
+@parent Blaster Rifle Parent=[v(CS_MASTER_WEAPON)]
+@set Blaster Rifle Parent = STICKY
+@set Blaster Rifle Parent = SAFE
+@set Blaster Rifle Parent = NO_WARN
+&COMBAT_DESCRIPTION Blaster Rifle Parent=This weapon is easily recognizable as a standard SoroSuub Blaster Rifle. The weapon comes standard with a retractable scope and stock, and is a large two-handed weapon with deadly damage potential even at long range. A standard power pack fits into its base.
+&COMBAT_AVAIL Blaster Rifle Parent=2
+&COMBAT_RESTR Blaster Rifle Parent=x
+&MESSAGE_WIELD Blaster Rifle Parent=ansi(gh,[name(%0)] draws [poss(%0)] [before(name(me),%b[last(name(me))])].)
+&MESSAGE_UNWIELD Blaster Rifle Parent=ansi(gh,[name(%0)] holsters [poss(%0)] [before(name(me),%b[last(name(me))])].)
+&MESSAGE_MISS Blaster Rifle Parent=ansi(gh,[name(%0)] takes aim with [poss(%0)] [before(name(me),%b[last(name(me))])] and misses [name(%1)].)
+&MESSAGE_HIT Blaster Rifle Parent=ansi(gh,[name(%0)] takes careful aim with [poss(%0)] [before(name(me),%b[last(name(me))])] and shoots [name(%1)].)
+&COMBAT_SPEED Blaster Rifle Parent=1.0
+&COMBAT_DAMAGE_TYPE Blaster Rifle Parent=Energy
+&COMBAT_SHOTS Blaster Rifle Parent=50
+&COMBAT_MAX_SHOTS Blaster Rifle Parent=50
+&COMBAT_CONCEAL Blaster Rifle Parent=9
+&COMBAT_SETTING Blaster Rifle Parent=kill
+&CHECK_TO_HIT Blaster Rifle Parent=sw_die(get_char_data(%0,Blaster))
+&CHECK_DAMAGE Blaster Rifle Parent=sw_die(15)
+@tel Blaster Rifle Parent=Combat Items
+
+@create E-11 Assault Rifle Parent
+@link E-11 Assault Rifle Parent = Combat Items
+@parent E-11 Assault Rifle Parent=[v(CS_MASTER_WEAPON)]
+@set E-11 Assault Rifle Parent = STICKY
+@set E-11 Assault Rifle Parent = SAFE
+@set E-11 Assault Rifle Parent = NO_WARN
+&COMBAT_DESCRIPTION E-11 Assault Rifle Parent=A Stormtrooper assult rifle is before you. It shines nicely, polished and well cared for by it's owner. You can see a few scratch marks around the reloading area that have been painted over, so the rifle and trooper have seen some combat.
+&COMBAT_AVAIL E-11 Assault Rifle Parent=2
+&COMBAT_RESTR E-11 Assault Rifle Parent=x
+&COMBAT_DAMAGE_TYPE E-11 Assault Rifle Parent=Energy
+&COMBAT_CONCEAL E-11 Assault Rifle Parent=8
+&COMBAT_SPEED E-11 Assault Rifle Parent=1.0
+&COMBAT_SETTING E-11 Assault Rifle Parent=kill
+&COMBAT_SHOTS E-11 Assault Rifle Parent=100
+&COMBAT_MAX_SHOTS E-11 Assault Rifle Parent=100
+&CHECK_DAMAGE E-11 Assault Rifle Parent=sw_die(15)
+&CHECK_TO_HIT E-11 Assault Rifle Parent=sw_die(get_char_data(%0,Blaster))
+&MESSAGE_WIELD E-11 Assault Rifle Parent=ansi(gh,[name(%0)] draws [poss(%0)] [before(name(me),%b[last(name(me))])].)
+&MESSAGE_UNWIELD E-11 Assault Rifle Parent=ansi(gh,[name(%0)] holsters [poss(%0)] [before(name(me),%b[last(name(me))])].)
+&MESSAGE_MISS E-11 Assault Rifle Parent=ansi(gh,[name(%0)] takes aim with [poss(%0)] [before(name(me),%b[last(name(me))])] and misses [name(%1)].)
+&MESSAGE_HIT E-11 Assault Rifle Parent=ansi(gh,[name(%0)] takes careful aim with [poss(%0)] [before(name(me),%b[last(name(me))])] and shoots [name(%1)].)
+@tel E-11 Assault Rifle Parent=Combat Items
+
+@create Blaster Carbine Parent
+@link Blaster Carbine Parent = Combat Items
+@parent Blaster Carbine Parent=[v(CS_MASTER_WEAPON)]
+@set Blaster Carbine Parent = STICKY
+@set Blaster Carbine Parent = SAFE
+@set Blaster Carbine Parent = NO_WARN
+&COMBAT_DESCRIPTION Blaster Carbine Parent=You see a standard blaster carbine. Halfway between a pistol and a rifle in size, it packs a reasonable punch for its size.
+&COMBAT_AVAIL Blaster Carbine Parent=12
+&COMBAT_RESTR Blaster Carbine Parent=frx
+&CHECK_DAMAGE Blaster Carbine Parent=sw_die(15)
+&CHECK_TO_HIT Blaster Carbine Parent=sub(sw_die(get_char_data(%0,Blaster)),5)
+&COMBAT_SHOTS Blaster Carbine Parent=100
+&COMBAT_MAX_SHOTS Blaster Carbine Parent=100
+&COMBAT_SETTING Blaster Carbine Parent=kill
+&COMBAT_CONCEAL Blaster Carbine Parent=8
+&COMBAT_DAMAGE_TYPE Blaster Carbine Parent=Energy
+&COMBAT_SPEED Blaster Carbine Parent=1.0
+&MESSAGE_WIELD Blaster Carbine Parent=ansi(gh,[name(%0)] draws [poss(%0)] [before(name(me),%b[last(name(me))])].)
+&MESSAGE_UNWIELD Blaster Carbine Parent=ansi(gh,[name(%0)] holsters [poss(%0)] [before(name(me),%b[last(name(me))])].)
+&MESSAGE_MISS Blaster Carbine Parent=ansi(gh,[name(%0)] takes aim with [poss(%0)] [before(name(me),%b[last(name(me))])] and misses [name(%1)].)
+&MESSAGE_HIT Blaster Carbine Parent=ansi(gh,[name(%0)] takes careful aim with [poss(%0)] [before(name(me),%b[last(name(me))])] and shoots [name(%1)].)
+@tel Blaster Carbine Parent=Combat Items
+
+@create Light Repeating Blaster Parent
+@link Light Repeating Blaster Parent = Combat Items
+@parent Light Repeating Blaster Parent=[v(CS_MASTER_WEAPON)]
+@set Light Repeating Blaster Parent = STICKY
+@set Light Repeating Blaster Parent = SAFE
+@set Light Repeating Blaster Parent = NO_WARN
+&COMBAT_DESCRIPTION Light Repeating Blaster Parent=You see a heavy blaster rifle. It is just about the most powerful handheld weapon, and quite illegal for civilians to have. This particular rifle looks like it may have taken more damage than it should have in the past, but apparently it still works.
+&COMBAT_AVAIL Light Repeating Blaster Parent=3
+&COMBAT_RESTR Light Repeating Blaster Parent=X
+&COMBAT_SHOTS Light Repeating Blaster Parent=30
+&COMBAT_MAX_SHOTS Light Repeating Blaster Parent=30
+&CHECK_TO_HIT Light Repeating Blaster Parent=sw_die(sub(get_char_data(%0,Blaster),3))
+&CHECK_DAMAGE Light Repeating Blaster Parent=sw_die(18)
+&COMBAT_CONCEAL Light Repeating Blaster Parent=10
+&COMBAT_SETTING Light Repeating Blaster Parent=kill
+&COMBAT_SPEED Light Repeating Blaster Parent=0.5
+&COMBAT_DAMAGE_TYPE Light Repeating Blaster Parent=Energy
+@tel Light Repeating Blaster Parent=Combat Items
+
+@create Hold-Out Blaster Parent
+@link Hold-Out Blaster Parent = Combat Items
+@parent Hold-Out Blaster Parent=[v(CS_MASTER_WEAPON)]
+@set Hold-Out Blaster Parent = STICKY
+@set Hold-Out Blaster Parent = SAFE
+@set Hold-Out Blaster Parent = NO_WARN
+&COMBAT_DESCRIPTION Hold-Out Blaster Parent=You see the smallest blaster made. Illegal and concealable, the hold-out class blasters tend to be a last resort when everything else has failed.
+&COMBAT_AVAIL Hold-Out Blaster Parent=2
+&COMBAT_RESTR Hold-Out Blaster Parent=rx
+&CHECK_DAMAGE Hold-Out Blaster Parent=sw_die(9)
+&CHECK_TO_HIT Hold-Out Blaster Parent=sw_die(get_char_data(%0,Blaster))
+&COMBAT_MAX_SHOTS Hold-Out Blaster Parent=6
+&COMBAT_SHOTS Hold-Out Blaster Parent=6
+&COMBAT_CONCEAL Hold-Out Blaster Parent=1
+&COMBAT_SETTING Hold-Out Blaster Parent=kill
+&COMBAT_DAMAGE_TYPE Hold-Out Blaster Parent=Energy
+&COMBAT_SPEED Hold-Out Blaster Parent=1.0
+&MESSAGE_WIELD Hold-Out Blaster Parent=ansi(gh,[name(%0)] draws [poss(%0)] [name(me)].)
+&MESSAGE_UNWIELD Hold-Out Blaster Parent=ansi(gh,[name(%0)] puts away [poss(%0)] [name(me)].)
+&MESSAGE_HIT Hold-Out Blaster Parent=ansi(gh,[name(%0)] takes aim with [poss(%0)] [name(me)] and shoots [name(%1)].)
+&MESSAGE_MISS Hold-Out Blaster Parent=ansi(gh,[name(%0)] fires [poss(%0)] [name(me)] at [name(%1)], but misses.)
+@tel Hold-Out Blaster Parent=Combat Items
+
+@create Knife Parent
+@link Knife Parent = Combat Items
+@parent Knife Parent=[v(CS_MASTER_WEAPON)]
+@set Knife Parent = STICKY
+@set Knife Parent = SAFE
+@set Knife Parent = NO_WARN
+@COST Knife Parent=9
+&COMBAT_DESCRIPTION Knife Parent=Your regular old hunting knife. Longish blade, short handle, and sharp edges.
+&COMBAT_AVAIL Knife Parent=1
+&COMBAT_RESTR Knife Parent=-
+&COMBAT_DAMAGE Knife Parent=Str + 1D (Maximum 6D)
+&CHECK_TO_HIT Knife Parent=sw_die(get_char_data(%0,Melee Combat))
+&CHECK_DAMAGE Knife Parent=sw_die(min(add(get_char_data(%0,Strength),3),18))
+&COMBAT_DAMAGE_TYPE Knife Parent=Melee
+&COMBAT_SETTING Knife Parent=kill
+&COMBAT_CONCEAL Knife Parent=2
+&COMBAT_SPEED Knife Parent=1.0
+&COMBAT_SHOTS Knife Parent=-1
+&MESSAGE_WIELD Knife Parent=ansi(gh,[name(%0)] draws [poss(%0)] [name(me)].)
+&MESSAGE_UNWIELD Knife Parent=ansi(gh,[name(%0)] sheathes [poss(%0)] [name(me)].)
+&MESSAGE_HIT Knife Parent=ansi(gh,[name(%0)] slices [name(%1)] with [poss(%0)] [name(me)].)
+&MESSAGE_MISS Knife Parent=ansi(gh,[name(%0)] slices at [name(%1)] but connects with nothing but air.)
+&COMBAT_SETTINGS Knife Parent=kill
+@tel Knife Parent=Combat Items
+
+@create Vibro Blade Parent
+@link Vibro Blade Parent = Combat Items
+@parent Vibro Blade Parent=[v(CS_MASTER_WEAPON)]
+@set Vibro Blade Parent = STICKY
+@set Vibro Blade Parent = SAFE
+@set Vibro Blade Parent = NO_WARN
+&COMBAT_DESCRIPTION Vibro Blade Parent=You see a long, curved sword. It appears to have a power pack in the handle, so you suspect it is quite a bit more modern and deadly than the weapon it was desigend to mimic.
+&COMBAT_AVAIL Vibro Blade Parent=2
+&COMBAT_RESTR Vibro Blade Parent=f
+&CHECK_TO_HIT Vibro Blade Parent=sw_die(get_char_data(%0,Melee Combat))
+&CHECK_DAMAGE Vibro Blade Parent=sw_die(min(add(get_char_data(%0,Strength),9),20))
+&COMBAT_SHOTS Vibro Blade Parent=-1
+&COMBAT_SPEED Vibro Blade Parent=1.0
+&COMBAT_DAMAGE_TYPE Vibro Blade Parent=Melee
+&COMBAT_CONCEAL Vibro Blade Parent=4
+&COMBAT_SETTING Vibro Blade Parent=kill
+&MESSAGE_WIELD Vibro Blade Parent=ansi(gh,[name(%0)] draws [poss(%0)] [name(me)] from it's scabbard and brings it to a ready position.)
+&MESSAGE_UNWIELD Vibro Blade Parent=ansi(gh,[name(%0)] puts [poss(%0)] [name(me)] back in it's scabbord.)
+&MESSAGE_HIT Vibro Blade Parent=ansi(gh,[name(%0)] slices [name(%1)] with [poss(%0)] [name(me)].)
+&MESSAGE_MISS Vibro Blade Parent=ansi(gh,[name(%0)] slices at [name(%1)] but connects with nothing but air.)
+&COMBAT_DAMAGE Vibro Blade Parent=Str + 3D (Maximum: 6D+2)
+&COMBAT_SETTINGS Vibro Blade Parent=kill
+@tel Vibro Blade Parent=Combat Items
+
+@create Vibro Axe Parent
+@link Vibro Axe Parent = Combat Items
+@parent Vibro Axe Parent=[v(CS_MASTER_WEAPON)]
+@set Vibro Axe Parent = STICKY
+@set Vibro Axe Parent = SAFE
+@set Vibro Axe Parent = NO_WARN
+@COMBAT_DATA Vibro Axe Parent=class axe|conceal 10|shots -1|stun 0|setting kill|damage 13|weapon
+&COMBAT_DESCRIPTION Vibro Axe Parent=You see a large, heavy axe. It has a powerpack installed in the head, and it looks possibly mechanized so you suspect it may be more than just a regular axe.
+&COMBAT_AVAIL Vibro Axe Parent=2
+&COMBAT_RESTR Vibro Axe Parent=r
+&CHECK_DAMAGE Vibro Axe Parent=sw_die(min(add(get_char_data(%0,Strength),10),21))
+&COMBAT_DAMAGE_TYPE Vibro Axe Parent=Melee
+&COMBAT_SHOTS Vibro Axe Parent=-1
+&COMBAT_SPEED Vibro Axe Parent=1.0
+&COMBAT_SETTING Vibro Axe Parent=kill
+&CHECK_TO_HIT Vibro Axe Parent=sw_die(get_char_data(%0,Melee Combat))
+&MESSAGE_WIELD Vibro Axe Parent=ansi(gh,[name(%0)]'s axe begins making a high-pitched whine as [obj(%0)] readies it for combat.)
+&MESSAGE_UNWIELD Vibro Axe Parent=ansi(gh,[name(%0)]'s axe ends it's whine as [obj(%0)] powers it off.)
+&COMBAT_DAMAGE Vibro Axe Parent=Str + 3D+1 (Maximum: 7D)
+&COMBAT_SETTINGS Vibro Axe Parent=kill
+@tel Vibro Axe Parent=Combat Items
+
+@create Bowcaster Parent
+@link Bowcaster Parent = Combat Items
+@parent Bowcaster Parent=[v(CS_MASTER_WEAPON)]
+@set Bowcaster Parent = STICKY
+@set Bowcaster Parent = SAFE
+@set Bowcaster Parent = NO_WARN
+@COMBAT_DATA Bowcaster Parent=class blaster|conceal 10|shots 6|stun 0|setting kill|damage 14|weapon
+&MAX_SHOTS Bowcaster Parent=6
+&COMBAT_DESCRIPTION Bowcaster Parent=You see what you take to be a weapon that looks like a cross between a crossbow and a heavy blaster. It looks very hard to load or use, as if it was ment for a very strong person.
+&COMBAT_AVAIL Bowcaster Parent=3
+&COMBAT_RESTR Bowcaster Parent=r
+&MESSAGE_WIELD Bowcaster Parent=ansi(gh,[name(%0)] brings [poss(%0)] bowcaster to bear and loads it with a loud click.)
+&MESSAGE_UNWIELD Bowcaster Parent=ansi(gh,[name(%0)] unloads [poss(%0)] bowcaster and slings it over [poss(%0)] sholder.)
+&MESSAGE_HIT Bowcaster Parent=ansi(gh,[name(%0)] takes careful aim, then fires a quarrel into [name(%1)].)
+&MESSAGE_MISS Bowcaster Parent=ansi(gh,[name(%0)] fires a quarrel at [name(%1)] but misses.)
+&COMBAT_MAX_SHOTS Bowcaster Parent=6
+&COMBAT_SHOTS Bowcaster Parent=6
+&COMBAT_DAMAGE_TYPE Bowcaster Parent=Energy
+&COMBAT_CONCEAL Bowcaster Parent=10
+&COMBAT_SPEED Bowcaster Parent=1.0
+&COMBAT_SETTING Bowcaster Parent=kill
+&CHECK_DAMAGE Bowcaster Parent=sw_die(12)
+&CHECK_TO_HIT Bowcaster Parent=sw_die(get_char_data(%0,Bowcaster))
+&COMBAT_SETTINGS Bowcaster Parent=kill
+@tel Bowcaster Parent=Combat Items
+
+@create Sporting Blaster Parent
+@link Sporting Blaster Parent = Combat Items
+@parent Sporting Blaster Parent=[v(CS_MASTER_WEAPON)]
+@set Sporting Blaster Parent = STICKY
+@set Sporting Blaster Parent = SAFE
+@set Sporting Blaster Parent = NO_WARN
+@COST Sporting Blaster Parent=185
+&COMBAT_DESCRIPTION Sporting Blaster Parent=You see a lower-power version of the blaster rifle. It was supposedly created to satisfy the need for a hunting weapon for rich gentlemen, but more often sees use as a legal substitute for a blaster rifle in smuggeler's hands.
+&COMBAT_AVAIL Sporting Blaster Parent=1
+&COMBAT_RESTR Sporting Blaster Parent=f
+&COMBAT_SPEED Sporting Blaster Parent=1.0
+&COMBAT_SHOTS Sporting Blaster Parent=50
+&COMBAT_MAX_SHOTS Sporting Blaster Parent=50
+&COMBAT_DAMAGE_TYPE Sporting Blaster Parent=Energy
+&COMBAT_CONCEAL Sporting Blaster Parent=8
+&COMBAT_SETTING Sporting Blaster Parent=kill
+&CHECK_DAMAGE Sporting Blaster Parent=sw_die(10)
+&MESSAGE_WIELD Sporting Blaster Parent=ansi(gh,[name(%0)] draws [poss(%0)] [before(name(me),%b[last(name(me))])].)
+&MESSAGE_UNWIELD Sporting Blaster Parent=ansi(gh,[name(%0)] holsters [poss(%0)] [before(name(me),%b[last(name(me))])].)
+&MESSAGE_MISS Sporting Blaster Parent=ansi(gh,[name(%0)] takes aim with [poss(%0)] [before(name(me),%b[last(name(me))])] and misses [name(%1)].)
+&MESSAGE_HIT Sporting Blaster Parent=ansi(gh,[name(%0)] takes careful aim with [poss(%0)] [before(name(me),%b[last(name(me))])] and shoots [name(%1)].)
+@tel Sporting Blaster Parent=Combat Items
+
+@create Lightsaber Parent
+@link Lightsaber Parent = Combat Items
+@parent Lightsaber Parent=[v(CS_MASTER_WEAPON)]
+@set Lightsaber Parent = STICKY
+@set Lightsaber Parent = SAFE
+@set Lightsaber Parent = NO_WARN
+&COMBAT_SETTINGS Lightsaber Parent=kill
+&COMBAT_SITE Lightsaber Parent=2
+&COMBAT_DESCRIPTION Lightsaber Parent=A flashlight-length tube of metal with a few obscure controls on one side sits before you. It could be any number of different mechanic's tools, though you don't think it quite looks like any of them.
+&COMBAT_AVAIL Lightsaber Parent=4
+&COMBAT_RESTR Lightsaber Parent=X
+&MESSAGE_UNWIELD Lightsaber Parent=ansi(hg,[name(%0)] turns off [poss(%0)] lightsaber, and puts it back on it's clip.)
+&MESSAGE_WIELD Lightsaber Parent=ansi(hg,[name(%0)] grips [poss(%0)] lightsaber, and ignites it with a snap-hiss.)
+&MESSAGE_ATTACK_FAIL Lightsaber Parent=ansi(hg,[name(%0)] slices at [name(%1)] but doens't quite connect with them.)
+&MESSAGE_ATTACK_SUCC Lightsaber Parent=ansi(hg,[name(%0)] slices [name(%1)] with his [name(me)].)
+&COMBAT_SETTING Lightsaber Parent=kill
+&COMBAT_CONCEAL Lightsaber Parent=1
+&COMBAT_DAMAGE_TYPE Lightsaber Parent=energy
+&CHECK_TO_HIT Lightsaber Parent=sw_die(get_char_data(%0,Lightsaber))
+&CHECK_DAMAGE Lightsaber Parent=sw_die(15)
+@tel Lightsaber Parent=Combat Items
+
+@create Blast Vest Parent
+@link Blast Vest Parent = Combat Items
+@parent Blast Vest Parent=[v(CS_MASTER_ARMOR)]
+@set Blast Vest Parent = LINK_OK
+@set Blast Vest Parent = STICKY
+@set Blast Vest Parent = SAFE
+@set Blast Vest Parent = NO_WARN
+&COMBAT_DESCRIPTION Blast Vest Parent=You see a vest of heavy fabric. It seems stiffer than a normal cloth vest, and you suspect that it is more than just decorational.
+&COMBAT_AVAIL Blast Vest Parent=1
+&COMBAT_RESTR Blast Vest Parent=-
+&COMBAT_ENERGY Blast Vest Parent=1
+&COMBAT_PHYSICAL Blast Vest Parent=3
+&CHECK_PROTECTION Blast Vest Parent=sw_die(u(v(dbref_weapon_data)/get_data,num(me),u(v(dbref_weapon_data)/get_data,u(v(dbref_player_data)/get_data,%1,weapon),damage_type)))
+&CHECK_TO_DODGE Blast Vest Parent=0
+@COST Blast Vest Parent=150
+@tel Blast Vest Parent=Combat Items
+
+@tel Combat Items=ThunderCombat V2.1
+
+think Creating the commands objects is finished.
+
+think Creating help files is starting.
+
+@create Help
+@link Help = ThunderCombat V2.1
+@set Help = STICKY
+&CMD_HELP Help=$+chelp*:think switch(strlen(trim(secure(%0))),0,setq(0,locate(num(me),Help,Ti)),[setq(0,locate(num(me),Help,Ti))][iter(trim(secure(%0)),setq(0,%q0 [locate(last(%q0),##,Ti)]))]);@select or(not(hasattrpval(last(%q0),helplock)),u(last(%q0)/helplock,%#)):[not(strmatch(iter(%q0,isdbref(##)),*0*))]=1:1,{@pemit %#=[header(Help on: '[iter(%q0,name(##), ,/)]')]%r[get_eval(last(%q0)/desc)]%r[switch(gt(words(lcon(last(%q0))),0),1,%r%b%bThe following subtopics are available:%r[ansi(h,table(sort(trim(iter(lcon(last(%q0)),switch(and(hastype(##,thing),or(u(##/helplock,%#),not(hasattrpval(##,helplock)))),1,|%b%b[name(##)])),|),a,|),18,79,|))]%r(Use '+chelp[switch(strlen(secure(%0)),0,%b,%b[trim(secure(%0))]%b)]<subtopic>' to access subtopics)%r)][trailer(End of Help)]},?:0,{@pemit %#=HELP: Ambiguious help topic requested. Please be more specific.},{@pemit %#=HELP: You are not allowed to read that file.}
+@DESCRIBE Help=A help object. Coded specifically for combat, but is generally useful as well.
+
+@create +wear
+@link +wear = Help
+@DESCRIBE +wear=Syntax: +wear <object>%r%rObject may be specified as name or dbref. You may not be wielding a weapon when you put on armor. You may not be able to wear armor because you already have some armor on.
+@tel +wear = Help
+
+@create +unwear
+@link +unwear = Help
+@DESCRIBE +unwear=Syntax: +unwear %[<object>%]%r%rObject is optionally specified, if not given you will unwear the most recently worn item. You may not remove armor when wielding a weapon.
+@tel +unwear = Help
+
+@create +wield
+@link +wield = Help
+@DESCRIBE +wield=Syntax: +wield <object>%r%rWields <object>. Object must be in your inventory and unwielded. You also must have a free hand to put the weapon in.
+@tel +wield = Help
+
+@create +unwield
+@link +unwield = Help
+@DESCRIBE +unwield=Syntax: +unwield %[<object>%]%r%rUnwields <object> or current weapon.
+@tel +unwield = Help
+
+@create +conceal
+@link +conceal = Help
+@DESCRIBE +conceal=Syntax: +conceal <object>%r%rAllows you to try and conceal your weapon. Those in the room with you have a chance (Perception vs Dexterity) to see you concealing it. After it is concealed, those who visually search you have a chance (Search vs Hide) of seeing it.
+@tel +conceal = Help
+
+@create +unconceal
+@link +unconceal = Help
+@DESCRIBE +unconceal=Syntax: +unconceal <object>%r%rAllows you to try and unconceal your weapon. Those in the room have a chance of noticing it (Perception vs Dexterity).
+@tel +unconceal = Help
+
+@create +next
+@link +next = Help
+@DESCRIBE +next=Syntax: +next / +last%r%rSwitches you to attack and unwield by default with your next or last weapon.
+@tel +next = Help
+
+@create +last
+@link +last = Help
+@DESCRIBE +last=Syntax: +next / +last%r%rSwitches you to attack and unwield by default with your next or last weapon.
+@tel +last = Help
+
+@create +set
+@link +set = Help
+@DESCRIBE +set=Syntax: +set <setting>%r%rSets your current weapon's setting to <setting>. Availible settings change from weapon to weapon, and you can see your weapon's settings by looking at it. Some weapons cannot have their setting changed.
+@tel +set = Help
+
+@create +parry
+@link +parry = Help
+@DESCRIBE +parry=Syntax: +parry%r%rAllows you to begin parrying if your weapon permits it. The advantage in parrying is that you get to roll your skill in the weapon rather than dodge skill to try and avoid an attack.
+@tel +parry = Help
+
+@create +unparry
+@link +unparry = Help
+@DESCRIBE +unparry=Syntax: +unparry%r%rAllows you to cease parrying.
+@tel +unparry = Help
+
+@create +attack
+@link +attack = Help
+@DESCRIBE +attack=Syntax: +attack <who>%r%rAllows you to attack <who> with your current weapon. <who> must be in the same room as you and must be setup to use the combat system.
+@tel +attack = Help
+
+@create +search
+@link +search = Help
+@DESCRIBE +search=Syntax: +search <who>%r%rAllows you to visually (distance -- not pat down) search <who> for weapons on them. Will show you all unconcealed and any concealed weapons you can find. <who> has a chance of seeing your search while you're doing it.
+@tel +search = Help
+
+@create +look
+@link +look = Help
+@DESCRIBE +look=Syntax: +look %[<who>|here|me%]%r%rAllows you to look at the combat stats for either some player or thing (<who> and me) or at everyone in the room in a brief format (here -- is default if not args supplied). +look should not be used to look at weapons or non-combat objects; strange things may happen if you do.
+@tel +look = Help
+
+@create +cover
+@link +cover = Help
+@DESCRIBE +cover=Syntax: +cover%r%rCovering allows you to get out of the line of attack of your enemy's weapons. This is intended to give the good RPer some time to make a pose to enhance RP or to enhance realism of actually diveing behind cover.
+@tel +cover = Help
+
+@create +uncover
+@link +uncover = Help
+@DESCRIBE +uncover=Syntax: +uncover%r%rPulls you out of cover and back into the battle.
+@tel +uncover = Help
+
+@create Actions
+@link Actions = Help
+@DESCRIBE Actions=On the way that combat "turns" work front, welcome to the concept of "Actions". The way that actions work is as follows. Almost any RP command will take a certain amount of D to do. So when you say, attack someone, it takes 1D. Now *all* your stats are lowered by 1D, until such time as the rounds timer detects that you have spent a time inactive (action wise, not commands wise) and will then raise you 1D.%r%rThis means: Those twinks who just +attack +attack +attack will get one or two shots off, then nothing (and if they do it enough will end up with negative dice and start shooting themselves). Plenty of time has been alloted to make a pose about your actions, then +attack. Note the system does not care when within the round time you take your action.%r%rAlso keep in mind that if you need a chance to make a long good RP pose, you can +cover yourself to get out of the fight, then pose whatever you wanted to.%r%rAs always, if someone won't behave on the system, call a Judge or me.
+@tel Actions = Help
+
+@create +jkill
+@link +jkill = Help
+@power +jkill = See_All
+&HELPLOCK +jkill=orflags(%0,WrJ)
+@DESCRIBE +jkill=Syntax: +jkill <player>%r%rAllows a judge or other admin to force a player to die. Useful for RPed combat, as well as for eliminating twinks from ICland.
+@tel +jkill = Help
+
+@create +setup
+@link +setup = Help
+@power +setup = See_All
+@DESCRIBE +setup=Syntax: +setup <who>%r%rForcefully sets <who> up for combat. Gives them combat_data only; will not overwrite char_data or any other attributes.
+&HELPLOCK +setup=orflags(%0,WrJ)
+@tel +setup = Help
+
+@create +wcheck
+@link +wcheck = Help
+@power +wcheck = See_All
+&HELPLOCK +wcheck=orflags(%0,WrJ)
+@DESCRIBE +wcheck=Syntax: +wcheck <type of weapon>%r%rLists out all of <type of weapon> that are out there. Will list location, and faction of location as well.
+@tel +wcheck = Help
+
+@create +jset
+@link +jset = Help
+@power +jset = See_All
+&HELPLOCK +jset=orflags(%0,WrJ)
+@DESCRIBE +jset=Syntax: +jset <who>/<what>=<value>%r%rSet's <who>'s <what> (in combat_data) to <value>. Use with extreme caution, and only if you understand the combat system. Potential uses: Force a player to unwield their weapon/all weapons. Generally shouldn't be used.
+@tel +jset = Help
+
+@create +flag
+@link +flag = Help
+@power +flag = See_All
+&HELPLOCK +flag=orflags(%0,WrJ)
+@DESCRIBE +flag=Syntax: +flag <who>=%[!%]<flag>%r%rSets or un-sets <who>'s flag. Who may either be a player or dbref number, or object in your current location. This is MUCHO USEFUL and every judge must know how to use it! You can make it so people cannot attack (no_attack) or are not attackable (no_attackable) or various other things.
+@tel +flag = Help
+
+@create +profile
+@link +profile = Help
+@power +profile = See_All
+@DESCRIBE +profile=Syntax: +profile%r%rProvides a combat profile of everybody who's online right now. Like +look but with two extras, IC/OOC status and if they have been through chargen yet.
+&HELPLOCK +profile=orflags(%0,WJ)
+@tel +profile = Help
+
+@create +jreport
+@link +jreport = Help
+@DESCRIBE +jreport=Syntax: +jreport%[/switch%] %[arguments%]%[=data%]%r%r+Jreport is the judge-report command. It allows players to give judge-reports, and admin to view the reports. Switches are as follows:%r%t+jreport <who>=<why>%r%t%tJreportinates <who> for their Judge skills with the reason <why>.%r%t+jreport/list%r%t%tShows the list of who has +jreports -- total counts(ADMIN ONLY)%r%t+jreport/list <who>%r%t%tDetailed listing of jreports on <who> (ADMIN ONLY)%r%t+jreport/from%r%t%tLists who has given how many jreports(ADMIN ONLY)%r%t+jreport/from <who>%r%t%tShows what jreports <who> has given (ADMIN ONLY)
+&DESC +jreport=Syntax: +jreport%[/switch%] %[arguments%]%[=data%]%r%r+Jreport is the judge-report command. It allows players to give judge-reports.  These will be used to evaluate the judges.  The Judge equivs of +nom and +twink go under the same command, so send both in!%r%r Switches are as follows:%r%t+jreport <who>=<why>%r%t%tJudge Reports <who> for their Judge skills with the reason%r%t%t<why>, be it good or bad.%r%t+jreport/list%r%t%tShows the list of who has +jreports -- total counts(ADMIN ONLY)%r%t+jreport/list <who>%r%t%tDetailed listing of jreports on <who> (ADMIN ONLY)%r%t+jreport/from%r%t%tLists who has given how many jreports(ADMIN ONLY)%r%t+jreport/from <who>%r%t%tShows what jreports <who> has given (ADMIN ONLY)
+@tel +jreport = Help
+
+@create Judges
+@link Judges = Help
+&HELPLOCK Judges=[orflags(%0,WrJ)]
+@DESCRIBE Judges=Okay all you Judge-type people. You're probably wondering what's up with this new combat system... The big deal is the flags that are stuffed on people now. no_wear, no_wield, no_attack, etc. The only ones you need to concern yourselves with are no_attack, no_throw, no_attackable. Those three flags (+chelp combat flag <flagname>) are by default set on all players.%r%rNow for the fun. When you go to judge a combat, probably someone will be set no_attack, no_throw, no_attackable. So, you're going to have to use the +flag (+chelp combat commands +flag) command to set those flags off of them for the combat, THEN RE-SET THEM AT THE END OF THE COMBAT.%r%rNow, about approving people for combat... It's going to be a subjective thing, but if they ask to be approved and demonstrate in combat RP that they can handle themselves (have them get attacked (brawling fight) by a crazed jawa or something) without judge-intervention in a nice rounds-based-manner with +checks or +attacks where appropriate, then you remove no_attack, no_throw, no_attackable, and they can be on their merry way.
+@tel Judges = Help
+
+@create Flags
+@link Flags = Help
+&HELPLOCK Flags=orflags(%0,WrJ)
+@DESCRIBE Flags=The following flags are available flags to set on players or combat items.%r%rNOTE: The combat system uses some flags for it's own use, usually no_wear and no_wield, etc on players. Please be careful when you change player's combat flags.
+
+@create no_throw
+@link no_throw = Flags
+@DESCRIBE no_throw=Flag: no_throw%r%rSet on a player or weapon, prevents use of weapon for the +throw command.%r%rNOTE: THIS IS YET ANOTHER FLAG THAT MUST BE CLEARED WHEN A PLAYER IS APPROVED FOR COMBAT.
+@tel no_throw=Flags
+
+@create no_conceal
+@link no_conceal = Flags
+@DESCRIBE no_conceal=Flag: no_conceal%r%rno_conceal set on a player or object will prevent said player from concealing stuff. This flag is set on all types of armor since you can't conceal them.%r%rFlag: no_unconceal%r%rno_unconceal set on a player or object will prevent said player from unconcealing (and potentially useing) stuff.
+@tel no_conceal=Flags
+
+@create no_attack
+@link no_attack = Flags
+@DESCRIBE no_attack=Flag: no_attack%r%rPrevents player or weapon from attacking. Period. If combat goes to a rounds based system, will probably be used in that.%r%rNOTE: THIS IS THE FLAG THAT YOU MUST REMOVE IF YOU ARE APPROVING A PLAYER FOR COMBAT EITHER PERMENANT OR TEMPORARY. PLEASE PLEASE PLEASE DON'T FORGET TO RESET THIS FLAG IF IT IS ONLY BEING TEMPORARIALLY REMOVED!
+@tel no_attack=Flags
+
+@create no_attackable
+@link no_attackable = Flags
+@DESCRIBE no_attackable=Flag: no_attackable%r%rPrevents player from being attacked. Period. If someone's attacking you twinkily, set this on yourself (you should have it on by default), and then yell at them, or tell me and I'll yell at them. (what was that yell command... something like @Nuke I think)%r%rNOTE: THIS IS ANOTHER FLAG THAT MUST BE REMOVED WHEN A PLAYER IS ENTERING COMBAT OR BEING PERMENANTLY APPROVED FOR COMBAT.
+@tel no_attackable=Flags
+
+@create under_cover
+@link under_cover = Flags
+@DESCRIBE under_cover=Flag: under_cover%r%rIndicates said player has gone under some sort of cover. This will allow the player time to type a response while they are not attackable (+cover sets you no_attackable).
+@tel under_cover=Flags
+
+@create no_cover
+@link no_cover = Flags
+@DESCRIBE no_cover=Flag: no_cover%r%rThis flag may be set on players and indicates that they can not take cover.%r%rFlag: no_uncover%r%rThis flag may be set on players and indicates that they can not get out from under cover. (trapped in cover)
+@tel no_cover=Flags
+
+@create no_parry
+@link no_parry = Flags
+@DESCRIBE no_parry=Flag: no_parry%r%rno_parry can be set on players or objects and indicates that said object or player is not capable of parrying at this time.%r%rFlag: no_unparry%r%rno_unparry prevents player from stopping their parry. Can be set on player or weaopn.
+@tel no_parry=Flags
+
+@create no_wield
+@link no_wield = Flags
+@DESCRIBE no_wield=Flag: no_wield%r%rno_wield can be set on a weapon or player and will prevent the player form wielding said weapon. Does not effect armor's weapons.%r%rFlag: no_unwield%r%rno_unwield can be set on a weapon or player and will prevent the player from unwielding said weapon. Does not effect armor's weapons.
+@tel no_wield=Flags
+
+@create parry
+@link parry = Flags
+@DESCRIBE parry=Flag: parry%r%rparry indicates that the player with it set is parrying with their weapon. Duh.
+@tel parry=Flags
+
+@create no_wear
+@link no_wear = Flags
+@DESCRIBE no_wear=Flag: no_wear%r%rno_wear may be set on player or armor. Prevents player from wearing the armor.%r%rFlag: no_unwear%r%rno_unwear may be set on player or armor. Prevents player from unwearing the armor.
+@tel no_wear=Flags
+
+@tel Flags = Help
+
+@tel Help = ThunderCombat V2.1
+
+think Creating help files is finished.
+
+@tel ThunderCombat V2.1=#2
+
+think ansi(rhfu,DO NOT DELETE THE CS_* ATTRIBUTES FROM YOURSELF! THEY ARE VITAL FOR PROPER OPERATION OF THE COMBAT SYSTEM!)
+
+

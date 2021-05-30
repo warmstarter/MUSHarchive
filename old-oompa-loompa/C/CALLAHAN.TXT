@@ -1,0 +1,161 @@
+Random Master Room stuff. Also a darts game.
+All dbrefs, of course, will need to be changed.
+
+&DAT-POLITICIAN here=Netcom
+&CMD-SET-DART-PHOTO here=$+set dart photo=*:@pemit/contents me=%N digs around in the box of photos near the bar, and pins the photo of %0 to the centre of the dart board.;&dat-politician me=%0
+&CMD-SET-DART-SCORE here=$+set dart score=*:@switch isnum(%0)=1,{[setq(0,trunc(%0))];&dat-dart-score me=%q0;@pemit/contents me=%N gets a bit of chalk and put %q0 as the score to be played to, on the dart board.},{@pemit %#=You write %0 on the dart score board, and Mike laughs.}
+&DAT-DART-SCORE here=100
+&CMD-THROW-DART here=$+throw dart:@switch v(dat-dartsgame)=1,,{@pemit/contents me=%N starts a new game of darts.;&dat-dartsgame me=1;@dolist lattr(me/score-*)=&## me};@pemit/contents me=%N throws a dart at the dart board;[setq(0,switch(rand(20),0,50,1,40,2,40,3,20,4,20,5,20,6,20,7,10,8,10,9,10,10,10,11,10,12,10,13,10,1))];@pemit/contents me=%N's dart lands in the %q0 ring and %s writes up the score.;&score-%# me=[add(v(score-%#),%q0)];@switch gt(v(score-%#),v(dat-dart-score))=1,{@pemit/contents me=%N's score is greater than the winning score. %N has just won the game.};@switch eq(%q0,50)=1,@pemit/contents me=%N's dart landed in the photo of [v(dat-politician)].
+&VIEW_SCORE_BOARD here=The chalkboard beside the darts board holds the score:%r%rPlay to: [v(dat-dart-score)]%rCurrent scores:%r%b[iter(lattr(me/score*),Name: [ljust(name(after(##,SCORE-)),20)] Score: [v(##)]%r)]%r[repeat(-,76)]
+&CMD-START-DART-GAME here=$+start dart game:@switch v(dat-dartsgame)=1,{@pemit %#=You have to end the old game first.},{@pemit/contents me=%N starts a new game of darts.;&dat-dartsgame me=1;@dolist lattr(me/score-*)=&## me}
+&CMD-END-DART-GAME here=$+end dart game:@switch v(dat-dartsgame)=1,{@pemit/contents me=%N ends the game of darts.;&dat-dartsgame me=;@dolist lattr(me/score-*)=&## me},@pemit %#=There is no current game.
+&DAT-DARTSGAME here=1
+&LH_DARTS Lhelp for the bar=%b[ljust(+set dart photo=<someone>,30)]Traditionally, a politician's face was put%r[space(31)]in the centre of the dart board.%r%b[ljust(+set dart score=<score>,30)]Sets the score to be played to. Numbers only.%r%b[ljust(+throw dart,30)]Throws a dart at the dart board.%r%b[ljust(+start dart game,30)]Starts a new game, wiping any old scores.%r%b[ljust(+end dart game,30)]Ends the dart game, wiping any old scores.%r%b[ljust(+view score board,30)]Shows the scores.%r
+
+@lock Out=J-FN-PLAYERCHECK/1
+@Succ Out=The dials of the machine stop spinning, your world stops whirling, and you emerge...
+@Osucc Out=fades off into the mists...
+@Odrop Out=materializes from the mists with an odd hint of flashing lights behind %o.
+&J-FN-PLAYERCHECK Out=[switch(type(%#),PLAYER,and(switch(hasattr(%#,desc),0,0,1,1),switch(words(lock(%#)),0,0,1),switch(hasattr(%#,sex),0,0,1,1),switch(hasflag(%#,HALTED),1,0,0,1),switch(words(lock(%#/use)),0,0,1),switch(hasflag(%#,ENTER_OK)=1,0,0,1)),1)]
+&J-FN-PLAYERINFO Out=[switch(hasattr(%#,desc),0,You need to type '@desc me=<whatever you look like>' before you leave this room.%r)][switch(words(lock(%#)),0,You need to type '@lock me=me' before leaving this room.%r)][switch(hasattr(%#,sex),0,You need to type '@sex me=<gender>' before leaving this room.%r)][switch(hasflag(%#,HALTED),1,You need to type '@set me=!halt' before leaving this room.%r)][switch(words(lock(%#/use)),0,You need to type '@lock/use me=me' before leaving this room.%r)][switch(hasflag(%#,ENTER_OK)=1,You need to type '@set me=enter_ok' before leaving this room.)]
+@Afail Out=@pemit %#=[u(j-fn-playerinfo)]
+@Fail Out=Your character is not totally set up and ready to leave.
+@Desc Out=Beyond the door, you catch a hint of Suffolk County, Long Island, New York.
+@Asucc Out=@switch match(%#,#1) member(get(#21/alias-all),%#)=0 0,{&alias-all #21=[get(#21/alias-all)] %#}
+---note that the asucc installs the new player in the mail alias 'all'
+@set Out=INHERIT
+
+@create Farmer's Daughter's Commands=10
+@Desc Farmer's Daughter's Commands=Josie's code object. Globals so far:%r[ljust(+help,17)][ljust(+finger,17)][ljust(+view,17)][ljust(+who,17)]%r[ljust(+lhelp,17)][ljust(+graffiti,17)][ljust(mp,17)][ljust(mw,17)]%r[ljust(+yawn,17)][ljust(+bill,17)]
+&CMD-VIEW Farmer's Daughter's Commands=$+view:@pemit %#=[setq(0,0)][setq(1,[sort(trim(iter(lattr(%l/view_*),[edit(after(##,VIEW_),_,%b)]|),r,|),,|)])][switch(words(%q1,|),0,There is nothing to view here.,Items to view here:%r%r[iter(%q1,[ljust(capstr(lcstr(##)),17)][switch(%q0,3,%r[setq(0,0)],[setq(0,[add(%q0,1)])])],|)]%r[center(Type '+view <item>' to see the details.,76)])]
+&CMD-VIEW-WHAT Farmer's Daughter's Commands=$+view *:@pemit %#=[setq(0,edit(%0,%b,_))][switch(hasattr(%l,view_%q0),0,There is no viewable object called '%0'.,[objeval(%l,u(%l/view_%q0))])]
+&CMD-FINGER Farmer's Daughter's Commands=$+finger *:@switch num(*%0)=#-1,@pemit %#='[capstr(%0)]' is not a player.,{@pemit %#=[ulocal(#35/fn-header,Callahan's Finger)][ulocal(#35/fn-finger,*%0)][ulocal(#35/fn-footer)]}
+&CMD-HELP Farmer's Daughter's Commands=$+help *:@pemit %#=[switch(member(setunion(get(#39/subjects),get(#39/subjects-mail),|),lcstr(%0),|),0,There is no +help for '%0'.,[ulocal(#35/fn-header,Callahan's Help)][ulocal(#39/help-[edit(%0,%b,_)])]%r[ulocal(#35/fn-footer)])]
+&CMD-HELP2 Farmer's Daughter's Commands=$+help:@pemit %#=[ulocal(#35/fn-header,Callahan's Help)]%b%b[ljust(People,17)][ljust(Things,17)][ljust(Wierd Stuff,17)][ljust(Indexes,23)]%r%b[repeat(-,74)]%r%b%b[ljust(finger,17)][ljust(lhelp,17)][ljust(bill,17)][ljust(index,17)]%r%b%b[ljust(mail,17)][ljust(places,17)][ljust(graffiti,17)][ljust(mail index,17)]%r%b%b[ljust(mp,17)][ljust(time,17)][ljust(yawn,17)]%r%b%b[ljust(mutter,17)][ljust(view,17)]%r%b%b[ljust(mw,17)]%r%b%b[ljust(who,17)]%r%r%b[center(Type '+help <subject>' for help on that topic.,74)]%r[ulocal(#35/fn-footer)]
+&CMD-LHELP Farmer's Daughter's Commands=$+lhelp:@pemit %#=[setq(0,0)][ulocal(#35/fn-header, [name(%l)] Lhelp)]%b[iter(lattr(sort([get(%l/lhrefs)]/lh_*)),[ljust(capstr(lcstr(edit(after(##,LH_),_,%b))),17)][switch(%q0,3,%r[setq(0,0)],[setq(0,add(%q0,1))])])]%r[ulocal(#35/fn-footer)]
+&CMD-LHELP2 Farmer's Daughter's Commands=$+lhelp *:@pemit %#=[setq(0,edit(%0,%b,_))][setq(2,get(%l/lhrefs))][setq(1,or(hasattr(%q2,lhd_%q0),hasattr(%q2,lh_%q0)))][switch(%q1,0,There is no +lhelp on that topic,[ulocal(#35/fn-header,[name(%l)]%b[capstr(lcstr(%0))])]%r[switch(hasattr(%q2,lh_%q0),1,[ulocal(%q2/lh_%q0)],[ulocal(%q2/lhd_%q0)])]%r[ulocal(#35/fn-footer)])]
+&CMD-WHO Farmer's Daughter's Commands=$+who:@pemit %#=[u(#35/fn-header,Callahan's Who List)][ulocal(#35/fn-who,objeval(%#,lwho()))][u(#35/fn-footer)]
+&CMD-GRAFFITI-ADD Farmer's Daughter's Commands=$+graffiti/add *:&graf-tmp-[get(#46/graftmpnum)] #46=%0;&graf-tmp-list #46=[cat(get(#46/graf-tmp-list),get(#46/graftmpnum))];&graftmpnum #46=[add(get(#46/graftmpnum),1)];@pemit %#=You choose a graffiti pen from the range along the bottom of the graffiti board, and add something to the board.
+&CMD-GRAFFITI-DELTMP Farmer's Daughter's Commands=$+graffiti/deltmp *:@switch hasflag(%#,wizard)=0,{@pemit %#=Only wizards may remove temporary graffiti from the file},{[setq(0,extract(get(#46/graf-tmp-list),%0,1))];@switch hasattr(#46,graf-tmp-%q0)=0,{@pemit %#=There is no graffiti entry '%0'.},{&graf-tmp-%q0 #46=;&graf-tmp-list #46=[remove(get(#46/graf-tmp-list),%q0)];@pemit %#=You remove temporary graffiti %0.}}
+&CMD-GRAFFITI-APPROVE Farmer's Daughter's Commands=$+graffiti/approve *:@switch hasflag(%#,wizard)=0,{@pemit %#=Only wizards may approve graffiti.},{[setq(0,extract(get(#46/graf-tmp-list),%0,1))];@switch hasattr(#46,graf-tmp-%q0)=0,{@pemit %#=There is no graffiti entry '%0'.},{&graf-[get(#46/grafnum)] #46=[get(#46/graf-tmp-%q0)];&graf-list #46=[cat(get(#46/graf-list),get(#46/grafnum))];&grafnum #46=[add(get(#46/grafnum),1)];&graf-tmp-%q0 #46=;&graf-tmp-list #46=[remove(get(#46/graf-tmp-list),%q0)];@pemit %#=You approve graffiti %0.}}
+&CMD-GRAFFITI-REMOVE Farmer's Daughter's Commands=$+graffiti/remove *:@switch hasflag(%#,wizard)=0,{@pemit %#=Only wizards may remove graffiti.},{[setq(0,extract(get(#46/graf-list),%0,1))];@switch hasattr(#46,graf-%q0)=0,{@pemit %#=There is no graffiti entry '%0'.},{&graf-%q0 #46=;&graf-list #46=[remove(get(#46/graf-list),%q0)];@pemit %#=You remove graffiti %0 from the main board.}}
+&CMD-GRAFFITI-LISTTMP Farmer's Daughter's Commands=$+graffiti/listtmp:[setq(0,get(#46/graf-tmp-list))];@switch hasflag(%#,wizard)=0,{@pemit %#=Only wizards may list temporary graffiti.},{@switch words(%q0)=0,{@pemit %#=There is no temporary graffiti.},{@dolist %q0={@pemit %#=Num: [member(%q0,##)]%r[get(#46/graf-tmp-##)]%r[repeat(.,76)]%r}}}
+&CMD-GRAFFITI-LIST Farmer's Daughter's Commands=$+graffiti/list:[setq(0,get(#46/graf-list))];@switch hasflag(%#,wizard)=0,{@pemit %#=Only wizards may list graffiti.},{@switch words(%q0)=0,{@pemit %#=There is no graffiti.},{@dolist %q0={@pemit %#=Num: [member(%q0,##)]%r[get(#46/graf-##)]%r[repeat(.,76)]}}}
+&CMD-GRAFFITI-LISTTMP-NUM Farmer's Daughter's Commands=$+graffiti/listtmp *:@switch hasflag(%#,wizard)=0,{@pemit %#=Only wizards may list temporary graffiti.},{[setq(0,extract(get(#46/graf-tmp-list),%0,1))];@switch hasattr(#46,graf-tmp-%q0)=0,{@pemit %#=There is no temporary graffiti entry '%0'.},{@pemit %#=Num: %0%r[get(#46/graf-tmp-%q0)]%r[repeat(.,76)]}}
+&CMD-GRAFFITI-LIST-NUM Farmer's Daughter's Commands=$+graffiti/list *:@switch hasflag(%#,wizard)=0,{@pemit %#=Only wizards may list graffiti.},{[setq(0,extract(get(#46/graf-list),%0,1))];@switch hasattr(#46,graf-%q0)=0,{@pemit %#=There is no graffiti entry '%0'.},{@pemit %#=Num: %0%r[get(#46/graf-%q0)]%r[repeat(.,76)]}}
+&CMD-MP Farmer's Daughter's Commands=$mp *=*:[setq(0,switch(pos(%,,%0),#-1,[iter(%0,switch(hasflag(*##,connected),1,num(*##)))],[iter(%0,switch(hasflag(*##,connected),1,num(*##)),%,)]))][setq(2,sort(iter(%q0,[name(##)]|),,|))][setq(1,trim(iter(%q2,switch(strmatch(last(%q2,|),##),1,switch(words(%q0),1,##,and ##),##),|)))][setq(3,switch(mid(%1,0,1),:,{Long distance to %q1: %N [after(%1,:)]},;,{Long distance to %q1: %N[after(%1,;)]},{You paged %q1 with '%1'.}))][setq(4,switch(mid(%1,0,1),:,{From afar to %q1, %N [after(%1,:)]},;,{From afar to %q1, %N[after(%1,;)]},{%N pages to %q1: %1}))];@pemit %#=%q3;@dolist %q0=@pemit ##={%q4}
+&CMD-MW Farmer's Daughter's Commands=$mw *=*:[setq(0,switch(pos(%,,%0),#-1,[iter(%0,switch(objeval(%#,num(##)),#-1,,objeval(%#,num(##))))],[iter(%0,switch(objeval(%#,num(##)),#-1,,objeval(%#,num(##))),%,)]))][setq(2,sort(iter(%q0,[name(##)]|),,|))][setq(1,trim(iter(%q2,switch(strmatch(last(%q2,|),##),1,switch(words(%q0),1,##,and ##),##),|)))][setq(3,switch(mid(%1,0,1),:,{%q1 sense "%N [after(%1,:)]"},;,{%q1 sense "%N[after(%1,;)]"},{You whisper "%1" to %q1.}))][setq(4,switch(mid(%1,0,1),:,{To %q1, you sense %N [after(%1,:)]},;,{To %q1, you sense %N[after(%1,;)]},{%N whispers to %q1: %1}))];@pemit %#=%q3;@dolist %q0=@pemit ##={%q4}
+&CMD-YAWN Farmer's Daughter's Commands=$+yawn:@pemit/contents %l=%N spams:%r%r[space(5)]Y%b%b%bY%b%b%bAAA%b%b%bW%b%b%bW%b%bN%b%b%bN%b%b|%r[space(5)]Y%b%b%bY%b%bA%b%b%bA%b%bW%bW%bW%b%bNN%b%bN%b%b|%r[space(5)]%bY%bY%b%b%bAAAAA%b%bWW%bWW%b%bN%bN%bN%b%b|%r[space(5)]%b%bY%b%b%b%bA%b%b%bA%b%bW%b%b%bW%b%bN%b%bNN%r[space(5)]%b%bY%b%b%b%bA%b%b%bA%b%bW%b%b%bW%b%bN%b%b%bN%b%bo%r
+&CMD-BILL Farmer's Daughter's Commands=$+bill:@pemit/contents %l=%N spams:%r%r____/|%r\\ o.O|%b%b%b%bAck!%r%b=(_)=%t%bThphth!%r%b%b%bU%r
+@set Farmer's Daughter's Commands=INHERIT
+
+@create Bauer's Functions=10
+&FN-HEADER Bauer's Functions=#[center(%b%0%b,74,=)]#%r
+&FN-FOOTER Bauer's Functions=#[repeat(=,74)]#
+&FN-FINGER Bauer's Functions=%bName: [ljust(name(%0),30)]Alias: [ljust(get(%0/alias),30)]%r%bSex: [get(%0/sex)]%r%b[repeat(-,74)]%r[setq(0,[iter(email:Email Address|snail:Snail Mail Address|interests:Interests|altchars:Altchars|vacation:Vacation|quote:Quote|pos:Position,[switch(hasattr(%0,before(##,:)),0,,[after(##,:)]:%b[objeval(num(%0),u(%0/[before(##,:)]))]|)],|)][iter(get(%0/fingerlist),[after(##,:)]:%b[objeval(num(%0),u(%0/[before(##,:)]))]|,|)]Idle: [switch(hasflag(%0,connected),0,Not Connected,[ulocal(#35/fn-idle,idle(num(%0)))])]|Connected: [switch(hasflag(%0,connected),0,Last Connected [get(%0/Last)],convsecs(sub(convtime(time()),conn(num(%0)))))])]%b[iter(squish(trim(%q0,,|),|),[rjust(before({##},:),19)]%b:%b[after({##},:)]%r,|)]
+@Desc Bauer's Functions=Any functions that can be used, please do. I suggest: fn-header, fn-footer, fn-idle and fn-conn.
+&FN-WHO Bauer's Functions=%b%b[ljust(Name,17)]%b%bConn%b%b%b%bIdle%b%b%b%bSex%b%b%b%b%bLocation%r%b[repeat(-,74)]%r%b[iter(%0,%b[ljust(name(##),17)]%b%b[ljust(ulocal(#35/fn-conn,conn(##)),6)]%b%b[ljust(ulocal(#35/fn-idle,idle(##)),6)]%b%b[ljust(switch(lcstr(mid(get(##/sex),0,1)),f,Female,m,Male,p,Plural,n,Neuter,Other%b),6)]%b%b[switch(objeval(%#,loc(##)),#-1,Unfindable,mid(name(loc(##)),0,30))]%r)]
+&FN-IDLE Bauer's Functions=[setq(0,mod(%0,60))][setq(1,div(mod(%0,3600),60))][setq(2,div(mod(%0,86400),3600))][setq(3,div(%0,86400))][setq(4,switch(%q1,-1,Error,0,%q0s,%q1m%q0s))][switch(%q3,-1,Error,0,[switch(%q2,-1,Error,0,%q4,%q2h)],%q3D)]
+&FN-CONN Bauer's Functions=[setq(0,mod(%0,60))][setq(1,div(mod(%0,3600),60))][setq(2,div(mod(%0,86400),3600))][setq(3,div(%0,86400))][setq(4,switch(%q1,-1,Error,0,%q0s,%q1m%q0s))][switch(%q3,-1,Error,0,[switch(%q2,-1,Error,0,%q4,%q2h)],%q3D)]
+
+@create Help Data Object=10
+&SUBJECTS Help Data Object=mutter|mutter2|places|places config|places options|view|index|finger|time|mail index|mail|lhelp|who|places etiquette|graffiti|graffiti 2|graffiti 3|mp|mw|bill|yawn
+&HELP-INDEX Help Data Object=[setq(0,0)]%b[iter(sort(get(#39/subjects),,|),[ljust(##,21)][switch(%q0,2,%r[setq(0,0)],[setq(0,add(%q0,1))])],|)]
+&SUBJECTS-MAIL Help Data Object=mail|check mail|skim|read|unread|add note|note|delete|clear|undelete|flush|mark|unmark|save|unsave|reply|forward|mail|mail config|mail write|mail2|mail read|mail3|mail aliases|mail4|mail folders|mail5|dash|proof|toss|cc|edit cc|bcc|edit bcc|edit to|edit subject|edit text|set mail flag|send|set mail option3|set mail option4|set mail default|set mail default2|show mail options|add personal alias|list personal aliases|expand personal alias|remove personal alias|list global aliases|add global alias|expand global alias|edit global alias|remove global alias|add folder|remove folder|move|list folders|select folder|add filter|remove filter|list filters|edit|mail credits|mail changes|destroy mailbox|edit personal alias|mail1|mail configuration|mail status|make mailbox|retract|review|set mail option|set mail option2|status of mail sent
+&HELP-MAIL_INDEX Help Data Object=[setq(0,0)]%b[iter(sort(get(#39/subjects-mail),,|),[ljust(##,21)][switch(%q0,2,%r[setq(0,0)],[setq(0,add(%q0,1))])],|)]
+&HELP-TIME Help Data Object=%r+time%r%rThis command shows the IC time.%r
+&HELP-VIEW Help Data Object=%r+view%r+view "item"%r%rThe first command shows the items in the room which can be specifically viewed. The second displays the description of the items.%r%rTo add a +view to a room you own, '&view_"item" here="text"'.
+&HELP-FINGER Help Data Object=+finger "player"%r%rThis command shows information about characters.%r%rPreset information and how to set it (all optional):%r@Sex me="male, female, neuter"[space(10)]@Alias me="alias"%r&EMAIL me="email address"[space(15)]&SNAIL me="snail mail address"%r&INTERESTS me="list of interests"[space(7)]&ALTCHARS me="altchars"%r&QUOTE me="a quote"[space(20)]&POS me="position"%r&VACATION me="if you intend to be away for more than a month, set this."%r%rOther information:%rIf you want to, you can set personalised information. To do this,%r&fingerlist me="attribute name":"Title"|"2nd name":"2nd Title"|"3rd....%rThen set the attributes.%r%rPlease note that : and | should not be used, and \[] will need \\ in front.%rThink about whether you want your RL address listed. Maybe so, maybe *not*.
+@Desc Help Data Object=To add to the +help, edit #39/subjects and add the name of your command.. check that there is no +help by that name yet! (check #39/subjects and #39/subjects_mail)%rThen add the attribute help-"whatever", replacing spaces with underscores.
+&HELP-LHELP Help Data Object=+lhelp%r+lhelp "subject"%r%r+lhelp on its own will show a list of help topics for the local area.%r+lhelp "subject" will show the help text for that subject.%r%rTo set lhelp: @create an object, then set &lhrefs "room"="dbref of object".%r&lh_"topic" "lhelp object"="text" will create an lhelp topic that shows on the lhelp index.%r&lhd_"topic" "lhelp object"="text" will create a 'dark' lhelp topic.%rSpaces in the topic names should be replaced with underscores.
+&HELP-WHO Help Data Object=+who%r%rShows a list of online people, how long they have been connected, and where they are. Wizards will also see dark wizards, but normal players won't.
+&HELP-PLACES_ETIQUETTE Help Data Object=Places code is a way to provide locations for private conversations, so please don't just 'join' an area that's already occupied without asking first. Politeness is an important part of Callahan's Place. 
+&HELP-GRAFFITI Help Data Object=+read graffiti%rThis command, of course, only works in the bar itself. It shows a random piece of graffiti from the board behind the bar (where a bar mirror would normally be.)%r%r+graffiti/add "graffiti"%r%rThis command (amazingly) works anywhere. It adds a bit of graffiti to a temporary database, and the wizards will later look at it, edit spelling errors, and move it to the main graffiti database.%r%rWiz-only commands: +help graffiti 2
+&HELP-GRAFFITI_3 Help Data Object=+graffiti/list%rLists all the approved graffiti.%r%r+graffiti/list "num"%rLists a specific graffiti(?) from the main db.%r%r+graffiti/remove%rRemoves graffiti from the main db, and renumbers it.%r%r%rAt this stage, editing is a matter of using @edit, and examining #46 (the database object). 'graf-*' is the main db, and 'graf-tmp-*' the temporary db.%rNote that the reference numbers are *not* the numbers they're stored under.
+&HELP-GRAFFITI_2 Help Data Object=+graffiti/listtmp%rLists the temporary graffiti.%r%r+graffiti/listtmp "num"%rLists a specific bit of graffiti.%r%r+graffiti/deltmp "num"%rRemoves a bit of temporary graffiti (but does NOT put it in the main database!). It renumbers the database.%r%r+graffiti/approve "number"%rApproves graffiti and puts it in the main database - and removes it from the temporary db. It renumbers the db.%r%r%rMain DB commands in '+help graffiti 3'.
+&HELP-MP Help Data Object=mp "people"="message"%rmp "people"=:"pose"%rmp "people"=;"pose"%r%rThis pages several people at once. This can only be used to contact players.%rThe ":" and ";" commands work just like in page or in normal poses.%rIf you need to page people with spaces in their names, use commas or aliases. EG:%r[space(10)]mp Josie Bauer, Doc Webster, Dagonet=Hi, I'm testing mp.%r[space(10)]mp Josie Doc Dagonet=Hi, I'm testing mp.%r
+&HELP-MW Help Data Object=mw "people"="message"%rmw "people"=:"pose"%rmw "people"=;"pose"%r%rThis whispers to several people at once. This can only be used to whisper to people or objects in the same room as you.%rThe ":" and ";" work just like in whisper or in normal poses.%rIf you need to whisper to people with spaces in their names, use commas or aliases. EG:%r[space(10)]mw Josie Bauer, Doc Webster, Dagonet=Hi, I'm testing mw.%r[space(10)]mw Josie Doc Dagonet=Hi, I'm testing mw.%r
+&HELP-YAWN Help Data Object=%r+yawn%r%roh god I'm sooooo tired. I don't think I'll bother with writing the help for this one....... yaaaaawn. Try it out y'rself.%r%rOh... an yeah, it's spammy%r
+&HELP-BILL Help Data Object=%rExpress your displeasure! Gag at that pun! Use '+bill' to show everyone in the room how you feel!%r%r(be aware that it's spammy, though)%r
+&HELP-CHECK_MAIL Help Data Object=[u(#20/check_mail_help)]
+&HELP-SKIM Help Data Object=[u(#20/skim_help)]
+&HELP-READ Help Data Object=[u(#20/read_help)]
+&HELP-UNREAD Help Data Object=[u(#20/unread_help)]
+&HELP-ADD_NOTE Help Data Object=[u(#20/add_note_help)]
+&HELP-MAIL_CHANGES Help Data Object=[u(#20/mail_changes_help)]
+&HELP-MAIL_CREDITS Help Data Object=[u(#20/mail_credits_help)]
+&HELP-EDIT Help Data Object=[u(#20/edit_help)]
+&HELP-LIST_FILTERS Help Data Object=[u(#20/list_filters_help)]
+&HELP-REMOVE_FILTER Help Data Object=[u(#20/remove_filter_help)]
+&HELP-ADD_FILTER Help Data Object=[u(#20/add_filter_help)]
+&HELP-SELECT_FOLDER Help Data Object=[u(#20/select_folder_help)]
+&HELP-LIST_FOLDERS Help Data Object=[u(#20/list_folders_help)]
+&HELP-MOVE Help Data Object=[u(#20/move_help)]
+&HELP-REMOVE_FOLDER Help Data Object=[u(#20/remove_folder_help)]
+&HELP-ADD_FOLDER Help Data Object=[u(#20/add_folder_help)]
+&HELP-REMOVE_GLOBAL_ALIAS Help Data Object=[u(#20/remove_global_alias_help)]
+&HELP-EDIT_GLOBAL_ALIAS Help Data Object=[u(#20/edit_global_alias_help)]
+&HELP-EXPAND_GLOBAL_ALIAS Help Data Object=[u(#20/expand_global_alias_help)]
+&HELP-ADD_GLOBAL_ALIAS Help Data Object=[u(#20/add_global_alias_help)]
+&HELP-NOTE Help Data Object=[u(#20/note_help)]
+&HELP-LIST_GLOBAL_ALIASES Help Data Object=[u(#20/list_global_aliases_help)]
+&HELP-DELETE Help Data Object=[u(#20/delete_help)]
+&HELP-REMOVE_PERSONAL_ALIAS Help Data Object=[u(#20/remove_personal_alias_help)]
+&HELP-EDIT_PERSONAL_ALIAS Help Data Object=[u(#20/edit_personal_alias_help)]
+&HELP-EXPAND_PERSONAL_ALIAS Help Data Object=[u(#20/expand_personal_alias_help)]
+&HELP-LIST_PERSONAL_ALIASES Help Data Object=[u(#20/list_personal_aliases_help)]
+&HELP-CLEAR Help Data Object=[u(#20/clear_help)]
+&HELP-ADD_PERSONAL_ALIAS Help Data Object=[u(#20/add_personal_alias_help)]
+&HELP-UNDELETE Help Data Object=[u(#20/undelete_help)]
+&HELP-FLUSH Help Data Object=[u(#20/flush_help)]
+&HELP-MARK Help Data Object=[u(#20/mark_help)]
+&HELP-UNMARK Help Data Object=[u(#20/unmark_help)]
+&HELP-UNSAVE Help Data Object=[u(#20/unsave_help)]
+&HELP-SAVE Help Data Object=[u(#20/save_help)]
+&HELP-REPLY Help Data Object=[u(#20/reply_help)]
+&HELP-SHOW_MAIL_OPTIONS Help Data Object=[u(#20/show_mail_options_help)]
+&HELP-FORWARD Help Data Object=[u(#20/forward_help)]
+&HELP-MAIL Help Data Object=[u(#20/mail_help)]
+&HELP-MAIL_CONFIG Help Data Object=[u(#20/mail_config_help)]
+&HELP-MAIL1 Help Data Object=[u(#20/mail1_help)]
+&HELP-MAIL2 Help Data Object=[u(#20/mail2_help)]
+&HELP-MAIL3 Help Data Object=[u(#20/mail3_help)]
+&HELP-SET_MAIL_DEFAULT2 Help Data Object=[u(#20/set_mail_default2_help)]
+&HELP-SET_MAIL_DEFAULT Help Data Object=[u(#20/set_mail_default_help)]
+&HELP-SET_MAIL_OPTION4 Help Data Object=[u(#20/set_mail_option4_help)]
+&HELP-SET_MAIL_OPTION3 Help Data Object=[u(#20/set_mail_option3_help)]
+&HELP-SET_MAIL_OPTION2 Help Data Object=[u(#20/set_mail_option2_help)]
+&HELP-MAIL4 Help Data Object=[u(#20/mail4_help)]
+&HELP-SET_MAIL_OPTION Help Data Object=[u(#20/set_mail_option_help)]
+&HELP-MAIL_CONFIGURATION Help Data Object=[u(#20/mail_configuration_help)]
+&HELP-DESTROY_MAILBOX Help Data Object=[u(#20/destroy_mailbox_help)]
+&HELP-MAIL5 Help Data Object=[u(#20/mail5_help)]
+&HELP-MAKE_MAILBOX Help Data Object=[u(#20/make_mailbox_help)]
+&HELP-MAIL_WRITE Help Data Object=[u(#20/mail_write_help)]
+&HELP-MAIL_STATUS Help Data Object=[u(#20/mail_status_help)]
+&HELP-MAIL_READ Help Data Object=[u(#20/mail_read_help)]
+&HELP-STATUS_OF_MAIL_SENT Help Data Object=[u(#20/status_of_mail_sent_help)]
+&HELP-MAIL_ALIASES Help Data Object=[u(#20/mail_aliases_help)]
+&HELP-MAIL_FOLDERS Help Data Object=[u(#20/mail_folders_help)]
+&HELP-REVIEW Help Data Object=[u(#20/review_help)]
+&HELP-DASH Help Data Object=[u(#20/dash_help)]
+&HELP-RETRACT Help Data Object=[u(#20/retract_help)]
+&HELP-PROOF Help Data Object=[u(#20/proof_help)]
+&HELP-SEND Help Data Object=[u(#20/send_help)]
+&HELP-SET_MAIL_FLAG Help Data Object=[u(#20/set_mail_flag_help)]
+&HELP-EDIT_TEXT_FLAG Help Data Object=[u(#20/edit_text_help)]
+&HELP-EDIT_SUBJECT_FLAG Help Data Object=[u(#20/edit_subject_help)]
+&HELP-TOSS Help Data Object=[u(#20/toss_help)]
+&HELP-CC Help Data Object=[u(#20/cc_help)]
+&HELP-EDIT_CC Help Data Object=[u(#20/edit_cc_help)]
+&HELP-EDIT_BCC Help Data Object=[u(#20/edit_bcc_help)]
+&HELP-BCC Help Data Object=[u(#20/bcc_help)]
+&HELP-EDIT_TO Help Data Object=[u(#20/edit_to_help)]
+&HELP-EDIT_SUBJECT Help Data Object=[u(#20/edit_subject_help)]
+&HELP-EDIT_TEXT Help Data Object=[u(#20/edit_text_help)]
+&HELP-MUTTER Help Data Object=[u(#28/help_mutter)]
+&HELP-MUTTER2 Help Data Object=[u(#28/help_mutter2)]
+&HELP-PLACES Help Data Object=[u(#28/help_places)]
+&HELP-PLACES_CONFIG Help Data Object=[u(#28/help_places_config)]
+&HELP-PLACES_OPTIONS Help Data Object=[u(#28/help_places_options)]
+

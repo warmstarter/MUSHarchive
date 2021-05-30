@@ -1,0 +1,29 @@
+@create Experimental WHO
+@set Experimental WHO=!NO_COMMAND
+@set Experimental WHO=WIZARD
+@set Experimental WHO=SAFE
+@set Experimental WHO=INHERIT
+@set Experimental WHO=OPAQUE
+@set Experimental WHO=ROYALTY
+&FLAG Experimental WHO=[switch(get(%0/Class),Builder,BUILDER,switch(hasflag(%0,WIZARD),1,WIZARD,switch(hasflag(%0,Royalty),1,ROYALTY,OTHER)))]
+@IDLE Experimental WHO=[ufun(fun_time,idle(%0))]
+&HOURS Experimental WHO=[switch(lt(div(mod(%0,86400),3600),10),1,0[div(mod(%0,86400),3600)],div(mod(%0,86400),3600))]
+&MINUTES Experimental WHO=[switch(lt(div(mod(%0,3600),60),10),1,0[div(mod(%0,3600),60)],div(mod(%0,3600),60))]
+&CAN_SEE Experimental WHO=[or(u(see_all),not(hidden(%1)))]
+&DAYS Experimental WHO=[div(%0,86400)]
+&IDLESCALE Experimental WHO=[switch(lt(%0,60),1,seconds,switch(lt(%0,3600),1,minutes,switch(lt(%0,86400),1,hours,days)))]
+&SEE_ALL Experimental WHO=[or(hasflag(%0,wizard),haspower(%0,see_all))]
+&EMPIRE_FILTER Experimental WHO=[switch(Get(%0/Empire),get(%#/Empire),1,0)]
+&HEADER Experimental WHO=[u(line)]%r[center([ansi(hg,GalaxyMUSH)],79)]%r[u(line)]%r[ansi(hc,Sta)] [ansi(hc,Sex)] [ansi(hc,Name)][space(12)][ansi(hc,Alias)][space(2)][ansi(hc,On For)][space(3)][ansi(hc,Idle)][space(5)][ansi(hc,Class)][space(10)][ansi(hc,Empire)]%r[u(line2)]
+&FOOTER Experimental WHO=[repeat([ansi(hr,~)],79)]
+&WHO_ENTRY Experimental WHO=[switch(get(%0/PlayStatus),BLD,ansi(c,BLD),WIZ,ansi(r,WIZ),ROY,ansi(hy,ROY),OOC,ansi(hc,OOC),IC,ansi(hg,IC%b),ansi(hx,ljust(#$,3)))] [switch(ucstr(get(%0/Sex)),M*,ansi(hb,M),F*,ansi(hm,F),ansi(hx,O))]%b%b [ansi(switch(u(Flag,%0),WIZARD,r,ROYALTY,hy,BUILDER,c,b),ljust(Name(%0),15))] [ansi(y,ljust(get(%0/Alias),5))] [ansi(r,rjust(u(Onfor,%0),9))] [ansi(m,rjust(u(Idle,%0),4))] [ansi(g,ljust(get(%0/Class),14))] [ansi(hr,ljust(get(%0/Empire),14))]
+@DESCRIBE Experimental WHO=Project: Who List.
+&FUN_TIME Experimental WHO=[setq(0,div(%0,3600))][switch(gt(%q0,9),0,0)]%q0:[setq(1,[div(sub(%0,[mul(div(%0,3600),3600)]),60)])][switch(gt(%q1,9),0,0)]%q1:[setq(2,[sub(%0,[mul(div(%0,60),60)])])][switch(gt(%q2,9),0,0)]%q2
+&ONFOR Experimental WHO=[ufun(fun_time,conn(name(%0)))]
+&EWHO Experimental WHO=$ewho:@pemit %#=[u(EHeader)][iter(filter(Empire_Filter,lwho()),switch(u(Can_See,%#,##),1,%r[u(EEntry,##)]))]%r[ansi(hm,There are [words(filter(Empire_Filter,lwho()))] players in Empire [get(%#/Empire)] connected.)]%r[ansi(r,Wizard)] - [ansi(hy,Royalty)] - [ansi(c,Builder)] - [ansi(b,Player)]
+&EHEADER Experimental WHO=[ansi(hc,Name%b%b%b%b%b%b%b%b%b%b%b%bAlias%b%b%b%bOn For%b%b%bIdle%b%b%b%b%bClass[space(11)]Organization)]%r[ansi(hb,repeat(~,79))]
+&EENTRY Experimental WHO=[ansi(switch(u(Flag,%0),WIZARD,r,ROYALTY,hy,BUILDER,c,b),ljust(Name(%0),15))] [ansi(y,ljust(get(%0/Alias),7))] [ansi(r,rjust(u(Onfor,%0),9))] [ansi(m,rjust(u(Idle,%0),4))] [ansi(g,ljust(get(%0/Class),15))] [ansi(hr,ljust(get(%0/Organization),20))]
+&LINE Experimental WHO=[repeat([ansi(r,*)],79)]
+&LINE2 Experimental WHO=[repeat([ansi(hm,=)],79)]
+@SEX Experimental WHO=[switch(poss(%0),his,M,her,F,its,O)]
+&WHO-1 Experimental WHO=$who:@pemit %#=[u(header)][iter(lwho(),switch(u(can_see,##),1,{%r[u(who_entry,##)]}))]%r[u(footer)]%r[ansi(hm,There are [words(lwho())] players connected.)]%r[ansi(r,Wizard)] - [ansi(hy,Royalty)] - [ansi(c,Builder)] - [ansi(b,Other)]

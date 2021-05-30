@@ -1,0 +1,148 @@
+this file is available by anonymous ftp from:
+
+pc4.math.oxy.edu:/ftp/pub/mbuilding/hbrgmoo.txt
+
+
+
+Anyone should send submissions for How to Build a Really Good <you fill in the blank> (ascii only!) to t_pascal@oxy.edu
+
+
+
+How to Build a Really Good MOO (from the popular series "How to Build a Really Good M*")
+
+by t_pascal@oxy.edu
+
+
+
+First, get the latest server software and core database.  Don't bother starting from scratch with minimum.db, your database will be branded as too original.  Second, find a machine on which to run the server.  The server should be as fast, as big, and as powerful a machine as you can find.  Remember, you'll need processing power and disk space for a Really Good MOO.  The next thing to do is to determine an opening date for the MOO.  A good date is two weeks from the first time you bring the server up.  This will give you plenty of time to create a Really Good MOO.  Don't worry if you're not done with the MOO by the deadline; open anyway.  Players are the best beta testers, and they love watching the MOO evolve and change around them.
+
+
+
+Now, you need to build the MOO.  Don't worry about a theme yet.  You just need a loose idea for now, then revise it when you are finished building.  You also need builders (not programmers, that's later), and you should have a meeting.  Be sure to log the meeting: it's very important.  In the builders' meeting, make sure you discuss issues like, "How much I enjoy Shadowrun", "I really, really like SpellJammer", "ZenMOO sucks", and "LambdaMOO is really lagged".  Talk for about an hour, or until everyone is sick of babbling, then let the builders loose and BUILD!  Don't worry about describing exits, or keeping a semi-realistic topography.  You can take care of these things later.
+
+
+
+While building, you will be wondering, "What is this MOO's theme?"  One good way to answer this question is to ask people what they are building.  For example, if you get the following answers: "I'm building a Clue(tm) game, in MOO", "I was trying to figure out how to build a sex motel", and "I'm trying to build the city of France", then you know your theme should be, "Sex, Clue(tm), and Paris in the Autumn."  (You originally thought you would design a MOO devoted to autumn)
+
+
+
+You will also wonder, "Should I try to enforce the Sex, Clue(tm), and Paris in Autumn theme?"  The answer is no.  It is natural that you will want to begin to add more than rooms to your MOO, but it is too soon.  If you feel especially motivated, try making lots of tinyscenery.  This helps by giving you something to do, and making your builders feel proud at the size of max_object().  Don't bother describing the tinyscenery, it will match any decor that way.
+
+
+
+You may also be tempted to wonder if you should put an "obvious exits" line in the room description.  This is an old and classical debate.  If you incorporate the exits into the description of the room, people will *have* to read your builders' beautiful prose to pick out the exits.  If you tell the user explicitly where the exits are, they will not read the beautiful descriptions.  The best answer to this problem is not to describe the rooms, and put in an obvious exits line instead.  Think of all the time and database bloat you'll save.
+
+
+
+Once you've got lots of rooms and tinyscenery, you now need some programmers.  That is, give your builders programmer bits.  Call a programmer's meeting, and log it.  Talk about the important programming issues like, "I'll port the RPG systems from TrekMOO, LambdaMOO, and GodNet", "I'll cut and paste all of the features objects from LambdaMOO", and "ZenMOO really sucks".  Talk for a couple of hours until everyone gets sick of hanging around, or the meeting breaks down when your new programmers have fun creating bongs, hammers and dolls of other programmers.
+
+
+
+One thing you might have forgotten to do is create lots of mail groups.  Groups like *Theme (disregard this folder), *Smut, *ProgrammingIssues (folder for the latest code porting news), and *NewProjects (Use this folder to talk about ideas you've seen on other M*s).  There should be about 16 mail groups for each player.  Remember to enforce cross-posting and babbling about non-topic ideas.  These mail groups are important.  If you haven't ported the MOO newsreader client, you'll need to have online usenet-like mail.  If necessary, you can write a shell script to format and dump news to your MOO.  Create *alt, *rec, etc. hierarchies.
+
+
+
+Now you are ready to begin to think about how your players are going to interact with the MOO and each other.  Wonder to yourself, "If I were a person with telnet and I spent fifteen hours in front of a terminal, would I be interested in Sex, Clue(tm), and Paris in Autumn?"  It doesn't matter what the answer is, you just have to wonder it.  Players love features, and you need to have plenty of them.  Get every feature you can find, anywhere.  Port all of the Really Good LP Mud emotions into your MOO.  Why would players want to type ":smiles" when they can type "smile"?  A Really Good MOO should have 5000 emotions, programmed individually on the $player class.  Don't use the alias abilities of the server, it will only slow things down.  Here's a good example:
+
+
+
+@verb $player:smile none none none
+
+@program $player:smile
+
+if (player.location == this.location)
+
+  if ($command_utils:yes_or_no("Really smile?"))
+
+    if ($command_utils:yes_or_no("Really Really smile?"))
+
+      player:tell("You smile.");
+
+      for x in (player.location.contents)
+
+        if (x.location == player.location && x.location == this.location)
+
+          x:tell(player.name," smiles.");
+
+        endif
+
+      endfor
+
+    else
+
+      player:tell("I didn't think you did.");
+
+    endif
+
+  else
+
+    player:tell("Then you shouldn't have typed it!");
+
+  endif
+
+else
+
+  player:tell("You cannot call someone else's emotions, shame!");
+
+endif
+
+
+
+Each emotion needs to be programmed separately, although you can use the @copy command to ease your work load.  Players enjoy a personal, warm touch to each verb or feature.  Another thing to note is that users like to have their own copies of verbs; allow them to @copy verbs from the $player class onto themselves.  The server will run faster.
+
+
+
+Your programmers may begin to whine about Multiple Inheritance.  Discuss the issue on *social and *alt.pets.chia.save.the.whales.smash.bash.stomp.  Send letters to the MOO-Cows mailing list.  You might want to switch to CoolMud (see "How to Build a Really Good CoolMud"), or even LP Mud (see "How to Build a Really Good LP Mud").  The best solution (if you stick with MOO) is to tell the programmers to use @copy.  @copy is a good verb, and should be @copy'd everywhere in case it gets corrupted.
+
+
+
+Now you are probably ready to allow users onto your Really Good MOO.  Advertise in alt.pets.chia.save.the.really.good.m*s.  Let people know how many emotions your MOO has, and how huge your database is.  Use adjectives like "new", "exciting", "Plenty of sex and Clue(tm)", and "Tell your friends".  Send mail to the unofficial mud list, and get added to it.  People will flock, and you will be famous.
+
+
+
+No doubt, interest will die off.  Once the initial newness of Sex, Clue(tm), and Paris in Autumn wears off, users will become ambivalent, and dissatisfied.  The RPG system needs work, the exits aren't described, and "your MOO needs more emotions" (note, no players will complain about your decor-correct tinyscenery).  Players will also suggest things to port.  Listen to them.  For example, "How can you have Sex, Clue(tm), and Paris in Autumn without bringing in Portuguese Rancher NPCs?"  Hold a players' meeting and log it.  Discuss issues like, "I play on a lot of Muds", "I really like LambdaMOO", "We need more emotions.  Who can use ':'?", and "Have you heard of ZenMOO?  It's cool."  Doubtless, the meeting will degrade; try to steer clear of issues like, "I think GodNet does the Paris theme better", "Does anyone know where I can get a telnet client?", and "ZenMOO sucks".
+
+
+
+The only way to stimulate more interest is to continue to build.  Build until it hurts.  Port until you have sixteen generic classes of the same thing.  Stick with the 16 * length(players()) mail group rule.  Type eval commands like ";create(toobj(random(tonum(max_object()))+1))".  Add the following lines of code to any verb in the database:
+
+
+
+while (!$math_utils:is_prime(random($maxint)))
+
+  if ($object_utils:isa(this,$root_class))
+
+    b = $string_utils:explode($login.welcome_message);
+
+  else
+
+    b = $string_utils:explode("alt.save.my.mother.because.she.is.dying",".");
+
+  endif
+
+endwhile
+
+
+
+And remember: use @copy!  It is the only way you will be successful.
+
+
+
+
+
+A partial list of Really Good MOOs:
+
+
+
+ZenMOO:            cheshire.oxy.edu 7777  (134.69.1.253)
+
+NeuroMOOncer:      Address and port unknown
+
+TrekMOO:           Address and port unknown
+
+GodNet:            Address and port unknown
+
+SexClue(tm)MOO:    Address and port unknown
+
+
+

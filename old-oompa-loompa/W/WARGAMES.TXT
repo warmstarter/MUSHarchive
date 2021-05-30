@@ -1,0 +1,50 @@
+@create Sentry Guard
+@link Sentry Guard = #5188
+&DEVFLAGS Sentry Guard=invincible
+@create Score Sheet
+@link Score Sheet = #5188
+@lock/Basic Score Sheet==#5070
+No attributes found.
+I don't know which one you mean!
+@create Control Console
+@link Control Console = #46
+@lock/Basic Control Console=#46
+@set Control Console = WIZARD
+&FITTO Control Console=[ljust(left(%0,%1),%1)]
+&DATA Control Console=#5068
+&RELAY Control Console=&Score[v(0)] [v(data)]=[ifelse([hasattr([v(data)],Score[v(0)])],[add([get([v(data)]/Score[v(0)])],1)],1)];&Hits[v(1)] [v(data)]=[ifelse([hasattr([v(data)],Hits[v(1)])],[add([get([v(data)]/Hits[v(1)])],1)],1)];@swi [v(annhit)]=1,{@remit [v(room)]=Computer>[name([v(0)])] hit [name([v(1)])].}
+&ANNHIT Control Console=1
+&ROOM Control Console=#5188
+&TOGANN Control Console=$annhits ?:@swi [v(0)]=-,{@remit [v(room)]=Announcements Off.[set(me,annhit:0)]},+,{@remit [v(room)]=Announcements On.[set(me,annhit:1)]},{@pemit %#=Please use '+' or '-'.}
+&ENDGAME Control Console=$end game:@dolist [pinzone(#5077)]={@pemit [##]=[ansi(hr,GAME OVER.)];@tr #5077/reqleave=[##],[name(##)]};@remit [v(room)]=Computer>[ansi(hr,GAME OVER)];&status me=0
+&BOOTPLR Control Console=$pboot *:@swi [isdbref([num(*[v(0)])])]_[inlist([pinzone(#5077)],[num(*[v(0)])])]=0_*,{@pemit %#=Invalid Player.},1_0,{@pemit %#=That player is not currently in this game.},1_1,{@pemit [num(*[v(0)])]=[ansi(hr,You are booted from the game.)];@fo [num(*[v(0)])]=EXIT GAME}
+&FANN Control Console=@remit [v(room)]=Computer>[v(0)]
+&ANNOUNCE Control Console=$announce *=*:@swi [ucstr([v(0)])]=GAME,{@zemit #5077=Announcement>%n says, "[v(1)]"},LOBBY,{@zemit #6272=Announcement>%n says, "[v(1)]"},ALL,{@zemit #5077=Announcement>%n says, "[v(1)]";@zemit #6272=Announcement>%n says, "[v(1)]"},{@pemit %#=Please use GAME, LOBBY, or ALL}
+&BEGINGAME Control Console=$begin game:@lock #5083=#5083;@dolist [lcon(#6520)]={@tr #6520/ENGAGE=[##]};&status me=1
+&STATUS Control Console=0
+&NEWGAME Control Console=$newgame:@unlock #5083;@wipe [v(data)];&plist #6248;@remit #5079=The Airlock unlocks with a swooshing sound.
+@SEMAPHORE Control Console=
+@set Control Console/SEMAPHORE=no_inherit locked
+&PAUSEGAME Control Console=$Pause Game:&status me=0;@dolist [zrooms(#5077)]={@remit [##]=Computer>[ansi(hr,Game Paused.)]}
+&LOCPLR Control Console=$plocs:@pemit %#=[ansi(hc,[repeat(~,79)])]%r[u(fitto,Name,30)] [u(fitto,Location,30)] [u(fitto,Shots,5)] [u(fitto,Hits,5)]%r[repeat(~,30)] [repeat(~,30)] [repeat(~,5)] [repeat(~,5)][iter([pinzone(#5077)],%r[u(fitto,[name([##])],30)] [u(fitto,[name([loc([##])])],30)] [u(fitto,[get([v(data)]/Score[##])],5)] [u(fitto,[ifelse([hasattr([v(data)],Hits[##])],[get([v(data)]/Hits[##])],0)],5)])]%r[ansi(hc,[repeat(~,79)])]
+Huh?  (Type "help" for help.)
+@create Lobby Zone
+@link Lobby Zone = #5073
+@parent Lobby Zone=#2443
+@lock/Zone Lobby Zone==#5070
+@power Lobby Zone = See_All
+&ZONENAME Lobby Zone=WarGames Lobby
+&SALERT Lobby Zone=[switch(get(#5187/STATUS),1,Game In Progress.,Waiting for new players.)]
+&ALERTS Lobby Zone=GIP
+&SHIPNAME Lobby Zone=Wargames Arena
+@create Weapons Locker
+@link Weapons Locker = #5079
+@lock/Basic Weapons Locker==#5070
+@set Weapons Locker = OPAQUE
+@set Weapons Locker = WIZARD
+@DESCRIBE Weapons Locker=Real Weapons are not allowed inside the WarGames arena, as they have a tendancy to fire as well as the Wargames Tag Phaser.  Because of this, this locker was created.%rTo store a weapon, type 'STORE <Weapon> IN LOCKER'%rTo retrieve any and all weapons you put in the locker, type 'RETRIEVE GUNS'%rOnly you can retrieve your own weapons.
+@set Weapons Locker/DESCRIBE=no_command visual
+&RETRGUN Weapons Locker=$retrieve guns:@pemit %#=[switch(hasattr(me,STO_%#),0,You don't have any weapons stored in this locker.,1,[squish(iter(v(STO_%#),tel(##,%#)))][oemit(%#,%n retrieves %p weapon[switch(words(v(sto_%#)),1,,s)] from the locker.)]You retrieve your weapon[switch(words(v(sto_%#)),1,,s)] from the locker.[wipe(me/STO_%#)])]
+&STOREGUN Weapons Locker=$store * in locker:@pemit %#=[switch(setr(1,locate(%#,%0,Ti)),#-1,I don't see that here.,#-2,I don't know which one!,[switch(hasattr(me,STO_%#),1,set(me,STO_%#:[v(STO_%#)] %q1),set(me,STO_%#:%q1))][tel(%q1,me)][oemit(%#,%n stores %p [name(%q1)] in the Weapons Locker.)]You store your [name(%q1)] in the Weapons Locker.)]
+&STO_#6958 Weapons Locker=#7760
+&STO_#2349 Weapons Locker=#7500

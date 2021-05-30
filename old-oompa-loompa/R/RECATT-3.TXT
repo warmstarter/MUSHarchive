@@ -1,0 +1,9 @@
+@create Class And Attach Object
+@link Class And Attach Object=#2
+@set Class And Attach Object=WIZARD
+@set Class And Attach Object=!NO_COMMAND
+@set Class And Attach Object=OPAQUE
+@set Class And Attach Object=INHERIT
+&CLASS Class And Attach Object=$@class *=*/*:@swi [and(hastype(%#,player),hastype([num(*%0)],player))]=1,{@swi [num(*%0)]=#-1,@pemit %#=There is no such player.,{@swi [get(%#/rank)]=>10,{@swi [get(%#/rank)]=>[get(num(*%0)/rank)],{&class [num(*%0)]=%1;&rank [num(*%0)]=%2;@dolist class rank=@lock *%0/##=Rank:>10;@pemit %#=[name(*%0)] has been reclassed: %1 - <%2>;@pemit [num(*%0)]=You have been reclassed: %1 - <%2>.},@pemit %#=You have no authority to do that.},@pemit %#=You have no authority to do that.}},@pemit %#=I don't know who you mean.
+&ATTACH Class And Attach Object=$@attach *=*/*:@swi [num(*%0)]=#-1,@pemit %#=That player does not exist.,{@swi [rank(%#)]=>10,{@swi [rank(%#)]=>[rank(*%0)],{&organization [num(*%0)]=%1;&division [num(*%0)]=%2;@dolist organization division=@lock *%0/##=Rank:>11;@pemit %#=[name(*%0)] has been attached to: <%1 - %2>;@pe [num(*%0)]=You have been attached to: <%1 - %2>.},@pe %#=You do not have the authority to do that.},@pemit %#=You do not have the authority to do that.
+&EMPIRE Class And Attach Object=$@empire *=*:@swi [hasflag(%#,WIZARD)]=1,{@switch [hastype(*%0,PLAYER)]=1,{&empire *%0=%1;@lock *%0/empire=Rank:>16;@pemit/silent *%0=You have been added to the `%1' Empire.;@pemit/silent %#=You have added [name(*%0)] to the `%1' Empire.},{@pemit/silent %#=You can only set empire on players.}},{@pemit/silent %#=You must be a wizard.}

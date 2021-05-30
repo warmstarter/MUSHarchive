@@ -1,0 +1,7 @@
+@create Notebook Parent Object
+@link Notebook Parent Object = #3954
+@lock/Basic Notebook Parent Object=#2940
+@set Notebook Parent Object = !NO_COMMAND
+&CMD_READ Notebook Parent Object=$sbread *:@swi 1=[and(isnum(%0),lte(%0,100),hasattr(me,PAGE_[%0]))],{@pe %#=Page %0:%r[get(me/PAGE_[%0])]},{@pe %#=Not a valid page number.}
+&CMD_WRITE Notebook Parent Object=$sbwrite *=*:@swi 1=[and(isnum(%0),lte(%0,100),not(hasattr(me,PAGE_[%0])))],{&PAGE_[%0] me=%1;@pe %#=Page %0:%r%1},{@pe %#=Not a valid page number.}
+@DESCRIBE Notebook Parent Object=Type 'sbwrite page#=message' to write a page.%rType 'sbread page#' to read it.%r%rThere are 100 pages and you cannot write on a page more than once.%rAn append command may be added at a future date.%r%rCreated by Speckled Staff@Tara'Nae MU*%rtaranae.godlike.com 3896%r

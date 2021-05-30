@@ -1,0 +1,24 @@
+@@ -*- mushcode -*- $Id: calendar.txt 1.2 Wed, 02 Aug 2000 22:39:31 -0700 shawnw $
+@@ Quote this file in, and look at the object it creates.
+@create Calendar Parent
+@lock/Basic Calendar Parent==me
+@lock/Link Calendar Parent==#0
+@set Calendar Parent = LINK_OK
+@set Calendar Parent = VISUAL
+@set Calendar Parent = !NO_COMMAND
+&CALENDAR_CMD Calendar Parent=$calendar for *:@pemit %#=switch(grab(v(months-fullname), first(%0)*), , That's not a month!, u(draw_calendar, left(#$, 3), if(rest(%0), rest(%0), last(time()))))
+&CURRENT_CALENDAR Calendar Parent=s(\[u\(draw_calendar\, [edit(elements(time(), 2 5), %b, \,)]\)\])
+&DAYS Calendar Parent=31 28 31 30 31 30 31 31 30 31 30 31
+@DESCRIBE Calendar Parent=u(current_calendar)%r%rTo see the calendar for any given month, try 'calendar for <name of month> \[<year>\]'. [switch(%!, #225, %rTo use the calendar-drawing routine directly\, u\(#225/draw_calendar\, <month as three-letter abbreviation>\, <year>\)\, or u\(#225/current_calendar\))
+@set Calendar Parent/DESCRIBE=no_command visual
+&DRAW_CALENDAR Calendar Parent=switch(0, gte(%1, 1970), Year must be after 1969., member(v(months), %0), %0 isn't a month!, center(ansi(hu, grab(v(months-fullname), %0*) %1), 29)%r[repeat(-, 29)]%r|[edit(v(weekdays), %b, |)]|%r[repeat(-, 29)]%r|[iter(u(get_daylist, %0, %1), rjust(switch(##, X, %b, ##), 3)[if(eq(0, mod(#@, 7)), |%r[repeat(-, 29)]%r)], , |)]|[repeat(%b%b%b|, sub(7, member(v(weekdays), u(get_enddow, %0, %1))))]%r[repeat(-, 29)])
+&GET_DAYLIST Calendar Parent=repeat(X%b, dec(member(Sun Mon Tue Wed Thu Fri Sat, u(get_startdow, %0, %1))))[lnum(1, extract(v(days), member(v(months), %0), 1))][if(cand(match(%0, Feb), u(is_leapyear, %0, %1)), %b29)]
+&GET_ENDDOW Calendar Parent=first(convsecs(convtime(Mon %0 [switch(%0, Feb, if(u(is_leapyear, %0, %1), 29, 28), extract(v(days), member(v(months), %0), 1))] 00:00:01 %1)))
+&GET_STARTDOW Calendar Parent=first(convsecs(convtime(Mon %0 01 00:00:01 %1)))
+&IS_LEAPYEAR Calendar Parent=switch(1, neq(mod(%1, 4), 0), 0, eq(mod(%1, 400), 0), 1, eq(mod(%1, 100), 0), 0, 1)
+&LICENSE Calendar Parent=This object (Raevnos's Calendar Parent) is released under the Gnu Public License. A copy of that license is avaliable at [tagwrap(a, href="http://www.gnu.org/copyleft/gpl.html", http://www.gnu.org/copyleft/gpl.html)]
+&MONTHS Calendar Parent=Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec
+&MONTHS-FULLNAME Calendar Parent=January Febuary March April May June July August September October Novemeber December
+&WEEKDAYS Calendar Parent=Sun Mon Tue Wed Thu Fri Sat
+
+

@@ -1,0 +1,18 @@
+@create Graphic bar function
+@lock/Basic Graphic bar function==me
+@lset Graphic bar function/Basic=no_inherit
+@lock/Parent Graphic bar function=!#0
+@lset Graphic bar function/Parent=no_inherit
+@lock/Use Graphic bar function=$#9001
+@lset Graphic bar function/Use=no_inherit
+@set Graphic bar function = LINK_OK
+@set Graphic bar function = !NO_COMMAND
+@set Graphic bar function = VISUAL
+&BAR.CREDITS Graphic bar function=Dandy@MUSH April 2002
+&BAR.THEME_DEFAULT Graphic bar function='r'r'r'y'y'y'y'g'g'b'b'b'**
+&BAR.THEME_DRAGON Graphic bar function='r'r'r'r'y'y'y'y'y'y'y'y'y'g'g'g'g'g'g'*i
+&BAR.THEME_MANA Graphic bar function='m'm'm'c'c'c'b'b'b'i'i'i
+&BAR.VERSION Graphic bar function=0.2
+@DESCRIBE Graphic bar function=-----bar function 0.2---------------[ansi(Wrh,Easy Colored Graphic Bars)]-----------------%rYou can @parent or @decompile the object.%rIf the fonction is set global \(help @function\) and named 'bar':%r[space(6)][ansi(h, bar \(<value> \[,<max>|100 \[,<theme>\]\] \) )]%r<value> %bthe value of the bar. \(best in range 0-15, but configurable\)%r<max> %b %bthe maximum the <value> could have. The malus \(max-value\) is drawed.%r100[space(6)]used for percent number.%r<theme> %bname of a custom theme. \(colors, skin\)%r%rDefault: [u(me/fun.bar,8)] bar\(8\) or bar\(8,8\) [u(me/fun.bar,8,10)] bar\(8,10\) bar\(76,100\)%r%rDwarf: %b [u(me/fun.bar,11)] %b bar\(11\), bar(11,,dwarf) or bar\(11,11,dwarf\)%rMana: %b %b[u(me/fun.bar,8,18,mana)] %b bar\(5,17,mana\) malus number.%rDragon %b [u(me/fun.bar,35,38,dragon)] %b bar\(35,38,dragon\) box+malus%r%r- malus drawed: "|" or "-n" \(wounds,not full...\)%r- an end-box can show a rest-number. \(small bar/bonus/big monster\)%r- creating a theme:%r&bar.theme_NEWTHEME bar='#'#'#'#'#'#'#'#...%rwhere # are each tag: %rbar element color: y=yellow, i=inverse, b=blue... \(help ansi\(\)%rbar custom element: +g !r ... \(to insert in the function too\)%rbar end-box: **=default *i=inverse \(BoxNumber=Value-NumberOfTags\)%r%r@mail dandy=for more and bugs.%r-------------------------------------------------------------------------------
+@set Graphic bar function/DESCRIBE=no_command visual
+&FUN.BAR Graphic bar function=[setq(t,[switch([secure(%2)],,default,[secure(%2)])])][setq(0,[secure(%0)])][setq(m,[switch([isnum(secure(%1))],1,[secure(%1)],0,%q0)])][switch(%qm,100,[setq(m,10)][setq(0,[add(div(%q0,10),[switch(remainder(%q0,10)],<5,0,1)])])])][edit([extract([v(bar.theme_[%qt])],1,[add(%q0,1)],')],'g+,[ansi(Gx,+)],'r!,[ansi(Rx,!)],'r,[ansi(Rx,|)],'c,[ansi(Cx,|)],'y,[ansi(Yx,|)],'b,[ansi(Bx,|)],'m,[ansi(Mx,|)],'g,[ansi(Gx,|)],'w,[ansi(Wx,|)],'x,[ansi(Xw,|)],'i,[ansi(i,|)],'**,[ansi(Mxh,[sub(%q0,11)])],'*i,[ansi(ih,[sub(%q0,11)])],'custom,CustomAnsi)][edit([switch([sub(%qm,%q0)],1,p,2,pp,3,ppp,4,pppp,5,ppppp,6,pppppp,7,ppppppp,8,pppppppp,9,ppppppppp,>9,r)],p,[|],r,[ansi(hr,-[sub(%qm,%q0)])])]

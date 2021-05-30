@@ -1,0 +1,24 @@
+@create Pairs Object (PO)
+
+@set Pairs Object (PO)=!no_command
+
+&DO_PAIRS Pairs Object (PO)=$+pairs *: @pemit %#=[setq(0,locate(%#,first(%0,/),*))][switch(controls(%#,%q0),#-1*,I don't see that here.,0,Permission denied.,[setq(1,u(SECURE_ATTR_FN,%#,lattr(%q0/[switch(%0,*/*,rest(%0,/),*)])))]Pairs Check for [name(%q0)]\(%q0[flags(%q0)]\)[map(PAIRS_FN,sort(%q1))])]
+&DO_PAIRS_FIND Pairs Object (PO)=$+pairs/find */*: @pemit %#=[setq(0,locate(%#,%0,*))][switch(%q0:[visible(%#,%q0)]:[hasattr(%q0,%1)],#-1:*:*,I don't see thathere.,#-2:*:*,I'm not sure which one you mean.,*:0:*,Permission denied.,*:*:0,That attribute does not exist.,u(PAIRMATCH_FN,get(%q0/%1)))]
+&PAIRS_FN Pairs Object (PO)=%r%b%b[ljust(%0:,28)] [setq(2,get(r(0)/%0))]%b [ljust(\{ \}: [u(COUNT_CHAR_FN,r(2),\{)]/[u(COUNT_CHAR_FN,r(2),\})],12)] %b [ljust(\[ \]: [u(COUNT_CHAR_FN,r(2),\[)]/[u(COUNT_CHAR_FN,r(2),\])],12)] %b [ljust(\( \): [u(COUNT_CHAR_FN,r(2),\()]/[u(COUNT_CHAR_FN,r(2),\))],12)]
+&PAIRMATCH_FN Pairs Object (PO)=[setq(4,v(PAREN0))][setq(5,v(PAREN1))][setq(6,v(BRACKET0))][setq(7,v(BRACKET1))][setq(8,v(BRACE0))][setq(9,v(BRACE1))][setq(2,Go)][foreach(STACKPAIR_FN,%0)][switch(%q2:%q3,Go:,No matching errors encountered.,Go:*,Match ended prematurely. Expected to pair for '[revwords(%q3)]'.,Match stopped on error '%q3' when expecting match to '%q0':%r%q1)]
+&PAREN0 Pairs Object (PO)=(
+&PAREN1 Pairs Object (PO)=)
+&BRACKET0 Pairs Object (PO)=[
+&BRACKET1 Pairs Object (PO)=]
+&BRACE0 Pairs Object (PO)={
+&BRACE1 Pairs Object (PO)=}
+&STACKPAIR_FN Pairs Object (PO)=[switch(%q2,Go,[switch(%0,%q4,setq(3,%q4 %q3),%q5,u(PM_PAREN_FN,%q3),%q6,setq(3,%q6 %q3),%q7,u(PM_BRACKET_FN,%q3),%q8,setq(3,%q8 %q3),%q9,u(PM_BRACE_FN,%q3))][setq(1,%q1%0)])]
+&PM_PAREN_FN Pairs Object (PO)=[switch(first(%0),%q4,[setq(3,rest(%0))],[setq(2,Error)][setq(3,%q5)][setq(0,first(%0))])]
+&PM_BRACKET_FN Pairs Object (PO)=[switch(first(%0),%q6,[setq(3,rest(%0))],[setq(2,Error)][setq(3,%q7)][setq(0,first(%0))])]
+&PM_BRACE_FN Pairs Object (PO)=[switch(first(%0),%q8,[setq(3,rest(%0))],[setq(2,Error)][setq(3,%q9)][setq(0,first(%0))])]
+&SECURE_ATTR_FN Pairs Object (PO)=[switch(hasflag(%0,wizard),1,%1,setdiff(%1,v(WIZONLY_ATTRS)))]
+&WIZONLY_ATTRS Pairs Object (PO)=Comment Last Lastsite Timeout Quota Rquota WHEN_CREATED
+&COUNT_CHAR_FN Pairs Object (PO)=[sub(words(escape(%0),%1),1)]
+
+
+

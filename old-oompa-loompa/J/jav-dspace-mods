@@ -1,0 +1,109 @@
+@@ Javelin's mods to Josh Bell's dspace
+@@
+@@ Mods to simplify dspace and remove race conditions
+@@ We ditch all recycling, and we use variable exits instead of teleports.
+@@
+@@ To use:
+@@ 1.  Upload Josh Bell's dynamic space 2.8 and optional map code as
+@@     per his instructions
+@@ 2.  Upload this file (by the same player)
+@@
+@@ No warranty expressed or implied, and no support will be provided
+@@ for this code. If it breaks, it's on you to fix it.
+@@ But I use it.
+@@
+
+
+@listen [xget(v(parent-room),ARRAY)]
+&recycle [xget(v(parent-room),ARRAY)]
+@amhear [xget(v(parent-room),ARRAY)]
+
+
+@@ ALLOC_ROOM and TEL_TO_ROOM must now return the room dbref.
+
+&ALLOC_ROOM [xget(v(parent-room),EXIT_PARENT)]=
+	[setq(0,dig(ulocal(GETNAME,%3,%4,%5)))]
+	[set(%va,num-%3.%4.%5:%q0)]
+	[set(%q0,xcoor:%3)]
+	[set(%q0,ycoor:%4)]
+	[set(%q0,zcoor:%5)]
+	[set(%q0,floating)]
+	[set(%q0,!no_command)]
+	[setq(1,ulocal(GETZONE,%3,%4,%5))]
+	[setq(2,zone(%q0,%q1))]
+	[set(%q0,ALEAVE:[trim(after(xget(%q1,ALEAVE),@@))])]
+	[set(%q0,STARTUP:[xget(%q1,STARTUP)])]
+	[setq(3,parent(%q0,ulocal(GETPARENT,%3,%4,%5)))]
+	[set(%q0,DARK_EXITS:[ulocal(GETDARKEXITS,%3,%4,%5)])]
+	[set(%q0,BLOCKED_EXITS:[ulocal(GETBLOCKEDEXITS,%3,%4,%5)])]
+	%q0
+
+
+&TEL_TO_ROOM [xget(v(parent-room),EXIT_PARENT)]=
+	[setq(0,get(%va/num-%3.%4.%5))]
+	[remit(%q0,%2 [ulocal(ODROP,%0)])]
+	%q0
+
+&DESTINATION [xget(v(parent-room),EXIT_PARENT)]=
+	[setq(7,u(DXNEW,u(XNEW,%L)))]
+	[setq(8,u(DYNEW,u(YNEW,%L)))]
+	[setq(9,u(DZNEW,u(ZNEW,%L)))]
+	[ulocal(if(hasattrval(%va,NUM-%q7.%q8.%q9),TEL_TO_ROOM,ALLOC_ROOM),
+                %#,%l,%N,%q7,%q8,%q9)]
+
+@fail [xget(v(parent-room),EXIT_PARENT)]=[u(fake_fail)]
+@lock [xget(v(parent-room),EXIT_PARENT)]=mylock/1
+&mylock [xget(v(parent-room),EXIT_PARENT)]=
+	[setq(7,u(DXNEW,u(XNEW,%L)))]
+	[setq(8,u(DYNEW,u(YNEW,%L)))]
+	[setq(9,u(DZNEW,u(ZNEW,%L)))]
+	[and(u(INRANGE,%q7,%q8,%q9),u(PASS_LOCK))]
+
+@@ Copy the @lock to everything that parents from this
+@@ And make 'em variable
+
+@dol lsearch(me,parent,[xget(v(parent-room),EXIT_PARENT)])= {
+	@lock ##=mylock/1;
+	@link ##=variable;
+	@chown ##=me;
+	@chzone ##=none;
+	@set ##=!halt
+ 	}
+
+&dummy [xget(v(parent-room),EXIT_PARENT)]
+&afailure [xget(v(parent-room),EXIT_PARENT)]
+
+
+@ALEAVE [v(parent-room)]=@@ @destroy 
+	[switch(0,[words([lcon(me)] [lexits(me)])],
+		  [wipe(%va/NUM-[v(xcoor)].[v(ycoor)].[v(zcoor)])]me,#-1)]
+
+@dol lattr([xget(v(parent-room),ARRAY)]/NUM*)=@switch 1=
+	[setq(0,get([xget(v(parent-room),ARRAY)]/##))]
+	[not(hasattr(%q0,ALEAVE))],,
+	[strmatch(xget(%q0,ALEAVE),*@@*)],,
+	@cpattr [v(parent-room)]/ALEAVE=%q0/ALEAVE
+
+&CMD_TELTO [v(parent-room)]= $telto * * *: @pemit [v(vt)]=TELEPORT %# to 
+	[u(switch(0,ulocal(INBOUNDS,%0,%1,%2),DUMMY,
+		hasattrval(%va,NUM-%0.%1.%2),ALLOC_ROOM,
+		TEL_TO_ROOM),%#,%L,%N,%0,%1,%2)]
+
+&DUMMY [v(parent-room)]=[pemit(%0,Coordinates out of bounds.)]#-1
+
+@@ 
+@@ Dynamic Teleporter
+@@
+
+@fo me=&dyn-tele me=[create(Dynamic Teleporter,10)]
+@fo me=@vt [v(parent-room)]=[v(dyn-tele)]
+@fo me=@vp [v(dyn-tele)]=[v(parent-room)]
+@link [v(dyn-tele)] = me
+@lock/Basic [v(dyn-tele)]= =me
+@lock/listen [v(dyn-tele)]=goodparent/1
+&goodparent [v(dyn-tele)]=[t(member(lparent(%#),v(vp)))]
+@set [v(dyn-tele)] = NO_COMMAND
+@set [v(dyn-tele)] = MONITOR
+@power [v(dyn-tele)] = Tport_Anything
+&LIST_TELTO [v(dyn-tele)]=^TELEPORT * to *: @tel %0=%1
+

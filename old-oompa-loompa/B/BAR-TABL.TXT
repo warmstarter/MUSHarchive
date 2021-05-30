@@ -1,0 +1,33 @@
+@create Table And Bar Parent
+@link Table And Bar Parent=[owner(me)]
+@lock Table And Bar Parent=*[owner(me)]
+@set Table And Bar Parent=LINK_OK
+@set Table And Bar Parent=VISUAL
+@set Table And Bar Parent=NO_COMMAND
+&CHUG Table And Bar Parent=$chug:@swi [hasattr(me,charges_%#)]=0,{@pemit %#=Sorry but you don't HAVE a drink.},1,{th [set(me,charges_%#:0)][switch(u(charges_%#),<1,[wipe(me/charges_%#)][wipe(me/drink_%N)][pemit(%#,You finish off your drink)][oemit(%L/%#,%N finishes off %p drink.)],[oemit(%l/%#,%N finishes off %p [u(drink_%N)])][pemit(%#,You finish off your [u(drink_%N)])])]}
+&HASLEFT Table And Bar Parent=^* has left.:@swi [hasattr(me,sitting_%#)]=1,{&sitting_%# me;&drink_%N me;@pemit %#=Next time it would be more polite to STAND first!},{&drink_%# me}
+&HELPER Table And Bar Parent=$+bhelp:@pemit %#=[repeat(-,78)]%r[center(Bar Room Help - Our Aim Is To Get You Drunk,78)]%r[repeat(-,78)]%r[ljust(sip,25)]Sips your drink%r[ljust(menu,25)]Shows you you choices for getting wasted.%r[ljust(order <drink>,25)]Orders a drink for you.%r[ljust(drink *,25)]Take a normal gulp of your drink.%r[ljust(tables,25)]Displays available tables to sit on.%r[ljust(sit with <person>,25)]Join <person> and you sit at their table.%r[ljust(sit,25)]Lets you sit at a random table%r[ljust(sit at <table>,25)]Lets you sit at a specific table%r[ljust(stand,25)]Lets you stand. Don't pass out.%r[ljust(tt <msg>,25)]Talks to people only at your table.%r[ljust(twho,25)]Displays who else is at your table.%r[repeat(-,78)]%r
+&ADDDRINK Table And Bar Parent=+addbev *:&list here=[setunion(get(here/list)],[capstr(%0)])];@pemit %#=Okay, I hope that drink sells. Your beverage has been added to the menu.
+@DESCRIBE Table And Bar Parent=To set up these tables, just parent a room to this. Set up tables by typing '&desc_table_<name> room=<small description>'.
+&SIP Table And Bar Parent=$sip:@swi [hasattr(me,charges_%#)]=0,{@pemit %#=Sorry but you don't HAVE a drink.},1,{th [set(me,charges_%#:[sub(u(charges_%#),3)])][switch(u(charges_%#),<1,[wipe(me/charges_%#)][wipe(me/drink_%N)][pemit(%#,You finish off your drink)][oemit(%L/%#,%N finishes off %p drink.)],[oemit(%l/%#,%N takes a small sip from %p [u(drink_%N)])][pemit(%#,You take a sip from your [u(drink_%N)])])]}
+&MENU Table And Bar Parent=$menu:@pemit %N=Today's Menu contains:%r[get(me/list)]
+&LIST Table And Bar Parent=BEER WINE WATER WHISKEY SOUTHERN_COMFORT
+&ORDER Table And Bar Parent=$order *:@swi [hasattr(me,drink_%N)]=0,{@pemit %N= The Bartender whips up a %0 and hands it to you.;@oemit %N = The Bartender whips up a %0 and hands it to %N.;&drink_%N me=%0;&charges_%# me=10},{@pemit %#=%rHave a drinking problem? Two hands and only one mouth? You already HAVE a drink!%r}
+&DRINK Table And Bar Parent=$drink:@swi [hasattr(me,charges_%#)]=0,{@pemit %#=Sorry but you don't HAVE a drink.},1,{th [set(me,charges_%#:[sub(u(charges_%#),3)])][switch(u(charges_%#),<1,[set(me,charges_%#:)][set(me,drink_%N:)][pemit(%#,You finish off your drink)][oemit(%L/%#,%N finishes off %p drink.)],[oemit(%l/%#,%N takes drink from %p [u(drink_%N)])][pemit(%#,You take a drink from your [u(drink_%N)])])]}
+@ALEAVE Table And Bar Parent=@select [u(hasattr,sitting_%#)]=1,{&table_[v(sitting_%#)] me=[setdiff(v(table_[v(sitting_%#)]),%#)];&sitting_%# me;@pemit %#=Next time it would be more polite if you would STAND before leaving.};@sel [hasattr(me,drink_%N)]=1,{@pemit %#=You finish off your drink as you leave.;@emit %N finishes off %p drink before leaving.;&charges_%# me;&drink_%N me}
+@ADISCONNECT Table And Bar Parent=@select [u(hasattr,sitting_%#)]=1,{&table_[v(sitting_%#)] me=[setdiff(v(table_[v(sitting_%#)]),%#)];&sitting_%# me}
+&HASATTR Table And Bar Parent=[switch(v(%0),,0,1)]
+&TLIST Table And Bar Parent=[ucstr(%0)] -- [v(desc_table_%0)]%rSeated: [switch(strlen(v(table_%0)),>0,iter(v(table_%0),name(##)),* Empty *)]
+&TABLES Table And Bar Parent=$tables:@pemit %#=[repeat(=,79)]%R[center(TABLE VIEW,79)]%R[repeat(-,79)][iter(sort(lattr(me/desc_table_*)),%r%r[u(tlist,after(after(##,_),_))])]%R[repeat(=,79)]
+&SIT_WITH Table And Bar Parent=$sit with *:@select [u(hasattr,sitting_%#)][not(not(member(lcon(me),num(%0))))][u(hasattr,sitting_[num(%0)])]=00?,{@oemit me/%#=%N scans the tables.;@pemit %#=You can't find [capstr(lcstr(%0))] the room.},0?0,{@pemit %#=[name(%0)]is not sitting at any table.},011,{@tr me/sit=%#,v(sitting_[num(%0)])},{@pemit %#=You are already sitting at a table.}
+&SIT Table And Bar Parent=@pemit %0=You sit at the %1 table.;@pem/list setdiff(lcon(me),setunion(v(table_%1),%0))=[name(%0)] sits at the %1 table.;@pem/list v(table_%1)=[name(%0)] sits at your table.;&table_%1 me=setunion(v(table_%1),%0);&sitting_%0 me=%1
+&SIT_RAND Table And Bar Parent=$sit:@select [u(hasattr,sitting_%#)]=0,{@tr me/sit=%#,[extract(iter(lattr(me/desc_table_*),after(after(##,_),_)),add(rand(words(lattr(me/desc_table_*))),1),1)]},{@pemit %#=You are already sitting at a table.}
+&SIT_AT Table And Bar Parent=$sit at *:@select [u(hasattr,desc_table_%0)][u(hasattr,sitting_%#)]=10,{@tr me/sit=%#,%0},0?,{@pemit %#=That table does not exist.},{@pemit %#=You are already sitting at a table.}
+&STAND Table And Bar Parent=$stand:@select [u(hasattr,sitting_%#)]=0,{@pemit %#=You are already standing.},{&table_[v(sitting_%#)] me=[setdiff(v(table_[v(sitting_%#)]),%#)];&sitting_%# me;@pemit %#=You stand up.;@oemit me/%#=%N stands up.}
+&TALK Table And Bar Parent=$tt *:@switch [u(hasattr,sitting_%#)]=1,{th [iter(v(table_[v(sitting_%#)]),switch(member(u(##/langs),u(%#/curr_lang)),>0,[pemit(##,At your table, [u(talk2,%N,%0)].)],[pemit(##,%N says something at your table in [u(%#/curr_lang)].)]))]},{@pemit %#=You start to talk to your table.. Then realize you aren't at one!}
+&TALK2 Table And Bar Parent=[switch(mid(%1,0,1),:,{%0 [mid(%1,1,strlen(%1))]},;,{%0[mid(%1,1,strlen(%1))]},{%0 says, "%1" in [u(%#/curr_lang)]})]
+&TWHO Table And Bar Parent=$twho:@select [u(hasattr,sitting_%#)]=0,{@pem %#=You are not sitting at a table. Sit down first.},@pemit %#=Sitting with you are: [setdiff(iter(v(table_[v(sitting_%#)]),name(##)),%n)].
+&HAS_DISCONNECTED Table And Bar Parent=^* has disconnected.:@select [u(hasattr,sitting_%#)]=1,{&table_[v(sitting_%#)] me=[setdiff(v(table_[v(sitting_%#)]),%#)];&sitting_%# me}
+&CLEAR_TABLES Table And Bar Parent=$clear tables:@switch [member(v(auth),%#)]=0,,{@pemit %#=Tables Cleared!;@dol lattr(me/TABLE_*)=&## me=;@dol lattr(me/sitting_*)=&## me=}
+&THANKS Table And Bar Parent=Table code thanks to Trillian of SW1. I'm lazy today. Other code compliments of Shathis.
+&ADDTABLE Table And Bar Parent=$addt *=*:&desc_table_%0 %l=%1;@pemit %#=Added: %0%R%R%1

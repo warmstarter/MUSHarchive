@@ -1,0 +1,35 @@
+@create Builder Helper
+@link Builder Helper=[owner(me)]
+@lock Builder Helper==[owner(me)]
+@set Builder Helper=ROYALTY
+@set Builder Helper=INHERIT
+@set Builder Helper=OPAQUE
+@set Builder Helper=WIZARD
+@set Builder Helper=SAFE
+@set Builder Helper=!NO_COMMAND
+&BUILD Builder Helper=$*-*:@force [owner(me)]=@dig %1={[escape(first(get(builder/%0)))]},{[escape(rest(get(builder/%0)))]};@trigger me/%0msgs
+&N Builder Helper=North;n South;s
+&NMSGS Builder Helper=@force [owner(me)]={@parent North=#37;North;@parent South=#37}
+&S Builder Helper=South;s North;n
+&W Builder Helper=West;w East;e
+&E Builder Helper=East;e West;w
+&U Builder Helper=Up;u Down;d
+&D Builder Helper=Down;d Up;u
+&SMSGS Builder Helper=@force [owner(me)]={@parent South=#37;South;@parent North=#37}
+&WMSGS Builder Helper=@force [owner(me)]={@parent West=#37;West;@parent East=#37}
+&EMSGS Builder Helper=@force [owner(me)]={@parent East=#37;East;@parent West=#37}
+&UMSGS Builder Helper=@force [owner(me)]={@parent Up=#37;Up;@parent Down=#37}
+&DMSGS Builder Helper=@force [owner(me)]={@parent Down=#37;Down;@parent Down=#37}
+@DESCRIBE Builder Helper=Just type (exit abbrev)>>(name of new room), where exit abbrev is n,s,w,e,nw,ne,sw,se,u, or d, and the room will be created with forward and backward exits, and succ, osucc, and odrop messages set on both exits.%rFeel free to modify exit names and success messages, or even add your own, just model after the ones that are already there.  All that needs to be set are an attribute for the names of the two exits (i.e.: N:North;n South;s), and an attribute for the success messages.%r%rNOTE: This object is (initially) set sticky and will go to room #0 if you drop it.%r%rPlease talk to Shiala if you find any bugs or have any comments.
+&NW Builder Helper=NorthWest;nw SouthEast;se
+&NE Builder Helper=NorthEast;ne SouthWest;sw
+&SW Builder Helper=SouthWest;sw NorthEast;ne
+&SE Builder Helper=SouthEast;se NorthWest;nw
+&NWMSGS Builder Helper=@force [owner(me)]={@parent NorthWest=#37;NorthWest;@parent SouthEast=#37}
+&NEMSGS Builder Helper=@force [owner(me)]={@parent NorthEast=#37;NorthEast;@parent SouthWest=#37}
+&SWMSGS Builder Helper=@force [owner(me)]={@parent SouthWest=#37;SouthWest;@parent NorthEast=#37}
+&SEMSGS Builder Helper=@force [owner(me)]={@parent SouthEast=#37;SouthEast;@parent NorthWest=#37}
+@SUCCESS Builder Helper=Before using this object you must first type the following commands:%r@chown [num(me)]=me%r@set [num(me)]=!halted%r@set [num(me)]=inherit%r@lock/use [num(me)]=me%r%rThen LOOK at it for instructions.
+@ACLONE Builder Helper=&owner me=%N;@lock me=*[v(owner)];@name me=[v(owner)]'s builder;@link me=#0;@set me=chown_ok;@set me=sticky;@pemit [v(owner)]=Your builder has been created.  Please type `get [num(me)]'
+&OWNER Builder Helper=[owner(me)]
+&CREDITS Builder Helper=I don't know who originally wrote the code, but if you ever find him (or her), thank them for writing this code!

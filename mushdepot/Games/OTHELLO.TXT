@@ -1,0 +1,59 @@
+@@ Object: Othello Game
+@@ Version: 1.2
+@@ Author: Jonathan A. Booth
+@@ E-mail: kamikaze@N0$PAMimsa.edu
+@@ Web: http://www.N0$PAMimsa.edu/~kamikaze/
+@@ (remove N0$PAM from hostnames to use them)
+@@ Date: Feb 20, 1999
+@@ Written for: PennMUSH 1.7.2 pl21
+@@ Author is willing to support: Yes
+@@
+@@ This script creates a little game board of othello. The rules
+@@ follow the standard othello rules, which are briefly explained in a
+@@ command on the object.
+@@ 
+@@ See the object's COPYRIGHT attribute for copyright information.
+@@
+@@ See the object's CHANGES attribute for a list of changes in each
+@@ version.
+@@
+
+@create Othello Game
+@set Othello Game = !NO_COMMAND
+&CHANGES Othello Game=V1.0 -- Initial release.|V1.1 -- Board now displayed to players after a chip is placed down.|V1.2 -- Bugfix: wasn't checking fun_cell_empty before letting a player play.
+&FUN_BOARD_PRINT Othello Game=[tagwrap(PRE,%b%b%b%b[iter(A B C D E F G H,##)]%b%b[u(FUN_BOARD_PRINT_I)]%r%b%b%b[ansi(wGh,+[repeat(-,15)]+)]%b[u(FUN_BOARD_PRINT_II)][iter(u(fun_board_get),%r[rjust(#@,2)]%b[ansi(wGh,|)][edit(map(FUN_CELL_PRINT,##,/),/,ansi(gGh,%b))][ansi(wGh,|)]%b[u(FUN_BOARD_PRINT_#@)],|)]%r%b%b%b[ansi(wGh,+[repeat(-,15)]+)]%b)]
+&FUN_CELL_PRINT Othello Game=switch(%0,0,ansi(wGh,.),1,ansi(wGh,w),2,ansi(xGh,B),!)
+@DESCRIBE Othello Game=u(fun_board_print)
+@set Othello Game/DESCRIBE=no_command visual
+&FUN_CELL_GET Othello Game=extract(extract(v(data_board),%1,1,|),%0,1,/)
+&FUN_CELL_SET Othello Game=set(me,data_board:[u(fun_cell_replace,%0,%1,%2)])
+&FUN_CELL_REPLACE Othello Game=replace(v(data_board),%1,replace(extract(v(data_board),%1,1,|),%0,%2,/),|)
+&FUN_BOARD_SETUP Othello Game=[set(me,data_board:[iter(lnum(%1),[edit(squish(repeat(0%b,%0)),%b,/)],%b,|)])][iter(4/4 4/5 5/5 5/4,u(fun_cell_set,before(##,/),after(##,/),inc(mod(#@,2))))]
+&FUN_BOARD_PRINT_1 Othello Game=It is [switch(v(data_turn),1,ansi(wXh,WHITE),2,ansi(xWh,BLACK),NOBODY)]'s turn.
+&FUN_SCORE_TOTAL Othello Game=words(graball(edit(edit(v(data_board),/,%b),|,%b),%0))
+&FUN_BOARD_PRINT_3 Othello Game=[name(first(v(DATA_PLAYERS)))]/[ansi(wXh,WHITE)]'s score is [u(fun_score_total,1)]
+&FUN_BOARD_PRINT_4 Othello Game=[name(rest(v(DATA_PLAYERS)))]/[ansi(xWh,BLACK)]'s score is [u(fun_score_total,2)]
+&FUN_SETUP Othello Game=[u(fun_board_setup)][set(me,DATA_TURN:1)]
+&FUN_BOARD_FULL Othello Game=eq(u(fun_score_total,0),0)
+&FUN_BOARD_PRINT_6 Othello Game=The game is [if(hasattr(me,DATA_BOARD),if(u(fun_board_full),over,in progress),waiting to be played)].
+&FUN_BOARD_PRINT_7 Othello Game=[if(cand(hasattr(me,DATA_BOARD),u(fun_board_full)),switch(sub(u(fun_score_total,1),u(fun_score_total,2)),0,{The game was a tie.},<0,{[ansi(xWh,BLACK)] won the game.},>0,{[ansi(wXh,WHITE)] won the game.},{Something bad happened to the game.}))]
+&FUN_CELL_EMPTY Othello Game=eq(u(FUN_CELL_GET,%0,%1),0)
+&FUN_CELL_VALID Othello Game=cand(gt(match(u(fun_cell_valid_list,%0,%1,%2),1),0),u(fun_cell_empty,%0,%1))
+&FUN_GAME_OTHER_PLAYER Othello Game=switch(%0,1,2,2,1,-1)
+&FUN_CELL_VALID_LIST Othello Game=[if(strlen(%5%6),if(cand(gte(%3,1),lte(%3,10),gte(%4,1),lte(%4,10),not(u(fun_cell_empty,%3,%4))),if(eq(u(fun_cell_get,%3,%4),%7),u(fun_cell_valid_list,%0,%1,%2,add(%3,%5),add(%4,%6),%5,%6,%7,cor(1,%8)),cand(%8,eq(u(fun_cell_get,%3,%4),%2))),0),iter(v(TOGGLE_DIRECTIONS),[setq(0,before(##,/))][setq(1,after(##,/))][u(fun_cell_valid_list,%0,%1,%2,add(%0,%q0),add(%1,%q1),%q0,%q1,u(fun_game_other_player,%2))]))]
+&TOGGLE_DIRECTIONS Othello Game=0/1 1/1 1/0 1/-1 0/-1 -1/-1 -1/0 -1/1
+&FUN_BOARD_FLIP Othello Game=[if(strlen(%5%6),if(cand(gte(%3,1),lte(%3,10),gte(%4,1),lte(%4,10),not(eq(u(fun_cell_get,%3,%4),%2))),u(fun_cell_set,%3,%4,%2)[u(fun_board_flip,%0,%1,%2,add(%3,%5),add(%4,%6),%5,%6)]),iter(u(fun_cell_valid_list,%0,%1,%2),if(##,setq(0,extract(v(TOGGLE_DIRECTIONS),#@,1))[setq(1,after(%q0,/))][setq(0,before(%q0,/))][u(fun_board_flip,%0,%1,%2,add(%0,%q0),add(%1,%q1),%q0,%q1)]))[u(fun_cell_set,%0,%1,%2)])]
+&FUN_GAME_SWITCH_TURN Othello Game=set(me,data_turn:[u(fun_game_other_player,v(DATA_TURN))])
+&COPYRIGHT Othello Game=Othello Game is Copyright Jonathan Booth (Rhysem@[M*U*S*H|SW2]), 1999. The author of this code takes no responsibility for it's sutibility or safety. If it breaks you get to keep all the pieces. This code is free for non-commercial use; contact me for info reguarding commercial use. You may redistribute this code provided it is unmodified and this COPYRIGHT notice is retained. Don't go and rip off the code as yours, that sucks and makes you suck. Bugs should be reported to me, as well as suggestions. Have fun with it, don't get too addicted. :)
+@set Othello Game/COPYRIGHT=no_command visual
+&FUN_BOARD_PRINT_I Othello Game=[ansi(h,Othello)], version 1.2. Type '[ansi(h,othello/help)]' for help.
+&CMD_PLAY Othello Game=$^(othello/)?play (a|b|c|d|e|f|g|h|i|j)(1|2|3|4|5|6|7|8|9|10)$:think setq(0,match(a b c d e f g h i j,lcstr(%2)));@sel u(fun_game_is_turn,%#):[ulocal(fun_cell_valid,%q0,%3,v(DATA_TURN))]=0:*,{@pemit %#=It's not your turn, or you're not playing the game.},*:0,{@pemit %#=That's not a valid position to place your chip down in.},1:1,{@pemit %#=You play at [ucstr(%2%3)].[ulocal(fun_board_flip,%q0,%3,v(DATA_TURN))][u(fun_game_switch_turn)]%r[u(FUN_BOARD_PRINT)];@oemit %#=%N plays at [ucstr(%2%3)].;@pemit setdiff(v(DATA_PLAYERS),%#)=[u(FUN_BOARD_PRINT)]},{@pemit %#=Utoh, error!}
+@set Othello Game/CMD_PLAY=regexp
+&FUN_GAME_IS_TURN Othello Game=strmatch(extract(v(DATA_PLAYERS),v(DATA_TURN),1),%0)
+&CMD_OTHELLO Othello Game=$^othello (.+)$:think setq(0,locate(me,secure(%1),P*));@sel u(fun_board_full):[isdbref(%q0)]=0:*,{@pemit %#=There is already a game of othello in progress. Please finish it first.},1:1,{@pemit %#=You begin a game of Othello with [name(%q0)]. You are [ansi(wXh,WHITE)].[u(fun_board_setup,8,8)];&data_players me=%# %q0;&data_turn me=1;@pemit %q0=%N has begun an Othello match with you. You are [ansi(xWh,BLACK)].},{@pemit %#=I don't see that player here.}
+@set Othello Game/CMD_OTHELLO=regexp
+&CMD_OTHELLO_ABORT Othello Game=$othello/abort:@sel strmatch(v(data_players),*%#*)=1,{@pemit %#=You abort the game of othello.;@wipe me/DATA_*},{@pemit %#=I don't think so.}
+&CMD_OTHELLO_HELP Othello Game=$othello/help:@pemit %#=[ansi(h,Othello board commands:)]%r%tothello/abort%t%tAbort a current game of othello%r%tothello/help%t%tThis help file%r%tothello/pass%t%tPass your turn becase you have no valid moves.%r%t%[othello/%]play <coord>%tPlay a chip in a game of othello at <coord>.%r%tothello/rules%t%tList the basic rules of othello.%r%tothello <player>%tPlay a game of othello with player.%r%rCoordinates in Othello are specified as a <letter><number> pair that is run together (nothing seperating them). For example, there is 'A1' and 'H8' at the upper-left and lower-rigth corners respectavly.%r%r[ansi(h,Othello)], version 1.2 is Copyright Jonathan Booth, 1999. See [num(me)]/COPYRIGHT for more info.
+&CMD_OTHELLO_RULES Othello Game=$othello/rules:@pemit %#=[ansi(h,Othello rules:)]%r%rThe rules of othello are simple. On your turn, you may place a chip down anywhere on the board that causes the chip you placed down, and another of your chips already on the board to make a sandwich of the other player's chips. This can occur in more than one direction at a time (even possibly every direction). When you place the chip, any chips in the "sandwich" are fliped to become your color.%r%rThe goal of the game is to end up with more chips of your color than your opponents, or to flip all of your opponents chips over so that they can no longer play (yes, it is possible).%r%rIf you should get in a position you can't play, you need to use the 'othello/pass' command to pass your turn to the other player. Note that it won't check to see if you have plays you could make, so check carefully before you use this command.
+&CMD_OTHELLO_PASS Othello Game=$othello/pass:@sel u(fun_game_is_turn,%#)=1,{@pemit %#=You pass your turn becuase you cannot play.[u(fun_game_switch_turn)];@oemit %#=%N passes %p turn up because %s has no moves.},{@pemit %#=It's not your turn, or you're not playing the game.}
+&FUN_BOARD_GET Othello Game=default(me/DATA_BOARD,iter(lnum(8),trim(repeat(0/,8),/),%b,|))

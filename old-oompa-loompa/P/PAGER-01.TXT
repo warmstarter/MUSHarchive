@@ -1,0 +1,25 @@
+@create Pager Parent
+@link Pager Parent=[owner(me)]
+@set Pager Parent=!NO_COMMAND
+@set Pager Parent=INHERIT
+@set Pager Parent=WIZARD
+&ADMIN_LIST Pager Parent=[owner(me)]
+&NEXT_PAGE Pager Parent=1
+&PAGE_PERSON Pager Parent=$pp *=*/*:@swi [t(member(u(page_list),%0,|))]=1, {@pe %#=You page [ansi(c,'%0')] with [ansi(hb,'%1')];&pages[get_eval(%0_pager/next_page)] [get(me/%0_pager)]=%1;&sender[get_eval(%0_pager/next_page)] [get(me/%0_pager)]=%#;@pe *%0=[ansi(hr,*BEEP* *BEEP* *BEEP*)] [ansi(yh,Page [get_eval(%0_pager/next_page)] is your current page.)];&subject[get_eval(%0_pager/next_page)] [get(me/%0_pager)]=%2;&list [get(me/%0_pager)]=[cat([get_eval(%0_pager/list)],[get_eval(%0_pager/next_page)])];&next_page [get(me/%0_pager)]=[add([get_eval(%0_pager/next_page)],1)]},{@pe %#=[ansi(hr,[capstr(%0)] isn't)] [ansi(hx,on the Page List.)]}
+@DESCRIBE Pager Parent=You see a black covered little electronic device.%rType [ansi(c,'PHELP')] for Pager Commands.%rThere [switch(words(lattr(me/pages*)),1,is currently 1 page.,are [words(lattr(me/pages*))] pages currently.)]
+&VIEW Pager Parent=$view:@pe %#={[u(line)]%r[center([name(me)],78)]%r[center(There [switch(words(lattr(me/pages*)),1,is 1 page,are [words(lattr(me/pages*))] pages)] currently.,78)]%r[u(line)]};@pe %#=[[rjust(#,2)] [u(markers)] [ljust(Subject,48)] [u(markers)] [ljust(Sender,10)] [u(markers)][ljust(Word Count,6)]];@dolist/notify [get_eval(me/list)]={@pe %#=[[rjust(##,2)] [u(markers)] [ljust(get_eval(me/subject##),48)] [u(markers)] [ljust(name(get_eval(me/sender##)),10)] [u(markers)][ljust([words(u(pages##))],6)]]};@wait me={@pe %#=[u(line)]}
+&LINE Pager Parent=[ansi(c,repeat(-,78))]
+&MARKERS Pager Parent=[ansi(hw,|)]
+@SEMAPHORE Pager Parent=7
+&SHOW_PAGE Pager Parent=$view *:@switch member(v(list),%0)=>0,{@pe %#=[u(line)]%r[centeR(Page #%0,78)]%r[u(line)]%r[ansi(hw,Subject:)] [u(subject%0)]%r[ljust({[ansi(hw,Sender:)]} [name(u(sender%0))],30)][ansi(hw,Word Count:)] [words(u(pages%0))]%r[u(line)]%r[space(5)][s(u(pages%0))]%r[u(line)]},{@pe %#=[ansi(hw,Pager:)] That's not an invalid choice.}
+&PA Pager Parent=[ansi(hw,Pager:)]
+&ERASE Pager Parent=$erase *:@switch or(gt(match(Get_eval(me/admin_list),%#),0),match(%#,get_eval(me/sender%0)))=1,{@switch pos(%0,get_eval(me/list))=#-1,{@pe %#=[u(pa)] Sorry, thats an invalid page number.},{&sender%0 me=;&subject%0 me=;&pages%0 me=;&list me=[delete(get(me/list),sub(pos(v(0),get(me/list)),1),add(strlen(%0),1))];@pe %#=[u(pa)] You erase page #%0.}},{@pe %#=[u(pa)] Only the sender and administrator of this pager may erase a page.}
+&ADD_P Pager Parent=$addp *=*:@switch [t(member(u(admin_list),%#))]=1, {@switch [t(member(u(page_list),%0,|))]=1, {@pe %#=[ansi(hr,%0 is already)] [ansi(hb,on the page list.)]},{@pe %#=[ansi(c,You add)] [ansi(hy,%0 to the)] [ansi(hc,page list.)];&page_list me=[u(page_list)]%0|;&%0_pager me=%1;@pe %#=[ansi(c,[name(%1)])] [ansi(hy,is added to %0)] [ansi(b,as pager.)]}},{@pe %#=[ansi(c,Access)] [ansi(hr,Denied!)]}
+&PAGE_LIST Pager Parent=Tari'Vor|Hase
+&TARI'VOR_PAGER Pager Parent=#5150
+&PAGER_LIST Pager Parent=Tari'Vor|
+&VIEW_LIST Pager Parent=$pl:@switch [t(member(u(admin_list),%#))]=1, {@pe %#=[u(line)]%r[space(35)][ansi(hw,Page List)]%r[u(line)]%r[space(37)][ansi(ch,Name)]%r[space(23)][ansi(g,Name of Person on the Page List)]%r[iter(u(page_list),[%t%t%t][ansi(hb,<Pager [#@]>)] [ansi(hy,[ljust(##,40)][%r])],|)]%r[u(line)]},{@pe %#=[ansi(c,Access)] [ansi(hr,Denied!)]}
+&DEL_P Pager Parent=$delp *:@switch [t(member(u(admin_list),%#))]=1, {@switch [t(member(u(page_list),%0,|))]=0, {@pe %#=[ansi(hr,%0 isn't)] [ansi(hb,on the page list.)]},{@pe %#=[ansi(c,You remove)] [ansi(hy,%0 from the)] [ansi(hg,page list.)];&page_list me=[remove(u(page_list),%0,|)];&%0_pager me=}},{@pe %#=[ansi(c,Access)] [ansi(hr,Denied!)]}
+&HASE_PAGER Pager Parent=#5559
+&TARI'VOR_PAGER_NUMBER Pager Parent=1
+&TEST_PL Pager Parent=$tpl:@pe %#=[u(line)]%r[ansi(h,hi)]%r[u(line)]%r[iter(u(page_list),[%t]<Panel [#@]>[%t][ljust(##,45)],|)]

@@ -1,0 +1,423 @@
+#============================================================================
+# MOBS.MUX  --  "mobiles" (automated combat puppets)
+#============================================================================
+
+###    #46 is the Mob Parent
+###    #61 is the Mob Commands object (Master Room)
+
+
+#----------------------------------------------------------------------------
+# EVENT HANDLERS
+#----------------------------------------------------------------------------
+
+### ARRIVED
+&listen-arrived #46 = ^* has arrived.: 
+  @mob %! arrived = %#
+-
+
+### LEFT
+&listen-left #46 = ^* has left.: 
+  @mob %! left = %#
+-
+
+### WIELDED
+&listen-wielded #46 = ^* wields *.: 
+  @mob %! wielded = %#
+-
+
+### UNWIELDED
+&listen-unwield #46 = ^* unwields *.: 
+  @mob %! unwielded = %#
+-
+
+### ENGAGED
+# 
+# %0 = dbref of attacker
+# %1 = dbref of attacker's weapon
+# %2 = level of success for engagement (could be FAILURE or BOTCH)
+# 
+&aengage #46 = 
+  think setq(0, u(#61/u-success-succfail, %2)); 
+  @mob %! engaged-%q0 = %0
+-
+
+### DISENGAGED
+&adisengage #46 = 
+  think setq(0, switch(%2, PASSIVE, passive, u(#61/u-success-succfail, %2))); 
+  @mob %! disengaged-%q0 = %0
+-
+
+### ATTACKED
+&aattack #46 = 
+  think setq(0, u(#61/u-success-succfail, %2)); 
+  @mob %! attacked-%q0 = %0
+-
+
+### DAMAGED
+#
+# %0 = your dbref
+# %1 = bodyloc that was damaged
+# %2 = how much damage was done in the most recent attack
+# %3 = total damage you've taken
+# %4 = dbref of attacker (damager, realy)
+# 
+&adamaged #46 = 
+  @mob %! damaged = %4
+-
+
+### KOed
+#
+# %0 = your dbref
+# %1 = bodyloc that was damaged
+# %2 = how much damage was done in the most recent attack
+# %3 = total damage you've taken
+# %4 = number of successes for shock roll
+# %5 = dbref of person who damaged you into shock
+#
+&ashock #46 = 
+  @mob %! koed = %5
+-
+
+### KILLED
+#
+# %0 = your dbref
+# %1 = number of successes for death roll
+# %2 = level of success for death roll (SUCCESS, FAILURE, BOTCH, BONUS)
+# %3 = dbref of person who killed you
+# 
+&adeath #46 = 
+  @mob %! killed = %3
+-
+
+
+#----------------------------------------------------------------------------
+# Access to mob commands
+#----------------------------------------------------------------------------
+
+&is-mob #61 = [hastag(%#, mob)]
+-
+@lock/use #61 = is-mob/1
+-
+@tag #46 = mob
+-
+
+
+#----------------------------------------------------------------------------
+# Semaphore management
+#----------------------------------------------------------------------------
+
+@startup #61 = 
+  @drain me; @notify me
+-
+
+@drain #61
+-
+@notify #61
+-
+
+
+#----------------------------------------------------------------------------
+# @MOB COMMANDS
+#----------------------------------------------------------------------------
+
+&cmd-@mob/notify #61 = $@mob/notify *=*: 
+  @pemit u(#61/u-owner, %0) = ansi(hg, MOB: [trim(%1)])
+-
+
+&cmd-@mob-invalid-action #61 = $@mob * *=*: 
+  think setq(0, switch(member(v(valid-actions), %0), 0, #-1, me)); 
+  @switch isdbref(%q0) = 1, {
+    @pemit %q0 = Invalid action (@mob %0 %1=%2).; 
+    @notify %q0
+  }
+-
+
+&cmd-@mob-arrived #61 = $@mob * arrived = *: 
+  @wait me = {
+    think setq(0, u(u-friend-or-enemy, %0)); 
+    &here-%q0 %0 = setunion(get(%0/here-%q0), %1); 
+    @mob/notify %0 = [name(%1)] arrived.; 
+    @notify me
+  }
+-
+
+&cmd-@mob-left #61 = $@mob * left = *: 
+  @wait me = {
+# remove the dbref from all here lists
+    think iter(lattr(%0/here-*), set(%0, ##:[setdiff(get(%0/##), %1)])); 
+    @mob/notify %0 = [name(%1)] left.; 
+    @notify me
+  }
+-
+
+&cmd-@mob-killed #61 = $@mob killed *=*: 
+  @wait me = {
+
+    @notify me
+  }
+-
+
+&cmd-@mob-killed #61 = $@mob killed *=*: 
+  @wait me = {
+
+    @notify me
+  }
+-
+
+&cmd-@mob-killed #61 = $@mob killed *=*: 
+  @wait me = {
+
+    @notify me
+  }
+-
+
+
+# PET <mob>
+# 
+# Makes the mob a little friendlier towards you.
+# 
+&cmd-pet #5 = $pet *: 
+  think setq(0, locate(%#, %0, n)); 
+  think setq(9, 
+    [isdbref(%q0)]
+    [t(member(get(%q0/here-enemy), %#))]
+    [t(member(get(%q0/here-friend), %#))]
+  ); 
+  @select %q9 = 
+  11?, {
+    @remit %L = %n pets the [name(%q0)], and it growls at %o.; 
+    &here-enemy %q0 = setdiff(get(%q0/here-enemy), %#); 
+  }, 
+  1?1, {
+    @remit %L = %n pets the [name(%q0)], and it purrs at %o.; 
+  }, 
+  1??, {
+    @remit %L = %n pets the [name(%q0)], and it purrs at %o warily.; 
+    &here-friend %q0 = setunion(get(%q0/here-enemy), %#); 
+  }, 
+  0??, {
+    @pemit %# = What do you want to pet?
+  }, 
+  {
+    @pemit %# = Huh?
+  }
+-
+
+
+#----------------------------------------------------------------------------
+# ACTION LOOP
+#----------------------------------------------------------------------------
+
+&heartbeat #46 = 5
+-
+
+# semaphore dbref
+#
+@VS #46 = #61
+-
+
+&loop-action #46 = 
+  @trigger me/tr-action
+-
+
+&goal #46 = choose-goal
+-
+
+&tr-action #46 = 
+  @wait %vS = {
+    think setq(0, default(%!/goal, choose-goal)); 
+    think setq(1, first(%q0)); 
+    @trigger %!/action-%q1 = rest(%q0); 
+    @mob/notify %! = [center(%b%q0%b, 75, =)]; 
+    @wait v(heartbeat) = {@trigger me/loop-action}
+  }
+-
+
+@halt #46
+-
+@@ @trigger #46/loop-action
+-
+
+#----------------------------------------------------------------------------
+# ACTIONS
+#----------------------------------------------------------------------------
+
+&action-choose-goal #46 = 
+  think setq(0, u(u-new-goal, %!)); 
+  &goal %! = %q0; 
+  @mob/notify %! = Goal is %q0.; 
+  @notify %vS
+-
+
+&u-new-goal #46 = 
+  switch(1, 
+    u(#61/u-are-here, %!, attackers), kill [u(#61/u-target-attackers, %0)], 
+    u(#61/u-are-here, %!, enemy),     kill [u(#61/u-target-enemy, %0)], 
+    u(#61/u-are-here, %!, fears),     escape, 
+# else
+    choose-goal
+  )
+-
+
+
+&action-kill #46 = 
+  think setq(0, locate(%!, %0, n)); 
+  @trigger %!/tr-alive-check = %q0; 
+
+  @switch 0 = 
+    isdbref(%q0), {
+      @fpose %! = looks around for [name(%q0)] but can't find [obj(%q0)].; 
+      &goal %! = choose-goal; 
+      @notify %vS
+    }, 
+    or(ulocal(#12/ul-is-wielding-a-weapon, %!), hastag(%!, weaponless)), {
+      @tr %!/sub-wield
+    }, 
+    u(#61/u-is-engaged-and-can-attack, %!, %q0), {
+      @tr %!/sub-engage = %q0
+    }, {
+      @tr %!/sub-attack = %q0
+    }
+-
+
+&sub-alive-check #46 = 
+  @switch and(isdbref(%0), 
+              or(and(hastag(%0, shock), hastag(%!, killer)), n
+                 hastag(%0, dead)
+              )
+          ) = 
+  1, {
+#   remove the dbref from all here lists
+    think iter(lattr(%!/here-*), set(%!, ##:[setdiff(get(%!/##), %0)])); 
+    &goal %! = choose-goal
+  }
+-
+    
+
+&sub-wield #46 = 
+  think setq(0, u(#61/u-wieldable-weapon, %!)); 
+
+  @switch words(%q0) = 0, {
+    @mob/notify %! = Wielding nothing; 
+    think settag(%!, weaponless); 
+    @notify %vS
+  }, {
+    think setq(0, first(shuffle(%q0))); 
+    @mob/notify %! = Wield %q0; 
+    @fo %! = {wield %q0}; 
+    @notify %vS
+  }
+-
+
+&sub-engage #46 = 
+# if we get here, and we're engaged by someone, we need to disengage first
+  think setq(0, u(#12/u-engaged-by, %!)); 
+  think setq(0, first(shuffle(%q0))); 
+
+  @switch isdbref(%q0) = 1, {
+    @fpose %! = rolls away from [name(%q0)]!; 
+    @mob/notify %! = Disengage %q0; 
+    @fo %! = {disengage %q0}; 
+    @notify %vS
+  }, {
+    @fpose %! = mrowls ferociously at [name(%0)]!; 
+    @mob/notify %! = Engage %0; 
+    @fo %! = {engage %0}; 
+    @notify %vS
+  }
+-
+
+&u-is-engaged-and-can-attack #61 = 
+  or(u(#12/u-is-engaged-to, %0, %1),
+    and(u(#12/u-is-engaged-by, %0, %1), 
+        u(#12/u-weapons-are-same-length, %0, %1)
+    )
+  )
+-
+
+&sub-attack #46 = 
+  @fpose %! = growls and leaps at [name(%0)]!; 
+  @mob/notify %! = Attack %0; 
+  @fo %! = {attack %0}; 
+  @notify %vS
+-
+
+
+#----------------------------------------------------------------------------
+# UFUNCTIONS
+#----------------------------------------------------------------------------
+
+&u-success-succfail #61 = 
+  switch(%0, 
+    SUCCESS, succeed, 
+    BONUS,   succeed, 
+# else
+    fail
+  )
+-
+
+&u-owner #61 = 
+  default(%0/owner, %0)
+-
+
+&u-are-here #61 = 
+  t(words(get(%0/here-%1)))
+-
+
+&u-friend-or-enemy #61 = 
+  udefault(%0/u-friend-or-enemy, u(u-friend-or-enemy-local, %0, %1), %1)
+-
+&u-friend-or-enemy-local #61 =
+  switch(1, 
+    t(member(get(%0/enemy-dbrefs),   %1)), enemy, 
+    t(member(get(%0/friend-dbrefs),  %1)), friend, 
+    t(member(get(%0/fears-dbrefs),   %1)), fears, 
+    t(member(get(%0/neutral-dbrefs), %1)), neutral, 
+
+    u(u-fof-2, %0, %1)
+  )
+-
+&u-fof-2 #61 = 
+  switch(1, 
+    t(member(default(%0/enemy-species,   #-1), get(%1/race))), enemy, 
+    t(member(default(%0/friend-species,  #-1), get(%1/race))), friend, 
+    t(member(default(%0/fears-species,   #-1), get(%1/race))), fears, 
+    t(member(default(%0/neutral-species, #-1), get(%1/race))), neutral, 
+
+    u(u-fof-3, %0, %1)
+  )
+-
+&u-fof-3 #61 = 
+  switch(1, 
+    t(member(default(%0/enemy-species,   #-1), u(u-currency, %1))), enemy, 
+    t(member(default(%0/friend-species,  #-1), u(u-currency, %1))), friend, 
+    t(member(default(%0/fears-species,   #-1), u(u-currency, %1))), fears, 
+    t(member(default(%0/neutral-species, #-1), u(u-currency, %1))), neutral, 
+
+    u(u-fof-4, %0, %1)
+  )
+-
+&u-fof-4 #61 = 
+  switch(1, 
+    strmatch(default(%0/race, #-1),  default(%1/race, #-2)),  neutral, 
+    strmatch(u(u-currency, %0, #-1), u(u-currency, %1, #-2),  neutral, 
+# else
+    default(%0/default-reaction, neutral)
+  )
+-
+
+&u-currency #61 = 
+  edit(default(%0/currency, %1), %b, _)
+-
+
+&u-target-attackers #61 = 
+  first(sortby(sort-damage, get(%0/here-attackers)))
+-
+
+&u-target-enemy #61 = 
+  first(shuffle(get(%0/here-enemy)))
+-
+
+&sort-damage #61 = 
+  [sign(sub(default(%!/dam-%0, 0), default(%!/dam-%1, 0)))]
+-

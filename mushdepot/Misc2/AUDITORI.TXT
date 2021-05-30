@@ -1,0 +1,26 @@
+@@  Auditorium Code 1.1
+@@
+@@  This was coded for TinyMUX 1.4p5 and up.  This turns any 
+@@  room into a working auditorium and manages a queue of speakers.
+@@
+@@  Changes from 1.0:  Updated and cleaned code. Added INLIST function.
+@@   
+@@  Send questions and comments to jpmg@primenet.com.
+@@
+&CANSPEAK here=[or(orflags(%#,WZw),match(%#,v(va)))]
+@lock/SpeechLock here=CANSPEAK/1
+@set here=!no_command
+&U-INLIST here=[gt(match(%0,%1),0)]
+@VA here=
+@VB here=
+&CMD-AUDITORIUM here=$auditorium:@switch 1=orflags(%#,WZw),{@set me=auditorium;@pemit/contents %l=ROOM: Speech locks enabled.},@pemit %#=This is a staff-only command.
+&CMD-NOTAUDITORIUM here=$!auditorium:@switch 1=orflags(%#,WZw),{@set me=!auditorium;@pemit/contents %l=ROOM: Speech locks removed.[set(me,va:)][set(me,vb:)]},@pemit %#=This is a staff-only command.
+&CMD-PASS_MIC here=$pass mic to *:think setq(0,pmatch(objeval(%#,%0)));@switch %#=v(va),{@switch 1=hasflag(%q0,connected),{@pemit/contents %l=ROOM: %N passes the microphone to [name(%q0)].[set(me,va:%q0)][set(me,vb:[remove(v(vb),%q0)])]},@pemit %#=I don't see that person here.},@pemit %#=([name(v(va))] currently has the microphone.)
+&CMD-RESET_MIC here=$reset mic:@switch 1=orflags(%#,WZw),{@pemit/contents %l=ROOM: %N resets the queue and picks up the microphone.[set(me,va:%#)][set(me,vb:)]},@pemit %#=This is a staff-only command.
+&CMD-AUDHELP here=$audhelp:@pemit %#=This room is a working auditorium!%r%rStaff only commands:%r%chauditorium%cn%tEnables speech locks in the room.%r%ch!auditorium%cn%tDisables speech locks in the room.%r%chreset mic%cn%tClears the speakers queue and picks up the mic.%r%rOpen Commands:%r%chpass mic to 'player'%cn%tThis, well, passes the mic to the specified player. :)%r%chjoin queue%cn%t%tAdd yourself to the speakers queue.%r%chexit queue%cn%t%tRemove yourself from the queue.%r%chstatus%cn%t%t%tDisplays the status of the room, current speaker, and%r%t%t%tthose waiting to speak.
+&CMD-STATUS here=$status:@switch 1=[hasflag(me,auditorium)],{@pemit %#=Speechlocks are currently enabled. [name(v(va))] has the floor. [setq(0,v(vb))][switch(words(%q0),0,setq(0,blah),1,[name(%q0)] is currently waiting to speak.,2,[name(first(%q0))] and [name(last(%q0))] are waiting to speak.,[iter(remove(%q0,last(%q0)),[name(##)]\\, )] and [name(last(%q0))] are waiting to speak.)]},@pemit %#=Speechlocks are not currently enabled in here.
+&CMD-JOIN_QUEUE here=$join queue:@switch 0=u(u-inlist,v(vb),%#),{@pemit %#=You add yourself to the queue to speak.[set(me,vb:[v(vb)] %#)]},@pemit %#=You are already on the queue.
+&CMD-EXIT_QUEUE here=$exit queue:@switch 1=u(u-inlist,v(vb),%#),{@pemit %#=You remove yourself from the queue of speakers.[set(me,vb:[remove(v(vb),%#)])]},@pemit %#=You are not currently on the queue.
+@Adesc here=@switch 1=hasflag(me,auditorium),{@pemit %#=NOTE: This room has speechlocks enabled. [name(v(va))] currently has the floor. Type 'audhelp' for help.},
+@@
+@@ -- END OF FILE --

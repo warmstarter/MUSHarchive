@@ -1,0 +1,20 @@
+@create Stunned Parent
+@link Stunned Parent=*[owner(me)]
+@lock Stunned Parent==*[owner(me)]
+@set Stunned Parent=!NO_COMMAND
+@set Stunned Parent=ENTER_OK
+@set Stunned Parent=HALT
+@set Stunned Parent=ROYALTY
+@STARTUP Stunned Parent=@tr me/unstun_person=[v(victim_num)]
+&DEVFLAGS Stunned Parent=stunned
+@AUSE Stunned Parent=@pemit [v(VICTIM_NUM)]=%n has slit your throat!;@tel [v(VICTIM_NUM)]=[v(dead_room)];@parent me=[v(corpse_parent)];&WEAPON_STRING me=knife judging by a deep gash in the throat;@name me=Corpse of [v(VICTIM_NAME)];@halt me=@@
+@OUSE Stunned Parent=pulls out a knife and slits [after(name(me),Stunned%b)]'s throat!
+@USE Stunned Parent=You pull out a knife and slit [after(name(me),Stunned%b)]'s throat!
+&GARBAGE_ROOM Stunned Parent=#859
+&UNSTUN_PERSON Stunned Parent=@pemit %0=You finally wake up, to find yourself in:;@dolist lcon(me)=@tel ##=%0;@tel %0=[switch(loc(me),v(stun_room),,v(garbage_room),,here)];@oemit %0=[name(%0)] wakes up.;@tel me=[v(garbage_room)];@destroy me;@wait 5=@halt me
+&STUN_PERSON Stunned Parent=@name me=Stunned [name(%0)];@set me=enter_ok;@pemit %0=You have been stunned!;@oemit %0=[name(%0)] has been stunned!;@dolist lcon(%0)=@switch [hasdevflag(##,nosteal)]=0, @tel ##=me;@tel me=[loc(%0)];@tel %0=[v(stun_room)];&VICTIM_NAME me=[name(%0)];&VICTIM_NUM me=%0;&VICTIM_SUBJ me=[subj(%0)];@wait %1=@tr me/unstun_person=%0
+@DESCRIBE Stunned Parent=The body of [v(victim_name)]. It looks like [v(victim_subj)] was stunned by a [v(weapon_string)].%rCommands are:%r%r[u(help,get [after(name(me),Stunned%b)],{Picks up the body.})]%r[u(help,drop [after(name(me),Stunned%b)],{Drops the body.})]%r[u(help,get [after(name(me),Stunned%b)]'s <item>,{Takes an item from the body.})]%r[u(help,give [after(name(me),Stunned%b)]=<item>,{Puts an item in the body.})]%r[u(help,enter [after(name(me),Stunned%b)],{Starts manipulating the body contents.})]%r[u(help,leave,{Stops manipulating the body contents.})]%r[u(help,use [after(name(me),Stunned%b)],{Slits the person's throat! Use with caution!})]
+&HELP Stunned Parent=[ljust(%0,30)] - [indent(33,45,{%1})]
+&WIZ_HELP Stunned Parent=VICTIM_NAME is the name of the victim. VICTIM_SUBJ is subj(victim). WEAPON_STRING is something like "phaser blast", or "disruptor blast" etc.
+&A_DESTROY Stunned Parent=@pemit [v(victim_num)]=[name(%0)] has vaporized you with a [name(##)]!;@tel [v(victim_num)]=[v(dead_room)];@destroy me
+&DEAD_ROOM Stunned Parent=#854

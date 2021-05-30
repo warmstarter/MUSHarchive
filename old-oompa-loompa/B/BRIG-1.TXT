@@ -1,0 +1,14 @@
+@create Brig Controller Parent
+@link Brig Controller Parent = #0
+@set Brig Controller Parent = LINK_OK
+@set Brig Controller Parent = VISUAL
+@set Brig Controller Parent = NO_COMMAND
+&DO_TELL_BRIG_HELP Brig Controller Parent=$brighelp:@pemit %# = Brig Commands:%r%r imprison <name> - adds <name> to the prisoner list%r release <name> - removes <name> from the prisoner list%r clearlist - clears all prisoner names%r list prisoners - shows who is on the prison list%r%r Note: all commands which alter the prisoner list also change the @lock on%r the brig door accordingly.%r
+&DO_TELL_PRISONER_LIST Brig Controller Parent=$list prisoners:@switch [words([v(prisoner_list)])] = {0},{@pemit %# = There are no prisoners.},{@pemit %# = [v(prisoner_list)]}
+&TEST_CHANGE_DONE Brig Controller Parent=@switch [gt([v(loop_num)],0)] = {1},{&lock_form me = [cat([v(lock_form)],|)];@tr me/change_door_lock},{@lock [v(my_door_number)] = [v(lock_form)];&lock_form me =}
+&LOOP_NUM Brig Controller Parent=0
+&CHANGE_DOOR_LOCK Brig Controller Parent=&lock_form me = [cat([v(lock_form)],[strcat(!*,[extract([v(prisoner_list)],[v(loop_num)],1)])])];&loop_num me = [sub([v(loop_num)],1)];@tr me/test_change_done
+&DO_CLEAR_PRISONERS Brig Controller Parent=$clearlist:&prisoner_list me =;@pemit %# = Prisoner list cleared.;@lock [v(my_door_number)] =
+&DO_ADD_PRISONER Brig Controller Parent=$imprison *:@switch [num(*%0)]={#-1},{@pemit %# = %0 is not a valid player name.},{&prisoner_list me=[cat(v(prisoner_list),%0)];@pemit %# = %0 added to prisoner list.;&loop_num me = [words(v(prisoner_list))];@tr me/change_door_lock}
+&DO_REMOVE_PRISONER Brig Controller Parent=$release *:@switch [pos(%0,v(prisoner_list))] = {#-1},{@pemit %# = %0 is not listed as a prisoner.},{&prisoner_list me = [remove(v(prisoner_list),%0)];@pemit %# = %0 has been removed from the prisoner list.;&loop_num me = [words(v(prisoner_list))];@switch [v(loop_num)] = {0},{@lock [v(my_door_number)] =},{@tr me/change_door_lock}}
+@DESCRIBE Brig Controller Parent=This is the parent for a brig system which will lock prisoners in, but still allow others to come and go. To set it up, @create a brig controller, @parent it to this object. Set an attribute on it called MY_DOOR_NUMBER which contains the dbref of the exit *from* the brig to the outside. In order for it to work, both the controller and the door have to be on the zone for the ship (good building practice anyway).%r Type 'brighelp' for a list of commands.%r%r%t Coded by Cmdr_Slitkoh.

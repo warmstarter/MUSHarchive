@@ -1,0 +1,210 @@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@pemit/silent me=TBmE4P: Script Started. Please wait.
+@@
+@@ Section 0: Script initiation section. DO NOT TOUCH.
+@@
+@@ Tampering with anything in this section will break this script.
+@@
+@switch [hasattr(me,~)]=0,,@mvattr me/~=me/tktilde
+@switch [hasattr(me,~~)]=0,,@mvattr me/~~=me/tksecs
+@pemit/silent me=TBmE4P: Starting at [ansi(h,time())][set(me,~~:[secs()])]
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@
+@@ Section 1: Introduction
+@@
+@@ This script, and the object it creates, both require side-effect
+@@ functions to be ENABLED on your MUSH. If your game does not have
+@@ side-effects ENABLED, DO NOT USE THIS SCRIPT. (You have been warned!)
+@@
+@@ This script is intended for PennMUSH 1.7.4p16 or newer. If your MUSH does
+@@ not meet this prerequisite, the created object will likely not work.
+@@
+@@ The softcode contained in this script is an original, 'clean room'
+@@ product of Trispis @ M*U*S*H. Trispis (Chuc McGuire) has never seen
+@@ the soft/hard-code for either Brandymail or Elendor's mail.
+@@
+@@ Installation instructions are simple enough...
+@@ 
+@@ Read and follow the instructions in sections 2-4, then quote the script
+@@ into your game.
+@@
+@pemit/silent me=TBmE4P: Configuring for Selections. Please wait..
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@
+
+@@ Section 2: Installation Method. (default)
+@@
+@@ New Installation: If this is a new installation, proceed directly to 
+@@ 'Section 4'
+@@
+@@ If this is an update, comment the lines of code in this section
+@@ (place two @ symbols followed by a space at the beginning of each line
+@@ of code), then proceed to 'Section 3' and follow the instructions.
+@@
+@set me=~:[create(TBmE4P,10)]
+@pemit/silent me=[name(v(~))]: Method Selected: Install.
+@link [v(~)]=me
+@set [v(~)] = LINK_OK
+@set [v(~)] = VISUAL
+@@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@ 
+@@ Section 3: Update Method.
+@@
+@@ If you are updating a previously existing installation:
+@@
+@@ 1) comment the lines of code in section 2.
+@@ 2) Set the first line of code in this section to contain your TBmE4P
+@@    parent's #dbref.
+@@ 3) uncomment [all of] the line[s] of code in this section (3).
+@@
+@@
+@@ &~ me=#8618
+@@ @pemit/silent me=[name(v(~))]: Method Selected: Update.
+@@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@
+@@ Section 4: Quiet Mode
+@@
+@@ If you do not want to see all of the spam from the installation, you
+@@ do not need to make any further changes to this script.
+@@
+@@ However, if you actually prefer to see all of the spam, then change the
+@@ 1 to a 0 in the following line.
+@@
+&quietstatus [v(~)]=1
+@@
+@@ There are no further changes required for this script.
+@@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@
+@@ Section 5: Universal
+@@
+@pemit/silent me=[setq(f,get(setr(o,v(~))/quietstatus))][set(%qo,quietstatus:[hasflag(me,quiet)])][name(v(~))] \([timestring(sub(secs(),v(~~)))]\): Proceeding [if(%qf,set(me,quiet)muted,noisy)].
+@@
+@lock/Command [v(~)]=LOCK.COMMAND.DISPLAY/1
+@lset [v(~)]/Command=no_inherit
+@pemit/silent me=[name(v(~))] \([timestring(sub(secs(),v(~~)))]\): Setting WARPEDcore information.
+&~.AUTHOR [v(~)]=Trispis @ M*U*S*H
+&~ [v(~)]=~http://www.elsemu.net/~nemo/warpedcore/
+&~.author [v(~)]=Trispis @ M*U*S*H
+&~.author.email [v(~)]=trispis@mush.pennmush.org
+&~.copyright [v(~)]=Copyright 2002 Chuc McGuire
+&~.license [v(~)]=GPL (Gnu General Public License)
+&~.license.url [v(~)]=http://www.gnu.org/copyleft/gpl.html
+&~.update [v(~)]=[time()]
+&~.url [v(~)]=http://www.elsemu.net/~nemo/softcode/
+&~.version [v(~)]=1.0.1b
+@DESCRIBE [v(~)]=[u(ufun.header)]%r%rWelcome to: TBmE4P ([ansi(bh,T)]'s [ansi(bh,B)]randy[ansi(bh,m)]ail [ansi(bh,E)]mulator [ansi(bh,4)] [ansi(bh,P)]ennMUSH) version [v(~.version)].%r%r... also known as TMail.%r%rFor help, type: +mail/help%r[u(ufun.footer)]
+@set [v(~)]/DESCRIBE=no_command visual
+@@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@
+@@ Section 6: Commands
+@@
+@pemit/silent me=[name(v(~))] \([timestring(sub(secs(),v(~~)))]\): Installing commands.
+@@
+&CMND.- [v(~)]=$-*:@switch/first %0=-*,,{@pemit %#=%vx: [ifelse(%vc,text added.[set(me,setr(0,mesg.%vc.body):[v(%q0)]%0%b)],[v(data.not_composing)])]}
+&CMND.-- [v(~)]=$--:@switch/first t(%vc)=0,{@pemit %#=%vx: [v(data.not_composing)]},{@pemit %#=%vx: Message queued to send in: [timestring(%vt)][set(me,list.queue:[setr(t,add(secs(),%vt))])][iter(lattr(me/mesg.%vc.*),set(me,queue.%qt.[last(itext(0),.)]:[v(itext(0))]),%b,)][set(me,queue.%qt:%vc)][wipe(me/mesg.%vc.*)][set(me,list.mesg:[remove(v(list.mesg),%vc)])][set(me,vc:)];@wait/until %qt=@tr me/trig.mail.queue=%#,%qt}
+&CMND.--- [v(~)]=$---:@switch/first [if(orflags(%#,Wr),1,hasflag(me,trust))]:[switch(1,hasflag(%#,Wizard),hasflag(me,wizard),hasflag(%#,royalty),hasflag(me,royalty),1)]:[t(%vc)]=0:*,{@pemit %#=%vx: Mailer must be set TRUST.},*:0:*,{@pemit %#=%vx: Mailer must have privs equal to your own: [ifelse(hasflag(%#,wizard),WIZARD,royalty)].},*:0,{@pemit %#=%vx: [v(data.not_composing)]},{@fo %#=@dol [setunion(,v(mesg.%vc.to) [v(mesg.%vc.cc)] [v(mesg.%vc.bcc)])]=@mail ##=[v(mesg.%vc.subject)]/To: [iter(v(mesg.%vc.to),name(itext(0)),%b,\,%b)][if(v(mesg.%vc.cc),%rCC: [iter(v(mesg.%vc.cc),name(itext(0)),%b,\,%b)])][if(member(v(mesg.%vc.bcc),##),BCC: [name(##)])]%r%r[v(mesg.%vc.body)][wipe(me/mesg.%vc.*)][set(me,list.mesg:[remove(v(list.mesg),%vc)])][set(me,vc:)]}
+&CMND.BCC [v(~)]=$+bcc *:@pemit %#=[ifelse(%vc,[if(setr(e,u(ufun.errck.players,setunion(,%0))),%qe)][if(%q1,u(ufun.bcc,trim(%q1)))],%vx: [v(data.not_composing)])]
+&CMND.CC [v(~)]=$+cc *:@pemit %#=[ifelse(%vc,[if(setr(e,u(ufun.errck.players,setunion(,%0))),%qe)][if(%q1,u(ufun.cc,trim(%q1)))],%vx: [v(data.not_composing)])]
+&CMND.CLEAR [v(~)]=$+clear:@fo %#=@mail/purge
+&CMND.DELETE_X [v(~)]=$+delete *:@switch/first [cand(isint(%0),gt(%0,0),lte(%0,lmath(add,elements(folderstats(owner(me),%vf),1 2))))]=0,{@pemit %#=%vx: That is not a valid message number.},{@fo %#=@mail/clear %0}
+&CMND.EDIT [v(~)]=$+edit *=*/*:@pemit %#=[if(%vc,ifelse(or(strmatch(%0,to),strmatch(%0,cc),strmatch(%0,bcc),strmatch(%0,subject),strmatch(%0,body),strmatch(%0,text)),u(ufun.edit,%0,%1,%2),%vx: What do you want to edit?))]
+&CMND.FILE_X.EQ.X [v(~)]=$+file *=?:@switch/first 0=[cand(isint(%0),gt(%0,0),lte(%0,lmath(add,elements(folderstats(%0),1 2))))],@pemit %#=%vx: That is not a valid message number.},[cand(isint(%1),gte(%1,0))],{@pemit %#=%vx: That is not a valid folder number.},{@fo %#=@mail/file %0=%1}
+&CMND.FOLDERS [v(~)]=$+folders:@fo %#=@mail/folder
+&CMND.FOLDER_X [v(~)]=$+folder ?:@switch/first 0=[cand(isint(%0),gte(%0,0))],{@pemit %#=%vx: That is not a valid folder number.},{@fo %#[set(me,vf:%0)]=@mail/folder %0}
+&CMND.FOLDER_X.EQ.X [v(~)]=$+folder ?=*:@switch/first 0=%0,{@pemit %#=%vx: Cannot rename folder 0 (INBOX).},[cand(isint(%0),gt(%0,0),lte(%0,9))],{@pemit %#=%vx: That is not a valid folder number.},[lte(strlen(%1),16)],{@pemit %#=%vx: Name too long.},{@fo %#=@mail/folder %0=%1}
+&CMND.MAIL [v(~)]=$+mail:@pemit %#=[u(describe)]
+&CMND.MAIL.HELP [v(~)]=$+mail/help:@pemit %#=[u(ufun.header)]%r+mail/help%r%rHelp is available on the following topics:%r%r[iter(v(help.topics),center(itext(0),25)[if(mod(inum(0),3),,%r[if(eq(inum(0),words(v(help.topics))),,%r)])],%b,)]%r%rType: +mail/help <topic>%r[u(ufun.footer)]
+&CMND.MAIL.HELP.X [v(~)]=$+mail/help *:@pemit %#=[if(hasattrp(me,help.%0),[u(ufun.header)]%r+mail/help [ucstr(%0)]%r%r[s(v(help.%0))]%r[u(ufun.footer)])]
+&CMND.MAIL.NEW [v(~)]=$+mail *=*:@pemit %#=[ifelse(%vc,%vx: [v(data.already_composing)],[if(setr(e,u(ufun.errck.players,setunion(,%0))),%qe)][if(%q1,ifelse(gte(strlen(%1),75),%vx: Subject too long.,u(ufun.new,trim(%q1),%1)))])]
+&CMND.MAIL.RESET [v(~)]=$+mail/fullreset:@switch/first words(lparent(me))=1,,{&vx me;@pemit %#=%vx: Performing full reset...; @wipe me}
+&CMND.MAIL.SET [v(~)]=$+mail/set *=*:@pemit %#=%vx: [if(setr(e,u(ufun.set.error,%0)),%qe,if(setr(e,u(ufun.set.%0.error,%1)),%qe,u(ufun.set,%0,%1)))]
+&CMND.PROOF [v(~)]=$+proof:@pemit %#=[ifelse(%vc,u(ufun.proof),%vx: [v(data.not_composing)])]
+&CMND.QUEUE [v(~)]=$+queue:@pemit %#=[ifelse(words(setr(l,v(list.queue))),[u(ufun.header)]%r[u(ufun.list.entries,queue,%ql)]%r[u(ufun.footer)],%vx: No messages in queue to unmail.)]
+&CMND.READ_X [v(~)]=$+read *:@switch/first [if(orflags(%#,Wr),1,hasflag(me,trust))]:[switch(1,hasflag(%#,Wizard),hasflag(me,wizard),hasflag(%#,royalty),hasflag(me,royalty),1)]:[isint(%0)]=0:*,{@pemit %#=%vx: Mailer must be set TRUST.},*:0:*,{@pemit %#=%vx: Mailer must have privs equal to your own: [ifelse(hasflag(%#,wizard),WIZARD,royalty)].},*:0,{@pemit %#=%vx: That is not a valid message number.},{@fo %#=@mail %0}
+&CMND.RESUME [v(~)]=$+resume:@pemit %#=[if(setr(0,remove(v(list.mesg),%vc)),[u(ufun.header)]%r[u(ufun.list.entries,mesg,%q0)]%r[u(ufun.footer)],%vx: No suspended messages.)]
+&CMND.RESUME_X [v(~)]=$+resume ?:@pemit %#=[ifelse(cand(isint(%0),%0,lte(%0,words(v(list.mesg)))),%vx: Resuming selected message.[set(me,vc:[elements(v(list.mesg),%0)])],%vx: That's not a valid message number to resume.)]
+&CMND.SKIM [v(~)]=$+skim:@fo %#=@mail/list [max(1,sub(setr(0,lmath(add,folderstats(%#,%vf))),19))]-%q0
+&CMND.SKIM_X-X [v(~)]=$+skim *-*:@switch/first [and(isint(%0),isint(%1),gt(%0,0),gt(%1,%0),lt(%0,setr(0,lmath(add,elements(folderstats(%#,%vf),1 2)))),lte(%1,%q0))]=0,{@pemit %#=%vx: That is not a valid range.},{@fo %#=@mail/list %0-%1}
+&CMND.SUSPEND [v(~)]=$+suspend:@pemit %#=%vx: [switch(words(v(list.mesg)),10,Cannot suspend 10th message. Get organized.,9,Suspending 9th message. Get organized.[set(me,vc:)],Message suspended.[set(me,vc:)])]
+&CMND.TOSS [v(~)]=$+toss:@pemit %#=[ifelse(%vc,%vx: Current message tossed.[wipe(me/mesg.%vc.*)][set(me,list.mesg:[remove(v(list.mesg),%vc)])][set(me,vc:)],%vx: [v(data.not_composing)])]
+&CMND.UNDELETE_X [v(~)]=$+undelete *:@switch/first [cand(isint(%0),gt(%0,0),lte(%0,lmath(add,elements(folderstats(owner(me),%vf),1 2))))]=0,{@pemit %#=%vx: That is not a valid message number.},{@fo %#=@mail/unclear %0}
+&CMND.UNMAIL [v(~)]=$+unmail:@pemit %#=[ifelse(words(setr(l,v(list.queue))),[u(ufun.header)]%r[u(ufun.list.entries,queue,%ql)]%r[u(ufun.footer)],%vx: No messages in queue to unmail.)]
+&CMND.UNMAIL_X [v(~)]=$+unmail *:@pemit %#=%vx: [ifelse(t(%vc),Unable to unmail while composing. +suspend first.,ifelse(cand(isint(%0),t(%0),lte(%0,words(v(list.queue)))),Message unmailed.[iter(lattr(me/queue.[setr(q,elements(v(list.queue),%0))].*)[setq(m,v(queue.%qq))],set(me,mesg.%qm.[last(itext(0),.)]:[v(itext(0))])[wipe(me/[itext(0)])])][set(me,list.queue:[remove(v(list.queue),%qq)])][wipe(me/queue.%qq)][set(me,vc:%qm)][set(me,list.mesg:[setunion(v(list.mesg),%qm)])],That is not a valid message number.))]
+@@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@
+@@ Section 7: Data
+@@
+@pemit/silent me=[name(v(~))] \([timestring(sub(secs(),v(~~)))]\): Installing data.
+@@
+&DATA.ALREADY_COMPOSING [v(~)]=You are already composing a message.
+&DATA.CURRENT [v(~)]=vc
+&DATA.DISPLAY.COMMANDS [v(~)]=+mail|+mail/help*
+&DATA.NOT_COMPOSING [v(~)]=You are not currently composing a message.
+&DATA.PREFIX [v(~)]=vx
+&DATA.TIMEOUT [v(~)]=vt
+@VF [v(~)]=0
+@VT [v(~)]=60
+@VX [v(~)]=TMAIL
+@@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@
+@@ Section 8: Processes
+@@
+@pemit/silent me=[name(v(~))] \([timestring(sub(secs(),v(~~)))]\): Installing processes.
+@@
+&LOCK.COMMAND.DISPLAY [v(~)]=lmath(or,not(strmatch(%!,last(lparent(me)))) [iter(v(data.display.commands),strmatch(%c,itext(0)),|,%b)])
+&TRIG.MAIL.QUEUE [v(~)]=@fo %0=@dol [setunion(,v(queue.%1.to) [v(queue.%1.cc)] [v(queue.%1.bcc)])]=@mail ##=[v(queue.%1.subject)]/To: [iter(v(queue.%1.to),name(itext(0)),%b,\,%b)][if(v(queue.%1.cc),%rCC: [iter(v(queue.%1.cc),name(itext(0)),%b,\,%b)])][if(member(v(queue.%1.bcc),##),BCC: [name(##)])]%r%r[v(queue.%1.body)][wipe(me/queue.%1*)][set(me,list.queue:[remove(v(list.queue),%1)])]
+&UFUN.BCC [v(~)]=%vx: BCC set to "[set(me,mesg.%vc.bcc:[setr(0,iter(%0,pmatch(%0)))])][iter(%q0,name(itext(0)))]"
+&UFUN.CC [v(~)]=%vx: CC set to "[set(me,mesg.%vc.cc:[setr(0,iter(%0,pmatch(%0)))])][iter(%q0,name(itext(0)))]"
+&UFUN.EDIT [v(~)]=[if(setr(e,u(ufun.edit.error,%0)),%vx: %qe,set(me,mesg.%vc.%0:[edit(v(mesg.%vc.[switch(%0,text,body,%0)]),%1,%2)])[u(ufun.proof)])]
+&UFUN.EDIT.ERROR [v(~)]=[ifelse(hasattrval(me,mesg.%vc.[switch(%0,text.body,%0)]),0,No such entry to edit.)]
+&UFUN.ERRCK.PLAYERS [v(~)]=[ifelse(lmath(and,iter(%0,isdbref(pmatch(itext(0))))),0[setq(1,iter(%0,pmatch(itext(0))))],iter(%0,switchall(pmatch(itext(0)),#-*,setq(0,%q0 [itext(0)]),#-1,%vx: No such player as '[itext(0)]'.%r,#-2,%vx: I don't know which '[itext(0)]' you mean.%r,setq(1,%q1 [itext(0)])),%b,))][if(words(%q0),%vx: Excluded: %q0%r)][if(%q1,,%vx: No valid recipients. No action performed.)]
+&UFUN.FOOTER [v(~)]=[rjust(ansi(bh,repeat(_,35)/),77)]
+&UFUN.HEADER [v(~)]=%b[ansi(bh,repeat(_,add(2,strlen(%vx))))]%r[ansi(bh,/)] %vx [ansi(bh,\\[repeat(_,sub(35,add(strlen(%vx),4)))])]
+&UFUN.LIST.ENTRIES [v(~)]=[iter(%1,Message: [inum(0)] [switch(lcstr(%0),queue,\(Sending in: [timestring(sub(itext(0),secs()))]\))][iter(To CC BCC,if(hasattrval(me,setr(a,%0.[itext(1)].[itext(0)])),%r[itext(0)]: [iter(v(%qa),name(itext(0)),%b,\,%b)]),%b,)],%b,%r%r)]
+&UFUN.NEW [v(~)]=%vx: Starting new message to "[iter(%0,name(pmatch(itext(0))))]" with subject "%1".[set(me,vc:[setr(0,secs())])][set(me,mesg.%q0.to:%0)][set(me,mesg.%q0.subject:%1)][set(me,mesg.%q0.body:)][set(me,list.mesg:[v(list.mesg)] %q0)]
+&UFUN.PROOF [v(~)]=[u(ufun.header)]%r%rCurrent Message%rTo: [iter(v(mesg.%vc.to),name(itext(0)))][if(setr(0,v(mesg.%vc.cc)),%rCC: [iter(%q0,name(itext(0)))])][if(setr(0,v(mesg.%vc.bcc)),%rBCC: [iter(%q0,name(itext(0)))])]%r%r[ifelse(hasattrval(me,mesg.%vc.body),[v(mesg.%vc.body)],[ansi(bh,No text entered.)])]%r[u(ufun.footer)]
+&UFUN.SET [v(~)]=[set(me,v(data.%0):%1)][ucstr(%0)] set to %1.
+&UFUN.SET.ERROR [v(~)]=[ifelse(hasattrpval(me,ufun.set.%0.error),0,No such value to set.)]
+&UFUN.SET.PREFIX.ERROR [v(~)]=[ifelse(lte(strlen(%0),16),0,Prefix must be 16 characters or less.)]
+&UFUN.SET.TIMEOUT.ERROR [v(~)]=[ifelse(isint(%0),0,Timeout must be an integer.)]
+@@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@
+@@ Section 9: Help files.
+@@
+@pemit/silent me=[name(v(~))] \([timestring(sub(secs(),v(~~)))]\): Installing help files.
+@@
+&HELP.ABOUT [v(~)]=This is a Brandymail emulator front-end for PennMUSH's @mail system. It is NOT Brandymail. It is a cleanroom implementation, based solely on the operational syntax of Brandymail (with minor references to Elendor's custom mailer) -- that is, the author (Trispis @ M*U*S*H) has *never* seen the code for Brandymail (nor Elendor's system), and has written this based solely on second-hand syntax information from users of Brandymail (Thanks to Noltar and others at M*U*S*H for their input). Please read the help files thoroughly because, although the syntax and many of the behaviors are very similar to Brandymail, there are some SIGNIFICANT behavorial DIFFERENCES (specifically with reference to sending and retracting messages).
+&HELP.ABOUT2 [v(~)]=Queued Sending and +unmail%r%rIf you desire to use the +unmail command on any message, then that message must:%r%r a) have been sent with the -- command (queued sending)%r b) still be in the queue.%r%rThe default queue timeout (i.e., how long a message is held in suspension before actually sending) is 60 seconds. This can be modified with "+mail/set timeout=<value>" (see: +mail/help settings)%r%r[ansi(rh,IMPORTANT NOTE)]: Once a message has been actually SENT, either via --- (immediate send) or and expired queued sending, it CANNOT be +unmailed.%r%rThis is a [ansi(hr,significant)] difference from the behavior of "stock" Brandymail. PennMUSH has no features to allow retrieval of @mail which has been sent. Thus, this emulator can only provide "queued" sending, per the above comentaries.
+&HELP.ACQUIRE [v(~)]=To acquire use of this code:%r%r @create mailer%r @parent mailer=[last(lparent(me))]%r @link mailer=me%r @lock mailer==me%r @lock/use mailer==me%r @set mailer=!no_command%r%r Mortals: @set mailer=trust%r%r Royalty: @set mailer=royalty%r [space(9)]@set mailer=trust%r%r Wizards: @set mailer=wizard%r%r Type: +mail/help
+&HELP.CREDITS [v(~)]=Credit for this project is given to the following individuals at M*U*S*H:%r%rNymeria, for having posed the initial request on +softcode.%rElvira, for having expressed further interest in the request on +admin.%rNoltar, for having provided most of the syntax reference information and much initial testing.%r%rCountless others who provided testing and debugging assistance.%r%rAnd, of course, Trispis, the author.
+&HELP.FOLDERS [v(~)]=This package has support for all of PennMUSH @mail's folders and filing commands. Syntax is as follows:%r%r[ljust(+delete <#>,22)]| Marks mesg number <#> of current folder for deletion.%r[ljust(+undelete <#>,22)]| Unmarks mesg number <#> so as not to be deleted.%r[ljust(+clear,22)]| Clears (permanently removes) all mesgs marked for %r[space(22)]| deletion in current folder.%r%r[ljust(+folders,22)]| Lists all folders%r[ljust(+folder <#>,22)]| Changes current folder to folder number <#>%r[ljust(+folder <#>=<name>,22)]| Assigns <name> to folder number <#>%r[ljust(+file <m#>=<f#>,22)]| Moves mesg number <m#> to folder number <f#>.%r%
+&HELP.ISSUES [v(~)]=Known Issues%r%rAny mail that has been queued to send, but not yet sent... will become clutter attributes during a MUSH crash or restart. These message will not be sent.%r%r+skim doesn't yet work because of problems with mail functions in pennmush. Anticipate corrections/workarounds for this soon.
+&HELP.OTHER [v(~)]=[ljust(+suspend,22)]| Suspends current mesg (max: 10).%r[ljust(+resume,22)]| Lists all suspended messages.%r[ljust(+resume <msg#>,22)]| Resumes message number <msg#>.%r%r[ljust(ansi(rh,+mail/fullreset),22)]| [ansi(rh,WARNING)]: WIPES EVERYTHING off of your mailer!%r[space(22)]| This is a utility intended for debugging only!!!%r[space(22)]| [ansi(rh,Use at your own risk!!!)]
+&HELP.READING [v(~)]=[ljust(+skim,32)]| Lists last 20 messages of INBOX.%r[ljust(+read <msg#>,32)]| Reads message <msg#> from INBOX.
+&HELP.SENDING [v(~)]=[ljust(+mail <players>=<subject>,32)]| Start new mesg to <players> with <subject>%r%r[ljust(+cc <players>,32)| Sets CC to <players>%r[ljust(+bcc <players>,32)]| Sets BCC to <players>%r%r[ljust(-<text>, 32)]| Appends <text> to current mesg.%r[ljust(+proof,32)]| Proofreads current mesg.%r+edit <to|cc|bcc|body>=old/new %b| Edits appropriately.%r[ljust(+toss,32)]| Toss (discard/trash) current mesg.%r%r[ljust(---,32)]| Sends current mesg immediately.%r%r[ljust(--,32)]| Queues current mesg.%r%r[ljust(+queue,32)]| Displays messages still in queue.%r%R[ljust(+unmail <#>,32)]| Retracts queued mesg number <#>.%r[space(32)]| See: +mail/help about2
+&HELP.SERVER [v(~)]=This code was developed on/for PennMUSH 1.7.5p4 and later.
+&HELP.SETTINGS [v(~)]=[ljust(+mail/set prefix=<text>,32)]| Sets error prefix to <text>.%r[ljust(+mail/set timeout=<secs>,32)]| Sets the queue timeout to <secs>.
+&HELP.TOPICS [v(~)]=about acquire credits sending reading folders settings other server issues
+@@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@
+@@ Section 10: Cleanup
+@@
+@pemit/silent me=[name(v(~))] \([timestring(sub(secs(),v(~~)))]\): Cleaning up.
+@switch [get(v(~)/quietstatus)]=0,@set me=!quiet
+@@
+&quietstatus [v(~)]
+&~ me
+@switch [hasattr(me,tktilde)]=0,,@mvattr me/tktilde=me/~
+@pemit/silent me=TBmE4P \([timestring(sub(secs(),v(~~)))]\)[wipe(me/~~)]: Done at [ansi(h,time())].
+@@
+@@ .:....1....:....2....:....3....:....4....:....5....:....6....:....7....:
+@@
+@@ The End.

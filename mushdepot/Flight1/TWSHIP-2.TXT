@@ -1,0 +1,58 @@
+@create ISS Baltimore
+@link ISS Baltimore=[owner(me)]
+@lock ISS Baltimore==[owner(me)]
+@set ISS Baltimore = INHERIT
+@set ISS Baltimore = OPAQUE
+@set ISS Baltimore = QUIET
+@set ISS Baltimore = UNFINDABLE
+@set ISS Baltimore = SAFE
+@set ISS Baltimore = ENTER_OK
+@set ISS Baltimore = ROYALTY
+@set ISS Baltimore = MONITOR
+@set ISS Baltimore = !NO_COMMAND
+&KICK-1 ISS Baltimore=$kick:@dol [lcon(me)]=drop ##
+&BOOT-1 ISS Baltimore=$boot *:@force [num(me)]=drop %0
+&IMPULSE-1 ISS Baltimore=$imp *:@remit [loc(me)]=[name(me)] ignites its impulse engine(s).;@wait 1=go %0;@wait 2={@remit [loc(me)]=[name(me)]'s impulse engine(s) go out.}
+&WARP-1 ISS Baltimore=$warp *:@remit [loc(me)]=[name(me)] goes into warp.;@wait 1=@tel %0;@wait 2={@remit [loc(me)]=[name(me)] drops out of warp.}
+&HYPER-1 ISS Baltimore=$hyper *:@remit [loc(me)]=[name(me)] stretches and disappears into hyperspace.;@wait 1=@tel %0;@wait 2={@remit [loc(me)]=[name(me)] appears from hyperspace.}
+&SLIPSTREAM-1 ISS Baltimore=$slip *:@remit [loc(me)]=[name(me)] starts glowing blue-green, then you see the ship accelerate and disappear.;@wait 1=@tel %0;@wait 2=@remit [loc(me)]=You see [name(me)] suddenly decelerate, and the ship stops glowing blue-green.
+&RECALL-1 ISS Baltimore=$rec *:@switch [get(me/%0)]=,@pemit %N=I don't recall that one.,@pemit %N=%0 is [get(me/%0)].
+&DESTS-1 ISS Baltimore=$dest *:@switch [get(me/%0)]=,@pemit %N=I don't recall that one.,@force [num(me)]=@remit [loc(me)]=[name(me)] emits a portal from a hidden point.;@wait 2=@remit [loc(me)]=Suddenly you feel wind all around you and a low tone atmospheric noise.;@wait 3=@remit [loc(me)]=A [ansi(w,white)] portal opens up where [name(me)] aimed the "weapon.";@wait 5=@remit [get(me/%0)]=A huge [ansi(w,white)] portal opens up in the air.;@wait 9=@remit [loc(me)]=The hard wind continues to mess up your hair.;@wait 17=@remit [loc(me)]=The wind calms down and the portal closes in on itself.;@wait 17=@tel [num(me)]=[get(me/%0)];@wait 18=@remit [get(me/%0)]=The huge [ansi(w,white)] portal, which opened in the air, closes in on itself.
+&BRING-1 ISS Baltimore=$bring *:@switch [get(me/%0)]=,@pemit %N=I don't recall that one.,@force [num(me)]=@tel [get(me/%0)]=here
+&REMEMBER-1 ISS Baltimore=$rem *:@set [num(me)]=[first(v(0))]:[rest(v(0))];@pemit %N=[first(v(0))] Destination remembered.
+&TIME-1 ISS Baltimore=$time:@remit [num(me)]=The Current MUSH Time is: [time()]
+&LOOK-1A ISS Baltimore=$+l:look
+&LOOK-1B ISS Baltimore=$peep:@force [owner(me)]=@listen [num(me)]=*;@force [num(me)]=l;@force [owner(me)]=@listen [num(me)]=
+&TALK-1A ISS Baltimore=$sp on:@force [owner(me)]=@set here=audible;@force [owner(me)]=@prefix [num(me)]=From [name(me)],
+&TALK-1B ISS Baltimore=$sp off:@force [owner(me)]=@set here=!audible;@force [owner(me)]=@prefix [num(me)]=
+&CLOAK-1 ISS Baltimore=$cloak:@remit here=[name(me)] cloaks, and shimmers from view.;@set [num(me)]=dark
+&DECLOAK-1 ISS Baltimore=$decloak:@set me=!dark;@remit here=[name(me)] decloaks, and shimmers into existence.
+&SPEAKER-1 ISS Baltimore=$spk *:@emit [ansi(r,%[)][ansi(hw,[name(me)])][ansi(r,%])] [switch(mid(%0,0,1),:,[ansi(hg,%N)]%b[ansi(hr,[mid(%0,1,strlen(%0))])],;,[ansi(hg,%N)][ansi(hr,[mid(%0,1,strlen(%0))])],{[ansi(hg,%N)] [ansi(r,says ")][ansi(hr,%0)][ansi(r,")]})]
+&CONDUIT-1 ISS Baltimore=$conduit *:@remit [loc(me)]=[name(me)] enters a TransWarp conduit.;@wait 1=@tel #%0;@wait 2={@remit [loc(me)]=[name(me)] comes out of a TransWarp conduit.}
+&EXIT_REPORT ISS Baltimore=Exits:[iter(lexits(here),%b%b[name(##)])]
+&MECH_SENSORS ISS Baltimore=[squish(iter(remove(lcon(here),%!),switch(t(ship),1,##)))]
+&SENSOR_REPORT ISS Baltimore=Sensor report:[iter(u(mech_sensors),%r[switch(get(##/lock),%!,*%b)][name(##)] -- [num(##)])]%r--- end ---
+&SENSORS-1 ISS Baltimore=$sensors:@remit me=[u(sensor_report)]%r[u(exit_report)]
+&CONTACT_LOST ISS Baltimore=^* has left.:@remit me=CONTACT LOST: [name(%0)] -- [num(%0)]
+&NEW_CONTACT ISS Baltimore=^* has arrived.:@remit me=NEW CONTACT: [name(%0)] -- [num(%0)]
+&MSETFREQ-1 ISS Baltimore=$msetfreq *:&mfreq me=%0;@pemit/silent %#=Comm Freq: %0
+&MSEND-1 ISS Baltimore=$msend *=*:@switch [t(get(%0/ship))]=0,{@remit %#=Invalid Communications Channel.},{@remit me=You send [ansi(hg,`)][ansi(hw,[switch(mid(%1,0,1),:,[ansi(hr,[mid(%1,1,strlen(%1))])],;,[ansi(hr,[mid(%1,1,strlen(%1))])],{[ansi(hw,%1)]})])][ansi(hg,')] over the Comm Panel.;@remit %0=Your Comm Panel Reads: Personal Transmission from [name(me)] -- [name(%#)]: [switch(mid(%1,0,1),:,[ansi(hr,[mid(%1,1,strlen(%1))])],;,[ansi(hr,[mid(%1,1,strlen(%1))])],{[ansi(hw,%1)]})]}
+&MTRANS-1 ISS Baltimore=$mtrans *:@dol [squish(iter(remove(lcon(here),%!),switch(t(get(##/ship)),1,##)))]=@swi [get(##/mfreq)]=[v(mfreq)],@remit ##=[ansi(hb,<)][ansi(hw,Transmission:)] [ansi(hr,Frequency)] [ansi(hy,[v(mfreq)] gHz)][ansi(hb,>)]%b[switch(mid(%0,0,1),:,[ansi(hg,[name(me)])]%b[ansi(hr,[mid(%0,1,strlen(%0))])],;,[ansi(hg,[name(me)])][ansi(hr,[mid(%0,1,strlen(%0))])],{[ansi(hg,[name(me)])][ansi(r,says ")][ansi(hr,%0)][ansi(r,")]})];@remit me=You transmit: [switch(mid(%0,0,1),:,[ansi(hg,[name(me)])]%b[ansi(hr,[mid(%0,1,strlen(%0))])],;,[ansi(hg,[name(me)])][ansi(hr,[mid(%0,1,strlen(%0))])],{[ansi(hg,[name(me)])][ansi(r,%bsays ")][ansi(hr,%0)][ansi(r,")]})]
+&WHEREIS-1 ISS Baltimore=$where *:@pemit/silent %#=[name(*%0)] is currently at: [name(loc(*%0))] - <[loc(*%0)]>
+&HELP-1A ISS Baltimore=$+help comm:@pemit/silent %#=Communications Help:%rmsend <name or db#>=<message> -- Send a message to a specific runabout.%rmtrans <message> -- Transmits a message over the current frequency.%rmsetfreq <frequency> -- Sets your frequency.
+&LISTEN-2B ISS Baltimore=$list off:@listen me;@remit me=Listening off.
+&LISTEN-2A ISS Baltimore=$list on:@listen me=*;@remit me=Listening on.
+&SHIP ISS Baltimore=1
+@LISTEN ISS Baltimore=*
+@OFAILURE ISS Baltimore=tried to pick up a space ship, but failed.
+@FAILURE ISS Baltimore=You cannot pick up a space ship, you fool!
+@EALIAS ISS Baltimore=embark;enter;board
+@LALIAS ISS Baltimore=o;ou;out;leave;exit;disembark
+@DESCRIBE ISS Baltimore=This is [name(me)], and is [name(owner(me))]'s vessel.
+@IDESCRIBE ISS Baltimore=This room is quite larger that you had imagined. It is an amazing place. Glancing at the walls, you notice that they are made of a rich grain of wood; expensive and look down at the floor you see that it is made out of marble, also expensive. To one end of the room, where the entrance is are steps which lead down to the floor. To either side of you, you notice pedestals which seem to be arranged in an equal distance which encircles the walls. On these pedestals you notice display cases that house precious artifacts. In one case you see a statue which was brought from the Gamma Quadrant, in another, you notice a piece of gold from a century in Earth before the use of latinum was implemented and the others house artifacts, but other pedestals house items of power and destruction and that is why they are housed in containers protected by force fields. As you glance around the room looking at the wall, you notice several famous paintings which gives the room a sort of fancy look. Against one of the far walls you notice a desk with a comfy black leather chair resting behind it. In the center of the room there is a part of the floor which is raised and in the center sits a chair. The room is lit in various areas by a hidden light source, which is mainly for giving the display cases a sort of ascent. The raised part of the floor is lit by a [ansi(w,white)] type of lighting which only seems to light the center part of the room where the chair and platform is. There is a latinum plated panel on the wall.
+&TIME-1 ISS Baltimore=$time:@remit [num(me)]=The Current MUSH Time is: [time()]
+&CREDITS ISS Baltimore=Coded by Jesse@DeltaMUSH
+&TAKEOFF ISS Baltimore=@remit [num(me)]=[name(me)] takes off!
+&PREFLIGHT ISS Baltimore=@remit [num(me)]=[name(me)] is preparing to launch. Please sit down and fasten seatbelts.
+&LANDING ISS Baltimore=@remit [num(me)]=[name(me)] is preparing to land, please brace yourselves.;@wait 2=@remit [num(me)]=[name(me)] has landed. You may leave now.
+&DEVFLAGS ISS Baltimore=invincible recharger nosteal

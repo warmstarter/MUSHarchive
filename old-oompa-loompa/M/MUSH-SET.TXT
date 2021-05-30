@@ -1,0 +1,12 @@
+@create Player Setter
+@link Player Setter=#0
+@lock Player Setter=#0
+@set Player Setter=!NO_COMMAND
+@set Player Setter=SAFE
+@set Player Setter=DARK
+@set Player Setter=INHERIT
+@set Player Setter=WIZARD
+@set Player Setter=SAFE
+@set Player Setter=MONITOR
+@LISTEN Player Setter=* has connected.
+@AHEAR Player Setter=@swi [or([orflags(%0,Wr)],[haspower(%0,guest)])]=1,{@pemit %0=Welcome back to SpaceMUSH.},{@switch [hasattr(%0,empire)]=1,{@pemit %0=Welcome Back!},{@pemit %0=Setting up your character, please wait.;@setemp *%0=None;@force #31=@reclass %0=Visitor/3;&playstatus %0=OOC;@lock *%0/playstatus=#1;@lock *%0/empire=#1;@lock *%0/rank=#1;@lock *%0/class=#1;@dol Public Newbie=@force *%0=@chan/on ##;@pemit %0=Thanks for coming to SpaceMUSH. Please set your @sex, &email, &race, and @alias. Thanks once again.}}

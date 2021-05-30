@@ -1,0 +1,69 @@
+# File: Guest Registrar
+# Purpose: Handle the logins of multiple guests.
+# Author: Ellan West  
+# Format: Mark Hassman
+# Description:  This small chunk of code handles the logins for
+# multiple guests when they are configured into the server.
+#
+# Setup: @pcreate 5 guests, configure the server to recognize
+#  the guests, create a guest home for them.  Link them all
+#  to that room, place an @adisconnect on them that wipes 
+#  all attributes and sends them home.  Lock the adisconnect
+#  attribute to wizards only.  The guest home should only be
+#  accessible to guests and admins.
+#
+@create Guest Registrar
+-
+@lock Guest Registrar=#1
+-
+&FOO Guest Registrar=4
+-
+# Change these to the dbrefs of your five guests.
+# These attribs aren't necessary but they are nice as a reference.
+&GUEST1 Guest Registrar=#39
+-
+&GUEST2 Guest Registrar=#45
+-
+&GUEST3 Guest Registrar=#46
+-
+&GUEST4 Guest Registrar=#47
+-
+&GUEST5 Guest Registrar=#48
+-
+# When a guest connects, the connect guest is newpassworded and the 
+#  next guest is configured.  This loops from 1-5 and back again.
+#
+&MON-CONNECT Guest Registrar=^Guest*connected.:
+	@switch/first [hasflag(%#, connected)]=1,
+	  {
+	    @newpassword %#=frItz0;
+ 	    @alias %#=;
+	    &foo me=[setq(0,[switch(add(mid(%N,5,1),1),6,1,add(mid(%N,5,1),1))])][r(0)];
+	    @wait 3=
+            {
+		@alias *Guest[r(0)]=Guest;
+		@newpassword Guest[r(0)]=guest
+	    }
+	  },
+	  @newpassword %N=guest
+-
+# Upon return to the Guest home, the guest is cleaned up and prepared
+# for login.  Guests who are still connected are unaffected.
+#
+&MON-ARRIVE Guest Registrar=^Guest*arrived.:
+	@switch/first [hasflag(%#, connected)]=0,
+	{
+	  @newpassword %N=guest;
+	  @wipe %#;
+	  @desc %#=A simple guest. Please be nice to me and answer my questions.
+	}
+-
+@set Guest Registrar=DARK
+-
+@set Guest Registrar=MONITOR
+-
+@set Guest Registrar=STICKY
+-
+# Needed to change passwords, etc.
+@set Guest Registrar=INHERIT
+-

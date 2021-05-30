@@ -1,0 +1,41 @@
+#   Author: Tim Poe (Telsin@Soucon)
+#   Format: Ellan West (12/30/96)
+#
+#########################################################################################
+#
+#  This lil tool is the best way I've ever seen to get useable inspection notes for
+#  a builder. It records all notes by roomdbref, and has sense enough not to overwrite 
+#  previous notes for the same room. The gnote command also adds sequential notes, not
+#  limited to a specific room-dbref.
+#
+#         To use this object, 
+#  For notes about a room type 'note <text> while in the room being inspected. 
+#         Repeat as needed. 
+#  To record general comments about a project as a whole, type 'gnote <text>
+#         Repeat as needed.  
+#  Set the 'notes' object visual and deliver to the builder for corrections.
+#
+#  To re-use, create a blank object, &notes Scribe=#dbref, and insert the new object
+#  into the Scribe
+################################ Scribe #################################################
+# Create the inspection tool
+@create Scribe=1
+-
+&CMD-NOTE Scribe=$note *:&R%L-[words(lattr([v(notes)]/R%l*))] 
+     [v(notes)]={%0};@pemit %#=Note 'R%L-[sub(words(lattr([v(notes)]/R%l*)),1)]' recorded.
+-
+&CMD-GNOTE Scribe=$gnote *:&GENERAL-[words(lattr([v(notes)]/GENERAL*))] [v(notes)]
+      ={%0};@pemit %#=Note 'GENERAL-[sub(words(lattr([v(notes)]/GENERAL*)),1)]' recorded. -
+#  Hold the place for the first notes object
+&NOTES Scribe=#XXXX
+-
+##################################### Notepad ##########################################
+#
+# Optional first notes object 
+@create Notepad1
+-
+&notes Scribe=[num(Notepad1)]
+-
+@tel Notepad1=Scribe
+-
+################################### End #################################################

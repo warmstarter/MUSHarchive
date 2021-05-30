@@ -1,0 +1,21 @@
+@@ System: TinyFugue 'ed' by Rhysem, V2.0
+@@ Author: Jonathan A. Booth
+@@ Email: kamikaze@N0$PAMimsa.edu
+@@ URL: http://www.N0$PAMimsa.edu/~kamikaze/
+@@ (remove NOSPAM from hostnames)
+@@ Date: December 23, 1998
+@@ Author is willing to support: yes
+@@
+@@ Creates a command called 'ed' that's the standard tinyfugue ed you
+@@ see everywhere, yet better. It will remember the last object you
+@@ edited an attribute on, and if you just 'ed foobar' it will assume you
+@@ mean 'ed <last object you edited>/foobar' and do that.
+@@
+@@ It also completes names using glob pattern matching, so if your
+@@ object has a set of attributes, foo_long_attrib bar_long_attrib
+@@ baz_long_attrib, and you want to edit the foo, all you do is 'ed
+@@ <object>/foo' and it'll try to match it out to 'foo_long_attrib'.
+@@
+&CMD_TINYFUGUE_ED me=$ed *:think [setq(0,switch([strmatch(secure(%0),*/*)]:[isdbref(get(%#/last_ed))],1:*,locate(%#,before(secure(%0),/),Nacehilmnp),0:1,get(%#/last_ed),#-1))][setq(1,last(secure(%0),/))][setq(1,switch(words(lattr(%q0/%q1*)),1,lattr(%q0/%q1*),%q1))];@sel [isdbref(%q0)]:[controls(%#,%q0)]:[visible(%#,%q0/%q1)]=0:*:*,{@pemit %#=[switch(isdbref(%q0),#-1*,{No such object visible.},#-2*,{More than one match to that name exist. Be more specific.},{Unknown object location error.})]},*:0:*,{@pemit %#=No permission to modify object.},*:*:0,{@pemit %#=No such attribute to edit, or you can't see that attribute.},1:1:1,{&last_ed %#=%q0;@pemit %#=FugueEdit> &%q1 %q0=[get(%q0/%q1)]}
+
+

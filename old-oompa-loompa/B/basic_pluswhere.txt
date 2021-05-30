@@ -1,0 +1,14 @@
+@@ Basic +Where
+@@
+@@ This is a basic +where, which shows Name, Location,
+@@ and the DB # of the room if it is set JUMP_OK.
+@@ Also accounts for UNFINDABLE flag, and uses
+@@ regexps to allow both 'where'%r@@ and '+where'
+@@ to trigger it.
+
+
+@create +where global
+@link +where global = #24
+@lock/Basic +where global=#0
+&+WHERE +where global=$^\+?where$:@pem/s %#=ansi(wh,[ljust(Name,14)] [ljust(Location,35)] #)%r[iter(lwho(),ljust(mid(name(##),0,14),14) [if(cand(hastype(loc(##),room),hasflag(loc(##),jump_ok),not(hasflag(##,unfindable))),ljust(mid(name(loc(##)),0,35),35) [ljust(loc(##),7)],ljust(mid(if(hasflag(##,unfindable),** UNFINDABLE **,name(loc(##))),0,42),42))],,%r)]
+@set +where global/+WHERE=regexp

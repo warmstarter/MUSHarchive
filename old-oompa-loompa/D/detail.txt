@@ -1,0 +1,58 @@
+##############################################################################
+# +detail  Packaged 5/24/96 by Mark Hassman 
+#	   Code slightly tweaked from original to return error messages
+#	   properly via locate()
+# Original Author: Talea@PernMUSH
+# 
+# Replace 'Globals Object' with the dbref of your global command object
+#  before formatting this file. Needs wiz-inheritance for attr lookup
+##############################################################################
+# +detail <object>
+# +detail <object>'s <detail>
+# 
+# +detail allows you to put details on objects and players without having to
+# indicate it obviously in the desc. The details can have the equivalent of
+# @osucc and @asucc as well.
+# 
+# To put a detail on the object or player, set &DETAIL_<detail name>
+# <object>=<detail> and optionally &ODETAIL_<detail name> and &ADETAIL_<detail
+# name> as well. Put underscores in the detail name if necessary, i.e. a 
+# detail of a gold necklace would be &DETAIL_GOLD_NECKLACE.
+# 
+# +detail <object> will show the list of details on the object. +detail
+# <object>'s <detail> will show the &DETAIL_<detail> attribute of <object>. It
+# will show the rest of the room the &ODETAIL_<detail> and trigger
+# &ADETAIL_<detail> if those exist.
+#
+# For example:
+# &DETAIL_GOLD_NECKLACE Sharra=A fine serpentine gold chain.
+# &ODETAIL_GOLD_NECKLACE Sharra=admires Sharra's gold necklace.
+# &ADETAIL_GOLD_NECKLACE Sharra=@pemit me=%N looked at your gold necklace!
+# 
+# >+detail Sharra
+# Interesting items: gold_necklace
+# >+detail Sharra's gold_necklace
+# A fine serpentine gold chain.
+# 
+# Sharra would see:
+# Mark looked at your gold necklace!
+# 
+# and everyone else in the room would see:
+# Mark admires Sharra's gold necklace.
+# CREDITS: Talea@PernMUSH
+##############################################################################
+
+ &CMD-DETAIL-DO Globals Object=$+detail *'s *: @verb 
+ [setq(0,lattr(locate(%#,%0,in)/DETAIL_*))][setq(1,match(r(0), 
+ DETAIL_[setq(4,edit(trim(%1),%b,_))][r(4)]*))][switch(r(1), 0, 
+ setq(1,match(r(0),DETAIL_*_[r(4)]*)))][setq(2,extract(r(0), r(1),1))][setq(
+ 3,switch(r(2),,DETAIL_%1,r(2)))][locate(%#,%0,in)]=%#,[r(3)],I don't see 
+ that here.,O[r(3)],,A[r(3)],{%1,%#}
+-
+
+ &CMD-DETAIL-DOALL Globals Object=$+detail *:@pemit 
+ %#=[setq(0,locate(%#,%0,in))][switch(r(0),#-1,There's no %0 
+ here.,[switch(words(lattr(r(0)/DETAIL_*)),0,There's nothing of interest 
+ on %0.,Interesting items: [lcstr(iter(lattr(r(0)/DETAIL_*),%b[after(##,
+ DETAIL_)]))])])]
+-

@@ -1,0 +1,33 @@
+@create Jesse's Shuttle
+@link Jesse's Shuttle=[owner(me)]
+@lock Jesse's Shuttle==*[owner(me)]
+@set Jesse's Shuttle=OPAQUE
+@set Jesse's Shuttle=SAFE
+@set Jesse's Shuttle=ROYALTY
+@LALIAS Jesse's Shuttle=o;ou;out;leave;exit
+&ACTIONS Jesse's Shuttle=$do *:@force #591=%0
+@DESCRIBE Jesse's Shuttle=This is Jesse's Shuttle. It is meant for him to transport to other places where he is needed.
+&REPLICATOR Jesse's Shuttle=$replicator *:@remit #591=The Computer chimes, and you see the replicator starting to work. As the sound fades, you see a small door open with %n's %0.
+&LIGHTS Jesse's Shuttle=$lights *:@remit #591=The Computer chimes, and you see the lights in [name(me)] go %0.
+&TELEPORT Jesse's Shuttle=$tele * *:@tel %0=%1
+&BOOT Jesse's Shuttle=$boot *:@force #591=drop %0
+&KICK Jesse's Shuttle=$kick:@dolist lcon(#591)=drop ##
+&LOCK Jesse's Shuttle=$lock:@set #591=!enter_ok;@remit #591=The Shuttle is now LOCKED.
+&UNLOCK Jesse's Shuttle=$unlock:@set #591=enter_ok;@remit #591=The Shuttle is now UNLOCKED.
+@IDESCRIBE Jesse's Shuttle=This is the interior of Jesse's Shuttle. It has a Pilot and Co-Pilot seats in the front of the shuttle, and about 8 couches in the back.
+&PEEP Jesse's Shuttle=$peep:look
+&MUSIC Jesse's Shuttle=$play *:@remit #591=The Computer chimes, and you start to hear %n's choice of music, %0, play over Jesse's Shuttle's hidden speakers.
+&SPEAK Jesse's Shuttle=$sp *:@force #591=@emit %n says "%0"
+&ACTION Jesse's Shuttle=$ac *:@force #591=@emit %n %0
+&REMEMBER Jesse's Shuttle=$rem *:@set #591=[first(v(0))]:[rest(v(0))];@pemit %n=Shuttle Destination remembered.
+&TELE-1 Jesse's Shuttle=$tel *:@switch [get(me/%0)]=,@pemit %n=I don't recall that one.,@force #591=@tel [get(me/%0)]
+&BRING Jesse's Shuttle=$bring *:@switch [get(me/%0)]=,@pemit %n=I don't recall that one.,@force #591=@tel [get(me/%0)]=here
+&OOC Jesse's Shuttle=#5
+&HOME Jesse's Shuttle=#792
+@LISTEN Jesse's Shuttle=*
+&MOVEMENT Jesse's Shuttle=$fly *:@force #591=go %0
+&MISC-1 Jesse's Shuttle=$do *:@force #591=%0
+&TIME Jesse's Shuttle=$time:@remit #591=The Current MUSH Time is: [time()]
+&RECALL Jesse's Shuttle=$rec *:@switch [get(me/%0)]=,@pemit %n=I don't recall that one.,@pemit %n=%0 is [get(me/%0)].
+&CLOAK Jesse's Shuttle=$cloak:@remit here=Jesse's Shuttle cloaks, and shimmers from view.;@set #591=dark
+&DECLOAK Jesse's Shuttle=$decloak:@set me=!dark;@remit here=Jesse's Shuttle decloaks, and shimmers into existence.

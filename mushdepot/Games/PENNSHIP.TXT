@@ -1,0 +1,372 @@
+@set me=quiet
+@switch [isdbref(num(Ship Computer Parent))]=0,{think [ansi(hm,INSTALL:)] No "Ship Computer Parent" object found -- creating...;@create Ship Computer Parent},1,{think [ansi(hm,INSTALL:)] "Ship Computer Parent" object already exists... skipping creation.}
+think [ansi(hm,INSTALL:)] Setting object flags...
+@set Ship Computer Parent = NO_COMMAND
+think [ansi(hm,INSTALL:)] Downloading Data...
+&DATA_AUTH.SLEEP Ship Computer Parent=4
+&DATA_AUTH.MONITOR Ship Computer Parent=4
+&DATA_AUTH.CLEAR Ship Computer Parent=4
+&DATA_AUTH.LOG Ship Computer Parent=4
+&DATA_LOGS.MAX Ship Computer Parent=50
+&DATA_AUTH.ROOMS Ship Computer Parent=2
+&DATA_AUTH.LOCK Ship Computer Parent=4
+&DATA_AUTH.ROSTER Ship Computer Parent=0
+&DATA_AUTH.UNLOCK Ship Computer Parent=4
+&DATA_AUTH.REM Ship Computer Parent=4
+&DATA_CHANNEL Ship Computer Parent=SecurityChannel
+&DATA_PREFIX.CHANNEL Ship Computer Parent=[ansi(n,<)][ansi(hr,v(DATA_CHANNEL))][ansi(n,>)]
+&DATA_AUTH.ADD Ship Computer Parent=4
+&DATA_PREFIX.GAME Ship Computer Parent=[ansi(hg,COMPUTER:)]
+&DATA_PREFIX.ERROR Ship Computer Parent=[ansi(hr,ERROR:)]
+&DATA_IDLE.MIN Ship Computer Parent=300
+&DATA_AUTH.AUTH Ship Computer Parent=5
+&DATA_AUTH.MAX Ship Computer Parent=5
+&DATA_AUTH.MIN Ship Computer Parent=0
+&DATA_AUTH.POS Ship Computer Parent=4
+&DATA_AUTH.ATT Ship Computer Parent=3
+&DATA_AUTH.DET Ship Computer Parent=3
+&DATA_AUTH.LOGS Ship Computer Parent=2
+&DATA_AUTH.VIEW Ship Computer Parent=2
+&DATA_AUTH.ALERTSET Ship Computer Parent=4
+&DATA_AUTH.ALERTS Ship Computer Parent=1
+&DATA_MOTD.DEFAULT Ship Computer Parent=Welcome aboard the [name(udefault(DATA_SHIP.DB,%!))]! Please act responsibly and in the best interest of the Empire at all times. Should you witness any suspicious activities\, report it to your commanding officer immediately.%r%r-- Your Captain%r%r\(This is a generic MOTD. To change it use '[ansi(v(FONT_SHIP.Cmds),ship/motd <text>)]'.\)
+&DATA_AUTH.MAIL Ship Computer Parent=4
+&DATA_AUTH.MOTD Ship Computer Parent=1
+&DATA_AUTH.SCAN Ship Computer Parent=1
+&DATA_PREFIX.ANNOUNCE Ship Computer Parent=[ansi(hc,SHIP ANNOUNCEMENT:)]
+&DATA_AUTH.ANNOUNCE Ship Computer Parent=3
+&DATA_AUTH.LOCATE Ship Computer Parent=2
+&DATA_AUTH.LOCKDOWN Ship Computer Parent=5
+&DATA_AUTH.MOTDSET Ship Computer Parent=4
+&DATA_AUTH.ALERT Ship Computer Parent=4
+&DATA_AUTH.ALERTREM Ship Computer Parent=4
+think [ansi(hm,INSTALL:)] Downloading Functions...
+&FUN_PLR.AUTH-SLEEP Ship Computer Parent=[or(or(hasflag(%0,Wizard),hasflag(%0,Royalty)),gte(trunc(extract(grab(v(DATA_ROSTER),%0 *,|),2,1)),trunc(v(DATA_AUTH.Sleep))))]
+&FUN_PLR.AUTH-MONITOR Ship Computer Parent=[or(or(hasflag(%0,Wizard),hasflag(%0,Royalty)),gte(trunc(extract(grab(v(DATA_ROSTER),%0 *,|),2,1)),trunc(v(DATA_AUTH.Monitor))))]
+&FUN_LOG.CONTROLLED Ship Computer Parent=[or(member(first(v(LOG_%1),|),%0),u(FUN_CONTROL,%0,first(v(LOG_%1),|)))]
+&FUN_LOG.VALID Ship Computer Parent=[and(gte(%0,1),lte(%0,words(v(DATA_LOGS))))]
+&FUN_PLR.AUTH-CLEAR Ship Computer Parent=[or(or(hasflag(%0,Wizard),hasflag(%0,Royalty)),gte(trunc(extract(grab(v(DATA_ROSTER),%0 *,|),2,1)),trunc(v(DATA_AUTH.Clear))))]
+&FUN_PLR.AUTH-LOG Ship Computer Parent=[or(or(hasflag(%0,Wizard),hasflag(%0,Royalty)),gte(trunc(extract(grab(v(DATA_ROSTER),%0 *,|),2,1)),trunc(v(DATA_AUTH.Log))))]
+&FUN_ALIAS2DB Ship Computer Parent=[first(grab(v(DATA_ROOMS),* %0*,|))]
+&FUN_PLR.AUTH-ROOMS Ship Computer Parent=[or(or(hasflag(%0,Wizard),hasflag(%0,Royalty)),gte(trunc(extract(grab(v(DATA_ROSTER),%0 *,|),2,1)),trunc(v(DATA_AUTH.Rooms))))]
+&FUN_PLR.AUTH-UNLOCK Ship Computer Parent=[or(or(hasflag(%0,Wizard),hasflag(%0,Royalty)),gte(trunc(extract(grab(v(DATA_ROSTER),%0 *,|),2,1)),trunc(v(DATA_AUTH.UnLock))))]
+&FUN_EXIT.LOCKED Ship Computer Parent=[trunc(match(lock(%0),AUTOMATED_ADMINLOCK/1))]
+&FUN_EXIT.VALID Ship Computer Parent=[and(hastype(%0,EXIT),and(u(FUN_ROOM.Reg,home(%0)),u(FUN_ROOM.Valid,home(%0))))]
+&FUN_PLR.AUTH-LOCK Ship Computer Parent=[or(or(hasflag(%0,Wizard),hasflag(%0,Royalty)),gte(trunc(extract(grab(v(DATA_ROSTER),%0 *,|),2,1)),trunc(v(DATA_AUTH.Lock))))]
+&FUN_PLR.AUTH-ROSTER Ship Computer Parent=[or(or(hasflag(%0,Wizard),hasflag(%0,Royalty)),gte(trunc(extract(grab(v(DATA_ROSTER),%0 *,|),2,1)),trunc(v(DATA_AUTH.Roster))))]
+&FUN_CONTROL Ship Computer Parent=[or(or(hasflag(%0,Wizard),and(hasflag(%0,Royalty),not(hasflag(%1,Wizard)))),gt(trunc(extract(grab(v(DATA_ROSTER),%0 *,|),2,1)),trunc(extract(grab(v(DATA_ROSTER),%1 *,|),2,1))))]
+&FUN_PLR.AUTH-REM Ship Computer Parent=[or(or(hasflag(%0,Wizard),hasflag(%0,Royalty)),gte(trunc(extract(grab(v(DATA_ROSTER),%0 *,|),2,1)),trunc(v(DATA_AUTH.Rem))))]
+&FUN_PLR.AUTH-ADD Ship Computer Parent=[or(or(hasflag(%0,Wizard),hasflag(%0,Royalty)),gte(trunc(extract(grab(v(DATA_ROSTER),%0 *,|),2,1)),trunc(v(DATA_AUTH.Add))))]
+&FUN_PLR.REG Ship Computer Parent=[t(match(v(DATA_ROSTER),%0 *,|))]
+&FUN_PLR.VALID Ship Computer Parent=[trunc(hastype(%0,PLAYER))]
+&FUN_CONVERT.SECS2TIME Ship Computer Parent=[if(gte(%0,86400),[div(%0,86400)]d%b)][ifelse(lt(setr(5,div(mod(%0,86400),3600)),10),0%q5,%q5)]:[ifelse(lt(setr(6,div(mod(mod(%0,86400),3600),60)),10),0%q6,%q6)]:[ifelse(lt(setr(7,mod(mod(mod(%0,86400),3600),60)),10),0%q7,%q7)]
+&FUN_PLR.AUTH-AUTH Ship Computer Parent=[or(or(hasflag(%0,Wizard),hasflag(%0,Royalty)),gte(trunc(extract(grab(v(DATA_ROSTER),%0 *,|),2,1)),trunc(v(DATA_AUTH.Auth))))]
+&FUN_AUTH.VALID Ship Computer Parent=[and(gte(trunc(%0),trunc(v(DATA_AUTH.Min))),lte(trunc(%0),trunc(v(DATA_AUTH.Max))))]
+&FUN_PLR.AUTH-LOCKDOWN Ship Computer Parent=[or(or(hasflag(%0,Wizard),hasflag(%0,Royalty)),gte(trunc(extract(grab(v(DATA_ROSTER),%0 *,|),2,1)),trunc(v(DATA_AUTH.Lockdown))))]
+&FUN_ALIAS.VALID Ship Computer Parent=[not(match(v(DATA_ROOMS),* %0,|))]
+&FUN_PLR.AUTH-LOGS Ship Computer Parent=[or(or(hasflag(%0,Wizard),hasflag(%0,Royalty)),gte(trunc(extract(grab(v(DATA_ROSTER),%0 *,|),2,1)),trunc(v(DATA_AUTH.Logs))))]
+&FUN_PLR.AUTH-DET Ship Computer Parent=[or(or(hasflag(%0,Wizard),hasflag(%0,Royalty)),gte(trunc(extract(grab(v(DATA_ROSTER),%0 *,|),2,1)),trunc(v(DATA_AUTH.Det))))]
+&FUN_PLR.AUTH-ATT Ship Computer Parent=[or(or(hasflag(%0,Wizard),hasflag(%0,Royalty)),gte(trunc(extract(grab(v(DATA_ROSTER),%0 *,|),2,1)),trunc(v(DATA_AUTH.Att))))]
+&FUN_ROOM.VALID Ship Computer Parent=[and(isdbref(%0),and(hastype(%0,ROOM),member([zone(%0)] [parent(%0)],udefault(DATA_SHIP.DB,%!))))]
+&FUN_ROOM.REG Ship Computer Parent=[t(match(v(DATA_ROOMS),%0 *,|))]
+&FUN_PLR.AUTH-POS Ship Computer Parent=[or(or(hasflag(%0,Wizard),hasflag(%0,Royalty)),gte(trunc(extract(grab(v(DATA_ROSTER),%0 *,|),2,1)),trunc(v(DATA_AUTH.Pos))))]
+&FUN_PLR.AUTH-VIEW Ship Computer Parent=[or(or(hasflag(%0,Wizard),hasflag(%0,Royalty)),gte(trunc(extract(grab(v(DATA_ROSTER),%0 *,|),2,1)),trunc(v(DATA_AUTH.View))))]
+&FUN_PLR.AUTH-ALERT Ship Computer Parent=[or(or(hasflag(%0,Wizard),hasflag(%0,Royalty)),gte(trunc(extract(grab(v(DATA_ROSTER),%0 *,|),2,1)),trunc(v(DATA_AUTH.Alert))))]
+&FUN_PLR.AUTH-ALERTSET Ship Computer Parent=[or(or(hasflag(%0,Wizard),hasflag(%0,Royalty)),gte(trunc(extract(grab(v(DATA_ROSTER),%0 *,|),2,1)),trunc(v(DATA_AUTH.AlertSet))))]
+&FUN_PLR.AUTH-ALERTS Ship Computer Parent=[or(or(hasflag(%0,Wizard),hasflag(%0,Royalty)),gte(trunc(extract(grab(v(DATA_ROSTER),%0 *,|),2,1)),trunc(v(DATA_AUTH.Alerts))))]
+&FUN_PLR.AUTH-DEFAULT Ship Computer Parent=[or(or(hasflag(%0,Wizard),hasflag(%0,Royalty)),member(owner(udefault(DATA_SHIP.DB,%!)),%0))]
+&FUN_PLR.AUTH-MAIL Ship Computer Parent=[or(or(hasflag(%0,Wizard),hasflag(%0,Royalty)),gte(trunc(extract(grab(v(DATA_ROSTER),%0 *,|),2,1)),trunc(v(DATA_AUTH.MAIL))))]
+&FUN_PLR.AUTH-MOTD Ship Computer Parent=[or(or(hasflag(%0,Wizard),hasflag(%0,Royalty)),gte(trunc(extract(grab(v(DATA_ROSTER),%0 *,|),2,1)),trunc(v(DATA_AUTH.MOTD))))]
+&FUN_PLR.AUTH-SCAN Ship Computer Parent=[or(or(hasflag(%0,Wizard),hasflag(%0,Royalty)),gte(trunc(extract(grab(v(DATA_ROSTER),%0 *,|),2,1)),trunc(v(DATA_AUTH.Scan))))]
+&FUN_PLR.AUTH-MOTDSET Ship Computer Parent=[or(or(hasflag(%0,Wizard),hasflag(%0,Royalty)),gte(trunc(extract(grab(v(DATA_ROSTER),%0 *,|),2,1)),trunc(v(DATA_AUTH.MOTDset))))]
+&FUN_PLR.AUTH-ANNOUNCE Ship Computer Parent=[or(or(hasflag(%0,Wizard),hasflag(%0,Royalty)),gte(trunc(extract(grab(v(DATA_ROSTER),%0 *,|),2,1)),trunc(v(DATA_AUTH.Announce))))]
+&FUN_PLR.AUTH-LOCATE Ship Computer Parent=[or(or(hasflag(%0,Wizard),hasflag(%0,Royalty)),gte(trunc(extract(grab(v(DATA_ROSTER),%0 *,|),2,1)),trunc(v(DATA_AUTH.Locate))))]
+&FUN_PLR.INTRUDER Ship Computer Parent=[and(and(not(member(masterorg(owner(me)),masterorg(owner(%0)))),not(match(v(DATA_ROSTER),[owner(%0)] *,|))),not(orflags(owner(%0),Wr)))]
+&FUN_PLR.AUTH-ALERTREM Ship Computer Parent=[or(or(hasflag(%0,Wizard),hasflag(%0,Royalty)),gte(trunc(extract(grab(v(DATA_ROSTER),%0 *,|),2,1)),trunc(v(DATA_AUTH.AlertRem))))]
+&FUN_STARDATE Ship Computer Parent=[trunc(mul(1000,add(50,fdiv(add(extract(0 31 59 90 120 151 181 212 243 273 304 334,match(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec,extract(time(),2,1)),1),extract(time(),3,1)),365))))].[mid(round(fdiv(mid(time(),11,2),24),1),2,1)]
+&FUN_PLR.AUTH-SETUP Ship Computer Parent=[or(or(hasflag(%0,Wizard),hasflag(%0,Royalty)),member(owner(udefault(DATA_SHIP.DB,%!)),%0))]
+&FUN_SHIP.LOC Ship Computer Parent=[first(extract(v(DATA_ROOMS),match(iter(v(DATA_ROOMS),%b0 [lcon(first(##))] 0 |,|),* %0 *,|),1,|))]
+think [ansi(hm,INSTALL:)] Downloading Configurations...
+&CNF_CHANNEL.SLEEP Ship Computer Parent=1
+&CNF_CHANNEL.MONITOR Ship Computer Parent=1
+&CNF_CHANNEL.LOG Ship Computer Parent=1
+&CNF_CHANNEL.RELEASE Ship Computer Parent=1
+&CNF_CHANNEL.SECURE Ship Computer Parent=1
+&CNF_CHANNEL.UNLOCK Ship Computer Parent=1
+&CNF_CHANNEL.LOCK Ship Computer Parent=1
+&CNF_CHANNEL.ADD Ship Computer Parent=1
+&CNF_CHANNEL.REM Ship Computer Parent=1
+&CNF_SHOW.IDLETIME Ship Computer Parent=0
+&CNF_CHANNEL.AUTH Ship Computer Parent=1
+&CNF_CHANNEL.POS Ship Computer Parent=1
+&CNF_CHANNEL.ATTACH Ship Computer Parent=1
+&CNF_CHANNEL.DETACH Ship Computer Parent=1
+&CNF_CHANNEL.ALERTSET Ship Computer Parent=0
+&CNF_CHANNEL.ALERT Ship Computer Parent=1
+&CNF_CHANNEL.ALERTREM Ship Computer Parent=0
+&CNF_CHANNEL.DEFAULT Ship Computer Parent=0
+&CNF_CHANNEL.MOTD Ship Computer Parent=0
+&CNF_CHANNEL.SCAN Ship Computer Parent=0
+&CNF_CHANNEL.MOTDSET Ship Computer Parent=1
+&CNF_CHANNEL.LOCATE Ship Computer Parent=0
+&CNF_CHANNEL.INTRUDER Ship Computer Parent=1
+&CNF_CHANNEL.LOCKDOWN Ship Computer Parent=1
+&CNF_CHANNEL.ANNOUNCE Ship Computer Parent=0
+&CNF_CHANNEL.MAIL Ship Computer Parent=1
+&CNF_SHOW.ALERT Ship Computer Parent=1
+think [ansi(hm,INSTALL:)] Downloading Error Messages...
+&ERR_!AUTH_SLEEP Ship Computer Parent=You are not authorized to set the ship to SLEEP status.
+&ERR_!AUTH_MONITOR Ship Computer Parent=You are not authorized to set the ship to MONITOR status.
+&ERR_LOG_!CONTROLLED Ship Computer Parent=You must be the log-author or have higher authorization than the log-author to clear it.
+&ERR_LOG_!VALID Ship Computer Parent=There is no such log available. Use '[ansi(v(FONT_SHIP.Cmds),ship/logs)]' to view a list.
+&ERR_!AUTH_CLEAR Ship Computer Parent=You do not have authorization to clear logs on the [name(udefault(DATA_SHIP.DB,%!))].
+&ERR_LOGS_MAXED Ship Computer Parent=This ship has reached the maximum number \([v(DATA_LOGS.Max)]\) of logs allowed. You must first '[ansi(v(FONT_SHIP.Cmds),ship/clear)]' some old logs.
+&ERR_!AUTH_LOG Ship Computer Parent=You do not have authorization to create logs on the [name(udefault(DATA_SHIP.DB,%!))].
+&ERR_ROOM_!REG2 Ship Computer Parent=Room [name(%0)]\(%0\) is not attached to the ship. First '[ansi(v(FONT_SHIP.Cmds),ship/attach)]' it.
+&ERR_ROOM_!VALID2 Ship Computer Parent=[capstr(lcstr(type(%0)))] [name(%0)]\(%0\) is not a valid room.
+&ERR_EXIT_!LOCKED Ship Computer Parent=That exit is already unlocked.
+&ERR_!AUTH_UNLOCK Ship Computer Parent=You do not have authorization to unlock doors aboard the [name(udefault(DATA_SHIP.DB,%!))].
+&ERR_!AUTH_ROOMS Ship Computer Parent=You do not have authorization to view the rooms attached to the [name(udefault(DATA_SHIP.DB,%!))].
+&ERR_EXIT_LOCKED Ship Computer Parent=That exit is already locked.
+&ERR_EXIT_!VALID Ship Computer Parent=That is either not a valid exit\, or the room the exit is in is not attached to the ship \(use '[ansi(v(FONT_SHIP.Cmds),ship/attach)]' first\).
+&ERR_!AUTH_LOCK Ship Computer Parent=You do not have authorization to lock doors aboard the [name(udefault(DATA_SHIP.DB,%!))].
+&ERR_PLR_!CONTROL Ship Computer Parent=You do not have power over [name(%0)]\(%0).
+&ERR_PLR_!REG Ship Computer Parent=But [name(%0)]\(%0\) is not on [name(udefault(DATA_SHIP.DB,%!))]'s ship roster.
+&ERR_!AUTH_ROSTER Ship Computer Parent=You do not have authorization to retrieve [name(udefault(DATA_SHIP.DB,%!))]'s ship roster.
+&ERR_SHIP_!VALID Ship Computer Parent='%0' is not a valid ship name.
+&ERR_PLR_REG Ship Computer Parent=[name(%0)]\(%0\) is already on [name(udefault(DATA_SHIP.DB,%!))]'s ship roster.
+&ERR_PLR_!VALID Ship Computer Parent='%0' is not a valid player.
+&ERR_!AUTH_ADD Ship Computer Parent=You do not have authorization to add players to [name(udefault(DATA_SHIP.DB,%!))]'s ship roster.
+&ERR_!AUTH_POS Ship Computer Parent=You do not have authorization to re-position players on [name(udefault(DATA_SHIP.DB,%!))]'s ship roster.
+&ERR_!AUTH_AUTH Ship Computer Parent=You do not have authorization to authorize players to [name(udefault(DATA_SHIP.DB,%!))]'s ship roster.
+&ERR_AUTH_!VALID Ship Computer Parent=The authorization number specified must be between [v(DATA_AUTH.Min)] and [v(DATA_AUTH.Max)].
+&ERR_!AUTH_ATT Ship Computer Parent=You do not have authorization to attach rooms to [name(udefault(DATA_SHIP.DB,%!))].
+&ERR_ROOM_!VALID Ship Computer Parent=The specified DB# must be a Room and zoned to [udefault(DATA_SHIP.DB,%!)].
+&ERR_ROOM_REG Ship Computer Parent=[name(%0)]\(%0\) is already attached to the [name(udefault(DATA_SHIP.DB,%!))].
+&ERR_!AUTH_DET Ship Computer Parent=You do not have authorization to detach rooms to [name(udefault(DATA_SHIP.DB,%!))].
+&ERR_ROOM_!REG Ship Computer Parent=[name(%0)]\(%0\) is already detached from the [name(udefault(DATA_SHIP.DB,%!))].
+&ERR_ALIAS_!VALID Ship Computer Parent=That is not a valid room-alias on the [name(udefault(DATA_SHIP.DB,%!))].
+&ERR_!AUTH_LOGS Ship Computer Parent=You do not have authorization to list the logs of the [name(udefault(DATA_SHIP.DB,%!))].
+&ERR_!AUTH_VIEW Ship Computer Parent=You do not have authorization to view the logs of the [name(udefault(DATA_SHIP.DB,%!))].
+&ERR_!AUTH_LOCKDOWN Ship Computer Parent=You do not have authorization to lockdown the [name(udefault(DATA_SHIP.DB,%!))].
+&ERR_!AUTH_LOCATE Ship Computer Parent=You do not have authorization to locate people aboard the [name(udefault(DATA_SHIP.DB,%!))].
+&ERR_!AUTH_ANNOUNCE Ship Computer Parent=You do not have authorization to make ship-wide announcements aboard the [name(udefault(DATA_SHIP.DB,%!))].
+&ERR_!AUTH_SCAN Ship Computer Parent=You do not have authorization to scan the [name(udefault(DATA_SHIP.DB,%!))].
+&ERR_!AUTH_MOTDSET Ship Computer Parent=You do not have authorization to set the MOTD for the [name(udefault(DATA_SHIP.DB,%!))].
+&ERR_!AUTH_MOTD Ship Computer Parent=You do not have authorization to view the MOTD for the [name(udefault(DATA_SHIP.DB,%!))].
+&ERR_!AUTH_MAIL Ship Computer Parent=You do not have authorization to send mail to the [name(udefault(DATA_SHIP.DB,%!))].
+&ERR_!AUTH_DEFAULT Ship Computer Parent=You do not have authorization to view the setup information for the [name(udefault(DATA_SHIP.DB,%!))].
+&ERR_!AUTH_ALERTS Ship Computer Parent=You are not authorized to view the alerts for the [name(udefault(DATA_SHIP.DB,%!))].
+&ERR_!AUTH_ALERTSET Ship Computer Parent=You are not authorized to set the alerts for the [name(udefault(DATA_SHIP.DB,%!))].
+&ERR_ALERT_!VALID Ship Computer Parent='%0' is already a ship alert on the [name(udefault(DATA_SHIP.DB,%!))].
+&ERR_!AUTH_ALERT Ship Computer Parent=You are not authorized to issue alerts for the [name(udefault(DATA_SHIP.DB,%!))].
+&ERR_ALERT_!VALID2 Ship Computer Parent='[edit(%0,_,%b)]' is not a valid ship alert on the [name(udefault(DATA_SHIP.DB,%!))].
+think [ansi(hm,INSTALL:)] Downloading Commands...
+&CMD_SHIP.MONITOR Ship Computer Parent=$ship/mon*:think [ifelse(u(FUN_PLR.Auth-Monitor,%#),u(TRI_SHIP.Monitor,%#),u(TRI_ERROR,%#,!AUTH_MONITOR))]
+&CMD_SHIP.HELP Ship Computer Parent=$ship/help:think [pemit(%#,[ansi(v(FONT_HELP.Border),[repeat(-,78)]%r<<<<<)][ansi(v(FONT_HELP.Header),center(Ship Help - [name(udefault(DATA_SHIP.DB,%!))],68))][ansi(v(FONT_HELP.Border),>>>>>%r[repeat(-,78)])]%r[u(DRAW_SHIP.Help)]%r[ansi(v(FONT_HELP.Border),repeat(-,78))])]
+&CMD_SHIP.LOCKDOWN Ship Computer Parent=$ship/lockd*:think [ifelse(u(FUN_PLR.Auth-Lockdown,%#),u(TRI_SHIP.Lockdown,%#),u(TRI_ERROR,%#,!AUTH_LOCKDOWN))]
+&CMD_SHIP.LOCATE Ship Computer Parent=$ship/loca* *:think [switch([u(FUN_PLR.Auth-Locate,%#)][u(FUN_PLR.Valid,setr(0,pmatch(secure(%1))))],0?,u(TRI_ERROR,%#,!AUTH_LOCATE),10,u(TRI_ERROR,%#,PLR_!VALID,secure(%1)),11,u(TRI_SHIP.Locate,%#,%q0),u(TRI_SYSERR,%#))]
+&CMD_SHIP.ANNOUNCE Ship Computer Parent=$ship/ann* *:think [ifelse(u(FUN_PLR.Auth-Announce,%#),u(TRI_SHIP.Announce,%#,%1),u(TRI_ERROR,%#,!AUTH_ANNOUNCE))]
+&CMD_SHIP.SLEEP Ship Computer Parent=$ship/sleep:think [ifelse(u(FUN_PLR.Auth-Sleep,%#),u(TRI_SHIP.Sleep,%#),u(TRI_ERROR,%#,!AUTH_SLEEP))]
+&CMD_SHIP.CLEAR Ship Computer Parent=$ship/clear *:think [switch([u(FUN_PLR.Auth-Clear,%#)][u(FUN_LOG.Valid,trunc(%0))][u(FUN_LOG.Controlled,%#,setr(0,extract(v(DATA_LOGS),trunc(%0),1)))],0??,u(TRI_ERROR,%#,!AUTH_CLEAR),10?,u(TRI_ERROR,%#,LOG_!VALID),110,u(TRI_ERROR,%#,LOG_!CONTROLLED),111,u(TRI_SHIP.Clear,%#,trunc(%0),%q0),u(TRI_SYSERR,%#))]
+&CMD_SHIP.LOG Ship Computer Parent=$ship/log *=*:think [switch([u(FUN_PLR.Auth-Log,%#)][gte(trunc(words(v(DATA_LOGS))),trunc(v(DATA_LOGS.Max)))],0?,u(TRI_ERROR,%#,!AUTH_LOG),11,u(TRI_ERROR,%#,LOGS_MAXED),10,u(TRI_SHIP.Log,%#,%0,%1),u(TRI_SYSERR,%#))]
+&CMD_SHIP.UNLOCK Ship Computer Parent=$ship/unlock *:think [switch([u(FUN_PLR.Auth-UnLock,%#)][u(FUN_EXIT.Valid,setr(0,locate(udefault(FUN_SHIP.Loc,loc(%#),%#),secure(%0),e)))][u(FUN_EXIT.Locked,%q0)],0??,u(TRI_ERROR,%#,!AUTH_UNLOCK),10?,u(TRI_ERROR,%#,EXIT_!VALID),110,u(TRI_ERROR,%#,EXIT_!LOCKED,%q0),111,u(TRI_UNLOCK.Both,%#,%q0),u(TRI_SYSERR,%#))]
+&CMD_SHIP.SECURE Ship Computer Parent=$ship/sec* *:think [switch([u(FUN_PLR.Auth-Lock,%#)][isdbref(setr(1,u(FUN_Alias2DB,edit(secure(%1),%b,_))))][u(FUN_ROOM.Valid,%q1)][u(FUN_ROOM.Reg,%q1)],0???,u(TRI_ERROR,%#,!AUTH_LOCK),10??,u(TRI_ERROR,%#,ALIAS_!VALID),110?,u(TRI_ERROR,%#,ROOM_!VALID2,%q1),1110,u(TRI_ERROR,%#,ROOM_!REG2,%q1),1111,u(TRI_SHIP.Secure,%#,%q1),u(TRI_SYSERR,%#))]
+&CMD_SHIP.ROOMS Ship Computer Parent=$ship/room*:think [ifelse(u(FUN_PLR.Auth-Rooms,%#),ifelse(gt(words(strcat(|,secure(%0))),1),ifelse(setr(0,match(iter(v(DATA_SHIP.Nums),edit(name(##),%b,_)),*[edit(rest(strcat(|,secure(%0))),%b,_)]*)),u(TRI_SHIP.Rooms,%#,extract(v(DATA_SHIP.Nums),%q0,1)),u(TRI_ERROR,%#,SHIP_!VALID,rest(strcat(|,secure(%0))))),u(TRI_SHIP.Rooms,%#,udefault(DATA_SHIP.DB,%!))),u(TRI_ERROR,%#,!AUTH_ROOMS))]
+&CMD_SHIP.RELEASE Ship Computer Parent=$ship/rel* *:think [switch([u(FUN_PLR.Auth-UnLock,%#)][isdbref(setr(1,u(FUN_Alias2DB,secure(edit(%1,%b,_)))))][u(FUN_ROOM.Valid,%q1)][u(FUN_ROOM.Reg,%q1)],0???,u(TRI_ERROR,%#,!AUTH_UNLOCK),10??,u(TRI_ERROR,%#,ALIAS_!VALID),110?,u(TRI_ERROR,%#,ROOM_!VALID2,%q1),1110,u(TRI_ERROR,%#,ROOM_!REG2,%q1),1111,u(TRI_SHIP.Release,%#,%q1),u(TRI_SYSERR,%#))]
+&CMD_SHIP.ADD Ship Computer Parent=$ship/add* *:think [switch([u(FUN_PLR.Auth-Add,%#)][u(FUN_PLR.Valid,setr(0,pmatch(secure(%1))))][u(FUN_PLR.Reg,%q0)],0??,u(TRI_ERROR,%#,!AUTH_ADD),10?,u(TRI_ERROR,%#,PLR_!VALID,secure(%1)),111,u(TRI_ERROR,%#,PLR_REG,%q0),110,u(TRI_SHIP.Add,%#,%q0),u(TRI_SYSERR,%#))]
+&CMD_SHIP.ATT Ship Computer Parent=$ship/att* *=*:think [switch([u(FUN_PLR.Auth-Att,%#)][u(FUN_ROOM.Valid,secure(%1))][u(FUN_ROOM.Reg,secure(%1))][u(FUN_ALIAS.Valid,left(edit(secure(%2),%b,_),20))],0???,u(TRI_ERROR,%#,!AUTH_ATT),10??,u(TRI_ERROR,%#,ROOM_!VALID,secure(%1)),111?,u(TRI_ERROR,%#,ROOM_REG,secure(%1)),1100,u(TRI_ERROR,%#,ALIAS_!VALID,left(edit(secure(%2),%b,_),20)),1101,u(TRI_SHIP.Att,%#,secure(%1),left(edit(secure(%2),%b,_),20)),u(TRI_SYSERR,%#))]
+&CMD_SHIP.DET Ship Computer Parent=$ship/det* *:think [switch([u(FUN_PLR.Auth-Det,%#)][u(FUN_ROOM.Valid,secure(%1))][u(FUN_ROOM.Reg,secure(%1))],0??,u(TRI_ERROR,%#,!AUTH_DET),10?,u(TRI_ERROR,%#,ROOM_!VALID,secure(%1)),110,u(TRI_ERROR,%#,ROOM_!REG,secure(%1)),111,u(TRI_SHIP.Det,%#,secure(%1)),u(TRI_SYSERR,%#))]
+&CMD_SHIP.LOGS Ship Computer Parent=$ship/logs*:think [ifelse(u(FUN_PLR.Auth-Logs,%#),ifelse(gt(words(strcat(|,secure(%0))),1),ifelse(setr(0,match(iter(v(DATA_SHIP.Nums),edit(name(##),%b,_)),*[edit(rest(strcat(|,secure(%0))),%b,_)]*)),u(TRI_SHIP.Logs,%#,extract(v(DATA_SHIP.Nums),%q0,1)),u(TRI_ERROR,%#,SHIP_!VALID,rest(strcat(|,secure(%0))))),u(TRI_SHIP.Logs,%#,udefault(DATA_SHIP.DB,%!))),u(TRI_ERROR,%#,!AUTH_LOGS))]
+&CMD_SHIP.REM Ship Computer Parent=$ship/rem* *:think [switch([u(FUN_PLR.Auth-Rem,%#)][u(FUN_PLR.Valid,setr(0,pmatch(secure(%1))))][u(FUN_PLR.Reg,%q0)][u(FUN_CONTROL,%#,%q0)],0???,u(TRI_ERROR,%#,!AUTH_REM),10??,u(TRI_ERROR,%#,PLR_!VALID,secure(%1)),110?,u(TRI_ERROR,%#,PLR_!REG,%q0),1110,u(TRI_ERROR,%#,PLR_!CONTROL,%q0),1111,u(TRI_SHIP.Rem,%#,%q0),u(TRI_SYSERR,%#))]
+&CMD_SHIP.ROSTER Ship Computer Parent=$ship/ros*:think [ifelse(u(FUN_PLR.Auth-Roster,%#),ifelse(gt(words(strcat(|,secure(%0))),1),ifelse(setr(0,match(iter(v(DATA_SHIP.Nums),edit(name(##),%b,_)),*[edit(rest(strcat(|,secure(%0))),%b,_)]*)),u(TRI_SHIP.Roster,%#,extract(v(DATA_SHIP.Nums),%q0,1)),u(TRI_ERROR,%#,SHIP_!VALID,rest(strcat(|,secure(%0))))),u(TRI_SHIP.Roster,%#,udefault(DATA_SHIP.DB,%!))),u(TRI_ERROR,%#,!AUTH_ROSTER))]
+&CMD_SHIP.SEC Ship Computer Parent=$ship/sec* *:
+&CMD_SHIP.LOCK Ship Computer Parent=$ship/lock *:think [switch([u(FUN_PLR.Auth-Lock,%#)][u(FUN_EXIT.Valid,setr(0,locate(udefault(FUN_SHIP.Loc,loc(%#),%#),secure(%0),e)))][u(FUN_EXIT.Locked,%q0)],0??,u(TRI_ERROR,%#,!AUTH_LOCK),10?,u(TRI_ERROR,%#,EXIT_!VALID),111,u(TRI_ERROR,%#,EXIT_LOCKED,%q0),110,u(TRI_LOCK.Both,%#,%q0),u(TRI_SYSERR,%#))]
+&CMD_SHIP.VIEW Ship Computer Parent=$ship/view *:think [ifelse(u(FUN_PLR.Auth-View,%#),ifelse(gt(words(secure(%0),/),1),ifelse(setr(0,match(iter(v(DATA_SHIP.Nums),edit(name(##),%b,_)),*[edit(before(secure(%0),/),%b,_)]*)),u(TRI_SHIP.View,%#,extract(v(DATA_SHIP.Nums),%q0,1),trunc(after(%0,/))),u(TRI_ERROR,%#,SHIP_!VALID,before(secure(%0),/))),u(TRI_SHIP.View,%#,udefault(DATA_SHIP.DB,%!),trunc(%0))),u(TRI_ERROR,%#,!AUTH_VIEW))]
+&CMD_SHIP.AUTH Ship Computer Parent=$ship/auth* *=*:think [switch([u(FUN_PLR.Auth-Auth,%#)][u(FUN_PLR.Valid,setr(0,pmatch(secure(%1))))][u(FUN_PLR.Reg,%q0)][u(FUN_CONTROL,%#,%q0)][u(FUN_AUTH.Valid,trunc(secure(%2)))],0????,u(TRI_ERROR,%#,!AUTH_AUTH),10???,u(TRI_ERROR,%#,PLR_!VALID,secure(%1)),110??,u(TRI_ERROR,%#,PLR_!REG,%q0),1110?,u(TRI_ERROR,%#,PLR_!CONTROL,%q0),11110,u(TRI_ERROR,%#,AUTH_!VALID),11111,u(TRI_SHIP.Auth,%#,%q0,trunc(secure(%2))),u(TRI_SYSERR,%#))]
+&CMD_SHIP.POS Ship Computer Parent=$ship/pos* *=*:think [switch([u(FUN_PLR.Auth-Auth,%#)][u(FUN_PLR.Valid,setr(0,pmatch(secure(%1))))][u(FUN_PLR.Reg,%q0)][u(FUN_CONTROL,%#,%q0)],0???,u(TRI_ERROR,%#,!AUTH_AUTH),10??,u(TRI_ERROR,%#,PLR_!VALID,secure(%1)),110?,u(TRI_ERROR,%#,PLR_!REG,%q0),1110,u(TRI_ERROR,%#,PLR_!CONTROL,%q0),1111,u(TRI_SHIP.Pos,%#,%q0,secure(%2)),u(TRI_SYSERR,%#))]
+&CMD_SHIP.ALERT Ship Computer Parent=$ship/alert *:think [ifelse(eq(trunc(pos(-,%0)),1),[switch([u(FUN_PLR.Auth-AlertRem,%#)][t(match(v(DATA_ALERTS),[setr(0,ifelse(isnum(after(%0,-)),first(extract(v(DATA_ALERTS),after(%0,-),1,|)),edit(after(%0,-),%b,_)))] *,|))],0?,u(TRI_ERROR,%#,!AUTH_AlertRem),10,u(TRI_ERROR%#,ALERT_!VALID2,after(%0,-)),11,u(TRI_SHIP.AlertRem,%#,%q0),u(TRI_SYSERR,%#))],ifelse(pos(=,%0),[switch([u(FUN_PLR.Auth-AlertSet,%#)][t(match(v(DATA_ALERTS),[setr(0,before(%0,=))] *,|))],0?,u(TRI_ERROR,%#,!AUTH_ALERTSET),11,u(TRI_ERROR,%#,ALERT_!VALID,before(%0,=)),10,u(TRI_SHIP.AlertSet,%#,%q0,after(%0,=)),u(TRI_SYSERR,%#))],[switch([u(FUN_PLR.Auth-Alert,%#)][t(match(v(DATA_ALERTS),[setr(0,ifelse(isnum(%0),first(extract(v(DATA_ALERTS),%0,1,|)),edit(%0,%b,_)))] *,|))][match(v(DATA_ALERT.Current),%q0)],0??,u(TRI_ERROR,%#,!AUTH_ALERT),10?,u(TRI_ERROR,%#,ALERT_!VALID2,%0),111,u(TRI_ERROR,%#,ALERT_!CHANGE,%q0),110,u(TRI_SHIP.Alert,%#,%q0),u(TRI_SYSERR,%#))]))]
+&CMD_SHIP.SETUP Ship Computer Parent=$ship/setup:think [ifelse(u(FUN_PLR.Auth-Setup,%#),u(TRI_SHIP.Setup,%#),u(TRI_ERROR,%#,!AUTH_Setup))]
+&CMD_SHIP.SETUP2 Ship Computer Parent=$ship/setup2:think [ifelse(u(FUN_PLR.Auth-Setup,%#),u(TRI_SHIP.Setup2,%#),u(TRI_ERROR,%#,!AUTH_Setup))]
+&CMD_SHIP.SETUP3 Ship Computer Parent=$ship/setup3:think [ifelse(u(FUN_PLR.Auth-Setup,%#),u(TRI_SHIP.Setup3,%#),u(TRI_ERROR,%#,!AUTH_Setup))]
+&CMD_SHIP.SETUP4 Ship Computer Parent=$ship/setup4:think [ifelse(u(FUN_PLR.Auth-Setup,%#),u(TRI_SHIP.Setup4,%#),u(TRI_ERROR,%#,!AUTH_Setup))]
+&CMD_SHIP.DEFAULT Ship Computer Parent=$ship/default:think [ifelse(u(FUN_PLR.Auth-Default,%#),u(TRI_SHIP.Default,%#),u(TRI_ERROR,%#,!AUTH_DEFAULT))]
+&CMD_SHIP.MAIL Ship Computer Parent=$ship/mail *=*:@tr me/[ifelse(u(FUN_PLR.Auth-Mail,%#),TRI_SHIP.Mail,TRI_ERROR)]=%#,[ifelse(u(FUN_PLR.Auth-Mail,%#),%0,!AUTH_MAIL)],%1
+&CMD_SHIP.MOTD Ship Computer Parent=$ship/motd:think [ifelse(u(FUN_PLR.Auth-MOTD,%#),u(TRI_SHIP.MOTD,%#),u(TRI_ERROR,%#,!AUTH_MOTD))]
+&CMD_SHIP.MOTDSET Ship Computer Parent=$ship/motd *:think [ifelse(u(FUN_PLR.Auth-MOTDset,%#),u(TRI_SHIP.MOTDset,%#,%0),u(TRI_ERROR,%#,!AUTH_MOTDset))]
+&CMD_SHIP.SCAN Ship Computer Parent=$ship/scan:think [ifelse(u(FUN_PLR.Auth-Scan,%#),u(TRI_SHIP.Scan,%#),u(TRI_ERROR,%#,!AUTH_SCAN))]
+&CMD_SHIP.ALERTS Ship Computer Parent=$ship/alerts:[ifelse(u(FUN_PLR.Auth-Alerts,%#),u(TRI_SHIP.Alerts,%#),u(TRI_ERROR,%#,!AUTH_ALERTS))]
+&CMD_SHIP.Copyright Ship Computer Parent=$ship/copy*:think [pemit(%#,Ship Computer Parent v2.0 -- Created by Demonic \(2000\)%rUpdated versions of this code can be found on:%r%b%bhttp://www.mindspring.com/~loparo)]
+think [ansi(hm,INSTALL:)] Downloading Triggers...
+&TRI_SHIP.SLEEP Ship Computer Parent=[iter(v(DATA_ROOMS),[set([first(##)],AENTER:)],|)][if(v(CNF_CHANNEL.Sleep),u(TRI_CEMIT,v(DATA_CHANNEL),CEMIT_Sleep,%0))][u(TRI_MESSAGE.Priv,%0,SHIP_Sleep)]
+&TRI_SHIP.MONITOR Ship Computer Parent=[iter(v(DATA_ROOMS),[set([first(##)],AENTER:[u(LISTEN_ARRIVE)])][set([first(##)],MONITOR)][set([first(##)],!halt)],|)][if(v(CNF_CHANNEL.Monitor),u(TRI_CEMIT,v(DATA_CHANNEL),CEMIT_Monitor,%0))][u(TRI_MESSAGE.Priv,%0,SHIP_MONITOR)]
+&TRI_SHIP.CLEAR Ship Computer Parent=[wipe([udefault(DATA_SHIP.DB,%!)]/LOG_%2)][set(udefault(DATA_SHIP.DB,%!),DATA_LOGS:[trim(squish(remove(v(DATA_LOGS),%2)))])][if(v(CNF_CHANNEL.Log),u(TRI_CEMIT,v(DATA_CHANNEL),CEMIT_CLEARED,%0,%1))][u(TRI_MESSAGE.Priv,%0,LOG_CLEARED,%1)]
+&TRI_SHIP.LOG Ship Computer Parent=[set(udefault(DATA_SHIP.DB,%!),DATA_COUNTER:[inc(trunc(v(DATA_COUNTER)))])][set(udefault(DATA_SHIP.DB,%!),LOG_[v(DATA_COUNTER)]:%0|[u(FUN_STARDATE,secs())]|[edit(%1,|,!)]|[edit(%2,|,!)])][set(udefault(DATA_SHIP.DB,%!),DATA_LOGS:[trim(squish(cat(v(DATA_LOGS),v(DATA_COUNTER))))])][if(v(CNF_CHANNEL.Log),u(TRI_CEMIT,v(DATA_CHANNEL),CEMIT_LOGGED,%0,%1))][u(TRI_MESSAGE.Priv,%0,LOG_CREATED,%1)]
+&TRI_SHIP.SECURE Ship Computer Parent=[iter(lexits(%1),if(not(u(FUN_EXIT.Locked,##)),u(TRI_LOCK.Both,%0,##,-1)))][if(and(v(CNF_CHANNEL.Secure),not(eq(%2,-1))),u(TRI_CEMIT,v(DATA_CHANNEL),CEMIT_SECURED,%0,%1))][if(not(eq(%2,-1)),[u(TRI_MESSAGE.Priv,%0,ROOM_SECURED,%1)][u(TRI_MESSAGE.Others,ifelse(match(%0,AUTO),%2,%0),ROOM_SECURED_BY,%0,%1)][u(TRI_MESSAGE.Room,%1,ROOM_SECURED2)])]
+&TRI_SHIP.ROOMS Ship Computer Parent=[pemit(%0,[ansi(v(FONT_ROOMS.Border),[repeat(-,78)]%r<<<<<)][ansi(v(FONT_ROOMS.Header),center(Ship Rooms - [name(%1)],68))][ansi(v(FONT_ROOMS.Border),>>>>>%r[repeat(-,78)])]%r%b[ansi(v(FONT_ROOMS.Title),Room Alias)][space(10)][ansi(v(FONT_ROOMS.Border),|)]%b[ansi(v(FONT_ROOMS.Title),Room DB#)]%b[ansi(v(FONT_ROOMS.Border),|)]%b[ansi(v(FONT_ROOMS.Title),Room Name)]%r[ansi(v(FONT_ROOMS.Border),[repeat(-,21)]|[repeat(-,10)]|[repeat(-,45)])][iter(flip(after(flip(xget(%1,DATA_ROOMS)),|)),%r%b[ljust(left(edit(extract(##,2,1),_,%b),20),20)][ansi(v(FONT_ROOMS.Border),|)]%b[ljust(first(##),9)][ansi(v(FONT_ROOMS.Border),|)]%b[left(name(first(##)),44)],|)]%r[ansi(v(FONT_ROOMS.Border),repeat(-,78))])]
+&TRI_SHIP.RELEASE Ship Computer Parent=[iter(lexits(%1),if(u(FUN_EXIT.Locked,##),u(TRI_UNLOCK.Both,%0,##,-1)))][if(v(CNF_CHANNEL.Release),u(TRI_CEMIT,v(DATA_CHANNEL),CEMIT_RELEASED,%0,%1))][u(TRI_MESSAGE.Priv,%0,ROOM_RELEASED,%1)][u(TRI_MESSAGE.Others,%0,ROOM_RELEASED_BY,%0,%1)][u(TRI_MESSAGE.Room,%1,ROOM_RELEASED2)]
+&TRI_UNLOCK.DOOR Ship Computer Parent=[lock(%1,edit(xget(%1,OLD_LOCK),*UNLOCKED*,))][set(%1,FAILURE:[xget(%1,OLD_FAILURE)])][set(%1,SUCCESS:[xget(%1,OLD_SUCC)])][set(%1,OFAILURE:[xget(%1,OLD_OFAILURE)])][set(%1,OSUCCESS:[xget(%1,OLD_OSUCC)])][set(%1,DESCRIBE:[xget(%1,OLD_DESC)])][wipe(%1/OLD_LOCK)][wipe(%1/OLD_FAILURE)][wipe(%1/OLD_SUCC)][wipe(%1/OLD_OFAILURE)][wipe(%1/OLD_OSUCC)][wipe(%1/OLD_DESC)][if(and(v(CNF_CHANNEL.Unlock),not(eq(%2,-1))),u(TRI_CEMIT,v(DATA_CHANNEL),CEMIT_UNLOCKED,%0,%1))][if(not(eq(%2,-1)),u(TRI_MESSAGE.Room,home(%1),EXIT_UNLOCKED_[ifelse(member(udefault(FUN_SHIP.Loc,loc(%0),%0),home(%1)),BY,OTHERSIDE)],%0,%1))]
+&TRI_UNLOCK.BOTH Ship Computer Parent=[iter(%1 [extract(lexits(loc(%1)),member(iter(lexits(loc(%1)),loc(##)),home(%1)),1)],u(TRI_UNLOCK.Door,%0,##,%2))]
+&TRI_SHIP.REM Ship Computer Parent=[set(udefault(DATA_SHIP.DB,%!),DATA_ROSTER:[ldelete(v(DATA_ROSTER),match(v(DATA_ROSTER),%1 *,|),|)])][if(v(CNF_CHANNEL.Rem),u(TRI_CEMIT,v(DATA_CHANNEL),CEMIT_REMOVED,%0,%1))][u(TRI_MESSAGE.Priv,%0,PLR_REMOVED,%1)][u(TRI_MESSAGE.Priv,%1,YOURE_REMOVED,%0)]
+&TRI_SHIP.ADD Ship Computer Parent=[set(udefault(DATA_SHIP.DB,%!),DATA_ROSTER:[trim(squish(strcat(v(DATA_ROSTER),%1 0 None|)))])][if(v(CNF_CHANNEL.Add),u(TRI_CEMIT,v(DATA_CHANNEL),CEMIT_ADDED,%0,%1))][u(TRI_MESSAGE.Priv,%0,PLR_ADDED,%1)][u(TRI_MESSAGE.Priv,%1,YOURE_ADDED,%0)]
+&TRI_ERROR Ship Computer Parent=[pemit(%0,[u(DATA_PREFIX.Error)][space(ifelse(words(u(DATA_PREFIX.Error)),1,0))][u(ERR_%1,%2,%3,%4,%5)])]
+&TRI_SHIP.DET Ship Computer Parent=[set(udefault(DATA_SHIP.DB,%!),DATA_ROOMS:[ldelete(v(DATA_ROOMS),match(v(DATA_ROOMS),%1 *,|),|)])][if(v(CNF_CHANNEL.Detach),u(TRI_CEMIT,v(DATA_CHANNEL),CEMIT_DETACHED,%0,%1))][u(TRI_MESSAGE.Priv,%0,ROOM_DETACHED,%1)]
+&TRI_SHIP.LOGS Ship Computer Parent=[pemit(%0,[ansi(v(FONT_LOGS.Border),[repeat(-,78)]%r<<<<<)][ansi(v(FONT_LOGS.Header),center(Ship Logs - [name(%1)],68))][ansi(v(FONT_LOGS.Border),>>>>>%r[repeat(-,78)])]%r%b[ansi(v(FONT_LOGS.Title),Log#)]%b[ansi(v(FONT_LOGS.Border),|)]%b[ansi(v(FONT_LOGS.Title),Stardate)]%b%b%b[ansi(v(FONT_LOGS.Border),|)]%b[ansi(v(FONT_LOGS.Title),Author)][space(11)][ansi(v(FONT_LOGS.Border),|)]%b[ansi(v(FONT_LOGS.Title),Subject)]%r[ansi(v(FONT_LOGS.Border),------|[repeat(-,12)]|[repeat(-,18)]|[repeat(-,39)])][ifelse(words(v(DATA_LOGS)),iter(v(DATA_LOGS),%r[rjust(#@,4)]%b%b[ansi(v(FONT_LOGS.Border),|)]%b[ljust(extract(v(LOG_##),2,1,|),11)][ansi(v(FONT_LOGS.Border),|)]%b[ljust(name(first(v(LOG_##),|)),17)][ansi(v(FONT_LOGS.Border),|)]%b[left(extract(v(LOG_##),3,1,|),38)]),%r%bThere are no logs available.)]%r[ansi(v(FONT_LOGS.Border),repeat(-,78))]%r* Type '[ansi(v(FONT_SHIP.Cmds),ship/view <#>)]' to view a log.)]
+&TRI_SHIP.ATT Ship Computer Parent=[set(udefault(DATA_SHIP.DB,%!),DATA_ROOMS:[trim(strcat(v(DATA_ROOMS),%1 %2|))])][if(v(CNF_CHANNEL.Attach),u(TRI_CEMIT,v(DATA_CHANNEL),CEMIT_ATTACHED,%0,%1,%2))][u(TRI_MESSAGE.Priv,%0,ROOM_ATTACHED,%1,%2)]
+&TRI_SHIP.POS Ship Computer Parent=[set(udefault(DATA_SHIP.DB,%!),DATA_ROSTER:[replace(v(DATA_ROSTER),match(v(DATA_ROSTER),%1 *,|),replace(grab(v(DATA_ROSTER),%1 *,|),3,edit(%2,%b,_)),|)])][if(v(CNF_CHANNEL.Pos),u(TRI_CEMIT,v(DATA_CHANNEL),CEMIT_POSITIONED,%0,%1,edit(%2,_,%b)))][u(TRI_MESSAGE.Priv,%0,PLR_POSITIONED,%1,edit(%2,_,%b))][u(TRI_MESSAGE.Priv,%1,YOURE_POSITIONED,%0,edit(%2,_,%b))]
+&TRI_SHIP.AUTH Ship Computer Parent=[set(udefault(DATA_SHIP.DB,%!),DATA_ROSTER:[replace(v(DATA_ROSTER),match(v(DATA_ROSTER),%1 *,|),replace(grab(v(DATA_ROSTER),%1 *,|),2,%2),|)])][if(v(CNF_CHANNEL.Auth),u(TRI_CEMIT,v(DATA_CHANNEL),CEMIT_AUTHORIZED,%0,%1,%2))][u(TRI_MESSAGE.Priv,%0,PLR_AUTHORIZED,%1,%2)][u(TRI_MESSAGE.Priv,%1,YOURE_AUTHORIZED,%0,%2)]
+&TRI_SYSERR Ship Computer Parent=[pemit(%0,ansi(fhr,SYSERR: There is a bug in the code. Please report this to an Administrator.))]
+&TRI_CEMIT Ship Computer Parent=[ifelse(haspower(me,cemit),cemit(%0,[u(DATA_PREFIX.Channel)][space(not(not(words(u(DATA_PREFIX.Game)))))][u(MSG_%1,%2,%3,%4)]),pemit(cwho(%0),[u(DATA_PREFIX.Channel)][space(not(not(words(u(DATA_PREFIX.Game)))))][u(MSG_%1,%2,%3,%4)]))]
+&TRI_MESSAGE.PRIV Ship Computer Parent=[pemit(%0,[u(DATA_PREFIX.Game)][space(not(not(words(u(DATA_PREFIX.Game)))))][u(MSG_%1,%2,%3,%4)])]
+&TRI_SHIP.ROSTER Ship Computer Parent=[pemit(%0,[ansi(v(FONT_ROSTER.Border),[repeat(-,78)]%r<<<<<)][ansi(v(FONT_ROSTER.Header),center(Ship Roster - [name(%1)],68))][ansi(v(FONT_ROSTER.Border),>>>>>%r[repeat(-,78)])]%r%b[ansi(v(FONT_ROSTER.Title),Crewmember Name)]%b%b%b[ansi(v(FONT_ROSTER.Border),|)] [ansi(v(FONT_ROSTER.Title),Position)][space(9)][ansi(v(FONT_ROSTER.Border),|)] [ansi(v(FONT_ROSTER.Title),Auth)] [ansi(v(FONT_ROSTER.Border),|)] [ansi(v(FONT_ROSTER.Title),Status)]%b%b%b[ansi(v(FONT_ROSTER.Border),|)] [ansi(v(FONT_ROSTER.Title),Location)]%r[ansi(v(FONT_ROSTER.Border),[repeat(-,19)]|[repeat(-,18)]|[repeat(-,6)]|[repeat(-,10)]|[repeat(-,21)])][iter(flip(after(flip(xget(%1,DATA_ROSTER)),|)),%r%b[ljust(left(name(first(##)),17),18)][ansi(v(FONT_ROSTER.Border),|)]%b[ljust(left(edit(extract(##,3,1),_,%b),16),17)][ansi(v(FONT_ROSTER.Border),|)]%b[rjust(left(trunc(extract(##,2,1)),3),4)]%b[ansi(v(FONT_ROSTER.Border),|)]%b[ljust(ifelse(eq(idle(first(##)),-1),OFFLINE,ifelse(v(CNF_SHOW.IdleTime),u(FUN_CONVERT.Secs2Time,idle(first(##))),ifelse(gte(idle(first(##)),v(DATA_IDLE.Min)),Idle,Active))),9)][ansi(v(FONT_ROSTER.Border),|)] [ifelse(match(v(DATA_ROOMS),[udefault(FUN_SHIP.Loc,loc(first(##)),first(##))] *,|),left(name(udefault(FUN_SHIP.Loc,loc(first(##)),first(##))),20),NOT ONBOARD)],|)]%r[ansi(v(FONT_ROSTER.Border),repeat(-,78))])]
+&TRI_LOCK.BOTH Ship Computer Parent=[iter(%1 [extract(lexits(loc(%1)),member(iter(lexits(loc(%1)),loc(##)),home(%1)),1)],u(TRI_LOCK.Door,%0,##,%2))]
+&TRI_LOCK.DOOR Ship Computer Parent=[set(%1,OLD_LOCK:[lock(%1)])][set(%1,OLD_FAILURE:[xget(%1,FAILURE)])][set(%1,OLD_OFAILURE:[xget(%1,OFAILURE)])][set(%1,OLD_SUCC:[xget(%1,SUCCESS)])][set(%1,OLD_OSUCC:[xget(%1,OSUCCESS)])][set(%1,OLD_DESC:[xget(%1,DESCRIBE)])][lock(%1,AUTOMATED_ADMINLOCK/1)][set(%1,AUTOMATED_ADMINLOCK:\[orflags\(\%#\,Wr\)\])][set(%1,FAILURE:\[ifelse\(eq\(v\(DATA_DOOR\)\,1\)\,You run into the door as it fails to open.\,You are knocked to the ground as you run into a powerful forcefield.\)\])][set(%1,SUCCESS:\[ifelse\(eq\(v\(DATA_DOOR\)\,1\)\,You mysteriously pass through the door.\,You mysteriously pass through the forcefield.\)\])][set(%1,OFAILURE:\[ifelse\(eq\(v\(DATA_DOOR\)\,1\)\,runs head-first into the door marked \[name\(me\)\].\,runs head-first into the forcefield marked \[name\(me\)\].\)\])][set(%1,OSUCCESS:\[ifelse\(eq\(v\(DATA_DOOR\)\,1\)\,mysteriously passes through the door.\,mysteriously passes through the forcefield.\)\])][set(%1,DESCRIBE:[xget(%1,DESCRIBE)]\%r\[ifelse\(eq\(v\(DATA_DOOR\)\,1\)\,The door appears to be locked.\,There seems to be a forcefield around the exit.\)\])][if(and(v(CNF_CHANNEL.Lock),not(eq(%2,-1))),u(TRI_CEMIT,v(DATA_CHANNEL),CEMIT_LOCKED,%0,%1))][if(not(eq(%2,-1)),u(TRI_MESSAGE.Room,home(%1),EXIT_LOCKED_[ifelse(member(udefault(FUN_SHIP.Loc,loc(%0),%0),home(%1)),BY,OTHERSIDE)],%0,%1))]
+&TRI_SHIP.VIEW Ship Computer Parent=[ifelse(u(FUN_LOG.Valid,%2),u(TRI_SHIP.View2,%0,%1,%2,extract(v(DATA_LOGS),%2,1)),u(TRI_ERROR,%#,LOG_!VALID))]
+&TRI_SHIP.VIEW2 Ship Computer Parent=[pemit(%0,[ansi(v(FONT_VIEW.Border),[repeat(-,78)]%r<<<<<)][ansi(v(FONT_VIEW.Header),center(Ship Log Viewing - [name(%1)],68))][ansi(v(FONT_VIEW.Border),>>>>>%r[repeat(-,78)])]%r%b[ansi(v(FONT_VIEW.Title),Log#)]%b[ansi(v(FONT_VIEW.Border),|)]%b[ansi(v(FONT_VIEW.Title),Stardate)]%b%b%b[ansi(v(FONT_VIEW.Border),|)]%b[ansi(v(FONT_VIEW.Title),Author)][space(11)][ansi(v(FONT_VIEW.Border),|)]%b[ansi(v(FONT_VIEW.Title),Subject)]%r[ansi(v(FONT_VIEW.Border),------|[repeat(-,12)]|[repeat(-,18)]|[repeat(-,39)])]%r[rjust(%2,4)]%b%b[ansi(v(FONT_LOGS.Border),|)]%b[ljust(extract(v(LOG_%3),2,1,|),11)][ansi(v(FONT_LOGS.Border),|)]%b[ljust(name(first(v(LOG_%3),|)),17)][ansi(v(FONT_LOGS.Border),|)]%b[left(extract(v(LOG_%3),3,1,|),38)]%r[ansi(v(FONT_VIEW.border),repeat(-,78))]%r%r[last(v(LOG_%3),|)]%r%r[ansi(v(FONT_VIEW.border),repeat(-,78))])]
+&TRI_SHIP.WELCOME Ship Computer Parent=[u(TRI_MESSAGE.Priv,%0,WELCOME)]
+&TRI_SHIP.INTRUDER Ship Computer Parent=[if(v(CNF_CHANNEL.Intruder),u(TRI_CEMIT,v(DATA_CHANNEL),CEMIT_INTRUDER,%0,%1,%2,%3))][u(TRI_MESSAGE.Priv,%1,PLR_INTRUDER)][u(TRI_MESSAGE.All,WALL_INTRUDER,%1,udefault(FUN_PLR.Loc,loc(%1),%1))][u(TRI_SHIP.Secure,AUTO,udefault(FUN_PLR.Loc,loc(%1),%1),%0)]
+&TRI_SHIP.LOCKDOWN Ship Computer Parent=[iter(flip(after(flip(v(DATA_ROOMS)),|)),u(TRI_SHIP.Secure,%0,first(##),-1),|)][if(v(CNF_CHANNEL.Lockdown),u(TRI_CEMIT,v(DATA_CHANNEL),CEMIT_LOCKEDDOWN,%0))][u(TRI_MESSAGE.All,WALL_LOCKEDDOWN,%0)][u(TRI_MESSAGE.Priv,%0,SHIP_LOCKEDDOWN)]
+&TRI_SHIP.LOCATE Ship Computer Parent=[if(v(CNF_CHANNEL.Locate),u(TRI_CEMIT,v(DATA_CHANNEL),CEMIT_LOCATED,%0,%1))][ifelse(match(v(DATA_ROOMS),[udefault(FUN_SHIP.Loc,loc(%1),%1)] *,|),u(TRI_MESSAGE.Priv,%0,PLAYER_LOCATED,%1,udefault(FUN_SHIP.Loc,loc(%1),%1)),u(TRI_MESSAGE.Priv,%0,PLAYER_LOCATED,%1,-1))]
+&TRI_SHIP.MAIL Ship Computer Parent=think [if(v(CNF_CHANNEL.MAIL),u(TRI_CEMIT,v(DATA_CHANNEL),CEMIT_MAIL,%0))]))][u(TRI_MESSAGE.Priv,%0,MAIL_SENT,%1,%2)];@mail [iter(flip(after(flip(v(DATA_ROSTER)),|)),if(gte(trunc(extract(##,2,1)),0),first(##)),|)]=MASS-Mail to the [name(udefault(DATA_SHIP.DB,%!))]/| [ansi(v(FONT_MAIL.Title),From:)] [ljust(left([name(%0)]\(%0\),24),24)][ansi(v(FONT_MAIL.Title),Stardate:)] [rjust(u(FUN_STARDATE,secs()),10)]%b%b%b[ansi(v(FONT_MAIL.Header),<< SHIP-MASS MAIL >>)] |%r| [ansi(v(FONT_MAIL.Title),Subject:)] [ljust(left(%1,64),65)]|%r[repeat(-,77)]%r%2
+&TRI_SHIP.ALERTS Ship Computer Parent=[pemit(%0,[ansi(v(FONT_ALERTS.Border),[repeat(-,78)]%r<<<<<)][ansi(v(FONT_ALERTS.Header),center(Ship Alerts - [name(udefault(DATA_SHIP.DB,%!))],68))][ansi(v(FONT_ALERTS.Border),>>>>>%r[repeat(-,78)])]%r%b[ansi(v(FONT_ALERTS.Title),#)]%b[ansi(v(FONT_ALERTS.Border),|)]%b[ansi(v(FONT_ALERTS.Title),ljust(Name,12))][ansi(v(FONT_ALERTS.Border),|)]%b[ansi(v(FONT_ALERTS.Title),Description)]%r[ansi(v(FONT_ALERTS.Border),---|-------------|------------------------------------------------------------)][ifelse(words(v(DATA_ALERTS)),iter(flip(after(flip(v(DATA_ALERTS)),|)),%r[rjust(#@,2)]%b[ansi(v(FONT_ALERTS.Border),|)]%b[ljust(left(edit(first(##),_,%b),12),12)][ansi(v(FONT_ALERTS.Border),|)]%b[left(rest(##),59)],|),%r%bThere are no alerts set. Use '[ansi(v(FONT_SHIP.Cmds),ship/alert <type>=<desc>)]' to set them.)]%r[ansi(v(FONT_ALERTS.Border),repeat(-,78))]%r* Type '[ansi(v(FONT_SHIP.Cmds),ship/alert <# or name>)]' to issue an alert.%r* Type '[ansi(v(FONT_SHIP.Cmds),ship/alert -<# or name>)]' to erase an alert.%r* Type '[ansi(v(FONT_SHIP.Cmds),ship/alert <type>=<desc>)]' to add a new alert.)]
+&TRI_SHIP.ALERT2 Ship Computer Parent=[set(udefault(DATA_SHIP.DB,%!),DATA_ALERT.Current:%1)][if(v(CNF_CHANNEL.Alert),u(TRI_CEMIT,v(DATA_CHANNEL),CEMIT_Alert,%0,%1))][u(TRI_MESSAGE.All,WALL_ALERT,%0,%1)][u(TRI_MESSAGE.Priv,%0,ALERT_ISSUED,%1)]
+&TRI_SHIP.ALERTREM2 Ship Computer Parent=[set(udefault(DATA_SHIP.DB,%!),DATA_ALERTS:[ldelete(v(DATA_ALERTS),match(v(DATA_ALERTS),%1 *,|),|)])][if(v(CNF_CHANNEL.AlertRem),u(TRI_CEMIT,v(DATA_CHANNEL),CEMIT_AlertRem,%0,%1))][u(TRI_MESSAGE.Priv,%0,ALERT_REM,%1)]
+&TRI_SHIP.ALERT Ship Computer Parent=[set(udefault(DATA_SHIP.DB,%!),DATA_ALERT.Current:%1)][if(v(CNF_CHANNEL.Alert),u(TRI_CEMIT,v(DATA_CHANNEL),CEMIT_Alert,%0,%1))][u(TRI_MESSAGE.All,WALL_ALERT,%0,%1)][u(TRI_MESSAGE.Priv,%0,ALERT_ISSUED,%1)]
+&TRI_SHIP.DEFAULT Ship Computer Parent=[setq(0,udefault(DATA_SHIP.DB,%!))][iter(v(LIST_DEFAULT.Attrs),[wipe(%q0/##)][set(%q0,##:[v(##)])])][if(v(CNF_CHANNEL.Default),u(TRI_CEMIT,v(DATA_CHANNEL),CEMIT_DEFAULTED,%0))]))][u(TRI_MESSAGE.Priv,%0,SHIP_DEFAULTED)]
+&TRI_SHIP.SETUP Ship Computer Parent=[pemit(%0,[ansi(v(FONT_SETUP.Border),[repeat(-,78)]%r<<<<<)][ansi(v(FONT_SETUP.Header),center(Ship Setup - [name(udefault(DATA_SHIP.DB,%!))],68))][ansi(v(FONT_SETUP.Border),>>>>>%r[repeat(-,78)])]%rSetting up your ship parent is relatively easy\, if you are organized and know what you're doing. You can either build your ship in advance or you can build as you go\, but either way you will need either a ship-zone or a ship-parent. The name of the zone or parent should be the exact name of your ship \(i.e. do NOT use IKV Wrath Zone... just use IKV Wrath\). You should then @parent your ship-zone or ship-parent to the DB# of the Ship Computer Parent. Most likely if you are viewing this text\, you've already done this part.%r%rIf you chose to use a ship-parent\, you MUST set the attribute &DATA_DB on your ship-parent to the dbref of itself. \(WARNING: if you do not do this\, you will find that the code is storing information on each room!\) Also be sure that each room is set !NO_COMMAND and that the ship-parent is set NO_COMMAND.%r%rIf you chose to use a ship-zone\, be sure the zone object is set !NO_COMMAND. Also be sure that the DATA_SHIP.DB attribute on your ship-zone is CLEARED\, not just empty.%r%rWhether you used a zone or parent you will now want to '[ansi(v(FONT_SHIP.Cmds),ship/default)]' to copy the default configuration options onto your zone or parent object. You may do this anytime\, but be aware you will lose any changes you made to the configurations \(you will NOT lose changes to your rosters\, rooms, or logs, etc..\)%r%r\(Continued in '[ansi(v(FONT_SHIP.Cmds),ship/setup2)]'\)%r[ansi(v(FONT_SETUP.Border),repeat(-,78))])]
+&TRI_SHIP.SETUP3 Ship Computer Parent=[pemit(%0,[ansi(v(FONT_SETUP.Border),[repeat(-,78)]%r<<<<<)][ansi(v(FONT_SETUP.Header),center(Ship Setup3 - [name(udefault(DATA_SHIP.DB,%!))],68))][ansi(v(FONT_SETUP.Border),>>>>>%r[repeat(-,78)])]%rYou will notice there is also a CNF_SHOW.IdleTime attribute -- this attribute will show the exact time a player is idling in the '[ansi(v(FONT_SHIP.Cmds),ship/roster)]' if set to 1\, and will show a generic activity status if set to 0.%r%rEach command accessed has an authorization level that me passed before its execution. If a player's authorization level is lower than the level set for that command\, they will receive an error message. The levels for each command are set in '[ansi(v(FONT_SHIP.Cmds),ex <ShipObjDB#>/DATA_AUTH.*)]' -- be sure not to set these above DATA_AUTH.Max or below DATA_AUTH.Min or you may get unexpected results.%r%rYou will notice all output from the ship commands is prefixed by some text \(i.e. GAME: or ERROR:\). You can change these prefixes in '[ansi(v(FONT_SHIP.Cmds),ex <ShipObjDB#>/DATA_PREFIX.*)]' -- try to keep them short and in some kind of ansi-color.%r%r\(Continued in '[ansi(v(FONT_SHIP.Cmds),ship/setup4)]'\)%r[ansi(v(FONT_SETUP.Border),repeat(-,78))])]
+&TRI_SHIP.SETUP4 Ship Computer Parent=[pemit(%0,[ansi(v(FONT_SETUP.Border),[repeat(-,78)]%r<<<<<)][ansi(v(FONT_SETUP.Header),center(Ship Setup4 - [name(udefault(DATA_SHIP.DB,%!))],68))][ansi(v(FONT_SETUP.Border),>>>>>%r[repeat(-,78)])]%rWhenever a log is created or a mass-mail is sent, it displays the Stardate to keep it IC. As of now, there is no stardate code so it just uses secs\(\). You can later change this in the FUN_STARDATE attribute -- please only change this if you understand code \(the secs function is passed into \%0, this cannot be changed by you\).%r%rYou will then want to familiarize yourself with the Ship Computer Parent commands via the '[ansi(v(FONT_SHIP.Cmds),ship/help)]'. Please note additional commands and features may be added at a later date without warning. The only command that is not self-explanatory is the '[ansi(v(FONT_SHIP.Cmds),ship/monitor)]'. It is suggested you keep this on and do not ship/sleep unless you will be keeping the ship inactive for long periods of times \(weeks or months\).%r[ansi(v(FONT_SETUP.Border),repeat(-,78))])]
+&TRI_SHIP.SETUP2 Ship Computer Parent=[pemit(%0,[ansi(v(FONT_SETUP.Border),[repeat(-,78)]%r<<<<<)][ansi(v(FONT_SETUP.Header),center(Ship Setup2 - [name(udefault(DATA_SHIP.DB,%!))],68))][ansi(v(FONT_SETUP.Border),>>>>>%r[repeat(-,78)])]%r* NOTE: From this point on\, the DB# of your ship-zone or ship-parent will be referred to as <ShipObjDB#>%r%rNext you will want to configure your options. The easiest thing to configure is the color of the text in the various displays. Type '[ansi(v(FONT_SHIP.Cmds),ex <ShipObjDB#>/FONT_*)]' to see a listing of the current color-settings. The fonts are named as such: FONT_<Command>.<Type> -- so FONT_HELP.Heading refers to the heading-text in the '[ansi(v(FONT_SHIP.Cmds),ship/help)]' command.%r%rEvery time someone executes a command\, a configuration option is checked to see if it should send the person's attempt to use that command over a channel. Those configuration options are listed in '[ansi(v(FONT_SHIP.Cmds),ex <ShipObjDB#>/CNF_*)]' -- set them to 1 if you want that command sent over a channel\, and set them to 0 if you don't. You can set which channel you want the attempts sent over in the DATA_CHANNEL attribute. Please create the channel using '[ansi(v(FONT_SHIP.Cmds),@chan/add <name>)]' before setting this attribute.%r%r%r%r\(Continued in '[ansi(v(FONT_SHIP.Cmds),ship/setup3)]'\)%r[ansi(v(FONT_SETUP.Border),repeat(-,78))])]
+&TRI_MESSAGE.ROOM Ship Computer Parent=[remit(%0,[u(DATA_PREFIX.Game)][space(not(not(words(u(DATA_PREFIX.Game)))))][u(MSG_%1,%2,%3,%4)])]
+&TRI_MESSAGE.OTHERS Ship Computer Parent=[pemit(setdiff(lcon(udefault(FUN_SHIP.Loc,loc(%0),%0)),%0),[u(DATA_PREFIX.Game)][space(not(not(words(u(DATA_PREFIX.Game)))))][u(MSG_%1,%2,%3,%4)])]
+&TRI_SHIP.MOTD Ship Computer Parent=[if(v(CNF_CHANNEL.MOTD),u(TRI_CEMIT,v(DATA_CHANNEL),CEMIT_MOTD,%0))]))][pemit(%0,[ansi(v(FONT_MOTD.Border),[repeat(-,78)]%r<<<<<)][ansi(v(FONT_MOTD.Header),center(Ship MOTD - [name(udefault(DATA_SHIP.DB,%!))],68))][ansi(v(FONT_MOTD.Border),>>>>>%r[repeat(-,78)])]%r[default([udefault(DATA_SHIP.DB,%!)]/DATA_MOTD,u(DATA_MOTD.Default))]%r[ansi(v(FONT_MOTD.Border),repeat(-,78))])]
+&TRI_SHIP.MOTDSET Ship Computer Parent=[set(udefault(DATA_SHIP.DB,%!),DATA_MOTD:%1)][if(v(CNF_CHANNEL.MOTDset),u(TRI_CEMIT,v(DATA_CHANNEL),CEMIT_MOTDset,%0))][u(TRI_MESSAGE.Priv,%0,MOTDset,%1)]
+&TRI_SHIP.SCAN Ship Computer Parent=[if(v(CNF_CHANNEL.Scan),u(TRI_CEMIT,v(DATA_CHANNEL),CEMIT_SCANNED,%0))][pemit(%0,[ansi(v(FONT_SCAN.Border),[repeat(-,78)]%r<<<<<)][ansi(v(FONT_SCAN.Header),center(Ship Scan - [name(udefault(DATA_SHIP.DB,%!))],68))][ansi(v(FONT_SCAN.Border),>>>>>%r[repeat(-,78)])]%r%r%b[ansi(v(FONT_SCAN.Title),Passenger Name)]%b%b%b%b[ansi(v(FONT_SCAN.Border),|)] [ansi(v(FONT_SCAN.Title),Organization)][space(5)][ansi(v(FONT_ROSTER.Border),|)] [ansi(v(FONT_SCAN.Title),Auth)] [ansi(v(FONT_SCAN.Border),|)] [ansi(v(FONT_SCAN.Title),Status)]%b%b%b[ansi(v(FONT_SCAN.Border),|)] [ansi(v(FONT_SCAN.Title),Location)]%r[ansi(v(FONT_SCAN.Border),[repeat(-,19)]|[repeat(-,18)]|[repeat(-,6)]|[repeat(-,10)]|[repeat(-,21)])][u(TRI_SHIP.Scan2,trim(squish(iter(v(DATA_ROOMS),lcon(first(##)),|))))]%r[ansi(v(FONT_SCAN.Border),repeat(-,78))]%r%bXXXX - Denotes an [ansi(v(SCAN.TITLE),INTRUDER!)])]
+&TRI_SHIP.SCAN2 Ship Computer Parent=[u(TRI_SHIP.Scan3,iter(%0,ifelse(or(and(hastype(##,THING),not(u(FUN_PLR.Intruder,##))),not(isdbref(##))),,##)))]
+&TRI_SHIP.SCAN3 Ship Computer Parent=[iter(%0,%r%b[ljust(left(name(##),17),18)][ansi(v(FONT_ROSTER.Border),|)]%b[ljust(left(masterorgname(##),16),17)][ansi(v(FONT_ROSTER.Border),|)]%b[rjust(left(ifelse(u(FUN_PLR.Intruder,##),XXXX,trunc(extract(grab(v(DATA_ROSTER),## *,|),2,1))),4),4)]%b[ansi(v(FONT_ROSTER.Border),|)]%b[ljust(ifelse(eq(idle(##),-1),OFFLINE,ifelse(v(CNF_SHOW.IdleTime),u(FUN_CONVERT.Secs2Time,idle(##)),ifelse(gte(idle(##),v(DATA_IDLE.Min)),Idle,Active))),9)][ansi(v(FONT_ROSTER.Border),|)] [ifelse(match(v(DATA_ROOMS),[udefault(FUN_SHIP.Loc,loc(##),##)] *,|),left(name(udefault(FUN_SHIP.Loc,loc(##),##)),20),NOT ONBOARD)])]
+&TRI_SHIP.ANNOUNCE Ship Computer Parent=[if(v(CNF_CHANNEL.Announce),u(TRI_CEMIT,v(DATA_CHANNEL),CEMIT_ANNOUNCED,%0))][u(TRI_MESSAGE.All,WALL_ANNOUNCEMENT,%0,%1)]
+&TRI_MESSAGE.ALL Ship Computer Parent=[iter(v(DATA_ROOMS),remit(first(##),[u(DATA_PREFIX.Announce)] [u(MSG_%0,%1,%2,%3,%4,%5)]),|)]
+&TRI_SHIP.ALERTREM Ship Computer Parent=[ifelse(match(v(DATA_ALERTS),%1 *,|),u(TRI_SHIP.AlertRem2,%0,%1),u(TRI_ERROR,%0,ALERT_!VALID2,%1))]
+&TRI_SHIP.SHOWALERT Ship Computer Parent=[if(v(CNF_SHOW.Alert),u(TRI_MESSAGE.Priv,%0,SHOWALERT))]
+&TRI_SHIP.ALERTSET Ship Computer Parent=[set(udefault(DATA_SHIP.DB,%!),DATA_ALERTS:[v(DATA_ALERTS)]%1 %2|)][if(v(CNF_CHANNEL.AlertSet),u(TRI_CEMIT,v(DATA_CHANNEL),CEMIT_AlertSet,%0,%1))][u(TRI_MESSAGE.Priv,%0,ALERT_SET,%1,%2)]
+think [ansi(hm,INSTALL:)] Downloading Messages...
+&MSG_CEMIT_MONITOR Ship Computer Parent=[name(%0)]\(%0\) has set the [name(udefault(DATA_SHIP.DB,%!))] to MONITOR status.
+&MSG_SHIP_MONITOR Ship Computer Parent=You have set the [name(udefault(DATA_SHIP.DB,%!))] to MONITOR status.
+&MSG_LOG_CLEARED Ship Computer Parent=Your have cleared log-entry %0 on the [name(udefault(DATA_SHIP.DB,%!))].
+&MSG_CEMIT_CLEARED Ship Computer Parent=[name(%0)]\(%0\) cleared log-entry %1 on the [name(udefault(DATA_SHIP.DB,%!))].
+&MSG_LOG_CREATED Ship Computer Parent=Your have entered a log entery with subject '%0' on the [name(udefault(DATA_SHIP.DB,%!))].
+&MSG_CEMIT_LOGGED Ship Computer Parent=[name(%0)]\(%0\) created log-entry '%1' on the [name(udefault(DATA_SHIP.DB,%!))].
+&MSG_ROOM_RELEASED Ship Computer Parent=You have released room [name(%0)]\(%0\) aboard the [name(udefault(DATA_SHIP.DB,%!))].
+&MSG_CEMIT_RELEASED Ship Computer Parent=[name(%0)]\(%0\) has released room [name(%1)]\(%1\) aboard the [name(udefault(DATA_SHIP.DB,%!))].
+&MSG_ROOM_SECURED Ship Computer Parent=You have secured room [name(%0)]\(%0\) aboard the [name(udefault(DATA_SHIP.DB,%!))].
+&MSG_CEMIT_SECURED Ship Computer Parent=[ifelse(match(%0,AUTO),The automated security system has secured room [name(%1)]\(%1\) aboard the [name(udefault(DATA_SHIP.DB,%!))].,[name(%0)]\(%0\) has secured room [name(%1)]\(%1\) aboard the [name(udefault(DATA_SHIP.DB,%!))].)]
+&MSG_EXIT_UNLOCKED Ship Computer Parent=You have unlocked exit [name(%0)]\(%0\) in room [name(home(%0))]\([home(%0)]\) aboard the ship [name(udefault(DATA_SHIP.DB,%!))].
+&MSG_CEMIT_UNLOCKED Ship Computer Parent=[name(%0)]\(%0\) has unlocked exit [name(%1)]\(%1\) in room [name(home(%1))]\([home(%1)]\) aboard the ship [name(udefault(DATA_SHIP.DB,%!))].
+&MSG_EXIT_LOCKED Ship Computer Parent=You have locked exit [name(%0)]\(%0\) in room [name(home(%0))]\([home(%0)]\) aboard the ship [name(udefault(DATA_SHIP.DB,%!))].
+&MSG_CEMIT_LOCKED Ship Computer Parent=[name(%0)]\(%0\) has locked exit [name(%1)]\(%1\) in room [name(home(%1))]\([home(%1)]\) aboard the ship [name(udefault(DATA_SHIP.DB,%!))].
+&MSG_CEMIT_REMOVED Ship Computer Parent=[name(%1)]\(%1\) has been removed from [name(udefault(DATA_SHIP.DB,%!))]'s ship roster by [name(%0)]\(%0\).
+&MSG_PLR_REMOVED Ship Computer Parent=You have removed [name(%0)]\(%0\) from [name(udefault(DATA_SHIP.DB,%!))]'s ship roster.
+&MSG_YOURE_REMOVED Ship Computer Parent=You have been removed from [name(udefault(DATA_SHIP.DB,%!))]'s ship roster by [name(%0)]\(%0\).
+&MSG_YOURE_ADDED Ship Computer Parent=You have been added to [name(udefault(DATA_SHIP.DB,%!))]'s ship roster by [name(%0)]\(%0\).
+&MSG_PLR_ADDED Ship Computer Parent=You have added [name(%0)]\(%0\) to [name(udefault(DATA_SHIP.DB,%!))]'s ship roster.
+&MSG_CEMIT_ADDED Ship Computer Parent=[name(%1)]\(%1\) has been added to [name(udefault(DATA_SHIP.DB,%!))]'s ship roster by [name(%0)]\(%0\).
+&MSG_CEMIT_DETACHED Ship Computer Parent=[name(%0)]\(%0\) has detached room [name(%1)]\(%1\) from ship [name(udefault(DATA_SHIP.DB,%!))].
+&MSG_ROOM_DETACHED Ship Computer Parent=You have detached room [name(%0)]\(%0\) from ship [name(udefault(DATA_SHIP.DB,%!))].
+&MSG_CEMIT_LOCKEDDOWN Ship Computer Parent=[name(%0)]\(%0\) has locked down the [name(udefault(DATA_SHIP.DB,%!))].
+&MSG_SHIP_LOCKEDDOWN Ship Computer Parent=You have locked down the [name(udefault(DATA_SHIP.DB,%!))].
+&MSG_PLR_INTRUDER Ship Computer Parent=You are not authorized to be on this ship. DISEMBARK IMMEDIATELY!
+&MSG_CEMIT_INTRUDER Ship Computer Parent=%0\(%1\) is an UNAUTHORIZED INTRUDER aboard the [name(udefault(DATA_SHIP.DB,%!))] in room [name(%2)]\(%2\).
+&MSG_WELCOME Ship Computer Parent=Type '[ansi(v(FONT_SHIP.Cmds),ship/help)]' for information on the ship computer.
+&MSG_CEMIT_ATTACHED Ship Computer Parent=[name(%0)]\(%0\) has attached room [name(%1)]\(%1\) to ship [name(udefault(DATA_SHIP.DB,%!))] with alias '[edit(%2,_,%b)]'.
+&MSG_ROOM_ATTACHED Ship Computer Parent=You have attached room [name(%0)]\(%0\) to ship [name(udefault(DATA_SHIP.DB,%!))] with alias '[edit(%1,_,%b)]'.
+&MSG_YOURE_POSITIONED Ship Computer Parent=You have been repositioned as %1 on [name(udefault(DATA_SHIP.DB,%!))]'s ship roster by [name(%0)]\(%0\).
+&MSG_PLR_POSITIONED Ship Computer Parent=You have repositioned [name(%0)]\(%0\) as %1 on [name(udefault(DATA_SHIP.DB,%!))]'s ship roster.
+&MSG_CEMIT_POSITIONED Ship Computer Parent=[name(%1)]\(%1) has been repositioned as %2 on [name(udefault(DATA_SHIP.DB,%!))]'s ship roster by [name(%0)]\(%0\).
+&MSG_YOURE_AUTHORIZED Ship Computer Parent=You have been given level %1 authorization on [name(udefault(DATA_SHIP.DB,%!))]'s ship roster by [name(%0)]\(%0\).
+&MSG_PLR_AUTHORIZED Ship Computer Parent=You have given [name(%0)]\(%0\) level %1 authorization on [name(udefault(DATA_SHIP.DB,%!))]'s ship roster.
+&MSG_CEMIT_AUTHORIZED Ship Computer Parent=[name(%1)]\(%1) has been given level %2 authorization on [name(udefault(DATA_SHIP.DB,%!))]'s ship roster by [name(%0)]\(%0\).
+&MSG_ROOM_SECURED_BY Ship Computer Parent=[ifelse(match(%0,AUTO),The automated security system has secured this room.,[name(%0)]\(%0\) has secured this room.)]
+&MSG_ROOM_RELEASED2 Ship Computer Parent=This room has been released of security.
+&MSG_ROOM_RELEASED_BY Ship Computer Parent=[name(%0)]\(%0\) has released the security of [name(%1)]\(%1\).
+&MSG_ROOM_SECURED2 Ship Computer Parent=This room has been secured.
+&MSG_SHIP_DEFAULTED Ship Computer Parent=You have reverted the [name(udefault(DATA_SHIP.DB,%!))] configuration options to their default values.
+&MSG_CEMIT_DEFAULTED Ship Computer Parent=[name(%0)]\(%0\) has reverted the [name(udefault(DATA_SHIP.DB,%!))] configuration options to their default values.
+&MSG_EXIT_UNLOCKED_BY Ship Computer Parent=[name(%0)]\(%0\) unlocks the exit marked [name(%1)]\(%1\).
+&MSG_EXIT_LOCKED_BY Ship Computer Parent=[name(%0)]\(%0\) has locked the exit marked [name(%1)]\(%1\).
+&MSG_EXIT_UNLOCKED_OTHERSIDE Ship Computer Parent=[name(%0)]\(%0\) unlocks the exit marked [name(%1)]\(%1\) from the other side.
+&MSG_EXIT_LOCKED_OTHERSIDE Ship Computer Parent=[name(%0)]\(%0\) locks the exit marked [name(%1)]\(%1\) from the other side.
+&MSG_CEMIT_ANNOUNCED Ship Computer Parent=[name(%0)]\(%0\) made a ship-wide announcement to the [name(udefault(DATA_SHIP.DB,%!))].
+&MSG_CEMIT_LOCATED Ship Computer Parent=[name(%0)]\(%0\) attempted to locate [name(%1)]\(%1\) aboard the [name(udefault(DATA_SHIP.DB,%!))].
+&MSG_PLAYER_LOCATED Ship Computer Parent=[ifelse(eq(%1,-1),[name(%0)]\(%0\) is not aboard the [name(udefault(DATA_SHIP.DB,%!))].,[name(%0)]\(%0\) is located in the [name(%1)].)]
+&MSG_WALL_LOCKEDDOWN Ship Computer Parent=[name(%0)]\(%0\) has locked down the [name(udefault(DATA_SHIP.DB,%!))].
+&MSG_WALL_ANNOUNCEMENT Ship Computer Parent=[name(%0)] broadcasts over the intercom: '%1'
+&MSG_CEMIT_SCANNED Ship Computer Parent=[name(%0)]\(%0\) performed a scan of the [name(udefault(DATA_SHIP.DB,%!))].
+&MSG_MOTDSET Ship Computer Parent=You have set the [name(udefault(DATA_SHIP.DB,%!))]'s MOTD to %0.
+&MSG_CEMIT_MOTDSET Ship Computer Parent=[name(%0)]\(%0\) has set the MOTD for the [name(udefault(DATA_SHIP.DB,%!))].
+&MSG_CEMIT_MOTD Ship Computer Parent=[name(%0)]\(%0\) has viewed the MOTD for the [name(udefault(DATA_SHIP.DB,%!))].
+&MSG_CEMIT_MAIL Ship Computer Parent=[name(%0)]\(%0\) has sent mail to the [name(udefault(DATA_SHIP.DB,%!))].
+&MSG_MAIL_SENT Ship Computer Parent=You have sent mail to the [name(udefault(DATA_SHIP.DB,%!))] with the following info:%r[ansi(v(FONT_MAIL.Title),SUBJECT:)] %0%r[ansi(v(FONT_MAIL.Title),BODY-TEXT:)] %1
+&MSG_CEMIT_SLEEP Ship Computer Parent=[name(%0)]\(%0\) has set the [name(udefault(DATA_SHIP.DB,%!))] to SLEEP status.
+&MSG_SHIP_SLEEP Ship Computer Parent=You have set the [name(udefault(DATA_SHIP.DB,%!))] to SLEEP status.
+&MSG_WALL_ALERT Ship Computer Parent=[name(%0)]\(%0\) has issued a '[ucstr(edit(%1,_,%b))]' alert! [capstr(rest(grab(v(DATA_ALERTS),%1 *,|)))]
+&MSG_CEMIT_ALERT Ship Computer Parent=[name(%0)]\(%0\) has issued a '[edit(%1,_,%b)]' alert on the [name(udefault(DATA_SHIP.DB,%!))].
+&MSG_ALERT_ISSUED Ship Computer Parent=You have issued a '[edit(%0,_,%b)]' alert for the [name(udefault(DATA_SHIP.DB,%!))].
+&ERR_ALERT_!CHANGE Ship Computer Parent=The ship is already under a '[edit(%0,_,%b)]' alert.
+&MSG_CEMIT_ALERTREM Ship Computer Parent=[name(%0)]\(%0\) has removed alert-type '[edit(%1,_,%b)]' on the [name(udefault(DATA_SHIP.DB,%!))].
+&MSG_ALERT_REM Ship Computer Parent=You have removed alert-type '[edit(%0,_,%b)]' from the [name(udefault(DATA_SHIP.DB,%!))].
+&MSG_CEMIT_ALERTSET Ship Computer Parent=[name(%0)]\(%0\) has set alert-type '[edit(%1,_,%b)]' on the [name(udefault(DATA_SHIP.DB,%!))].
+&MSG_ALERT_SET Ship Computer Parent=You have set alert-type '[edit(%0,_,%b)]' to '%1' for the [name(udefault(DATA_SHIP.DB,%!))].
+&MSG_WALL_INTRUDER Ship Computer Parent=[ansi(hr,INTRUDER ALERT!!!)] [name(%0)]\(%0\) is in the [name(%1)]!!!
+&MSG_SHOWALERT Ship Computer Parent=The ship is currently under '[ucstr(edit(v(DATA_ALERT.Current),_,%b))]' alert.
+think [ansi(hm,INSTALL:)] Downloading Fonts...
+&FONT_ROOMS.TITLE Ship Computer Parent=hr
+&FONT_ROOMS.HEADER Ship Computer Parent=hx
+&FONT_ROOMS.BORDER Ship Computer Parent=r
+&FONT_SHIP.CMDS Ship Computer Parent=hc
+&FONT_ROSTER.BORDER Ship Computer Parent=r
+&FONT_ROSTER.HEADER Ship Computer Parent=hx
+&FONT_ROSTER.TITLE Ship Computer Parent=hr
+&FONT_LOGS.BORDER Ship Computer Parent=r
+&FONT_LOGS.HEADER Ship Computer Parent=hx
+&FONT_LOGS.TITLE Ship Computer Parent=hr
+&FONT_VIEW.BORDER Ship Computer Parent=r
+&FONT_VIEW.HEADER Ship Computer Parent=hx
+&FONT_VIEW.TITLE Ship Computer Parent=hr
+&FONT_SCAN.BORDER Ship Computer Parent=r
+&FONT_SCAN.HEADER Ship Computer Parent=hx
+&FONT_SCAN.TITLE Ship Computer Parent=hr
+&FONT_HELP.BORDER Ship Computer Parent=r
+&FONT_HELP.HEADER Ship Computer Parent=hr
+&FONT_MOTD.BORDER Ship Computer Parent=r
+&FONT_MOTD.HEADER Ship Computer Parent=hr
+&FONT_MAIL.TITLE Ship Computer Parent=hr
+&FONT_MAIL.HEADER Ship Computer Parent=hx
+&FONT_ALERTS.BORDER Ship Computer Parent=r
+&FONT_ALERTS.HEADER Ship Computer Parent=hx
+&FONT_ALERTS.TITLE Ship Computer Parent=hr
+&FONT_SETUP.BORDER Ship Computer Parent=r
+&FONT_SETUP.HEADER Ship Computer Parent=hr
+think [ansi(hm,INSTALL:)] Downloading Miscellaneous...
+&BAK_SHIP.LOC Ship Computer Parent=[first(extract(v(DATA_ROOMS),match(iter(v(DATA_ROOMS),%b0 [lcon(first(##))] 0 |,|),* %0 *,|),1,|))]
+&LISTEN_ARRIVE Ship Computer Parent=think \[if\(isdbref\(\%#\)\,ifelse\(u\([udefault(DATA_SHIP.DB,%!)]/FUN_PLR.Intruder\,\%#\)\,u\([udefault(DATA_SHIP.DB,%!)]/TRI_SHIP.Intruder\,\%n\,\%#,owner\(\%#\)\,\%!\)\,\[u\([udefault(DATA_SHIP.DB,%!)]/TRI_SHIP.Welcome\,\%#\,owner\(\%#\)\)\]\[u\([udefault(DATA_SHIP.DB,%!)]/TRI_SHIP.ShowAlert\,\%#\)\]\)\)\]
+&DRAW_SHIP.HELP Ship Computer Parent=%b%b[ansi(v(FONT_SHIP.Cmds),ljust(ship/setup,30))]- Views setup documentation%r%b%b[ansi(v(FONT_SHIP.Cmds),ljust(ship/motd <text>,30))]- Sets MOTD. If no text given\, views MOTD%r%r%b%b[ansi(v(FONT_SHIP.Cmds),ljust(ship/locate <person>,30))]- Attempts to locate person on the ship%r%b%b[ansi(v(FONT_SHIP.Cmds),ljust(ship/scan,30))]- Shows all players and intruders on ship%r%b%b[ansi(v(FONT_SHIP.Cmds),ljust(ship/roster,30))]- Views the ship roster%r%b%b[ansi(v(FONT_SHIP.Cmds),ljust(ship/add <person>,30))]- Adds a person to the ship roster%r%b%b[ansi(v(FONT_SHIP.Cmds),ljust(ship/remove <person>,30))]- Removes a person from the ship roster%r%b%b[ansi(v(FONT_SHIP.Cmds),ljust(ship/authorize <person>=<#>,30))]- Gives indicated authorization to person%r%b%b[ansi(v(FONT_SHIP.Cmds),ljust(ship/position <person>=<text>,30))]- Sets a person's position on the ship%r%r%b%b[ansi(v(FONT_SHIP.Cmds),ljust(ship/rooms,30))]- Views the rooms attached to the ship%r%b%b[ansi(v(FONT_SHIP.Cmds),ljust(ship/attach <roomDB#>=<alias>,30))]- Attaches a room to the ship with 'alias'%r%b%b[ansi(v(FONT_SHIP.Cmds),ljust(ship/detach <roomDB#>,30))]- Detaches a room from the ship%r%r%b%b[ansi(v(FONT_SHIP.Cmds),ljust(ship/logs,30))]- Views a list of current ship logs%r%b%b[ansi(v(FONT_SHIP.Cmds),ljust(ship/log <subj>=<text>,30))]- Creates a log with subject and body-text%r%b%b[ansi(v(FONT_SHIP.Cmds),ljust(ship/clear <log#>,30))]- Clears the indicated log%r%b%b[ansi(v(FONT_SHIP.Cmds),ljust(ship/view <log#>,30))]- Views the indicated log%r%b%b[ansi(v(FONT_SHIP.Cmds),ljust(ship/announce <text>,30))]- Broadcasts a ship-wide message%r%b%b[ansi(v(FONT_SHIP.Cmds),ljust(ship/mail <subj>=<body>,30))]- Mails crew with specified subject and text%r%r%b%b[ansi(v(FONT_SHIP.Cmds),ljust(ship/lockdown,30))]- Locks all exits on the ENTIRE ship%r%b%b[ansi(v(FONT_SHIP.Cmds),ljust(ship/secure <room alias>,30))]- Locks all exits of the specified room%r%b%b[ansi(v(FONT_SHIP.Cmds),ljust(ship/release <room alias>,30))]- Unlocks all exits of the specified room%r%b%b[ansi(v(FONT_SHIP.Cmds),ljust(ship/lock <exit>,30))]- Locks specified exit%r%b%b[ansi(v(FONT_SHIP.Cmds),ljust(ship/unlock <exit>,30))]- Unlocks specified exit%r%b%b[ansi(v(FONT_SHIP.Cmds),ljust(ship/monitor,30))]- Forces ship to respond to speech/events%r%b%b[ansi(v(FONT_SHIP.Cmds),ljust(ship/sleep,30))]- Stops ship from responding to speech/events%r%r%b%b[ansi(v(FONT_SHIP.Cmds),ljust(ship/alerts,30))]- Views a list of valid ship alerts%r%b%b[ansi(v(FONT_SHIP.Cmds),ljust(ship/alert <type>=<desc>,30))]- Adds the alert-type with given description%r%b%b[ansi(v(FONT_SHIP.Cmds),ljust(ship/alert -<type>,30))]- Removes the specified type of alert%r%b%b[ansi(v(FONT_SHIP.Cmds),ljust(ship/alert <type>,30))]- Issues the specified type of alert%r%r%b%b[ansi(v(FONT_SHIP.Cmds),ljust(ship/copyright,30))]- Displays copyright information
+&LIST_DEFAULT.ATTRS Ship Computer Parent=FONT_MAIL.HEADER FONT_MAIL.TITLE FONT_MOTD.HEADER FONT_MOTD.BORDER FONT_SCAN.TITLE FONT_SCAN.HEADER FONT_SCAN.BORDER FONT_HELP.HEADER FONT_HELP.BORDER FONT_VIEW.TITLE FONT_VIEW.HEADER FONT_VIEW.BORDER FONT_LOGS.TITLE FONT_LOGS.HEADER FONT_LOGS.BORDER FONT_ROSTER.TITLE FONT_ROSTER.HEADER FONT_ROSTER.BORDER FONT_SHIP.CMDS FONT_ROOMS.BORDER FONT_ROOMS.HEADER FONT_ROOMS.TITLE CNF_CHANNEL.MAIL CNF_CHANNEL.MOTD CNF_CHANNEL.MOTDSET CNF_CHANNEL.SCAN CNF_CHANNEL.ANNOUNCE CNF_CHANNEL.LOCATE CNF_CHANNEL.LOCKDOWN CNF_CHANNEL.INTRUDER CNF_CHANNEL.DETACH CNF_CHANNEL.ATTACH CNF_CHANNEL.POS CNF_CHANNEL.AUTH CNF_SHOW.IDLETIME CNF_CHANNEL.ADD CNF_CHANNEL.REM CNF_CHANNEL.LOCK CNF_CHANNEL.UNLOCK CNF_CHANNEL.SECURE CNF_CHANNEL.DEFAULT CNF_CHANNEL.RELEASE CNF_CHANNEL.LOG CNF_CHANNEL.MONITOR CNF_CHANNEL.SLEEP DATA_AUTH.MAIL DATA_AUTH.MOTD DATA_AUTH.MOTDSET DATA_AUTH.SCAN DATA_AUTH.ANNOUNCE DATA_AUTH.LOCATE DATA_AUTH.LOCKDOWN DATA_AUTH.VIEW DATA_AUTH.LOGS DATA_AUTH.DET DATA_AUTH.ATT DATA_AUTH.POS DATA_AUTH.MIN DATA_AUTH.MAX DATA_AUTH.AUTH DATA_AUTH.ADD DATA_AUTH.REM DATA_AUTH.ROSTER DATA_AUTH.LOCK DATA_AUTH.UNLOCK DATA_AUTH.ROOMS DATA_AUTH.LOG DATA_AUTH.CLEAR DATA_AUTH.MONITOR DATA_AUTH.SLEEP DATA_PREFIX.ANNOUNCE DATA_PREFIX.ERROR DATA_PREFIX.GAME DATA_PREFIX.CHANNEL FUN_STARDATE DATA_CHANNEL CNF_CHANNEL.ALERT CNF_CHANNEL.ALERTREM CNF_CHANNEL.ALERTSET DATA_AUTH.ALERT DATA_AUTH.ALERTSET DATA_AUTH.ALERTREM DATA_AUTH.ALERTS FONT_ALERTS.BORDER FONT_ALERTS.HEADER FONT_ALERTS.TITLE CNF_SHOW.Alert
+think [ansi(hm,INSTALL:)] [ansi(hr,Download is complete!  Now you must do the following:)]
+think [ansi(hm,INSTALL:)] To install the Ship Comptuer Parent, you must first have an existing
+think [ansi(hm,INSTALL:)] room parent or zone for your ship.  @parent that object to the Ship
+think [ansi(hm,INSTALL:)] Computer Parent object\, then type 'ship/help' and 'ship/setup'.
+think [ansi(hm,INSTALL:)]
+think [ansi(hm,INSTALL:)] If nothing happens and you are using a zone\, make certain the zone
+think [ansi(hm,INSTALL:)] is set !NO_COMMAND.  If nothing happens and you are using a room
+think [ansi(hm,INSTALL:)] parent\, make certain the room you are in is set !NO_COMMAND.
+think [ansi(hm,INSTALL:)]
+think [ansi(hm,INSTALL:)] Of course, the Copyright code should remain on the object AS IS -- it
+think [ansi(hm,INSTALL:)] should not be modified.  The only exception to this is IF you improve
+think [ansi(hm,INSTALL:)] the code or add to it, you may ADD 'Modified By: <your name>' after
+think [ansi(hm,INSTALL:)] the original text.
+think [ansi(hm,INSTALL:)] 
+think [ansi(hm,INSTALL:)] If you have any problems with this code, e-mail:
+think [ansi(hm,INSTALL:)] %b%b[ansi(hc,worldwar@bb6.betterbox.net)]
+@set me=!quiet
+
+

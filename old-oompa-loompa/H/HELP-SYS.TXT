@@ -1,0 +1,57 @@
+@@ Object: Help System
+@@ Version: 1.0
+@@ Author: Jonathan A. Booth
+@@ E-mail: kamikaze@N0$PAMimsa.edu
+@@ Web: http://www.N0$PAMimsa.edu/~kamikaze/
+@@ (remove N0$PAM from hostnames to use them)
+@@ Date: Oct 28, 1998
+@@ Written for: PennMUSH 1.7.2 pl15
+@@ Author is willing to support: Yes
+@@
+@@ My help system, compatable with all my helpfiles I distribute (except
+@@ the ones to go in the hardcode 'help' for tcl scripts). It's pretty easy
+@@ to use and setup, and has directions included with it in it's description.
+@@
+@@ Copyleft under the terms of the GPL, 1998, Jonathan A. Booth
+@@ (email: kamikaze@N0$PAMimsa.edu)
+@@
+
+@pemit me=CREATING HELP SYSTEM GLOBAL COMMANDS OBJECT
+@create Help System
+@link Help System = #2
+@lock/Basic Help System==#0
+@set Help System = STICKY
+@set Help System = SAFE
+@power Help System = Pemit_All
+@power Help System = Queue
+@power Help System = See_All
+@DESCRIBE Help System=[table(sort(lattr(me/*)),25,78)]
+@set Help System/DESCRIBE=no_command visual
+&CMD_HELP_INDEX Help System=$+help/index:@pemit %#=[u(Help Database/func_get_help,%#,@index)]
+&CMD_HELP_REBUILD Help System=$+help/rebuild:@select [orflags(%#,W)]=1,{@pemit %#=Rebuilding help database... This space >[u(Help Database/func_rebuild)]< should be empty.},{@pemit %#=Hmm... No.}
+&CMD_HELP_SPECIFIC Help System=$+help *:@pemit %#=[u(Help Database/func_get_help,%#,secure(%0))]
+&CMD_HELP Help System=$+help:@pemit %#=[u(Help Database/func_get_help,%#,)]
+&CMD_HELP_SEARCH Help System=$+help/search *:@pemit %#=[u(Help Database/func_get_search,%#,secure(%0))]
+
+@pemit me=CREATING BASIC HELP DATABASE OBJECT
+@create Help Database
+@set Help Database = STICKY
+@set Help Database = SAFE
+@set Help Database = NO_COMMAND
+
+&FILE_@ADMIN Help Database=The following admin-only commands have help listed:%r%r[table(edit(sort(v(data_@admin),a,|),_,%b),18,78,|)]%r%rUse '+help <name>' to access the help on them.
+&VISIBLE_@ADMIN Help Database=u(func_isfachead,%0)
+&FILE_@MAIN Help Database=The following commands have help listed:%r%r[table(edit(sort(u(data_@main),a,|),_,%b),18,78,|)]%r%rUse '+help <name>' to access the help on them.
+&FUNC_ISROY Help Database=orflags(%0,Wr)
+&FUNC_ISADMIN Help Database=orflags(%0,WrJ)
+&FUNC_ISFACHEAD Help Database=orflags(%0,Wrj)
+&FUNC_ISJUDGE Help Database=orflags(%0,WJ)
+&FUNC_REBUILD Help Database=[squish([setq(0,)][setq(1,)][iter(lattr(me/FILE_*),[switch(hasattr(me,IGNORE_[after(##,FILE_)]),0,setq(0,setunion(%q0,after(##,FILE_),|)))][setq(1,setunion(%q1,after(##,FILE_),|))])][set(me,data_@main:[lcstr(%q0)])][set(me,data_topics:[lcstr(%q1)])])][squish([setq(1,)][iter(lattr(me/VISIBLE_*),setq(1,setunion(%q1,after(##,VISIBLE_),|)))][set(me,data_@admin:[setdiff(lcstr(%q1),@admin,|)])])]
+&FUNC_FIND_TOPIC Help Database=[setq(0,grab(v(data_topics),@%1*,|))][switch(gt(strlen(%q0),0),0,setq(0,grab(v(data_topics),%1*,|)))][switch(gt(strlen(%q0),0),0,setq(0,grav(v(data_topics),*%1*,|)))][switch(and(eq(words(%q0),1),udefault(VISIBLE_%q0,1,%0)),1,FILE_%q0,#-1)]
+&FUNC_GET_HELP Help Database=[setq(1,edit(switch(strlen(%1),0,@main,%1),%b,_))][switch(ulocal(func_find_topic,%0,%q1),*#-1*,No entry for '%q1'.,[header(+Help: [lcstr(after(#$,_))])]%r[u(me/#$)]%r[trailer(End of Help)])]
+&FUNC_GET_SEARCH Help Database=[setq(1,grepi(me,file_*,%1))][switch(strlen(%q1),0,{No occurances of string, '%1' found in helpfiles.},[header(Help search on %1)][iter(%q1,%rFound: [after(lcstr(##),file_)])]%r[trailer(End of Help)])]
+@DESCRIBE Help Database=To add help: Put your help in FILE_<name>. It will be run through u() so you can do cool stuff in it. If you want it locked to only <x> people, set the VISIBLE_<name> attribute to be 1 if they can see it, 0 if not. If the topic should not be indexed into the main index (say you're adding a subindex and it's items and you don't want them in the main index), then set the IGNORE_<name> attribute and it won't put them in the main index. Then do a +help/rebuild to rebuild the database.%r%rQuestions go to GlobalsWiz.
+&FILE_+HELP Help Database=Syntax: +help%[/<flag>%] %[<topic>%]%r%r+help by itself will give you the main help screen. The following flags are available:%r%r%t/index%t%t- Displays the index of all helpfiles%r%t/rebuild%t- Rebuilds the help database (admin only)%r%t/search%t%t- Searches the database for <topic>
+
+@pemit me=DONE
+@pemit me=Don't forget to put the Help Database inside the Help System.  Once you do that you'll also want to +help/rebuild to get it to rebuild it's helpfiles table.

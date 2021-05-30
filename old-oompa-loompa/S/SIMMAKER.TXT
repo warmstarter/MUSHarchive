@@ -1,0 +1,13 @@
+@create Sim Maker
+@link Sim Maker=[owner(me)]
+@set Sim Maker=OPAQUE
+@set Sim Maker=WIZARD
+@set Sim Maker=SAFE
+@VC Sim Maker=$make add:@parent create(Communications Console)=#490;@parent create(Command Console)=#471;&command ship object=[num(command)];@dolist lcon(me)={@link ##=here;drop ##;@fo %#=@set ##=Wizard;&Ship_Object ##=[num(Ship Object)];@tr ##/man_setup};@wait 2={@link Communications Console=[loc(%#)];@link Command Console=[loc(%#)];@tel Communications=home;@tel command console=home}
+&SHIP_OBJECT Sim Maker=#498
+@VA Sim Maker=$make sim:@clone [v(Ship_Object)];@parent create(Helm Console)=#472;@parent create(Navigation Console)=#469;@parent create(Engineering Console)=#470;@parent create(Damage Control Console)=#492;@dolist lcon(me)={@link ##=%L;@fo %#=@set ##=Wizard;&Ship_Object ##=[num(Ship Object)];@tr ##/man_setup;@tel ##=home};@link ship object=helm;&helm ship object=[num(helm)];&nav ship object=[num(navigation)];&eng ship object=[num(engineering)];&damcon ship object=[num(damage)];@link ship object=helm
+@VD Sim Maker=$setup rs *=*,*:&space ship object=real;@name ship object=%0 Ship Object;&name ship object=%0;&filespec Ship object=%1;&docked_at ship object=%2;@link ship marker=[get(%2/dock)];@name ship marker=%0;@tel %0=home;@pemit %#=RS ship setup. Name: %0, Filespec: %1, docked_at: %2.
+@VE Sim Maker=$make airlock:@fo %#={@open {Airlock <A>;Airlock;A}=variable;@lock Airlock=docked/1;@set airlock=light;@parent airlock=#497;&ship_object airlock=[num(ship object)];@set airlock=wizard};&airlock [get(ship object/marker)]=%L
+@VF Sim Maker=$make bridge:@clone [v(Ship_Object)];@parent create(Helm Console)=#472;@parent create(Navigation Console)=#469;@parent create(Communications Console)=#490;@parent create(Command Console)=#471;@dolist lcon(me)={@link ##=%L;@fo %#=@set ##=wizard;&ship_object ##=[num(ship object)];@tr ##/man_Setup;@tel ##=home};@link ship object=helm;&helm ship object=[num(helm)];&nav ship object=[num(navigation)];&comm ship object=[num(communications)];&command ship object=[num(command)];@parent create(Ship Marker)=#499;&ship_object ship marker=[num(ship object)];&marker ship object=[num(ship marker)];drop ship marker
+@VG Sim Maker=$make eng:@parent create(Engineering Console)=#470;@parent create(Damage Control Console)=#492;@dolist lcon(me)={@link ##=%L;@fo %#=@set ##=wizard;&ship_object ##=[num(ship object)];@tr ##/man_setup;@tel ##=home};&eng ship object=[num(engineering)];&damcon ship object=[num(damage control)]
+@VH Sim Maker=$make trans:@parent create(Transporter Console)=#491;@link [con(me)]=%L;@fo %#=@set [con(me)]=wizard;&ship_object [con(me)]=num(ship object);@tr [con(me)]/man_setup;&trans ship object=[con(me)];@tel [con(me)]=home

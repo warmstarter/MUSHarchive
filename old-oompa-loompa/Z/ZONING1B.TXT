@@ -1,0 +1,36 @@
+@create Trader Base-1 Zone
+@link Trader Base-1 Zone = #2
+@lock/Basic Trader Base-1 Zone==*[owner(me)]
+@lock/Zone Trader Base-1 Zone==*[owner(me)]
+@set Trader Base-1 Zone=INHERIT
+@set Trader Base-1 Zone=OPAQUE
+@set Trader Base-1 Zone=!NO_COMMAND
+@set Trader Base-1 Zone=WIZARD
+@set Trader Base-1 Zone=SAFE
+@set Trader Base-1 Zone=MONITOR
+@DESCRIBE Trader Base-1 Zone=This is the Zone for the Black Lance StarBase Trader Base-1.
+&SET_MOTD Trader Base-1 Zone=$+setmotd *:@switch [get([v(room_parent)]/commandlist)]=*%#*,{&motd me=%0;@pe %#=MOTD Changed.},{@pe %#=Access Denied, %N}
+&LIST_MOTD Trader Base-1 Zone=$+motd:@pe %#=[ansi(hb,repeat(~*,39))]%r[v(motd)]%rType '+Motd' to see this message again.%r[ansi(hb,repeat(~*,39))]
+&TEMP Trader Base-1 Zone=#2292
+&COMMANDLIST Trader Base-1 Zone=#67 #4261 #5539
+&ACCESSDENIED Trader Base-1 Zone=[ansi(r,ACCESS DENIED.)] That command is restricted to Command Personnel only.
+&COMMANDACCESS Trader Base-1 Zone=[t(member(v(commandlist),%0))]
+&CREWACCESS Trader Base-1 Zone=[or(or(member(v(crewlist),%0),member(v(commandlist),%0)),or(hasflag(%0,WIZARD),switch(get(%0/empire),Federation,1,0)))]
+&INTRUDER Trader Base-1 Zone=^* has arrived.:@switch [u(CrewAccess,%#)]=0, {&salert me=[ansi(hr,INTRUDER ALERT)];@zemit %!=[ansi(hr,=== INTRUDER ALERT === === INTRUDER ALERT ===)]%r[switch(type(%#),PLAYER,%n(%#[flags(%#)]) detected in [name(loc(%#))]([loc(%#)][flags(loc(%#))])!,%n(%#[flags(%#)]) owned by [name(owner(%#))]([owner(%#)][flags(owner(%#))]) detected in [name(loc(%#))]([loc(%#)][flags(loc(%#))])!)]%rAll security personnel please prepare for a possible combat situation.}
+&CHELP Trader Base-1 Zone=[ljust(%0,20)] - [indent(23,56,{%1})]
+@VM Trader Base-1 Zone=$chelp:@pemit %#=[repeat(=,79)]%r[center(BLB Trader Base-1 Commands Help,79)]%r[repeat(=,79)]%r[u(chelp,<alert> ALERT,{Initiates <alert> alert, where <alert> is RED, YELLOW, GREEN, BLUE, or INTRUDER.})]%r[u(chelp,INT <message>,Sends <message> throughout the ship using the Intercom system.)]%r[u(chelp,CREW LIST,Displays the list of people with crew access.)]%r[u(chelp,COMMAND LIST,Displays the list of people with command access.)]%r[u(chelp,CREW ADD <person>,Adds <person> to the crew list.)]%r[u(chelp,CREW DEL <person>,Deletes <person> from the crew list.)]%r[u(chelp,COMMAND ADD <person>,Adds <person> to the crew list.)]%r[u(chelp,COMMAND DEL <person>,Deletes <person> from the crew list.)]%r%rAll commands except for INT are restricted to personnel with Command Access%ronly.%r[repeat(=,79)]
+@VL Trader Base-1 Zone=$command del *:@switch [u(CommandAccess,%#)][locate(%#,%0,*)]=#-1,{@pemit %#=I don't see that here.},#-2,{@pemit %#=I don't know which one you mean!},0*,{@pemit %#=[u(AccessDenied)]},{&temp me=[locate(%#,%0,*)];&commandlist me=[switch(u(CommandAccess,v(temp)),0,pemit(%#,[name(v(temp))] is not on the Command List.),pemit(%#,[name(v(temp))] has been removed from the Command List.))][remove(v(commandlist),v(temp))]}
+@VK Trader Base-1 Zone=$crew del *:@switch [u(CommandAccess,%#)][locate(%#,%0,*)]=#-1,{@pemit %#=I don't see that here.},#-2,{@pemit %#=I don't know which one you mean!},0*,{@pemit %#=[u(AccessDenied)]},{&temp me=[locate(%#,%0,*)];&crewlist me=[switch(u(CrewAccess,v(temp)),0,pemit(%#,[name(v(temp))] is not on the Crew List.),pemit(%#,[name(v(temp))] has been removed from the Crew List.))][remove(v(crewlist),v(temp))]}
+@VJ Trader Base-1 Zone=$command add *:@switch [u(CommandAccess,%#)][locate(%#,%0,*)]=#-1,{@pemit %#=I don't see that here.},#-2,{@pemit %#=I don't know which one you mean!},0*,{@pemit %#=[u(AccessDenied)]},{&temp me=[locate(%#,%0,*)];&commandlist me=[switch(u(CommandAccess,v(temp)),1,[v(commandlist)][pemit(%#,[name(v(temp))] is already on the Command List.)],[v(commandlist)] [v(temp)][pemit(%#,[name(v(temp))] has been added to the Command List.)])]}
+@VI Trader Base-1 Zone=$crew add *:@switch [u(CommandAccess,%#)][locate(%#,%0,*)]=#-1,{@pemit %#=I don't see that here.},#-2,{@pemit %#=I don't know which one you mean!},0*,{@pemit %#=[u(AccessDenied)]},{&temp me=[locate(%#,%0,*)];&crewlist me=[switch(u(CrewAccess,v(temp)),1,[v(crewlist)][pemit(%#,[name(v(temp))] is already on the Crew List.)],[v(crewlist)] [v(temp)][pemit(%#,[name(v(temp))] has been added to the Crew List.)])]}
+@VH Trader Base-1 Zone=$command list:@switch [u(CommandAccess,%#)]=0, {@pemit %#=[u(AccessDenied)]}, {@pemit %#=Command Access List for [name(me)] follows:[iter(v(commandlist),%r[get(##/class)] [name(##)](##[flags(##)]).)]%r--- end ---}
+@VG Trader Base-1 Zone=$crew list:@switch [u(CommandAccess,%#)]=0, {@pemit %#=[u(AccessDenied)]}, {@pemit %#=Crew Access List for [name(me)] follows:[iter(v(crewlist),%r[get(##/class)] [name(##)](##[flags(##)]).)]%r--- end ---}
+@VF Trader Base-1 Zone=$int *:@zemit %!=<Intercom> %n says, "%0"
+@VE Trader Base-1 Zone=$intruder alert:@switch [u(CommandAccess,%#)]=0, {@pemit %#=[u(AccessDenied)]}, {@pemit %#=Initiating [ansi(hr,INTRUDER)] alert.;&salert me=[ansi(hr,INTRUDER ALERT)];@zemit %!=[ansi(hr,=== INTRUDER ALERT === === INTRUDER ALERT ===)]%rIntruder alert has been initiated by %n. Security personnel please prepare for a combat situation.}
+@VD Trader Base-1 Zone=$green alert:@switch [u(CommandAccess,%#)]=0, {@pemit %#=[u(AccessDenied)]}, {@pemit %#=Initiating [ansi(hg,GREEN)] alert.;@zemit %!=[ansi(hg,=== GREEN ALERT ===)]%rGreen alert has been initiated by %n. Standing down from alert status.;&salert me=[ansi(hg,GREEN)]}
+@VC Trader Base-1 Zone=$yellow alert:@switch [u(CommandAccess,%#)]=0, {@pemit %#=[u(AccessDenied)]}, {@pemit %#=Initiating [ansi(hy,YELLOW)] alert.;@zemit %!=[ansi(hy,=== YELLOW ALERT === === YELLOW ALERT ===)]%rYellow alert has been initiated by %n. Please be prepared in the event that an emergency situation arises.;&salert me=[ansi(hy,YELLOW ALERT)]}
+@VB Trader Base-1 Zone=$blue alert:@switch [u(CommandAccess,%#)]=0, {@pemit %#=[u(AccessDenied)]}, {@pemit %#=Initiating [ansi(hb,BLUE)] alert.;@zemit %!=[ansi(hb,=== BLUE ALERT ===)]%rBlue alert has been initiated by %n. All decks, prepare for atmospheric entry.;&salert me=[ansi(hb,BLUE ALERT)]}
+@VA Trader Base-1 Zone=$red alert:@switch [u(CommandAccess,%#)]=0, {@pemit %#=[u(AccessDenied)]}, {@pemit %#=Initiating [ansi(fhr,RED)] alert.;@zemit %!=[ansi(fhr,=== RED ALERT === === RED ALERT === === RED ALERT ===)]%rRed alert has been initiated by %n. All hands to battlestations!;&salert me=[ansi(fhr,RED ALERT)]}
+&SALERT Trader Base-1 Zone=GREEN
+&LIGHT_TYPE Trader Base-1 Zone=alertlights
+&ROOM_PARENT Trader Base-1 Zone=#4979

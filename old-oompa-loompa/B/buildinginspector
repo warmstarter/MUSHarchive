@@ -1,0 +1,83 @@
+From: jim@world.std.com (James D. McNamara)
+Message-Id: <199303271447.AA13699@world.std.com>
+Subject: Automated db cleaning
+Date: Sat, 27 Mar 1993 09:47:34 -0500 (EST)
+
+> My lates project has been to create an object (or objects) that will do my
+> routine database cleaning for me. I am looking for input as to good ways to
+> do this as well as more input to the information I've already generated.
+
+After perusing Lydis'a eval functions, I said "Yes! Indeed!"  But then
+another issue became apparent: a lengthy eval could bring a busy MUSH
+to its knees.
+
+I submit for your approval the "Building Inspector" that I build for
+SwordsMUSH.  The criteria for which it inpects can be programmed in the
+appropriate registers.
+
+This is a "BY CYCLE", not an "EVAL", device.  It requires a couple of
+cycles to check each object.  Because it is not nearly as elegant as
+evals, I was not going to submit it.  BUT, it appears that the "Building
+Inspector" can run CONCURRENTLY with an active MUSH and NOT jam the
+queues or otherwise cause excessive lag.
+
+I would LOVE any comments and criticisms -- email would be fine.
+
+--Melryn@SwordsMUSH, aka, jim@world.STD.COM
+
+----- cut here -----
+@@ SwordsMUSH Building Inspector -- Melryn@SwordsMUSH, world.std.com 4201
+
+@create Building Inspector
+@link Building Inspector = #56
+@lock Building Inspector = #17&!#17
+@lock/enter Building Inspector = #17&!#17
+
+@COMMENT Building Inspector=START INSpection, SUMMARY, REPORT <playername>
+
+&CMDSUMMARY Building Inspector=$SUMMARY:@swi %vz=unoccupied,{@emit >Summary of
+Building Code Violations:;@dolist lattr(#304)=@swi mid(##,0,1)=#,@emit
+-[name(##)]: [words(get(#304/##))]},{:is currently occupied.}
+
+&CMDSTART Building Inspector=$START INS*:@swi %vz=unoccupied,{@swi
+flags(%#)=*W*,{:starts another inspection.;@fo %#=@trig #207/va},{"A wizard
+must give me that instruction, %N.}},:looks busy.
+
+@VF Building Inspector=@set #304=owner(%vn):[get(strcat(#304/,owner(%vn)))]
+%vn;@trig me/vi
+
+@VT Building Inspector=$REPORT *:@emit >Building Code Violations for
+[name(pmatch(%0))]:;@dolist get(strcat(#304/,pmatch(%0)))=@emit -[type(##)]
+[name(##)](##[flags(##)])
+
+@@ Object #304 is an "ACME Crytal Ball", with (initially) NO attributes.
+@@ The Building Inspector is carrying it.
+
+
+@VC Building Inspector=@dolist lattr(#304)=@set #304=##:;@desc #304=One ACME
+crystal ball.
+@VP Building Inspector=@swi secure(get(%vn/desc))=,@trig me/vf,@trig me/vi
+@VR Building Inspector=@swi secure(get(%vn/desc))=,@trig me/vf,@trig me/vi
+@VE Building Inspector=@swi secure(get(%vn/desc))=,@trig me/vf,@trig me/vi
+@ADESCRIBE Building Inspector=@swi %vz=occupied,{"We're currently inspecting
+dbid %vn. We've been inspecting since [get(#304/vs)].},{@pemit %#=The Inspector
+is currently %vz. The last inspection ran from [get(#304/vs)] through
+[get(#304/vt)].}
+@VZ Building Inspector=unoccupied
+@VI Building Inspector=@swi %vn=strcat(#,sub(first(lstats(all)),1)),{@set
+#304=vt:[time()];@vz me=unoccupied},{@vn me=strcat(#,add(edit(%vn,#,),1));@trig
+me/vb}
+@VN Building Inspector=#377
+@VB Building Inspector=@swi type(%vn)=EXIT,@trig me/ve,OBJECT,@trig
+me/vo,ROOM,@trig me/vr,PLAYER,@trig me/vp,@trig me/vi
+@VA Building Inspector=@vz me=occupied;@dolist lattr(#304)={@set
+#304=##:};@desc #304=One ACME crystal ball.;@set #304=vs:[time()];@vn
+me=#0;@trig me/vb
+@VO Building Inspector=@swi secure(get(%vn/desc))=,@trig me/vf,@trig me/vi
+@DESCRIBE Building Inspector=A shortish man in fine dress, he wears spectacles
+and keeps what remains of his balding hair in good trim. He's eyeballing some
+City Ordinances -- better read "NEWS BUILDERS" to be sure you don't cross this
+guy. He uses a crystal ball to scry all the buildings in the land and makes
+commands are [get(me/comment)].
+
+@@ Finis.

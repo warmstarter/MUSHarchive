@@ -1,0 +1,46 @@
+@create Spam Club HeadQuarters Zone
+@lock/Zone Spam Club HeadQuarters Zone==#4|=#8
+@lock/Basic Spam Club HeadQuarters Zone==#4
+@set Spam Club HeadQuarters Zone=INHERIT
+@set Spam Club HeadQuarters Zone=LINK_OK
+@set Spam Club HeadQuarters Zone=VISUAL
+@set Spam Club HeadQuarters Zone=WIZARD
+@set Spam Club HeadQuarters Zone=SAFE
+@set Spam Club HeadQuarters Zone=MONITOR
+&DESC_STORE Spam Club HeadQuarters Zone=There is no currect Description set. Remember to Store the room description in &DESC_STORE, @set here=dark, and set all the exits light.
+&WINDOWS Spam Club HeadQuarters Zone=[ansi(c,switch([u(me/daylight)],1,{Sunlight shines through a window here, lighting the room.},0,{Pale moonlight shines darkly through a window, giving the room just enough illumination not to run in to anything.}))]
+&ROOM_LIGHTS Spam Club HeadQuarters Zone=[ansi(c,An overhead light illuminates the room.)]
+&SUN_LIGHT Spam Club HeadQuarters Zone=[ansi(c,[switch([u(me/daylight)],1,{The sun shines down from above, lighting the area up.},0,The pale moon shines its cold light here.)])]
+&LAMP_LIGHTS Spam Club HeadQuarters Zone=[ansi(c,A small lamp in the room illuminates it's surroundings.)]
+&DAYLIGHT Spam Club HeadQuarters Zone=[and(gt(mid(time(),11,2),6),lt(mid(time(),11,2),20))]
+&BUILDING_LIGHTS Spam Club HeadQuarters Zone=[ansi(c,Overhead lights illuminate the building well.)]
+&STREET_LIGHTS Spam Club HeadQuarters Zone=[ansi(c,[switch([u(me/daylight)],1,The Street lights which line the sidewalks here are currently off.,0,The Street lights shine brightly on to the street below.)])]
+&ALERT_LIGHTS Spam Club HeadQuarters Zone=[ansi(c,Large panels that line the wall are [get(zone(me)/salert)].)]
+&TORCHLIGHT Spam Club HeadQuarters Zone=[ansi(c,A torch on the wall burns brightly, lighting up the room.)]
+@SUCCESS Spam Club HeadQuarters Zone=[switch([v(light_type)],alertlights,[eval(me,alert_lights)],torchlight,[eval(me,torchlight)],streetlights,[eval(me,street_lights)],buildinglights,[eval(me,Building_Lights)],lamplights,[eval(me,Lamp_Lights)],roomlights,[eval(me,Room_Lights)],daylight,[eval(me,Sun_Light)],windowlight,[eval(me,Windows)],default,[eval(me,defaultlights)])]
+&ROOM_PARENT Spam Club HeadQuarters Zone=#42
+&LIST_MOTD Spam Club HeadQuarters Zone=$+motd:@pe %#=[ansi(hb,repeat(~*,39))]%r[v(motd)]%rType '+Motd' to see this message again.%r[ansi(hb,repeat(~*,39))]
+&SET_MOTD Spam Club HeadQuarters Zone=$+setmotd *:@switch [get([v(room_parent)]/commandlist)]=*%#*,{&motd me=%0;@pe %#=MOTD Changed.},{@pe %#=Access Denied, %N}
+&LIGHT_TYPE Spam Club HeadQuarters Zone=alertlights
+&INTRUDER Spam Club HeadQuarters Zone=^* has arrived.:@switch [u(CrewAccess,%#)]=0, {&salert me=[ansi(hr,INTRUDER ALERT)];@zemit %!=[ansi(hr,=== INTRUDER ALERT === === INTRUDER ALERT ===)]%r[switch(type(%#),PLAYER,%n(%#[flags(%#)]) detected in [name(loc(%#))]([loc(%#)][flags(loc(%#))])!,%n(%#[flags(%#)]) owned by [name(owner(%#))]([owner(%#)][flags(owner(%#))]) detected in [name(loc(%#))]([loc(%#)][flags(loc(%#))])!)]%rAll security personnel please prepare for a possible combat situation.}
+&SALERT Spam Club HeadQuarters Zone=GREEN
+&CHELP Spam Club HeadQuarters Zone=[ljust(%0,20)] - [indent(23,56,{%1})]
+@VA Spam Club HeadQuarters Zone=$red alert:@switch [u(CommandAccess,%#)]=0, {@pemit %#=[u(AccessDenied)]}, {@pemit %#=Initiating [ansi(fhr,RED)] alert.;@zemit %!=[ansi(fhr,=== RED ALERT === === RED ALERT === === RED ALERT ===)]%rRed alert has been initiated by %n. All hands to battlestations!;&salert me=[ansi(fhr,RED ALERT)]}
+@VB Spam Club HeadQuarters Zone=$yellow alert:@switch [u(CommandAccess,%#)]=0, {@pemit %#=[u(AccessDenied)]}, {@pemit %#=Initiating [ansi(hy,YELLOW)] alert.;@zemit %!=[ansi(hy,=== YELLOW ALERT === === YELLOW ALERT ===)]%rYellow alert has been initiated by %n. Please be prepared in the event that an emergency situation arises.;&salert me=[ansi(hy,YELLOW ALERT)]}
+@VC Spam Club HeadQuarters Zone=$blue alert:@switch [u(CommandAccess,%#)]=0, {@pemit %#=[u(AccessDenied)]}, {@pemit %#=Initiating [ansi(hb,BLUE)] alert.;@zemit %!=[ansi(hb,=== BLUE ALERT ===)]%rBlue alert has been initiated by %n. All decks, prepare for atmospheric entry.;&salert me=[ansi(hb,BLUE ALERT)]}
+@VD Spam Club HeadQuarters Zone=$intruder alert:@switch [u(CommandAccess,%#)]=0, {@pemit %#=[u(AccessDenied)]}, {@pemit %#=Initiating [ansi(hr,INTRUDER)] alert.;&salert me=[ansi(hr,INTRUDER ALERT)];@zemit %!=[ansi(hr,=== INTRUDER ALERT === === INTRUDER ALERT ===)]%rIntruder alert has been initiated by %n. Security personnel please prepare for a combat situation.}
+@VE Spam Club HeadQuarters Zone=$int *:@zemit %!=<Intercom> %n says, "%0"
+@VF Spam Club HeadQuarters Zone=$crew list:@switch [u(CommandAccess,%#)]=0, {@pemit %#=[u(AccessDenied)]}, {@pemit %#=Crew Access List for [name(me)] follows:[iter(v(crewlist),%r[get(##/class)] [name(##)](##[flags(##)]).)]%r--- end ---}
+@VG Spam Club HeadQuarters Zone=$command list:@switch [u(CommandAccess,%#)]=0, {@pemit %#=[u(AccessDenied)]}, {@pemit %#=Command Access List for [name(me)] follows:[iter(v(commandlist),%r[get(##/class)] [name(##)](##[flags(##)]).)]%r--- end ---}
+&CREWACCESS Spam Club HeadQuarters Zone=[or(or(member(v(crewlist),%0),member(v(commandlist),%0)),or(hasflag(%0,WIZARD),switch(get(%0/empire),Federation,1,0)))]
+&COMMANDACCESS Spam Club HeadQuarters Zone=[t(member(v(commandlist),%0))]
+&ACCESSDENIED Spam Club HeadQuarters Zone=[ansi(r,ACCESS DENIED.)] That command is restricted to Command Personnel only.
+@VH Spam Club HeadQuarters Zone=$crew add *:@switch [u(CommandAccess,%#)][locate(%#,%0,*)]=1#-1, {@pemit %#=I don't see that here.}, 1#-2, {@pemit %#=I don't know which one you mean!}, 0*, {@pemit %#=[u(AccessDenied)]}, {&temp me=[locate(%#,%0,*)];&crewlist me=[switch(u(CrewAccess,v(temp)),1,[v(crewlist)][pemit(%#,[name(v(temp))] is already on the Crew List.)],[v(crewlist)] [v(temp)][pemit(%#,[name(v(temp))] has been added to the Crew List.)])]}
+@VI Spam Club HeadQuarters Zone=$command add *:@switch [u(CommandAccess,%#)][locate(%#,%0,*)]=1#-1, {@pemit %#=I don't see that here.}, 1#-2, {@pemit %#=I don't know which one you mean!}, 0*, {@pemit %#=[u(AccessDenied)]}, {&temp me=[locate(%#,%0,*)];&commandlist me=[switch(u(CommandAccess,v(temp)),1,[v(commandlist)][pemit(%#,[name(v(temp))] is already on the Command List.)],[v(commandlist)] [v(temp)][pemit(%#,[name(v(temp))] has been added to the Command List.)])]}
+@VJ Spam Club HeadQuarters Zone=$crew del *:@switch [u(CommandAccess,%#)][locate(%#,%0,*)]=1#-1, {@pemit %#=I don't see that here.}, 1#-2, {@pemit %#=I don't know which one you mean!}, 0*, {@pemit %#=[u(AccessDenied)]}, {&temp me=[locate(%#,%0,*)];&crewlist me=[switch(u(CrewAccess,v(temp)),0,pemit(%#,[name(v(temp))] is not on the Crew List.),pemit(%#,[name(v(temp))] has been removed from the Crew List.))][remove(v(crewlist),v(temp))]}
+@VK Spam Club HeadQuarters Zone=$command del *:@switch [u(CommandAccess,%#)][locate(%#,%0,*)]=1#-1, {@pemit %#=I don't see that here.}, 1#-2, {@pemit %#=I don't know which one you mean!}, 0*, {@pemit %#=[u(AccessDenied)]}, {&temp me=[locate(%#,%0,*)];&commandlist me=[switch(u(CommandAccess,v(temp)),0,pemit(%#,[name(v(temp))] is not on the Command List.),pemit(%#,[name(v(temp))] has been removed from the Command List.))][remove(v(commandlist),v(temp))]}
+&COMMANDLIST Spam Club HeadQuarters Zone=#4 #8
+@VL Spam Club HeadQuarters Zone=$green alert:@switch [u(CommandAccess,%#)]=0, {@pemit %#=[u(AccessDenied)]}, {@pemit %#=Initiating [ansi(hg,GREEN)] alert.;@zemit %!=[ansi(hg,=== GREEN ALERT ===)]%rGreen alert has been initiated by %n. Standing down from alert status.;&salert me=[ansi(hg,GREEN)]}
+&TEMP Spam Club HeadQuarters Zone=#2292
+@VM Spam Club HeadQuarters Zone=$chelp:@pemit %#=[repeat(=,79)]%r[center(BLB Trader Base-1 Commands Help,79)]%r[repeat(=,79)]%r[u(chelp,<alert> ALERT,{Initiates <alert> alert, where <alert> is RED, YELLOW, GREEN, BLUE, or INTRUDER.})]%r[u(chelp,INT <message>,Sends <message> throughout the ship using the Intercom system.)]%r[u(chelp,CREW LIST,Displays the list of people with crew access.)]%r[u(chelp,COMMAND LIST,Displays the list of people with command access.)]%r[u(chelp,CREW ADD <person>,Adds <person> to the crew list.)]%r[u(chelp,CREW DEL <person>,Deletes <person> from the crew list.)]%r[u(chelp,COMMAND ADD <person>,Adds <person> to the crew list.)]%r[u(chelp,COMMAND DEL <person>,Deletes <person> from the crew list.)]%r%rAll commands except for INT are restricted to personnel with Command Access%ronly.%r[repeat(=,79)]
+@DESCRIBE Spam Club HeadQuarters Zone=[ansi(hc,----)] [edit(name(zone(me)),Zone,)][ansi(hc,[repeat(-,[sub(73,[sub([strlen(name(zone(me)))],5)])])])]%r[ansi(hw,[eval(me,desc_store)])]%r%r[ansi(hb,-)] [ansi(hc,People)] [ansi(hb,-)] [squish([iter(lcon(me),switch(type(##),PLAYER,switch(idle(##),-1,,switch(hasflag(##,Dark),0,edit(name(##),Console,) [switch(hasflag(##,IC),1,(IC))] [switch(hasattr(##,CAPTION),1,{Brandishing: [get(##/CAPTION)]})] [ansi(hb,-)]))))])]%r[ansi(hb,-)] [ansi(hc,Objects)] [ansi(hb,-)] [squish([iter(lcon(me),switch(type(##),THING,switch(hasflag(##,Dark),0,edit(name(##),Console,) [switch(hasflag(##,IC),1,(IC))] [switch(hasattr(##,CAPTION),1,{Brandishing: [get(##/CAPTION)]})] [ansi(hb,-)])))])][iter(v(Installed),[s(%r)][ansi(hc,There is a)] [ansi(g,edit(##,_,space(1)))] [ansi(hc,here.)])]

@@ -1,0 +1,127 @@
+@@ Faraday's Data Terminal
+@@ Coded by Linda Naughton O'Meara (http://www.wordsmyth.org)
+@@
+@@ DISCLAIMERS:
+@@ - Permission is given to use and distribute this code, providing the 
+@@   credits entry in the help file remains intact.
+@@ - Although every effort has been made to test and debug this code, no warranty 
+@@   is provided for its use.
+@@   By using this code, you agree that the author is not responsible for any ill 
+@@   effects on your MUSH.
+@@ - I will support the code as far as I can, but I make no guarantees that I will 
+@@   have time to do everything.  RL comes first.  Please report any bugs or 
+@@   suggestions through http://www.wordsmyth.org
+@@
+@@ FEATURES:
+@@ This system is a standard Data Terminal.  You can use it for anything from personal
+@@ journal storage to criminal records.  It allows you to create, view, edit and delete
+@@ 'files' on the system.
+@@
+@@ REQUIREMENTS:
+@@ This code is designed for PennMUSH only.  As long as PennMUSH stays backwards compatible,
+@@ it will work on version 1.7.4 patchlevel 13 or higher.  You're welcome to try it on older
+@@ versions of Penn, or on TinyMUX, but I make no guarantees that it will work.
+@@
+@@ INSTALLATION:
+@@ This install script will handle everything for you. Simply save it as a TEXT file and
+@@ /quote it (or equivalent) to your MUSH as your Wizard character.
+@@
+@@ There is no need to create objects ahead of time.  You do not even have to edit this 
+@@ file by hand.
+@@
+@@ If you do not have /quote in your MUSH client, you can copy and paste, but beware of 
+@@ linebreaks inserted when copying!!
+@@
+@@ SETUP:
+@@ After installation, the terminal should be configured with a title and an access list
+@@ (if the terminal is restricted).  These activities can only be performed by the 
+@@ terminal's owner.  By default the terminal has only one owner (the person who created
+@@ it), but you can manually modify the OWNER_LIST attribute on the terminal database
+@@ object to add other owners.
+@@
+@@ You should also give the terminal a description, and can change its name if you want.
+@@
+@@ A few other attributes you may want to configure on the database object:
+@@ FUN_ICTIME - If your MUSH has a dedicated ictime() function, you can use it here.  
+@@              Otherwise it defaults to just using time().
+@@ FUN_TOP_LINE and FUN_BOTTOM_LINE - If your MUSH uses custom lines, you can use their
+@@                                    format in these attributes.  I do ask that you
+@@                                    leave the '+term/help' prompt in the bottom
+@@                                    line somewhere though, so it's always displayed.
+@@ 
+@@ USAGE:
+@@ Looking at the object will always show the terminal description followed by either the
+@@ main file list (if the person has access to the terminal) or an error message (if the
+@@ person doesn't have access to the terminal).  The bottom line of the file list 
+@@ always points out the +term/help command.
+@@
+@@ UPDATES:
+@@ A mailing list is available if you wish to be notified of bugfixes or other updates to this code.  
+@@ Visit my webpage: http://www.wordsmyth.org/faraday to find out more.
+@@
+@@ --------------------------------------------------------------------------------
+
+@set me=quiet
+
+@pemit/silent %#=[ansi(hr,Beginning Data Terminal Installation...)]%R
+
+@pemit/silent %#=[ansi(hr,Creating Objects...)]%R
+
+@create Data Terminal
+@set Data Terminal = WIZARD
+@set Data Terminal = SAFE
+@set Data Terminal = !NO_COMMAND
+@set Data Terminal = OPAQUE
+@lock Data Terminal = me
+@DESCRIBE Data Terminal=A standard data terminal.
+@ADESCRIBE Data Terminal=@fo %#=+term
+@STARTUP Data Terminal=@set me=!no_command
+&CMD-+TERM Data Terminal=$+term:think pemit(%#,switch(u(#538/fun_has_access,%#),0,,[setq(0,u(#538/fun_list_files))][u(#538/fun_display_files,1,[switch(gte(words(%q0),20),1,20,words(%q0))],%#)]))
+&CMD-+TERM-CATCHUP Data Terminal=$+term/catchup:think pemit(%#,switch(0,u(#538/fun_has_access,%#),,ansi(hg,You mark all files as read.))[set(%#,read_#538:[iter(lattr(#538/file_*),after(##,_))])]))
+&CMD-+TERM-DEL Data Terminal=$+term/del *:think [setq(0,u(#538/fun_list_files))][setq(1,extract(%q0,%0,1,))]pemit(%#,switch(0,u(#538/fun_has_access,%#),,isnum(%0),ansi(hr,That is not a valid number.),lte(%0,words(%q0)),ansi(hr,There aren't that many files.),gte(%0,1),ansi(hr,That is not a valid number.),ansi(hg,You delete file number %0.[wipe(#538/%q1)])))
+&CMD-+TERM-EDIT Data Terminal=$+term/edit *=*/*:think [setq(0,u(#538/fun_list_files))][setq(1,extract(%q0,%0,1,))]pemit(%#,switch(0,u(#538/fun_has_access,%#),,isnum(%0),ansi(hr,That is not a valid number.),lte(%0,words(%q0)),ansi(hr,There aren't that many files.),gte(%0,1),ansi(hr,That is not a valid number.),ansi(hg,You edit file number %0.)[set(#538,%q1:[edit(xget(#538,%q1),%1,%2)])]))
+&CMD-+TERM-LIST Data Terminal=$+term *-*:think [setq(0,words(u(#538/fun_list_files)))]pemit(%#,switch(0,u(#538/fun_has_access,%#),,isnum(%0),ansi(hr,That is not a valid number.),isnum(%1),ansi(hr,That is not a valid number.),gte(%0,1),ansi(hr,That is not a valid number.),gte(%1,1),ansi(hr,That is not a valid number.),lte(%0,%q0),ansi(hr,There aren't that many files.),lte(%1,%q0),ansi(hr,There aren't that many files.),lte(%0,%1),ansi(hr,Your numbers are backwards.),lte(sub(%1,%0),25),ansi(hr,You may only display a maximum of 20 files at a time.),[u(#538/fun_display_files,%0,%1,%#)]))
+&CMD-+TERM-NEW Data Terminal=$+term/new *=*:think switch(0,u(#538/fun_has_access,%#),,[pemit(%#,ansi(hg,You create a new file with title %0.))][set(#538,file_[xget(#538,next_file)]:%0|%N|[u(#538/fun_ictime)]|[u(#538/fun_escape_cr,%1)])][set(#538,next_file:[inc(xget(#538,next_file))])]))
+&CMD-+TERM-VIEW Data Terminal=$+term *:think [setq(0,u(#538/fun_list_files))][setq(1,extract(%q0,%0,1,))]pemit(%#,switch(0,u(#538/fun_has_access,%#),,not(match(%0,*-*)),,isnum(%0),ansi(hr,That is not a valid number.),lte(%0,words(%q0)),ansi(hr,There aren't that many files.),gte(%0,1),ansi(hr,That is not a valid number.),[set(%#,read_#538:[xget(%#,read_#538)]%B[after(%q1,_)])][u(#538/fun_top_line)]%R[ansi(g,Author:)] [u(#538/fun_get_author,%q1)]%R[ansi(g,Date:)]%B%B%B[u(#538/fun_get_time,%q1)]%R[ansi(g,File:)]%B%B%B[ansi(h,u(#538/fun_get_title,%q1))]%R[repeat(-,78)]%R[u(#538/fun_get_text,%q1)]%R[u(#538/fun_bottom_line)]))
+&CMD-+TERM-SEARCH Data Terminal=$+term/search *:think pemit(%#,switch(0,u(#538/fun_has_access,%#),,[u(#538/fun_top_line)][setq(0,u(#538/fun_list_files))][setq(1,grepi(#538,file_*,%0))]%R[ansi(h,#%B%B%B%B%BSearch Results: "%0")]%R[repeat(-,78)][iter(extract(sortby(#538/fun_sortby_recent,%q1),1,20),%R[ljust([match(%q0,##)].,3)]%B[switch(u(#538/fun_is_unread_file,%#,##),1,U%B,%B%B)][ljust(u(#538/fun_get_title,##),48)][u(#538/fun_get_time,##)])][switch(1,gt(words(%q1),25),%R%R[ansi(hr,Too many search results.  Try a search term that isn't so broad.)])]%R[u(#538/fun_bottom_line)]))
+&CMD-+TERM-ACCESS Data Terminal=$+term/access:think pemit(%#,switch(match(xget(#538,owner_list),%#),0,ansi(hr,This command is restricted to the terminal owner.),[u(#538/fun_top_line)]%R[ansi(h,Access List:)]%R[iter(xget(#538,access_list),name(##))]%R[u(#538/fun_bottom_line)]))
+&CMD-+TERM-ADDACCESS Data Terminal=$+term/addaccess *:think [setq(0,pmatch(%0))]pemit(%#,switch(0,match(xget(#538,owner_list),%#),ansi(hr,This command is restricted to the terminal owner.),t(%q0),ansi(hr,That is not a valid player.),not(match(xget(#538,access_list),%q0)),ansi(hr,That person already has access.),ansi(hg,You add %0 to the access list.)[set(#538,access_list:[xget(#538,access_list)]%B%q0)]))
+&CMD-+TERM-DELACCESS Data Terminal=$+term/delaccess *:think [setq(0,pmatch(%0))]pemit(%#,switch(0,match(xget(#538,owner_list),%#),ansi(hr,This command is restricted to the terminal owner.),t(%q0),ansi(hr,That is not a valid player.),match(xget(#538,access_list),%q0),ansi(hr,That person doesn't have access.),ansi(hg,You remove %0 from the access list.)[set(#538,access_list:[remove(xget(#538,access_list),%q0)])]))
+&CMD-+TERM-HELP Data Terminal=$+term/help:think pemit(%#,[u(#538/fun_top_line)]%RThis terminal is used to store data in files.  Each file can be given a title, and is automatically stamped with the date and time when it was created.  Files are displayed with the newest first, and there is an indication of whether you've read the file or not.  Access is restricted, and may only be granted by staff.%R%R[ansi(hg,Viewing Commands)]%R[ansi(h,+term)] - Lists all files%R[ansi(h,+term <#>)] - Views a file.%R[ansi(h,+term <#>-<#>)] - Lists only files in a certain range%R[ansi(h,+term/catchup)] - Marks all files as read.%R[ansi(h,+term/search <search term>)] - Lists files containing the search term.%R%R[ansi(hg,Editing Commands)]%R[ansi(h,+term/new <title>=<file data>)] - Creates a new file%R[ansi(h,+term/edit <#>=<text to find>/<text to replace with>)] - Edits an existing file%R[ansi(h,+term/del <#>)] - Deletes a file.[switch(t(match(xget(#538,owner_list),%#)),1,%R%R[ansi(hg,Owner-Only Commands)]%R[ansi(h,+term/title <title>)] - Changes the title of the terminal.%R[ansi(h,+term/access)] - Shows who has access to the terminal.%R[ansi(h,+term/addaccess <player>)] - Gives a player access to the terminal.%R[ansi(h,+term/delaccess <player>)] - Removes a player's terminal access.)]%R%R--Terminal System coded by [ansi(hr,Faraday)] (http://www.wordsmyth.org)--%R[ansi(g,Version [xget(#538,version)])]%R[u(#538/fun_bottom_line)]
+&CMD-+TERM-TITLE Data Terminal=$+term/title *:think switch(0,match(xget(#538,owner_list),%#),pemit(%#,ansi(hr,This command is restricted to the terminal owner.)),pemit(%#,ansi(hg,You set the title of the computer to %0.)[set(#538,title:%0)]))
+@create Data Terminal DB
+@set Data Terminal DB = NO_COMMAND
+@set Data Terminal DB = SAFE
+&ACCESS_LIST Data Terminal DB=
+&FUN_BOTTOM_LINE Data Terminal DB=center(%B+term/help%B,78,=)
+&FUN_DISPLAY_FILES Data Terminal DB=[setq(9,u(#538/fun_list_files))][u(#538/fun_top_line)]%R[ansi(h,#%B%B%B%B%BFile[space(44)]Date)]%R[repeat(-,78)][iter(extract(%q9,%0,%1),%R[ljust([add(%0,#@,-1)].,3)]%B[switch(u(#538/fun_is_unread_file,%2,##),1,U%B,%B%B)][ljust(u(#538/fun_get_title,##),48)][u(#538/fun_get_time,##)])]%R%R[ansi(h,[switch(words(%q9),0,~ No Files ~,~ Files %0-%1 of [words(%q9)] ~)][space(35)]'U' - Unread File)]%R[u(#538/fun_bottom_line)]
+&FUN_ESCAPE_CR Data Terminal DB=[edit(edit(%0,%r,\\\%r),%R,\\\%R)]
+&FUN_GET_AUTHOR Data Terminal DB=extract(xget(#538,%0),2,1,|)
+&FUN_GET_TEXT Data Terminal DB=extract(u(#538/fun_replace_cr,xget(#538,%0)),4,1,|)
+&FUN_GET_TIME Data Terminal DB=extract(xget(#538,%0),3,1,|)
+&FUN_GET_TITLE Data Terminal DB=extract(xget(#538,%0),1,1,|)
+&FUN_HAS_ACCESS Data Terminal DB=switch(1,orflags(%#,Wr),1,t(match(xget(#538,access_list),%0)),1,0[pemit(%0,ansi(hr,Sorry - You do not have access to this terminal.))])
+&FUN_ICTIME Data Terminal DB=time()
+&FUN_IS_UNREAD_FILE Data Terminal DB=not(match(xget(%0,read_#538),after(%1,_))
+&FUN_LIST_FILES Data Terminal DB=sortby(fun_sortby_recent,lattr(#538/file_*))
+&FUN_REPLACE_CR Data Terminal DB=[edit(edit(%0,\\\%r,%r),\\\%R,%R)]
+&FUN_SORTBY_RECENT Data Terminal DB=sub(after(%1,_),after(%0,_))
+&FUN_TOP_LINE Data Terminal DB=center(%B[xget(#538,title)]%B,78,=)
+&NEXT_FILE Data Terminal DB=1
+&TITLE Data Terminal DB=Data Terminal
+&VERSION Data Terminal DB=1.0
+
+@pemit/silent %#=[ansi(hr,Setting up database numbers...)]%R
+
+@fo me=&owner_list Data Terminal DB=%#
+@fo me=@edit Data Terminal/*=#538,[num(Data Terminal DB)]
+@fo me=@edit Data Terminal DB/*=#538,[num(Data Terminal DB)]
+
+@wait 5=@pemit/silent %#=[ansi(hr,Moving objects to their appropriate places...)]%R
+
+@wait 6=@tel Data Terminal DB=Data Terminal
+
+@wait 7=@pemit/silent %#=%R%R[ansi(hr,Installation Complete!!  You may now change the name of the terminal object and edit its description if you like.  You should also set its title and access list using the commands in +term/help.)]%R
+
+@wait 8=@set me=!quiet
+

@@ -1,0 +1,151 @@
+PARENT: Bartender Code(#774MVYehs)
+Type: THING Flags: MONITOR VISUAL PARENT_OK ENTER_OK HALTED SAFE
+If you can't find the number of this Bartender parent code to @parent it then
+you prob shouldn't be trying to parent it :)
+Owner: Eddy Tengel  Key: *UNLOCKED* Loonies: 1
+ORDER:$order *:@oemit %n=%N yells for %0 from [name(me)].;@pemit %#=You order
+%0.;@swi %s=he,{@wait 5=@emit [name(me)] smiles demurely and says, "At once,
+milord. I shall get you your %0 immediately." She hurries off to the kitchen.},
+{@wait 5=@emit [name(me)] smiles and says, "At once, milady. I shall get your
+%0 immediately." She hurries off to the kitchen.};@wait 10=@emit [name(me)]
+returns from the kitchen and places %N's %0 in front of %o, sparing %o a wink
+and a smile.
+Adesc:@pemit %#=To order from [name(me)], simply 'order <whatever>'
+Sex:Female
+CDSTATS:PLAYING
+REPORT:$reporting::smiles and lets %n take over. "All yours!" she says softly,
+smiling appreciatively at %N.;&on_duty me=1;&duty me=%n
+ON_DUTY:1
+OFFDUTY:$off duty::smiles and slides back behind the bar, taking over for %n.
+"Good morrow," she says with a smile and a wink.;&duty me;&on_duty me=0
+REQUEST:$request * by *:@swi [get(me/song_on)]=0,{&song_on m==1;@pemit %n=You
+go over to [name(me)] and request her to play %0, by %1.;@oemit %n=%n heads
+over to [name(me)] and whispers something.;@wait 4=:smiles and pops in a Disc.;
+@wait 7=@emit [get(#774/pref[rand(5)])] %1's "%0" [get(#774/last[rand(4)])];
+@wait 15=ambi;@wait 120=ambi;@wait 200=@emit The dancing slowly stops as "%0"
+ends.;@wait 200=&song_on me=0},1,{@pemit %n=[name(me)] grins, "Hey, let the
+Disc finish first, cool?"}
+SONG_ON:0
+PREF0:Suddenly the speakers spring to life as
+PREF1:The sound system blares as
+PREF2:The crowd cheers as
+PREF3:A few people head out to the dance floor as
+PREF4:The lighting plays across the crowd as
+LAST0:begins playing
+LAST1:can be heard throughout the club.
+LAST2:echoes throughout the club.
+LAST3:blares to life on the sound system.
+DUTY:Beauty
+No exits.
+Home: Free Coding Room(#502RFLh)
+Location: Free Coding Room(#502RFLh)
+_______________________________________________________________________________
+PARENT: Table Parent Object(#362MOVYhs)
+Type: THING Flags: MONITOR OPAQUE VISUAL PARENT_OK HALTED SAFE
+This is the table object. To use this do the following:%r%r@create <object>%r
+@parent <object>=#362 (you may have already done this)%r@lock <object>=me%rdrop
+<object>%rconfigure <number of tables> tables%r%rThis will set up the numbler
+of tables you want with a random maximum of seats per table, and a name for
+each table of `table <number>'. These can be reset by typing:%r%r&maxseats
+<table number><object>=<number of seats>%r%rThe tables can be renamed by
+typing:%r%r&table<table number> <object>=<new table name>%r%rThe table name
+should not start with a capital letter, or end in a period. One final note, due
+to the fact that the object listens for messages (it MUST be set MONITOR) it
+cannot be set dark to hide it.
+Owner: Eddy Tengel  Key: Free Coding Room(#502RFLh) Loonies: 1
+JOINTABLE1:$sit at #*:@switch 0=[not(member(iter(rest(lnum(add(v(maxtables),
+1))), [v(table##names)]), %#))],{@pemit %#=Don't you think you should 'stand'
+first?},[lte(%0, v(maxtables))],{@pemit %#=It would help if there were that
+many tables.},[gt(v(maxseats%0), words(v(table%0names)))],{@pemit %#=There
+aren't any free seats at that table.},{@oemit %#=%N sits down at [v(table%0)].;
+@pemit %#=You sit down at [v(table%0)].;@dolist [v(table%0names)]=@pemit ##=%N
+sits down and joins you.;&table%0names me=[v(table%0names)] %#}
+JOINTABLE:$sit with *:[setq(0, extract(iter(rest(lnum(add(v(maxtables), 1))),
+[switch(words(v(table##names)), 0,, [repeat(%b##, words(v(table##names)))])])
+member(iter(rest(lnum(add(v(maxtables), 1))), [v(table##names)]), num(%0)),
+1))];@switch 0=[member(iter(rest(lnum(add(v(maxtables), 1))), [v(table##
+names)]),num(%0))],{@pemit %#=There isn't anyone named '%0' sitting here.},
+[not(member(iter(rest(lnum(add(v(maxtables), 1))), [v(table##names)]), %#))],
+{@pemit %#=Don't you think you should 'stand' first?},[lte(r(0),
+v(maxtables))],{@pemit %#=It would help if there were that many tables.},
+[gt(v(maxseats[r(0)]), words(v(table[r(0)]names)))],{@pemit %#=There aren't any
+free seats at the table %0 is at.},{@oemit %#=%N sits down at [v(table
+[r(0)])].;@pemit %#=You sit down at [v(table[r(0)])].;@dolist [v(table[r(0)]
+names)]=@pemit ##=%N sits down and joins you.;&table[r(0)]names me=[v(table
+[r(0)]names)] %#}
+STANDTABLE:$stand:@switch [member(iter(rest(lnum(add(v(maxtables), 1))),[v
+(table##names)]), %#)]=0,{@pemit %#=Well, you stretch, but standing is hard
+considering you already are.},{[setq(0, [extract(s(iter(rest(lnum(add(v
+(maxtables), 1))),[switch(words(v(table##names)), 0,, [repeat(%b##, words(v
+(table##names)))])])),member(iter(s(rest(lnum(add(v(maxtables), 1)))), [v
+(table##names)]), %#), 1)])];&table[r(0)]names me=[remove(v(table[r(0)]names),
+%#)];@pemit %#=You stand and stretch, leaving your seat.;@dolist [v(table[r(0)]
+names)]=@pemit ##=%N stands, leaving the table.}
+TALK:$tt *:@switch [member(iter(rest(lnum(add(v(maxtables), 1))), [v(table##
+names)]), %#)]=0,{@pemit %#=Try sitting down at a table first, perhaps?},
+{@dolist [v(table[extract(iter(rest(lnum(add(v(maxtables), 1))), [switch(words
+(v(table##names)), 0,, [repeat(%b##, words(v(table##names)))])]), member(iter
+(rest(lnum(add(v(maxtables), 1))), [v(table##names)]), %#), 1)]names)]={@pemit
+##=At your table, %N[switch(mid(%0, 0, 1), :, %b[delete(%0, 0, 1)], ;, [delete
+(%0, 0, 1)], %bsays "%0")]}}
+TABLE_CMD:$tables:@dolist [rest(lnum(add(v(maxtables), 1)))]=@pemit %#=[capstr
+(v(table##))] ({#}##) has [switch(sub(v(maxseats##), words(v(table##names))),
+0, no, [sub(v(maxseats##), words(v(table##names)))])] empty [switch(sub(v
+(maxseats##), words(v(table##names))), 1, seat, seats)].[switch(words(v(table##
+names)), 0,,1, %rSeated is: %b[name(v(table##names))].,%rSeated are: %b[u(#362/
+table_look, v(table##names))])]
+TABLEHELP:$tablehelp:@pemit %#=get_eval(me/help)
+CONFIGURE:$configure * tables:@switch isnum(%0)=0,@pemit %#=The number of
+tables needs to be a number!,{&CLEANUPSEATSA me=get(me/CLEANUPSEATSA);
+&CLEANUPSEATSB me=get(me/CLEANUPSEATSB);@set me=monitor;&MAXTABLES me=%0;
+@dolist [lnum(v(maxtables))]={&maxseats[add(##, 1)] me=[add(rand(9), 1)];
+&table[add(##, 1)] me=table [add(##, 1)]}}
+CREDITS:Table code parent from Dark Web. Coder unknown. Originaly from Damned?
+CLEANUPSEATSA:^* has left.:@switch member(iter(rest(lnum(add(v(maxtables),
+1))), [v(table##names)]), %#)=>0,{[setq(0, [extract(iter(rest(lnum(add(v
+(maxtables),1))), [switch(words(v(table##names)), 0,, [repeat(%b##,words(v
+(table##names)))])]), member(iter(rest(lnum(add(v(maxtables), 1))), [v(table##
+names)]), %#), 1)])];&table[r(0)]names me=[remove(v(table[r(0)]names), %#)];
+@dolist [v(table[r(0)]names)]={@pemit ##=%N stands, leaving the table.};@pemit
+%#=You stand, leaving your seat.}
+CLEANUPSEATSB:^* has disconnected.:@switch member(iter(rest(lnum(add(v
+(maxtables), 1))), [v(table##names)]), %#)=>0,{[setq(0, [extract(iter(rest
+(lnum(add(v(maxtables), 1))), [switch(words(v(table##names)), 0,, [repeat(%b##,
+words(v(table##names)))])]), member(iter(rest(lnum(add(v(maxtables), 1))),
+[v(table##names)]), %#), 1)])];@dolist [v(table[r(0)]names)]={@pemit ##=%N
+stands, leaving the table.};&table[r(0)]names me=[remove(v(table[r(0)]names),
+%#)]}
+MAXTABLES:8
+MAXSEATS1:5
+TABLE1:table 1
+MAXSEATS2:4
+TABLE2:table 2
+MAXSEATS3:2
+TABLE3:table 3
+MAXSEATS4:1
+TABLE4:table 4
+MAXSEATS5:8
+TABLE5:table 5
+MAXSEATS6:6
+TABLE6:table 6
+MAXSEATS7:3
+TABLE7:table 7
+MAXSEATS8:9
+TABLE8:table 8
+HELP:Tables are a virtual `place' to sit. You remain in the same room, but%r
+join a group of people within that room who may or may not be having a%rquiet
+conversation at that table. Credit for this concept goes to%rGahron@AmberMUSH
+for the original idea.%r%r[space(2)]Commands:%r[space(2)]---------%r[space(2)]
+Sit <table name>[space(12)]Sits you at <tablename> (Disabled)%r[space(2)]Sit at
+#<num>[space(15)]Sits you at table #<num>.%r[space(2)]Sit with <name>[space
+(13)]Sits you at the table with <name>.%r[space(2)]Stand[space(23)]Removes you
+from your table.%r%r[space(2)]Tt <message>[space(16)]Relays a message to all
+those at your table.%r[space(30)]This command takes ':' and '\;' substitutions.
+%r%r[space(2)]Tables[space(22)]Lists who's sitting at all tables.%r[space(2)]
+Table <num>[space(17)]Lists who's sitting at table <num>. (Disabled)
+TABLE_LOOK:[iter(%0[setq(8,words(%0))],[setq(9,add(%q9,1))][switch([SUB
+(%q8,%q9)],0, and [name(##)],{[name(##)], })])]
+No exits.
+Home: Foyer
+Location: Free Coding Room(#502RFLh)
+_______________________________________________________________________________

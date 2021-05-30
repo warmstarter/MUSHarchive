@@ -1,0 +1,64 @@
+@create USS Patapsco
+@link USS Patapsco = #320
+@lock/Basic USS Patapsco==#113
+@lock/Use USS Patapsco==#113
+@set USS Patapsco = HAVEN
+@set USS Patapsco = INHERIT
+@set USS Patapsco = OPAQUE
+@set USS Patapsco = QUIET
+@set USS Patapsco = UNFINDABLE
+@set USS Patapsco = SAFE
+@set USS Patapsco = ROYALTY
+@set USS Patapsco = MONITOR
+&EXIT_REPORT USS Patapsco=Exits:[iter(lexits(here),%b%b[name(##)])]
+&MECH_SENSORS USS Patapsco=[squish(iter(remove(lcon(here),%!),switch(t(get(##/sname)),1,##)))]
+&SENSOR_REPORT USS Patapsco=Sensor report:[iter(u(mech_sensors),%r[switch(get(##/lock),%!,*%b)][name(##)] -- [num(##)])]%r--- end ---
+&SENSORS-1 USS Patapsco=$sensors:@pemit me=[u(sensor_report)]%r[u(exit_report)]
+&CONTACT_LOST USS Patapsco=^* has left.:@remit me=CONTACT LOST: [name(%#)] -- [num(%#)];think [switch(get(me/lock),%#,[set(me,Lock:)][remit(%#,Weapons lock from [name(me)] -- [u(specs,name)] has been broken.)][remit(me,Weapons lock on [name(%#)] lost.)]
+&NEW_CONTACT USS Patapsco=^* has arrived.:@remit me=NEW CONTACT: [name(%0)] -- [num(%0)]
+&RFREQ USS Patapsco=10
+&RSETFREQ USS Patapsco=$rsetfreq *:&rfreq me=%0;@pemit %#=Comm Freq: %0
+&RTRANS USS Patapsco=$rtrans *:@dol [squish(iter(remove(lcon(here),%!),switch(t(get(##/Runabout)),1,##)))]=@swi [get(##/rfreq)]=[v(rfreq)],@remit ##=[ansi(hb,<)][ansi(hw,Transmission:)] [ansi(hr,Frequency)] [ansi(hy,[v(rfreq)] gHz)][ansi(hb,>)]%b[switch(mid(%0,0,1),:,[ansi(hg,[name(me)])]%b[ansi(hr,mid(%0,1,strlen(%0)))],;,[ansi(hg,[name(me)])][ansi(hr,mid(%0,1,strlen(%0)))],{[ansi(hg,[name(me)])] [ansi(r,says ")][ansi(hr,%0)][ansi(r,")]})];@remit me=You transmit: [switch(mid(%0,0,1),:,[ansi(hg,[name(me)])]%b[ansi(hr,mid(%0,1,strlen(%0)))],;,[ansi(hg,[name(me)])][ansi(hr,mid(%0,1,strlen(%0)))],{[ansi(hg,[name(me)])] [ansi(r,says ")][ansi(hr,%0)][ansi(r,")]})]
+&RSEND USS Patapsco=$rsend *=*:@switch [t(get(%0/Runabout))]=0,{@pemit %#=Invalid Communications Channel.},{@remit me=You send [ansi(hg,`)][ansi(hw,[switch(mid(%1,0,1),:,[ansi(hr,[mid(%1,1,strlen(%1))])],;,[ansi(hr,[mid(%1,1,strlen(%1))])],{[ansi(hw,%1)]})])][ansi(hg,')] over the Comm Panel.;@remit %0=Your Comm Panel Reads: Personal Transmission from [name(me)] -- [u(specs,name)]: [switch(mid(%1,0,1),:,[ansi(hr,[mid(%1,1,strlen(%1))])],;,[ansi(hr,[mid(%1,1,strlen(%1))])],{[ansi(hw,%1)]})]}
+&DOOM_MECH USS Patapsco=1
+&LOOK-2A USS Patapsco=$+l:look
+&LISTEN-2B USS Patapsco=$list off:@listen me;@remit me=Listening off.
+&LISTEN-2A USS Patapsco=$list on:@listen me=*;@remit me=Listening on.
+&SPEAK-1A USS Patapsco=$spk *:@emit [ansi(r,%[)][ansi(hw,[name(me)])][ansi(r,%])] [switch(mid(%0,0,1),:,[ansi(hg,%N)]%b[ansi(hr,[mid(%0,1,strlen(%0))])],;,[ansi(hg,%N)][ansi(hr,[mid(%0,1,strlen(%0))])],{[ansi(hg,%N)] [ansi(r,says ")][ansi(hr,%0)][ansi(r,")]})]
+&CLOAK-1 USS Patapsco=$cloak:@remit here=[name(me)] cloaks, and shimmers from view.;@set [num(me)]=dark
+&DECLOAK-1 USS Patapsco=$decloak:@set me=!dark;@remit here=[name(me)] decloaks, and shimmers into existence.
+&OOC USS Patapsco=#0
+&FREQ USS Patapsco=100
+&SNAME USS Patapsco=Runabout
+&HOME USS Patapsco=#320
+&REMEMBER-1 USS Patapsco=$rem *:@set [num(me)]=[first(v(0))]:[rest(v(0))];@pemit %n=Runabout Destination remembered.
+&BRING-1 USS Patapsco=$bring *:@switch [get(me/%0)]=,@pemit %n=I don't recall that one.,@force [num(me)]=@tel [get(me/%0)]=here
+&RECALL-1 USS Patapsco=$rec *:@switch [get(me/%0)]=,@pemit %n=I don't recall that one.,@pemit %n=%0 is [get(me/%0)].
+&DESTS-1 USS Patapsco=$dest *:@switch [get(me/%0)]=,@pemit %N=I don't recall that one.,@force [num(me)]=@remit [loc(me)]=[name(me)] emits a portal from a hidden point.;@wait 2=@remit [loc(me)]=Suddenly you feel wind all around you and a low tone atmospheric noise.;@wait 3=@remit [loc(me)]=A green portal opens up where [name(me)] aimed the "weapon.";@wait 5=@remit [get(me/%0)]=A huge green portal opens up in the air.;@wait 9=@remit [loc(me)]=The hard wind continues to mess up your hair.;@wait 17=@remit [loc(me)]=The wind calms down and the portal closes in on itself.;@wait 17=@tel [num(me)]=[get(me/%0)];@wait 18=@remit [get(me/%0)]=The huge green portal, which opened in the air, closes in on itself.
+&RUNABOUT USS Patapsco=1
+&MSEND USS Patapsco=$msend *=*:@switch [t(get(%0/DOOM_Mech))]=0,{@pemit %#=Invalid Communications Channel.},{@remit me=You send [ansi(hg,`)][ansi(hw,[switch(mid(%1,0,1),:,[ansi(hr,[mid(%1,1,strlen(%1))])],;,[ansi(hr,[mid(%1,1,strlen(%1))])],{[ansi(hw,%1)]})])][ansi(hg,')] over the Comm Panel.;@remit %0=Your Comm Panel Reads: Personal Transmission from [name(me)] -- [u(specs,name)]: [switch(mid(%1,0,1),:,[ansi(hr,[mid(%1,1,strlen(%1))])],;,[ansi(hr,[mid(%1,1,strlen(%1))])],{[ansi(hw,%1)]})]}
+&MTRANS USS Patapsco=$mtrans *:@dol [squish(iter(remove(lcon(here),%!),switch(t(get(##/DOOM_Mech)),1,##)))]=@swi [get(##/freq)]=[v(freq)],@remit ##=[ansi(hb,<)][ansi(hw,Transmission:)] [ansi(hr,Frequency)] [ansi(hy,[v(freq)] gHz)][ansi(hb,>)]%b[switch(mid(%0,0,1),:,[ansi(hg,[name(me)])]%b[ansi(hr,mid(%0,1,strlen(%0)))],;,[ansi(hg,[name(me)])][ansi(hr,mid(%0,1,strlen(%0)))],{[ansi(hg,[name(me)])] [ansi(r,says ")][ansi(hr,%0)][ansi(r,")]})];@remit me=You transmit: [switch(mid(%0,0,1),:,[ansi(hg,[name(me)])]%b[ansi(hr,mid(%0,1,strlen(%0)))],;,[ansi(hg,[name(me)])][ansi(hr,mid(%0,1,strlen(%0)))],{[ansi(hg,[name(me)])] [ansi(r,says ")][ansi(hr,%0)][ansi(r,")]})]
+&MSETFREQ USS Patapsco=$setfreq *:&freq me=%0;@pemit %#=Comm Freq: %0
+&KICK-1 USS Patapsco=$kick:@dol [lcon(me)]=drop ##
+&BOOT-1 USS Patapsco=$boot *:@force [num(me)]=drop %0
+&FLY-1 USS Patapsco=$fly *:@force [num(me)]=@emit The [name(me)] lifts off, to a destination unknown.;@trigger [num(me)]/preflight;@wait 2=@trigger [num(me)]/takeoff;@force [owner(me)]=@wait 3=@tel [num(me)]=%0;@emit The [name(me)] appears, and lands safely on the ground.;@wait 4=@trigger [num(me)]/landing
+&WHEREIS-1 USS Patapsco=$where *:@pemit %N=[name(*%0)] is currently at: [name(loc(*%0))] - <[loc(*%0)]>
+&CLOAK USS Patapsco=$rcloak:@force [num(me)]=@emit The [name(me)] shimmers, and disappears from existence.;@force [owner(me)]=@set [num(me)]=dark
+&DECLOAK USS Patapsco=$dcloak:@force [owner(me)]=@set [num(me)]=!dark;@force [num(me)]=@emit You see the [name(me)] appear, then shimmer into existence.
+&FLY-2 USS Patapsco=$mf *:@force [num(me)]=The runabout takes off, and heads to a nearby destination.;@force [num(me)]=go %0;@wait 1=@force [num(me)]=@emit The runabout appears, and lands on the ground.
+&TALK-1A USS Patapsco=$sp on:@force [owner(me)]=@set here=audible;@force [owner(me)]=@prefix [num(me)]=From [name(me)],
+&TALK-1B USS Patapsco=$sp off:@force [owner(me)]=@set here=!audible;@force [owner(me)]=@prefix [num(me)]=
+&TIME-1 USS Patapsco=$time:@remit [num(me)]=The Current MUSH Time is: [time()]
+&CREDITS USS Patapsco=Coded by Jesse@DeltaMUSH
+&LOOK-1A USS Patapsco=$peep:@force [owner(me)]=@listen [num(me)]=*;@force [num(me)]=l;@force [owner(me)]=@listen [num(me)]=
+&TAKEOFF USS Patapsco=@remit [num(me)]=[name(me)] takes off!
+&PREFLIGHT USS Patapsco=@remit [num(me)]=[name(me)] is preparing to launch. Please sit down and fasten seatbelts.
+&LANDING USS Patapsco=@remit [num(me)]=[name(me)] is preparing to land, please brace yourselves.;@wait 2=@remit [num(me)]=[name(me)] has landed. You may leave now.
+&DEVFLAGS USS Patapsco=invincible recharger nosteal
+&HELP-1A USS Patapsco=$+help comm:@pemit %#=Communications Help:%rrsend <name or db#>=<message> -- Send a message to a specific runabout.%rmtrans <message> -- Transmits a message over the current frequency.%rrsetfreq <frequency> -- Sets your frequency.
+&LIGHT_TYPE USS Patapsco=lamplights
+@LALIAS USS Patapsco=o;ou;out;leave;exit;disembark
+@EALIAS USS Patapsco=embark;enter Patapsco;patapsco
+@DESCRIBE USS Patapsco=This is [name(owner(me))]'s Personal Runabout, the [name(me)].
+@IDESCRIBE USS Patapsco=This is the inside of [name(owner(me))]'s Runabout ([name(me)]). You see 4 chairs in the front, 1 is the piloting, 2 is engineering, 3 is copilot, and 4 is scanners/sensors. In the next compartment has a conference table and some beds in it. You are in a compartment that contains recreational facilities. You see a chess board, a table with a lot of chairs on it, and rules to a unknown game on the wall.
+@LISTEN USS Patapsco=*

@@ -1,0 +1,27 @@
+@@Airship Code by Xero for FinalFantasyMUX.  Change the `Blackjack' part to whatever you want the name of the ship to be.
+@create Blackjack
+@desc Blackjack=A great airship.  It is a large zeppelin with a black balloon with orange streamlining on it.  A gondola hangs down.  This looks very flashy, almost gaudy.
+@idesc Blackjack=%tYou stand on the deck of the Blackjack.  A steering wheel sits at the front (AIRHELP for directions)  A door at the back goes belowdeck.%tThe wind whips at your face.
+&AIRHELP Blackjack=$AIRHELP:@pemit *%#=-=-=-=-=-=-=-=-=-=<Airship Code Help by Xero>=--=-=-=-=-%rSteering- Angling the ship type `steer <direction should be an exit name>'%rDriving- Type `DRIVE' to go in the defined direction.%rSpeed- This is pretty trivial but to set speed type `Speed <desired speed>%rHeight- Another useless one but `HEIGHT <either high or low>%rDocking- To dock the ship type `Dock'%rThis code is created and maintained by Xero @ FinalFantasyMUX, RivaMUSH, HappyMUX, Realtime MUSH
+&STEER_CMD Blackjack=$steer *:@emit %N sets course for %0.;@pemit/contents me=%N steers the ship towards %0.;&VA me=%0
+&DRIVE_CMD Blackjack=$drive:pose speeds away at %VB miles per hour towards %VA, flying %VC.;@pemit/contents me=%N steps on the gas and the ship goes at %VB towards %VA, flying %VC.;@fo me=%VA
+&SPEED_CMD Blackjack=$speed *:&VB me=%0;@wait 1=@pemit/contents me=%N sets the vessel's speed to %VB.
+&HEIGHT_CMD Blackjack=$height high:&VC me=high;@pemit/contents me=%N sets the height of the ship to %VC.;@emit The Blackjack goes higher in the air.
+&HEIGHT2_CMD Blackjack=$height low:&VC me=low;@pemit/contents me=%N sets the height of the ship to low.;@emit The Blackjack lowers in the air.
+&DOCK_CMD Blackjack=$dock:@emit The Blackjack docks.;@pemit/contents me=The ship shudders as it docks.
+@listen Blackjack=*
+@lalias Blackjack=o;ou;out;leave;exit;disembark
+@ealias Blackjack=embark;enter airship
+@set Blackjack=enter_ok
+@set Blackjack=safe
+@set Blackjack=audible
+@set Blackjack=transparent
+@prefix Blackjack=From the Blackjack,
+@inprefix Blackjack=From the ground,
+@enter Blackjack=You climb aboard the Blackjack.
+@oenter Blackjack=climbs aboard.
+@oxenter Blackjack=gets onboard the Blackjack.
+@leave Blackjack=You climb off of the Blackjack.
+@oleave Blackjack=climbs off the ship.
+@oxleave Blackjack=climbs down from the Blackjack.
+@adrop Blackjack=@emit The Blackjack comes along flying %VC at %VB miles per hour.

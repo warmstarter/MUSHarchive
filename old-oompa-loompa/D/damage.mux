@@ -1,0 +1,567 @@
+##############################################################################
+# DAMAGE.MUX
+##############################################################################
+
+#14 is the Damage System object
+#15 is the Damage Database object
+
+
+@@  Combat Lite: Damage Sub-System -- a combat system for FiranMUX
+    Copyright (C) 1998 Adam Dray <adam@legendary.org>
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+-
+
+
+
+
+#14 is the semaphore for @damage/direct
+@drain #14
+-
+@notify #14
+-
+@startup #14 = 
+  @drain me; 
+  @notify me
+-
+
+#15 is the semaphore for @damage
+@drain #15
+-
+@notify #15
+-
+@startup #15 = 
+  @drain me; 
+  @notify me
+-
+
+
+
+@vD #14 = #15
+-
+
+
+think @damage/direct
+-
+# @DAMAGE/DIRECT player/bodyloc = amount X type BY player
+#
+# The numeric amount of damage is stored for each bodyloc.
+# At this time, the type of damage is not recorded.
+# 
+&cmd-damage/direct #14 = $@damage/direct */*=*x* by *: 
+
+# semaphored.  Don't forget to "@notify me" at the end of each block of code
+  @wait me = {
+
+    think setq(0, trim(%0)); 
+    think setq(1, trim(%1)); 
+    think setq(2, add(0, trim(%2))); 
+    think setq(3, switch(member(get(%vD/damage-types), trim(%3)), 
+                    0, blunt, trim(%3))); 
+
+    think setq(9, 
+      [isdbref(%q0)]
+      [gt(%q2, 0)]
+    ); 
+
+    @pemit %q0 = 
+      switch(hastag(%q0, combatstats), 1, 
+        You take [switch(%q2, 1, 1 point, %q2 points)] of damage.); 
+	
+    @select %q9 = 
+
+#   NOMINAL CASE
+    11, {
+#     map the actual damage class to an actual trauma/wound type
+#     and replace %q3 with it
+      think setq(3, u(u-damage-class-to-wound-type, %q3)); 
+
+      &realname %q0 = [default(%q0/realname, last(name(%q0)))]; 
+
+#     store the total amount for that wound-type to that bodyloc
+      &damage-%q1-%q3 %q0 = add(%q2, get(%q0/damage-%q1-%q3)); 
+
+#     store the total amount of damage for that bodyloc and 
+#     trigger the bodyloc damage handler for that player
+      think setq(4, u(u-attr-sum, %q0, damage-%q1-*)); 
+      &damage-%q1 %q0 = %q4; 
+      @trigger %vD/ADamaged-%q1 = %q0, %q1, %q2, %q4, %4; 
+      @trigger %q0/ADamaged-%q1 = %q0, %q1, %q2, %q4, %4; 
+
+#     re-total the total damage of the character and 
+#     trigger the total damage handler for that player
+      think setq(4, sub(u(u-attr-sum, %q0, damage-*), 
+                        u(u-attr-sum, %q0, damage-*-*))
+      ); 
+      &damage %q0 = %q4; 
+      @trigger %vD/ADamaged = %q0, %q1, %q2, %q4, %4; 
+      @trigger %q0/ADamaged = %q0, %q1, %q2, %q4, %4; 
+
+#     trigger the wound type handler for messages
+      @trigger %vD/ADamaged-%q3 = %q0, %q1, %q2, %q4, %4; 
+
+#     check shock effect of damage and
+#     trigger shock-effect routines, if shock occurs
+      think setq(5, ulocal(ul-shocksurvival-successes, %q0, %q4)); 
+      think setq(6, u(u-shocksurvival-success-level, %q5)); 
+
+#     do the shock stuff if they failed this time but weren't 
+#     already in shock
+
+#     combat stats for shock roll if not already in shock
+      @switch hastag(%q0, shock) = 0, {
+        @pemit %q0 = switch(hastag(%0, combatstats), 1, 
+          COMBAT: %q6 (%q5 successes) for shock resistance); 
+      }, {
+        @@ do nothing @@
+      }; 
+
+      @switch and(strmatch(%q6, FAILURE), not(hastag(%q0, shock))) = 1, {
+        @trigger %vD/AShock = %q0, %q1, %q2, %q4, %q5, %4; 
+        @trigger %q0/AShock = %q0, %q1, %q2, %q4, %q5, %4; 
+      }, {
+        @@ do nothing @@
+      }; 
+
+#     do the death stuff if they are in shock from this time or before
+      @switch or(strmatch(%q6, FAILURE), hastag(%q0, shock)) = 1, {
+#       check for death result and
+#       trigger death routines, if death occurs
+        think setq(5, ulocal(ul-deathsurvival-successes, %q0, %q4)); 
+        think setq(6, u(u-deathsurvival-success-level, %q5)); 
+
+#       combat stats for death roll
+        @pemit %q0 = switch(hastag(%0, combatstats), 1, 
+          COMBAT: %q6 (%q5 successes) for death resistance); 
+
+#       explicitly run all matching conditions...
+        @switch/all [hastag(%q0, dead)]/%q6 = 
+        1/*, {
+#         Hey, stop beating a dead horse!
+          @pemit %4 = 
+            [goodname(%4)] damages [name(%q0)] but [subj(%q0)] 
+            is already dead!; 
+          @pemit %4 = Hey! Stop kicking a dead horse!; 
+        }, 
+        0/FAILURE, {
+#         Character failed her death save... trigger the death routines...
+          @trigger %vD/ADeath = %q0, %q5, %q6, %4; 
+          @trigger %q0/ADeath = %q0, %q5, %q6, %4; 
+        }; 
+        @wait 0=@notify me 
+      }, {
+        @notify me
+      } 
+    }, 
+
+#   could not find object
+    0?, {
+      @error %# = locate %q0; 
+      @notify me
+    },
+
+#   damage amount was <= 0
+    ?0, {
+      @pemit %# = Non-positive damage amount was ignored.; 
+      @notify me
+    }, 
+
+#   ERROR in @switch
+    *, {
+      @pemit %# = ERROR: Serious error in the code.; 
+      @pemit %# = ERROR: @switch %%q9 = %q9; 
+      @notify me
+    }; 
+  }
+-
+
+
+think @damage
+-
+# @DAMAGE player/bodyloc = amount X type BY player
+#
+# Indirect Damage -- takes armor into consideration
+# 
+# The numeric amount of damage is stored for each bodyloc.
+# At this time, the type of damage is not recorded.
+# 
+&cmd-damage #14 = $@damage */*=*x* by *: 
+  @wait #15 = {
+
+    think setq(0, trim(%0)); 
+    think setq(1, trim(%1)); 
+    think setq(2, add(0, trim(%2))); 
+    think setq(3, switch(member(get(#15/damage-types), trim(%3)), 
+                    0, bashing, trim(%3))); 
+#   don't do anything with %4
+
+#   find the armor on the bodyloc hit
+    think setq(4, ulocal(ul-armor-dbref, %q0, %q1)); 
+
+#   look up the armor's defense vs. that damage class
+    think setq(5, u(u-armor-defense-vs-damageclass, %q4, %q3)); 
+
+    think setq(9, 
+      [isdbref(%q4)]
+      [isdbref(%q0)]
+      [gt(%q2, 0)]
+    ); 
+
+
+    @select %q9 = 
+
+#   NOMINAL CASE -- armor exists to protect victim
+    111, {
+
+### %q2 = total damage
+### %q6 = damage that gets through
+### %q7 = absorbed damage
+
+#     roll some dice: 
+#       number of dice = #points of damage, difficulty = armor defense
+#       the number of successes is the number of damage points that get thru.
+      think setq(6, successes(%q2, %q5)); 
+
+#     let the combatstats player know how much damage was absorbed, otherwise
+#     just show a generic message
+      think setq(7, sub(%q2, %q6)); 
+
+      @pemit %q0 = switch(hastag(%q0, combatstats), 1, 
+        Your [goodname(%q4)] absorbs 
+        [switch(%q7, 0, no, 1, 1 point of, %q7 points of)] damage (of %q2)., 
+#     else
+        Your [goodname(%q4)] absorbs some of the damage.
+      ); 
+
+#     if more than 0 points of damage got through, handle it directly
+      @switch %q6 = >0, {
+        @damage/direct %q0/%q1 = %q6 x %q3 by %4
+      }; 
+
+#     armor always decreases in quality by total damage (not just damage that
+#     doesn't get through or damage absorbed) when it's hit, despite success
+      &quality %q4 = sub(default(%q4/quality, 0), %q2); 
+
+#     if quality < 1, break the armor
+      @switch get(%q4/quality) = <1, {
+        @remit loc(%q0) = [goodname(%q0)]'s [goodname(%q4)] has broken!; 
+#        @tag %q4 = broken; 
+        think setq(%q4, broken); 
+        @notify #15
+      }, {
+        @notify #15
+      }
+    }, 
+
+#   no armor there... pass through for damage
+    0??, {
+      @damage/direct %q0/%q1 = %q2 x %q3 by %4; 
+      @notify #15
+    }, 
+
+#   not a dbref (victim)
+    ?0?, {
+      @error %# = locate %q0; 
+      @notify #15
+    }, 
+
+#   damage isn't more than 0
+    ??0, {
+      @pemit %# = Non-positive damage amount was ignored.; 
+      @notify #15
+    }, 
+
+#   ERROR
+    *, {
+      @pemit %# = Tell a staff member that @damage is broken.; 
+      @notify #15
+    }
+  }
+-
+
+
+think @revive
+-
+#=================================================================#
+# @REVIVE player
+#
+# Attempts to restore player to perfect health.
+# Removes all damage, all shock and death effects.
+# 
+# By Adam Dray
+# Modified by Stephanie Dray 9/16/98
+#=================================================================#
+
+&cmd-revive #14 = $@revive *:
+
+#-----------------------------------------------------------------
+# %q0 = player to be revived
+# %q1 = player's unconscious body
+# %q9 = error conditions
+#---------------------------------------------------------------- 
+
+  think setq(0, locate(%#, %0, *P)); 
+  think setq(1, get(%#/body));
+
+  think setq(9, [isdbref(%q0)]
+                [orflags(%#, WZ)]); 
+
+  @select %q9 = 
+  11, {think res_return(combat, immobile, %q0); 
+       think res_return(combat, gagged, %q0); 
+
+#      @cleartags %q0 = shock dead; 
+
+       think settag(%q0, !shock); 
+       think settag(%q0, !dead);
+       think settag(%q0, !asleep);
+       @wipe %q0/damage*; 
+
+#      get the body back and its contents
+    
+       &ic %q0=[loc(%q1)];
+       @teleport %q1=#2951;
+       @dolist lcon(%q1)={@tel ##=%q0};
+       &sleeper %q0;
+       &body %q0;
+
+#      Put the player back where he was before the shock or death
+ 
+       @teleport/quiet %q0=[get(%q0/ic)];
+       @fpose %q0=is revived!;
+       @zap %q1;
+
+       @wait 0=@wait 0={
+       @switch %# = 
+          %q0, {@pemit %# = You revive yourself.}, 
+          {@remit loc(%q0) = %n has revived [goodname(%q0)].; 
+           @pemit %# = You revive [goodname(%q0)] (%q0).}}}, 
+
+  0?, {@error %# = locate %q0}, 
+
+  ?0, {@pemit %# = Only wizards and royalty may use this command.}, 
+
+  {@pemit %# = ERROR: #14/cmd-revive isn't functioning properly.}
+-
+
+#############################################################################
+# UFUNCTIONS
+#############################################################################
+
+# fold(fold-add, list of numbers)
+# 
+&fold-add #14 = 
+  add(%0, %1)
+-
+
+# ulocal(ul-shocksurvival-successes, player dbref, damage)
+# 
+# Returns the results of a successes roll:
+#   Dice = best and worst of Health, Endurance, and Willpower 
+#          (throw out the middle)
+#   Difficulty = damaged person's shock-resistance score
+# 
+&ul-shocksurvival-successes #14 = 
+  [setq(0, 
+    [attribute(%0, Health)] 
+    [attribute(%0, Endurance)] 
+    [attribute(%0, Willpower)]
+  )]
+  [setq(1, sort(%q0, n))]
+  [setq(2, add(first(%q1), last(%q1)))]
+  [setq(3, u(u-shocksurvival-difficulty, %0, %1))]
+
+#  [pemit(*adam, SHOCK DICE: %q2%, DIFFICULTY: %q3)]
+
+  [successes(%q2, %q3)]
+-
+
+# u(u-shocksurvival-difficulty, player dbref, points of damage)
+# 
+# Returns the difficulty for a shock-survival roll.
+# This number is 10 - a base number read from the player (or a parent) and
+# modified upward (more difficult) by 1 for every 5 points of damage.
+# 
+# Divide by 0 is fine here. add() will turn the result into add(..., 0)
+# 
+&u-shocksurvival-difficulty #14 = 
+  add(sub(10, u(%0/shock-resistance)), 
+      div(%1, u(%0/shock-resistance-divisor)))
+-
+
+# 1+ is a success, <1 is a failure
+# 
+&u-shocksurvival-success-level #14 = 
+  switch(1, 
+    gte(%0, 1), SUCCESS, 
+                FAILURE
+  )
+-
+
+# ulocal(ul-deathsurvival-successes, player dbref, damage)
+# 
+# Returns the results of a successes roll:
+#   Dice = best two of Favor, Passion, Luck and Willpower
+# 
+&ul-deathsurvival-successes #14 = 
+  [setq(0, 
+    [attribute(%0, Favor)] 
+    [attribute(%0, Passion)] 
+    [attribute(%0, Luck)] 
+    [attribute(%0, Willpower)]
+  )]
+  [setq(1, revwords(sort(%q0, n)))]
+  [setq(2, add(first(%q1), first(rest(%q1))))]
+  [setq(3, u(u-deathsurvival-difficulty, %0, %1))]
+
+#  [pemit(*adam, DEATH DICE: %q2%, DIFFICULTY: %q3)]
+
+  [successes(%q2, %q3)]
+-
+
+# u(u-deathsurvival-difficulty, player dbref, points of damage)
+# 
+# Returns the difficulty for a death-survival roll.
+# This number is 10 - a base number read from the player (or a parent) and
+# modified upward (more difficult) by 1 for every 5 points of damage.
+# 
+# Divide by 0 is fine here. add() will turn the result into add(..., 0)
+# 
+&u-deathsurvival-difficulty #14 = 
+  add(sub(10, u(%0/death-resistance)), 
+      div(%1, u(%0/death-resistance-divisor)))
+-
+
+# 1+ is a success, <1 is a failure
+# 
+&u-deathsurvival-success-level #14 = 
+  switch(1, 
+    gte(%0, 1), SUCCESS, 
+                FAILURE
+  )
+-
+
+
+# u(u-attr-sum, dbref, pattern)
+# 
+# Totals the values stored in all the attributes matching the pattern
+# on the dbref and returns the sum.
+# 
+&u-attr-sum #14 = 
+  fold(me/fold-add, iter(lattr(%0/%1), get(%0/##)))
+-
+
+# u(u-damage-class-to-wound-type, damage class)
+# 
+# Returns a wound type (gash, laceration, bruise, broken, etc.) for a 
+# damage class.  May be determined randomly.
+# 
+&u-damage-class-to-wound-type #14 = 
+  choose(u(u-lefthalf,  udefault(%vD/wounds-%0, 
+                                 u(%vD/u-wounds-default)), 
+           :), 
+         u(u-righthalf, udefault(%vD/wounds-%0, 
+                                 u(%vD/u-wounds-default)), 
+           :)
+  )
+-
+
+# u(u-righthalf, associated list, delimiter)
+# u(u-lefthalf,  associated list, delimiter)
+# 
+# Returns the right (or left) half of an associated list. For example
+# u(u-righthalf, a:2 b:1 c:3 d:6, :) returns 2 1 3 6.
+# 
+&u-righthalf #14 = 
+  iter(%0, after(##, %1))
+-
+&u-lefthalf #14 = 
+  iter(%0, before(##, %1))
+-
+
+
+# ulocal(ul-armor-dbref, player dbref, wearloc)
+# 
+# Returns the dbref of armor protecting the player's wearloc location
+#  
+&ul-armor-dbref #14=[setq(0, u(u-new-location, %1))]
+  [filter(filter-worn-on, clothinglist(%0))]
+
+# For old clothing code.
+#
+# &ul-armor-dbref #14 = 
+#   [setq(0, before(default(%0/wear-%1, #-1|NOTHING), |))]
+#   [ifelse(or(hastag(%q0, broken), 
+#              not(hastag(%q0, armor)), 
+#              lte(default(%q0/quality, 0), 0)
+#           ), 
+# # if
+#     #-1, 
+# # else
+#     %q0
+#   )]
+-
+# u(u-new-location,<old location>)
+#
+&u-new-location #14=[ifelse(match(v(old-loc),%0), 
+  extract(v(new-loc),match(v(old-loc),%0),1), 
+  %0)]
+-
+# List of old locations damage expects
+
+&old-loc #14=leftleg rightleg leftarm rightarm lefthand righthand 
+  back waist chest head feet
+-
+# List of new locations that armor/clothing expects
+
+&new-loc #14=l_shin r_shin l_forearm r_forearm l_palm r_palm 
+  upper_back l_thigh chest forehead l_heel
+-
+# filter(filter-worn-on, <list of items to check if worn on %q0)
+#
+# Returns '1' if item has the worn-on of '%q0' somewhere on it
+# %q0 MUST be location checking for clothing worn on...
+
+&filter-worn-on #14=[t(match(get(%0/worn-on), %q0))]
+- 
+
+# u(u-armor-defense-vs-damageclass, armor dbref, damage class)
+# 
+# Returns the defense number for the armor vs. weapons of damage class.
+# Add 1 as a 'bandaid' for too-low numbers that were set.
+#
+&u-armor-defense-vs-damageclass #14 = 
+  add(1, default(%0/defense-%1, 1))
+-
+
+
+
+
+
+##############################################################################
+# GENERIC PLAYER (#874) ADDITIONS
+##############################################################################
+
+&shock-resistance #874 = 7
+-
+&death-resistance #874 = 10
+-
+
+&shock-resistance-divisor #874 = 8
+-
+&death-resistance-divisor #874 = 10
+-
+
+#include damage-db.mux

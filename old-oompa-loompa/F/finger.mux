@@ -1,0 +1,90 @@
+#######################################################
+# This is the @finger code for FiranMUX               #
+# The @finger code object is #3285                    #
+#######################################################
+  
+
+@Amove #3285 = @tel me=#2
+-
+
+@set #3285/Amove = no_command
+-
+
+&TAGS #3285 = master_object
+-
+
+&FINGER #3285 = $@finger *:
+	@pemit %#=
+		[switch(%0,me,setq(0,%#),setq(0,pmatch(%0)))]
+		[switch(%q0,#-1*, There is no such player.,%cr.
+			[repeat(-,76)].%cn%r[ljust(%cr| .-%cn %cy%ch@Finger on 
+				[name(%q0)]%cn %cr-.%cn,77)]%cr|%cn%r%cr| |%cn
+				[space(add(strlen(name(%q0)), 16))]%cr`%cn%cr
+				[repeat(-,[sub(57, strlen(name(%q0)))])]'%cn%r%cr| |%cn%r%cr| |%cn %b%b
+				[ljust(%cgName:%cn [name(%q0)]%b<[get(%q0/ALIAS)]>,52)][space(1)]
+				[ljust(%cgSex:%cn 
+					[switch(get(%q0/sex), m*, Male, f*, Female, n*, 
+					Neuter, p*, Plural, Unknown)],15)]%r%cr| |%cn %b%b
+				[ljust(%cgRank:%cn [get(%q0/RANK)],51)]%cg[space(1)]
+				[ljust([switch(hasflag(%#,wizard),
+					0,Connection:%cn 
+						[switch(
+							[and(hasflag(%q0,connected),not(hasflag(%q0,dark)))]
+							[hastag(%q0,afk)],
+					 		11,Afk,
+							10,Not Afk,
+							0?,Offline)],
+					1,Idle:%cn 
+						[switch(
+							hasflag(%q0,connected),
+							1,[div(setr(1,idle(%q0)),86400)]d%b
+								[div(mod(%q1,86400),3600)]h%b[div(mod(%q1,36 00) ,60)]m%b
+								[mod(%q1,60)]s
+							, Offline)]
+					)],15)]
+				[switch(rank(%#, Junior), 1,%r%cr| |%cn %b
+					[ljust(%cgEmail:%cn [get(%q0/EMAIL)],25)])]%r%cr| |%cn 
+				[ljust(%cgStatus:%cn 
+					[switch([hasflag(%#, WIZARD)]
+						[hasflag(%q0,connected)]
+						[hastag(%q0,roster)]
+						[hasflag(%q0,DARK)],
+							1101,Connected (DARK),
+							?01?,On the Roster,
+							?100,Connected,
+							0101,Offline - Last Disconnected:
+								%b[get(%q0/LASTDISCONNECT)],
+							?00?,Offline - Last Disconnected:
+								%b[get(%q0/LASTDISCONNECT)],
+							?110,On the Roster and Connected?,
+							0111,On the Roster,
+							1111,On the Roster\,Connected\, and Dark)],25)]%r
+				[format([ljust(%b%cgQuote:%cn 
+					[get_eval(%q0/QUOTE)],25)],70,%cr|%b|%b%cn,%b)]
+				[switch(t(elements(mail(%q0), 2)), 
+					1, [ljust(%r%cr| |%cn 
+					%cg[name(%q0)] has unread mail.,25)])]
+				[switch(hasflag(%q0, VACATION), 
+					1, [ljust(%r%cr| |%cn %cgOn Vacation:%cn 
+						[get(%q0/AWAY)],25)], %b)]%r%cr|%b`[repeat(-,74)]%cn%cr.
+						%cn%r%cr|%cn[space(4)]%cy%ch
+				See 'help @finger' for information on @finger.[space(26)]%cn%cr|%cn%r%cr`
+				[repeat(-,76)]%cn%cr'%cn)]
+-
+
+&JFINGER #3285 = $@finger:@pemit %#=It's '@finger <player name>'. For help read 'help @finger'.
+-
+
+@set #3285 = WIZARD
+-
+
+@set #3285  = ROYALTY
+-
+
+@set #3285 = UNINSPECTED
+-
+
+@set #3285 = IMMORTAL
+-
+
+@set #3285 = SAFE

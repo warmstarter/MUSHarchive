@@ -1,0 +1,52 @@
+#############################################################################
+# Command: +view
+# Type: Global/Local
+# Author: Unknown
+# Format: M. Hassman (10/15/97)
+#############################################################################
+# Description/Help
+# Commands:
+#  +view
+#  +view <object>
+#
+# +view allows you to have "virtual objects" in your rooms -- objects that
+# can be looked at and respond with the equivalent of Desc, Odesc, and
+# Adesc, but cannot be picked up. This allows you to put more detail into
+# your rooms without needing to create a lot of extraneous objects.
+#
+# To put a 'view'able object in a location, add the attribute VIEW_<object
+# name> to the location, and, optionally, OVIEW_<object name> and
+# AVIEW_<object name>. If there are spaces in the name, substitute
+# underscores (i.e. a viewable 'oak table' would be VIEW_OAK_TABLE).
+# 
+# '+view <name>' shows the contents of the VIEW attribute to the player.
+# If there is an OVIEW, everyone else in the room sees "<player name>
+# <OVIEW message>". If an AVIEW exists, it is executed. Players may use
+# partial names to view objects; the oak table could be viewed with '+view
+# oak'. The name that the player used is passed to the VIEW attributes as
+# %0. The player's name and dbref are passed as %N and %# (and %1),
+# respectively.
+#
+# '+view' lists all viewable objects in a location.
+#############################################################################
+# CMD-VIEW-ALL:  Lists all viewable 'objects' on the current location.
+
+&CMD-VIEW-ALL Globals Object=$+view: 
+	@pemit %#=
+	  [setq(0,lattr(%l/VIEW_*))]
+          [switch(r(0),,There is nothing of interest here.,
+		Interesting items: 
+		[lcstr(iter(r(0),%b[edit(after(##,VIEW_),_,%b)]))]
+          )]
+
+-
+&CMD-DO-VIEW Globals Object=$+view *: 
+	@verb 
+	  [setq(0,lattr(%l/VIEW_*))]
+	  [setq(1,match(r(0),VIEW_[setq(4,edit(trim(%0),%b,_))][r(4)]*))]
+	  [switch(r(1),0,setq(1,match(r(0),VIEW_*_[r(4)]*)))]
+	  [setq(2,extract(r(0),r(1),1))]
+	  [setq(3,switch(r(2),,VIEW_%0,r(2)))]
+	%l=%#,[r(3)],I don't see that here.,
+	   O[r(3)],views the room carefully.,A[r(3)],{%0,%#}
+-

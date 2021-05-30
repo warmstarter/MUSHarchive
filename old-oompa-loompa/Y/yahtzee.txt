@@ -1,0 +1,83 @@
+@create Yahtzee
+@lock Yahtzee==me
+&JOIN Yahtzee=$join:@switch/first hasattr(me,mode)/[v(players)]=1/*,{@pemit %#=Sorry, but [u(list,v(players))] are playing.},0/*%#*,{@pemit %#=You have already joined! When all the players who want to play have joined, you can type start to start the game.},{@pemit %#=You join the game of yahtzee with [u(list,v(players))].;&players me=v(players) %#;@emit %n joins the game of yahtzee. To join, type %xh%xrjoin%xn.}
+&LIST Yahtzee=switch(words(%0),0,no one,1,name(%0),2,name(first(%0)) and [name(last(%0))],iter(extract(%0,1,sub(words(%0),2)),name(##)\,) [extract(%0,sub(words(%0),2),1)] and [name(last(%0))])
+&START Yahtzee=$start:@switch/first v(players)/[hasattr(me,mode)]=/*,{@pemit %#=No one has joined the game.},*/1,{@pemit %#=The game is already going!},*%#*/*,{&players me=shuffle(v(players));&turn me=first(v(players));&mode me=start;@pemit/list v(players)=%n starts the game of yahtzee. It is [name(v(turn))]'s turn.;@dolist v(players)={&score_## me=||||||||||||;&turns_## me=0;&total_%# me=0;&bonus_## me=0}}
+&ROLL Yahtzee=$roll:@switch/first hasattr(me,mode)/[strmatch(v(players),*%#*)]/[strmatch(v(turn),%#)]/[strmatch(start,v(mode))]=0/*/*/*,{@pemit %#=No game in progress.},*/0/*/*,{@pemit %#=You aren't playing.},*/*/0/*,{@pemit %#=It's not your turn.},*/*/*/0,{@pemit %#=switch(v(mode),roll1,Please specify which dice to reroll.,roll2,Please specify which dice to reroll.,score,You can't roll again!)},{&dice me=cat(inc(rand(6)),inc(rand(6)),inc(rand(6)),inc(rand(6)),inc(rand(6)));@pemit/list v(players)=%n rolls the dice for the first time and gets: [u(dice_disp,v(dice))];&mode me=roll1}
+&ROLL_ARGS Yahtzee=$roll *:@switch/first hasattr(me,mode)/[strmatch(v(players),*%#*)]/[strmatch(v(turn),%#)]/[strmatch(roll1 roll2,*[v(mode)]*)]/[u(rollcheck,%0)]=0/*/*/*/*,{@pemit %#=No game in progress.},*/0/*/*/*,{@pemit %#=You aren't playing.},*/*/0/*/*,{@pemit %#=It's not your turn.},*/*/*/0/*,{@pemit %#=switch(v(mode),start,Please use roll by itself for your first roll.,score,You can't roll again!)},*/*/*/*/0,{@pemit %#='%0' are invalid dice to roll, or you don't have all of those.},{&dice me=u(rollrep,%0);@pemit/list v(players)=%n rolls %0 and ends up with: [u(dice_disp,v(dice))];&mode me=[switch(v(mode),roll1,roll2,roll2,score)]}
+&ROLLCHECK Yahtzee=eq(words(fold(me/rollcheck_fold,%0,v(dice))),sub(5,words(%0)))
+&ROLLCHECK_FOLD Yahtzee=remove(%0,%1)
+&ROLLREP Yahtzee=setq(0,%0)[iter(v(dice),ifelse(strmatch(%q0,*##*),setq(0,remove(%q0,##))[inc(rand(6))],##))]
+&YSCORE Yahtzee=$yscore* *:@switch/first hasattr(me,mode)/[strmatch(v(players),*%#*)]/[strmatch(v(turn),%#)]/[strmatch(roll1 roll2 score,*[v(mode)]*)]/[u(scorecheck,%0,%1)]=0/*/*/*/*,{@pemit %#=No game in progress.},*/0/*/*/*,{@pemit %#=You aren't playing.},*/*/0/*/*,{@pemit %#=It's not your turn.},*/*/*/0/*,{@pemit %#=You must roll first!},*/*/*/*/-1,{@pemit %#=Invalid command, "yscore%0 %1".},*/*/*/*/-2,{@pemit %#=Invalid category, "%1"},*/*/*/*/-3,{@pemit %#=Why would you want to zero that if you already have a [extract(v(score_%#),%q9,1,|)] there?},*/*/*/*/-4,{@pemit %#=You can't put [v(dice)] in the [extract(V(categories),%q9,1,|)] category!},*/*/*/*/-5,{@pemit %#=You already have a [extract(v(score_%#),%q9,1,|)] in your [extract(v(categories),%q9,1,|)] category.},{@pemit/list v(players)=%n takes a [setr(8,ifelse(strmatch(%0,/zero),0,u(scoring_%q9,v(dice))))] in %p [extract(v(categories),%q9,1,|)] category.;&score_%# me=replace(v(score_%#),%q9,%q8,|);&total_%# me=add(v(total_%#),%q8);&turns_%# me=inc(v(turns_%#));&players me=u(newturn);&turn me=first(v(players));&mode me=start;&bonus_%# me=u(bonus,%#);@switch iter(v(players),eq(v(turns_##),13))=*0*,{@pemit/list v(players)=It is [name(v(turn))]'s turn.},{@pemit/list v(players)=Game over, winner(s): [u(list,u(winner))];&turn me;&dice me;@dolist v(players)={&score_## me;&turns_## me;&total_## me;&bonus_## me};&mode me;&players me}}
+&SCORECHCK/ZERO Yahtzee=ifelse(strlen(extract(v(score_%#),%q9,1,|)),-3,zero)
+&SCORECHECK Yahtzee=ifelse(setr(9,match(v(categories),%1*,|)),ifelse(hasattr(me,scorechck%0),u(scorechck%0),-1),-2)
+&SCORECHCK Yahtzee=ifelse(strlen(extract(v(score_%#),%q9,1,|)),-5,ifelse(u(score_check_%q9,v(dice)),score,-4))
+&WINNER Yahtzee=munge(me/winner_munge,iter(v(players),v(score_##)),v(players))
+&NEWTURN Yahtzee=rest(v(players)) [firsT(v(players))]
+&SCORE_CHECK_1 Yahtzee=1
+&SCORING_1 Yahtzee=mul(dec(words(%0,1)),1)
+&ADD_FOLD Yahtzee=add(%0,%1)
+&SCORE_CHECK_2 Yahtzee=1
+&SCORING_2 Yahtzee=mul(dec(words(%0,2)),2)
+&SCORE_CHECK_3 Yahtzee=1
+&SCORING_3 Yahtzee=mul(dec(words(%0,3)),3)
+&SCORE_CHECK_4 Yahtzee=1
+&SCORING_4 Yahtzee=mul(dec(words(%0,4)),4)
+&SCORE_CHECK_5 Yahtzee=1
+&SCORING_5 Yahtzee=mul(dec(words(%0,5)),5)
+&SCORE_CHECK_6 Yahtzee=1
+&SCORING_6 Yahtzee=mul(dec(words(%0,6)),6)
+&SCORE_CHECK_7 Yahtzee=gt(words(edit(iter(%0,lte(words(edit(%0,##,)),2)),0,)),0)
+&SCORING_7 Yahtzee=fold(add_fold,%0)
+&SCORE_CHECK_8 Yahtzee=gt(words(edit(iter(%0,lte(words(edit(%0,##,)),1)),0,)),0)
+&SCORING_8 Yahtzee=fold(add_fold,%0)
+&SCORE_CHECK_9 Yahtzee=corbool(eq(words(setunion(extract(sort(%0),1,3),)),1),eq(words(setunion(extract(revwords(sort(%0)),1,3),)),1))
+&SCORING_9 Yahtzee=25
+&SCORE_CHECK_10 Yahtzee=corbool(strmatch([setr(0,trim(setunion(sort(%0),)))],*1 2 3 4*),strmatch(%q0,*2 3 4 5*),strmatch(%q0,*3 4 5 6*))
+&SCORING_10 Yahtzee=30
+&SCORE_CHECK_11 Yahtzee=corbool(strmatch([setr(0,trim(setunion(sort(%0),)))],*1 2 3 4 5*),strmatch(%q0,*2 3 4 5 6*))
+&SCORING_11 Yahtzee=40
+&SCORE_CHECK_12 Yahtzee=eq(words(setunion(%0,%0)),1)
+&SCORING_12 Yahtzee=50
+&SCORE_CHECK_13 Yahtzee=1
+&SCORING_13 Yahtzee=fold(add_fold,%0)
+&CATEGORIES Yahtzee=Ones|Twos|Threes|Fours|Fives|Sixes|3 of a kind|4 of a kind|Full house|Small straight|Large straight|Yahtzee|Chance
+&DICE_DISP Yahtzee=ifelse(hasattr(me,noasciidice),%0,iter(1 2 3 4 5 6 7,%r[extract([u(row##)],[extract(%0,1,1)],1,z)] [extract([u(row##)],[switch([gt([words(%0)],1)],1,[extract(%0,2,1)],7)],1,z)] [extract([u(row##)],[switch([gt([words(%0)],2)],1,[extract(%0,3,1)],7)],1,z)] [extract([u(row##)],[switch([gt([words(%0)],3)],1,[extract(%0,4,1)],7)],1,z)] [extract([u(row##)],[switch([gt([words(%0)],4)],1,[extract(%0,5,1)],7)],1,z)]))
+&SHOW_CARD Yahtzee=$show card:@pemit %#=space(15)[parse(setr(7,sort(v(players))),center(strtrunc(name(##),8),8))]%r[iter(1 2 3 4 5 6 7 8 9 10 11 12 13,%r[ljust(extract(v(categories),##,1,|),14)][map(setq(0,##)me/card_map,%q7)])]%r[ljust(Top Total,14)][iter(%q7,center(fold(add_fold,edit(extract(v(score_##),1,6,|),|,%b)),8))]%r[ljust(Bonus,14)][iter(%q7,center(v(bonus_##),8))]%r[ljust(Bottom Total,14)][iter(%q7,center(fold(add_fold,edit(extract(v(score_##),7,7,|),|,%b)),8))]%r[ljust(Grand Total,14)][iter(%q7,center(add(v(total_##),v(bonus_##)),8))]
+&CARD_MAP Yahtzee=center(extract(v(score_%0),%q0,1,|),8)
+&ENDGAME Yahtzee=$end:@pemit/list v(players)=Game over, winner(s): [u(list,u(winner))];@dolist v(players)={&score_## me;&turns_## me;&total_## me;&bonus_## me};&mode me;&turn me;&dice me;@emit Yahtzee game ended by %n.;&players me
+&BONUS Yahtzee=ifelse(gte(fold(add_Fold,edit(extract(v(score_%0),1,6,|),|,%b)),63),35,0)
+&ROW1 Yahtzee=%b______%b%bz%b______%b%bz%b______%b%bz%b______%b%bz%b______%b%bz%b______%b%b
+&ROW2 Yahtzee=|\\'.%b'.\\%bz|\\`%b'%b.\\%bz|\\%b%b.%b%b\\%bz|\\%b.%b'%b\\%bz|\\'.%b'.\\%bz|\\`%b'%b.\\%b
+&ROW3 Yahtzee=|%b+-----+z|%b+-----+z|%b+-----+z|%b+-----+z|%b+-----+z|%b+-----+
+&ROW4 Yahtzee=|'|%b%b%b%b%b|z|.|%bo%b%b%b|z|'|%bo%b%b%b|z|.|%bo%bo%b|z|.|%bo%bo%b|z|'|%bo%bo%b|
+&ROW5 Yahtzee=\\.|%b%bo%b%b|z\\%b|%b%b%b%b%b|z\\.|%b%bo%b%b|z\\%b|%b%b%b%b%b|z\\%b|%b%bo%b%b|z\\.|%bo%bo%b|
+&ROW6 Yahtzee=%b\\|%b%b%b%b%b|z%b\\|%b%b%bo%b|z%b\\|%b%b%bo%b|z%b\\|%bo%bo%b|z%b\\|%bo%bo%b|z%b\\|%bo%bo%b|
+&ROW7 Yahtzee=%b%b+-----+z%b%b+-----+z%b%b+-----+z%b%b+-----+z%b%b+-----+z%b%b+-----+
+&HELP_COMMANDS Yahtzee=$yahtzee commands:@pemit %#=This is the list of commands for playing yahtzee.%r%r%xrjoin -- Joins a game, although this doesn't start the game, it puts you on the 'waiting list'. When enough players have joined, you type 'start' to start. It is possible (and fun) to play a one player game.%r%xgstart -- Starts a game with all the people who have 'join'ed. If you haven't used the join command yet, you are automatically joined.%r%xbroll -- Just roll by itself is used on the first turn to initially roll all five dice. You may only use this once per turn.%r%xmroll <dice> -- This rolls the dice you specify. It is used like this:%rYour dice: 4 3 2 1 5%rYou want to roll the 4, 3, and 1 so you type:%rroll 4 3 1%R%xgshow card -- This command shows the score card. It will show you the points for each player.%r%xryscore -- Usage: Yscore <category>%rThis is used to score the dice you have in the category specified. Possible categories are the ones listed in the left-hand column on the score card.%r%xh%xbyscore/zero <category> -- Like yscore, but this one will score a zero in the chosen category.%xn
+&HELP_RULES Yahtzee=$yahtzee rules:@pemit %#=Each category has a specific set of rules that define what types of rolls you can put there, and how many points you get. The ones-sixes categories can take any rolls, but you only get the amount of points equal to the sum of the dice of that type that you have. If you had rolled a 2 3 4 2 2, and chose to put that in your sixes, you would get 6 points.%r%rUpper section:%r%tThe upper section is all of the ones-sixes. If your total score on the upper section is 63 or over, you get a bonus 35 points added to your score. If you were to get exactly 3 dice in each of the categories, that is 3 ones, 3 twos, etc, then it would add up to 63 points. But if you only got two dice in one of the categories, you could always make it up by overachieving in another category.%r@pemit %#=Lower Section:%r%tThe lower section has no bonus. The points you recieve is simply the combined total of all the points you have recieved.%r%r<type 'yahtzee rules2' for more help>
+&HELP_OVERVIEW Yahtzee=$yahtzee overview:@pemit %#=%tYahtzee is a game of luck and skill. It is played by rolling dice and trying to get them to be one of 13 pre-defined choices. On a turn, you first roll all 5 dice. The second roll, you will roll only those dice you wish to change. On your third roll, you may do the same, but then you must choose what category to put your dice in. Once everyone has filled up his/her score card, the game ends and a winner is declared. %r%r<type 'yahtzee rules' for more help.>
+&HELP_RULES2 Yahtzee=$yahtzee rules2:@pemit %#=The next section will describe to you the scoring for each of the sections on the yahtzee score card.%rType yahtzee <category> to access the help for the categories.%r%rCategories:%rOnes-sixes %r3 of a kind%r4 of a kind%rFull house%rSmall Straight%rLarge Straight%rYahtzee%rChance%r%r<see also 'yahtzee zero'>
+&HELP_ONES-SIXES Yahtzee=$yahtzee ones-sixes:@pemit %#=%tThese are the categories that make up the Upper Section. They are all similar in scoring. You recieve the total of all the dice of that type in your roll. Although it isn't recommended, you can score your dice in one of these categories even if you don't have any of the proper dice, it will just count as a zero. Ex: You could score 1 2 2 3 4 in your fives category if you needed to. See 'yahtzee strategy' for more details.
+&HELP_3KIND Yahtzee=$yahtzee 3 of a kind:@pemit %#=%tThis category has specific rules for scoring in it. You MUST have three of one kind of dice to score your dice here. The score is determined by adding up all of the dice scored.%r%rex: 3 3 3 5 6 ---> this can score in 3 of a kind cause of the three three's.%r%r3 4 2 2 6 --> this would not score in 3 of a kind because there aren't three of any kind of die.
+&HELP_4KIND Yahtzee=$yahtzee 4 of a kind:@pemit %#=%tThis is almost exactly like 3 of a kind, except that you need to have 4 of one kind of die.
+&HELP_FULL Yahtzee=$yahtzee full house:@pemit %#=%tThis category requires that you have 3 of one kind of die and 2 of another. It is just like the draw poker version of a full house. It always scores 25 points.
+&HELP_SMALL Yahtzee=$yahtzee small straight:@pemit %#=%tThis requires that you have four dice in chronological order. Possibilities include: 1 2 3 4, 2 3 4 5, 3 4 5 6. This always scores 30 points.
+&HELP_LARGE Yahtzee=$yahtzee large straight:@pemit %#=%tThis is like a small straight, except that all of your dice must be in chronological order. Possibilities are: 1 2 3 4 5, 2 3 4 5 6. This always scores 40 points.
+&HELP_YAHTZEE Yahtzee=$yahtzee yahtzee:@pemit %#=%tThis requires that you have all of the dice the same number. It scores 50 points regardless of what you have, whether it's ones or sixes. Refer to the strategy section for more info.
+&HELP_CHANCE Yahtzee=$yahtzee chance:@pemit %#=%tThis has no limitations, any roll can be scored here. The score is the total of all of the dice. This is usually used when you are going for something and you don't get exactly what you wanted. You only get one per game.
+&HELP_ZERO Yahtzee=$yahtzee zero:@pemit %#=If you have already used up your chance and you roll something that won't fit in any categories, you may take a zero in any category. While this isn't always preferable, most games the yahtzee category gets zero'd. The command for zero-ing is not yet made, so if you need a score zero'd, talk to Stile. The command will be finished soon, so bear with me.%r%r<see 'yahtzee commands' for further help>
+&HELP_NEWS Yahtzee=$yahtzee news:@pemit %#=The zero command now works. You don't need to bug Stile anymore :)%r%r3d dice have been added. I will be making it possible to disable them, but as of now, that's your problem :P
+&HELP_STRATEGY Yahtzee=$yahtzee strategy:@pemit %#=I will have this up soon... don't despair...
+@Desc Yahtzee=This is the yahtzee machine. For commands, type yahtzee commands. If you don't know how to play, type yahtzee overview.
+&WINNER_MUNGE Yahtzee=extract(revwords(sort(%0)),1,words(matchall(%0,first(revwords(sort(%0))))))
+&TOTAL_#1334 Yahtzee=143
+&SCORE_#1334 Yahtzee=0|6||||18|||25|30|40||24
+&TURNS_#1334 Yahtzee=7
+&BONUS_#1334 Yahtzee=0
+&NOASCIIDICE Yahtzee=1
+&PLAYERS Yahtzee=
+@set Yahtzee=VISUAL
+@set Yahtzee=COMMANDS
+
+

@@ -1,0 +1,10 @@
+@create TV Camera Parent
+@Desc TV Camera Parent=This is a TV camera, 'install' to install and `camhelp' to operate.
+&INSTALL TV Camera Parent=$install:@ahear me={@pemit \[u(trans)]\=+TRANSMIT-%%0} ; @pemit %#=Install complete.
+&CAMON TV Camera Parent=$camon:@emit Camera is rolling;@pemit [u(trans)]=+DESC-[u(here/desc)];@listen me=*
+&CAMOFF TV Camera Parent=$camoff:@listen me ;@pemit [u(trans)]=+DESC-STATIC ; @emit Camera has stopped rolling.
+&CAMSET TV Camera Parent=$camset *:&trans me=%0 ;@pemit %#=Set.
+&TRANS TV Camera Parent=@@
+&CAMHELP TV Camera Parent=$camhelp:@pemit %#=[u(help)]
+&HELP TV Camera Parent=`camon' - Turns camera on for recording.%r`camoff'- Stops recording.%r`camset <transmitter number>' - Sets where camera send to ## transmitter.
+

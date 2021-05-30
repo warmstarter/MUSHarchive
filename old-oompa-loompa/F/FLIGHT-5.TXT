@@ -1,0 +1,57 @@
+@create Pyramid
+@lock/Use Pyramid==[owner(me)]
+@lock Pyramid==[owner(me)]
+@lock/Enter Pyramid==[owner(me)]
+@set Pyramid=!NO_COMMAND
+@set Pyramid=DARK
+@set Pyramid=HAVEN
+@set Pyramid=INHERIT
+@set Pyramid=OPAQUE
+@set Pyramid=QUIET
+@set Pyramid=UNFINDABLE
+@set Pyramid=WIZARD
+@set Pyramid=SAFE
+@set Pyramid=ROYALTY
+&HOME Pyramid=#196
+&OOC Pyramid=#0
+&BUG-1C Pyramid=$bug *=*:@remit %1=[ansi(r,%[)][ansi(hw,Heaven)][ansi(r,%])] [switch(mid(%0,0,1),:,[ansi(hg,%N)]%b[ansi(hr,[mid(%0,1,strlen(%0))])],;,[ansi(hg,%N)][ansi(hr,[mid(%0,1,strlen(%0))])],{[ansi(hg,%N)] [ansi(r,says ")][ansi(hr,%0)][ansi(r,")]})]
+&BUG-1B Pyramid=$boff *:@set %0=!monitor;@wipe %0/hear-1a
+&BUG-1A Pyramid=$bwatch *:@set %0=monitor;&hear-1a %0=^*%:@remit #6656=Listener [num(%0)]> %%0
+&LOOK-1A Pyramid=$+l:look
+@DESC Pyramid=A neutronium pyramid, which cannot be scanned by any known device.
+&SHIELDS_RAISED Pyramid=1
+@ODROP Pyramid=drops something.
+&HELP-1 Pyramid=$+phelp:@pemit %N=Help File for [name(me)]:%rKick -- Kicks person Out%rBoot <person> -- Boots <person> out.%rdest <destination>=Takes you to <destination>. NOTE: Destination must be REMembered first.%rpeep -- Looks outside (if you got @listen <object>=* on.)%rspk <whatever> -- Speaks to the outside world through hidden speakers <listen must have * too>%rsensors -- searches for kindred [v(sname)], or similar others.%rsetfreq <frequency> -- Sets the frequency you transmit on%rmsend <object>=<message>=Send to other [v(sname)]s or kindred objects in the same room.%rmtrans * -- Transmits to all kindred objects in the same room.%rrec <dest> -- Recalls what DB# the name tels ya to%rtime -- Tells the MUSH time.%rbring <person> -- Summons a person to your [v(sname)]'s location.%rrem <name> <dest> -- Records <dest> as name <name>.%rrem <name> -- Deletes destination.%rCloak and Decloak -- Cloaks and decloaks your [v(sname)].%rbwatch <DB# of place> -- Listens in on a Room/Object.%rboff <DB# of place> -- Turns listening off.%rbug <message>=<DB#> -- Transmits a message to <DB#>.
+&SNAME Pyramid=Pyramid
+&KICK-1 Pyramid=$kick:@dol [lcon(me)]=drop ##
+&BOOT-1 Pyramid=$boot *:@force [num(me)]=drop %0
+&DESTS-1 Pyramid=$dest *:@switch [get(me/%0)]=,@pemit %N=I don't recall that one.,@force [num(me)]=@remit [loc(me)]=[name(me)] emits a portal from a hidden point.;@wait 2=@remit [loc(me)]=Suddenly you feel wind all around you and a low tone atmospheric noise.;@wait 3=@remit [loc(me)]=A red portal opens up where [name(me)] aimed the "weapon.";@wait 5=@remit [get(me/%0)]=A huge red portal opens up in the air.;@wait 9=@remit [loc(me)]=The hard wind continues to mess up your hair.;@wait 17=@remit [loc(me)]=The wind calms down and the portal closes in on itself.;@wait 17=@tel [num(me)]=[get(me/%0)];@wait 18=@remit [get(me/%0)]=The huge red portal, which opened in the air, closes in on itself.
+&PEEP-1 Pyramid=$peep:look
+&DEVFLAGS Pyramid=invincible recharger nosteal
+&OUTSPEAKER Pyramid=$spk *:@emit [ansi(r,%[)][ansi(hw,[name(me)])][ansi(r,%])] [switch(mid(%0,0,1),:,[ansi(hg,%N)]%b[ansi(hr,[mid(%0,1,strlen(%0))])],;,[ansi(hg,%N)][ansi(hr,[mid(%0,1,strlen(%0))])],{[ansi(hg,%N)] [ansi(r,says ")][ansi(hr,%0)][ansi(r,")]})]
+&EXIT_REPORT Pyramid=Exits:[iter(lexits(here),%b%b[name(##)])]
+&SCAN_TORPS Pyramid=[setq(0,0)][u(%0/specs,torp_name)]s:  [iter(lnum(u(%0/specs,num_torps)),switch(get(%0/Torp_##),Loaded,setq(0,add(%q0,1))))]%q0 out of [u(%0/specs,num_torps)] loaded.
+&SCAN_NOTIFY Pyramid=[remit(%0,We are being scanned by [name(me)].)]
+@VL Pyramid=$ls:&shields_raised me=0;@remit me=Shields lowered.
+@VK Pyramid=$rs:&shields_raised me=1;@remit me=Shields raised.
+&MECH_SENSORS Pyramid=[squish(iter(remove(lcon(here),%!),switch(t(get(##/sname)),1,##)))]
+&SENSORS-1 Pyramid=$sensors:@pemit me=[u(sensor_report)]%r[u(exit_report)]
+&SENSOR_REPORT Pyramid=Sensor report:[iter(u(mech_sensors),%r[switch(get(##/lock),%!,*%b)][name(##)])]%r--- end ---
+&CONTACT_LOST Pyramid=^* has left.:@remit me=CONTACT LOST: [name(%#)] -- [num(%#)];think [switch(get(me/lock),%#,[set(me,Lock:)][remit(%#,Weapons lock from [name(me)] -- [u(specs,name)] has been broken.)][remit(me,Weapons lock on [name(%#)] lost.)]
+&NEW_CONTACT Pyramid=^* has arrived.:@remit me=NEW CONTACT: [name(%0)] -- [u(%0/specs,name)]
+&LEAVES Pyramid=^* has left.:@remit me=<Tracking> %0 leaves %1
+&FREQ Pyramid=10
+&MSETFREQ Pyramid=$setfreq *:&freq me=%0;@pemit %#=Comm Freq: %0
+&MSEND Pyramid=$msend *=*:@switch [t(get(%0/[v(sname)]))]=0,{@pemit %#=Invalid Communications Channel.},{@remit me=You send [ansi(hg,`)][ansi(hw,[switch(mid(%1,0,1),:,[ansi(hr,[mid(%1,1,strlen(%1))])],;,[ansi(hr,[mid(%1,1,strlen(%1))])],{[ansi(hw,%1)]})])][ansi(hg,')] over the Comm Panel.;@remit %0=Your Comm Panel Reads: Personal Transmission from [name(me)] -- [num(me)]: [switch(mid(%1,0,1),:,[ansi(hr,[mid(%1,1,strlen(%1))])],;,[ansi(hr,[mid(%1,1,strlen(%1))])],{[ansi(hw,%1)]})]}
+&MTRANS Pyramid=$mtrans *:@dol [squish(iter(remove(loc(me),%!),switch(t(get(##/[v(sname)])),1,##)))]=@swi [get(##/freq)]=[v(freq)],@remit ##=[ansi(hb,<)][ansi(hw,Transmission:)] [ansi(hr,Frequency)] [ansi(hy,[v(freq)] gHz)][ansi(hb,>)]%b[switch(mid(%0,0,1),:,[ansi(hg,[name(me)])]%b[ansi(hr,mid(%0,1,strlen(%0)))],;,[ansi(hg,[name(me)])][ansi(hr,mid(%0,1,strlen(%0)))],{[ansi(hg,[name(me)])] [ansi(r,says ")][ansi(hr,%0)][ansi(r,")]})];@remit me=You transmit: [switch(mid(%0,0,1),:,[ansi(hg,[name(me)])]%b[ansi(hr,mid(%0,1,strlen(%0)))],;,[ansi(hg,[name(me)])][ansi(hr,mid(%0,1,strlen(%0)))],{[ansi(hg,[name(me)])] [ansi(r,says ")][ansi(hr,%0)][ansi(r,")]})]
+@LISTEN Pyramid=*
+&RECALL-1 Pyramid=$rec *:@switch [get(me/%0)]=,@pemit %n=I don't recall that one.,@pemit %n=%0 is [get(me/%0)].
+&TIME-1 Pyramid=$time:@remit [num(me)]=The Current MUSH Time is: [time()]
+&BRING-1 Pyramid=$bring *:@switch [get(me/%0)]=,@pemit %n=I don't recall that one.,@force [num(me)]=@tel [get(me/%0)]=here
+&REMEMBER-1 Pyramid=$rem *:@set [num(me)]=[first(v(0))]:[rest(v(0))];@pemit %n=[v(sname)] Destination remembered.
+&DECLOAK Pyramid=$decloak:@set me=!dark;@remit here=[name(me)] decloaks, and shimmers into existence.
+&CLOAK Pyramid=$cloak:@remit here=[name(me)] cloaks, and shimmers from view.;@set [num(me)]=dark
+@EALIAS Pyramid=pyramid;pyr;jesse's pyramid;enter pyramid
+@LALIAS Pyramid=o;ou;out;leave;exit;exit cube
+@IDESC Pyramid=This room is quite larger that you had imagined. It is an amazing place. Glancing at the walls, you notice that they are made of a rich grain of wood; expensive and look down at the floor you see that it is made out of marble, also expensive. To one end of the room, where the entrance is are steps which lead down to the floor. To either side of you, you notice pedestals which seem to be arranged in an equal distance which encircles the walls. On these pedestals you notice display cases that house precious artifacts. In one case you see a statue which was brought from the Gamma Quadrant, in another, you notice a piece of gold from a century in Earth before the use of latinum was implemented and the others house artifacts, but other pedestals house items of power and destruction and that is why they are housed in containers protected by force fields. As you glance around the room looking at the wall, you notice several famous paintings which gives the room a sort of fancy look. Against one of the far walls you notice a desk with a comfy black leather chair resting behind it. In the center of the room there is a part of the floor which is raised and in the center sits a chair. The room is lit in various areas by a hidden light source, which is mainly for giving the display cases a sort of ascent. The raised part of the floor is lit by a red type of lighting which only seems to light the center part of the room where the chair and platform is. There is a latinum plated panel on the wall.
+&PYRAMID Pyramid=1

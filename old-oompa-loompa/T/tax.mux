@@ -1,0 +1,56 @@
+##################################################################
+#                   TAXES FOR FIRANMUX                           #
+#                                                                #
+# #98 = The tax command object                                   #
+# #97 = The tax database object                                  #
+##################################################################
+
+#================================================================#
+#     COMMAND: @TAX/FEDERAL <TYPE OF TAX>/<VICTIM>=<AMOUNT>      #
+#                                                                #
+# Where:                                                         #
+#   the Federal sales revenue account # is 2                     #
+#   the bank dbref is #929                                       #
+#================================================================#
+
+&CMD-TAX-FEDERAL-SALES #98=$@TAX/FEDERAL SALES/*=*:
+
+  think setq(0, trim(%0));
+  think setq(0, locate(%#, %0, *));
+  think setq(1, trim(%1));
+  think setq(9, [isdbref(%q0)]
+                [isnum(%q1)]);
+  think setq(1, [round(mul(%q1,u(#97/federal-sales-tax)),1)]);
+
+  @select %q9=
+     0?, {@pemit %#=I don't see what/who you want to tax.},
+     ?0, {@pemit %#=You must specify a number amount that you 
+                    want to tax.},
+     11, {think ac_adjust(%q0, stenis, mul(-1, %q1));
+          think ac_adjust(#6527, stenis, %q1);
+          @pemit %#=[name(%q0)] has been taxed for sales in the 
+                 amount of %q1 stenis;
+          @pemit %q0=A sales tax of %q1 stenis has been collected 
+                 from you.;
+          think setq(3, trim(extract(ictime(), 7, 1)));
+          &federal-sales-tax-%q3 #97=[add(%q1,get(#97/federal-sales-tax-%q3))]}
+
+-
+
+&clans #98=#82 #83 #84 #84 #85 #86 #87 #89 #91
+-
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

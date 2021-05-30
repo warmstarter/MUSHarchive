@@ -1,0 +1,20 @@
+@create <LB> Languages Box=10
+@lock <LB> Languages Box=CHECK_ISWIZ/1
+@Desc <LB> Languages Box=This box has the following global commands:%rss <text> - Speak in another language.%rlang <language> - Select language to speak in.%rlanguages - List known languages.%rlanguages/all - List all languages in the system.%rlanguages/setup - Initialize languages on yourself.%rlanguages/add <name>=<language> - Add a language to a player. (Staff only)%rlanguage help - Display help on languages.%r+roll XdY or +roll dY - Roll X number of dY dice.
+&SS <LB> Languages Box=$ss *:@dolist [lcon(loc(%#))]=@pemit ##=%N [setq(0,get(%#/langs))][setq(1,u(islang,%q0))][switch(u(haslang,##,%q0),1,says "[secure(%0)]" in %q1.,[u(talk)] in [switch(words(%q1),1,%q1,rest(%q1))].)]
+&ABRV <LB> Languages Box=ke se qe de mi or ks so gd md hd gn pl dm dc 
+&FULL <LB> Languages Box=Kagonesti Elvish|Silvanesti Elvish|Qualinesti Elvish|Sea Elvish|Minotaur|Orcish|Kenderspeak|Solamnic|Gullytalk|Mountain Dwarvish|Hill Dwarvish|Gnomish|Plainsmen|Metallic Draconic|Chromatic Draconic
+&HASLANG <LB> Languages Box=[gt(member(get(%0/langs),first(%1)),0)]
+&ISLANG <LB> Languages Box=[index(v(full),|,[member(v(abrv),first(%0))],1)]
+&LANGUAGE <LB> Languages Box=$languages:@pemit %#=You know the following languages:[iter(get(%#/langs),%r([ucstr(##)]) [u(islang,##)])]
+&LANG <LB> Languages Box=$lang *:@switch/first [setq(0,get(%#/langs))][neq(strlen(%0),2)][gt(member(%q0,%0),0)]=1?,@pemit %#=Please use the 2-letter abbreviation for the language you wish to select.%rType 'languages' to list them.,00,{@pemit %#=You don't seem to speak ([ucstr(%0)]) [index(v(full),|,[member(v(abrv),%0)],1)]},01,{@pemit %#=You are now speaking ([ucstr(%0)]) [index(v(full),|,[member(v(abrv),%0)],1)].;@unlock %#/langs;&langs %#=%0 [setdiff(%q0,%0)];@lock %#/langs=me}
+&LSETUP <LB> Languages Box=$lang*/setup:@pemit %#=Attempting to initialize and configure your languages. All previously known languages have been erased.;@unlock %#/langs;&langs %#=cm [switch(get(%#/race),*Kagonesti,ke,*Qualinesti,qe,*Silvanesti,se,Elf - D*,de,Kender,ks,Gnome*,gn,*Mountain,md,*Hill,hd,*Gully,gd,*Plainsman,pl,Minotaur*,mi,Orc*,or)];@lock %#/langs=me;@pemit %#=Completed. Type 'languages' to view which ones you speak. Contact a staff member to add other languages.
+&LANGALL <LB> Languages Box=$lang*/all:@pemit %#=The following languages are in the database:[iter(lnum(words(v(abrv))),%r([ucstr(extract(v(abrv),[add(##,1)],1))]) [index(v(full),|,[add(##,1)],1)])]
+&LANGADD <LB> Languages Box=$languages/add *=*:@switch/first [elock(me,%#)][setq(0,num(*%0))]%q0[gt(member(v(abrv),%1),0)]=0*,@pemit %#=You are not authorized to use that command.,?#-1*,@pemit %#=I'm not sure who '%0' is.,*0,@pemit %#=I'm not sure which language '%1' is. Use the 2-letter appreviations found in 'languages/all'.,{@pemit %#=Language [ucstr(%1)] [index(v(full),|,[member(v(abrv),%1)],1)] added to [name(*%0)].;@unlock %q0/langs;&langs %q0=[setunion(get(%q0/langs),lcstr(%1))];@lock %q0/langs=me;@pemit %q0=%N has added [index(v(full),|,[member(v(abrv),%1)],1)] to your list of known languages.}
+@Succ <LB> Languages Box=This box should be owned by a wizard, be set in the globals room, and be set !HALT and WIZARD.
+&TALK <LB> Languages Box=[switch(rand(5),0,speaks,1,talks,2,says a few words,says something)]
+@lock/EnterLock <LB> Languages Box=CHECK_ISWIZ/1
+&ROLL <LB> Languages Box=$+roll *d*:@remit [loc(%#)]=<OOC> %N rolls [secure(%0)]d[secure(%1)]: [switch(words(%0),0,[add(1,rand(secure(%1)))],{[setq(0,iter(lnum(secure(%0)),[add(1,rand(secure(%1)))]))]%q0, Total: [iter(%q0,setq(1,add(##,%q1)))]%q1})]
+&CHECK_ISWIZ <LB> Languages Box=[hasflag(%#,Wizard)]
+@set <LB> Languages Box=INHERIT
+@set <LB> Languages Box=SAFE

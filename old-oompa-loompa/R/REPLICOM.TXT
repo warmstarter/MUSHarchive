@@ -1,0 +1,38 @@
+@create Compin
+@link Compin = [loc(owner(me))]
+@parent Compin=$Compin 1.0
+@power Compin = See_All
+&CHANDLE Compin= Jesse
+&CFREQ Compin= 200.333
+&CENC Compin= silly's pizza
+
+@create $Compin 1.0
+@link $Compin 1.0 = [loc(owner(me))]
+@set $Compin 1.0 = OPAQUE
+@power $Compin 1.0 = See_All
+&CMD_HANDLE $Compin 1.0=$compin handle *:th [set(me, CHANDLE: %0)][pemit(%#, [ansi(hg, %[)][ansi(hy, Compin)][ansi(hg, %])] -- Handle set to %0.)]
+&CMD_FREQ $Compin 1.0=$compin freq *:th [switch([and([gt(%0, 0)], [lt(%0, 1500)])], 1, [set(me, CFREQ: %0)][pemit(%#, [ansi(hg, %[)][ansi(hy, Compin)][ansi(hg, %])] -- Frequency set to %0 GHz.)], [pemit(%#, [ansi(hg, %[)][ansi(hy, Compin)][ansi(hg, %])] -- Frequency out of range, must be between 1 and 1499 GHz)]
+&CMD_TAP $Compin 1.0=$tap compin:th [switch([v(CACTIVE)], 1, [set(me, CACTIVE:0)][remit(%L, %N taps his [name(me)] and it deactivates.)], [set(me, CACTIVE:1)][remit(%L, %N taps his [name(me)] and it activates producing a short beep.)]
+&CACTIVE $Compin 1.0=1
+&CMD_ENC $Compin 1.0=$compin enc *:th [set(me, CENC: %0)][pemit(%#, [ansi(hg, %[)][ansi(hy, Compin)][ansi(hg, %])] -- Encryption set to %0.)]
+&CMD_INFO $Compin 1.0=$compin info: [switch([v(CACTIVE)], 1, [pemit(%#, [ansi(hg, [repeat(~, 79)])]%r[center(Compin Info, 79)]%r%rFrequency: [v(CFREQ)] Ghz.%rHandle: [v(CHANDLE)]%rEncryption: [v(CENC)]%r[ansi(hg, [repeat(~, 79)])])], [pemit(%#, Your compin isn't active!)])]
+&CFREQ $Compin 1.0=1
+&CHANDLE $Compin 1.0=UNKNOWN
+&CENC $Compin 1.0=1234
+&CMD_SEND $Compin 1.0=$- *: [iter([lsearch(all, parent, #3799)], [u(##/REC_TRANS, [v(CHANDLE)], [v(CFREQ)], [encrypt(%0, [v(CENC)])], [zone(loc(%#))])])]
+&REC_TRANS $Compin 1.0=[switch([eq([v(CFREQ)], %1)], 1, [emit([ansi(hg, %[)][ansi(hy, C:)][ansi(hb, [v(CFREQ)])]:%0[ansi(hg, %])] - [decrypt(%2, [v(CENC)])])], )]
+@DESCRIBE $Compin 1.0=A standard compin.%r%rcompin info%rcompin handle <handle>%rcompin freq <frequency>%rcompin enc <encryption>%r- <message>
+@set $Compin 1.0/DESCRIBE=no_command visual
+
+@create $Replicator 1.0
+@link $Replicator 1.0 = [loc(owner(me))]
+@lock/Basic $Replicator 1.0==[owner(me)]
+@set $Replicator 1.0 = OPAQUE
+@set $Replicator 1.0 = WIZARD
+&CFREQ $Replicator 1.0=1
+@DESCRIBE $Replicator 1.0=[ansi(g, [repeat(~, 79)])]%r[center(Replicator, 79)]%r%rContents: [iter([lcon(me)], [name(##)], , %,)]%r%rUse REPLICATE * to replicate item.%r[ansi(g, [repeat(~, 79)])]
+@set $Replicator 1.0/DESCRIBE=no_command visual
+&CMD_REPL $Replicator 1.0=$replicate *: {th [switch([haspower(%#, guest)], 1, [set(me, CNUM:0)][pemit(%#, Guests can't do that!)], [switch([match([iter([lcon(me)], name(##), , |)], *%0*, |)], 0, [set(me, CNUM:0)][pemit(%#, I don't know how to replicate %0!)], [set(me, CNUM:[clone(%0)])][pemit(%#, Replicated.)])])]};@tri me/ause
+&CNUM $Replicator 1.0=#3808
+@AUSE $Replicator 1.0=@power [v(CNUM)]=see_all;@set [v(CNUM)]=!no_comm
+@set $Replicator 1.0/AUSE=no_command

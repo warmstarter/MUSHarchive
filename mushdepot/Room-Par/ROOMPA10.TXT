@@ -1,0 +1,15 @@
+@create $room parent
+@lock/Enter $room parent=#8
+@lock $room parent=#8
+@lock/Zone $room parent=#8
+@set $room parent=LINK_OK
+@set $room parent=VISUAL
+@set $room parent=SAFE
+@set $room parent=HALT
+@set $room parent=!NO_COMMAND
+&DESCRIBE_EXIT_PLANET $room parent=%r[ifelse(hasattrp(%!,DESC1),u(DESC1),ansi(r,center(Place exit description in &DESC1 attribute.,78)))]%r
+&DESCRIBE_EXIT_SHIP $room parent=%r[ifelse(hasattrp(%!,DESC1),u(DESC1),ansi(r,center(Place exit description in &DESC1 attribute.,78)))]%r
+&DESCRIBE_ROOM_PLANET $room parent=%r[ifelse(hasattrp(%!,DESC1),u(DESC1),center(Place room description in &DESC1 attribute.,78))]%r%r[setq(1,squish(remove(iter(lcon(%!),ifelse(isbuilder(##),,ifelse(isdark(##),,##))),%#)))][setq(2,squish(iter(lexits(%!),ifelse(isdark(##),,##))))][setq(0,ifelse(gt(words(%q1),words(%q2)),words(%q1),words(%q2)))][ifthen(words(v(inspect)),[ansi(bh,Inspectable:)]%b[iter(v(inspect),##,|,%,%b)].%r)][ansi(bh,ljust(Contents:,44) Obvious Exits:)][ifthen(gt(%q0,0),iter(lnuma(%q0),%r[setq(3,extract(%q1,##,1))][setq(4,extract(%q2,##,1))][ifelse(%q3,ifelse(hastype(%q3,P),ifelse(isconn(%q3),ansi(hc,ljust(name(%q3) [ifelse(isic(%q3),,<OOC>)],44)),ansi(c,ljust(name(%q3) %(sleeping%),44))),ansi(hw,ljust(mid(name(%q3),0,44),44))),space(44))] [ifthen(%q4,ljust(mid(name(%q4),0,14),14)%b[ansi(hw,%[)][ansi(default(loc(%q4)/COLOR,g)h,ifelse(loc(%q4),trim(mid(before(name(loc(%q4)),%b-),0,16)),%(closed%)))][ansi(hw,%])])],,))]
+&DESCRIBE_ROOM_SHIP $room parent=%r[ifelse(hasattrp(%!,DESC1),u(DESC1),center(Place room description in &DESC1 attribute.,78))]%r%r[setq(1,squish(remove(iter(lcon(%!),ifelse(isbuilder(##),,ifelse(isdark(##),,##))),%#)))][setq(2,squish(iter(lexits(%!),ifelse(isdark(##),,##))))][setq(0,ifelse(gt(words(%q1),words(%q2)),words(%q1),words(%q2)))][ansi(secfn(alert,color,beacon),center(---%[ [secfn(alert,beacon)] %]---,78))]%r[ifthen(words(v(inspect)),[ansi(bh,Inspectable:)]%b[iter(v(inspect),##,|,%,%b)].%r)][ansi(bh,ljust(Contents:,44) Obvious Exits:)][ifthen(gt(%q0,0),iter(lnuma(%q0),%r[setq(3,extract(%q1,##,1))][setq(4,extract(%q2,##,1))][ifelse(%q3,ifelse(hastype(%q3,P),ifelse(isconn(%q3),ansi(hc,ljust(name(%q3) [ifelse(isic(%q3),,<OOC>)],44)),ansi(c,ljust(name(%q3) %(sleeping%),44))),ansi(hw,ljust(mid(name(%q3),0,44),44))),space(44))] [ifthen(%q4,ljust(mid(name(%q4),0,14),14)%b[ansi(hw,%[)][ansi(default(loc(%q4)/COLOR,g)h,ifelse(loc(%q4),trim(mid(before(name(loc(%q4)),%b-),0,16)),%(closed%)))][ansi(hw,%])])],,))]
+@DESCRIBE $room parent=ifelse(hastype(%!,R),u(DESCRIBE_ROOM_SHIP),u(DESCRIBE_EXIT_SHIP))
+&ALERCALL $room parent=iter(%7,remit(##,ansi(%3,center(%2,79))),,)

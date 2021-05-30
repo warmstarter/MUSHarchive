@@ -1,0 +1,130 @@
+@@ Header Functions and HOOK_XP
+@@ Author:  Sholevi (D Young; mrdyg@yahoo.com)
+@@ Date:  Oct 09, 2003
+
+
+@@ -- Header Functions
+@@ Header functions are usually created for the purpose of displaying
+@@ an ansi-colored border with titles for general uses.  Some common
+@@ display uses are for room parents, +finger, +who, etcetera.
+@@ The header functions here allow a great deal of flexibility when
+@@ coloring, sizing and using particular characters in your headers.
+
+@@ Here is an example of the useage of header_lr()
+@@
+@@    header_lr(Left Label, Right Label, 72, =, w, hw, hc, \[, \] )
+@@
+@@ This would return a header that looks like this:
+@@
+@@    ==[ Left Label ]=======================================[ Right Label ]==
+@@
+@@ Notice that the full length is not more than 72 characters long, 
+@@ as specified.  The ='s would be colored white (w), the labels would
+@@ be colored bright white (hw), and the brackets would be colored bright
+@@ cyan (hc).  Also note that with all the header functions, all the arguments
+@@ are optional, except for the length.  So header_c(,76) or header_c(,76,,,,,,)
+@@ is perfectly valid, since default options will be used.
+
+@@ Syntax:
+@@ header_c, header_l and header_r take this syntax:
+@@  X(<lbl>, <len>, <chr>, <bdr clr>, <lbl clr>, <bkt clr>, <lbkt>, <rbkt>)
+@@
+@@ header_lr takes the same syntax, plus one extra argument for the other label:
+@@  X(<lbl>, <lbl>, <len>, <chr>, <bdr clr>, <lbl clr>, <bkt clr>, <lbkt>, <rbkt>)
+@@
+@@ header_n takes only a few arguments, since it has no label:
+@@  X(<len>, <chr>, <bdr clr>)
+@@
+@@ And remember, each argument is optional, except for the length,
+@@ in any function.
+
+@@ Syntax Legend:
+@@ len:  length of the header
+@@ lbl:  label
+@@ bdr:  border
+@@ lbkt:  left bracket character
+@@ rbkt:  right bracket character
+@@ clr:  color
+@@ chr:  character used in the border
+
+
+@create GF
+
+@@ header_c displays its title in the middle.
+&FUN_HEADER_C GF=[switch(lt(%1,add(strlen(%0),4)),#-*,switch(%1,,[ansi(hr,-)] Invalid Argument List For Header_C.,[ansi(hr,-)] Invalid Length For Header_C.),1,[ansi(hr,-)] Invalid Length For Header_C.,[ansi(switch(%3,,b,%3),[left(repeat(switch(%2,,-,%2),inc(div(div(sub(%1,add(strlen(%0),4)),2),switch(%2,,1,strlen(%2))))),add(mod(add(strlen(%0),%1),2),div(sub(%1,add(strlen(%0),4)),2)))])][switch(t(strlen(%0)),0,[ansi(switch(%3,,b,%3),[left(repeat(switch(%2,,-,%2),4),4)])],[ansi(switch(%5,,b,%5),switch(strlen(%6),1,%6,<))][ansi(switch(%4,,w,%4),%b%0%b)][ansi(switch(%5,,b,%5),switch(strlen(%7),1,%7,>))])][ansi(switch(%3,,b,%3),[left(repeat(switch(%2,,-,%2),div(div(sub(%1,add(strlen(%0),4)),2),switch(%2,,1,strlen(%2)))),div(sub(%1,add(strlen(%0),4)),2))])])]
+
+@@ header_l displays its label on the left.
+&FUN_HEADER_L GF=[switch(lt(%1,add(strlen(%0),6)),#-*,switch(%1,,[ansi(hr,-)] Invalid Argument List For Header_L.,[ansi(hr,-)] Invalid Length For Header_L.),1,[ansi(hr,-)] Invalid Length For Header_L.,[ansi(switch(%3,,b,%3),[left(switch(%2,,--,%2%2),2)])][switch(t(strlen(%0)),0,[ansi(switch(%3,,b,%3),[left(repeat(switch(%2,,-,%2),4),4)])],[ansi(switch(%5,,b,%5),switch(strlen(%6),1,%6,<))][ansi(switch(%4,,w,%4),%b%0%b)][ansi(switch(%5,,b,%5),switch(strlen(%7),1,%7,>))])][ansi(switch(%3,,b,%3),)][left(repeat([ansi(switch(%3,,b,%3),[switch(%2,,-,%2)])],inc(div(sub(sub(%1,6),strlen(%0)),switch(%2,,1,strlen(%2))))),sub(sub(%1,6),strlen(%0)))])]
+
+@@ header_lr displays one title on the left and another on the right.
+@@ but both are optional.
+&FUN_HEADER_LR GF=[switch(lt(%2,add(strlen(%0),strlen(%1),12)),#-*,switch(%2,,[ansi(hr,-)] Invalid Argument List For Header_Lr.,[ansi(hr,-)] Invalid Length For Header_LR.),1,[ansi(hr,-)] Invalid Length For Header_Lr.,[ansi([switch(%4,,b,%4)],[left(switch(%3,,--,%3%3),2)])][switch(t(strlen(%0)),0,[ansi([switch(%4,,b,%4)],[left(repeat(switch(%3,,-,%3),4),4)])],[ansi([switch(%6,,b,%6)],switch(strlen(%7),1,%7,<))][ansi([switch(%5,,w,%5)],%b%0%b)][ansi([switch(%6,,b,%6)],switch(strlen(%8),1,%8,>))])][ansi([switch(%4,,b,%4)],[left([repeat([switch(%3,,-,%3)],inc(div(sub(sub(sub(%2,12),strlen(%0)),strlen(%1)),switch(%3,,1,strlen(%3)))))],sub(sub(sub(%2,12),strlen(%0)),strlen(%1)))])][switch(t(strlen(%1)),0,[ansi([switch(%4,,b,%4)],[left([repeat([switch(%3,,-,%3)],4)],4)])],[ansi([switch(%6,,b,%6)],switch(strlen(%7),1,%7,<))][ansi([switch(%5,,w,%5)],%b%1%b)][ansi([switch(%6,,b,%6)],switch(strlen(%8),1,%8,>))])][ansi([switch(%4,,b,%4)],[left(switch(%3,,--,%3%3),2)])])]
+
+@@ header_n displays no title (just a border of length and color you specify).
+&FUN_HEADER_N GF=[switch(isnum(%0),0,[ansi(hr,-)] Invalid Length For Header_N,[ansi(switch(%1,,b,%1),[left(repeat(switch(%2,,-,%2),inc(div(%0,if(strlen(%2),strlen(%2),1)))),%0)])])]
+
+@@ header_r displays its label on the right.
+&FUN_HEADER_R GF=[switch(lt(%1,add(strlen(%0),6)),#-*,switch(%1,,[ansi(hr,-)] Invalid Argument List For Header_R.,[ansi(hr,-)] Invalid Length For Header_R.),1,[ansi(hr,-)] Invalid Length For Header_R.,[ansi(switch(%3,,b,%3),[left(repeat(switch(%2,,-,%2),inc(div(sub(sub(%1,6),strlen(%0)),switch(%2,,1,strlen(%2))))),sub(sub(%1,6),strlen(%0)))])][switch(t(strlen(%0)),0,[ansi(switch(%3,,b,%3),[repeat(if(eq(1,strlen(%2)),%2,-),4)])],[ansi(switch(%5,,b,%5),switch(strlen(%6),1,%6,<))][ansi(switch(%4,,w,%4),%b%0%b)][ansi(switch(%5,,b,%5),switch(strlen(%7),1,%7,>))])][ansi(switch(%3,,b,%3),[left(switch(%2,,--,%2%2),2)])])]
+
+
+
+@@ --  Hook_XP
+@@ This function is my own design inspired by discussions on
+@@ how players should receive XP to spend on combat skills.
+@@ 
+@@ The premise behind hook_xp is that of awarding the players
+@@ of a MUSH with experience points spendable on improving 
+@@ their softcoded skills (for combat or what have you).
+@@ Hook_XP rewards players based on their participation in RP
+@@ by using the @EMIT and POSE commands, and its associated
+@@ semipose shortcuts : and ;.
+@@
+@@ When a player uses one of these commands (pose or @emit),
+@@ the hook checks these conditions, and if all hold true
+@@ the player's XP counter is bumped by one.
+@@   1) Is the player's status considered to be IC?
+@@   2) Is there at least one other player in the room?
+@@   3) Is the last time the player received XP by using
+@@   this command greater than one minute and 15 seconds?
+@@ The hook checks that the player is IC by the presence of the 
+@@ FIXED flag, but this can be customized for whatever is defined
+@@ to be IC on a particular MUSH.  It also checks the interval
+@@ between usages of the command to prevent abuse such as this:
+@@ @dol lnum(100)=@emit Hi.
+@@ The length of the interval (75 seconds) can be changed.
+@@
+@@ IF all of these tests pass, then the player's XP counter is
+@@ bumped by 1.  Then the XP counter is checked, and if it has
+@@ reached 24, then it is reset to 0 again and the player is 
+@@ given 1 experience point.  This is, in essence, equivalent to
+@@ awarding players 1 experience point for every 24 poses.
+@@ This of course can be changed, depending on your idea of
+@@ how quickly players should earn XP based on their RP part-
+@@ icipation.  By default, the hook increments the player's
+@@ DSS_XP attribute, which is where Dahan's Skill System
+@@ stores its value for experience points, and can be changed
+@@ to suit whatever system a particular MUSH uses.
+@@
+@@ The fact of the matter is that this function will likely
+@@ not be suitable "out of the box" for any MUSH, it will need
+@@ to be modified depending on the rules of each site.  But
+@@ the basic premise and code from which to start with for the
+@@ XP hook is here for you.
+
+
+@@ Installation:
+@@
+@@ Use these commands to install the hook for POSE and @EMIT:
+@@
+@@ @hook/after pose=<gf>,hook_xp
+@@ @hook/after @emit=<gf>,hook_xp
+@@
+@@ Replace <gf> with the dbref of the object where the HOOK_XP
+@@ attribute is.  Because these commands (@hook) do not last
+@@ after reboots, you will need to put it in the @startup
+@@ attribute of some object that has a Wizard flag to be able
+@@ to use the @hook command.  You may also @hook this function
+@@ into other PennMUSH commands that might aide in RP on your
+@@ MUSH.
+
+&HOOK_XP GF=if(and(hasflag(%#,FIXED),gt(words(setinter(lwho(),lcon(%L))),1),gte(sub(secs(),last(default(%#/xp_counter,0))),75)),[set(%#,xp_counter:[if(eq(setr(0,first(default(%#/xp_counter,0))),24),0[set(%#,DSS_XP:[inc(default(%#/dss_xp,0))])],inc(%q0))]%b[secs()])][set(%#/xp_counter,wizard mortal_dark)])

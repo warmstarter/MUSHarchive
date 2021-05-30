@@ -1,0 +1,74 @@
+#!/usr/local/bin/perl5
+#
+# mushi.pl - Take a mush @decomp file (unwrapped) on stdin and
+#            put out a pretty version on stdout that can be used by mpp
+#
+sub indent;
+sub unindent;
+sub nl;
+
+$step = 2;
+while ($line = <STDIN>) {
+	if (length($line) < 70) {
+	  print "$line\n";
+	  next;
+	}
+	$ind = 0; indent;
+	($start,$rest) = $line =~ /^(.*?=)(.*)/;
+	print $start if $start;
+	if ($rest =~ s/^(\$.*?[^\\]: *)//) {
+		nl;
+		print $1;
+	 	indent;	
+	}
+        $rest =~ s/\]\[/\]\n\[/g;
+        $rest =~ s/\},/\},\n/g;
+	if ($rest =~ s/^(\@[^;]*?=)//) {
+		nl;
+		$com = $1;
+		$com =~ s/\]\n\[/\]\n$spaces\[/g;
+		print $com;
+		indent;
+	}
+	$rest =~ s/(%r|;)/\1\n/gi;
+	@chars = split('',$rest);
+	nl;
+        $lastchar = "\n";
+	foreach (@chars) {
+		if ($_ eq "{") {
+		   indent, nl;
+		   print;
+		   $lastchar = "{";
+		   indent, nl;
+		} elsif ($_ eq "}") {
+		   unindent, nl;
+		   print;
+		   unindent;
+		} elsif ($_ eq "\n") {
+		   nl;
+		} elsif ($_ eq " ") {
+		  print unless $lastchar =~ /[;\n]/;
+		} else {
+		  print;
+		}
+	        $lastchar = $_;
+	}
+       print "\n\n";
+}
+
+# Increase the indent by step, and set up $spaces
+sub indent {
+	$ind += $step;
+	$spaces = " " x $ind;
+}
+
+# Decrease the indent by step, and set up $spaces
+sub unindent {
+	$ind -= $step;
+	$spaces = " " x $ind;
+}
+
+# Print a new line
+sub nl {
+  print "\n$spaces" unless ($lastchar eq "\n");
+}

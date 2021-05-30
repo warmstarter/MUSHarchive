@@ -1,0 +1,61 @@
+@@
+@@ Storyteller (WoD) dice and prove mechanics.
+@@ By Javelin, 2003, released under the Artistic License.
+@@
+@@ This provides these basic commands:
+@@  +pdice <n>d<sides>   - Privately roll some dice.
+@@  +dice <n>d<sides>    - Roll some dice and announce in the room
+@@  +prove <attribute>=<minimum level> to <other player>
+@@      - Prove to the player that you have attribute at some level,
+@@        where levels are expressed between 1 and 5
+@@  +prove [!]<attribute> to <other player>
+@@      - Prove that you have/don't have attribute at any non-zero level (used
+@@        for proving things like virtues/flaws
+@@  +roll <attribute>=<difficulty level>
+@@      - Rolls an attribute against a difficulty level and announces
+@@        level of success (in words) to the room.
+@@ 
+@@
+@@ This object requires that you add an ufun called GETVAL that
+@@ takes two arguments - a dbref and an RPG attribute (skill, etc.)
+@@ and looks up the value of the attribute on the player. Values must
+@@ be numbers from 1-5. Here's an example of one for a particular
+@@ character data setup:
+@@
+@@ &ALLSTATS storyteller mechanics=[setunion(iter(attribs|abilities|backgrounds|languages|stats,edit(xget(%0,##),%b,|),|,|),xget(%0,powers),|)]
+@@ &getval storyteller mechanics= [setq(0,u(allstats,%0))][after(grab(%q0,%1:*,|),:)]
+@@
+
+
+@create Storyteller Mechanics
+@link Storyteller Mechanics = #2
+@lock/Basic Storyteller Mechanics==me
+@set Storyteller Mechanics = SAFE
+@power Storyteller Mechanics = See_All
+&ABIL_TO_DICE Storyteller Mechanics=[add(u(getval,%0,%1),u(getval,%0,%2))]d10
+&ADD_ABILS Storyteller Mechanics=add(%0,add(ulocal(getval,%1,%q1),ulocal(getval,%1,%q2)))
+&COUNT_SUCCESS Storyteller Mechanics=[add(%0,sub(gt(%1,%q1),eq(%1,1)))]
+@DESCRIBE Storyteller Mechanics=Commands: +pdice, +dice, +roll
+@set Storyteller Mechanics/DESCRIBE=no_command visual
+&DIE_RESULT Storyteller Mechanics=[iter(lnum(before(%0,d)),add(1,rand(after(%0,d))))]
+&DO_DIE Storyteller Mechanics=$+pdice *: @pemit %#=<<DICE>> You roll: [u(die_result,%0)]
+&DO_DIE_LOUD Storyteller Mechanics=$+dice *: @remit %l=<<DICE>> %N rolls %0: [u(die_result,%0)]
+&DO_PROVE_STAT Storyteller Mechanics=$+prove *=* to *: @switch 1=[lt(%1,1)],{@pemit %#=Use a level between 1 and 5.}, [lt(u(getval,%#,%0),%1)], {@pemit %#=You can't +prove that.}, {@pemit/list [setunion(%#,iter(edit(edit(%2,here,lcon(%l)),\,,|),locate(%#,##,P*),|))]=PROVE: %N has at least %1 in [capstr(%0)].}
+&DO_PROVE_VF Storyteller Mechanics=$+prove * to *: @switch/first 0=[not(strmatch(%0,*=*))],,[setq(0,strmatch(%0,!*))][setq(1,switch(%q0,1,after(%0,!),%0))][eq(%q0,eq(ulocal(getval,%#,%q1),0))], {@pemit %#=You can't +prove that.}, {@pemit/list [setunion(%#,iter(edit(edit(%1,here,lcon(%l)),\,,|),locate(%#,##,P*),|))]=PROVE: %N [switch(%q0,1,does not have,has)] '[capstr(%q1)]'.}
+&DO_ROLL Storyteller Mechanics=$+roll *=*: @remit %l=<<DICE>> %N rolls %0 against difficulty %1 and [u(result,u(die_result,switch(match(%0,*+*),1,u(abil_to_dice,%#,before(%0,+),after(%0,+)),%0)),%1)]
+&RESULT Storyteller Mechanics=[setq(1,sub(%1,1))][setq(0,fold(count_success,%0,0))][v(success_string[max(-5,min(5,%q0))])]
+@STARTUP Storyteller Mechanics=@drain me; @notify me
+@tr storyteller mechanics/startup
+&SUCCESS_STRING-1 Storyteller Mechanics=partially botches.
+&SUCCESS_STRING-2 Storyteller Mechanics=botches.
+&SUCCESS_STRING-3 Storyteller Mechanics=botches.
+&SUCCESS_STRING-4 Storyteller Mechanics=does considerably worse than expected, botching seriously.
+&SUCCESS_STRING-5 Storyteller Mechanics=botches wildly.
+&SUCCESS_STRING0 Storyteller Mechanics=fails.
+&SUCCESS_STRING1 Storyteller Mechanics=partially succeeds.
+&SUCCESS_STRING2 Storyteller Mechanics=succeeds.
+&SUCCESS_STRING3 Storyteller Mechanics=succeeds.
+&SUCCESS_STRING4 Storyteller Mechanics=does considerably better than expected, succeeding strongly.
+&SUCCESS_STRING5 Storyteller Mechanics=succeeds wildly.
+&rolldots storyteller mechanics= [switch(orflags(owner(%#),Wr),1, localize([setq(0,)] [null(iter(%1,setq(0,add(%q0,ulocal(getval,%0,itext(0))))))] [lmath(add,iter(lnum(%q0),switch(die(1,10),1,-1,<%2,0,1)))]))] 
+

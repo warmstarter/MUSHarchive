@@ -1,0 +1,152 @@
+Object: The Nifty +Help System v.1.0
+Server: PennMUSH 1.5
+Notes:
+1) This object will create hard newlines under some versions of PennMUSH (later than p10, I believe), so beware if you're running a version of the server that can't handle them! It runs fine under p15. 
+2) The object should ideally be given pemit_all power, assuming you want it to be able to pemit to HAVEN/pagelocked players and that pemit_all is available as a power on your MUSH. No other powers are necessary. 
+3) The system is composed of two parts, in order to avoid cluttering the Master Room with non-trigger attributes. The +Help System object should be in the master room; the +Help Storage object should NOT. In order for the system to work properly, both objects must be owned by the same person. 
+
+Date Released: 10/26/95
+Coder: Cyclonus@Transformers2005 // Nightbird@2k5 & @TF1 // Shalott@lots.of.places :)
+Email: shalott@liii.com
+
+Description: +help is nearly universal on every MUSH I've seen, but there's no publically available system that I know of, so I thought I'd share mine. The system makes it extremely easy for any admin to add or remove help on a topic with a minumum of fuss, keeping the +help files up to date nicely. The system also supports submenus, to keep your index from becoming cluttered. Feel free to use this and modify it as you like, but please drop me a note to let me know if you like it, and especially if you find some nifty modification to it so I can upgrade it. 
+
+Installation: Pretty simple. Just cut&paste or /quote in the code below. You need to make two quick substitutions: put in your mush name where it says <YOUR MUSH NAME HERE> and put in the dbref number of the +Help Storage item into the @edit command at the very bottom where it says <DBREF # OF +HELP STORAGE ITEM>. :) 
+
+Sample Output:
++help
+=^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=^=
++HELP TOPICS                   ->>*<<-                    TRANSFORMERS 2005
+=v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=v=
+        
+        '               +admin          +alias          +allow          
+        +aside          +bbhelp         +define         +email          
+        +faction        +finger         +help           +ictime         
+        +invis          +local          +ooc            +promote        
+        +rude           +rumor          +spell          +stealth        
+        +suggest        +tpclear        +tpinfo         +tppost         
+        +transmit       +twink          +who            credits         
+        ic              mutter          mutter2         ooc             
+        radio           rank            space          
+---------------------------------SUBMENUS----------------------------------        
+        advancement     combat          energon         transform       
+        =-------------------------------------------------------------------------=
+To see the help on any of these topics, type '+help <topic>'
+=-------------------------------------------------------------------------=
+
+DISCLAIMER: I didn't put anything nasty in this code, but someone else might have handled this before you got it, so don't blame me if you pop it in without reading it and something unpleasant happens. 
+
+----------------8<- CUT HERE ->8---------8<- CUT HERE ->8----------------- 
+
+@create +Help System
+@create +Help Storage
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 
+@@
+@@ The trigger commands (&DO_<WHATEVER>) will all be on the +Help 
+@@ System, which should go in the Master Room. In order to avoid lag, 
+@@ the actual +help entries and much of the code is stored on the 
+@@ +Help Storage item, which should NOT be in the Master Room. You 
+@@ can store it inside the +Help System, or in your own code storage 
+@@ room.
+@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 
+
+@power +Help System=pemit_all
+
+@@ avoid all those annoying Set. messages... 
+
+@set +Help System=QUIET
+
+@set +Help Storage=QUIET
+
+&mush_name +Help Storage=<YOUR MUSH NAME HERE> 
+
+@desc +Help System=%R[space(5)]This object contains the global +help and +adminhelp for the MUSH. Please do not add help topics or touch this item unless you know what you are doing. This object must remain in the Master Room of the MUSH. For help on using the +help system, type +help. For help on adding help topics, see +adminhelp.%R
+
+@desc +Help Storage=%R[space(5)]This object stores the +help entries. Please do not do anything bad to it.%R 
+
+@set +Help System=!NO_COMMAND
+@set +Help Storage=NO_COMMAND
+@set +Help System=SAFE
+@set +Help Storage=SAFE
+@lock +Help System=me
+@lock +Help Storage=me
+
+&DO_HELP_SUBJ +Help System=$+help *:@pemit %#=[switch([member(get(#2222/help_list),%0)]_[member(get(#2222/submenu_list),%0)],0_0,{There is no +help on %0.},*_0,{[u(#2222/helpsubjheader,%0)][eval(#2222,help_%0)]%r=[repeat(-,73)]=},{[u(#2222/helpheader)][space(8)][u(#2222/help_print_rows,%0)]%R[u(#2222/menutail,%0)]})]
+
+&DO_HELP_SUBMENU +Help System=$+help/* *:@pemit %#=[switch(and(member(get(#2222/submenu_list),%0),member(get(#2222/[%0]_list),%1)),0,That is either an invalid submenu or an invalid topic.,[u(#2222/helpsubjheader,%1)][eval(#2222,help_%1)]%r=[repeat(-,73)]= )]
+
+&DO_HELP +Help System=$+help:@pemit %#=[u(#2222/helpheader)][space(8)][u(#2222/help_print_rows,help)]%r[center(SUBMENUS,75,-)][space(8)][u(#2222/help_print_rows,submenu)][u(#2222/helptail)] 
+
+&DO_ADMINHELP +Help System=$+adminhelp:@pemit %#=[switch(orflags(%#,Wr),1,[u(#2222/adminhelpheader)][space(8)][u(#2222/help_print_rows,adminhelp)]%r[u(#2222/adminhelptail)],Type 'help' or '+help' for help.)] 
+
+&DO_ADMINHELP_SUBJ +Help System=$+adminhelp *:@pemit %#=[switch(orflags(%#,Wr),1,[switch(member(get(#2222/adminhelp_list),%0),0,There is no +adminhelp on %0.,[u(#2222/adminhelpsubjheader,%0)][eval(#2222,help_%0)]%r=[repeat(-,73)]=)],Type 'help' or '+help' for help.)]
+
+&DO_ADDHELP +Help System=$addhelp *=*:@select orflags(%#,Wr)=1,{&help_[%0] #2222={%1};&help_list #2222=[setunion(get(#2222/help_list),%0)];@pemit %#=+help added on %0.}
+
+&DO_DELHELP +Help System=$delhelp *:@select orflags(%#,Wr)=1,{&help_[%0] #2222=;&help_list #2222=[setdiff(get(#2222/help_list),%0)];@pemit %#=+help removed on %0.}
+
+&DO_ADDMENU +Help System=$addmenu *:@select and(orflags(%#,Wr),eq(member(adminhelp admin submenu,%0),0))=1,{&submenu_list #2222=[setunion(get(#2222/submenu_list),%0)];@pemit %#=Submenu %0 added. To add help topics to it, please type 'addhelp/%0 <topic>=<help message>'.
+
+&DO_DELMENU +Help System=$delmenu *:@select hasflag(%#,Wizard)=1,@pemit %#={This command will completely delete submenu [%0] from the +help system and wipe all entries for the [words(get(#2222/[%0]_list))] topics under it. If you are sure you wish to proceed, please type 'confirm delmenu %0' now.}
+
+&CONFIRM_DELMENU +Help System=$confirm delmenu *:@select hasflag(%#,Wizard)=1,{@dol [get(#2222/[%0]_list)]=&help_[##] #2222= ; @wait 1=&[%0]_list #2222= ; &submenu_list #2222=[setdiff(get(#2222/submenu_list),%0)] ; @pemit %#=Submenu %0 removed from +help system.}
+
+&DO_MENU_ADDHELP +Help System=$addhelp/* *=*:@select and(orflags(%#,Wr),member(get(#2222/submenu_list),%0))=1,{&help_[%1] #2222={%2};&[%0]_list #2222=[setunion(get(#2222/[%0]_list),%1)];@pemit %#=+help/[%0] added on %1} 
+
+&DO_MENU_DELHELP +Help System=$delhelp/* *:@select and(orflags(%#,Wr),member(get(#2222/submenu_list),%0))=1,{&help_[%1] #2222=;&[%0]_list #2222= [setdiff(get(#2222/[%0]_list),%1)];@pemit %#=+help/[%0] on %1 removed.} 
+
+&DO_ADDADMINHELP +Help System=$addadminhelp *=*:@select orflags(%#,Wr)=1,{&help_[%0] #2222={%1};&adminhelp_list #2222=[setunion(get(#2222/adminhelp_list),%0)];@pemit %#=+adminhelp added on %0.} 
+
+&DO_DELADMINHELP +Help System=$deladminhelp *:@select orflags(%#,Wr)=1,{&help_[%0] #2222=;&adminhelp_list #2222=[setdiff(get(#2222/adminhelp_list),%0)];@pemit %#=+adminhelp removed on %0.} 
+
+&HELP_PRINT_ROWS +Help Storage=[iter([u(help_row_counter,%0)],%r[space(8)][u(helprow, [extract([v([%0]_list)],##,4)])])]
+
+&HELP_ROW_COUNTER +Help Storage=[iter([lnum([u(help_num_rows,%0)])],[add([mul(##,4)],1)])] 
+
+&HELP_NUM_ROWS +Help Storage=[add([div([words([v([%0]_list)] )],4)],1)]
+
+&MENUTAIL +Help Storage==[repeat(-,73)]=%RTo see help on these topics, type +help/[%0] <topic>%R=[repeat(-,73)]= 
+
+&HELPROW +Help Storage=[iter(%0,[ljust(##,15)])] 
+
+&HELPSUBJHEADER +Help Storage=[repeat(=^,37)]=%r[ljust(+HELP ON [ucstr(%0)],31)]->>*<<-[rjust(ucstr(v(mush_name)),37)]%r[repeat(=v,37)]=%r 
+
+&HELPHEADER +Help Storage=[repeat(=^,37)]=%r[ljust(+HELP TOPICS,31)]->>*<<-[rjust(ucstr(v(mush_name)),37)]%r[repeat(=v,37)]=%r 
+
+&HELPTAIL +Help Storage==[repeat(-,73)]=%rTo see the help on any of these topics, type '+help <topic>'%r=[repeat(-,73)]=%r 
+
+&ADMINHELPSUBJHEADER +Help Storage=[repeat(=^,37)]=%r[ljust(+ADMINHELP ON [ucstr(%0)],31)]->>*<<-[rjust(ucstr(v(mush_name)),37)]%r[repeat(=v,37)]=%r 
+
+&ADMINHELPHEADER +Help Storage=[repeat(=^,37)]=%r[ljust(+ADMINHELP TOPICS,31)]->>*<<-[rjust(ucstr(v(mush_name)),37)]%r[repeat(=v,37)]=%r 
+
+&ADMINHELPTAIL +Help Storage=[repeat(-,73)]=%rTo see the help on any of these topics, type '+adminhelp <topic>'%r=[repeat(-,73)]=% 
+
+&HELP_LIST +Help Storage=+help credits
+
+&ADMINHELP_LIST +Help Storage=+adminhelp addhelp delhelp submenus 
+
+&HELP_+HELP +Help Storage=Syntax: +help OR +help <topic>%r%rThe first command gets you the index of +help files available on global commands and topics, while the second gets you the help file on that topic. 
+
+&HELP_CREDITS +Help Storage=This +help system was coded by Cyclonus@Transformers2005 and is available for public use by e-mailing the author (shalott@liii.com).
+
+&HELP_+ADMINHELP +Help Storage=Syntax: +adminhelp OR +adminhelp <topic>%r%rThe first command gets you the index of +help files available on admin-only commands and topics, while the second gets you the adminhelp file on that topic.
+
+&HELP_ADDHELP +Help Storage=Syntax: addhelp <COMMAND>=<HELP TEXT>%r%rThis command allows you to add a +help entry on a command. To add a +adminhelp entry, you must type: addadminhelp <COMMAND>=<HELP TEXT>. Please look at other +help entries and follow their standard syntax.
+
+&HELP_DELHELP +Help Storage=Syntax: delhelp <COMMAND>%R%RThis command removes a +help entry on COMMAND. Please do not remove commands unless you know what you are doing. To change the help on a command, you can simply reset it by doing 'addhelp' again. To remove a +adminhelp topic, type 'deladminhelp <COMMAND>'.
+
+&HELP_SUBMENUS +Help Storage=Commands: addmenu <MENU>%R[space(10)]delmenu <MENU>%R[space(10)]addhelp/<MENU> <COMMAND>=<HELP TEXT>%R[space(10)]delhelp/<MENU> <COMMAND>=<HELP TEXT>%R%RThese commands allow you to create submenus within the +help system and a dd/remove entries on those submenus. Please be very careful using the delmenu command, as it removes an entire submenu and erases all its entries.
+
+@edit +Help System/*={#2222},{<DBREF # OF +HELP STORAGE ITEM>}
+
+@set +Help System=!QUIET
+
+@set +Help Storage=!QUIET
+
+@name +Help System=The Nifty +Help System v.1.0 
+
+@pemit me=+Help System completed. @teleport it to your Master Room to make it global, and please drop Cyclonus a line (at shalott@liii.com, or on Transformers2005) if you like it or come up with improvements!
+
+

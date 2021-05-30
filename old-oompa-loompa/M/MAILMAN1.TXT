@@ -1,0 +1,33 @@
+Mailman(#2852LV)
+Type: Thing Flags: LINK_OK VISUAL
+[center(Mordren's Mailperson,78)]%RCOMMANDS:%R[repeat(-,78)]%R-newgroup <name
+of group>=<people in group>%r%tCreates a new mail group with <people> in it.%R
+-mgroups%R%TLists your personal mail groups.%R-mail <person>/<subject>=
+<message>%R%TMails the message.%R-gmail <group>/<subject>=<message>%R%TMails a
+group message.%R&-sig <signature>%R%TCreates a personalized signature for your
+mail.%R-forward <message #>/<subject>=<message>%R%TReplies to the message.%R%r
+A big thanks to Trillian at SW1 (whoever that is) for the concept of this
+Mailman.  All the code is original.  Mail Mordren with problems (be sure to use
+the mailperson).%R%RType -getstarted for what to do to get going.
+Owner: Union_bldr  Zone: Union ZMO  Code Credits: 1
+Parent: *NOTHING*
+Powers:
+Warnings checked: none
+Created: Wed May  1 09:41:33 1996
+Last Modification: Thu May  2 10:39:43 1996
+FORWARD [#2539]: $-forward */*:@fo %#=@mail %0=mail(%1)
+CREATESIGN [#2539]: $-sig *:&signature me=%0;@pemit %#=<MAIL>: Your signature
+has been set as %0.
+SIGNATURE [#2539]: SAMPLE SIGNATURE
+GROUPMAIL [#2539]: $-gmail */*=*:@dolist [v(mg_%0)]=@fo %#=@mail ##=[repeat(-,
+78)]%RTo:  ##%RFrom:  %N%RSubject:  %1%RCC:  [v(mg_%0)]%R[repeat(-,78)]%R%2%R[v
+(signature)]%R[repeat(-,78)]%R
+MAIL [#2539]: $-mail */*=*:@fo %#=@mail %0=[repeat(-,78)]%RTo:  %0%RFrom:
+%N%RSubject:  %1%R[repeat(-,78)]%R%2%R[v(signature)]%r[repeat(-,78)]%R
+CREATEMAILGROUPS [#2539]: $-newgroup *=*:&mg_%0 me=%1;&mgs me=[v(mgs)] %0;
+@pemit %#=[repeat(-,78)]%RYou created a mailgroup named %0 with %1 in it.
+MAILGROUPS [#2539]: $-mgroups:@pemit %#=[repeat(*,78)]%R[center(Your Mailgroups
+are:,78)]%R;@dolist [v(mgs)]=@pemit %#=Group: ## with [v(mg_##)] as members.%R
+Home: --Barracks-- The Bantha(#2556RCLnt)
+Location: Kessel_Build
+_______________________________________________________________________________

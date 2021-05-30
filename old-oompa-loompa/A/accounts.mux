@@ -1,0 +1,320 @@
+########################################################################
+# ECONOMY.MUX  --  economic system
+########################################################################
+
+@@ Features @@
+
+Data structures:
+  * A Bank is an object that has one or more accounts stored on it.
+  * An Account is a specially-named attribute on a Bank that stores
+    an amount of some currency.
+  * Currency is a unit of measurement of something, like silver coins, 
+    raw iron ore, wheat grain, water, food, or loyalty.
+
+Operations:
+  * A Transfer is the movement of some number of units of currency of 
+    some type from an account on one object to an account of the same
+    currency type on another object.  For instance, you can transfer
+    5 units of wheat currency from the Wheat account on a bushel object 
+    (bank) to the Wheat account on the grain silo object (bank).
+  * A Conversion is changing units of one or more types of currency into
+    units of one or more different kinds of currency.  For example, typing 
+    the command 'cook soup' might convert 4 Water (units) + 1 Chicken + 
+    2 Spices + 1 Cooking-Labor into 5 Soup units.
+  * Accounts can be Created, Adjusted, and Destroyed.  Newly Created 
+    accounts have to be initialized to some numeric value, even if it is 
+    0.  Adjusting an account lets you add or subtract units from it in a 
+    safe way.  Destroyed accounts lose all the data in them and go away 
+    forever.
+
+
+Master Bank:
+
+A Master Bank object tracks the MUXwide totals of all accounts, and
+adjusts this master listing whenever an account is created, adjusted,
+or destroyed, and whenever units are converted.  This allows for admin
+tracking of the economic system as a whole.
+
+Note that accounts on the Master Bank aren't adjusted automatically
+when an object is destroyed.  This might be fixed later.
+
+
+"File Locking":
+
+Critical transactions are semaphored for security, using the Master-Bank
+attribute on the Global Semaphores Object.
+
+
+# # # N O T E # # #
+
+Due to limitations on the locking mechanism, some code needs to be
+duplicated.  Specifically (at the moment) pieces of @account/create
+are duplicated within /transfer, and pieces of @account/adjust are
+duplicated in /transfer and /destroy.
+
+-
+
+
+#6 = Builder Commands
+#50 = Function Library
+#51 = Global Semaphores Object
+#56 = Master Bank
+
+
+# v(master-bank) returns the number of the Master Bank
+#
+&master-bank #6 = #56
+-
+
+# v(semaphore-bank) returns the object/attribute to lock on
+#
+&semaphore-bank #6 = #51/Master-Bank
+-
+
+@startup #6 = 
+  @drain v(semaphore-bank); 
+  @notify v(semaphore-bank)
+-
+
+
+# @account/create <object>/<account name> = <amount>
+#
+# Make a new account called <account name> on <object>, and initialize it 
+# with <amount> units of the currency type which matches <account name>.
+
+# Reports an error if the account already exists on the object, or if there
+# is no such account pre-registered on the Master Bank.  If <object> is
+# "master", it will attempt to create the account on the Master Bank.
+# 
+&cmd-account/create #6 = $@account/create */*=*: 
+  think objeval(%#, ac_create(%0, %1, %2)); 
+-
+
+
+# %0 = .         if use the default %q0
+#      none      if don't associate with parent object
+#      a dbref   if use the specified dbref
+#      anything else is an error
+# %q0 = dbref of default object
+# 
+&program-associate-parent #6 = 
+  think setq(9, %#); 
+  think setq(6, 
+    switch(%0, 
+    .,    %q0, 
+    none, none[setq(9, #-1)], 
+    q*,   quit[setq(9, #-1)], 
+#   else
+      ifelse(isdbref(%0), %0, #-1)
+    )
+  ); 
+
+  @switch %q6 = #-1, {
+    @pemit %q9 = That's not a valid dbref. Try again.; 
+    @program %q9 = me/program-associate-parent
+  }, {
+    @force %q9 = {@account/parent %q6/%q3}; 
+    @notify v(semaphore-bank)
+  }
+-
+
+
+# @account/destroy <object>/<account name>
+# 
+# Irrevocably delete an account from an object.  If the account name is
+# 'master', this will delete the account from the Master Bank; this does
+# NOT delete similarly named accounts from other banks, though.
+# 
+&cmd-account/destroy #6 = $@account/destroy */*: 
+  think objeval(%#, ac_destroy(%0, %1)); 
+-
+
+
+# Expects:
+#   %q0 = dbref of bank whose account we will destroy
+#   %q1 = name of account attribute to destroy
+#   %0  = y* (yes, to destroy account) or anything else (not to destroy it)
+#
+&prog-destroy-account #6 = 
+  think setq(2, 
+    [hasaccount(%q0, %q1)]
+    [strmatch(lcstr(%0), y*)]
+    [strmatch(%q0, v(master-bank))]
+  );
+
+  @switch/first %q2 = 
+  110, {
+#   if it's not the master bank, then the master bank needs adjusted first
+    &%q1 [v(master-bank)] = sub(get(v(master-bank)/%q1), get(%q0/%q1)); 
+
+    @wipe %q0/%q1; 
+    @pemit %# = Account 
+      [ifelse(hasaccount(%q0, %q1), 
+        not actually destroyed, destroyed.)]; 
+    @notify v(semaphore-bank)
+  }, 
+
+  111, {
+    @wipe %q0/%q1; 
+    @pemit %# = Account 
+      [ifelse(hasaccount(%q0, %q1), 
+        not actually destroyed, destroyed.)]; 
+    @notify v(semaphore-bank)
+  }, 
+
+  0??, {
+    @pemit %# = 
+      Something went wrong! [name(%q0)] doesn't have 
+      [art(clip(%q1))] [clip(%q1)] account to destroy.; 
+    @notify v(semaphore-bank)
+  }, 
+
+  ?0?, {
+    @pemit %# = Account not destroyed.; 
+    @notify v(semaphore-bank)
+  }, 
+
+# error
+  {
+    @pemit %# = Tell a wizard that @account/destroy is broken.; 
+    @mail/quick Adam/BUG: #6/prog-destroy-account = 
+      Error condition: '%q2'; 
+    @notify v(semaphore-bank)
+  }
+-
+
+
+# @account/list <object>[/<pattern>]
+#
+# Without the optional /<pattern>, the command lists all the accounts
+# that are on the object.  If a /<pattern> is specified, it lists all
+# the accounts on the object which match the pattern.  The pattern is a 
+# typical MUX pattern which may include * and ? characters.
+#
+&cmd-account/list #6 = $@account/list *: 
+    think setq(9, switch(%0, */*, first(%0,/), %0)); 
+    think setq(0, switch(%q9, master, v(master-bank), locate(%#, %q9, *))); 
+    think setq(1, switch(%0, */*, rest(%0,/), *)); 
+
+    @switch isdbref(%q0) = 0, {
+      @error %# = locate %q0; 
+      @notify v(semaphore-bank)
+    }, {
+      @pemit %# = %ch[center(Accounts on [name(%q0)], 45)]%r; 
+      @pemit %# = %ch%cr
+        [ljust(Account Name, 35)]%b
+        [rjust(Balance, 10)]
+      ; 
+      @dolist lattrp(%q0/AC-%q1) = {
+        @pemit %# = 
+          [ljust([clip(##)] [switch(hasattr(%q0, ##), 0, \(inh.\))], 35)]%b
+          [rjust(comma(get(%q0/##)), 10)]
+      }; 
+      @wait 0 = {
+        @pemit %# = --; 
+      }
+    }
+-
+
+
+# @account/adjust <object>/<account name> = <amount>
+#
+# Adds the specified amount to an object's account.  To subtract from
+# the account, make <amount> a negative number.
+#
+&cmd-account/adjust #6 = $@account/adjust */*=*: 
+  think objeval(%#, ac_adjust(%0, %1, %2)); 
+-
+
+
+# @account/transfer <amount> <account name> from <object1> to <object2>
+#
+# Moves an amount of currency from an account on one object to the 
+# corresponding account on the other object.  Creates the account on
+# object2 if necessary.
+#
+# It is ILLEGAL to transfer from an object to the master bank, or from
+# the master bank to an object. Tranfers between an object and itself
+# nonsensicle, and is therefore also illegal. 
+#
+# Transferring between different non master-bank objects is permissible.
+#
+# Amended PLR 1/11/97
+#
+# %0 = amount
+# %1 = currency type
+# %2 = source object
+# %3 = destination object
+#
+# %q0=Dbref of master bank
+# %q1=Source object to transfer currency from
+# %q2=Account to be transferred
+# %q3=Destination object to transfer currency to
+
+&cmd-account/transfer #6 = $@account/transfer * * from * to *: 
+  think objeval(%#, ac_transfer(%0, %1, %2, %3)); 
+-
+
+
+# COMMAND: @ACCOUNT/PARENT */*
+# by Stephanie
+#
+&cmd-account/parent #6 = $@account/parent */*: 
+  think setq(0, locate(%#, %0, *)); 
+  think setq(1, u(u-parent-attribute, %q0, %1)); 
+  think setq(9, 
+    [isdbref(%q0)]
+    [iscurrency(%1)]
+  );
+
+  @switch/first %q9=
+  11, {
+    &%q1 [v(master-bank)] = %q0;
+    &currency %q0 = [makeattr(clip(%q1))];
+    @pemit %# = 
+      Added %q0 [name(%q0)] as the parent object for %1 currency.
+  },
+
+  0?, {
+    @error %#= locate %q0
+  }, 
+
+  ?0, {
+    @pemit %# = %1 doesn't appear to be a valid currency.
+  }, 
+
+#error
+  {
+    @mail/quick Steph/BUG: #6/cmd-account/parent = 
+      @account/parent is producing an unexpected condition: '%q9'
+  }
+-
+
+
+
+########################################################################
+# UFuns for economy system
+########################################################################
+
+# u(u-account-attribute, <object>, <currency>)
+#
+# Returns the proper attribute name for the currency type on the given 
+# object.  On the Master Bank, account attributes are not prefixed with
+# 'AC-', as they are on all other objects.
+#
+&u-account-attribute #6 = 
+  AC-[makeattr(clip(%1))]
+-
+
+
+# u(u-parent-attribute, <object>, <currency>)
+#
+# Returns the proper attribute name for the currency type on the
+# given object.
+#
+&u-parent-attribute #6 = 
+ PNT-[makeattr(clip(%1))]
+-
+
+&u-dspace-attribute #6 = 
+-

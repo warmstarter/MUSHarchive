@@ -1,0 +1,20 @@
+@create WIZ/ROY Commands System
+@link WIZ/ROY Commands System=#2
+@lock/Use WIZ/ROY Commands System=Gate/1|Gate1/1
+@lock WIZ/ROY Commands System==#2
+@lock/Enter WIZ/ROY Commands System==#2
+@set WIZ/ROY Commands System=OPAQUE
+@set WIZ/ROY Commands System=WIZARD
+@set WIZ/ROY Commands System=SAFE
+&REGISTER WIZ/ROY Commands System=$@register *:@set [num(*%0)]=!UNREGISTERED;@pemit %#=You have Registered [name([num(*%0)])].;@pemit [num(*%0)]=You have been Registered by %N.
+&DO_OFFDUTY WIZ/ROY Commands System=$+offduty:@switch [hastype(%#,player)]=0,{@pemit %#=Permission Denied.},{@switch not([xget(%#,on-duty)])=1,{@pemit %#= [ansi(g,Permission Denied.  You are already OFF-DUTY!)]},{@pemit/list [lsearch(all,flags,cP)]=[ansi(c,ADMIN:)] [ansi(g,%N is now)] [ansi(r,OFF-DUTY)];&on-duty %#=0;@atrlock %#/on-duty=#1}}}
+&DO_ONDUTY WIZ/ROY Commands System=$+onduty:@switch [hastype(%#,player)]=0,{@pemit %#=Permission Denied.},{@switch not([xget(%#,on-duty)])=0,{@pemit %#= [ansi(g,Permission Denied.  You are already ON-DUTY!)]},{@pemit/list [lsearch(all,flags,cP)]=[ansi(c,ADMIN:)] [ansi(g,%N is now ON-DUTY)];&on-duty %#=1;@atrlock %#/on-duty=#1}}}
+&DO_WLIST WIZ/ROY Commands System=$@wlist:@pemit %#=KindredMUSH Wizard Player List:%r%r[iter([lsearch(all,flags,PW)],[name(##)], ,%r)]%r%rTotal Number Of Wizard Players: [words([lsearch(all,flags,PW)])]
+&DO_RLIST WIZ/ROY Commands System=$@rlist:@pemit %#=KindredMUSH Royalty Player List:%r%r[iter([lsearch(all,flags,Pr)],[name(##)], ,%r)]%r%rTotal Number Of Royalty Players: [words([lsearch(all,flags,Pr)])]
+&DO_PLIST WIZ/ROY Commands System=$@plist:@pemit %#=[ansi(c,SpaceMUSH)] [ansi(h,Player List:)]%r%r[iter([lsearch(all,flags,P)],[ansi(c,|)][ansi(h,[name(##)])][ansi(c,|)][space(2)])]%r%r[ansi(h,Total Number Of Players:)] [ansi(c,[words([lsearch(all,flags,P)])])]
+&DO_WIZMOTD WIZ/ROY Commands System=$+wizmotd *:@switch [hasflag(%#,WIZARD)]=0,{@pemit %#=Permission Denied.},{@wizmotd [repeat([ansi(hb,-=)],39)]%r[ansi(hy,SpaceMUSH Wizard Message Of The Day)]%r[repeat([ansi(hb,-=)],39)]%r[ansi(c,%0)]%r[rjust([ansi(c,-%N)],79)];@pemit %#=WIZMOTD SET: [time()].;@pemit/list [setunion([lsearch(all,flag,Pr)],[lsearch(all,flag,PW)])]=GAME: New Wizmotd Set By %N.}
+&DO_MOTD WIZ/ROY Commands System=$+motd *:@switch [hasflag(%#,WIZARD)]=0,{@pemit %#=Permission Denied.},{@motd [repeat([ansi(hb,-=)],39)]%r[ansi(hy,SpaceMUSH Message Of The Day)]%r[repeat([ansi(hb,-=)],39)]%r[ansi(c,%0)];@pemit %#=MOTD SET: [time()].}
+&GATE1 WIZ/ROY Commands System=[hasflag(%#,ROYALTY)]
+&GATE WIZ/ROY Commands System=[hasflag(%#,WIZARD)]
+&DO_EMPIRE WIZ/ROY Commands System=$DISABLED@empire *=*:@switch hasflag(%#,Wizard)=0,{@pemit %#=Permission denied.},{@switch [setq(0,locate(%#,%0,Ppn))]%q0=#-1,{@pemit %#=I don't see %0 here.},#-2,{@pemit %#=I don't know which %0 you mean.},{&Empire %q0=%1;@pemit %#=[name(%q0)] is now part of the %1 Empire.;@pemit %q0=%n joins you to the %1 Empire.}}
+&DO_BCREATE WIZ/ROY Commands System=$@bcreate *=*/*:@switch hasflag(%#,WIZARD)=0,{@Pemit %#=Permission Denied.  %rAsk a Wizard.},{@Switch hastype(%#,PLAYER)=0,{@pemit %#=Permission Denied.  You must be a player.},{@switch num(*%0)=#-1,{@pcreate %0=%1;&empire *%0=%2;@Set *%0=!UNREGISTERED;&e-mail *%0=**VARIABLE**;@atrlock *%0/e-mail=on;@atrlock *%0/empire=on;&class *%0=Builder;@atrlock *%0/class=on;&rank *%0=17;&title *%0=Builder;@atrlock *%0/rank=on;@dolist builder hide idle unkillable no_pay no_quota=@Power *%0=##;@force *%0=@Mail %0=This is your builder character.  Please do not abuse its powers, or they will be taken away. Good luck on your empire!%r%R**HT ADMIN %N**;@tel *%0=#1167;@pemit %#=Builder `%0' created with password `%1' for Empire `%2'.},{@pemit %#=That name is invalid or already in use.  Please try again.}}}

@@ -1,0 +1,27 @@
+It's a neat little strategy board game. The code has been lying around
+on TinyTIM for years and years, so I decided to submit it. I don't
+think Non-Prophet would mind, as he left other games of his XAMINE_OK as well.
+
+
+@create 121 board game
+@desc 121 board game=This is an original game created by Non-Prophet. It consists of an 11x11 grid of numbers randomly picked between 1 and 5. You have a piece (the *) which begins in the center of the grid. You are then allowed to jump that piece in any direction (up, down, left, or right) as long as do not jump onto a blank space or off of the board. Type 'board rules' for more.
+@Osucc 121 board game=decides to pick up the 121 game.
+@Succ 121 board game=You pick up the 121 board game.
+@Odrop 121 board game=puts down the 121 board game.
+@Drop 121 board game=You discard the 121 board game.
+@VA 121 board game=@emit;@dolist 0 11 22 33 44 55 66 77 88 99 110=@emit mid(v(vc),##,11);@wait DONE={@emit;@emit You have claimed [v(vy)] square(s) thus far.;@emit You must jump [v(vb)] space(s) in some direction.}
+@VB 121 board game=3
+@VC 121 board game=*---4-152154554311212542321431433414523422353145335331533-51-143543241255533313151143435115321524222555443535445123323343
+@VD 121 board game=$reset board:@vy me=1;@ve me;@dolist genlist(1,11)={@ve me=concat(v(ve),add(rand(9000),1000),add(rand(9000),1000),add(rand(900),100))};@trigger me/vf
+@VE 121 board game=*---4-152154554311212542321431433414523422353145335331533-51-143543241255533313151143435115321524222555443535445123323343
+@VF 121 board game=@ve me=edit(v(ve),spaces(1),,0,5,9,4,8,3,7,2,6,1);@vb me=mid(v(ve),60,1);@vz me=60;@vc me;@vc me=edit(v(vc),+,[mid(v(ve),0,60)],+,*,+,[mid(v(ve),61,60)]);@trigger me/va
+@VG 121 board game=$jump up:@vh me=sub(v(vz),mul(v(vb),11));@if not(or(eq(mid(v(ve),v(vh),1),-),lt(v(vh),0)))={@vb me=mid(v(ve),v(vh),1);@vc me;@vc me=edit(v(vc),+,[mid(v(ve),0,v(vh))],+,*,+,[mid(v(ve),add(v(vh),1),sub(sub(v(vz),v(vh)),1))],+,-,+,mid(v(ve),add(v(vz),1),sub(120,v(vz)));@vz me=v(vh);@ve me=v(vc);@vy me=add(v(vy),1);@trigger me/va},{@emit You can jump that way!!}
+@VH 121 board game=0
+@VI 121 board game=$jump down:@vh me=add(v(vz),mul(v(vb),11));@if not(or(eq(mid(v(ve),v(vh),1),-),gt(v(vh),120)))={@vb me=mid(v(ve),v(vh),1);@vc me;@vc me=edit(v(vc),+,[mid(v(ve),0,v(vz))],+,-,+,[mid(v(ve),add(v(vz),1),sub(sub(v(vh),v(vz)),1))],+,*,+,mid(v(ve),add(v(vh),1),sub(120,v(vh)));@vz me=v(vh);@ve me=v(vc);@vy me=add(v(vy),1);@trigger me/va},{@emit You can jump that way!!}
+@VJ 121 board game=$jump right:@vh me=add(v(vz),v(vb));@if not(or(eq(mid(v(ve),v(vh),1),-),lt(sub(10,mod(v(vz),11)),v(vb))))={@vb me=mid(v(ve),v(vh),1);@vc me;@vc me=edit(v(vc),+,[mid(v(ve),0,v(vz))],+,-,+,[mid(v(ve),add(v(vz),1),sub(sub(v(vh),v(vz)),1))],+,*,+,mid(v(ve),add(v(vh),1),sub(120,v(vh)));@vz me=v(vh);@ve me=v(vc);@vy me=add(v(vy),1);@trigger me/va},{@emit You can jump that way!!}
+@VK 121 board game=$jump left:@vh me=sub(v(vz),v(vb));@if not(or(eq(mid(v(ve),v(vh),1),-),lt(mod(v(vz),11),v(vb))))={@vb me=mid(v(ve),v(vh),1);@vc me;@vc me=edit(v(vc),+,[mid(v(ve),0,v(vh))],+,*,+,[mid(v(ve),add(v(vh),1),sub(sub(v(vz),v(vh)),1))],+,-,+,mid(v(ve),add(v(vz),1),sub(120,v(vz)));@vz me=v(vh);@ve me=v(vc);@vy me=add(v(vy),1);@trigger me/va},{@emit You can jump that way!!}
+@VL 121 board game=$board rules:@emit;@emit The object is to claim as many spaces as possible WITHOUT be allowed to land on a previously claimed space. Once you jump OFF of a number, it become a blank - and may not be jumped to again. Lastly...while you may JUMP in any direction, you may only JUMP A DISTANCE EQUAL TO THE ORIGINAL NUMBER OF THE SPACE YOU ARE CURRENTLY OCCUPYING (the game will let you know that number). Type 'board rules 2'.
+@VM 121 board game=$board rules 2:@emit;@emit To jump type 'jump *' where * is either 'up', 'down', 'left', or 'right'. Finally... as with all of Non-Prophet's games... if you are carrying the game (you GET it), only you may play it and see the results. If you leave it in an emit_ok room, though, ANYONE there may play it and, their playing will emit the results to EVERYONE. 'view board' to see the current position. To begin a new game, type 'reset board'.
+@VN 121 board game=$view board:@trigger me/va
+@VY 121 board game=7
+@VZ 121 board game=0

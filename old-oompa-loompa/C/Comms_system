@@ -1,0 +1,50 @@
+Communication Device
+--------------------
+Version 1.0
+
+
+Coded and designed by Hangover 
+UK_MUSH         - 134.83.128.247   	4201
+FUBARmush       - 137.148.20.7     	7719
+TrippyMUSH	- 128.153.16.131	7567
+
+Drink and be merry!
+8-)
+
+---------------------------------------------------------------------------
+
+@create Communications Computer<cc>=10
+@Desc Communications Computer<cc>=%rThe following commands are avilable:%r%r%t@com +<name>%t%t- will add you to channel <name>%r%t@com -<name>%t%t- will remove you from channel <name>%r%t@com who <name>%t%t- lists all wizard players on channel <name>%r%t@com list%t%t- lists all the channels%r%t@com <name>=<message>%t- will display <message> on channel <name>%r%t@com me%t%t%t- lists all channels that you are on%r%r%t@chan +<name>%t%t- will add a new channel(wiz only)%r%t@chan -<name>%t%t- will remove a channel(wiz only)%r%r
+&JOIN_CHANNEL Communications Computer<cc>=$@com +*:@switch member(v(CHANNELS),ucstr(%0))=>0,{@switch member(v(C_[ucstr(%0)]),%#)=>0,@pemit %#=You are already on that channel.,{&C_[ucstr(%0)] me=v(C_[ucstr(%0)]) [%#];@dolist lwho()=@switch member(v(C_[%0]),##)=>0,@pemit ##=\[[capstr(%0)]\] [%n] has joined the channel.}},@pemit %#=There is no channel of that name. Type '@com list' to get a list of all the different channels.
+&LEAVE_CHANNEL Communications Computer<cc>=$@com -*:@switch member(v(CHANNELS),ucstr(%0))=>0,{@switch member(v(C_[ucstr(%0)]),%#)=>0,{@dolist lwho()=@switch member(v(C_[%0]),##)=>0,@pemit ##=\[[capstr(%0)]\] [%n] has left the channel.;@pemit %#=You have left this channel.;&C_[ucstr(%0)] me=s(edit(v(C_[ucstr(%0)]),%#,));},@pemit %#=You are not on that channel at the moment.},@pemit %#=There is no channel of that name.
+&CHANNEL_WHO Communications Computer<cc>=$@com who *:@switch member(v(CHANNELS),ucstr(%0))=>0,{@pemit %#=The following people are on the [capstr(%0)] channel:;@dolist lwho()=@switch member(v(C_[%0]),##)=>0,@pemit %#=name(##);},@pemit %#=There is no channel of that name.
+&LIST_CHANNELS Communications Computer<cc>=$@com list:@pemit %#=********************** TrippyMUSH Communication System ***********************%r%rThe following channels are available:%r[iter(v(CHANNELS),%r[capstr(lcstr(##))])];@pemit %#=%rTo join a channel type '@com +<name>'.%r%r******************************************************************************
+&USE_CHANNEL Communications Computer<cc>=$@com *=*:@switch member(v(CHANNELS),ucstr(%0))=>0,{@switch member(v(C_[%0]),%#)=>0,{@switch pos(:,%1)=1,{@dolist lwho()=@switch member(v(C_[%0]),##)=>0,@pemit ##=\[[capstr(%0)]\] [%n] [mid(%1,1,sub(strlen(%1),1))]},{@dolist lwho()=@switch member(v(C_[%0]),##)=>0,@pemit ##=\[[capstr(%0)]\] [%n] says '[%1]'.}},@pemit %#=You are not on this channel.},@pemit %#=There is no channel of this name.
+&MY_CHANNELS Communications Computer<cc>=$@com me:@pemit %#=You are on the following channels:%r;@dolist v(CHANNELS)=@switch member(v(C_[usctr(##)]),%#)=>0,@pemit %#=capstr(lcstr(##))
+&ADD_NEW_CHANNEL Communications Computer<cc>=$@chan +*:@switch hasflag(%#,wizard)=1,{@switch secure(%0)=%0,{@switch words(%0)=1,{@switch member(v(CHANNELS),ucstr(%0))=>0,@pemit %#=Sorry there is already a channel of that name.,{&CHANNELS me=v(CHANNELS) [ucstr(%0)];@pemit %#=New channel added.}},@pemit %#=The channel name must be one word only.},@pemit %#=That is not a suitable name.%rIt must not include any of the following characters : \[\]\(\)\{\}\;\%\\$},@pemit %#=Sorry only wizards are allowed to use this command.
+&REMOVE_CHANNEL Communications Computer<cc>=$@chan -*:@switch hasflag(%#,wizard)=1,{@switch member(v(channels),ucstr(%0))=>0,{@dolist lwho()=@switch member(v(C_[%0]),##)=>0,@pemit ##=\[[capstr(%0)]\] Sorry but this channel is being removed.;&CHANNELS me=s(edit(v(channels),ucstr(%0),));&C_[ucstr(%0)] me;@pemit %#=Channel removed.},@pemit %#=Sorry but there is no channel of that name.},@pemit %#=Sorry only wizards are allowed to use this command.
+
+---------------------------------------------------------------------------
+
+
+This device will allow you to create a device that allows you to set up
+a communication system in your MUSH.
+
+The following commands are avilable:
+
+        @com +<name>            - will add you to channel <name>
+        @com -<name>            - will remove you from channel <name>
+        @com who <name>         - lists all connected players on channel <name>
+        @com list               - lists all the channels
+        @com <name>=<message>   - will display <message> on channel <name>
+        @com me                 - lists all channels that you are on
+
+        @chan +<name>           - will add a new channel(wiz only)
+        @chan -<name>           - will remove a channel(wiz only)
+
+
+It is all self explanatory.
+
+If you have any questions the mail me at u9228616@athmail1.causeway.qub.ac.uk
+
+

@@ -1,0 +1,1327 @@
+#############################################################################
+#  R A N G E D . M U X  -- ranged combat
+#############################################################################
+#12 is the Combat code object
+#13 is the Combat database -- stores information about combats
+
+@set me = quiet
+-
+
+@@  Combat Lite: Ranged Combat -- a combat system for FiranMUX
+    Copyright (C) 1998 Adam Dray <adam@legendary.org>
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+-
+
+
+
+&RCS-Ranged #12 = 
+    @@ $Id: ranged.mux,v 1.25 2000/09/24 16:15:59 scott Exp $
+-
+
+
+#----------------------------------------
+# AIM target
+# AIM AT target
+# 
+# Aim a ranged weapon at someone. Requires no energy.
+# 
+#----------------------------------------
+&cmd-aim #12 = $aim *: 
+#----------------------------------------
+  @wait me = {
+    think setq(9, switch(%0, at *, rest(%0), %0)); 
+    think setq(0, locate(%#, %q9, n)); 
+    think setq(1, u(u-weapon-wielded, %#)); 
+
+    &combat-check %# = [time()] -- tried to aim at '%q9'; 
+
+    think setq(9, 
+      [isdbref(%q0)]
+      [u(u-is-valid-combatant, %q0)]
+      [u(u-can-aim-now, %#)]
+      [not(or(u(u-is-engaged-to-someone, %#), u(u-is-engaged-by-someone, %#)))]
+      [not(strmatch(%q1, v(fists)))]
+      [u(u-is-aimed-at-someone, %#)]
+    ); 
+
+    @select %q9 = 
+
+##    NOMINAL CASE -- not aiming at anyone
+      111110, {
+#       Timestamp attacker
+        &last-combat %# = secs(); 
+        &combat-check %#  = [time()] -- aimed [name(%q1)] (%q1) at [name(%q0)] (%q0); 
+        &combat-check %q0 = [time()] -- %n (%#) aimed [name(%q1)] (%q1) at you; 
+
+#       Notify target and people nearby
+        @remit %L = [goodname(%#)] aims %p [goodname(%q1)] at [goodname(%q0)]!; 
+
+#       Remember who the attacker is aiming at and who the defender is aimed at by
+        &combat-aimed-at %# = %q0; 
+        &combat-aimed-by %q0 = setunion(get(%q0/combat-aimed-by), %#); 
+      }, 
+
+##    NOMINAL CASE -- but is aiming at someone already
+      111111, {
+#       Timestamp attacker
+        &last-combat %# = secs(); 
+        &combat-check %#  = [time()] -- aimed [name(%q1)] (%q1) at [name(%q0)] (%q0); 
+        &combat-check %q0 = [time()] -- %n (%#) aimed [name(%q1)] (%q1) at you; 
+
+#       Clear aims
+        think ulocal(ul-clear-aims, %#); 
+
+#       Notify target and people nearby
+        @remit %L = [goodname(%#)] aims %p [goodname(%q1)] at [goodname(%q0)]!; 
+
+#       Remember who the attacker is aiming at and who the defender is aimed at by
+        &combat-aimed-at %# = %q0; 
+        &combat-aimed-by %q0 = setunion(get(%q0/combat-aimed-by), %#); 
+      }, 
+
+
+##    Can't find the target
+      0?????, {@pemit %# = I don't know what you want to aim at.}, 
+
+##    Not a valid combatant
+      ?0????, {@pemit %# = You're not allowed to attack [goodname(%q0)].}, 
+
+##    The waiting period hasn't expired
+      ??0???, {@pemit %# = You must wait [sub(u(u-time-till-attack, %#), secs())] 
+                         seconds before you can attack anyone.}, 
+
+##    Currently engaged to or by someone (can't aim then)
+      ???0??, {@pemit %# = You need to disengage before you can aim at someone.}, 
+
+##    Can't aim your fists (because they're connected!)
+      ????0?, {@pemit %# = You wave your fists threateningly at [goodname(%q0)].%r
+                           Try wielding some kind of object or weapon first.; 
+               @oemit %# = %n waves %p fists threateningly at [goodname(%q0)].}, 
+
+##    This case is handled by the nominal case
+      ?????0, {@@}, 
+
+##    ERROR
+      *, {@combat/error %# = #12/cmd-aim, aim %0, Q9=%q9}; 
+
+    @wait 0 = @notify me
+  }
+-
+
+
+#----------------------------------------
+# SHOOT target
+# SHOOT AT target
+# 
+# Shoot an ammo-driven ranged weapon at someone. 
+# Requires a prior aim.
+# 
+#----------------------------------------
+&cmd-shoot #12 = $shoot *: 
+#----------------------------------------
+  @wait me = {
+    think setq(9, switch(%0, at *, rest(%0), %0)); 
+    think setq(0, locate(%#, %q9, n)); 
+    think setq(1, u(u-weapon-wielded, %#)); 
+
+    &combat-check %# = [time()] -- tried to shoot at '%q9'; 
+
+    think setq(9, 
+      [isdbref(%q0)]
+      [u(u-is-wielding-a-shoot-weapon, %#)]
+      [u(u-is-aimed-at-someone, %#)]
+      [u(u-is-valid-combatant, %q0)]
+      [u(u-can-shoot-now, %#)]
+      [u(u-has-ammo, u(u-weapon-wielded, %#))]
+      [u(u-has-shoot-energy, %#)]
+    ); 
+
+    @select %q9 = 
+
+##    NOMINAL CASE
+      1111111, {
+#       Timestamp the player
+        &last-combat %# = secs(); 
+        &combat-check %#  = 
+          [time()] -- shoot [name(%q0)] (%q0) with [name(%q1)] (%q1); 
+        &combat-check %q0 = [time()] -- %n (%#) shot at you with [name(%q1)] (%q1); 
+
+#       Get wielded weapon for attacker
+        think setq(1, u(u-weapon-wielded, %#)); 
+
+#       Find the ammo that is being used
+        think setq(2, ulocal(ul-ammo-loaded, %q1)); 
+
+#       Get damage class verb for attacker's weapon
+        think setq(8, u(u-verb-damage-class, %q1, ranged));
+
+#       Get damage class verb for attacker's ammo
+        think setq(4, u(u-verb-damage-class, %q2, default(%q2/damage-class, piercing)));
+
+#       Roll some dice now
+        think setq(5, ulocal(ul-shoot-success, %#, %q1, %q0, 0)); 
+        think setq(6, u(u-shoot-level-of-success, %q5)); 
+
+#       Subtract energy
+        think take_energy(%#, u(u-energy-cost-shoot-%q6), energy); 
+
+#       Print out combat stats, if activated
+        @pemit %# = switch(hastag(%#, combatstats), 1, 
+                           COMBAT: %q6 (%q5 successes) for shoot); 
+        @pemit %# = switch(hastag(%#, combatstatus), 1, combatstatus(%#)); 
+
+#       Trigger the victim's AAttack routine, and pass it useful information
+        @pemit %q0 = switch(hasflag(%q0, puppet), 1, 
+          {Triggered your AAttack with %r
+                   %%0 = %0 -- attacker's dbref %r
+                   %%1 = %1 -- dbref of attacker's weapon %r
+                   %%2 = %2 -- BONUS, SUCCESS, FAILURE, or BOTCH %r
+                   %%3 = %3 -- Number of successes}); 
+
+# We pass the AMMO to the routine, rather than the weapon. 
+        @trigger %q0/AAttack = %#, %q2, %q6, %q5; 
+
+# Trigger the weapon's AAttack routine, and pass it useful information
+# Note that the AMMO is passed the DBREF of the actual weapon
+        @trigger %q2/AAttack = %q0, %q1, %q6, %q5; 
+
+
+#####   Processing specific to success level ...
+        @select %q6 = 
+
+        SUCCESS, {
+          @remit %L = 
+            [capstr(goodname(%#))] aims %p [goodname(%q1)] and %q4 
+            [goodname(%q0)] with %p [goodname(%q2)].; 
+
+          &combat-check %#  = 
+              [time()] -- shot and hit [name(%q0)] (%q0) with [name(%q1)] (%q1); 
+          &combat-check %q0 = 
+              [time()] -- %n (%#) shot and hit you with [name(%q1)] (%q1); 
+
+#         pick a hit location : victim, attacker, weapon, successes, success level
+          think setq(7, ulocal(ul-hit-location, %q0, %#, %q1, %q5, %q6)); 
+          @remit %L = 
+            [goodname(%q0)] takes a hit to the 
+               [u(#15/u-bodyloc-description, %q7)]! ;
+
+#         damage!!
+          think setq(8, u(u-damage-amount, %#, %q2, %q5)); 
+          think setq(9, default(%q2/damage-class, piercing)); 
+          @damage %q0/%q7 = %q8 x %q9 by %#; 
+        }, 
+
+        BONUS, {
+          @remit %L = 
+            [capstr(goodname(%#))] %q8 %p [goodname(%q1)] and nails [goodname(%q0)] 
+            hard with %p [goodname(%q2)]!; 
+
+          &combat-check %#  = 
+              [time()] -- shot and hit [name(%q0)] (%q0) with [name(%q1)] (%q1); 
+          &combat-check %q0 = 
+              [time()] -- %n (%#) shot and hit you with [name(%q1)] (%q1); 
+
+#         pick a hit location : victim, attacker, weapon, successes, success level
+          think setq(7, ulocal(ul-hit-location, %q0, %#, %q1, %q5, %q6)); 
+          @remit %L = 
+            [goodname(%q0)] takes a hit to the 
+               [u(#15/u-bodyloc-description, %q7)]! ;
+
+#         damage!!
+          think setq(8, u(u-damage-amount, %#, %q2, %q5)); 
+          think setq(9, default(%q2/damage-class, piercing)); 
+          @damage %q0/%q7 = %q8 x %q9 by %#; 
+        }, 
+
+        FAILURE, {
+          @remit %L = 
+            [capstr(goodname(%#))] misses [goodname(%q0)] with %p [goodname(%q2)].; 
+
+
+
+###     If we missed, then increment the ammo's account on the current room
+###     so that people can 'find arrows' and such. Transfer the ammunition's
+###     accounts to 'here'. 
+        @wait 0 =  @account/transfer 1 [get(%q2/currency)] 
+		   from [%q2] to [loc(%#)];
+        }, 
+
+        BOTCH, {
+          @remit %L = 
+            [capstr(goodname(%#))] tries to hit [goodname(%q0)] with %p 
+            [goodname(%q2)], but %s misses terribly!; 
+
+###     If we missed, then increment the ammo's account on the current room
+###     so that people can 'find arrows' and such. Transfer the ammunition's
+###     accounts to 'here'. 
+        @wait 0 =  @account/transfer 1 [get(%q2/currency)] 
+		   from [%q2] to [loc(%#)];
+        }, 
+
+#       ERROR: unexpected success level
+        {
+          @remit %L = 
+            COMBAT: [capstr(goodname(%#))] has found a bug in the combat system. 
+                    The staff is being notified.; 
+          @combat/error #12/cmd-shoot, shoot %0, Inner @select: %q6(%q5 successes); 
+        }; 
+
+###     Destroy the ammo no matter if we hit or missed
+        @wait 0 = @zap %q2; 
+
+###     Clear the loaded attribute so that the weapon hasn't any ammo
+        @wait 0 = &loaded %q1; 
+
+###     Clear aims no matter if we hit or missed
+        @wait 0 = think ulocal(ul-clear-aims, %#); 
+
+      }, 
+
+##    Can't find the target
+      0??????, {@pemit %# = I don't know who you want to shoot at.}, 
+
+##    Not wielding a weapon they can shoot with
+      ?0?????, {@pemit %# = You can't shoot anything with a 
+                            [goodname(u(u-weapon-wielded, %#))].}, 
+
+##    Haven't aimed yet
+      ??0????, {@pemit %# = You need to 'aim' at your target first.}, 
+
+##    Not a valid target -- not allowed to shoot at that
+      ???0???, {@pemit %# = You're not allowed to attack [goodname(%q0)].},  
+
+##    Waiting period hasn't expired yet
+      ????0??, {@pemit %# = You must wait [sub(u(u-time-till-shoot, %#), secs())] 
+                            seconds before you can shoot anyone.}, 
+
+##    No ammunition loaded (arrows, sling bullets, etc.)
+      ?????0?, {@pemit %# = There's nothing in your [goodname(u(u-weapon-wielded, %#))] 
+                            to shoot!}, 
+
+##    Not enough energy
+      ??????0, {@pemit %# = You don't have enough energy to shoot that.}, 
+
+##    ERROR
+      *, {@combat/error %# = #12/cmd-shoot, shoot %0, Q9=%q9}; 
+    
+    @wait 0 = @notify me;
+  }
+-
+
+#----------------------------------------
+# THROW target
+# THROW AT target
+# 
+# Throw something at the target.
+# Requires a prior aim.
+# 
+#----------------------------------------
+&cmd-throw #12 = $throw *: 
+#----------------------------------------
+  @wait me = {
+    think setq(9, switch(%0, at *, rest(%0), %0)); 
+    think setq(0, locate(%#, %q9, n)); 
+    think setq(1, u(u-weapon-wielded, %#)); 
+
+    &combat-check %# = [time()] -- tried to throw at '%0'; 
+
+    think setq(9, 
+      [isdbref(%q0)]
+      [u(u-is-aimed-at-someone, %#)]
+      [u(u-is-valid-combatant, %q0)]
+      [u(u-can-throw-now, %#)]
+      [u(u-has-throw-energy, %#)]
+      [not(hasflag(%q1, parent))]
+    ); 
+
+    @select %q9 = 
+
+##    NOMINAL CASE
+      111111, {
+#       Timestamp the player
+        &last-combat %# = secs(); 
+
+        &combat-check %#  = 
+            [time()] -- threw [name(%q1)] (%q1) at [name(%q0)] (%q0); 
+        &combat-check %q0 = 
+            [time()] -- %n (%#) threw [name(%q1)] (%q1) at you; 
+
+#       Get wielded weapon for attacker
+        think setq(1, u(u-weapon-wielded, %#)); 
+
+#       Get damage class verb for attacker's weapon
+        think setq(8, u(u-verb-damage-class, %q1));
+
+#       Get the message used when throwing the weapon
+        think setq(7, u(u-verb-thrown, %q1)); 
+
+#       Roll some dice now
+        think setq(5, ulocal(ul-throw-success, %#, %q1, %q0, 0)); 
+        think setq(6, u(u-throw-level-of-success, %q5)); 
+
+#       Subtract energy
+        think take_energy(%#, u(u-energy-cost-throw-%q6, %q1), energy); 
+
+#       Print out combat stats, if activated
+        @pemit %# = switch(hastag(%#, combatstats), 1, 
+                           COMBAT: %q6 (%q5 successes) for throw); 
+        @pemit %# = switch(hastag(%#, combatstatus), 1, combatstatus(%#)); 
+
+#       Trigger the victim's AAttack routine, and pass it useful information
+        @pemit %q0 = switch(hasflag(%q0, puppet), 1, 
+          {Triggered your AAttack with %r
+                   %%0 = %0 -- attacker's dbref %r
+                   %%1 = %1 -- dbref of attacker's weapon %r
+                   %%2 = %2 -- BONUS, SUCCESS, FAILURE, or BOTCH
+                   %%3 = %3 -- Number of successes}); 
+        @trigger %q0/AAttack = %#, %q1, %q6, %q5; 
+
+#	Trigger the weapon's AAttack routine, and pass it useful information
+        @trigger %q1/AAttack = %q0, %q1, %q6, %q5; 
+
+
+#####   Processing specific to success level ...
+        @select %q6 = 
+
+        SUCCESS, {
+          @remit %L = 
+            [capstr(goodname(%#))] %q7 %p [goodname(%q1)] and %q8 
+            [goodname(%q0)] with it.; 
+
+          &combat-check %#  = 
+              [time()] -- threw and hit [name(%q0)] (%q0) with [name(%q1)] (%q1); 
+          &combat-check %q0 = 
+              [time()] -- %n (%#) threw and hit you with [name(%q1)] (%q1); 
+
+#         pick a hit location : victim, attacker, weapon, successes, success level
+          think setq(7, ulocal(ul-hit-location, %q0, %#, %q1, %q5, %q6)); 
+          @remit %L = 
+            [goodname(%q0)] takes a hit to the 
+               [u(#15/u-bodyloc-description, %q7)]! ;
+
+#         damage!!
+          think setq(8, u(u-damage-amount, %#, %q2, %q5)); 
+          think setq(9, default(%q2/damage-class, piercing)); 
+          @damage %q0/%q7 = %q8 x %q9 by %#; 
+
+#         move the weapon from attacker to victim
+          @tel/quiet %q1 = %q0; 
+          @pemit %q0 = [name(%q1)] is now in your inventory.
+        }, 
+
+        BONUS, {
+          @remit %L = 
+            [capstr(goodname(%#))] %q7 %p [goodname(%q1)] and %q8 [goodname(%q0)] 
+            HARD with it!; 
+
+          &combat-check %#  = 
+              [time()] -- threw and hit [name(%q0)] (%q0) with [name(%q1)] (%q1); 
+          &combat-check %q0 = 
+              [time()] -- %n (%#) threw and hit you with [name(%q1)] (%q1); 
+
+#         pick a hit location : victim, attacker, weapon, successes, success level
+          think setq(7, ulocal(ul-hit-location, %q0, %#, %q1, %q5, %q6)); 
+          @remit %L = 
+            [goodname(%q0)] takes a hit to the 
+               [u(#15/u-bodyloc-description, %q7)]! ;
+
+#         damage!!
+          think setq(8, u(u-damage-amount, %#, %q1, %q5)); 
+          think setq(9, default(%q1/damage-class, bashing)); 
+          @damage %q0/%q7 = %q8 x %q9 by %#; 
+
+#         move the weapon from attacker to victim
+          @tel/quiet %q1 = %q0; 
+          @pemit %q0 = [name(%q1)] is now in your inventory.
+        }, 
+
+        FAILURE, {
+          @remit %L = 
+            [capstr(goodname(%#))] misses [goodname(%q0)] with %p [goodname(%q1)].; 
+
+#         move the weapon from attacker to the room
+          @tel/quiet %q1 =[loc(%q1)]; 
+        },
+
+        BOTCH, {
+          @remit %L = 
+            [capstr(goodname(%#))] tries to throw %p [goodname(%q1)] at 
+            [goodname(%q0)], but %s misses terribly!; 
+
+#         move the weapon from attacker to the room
+          @tel/quiet %q1 = [loc(%q1)]; 
+        }, 
+
+#       ERROR: unexpected success level
+        {
+          @remit %L = 
+            COMBAT: [capstr(goodname(%#))] has found a bug in the combat system. 
+                    The staff is being notified.; 
+          @combat/error #12/cmd-throw, throw %0, Inner @select: %q6(%q5 successes); 
+        }; 
+
+###     Clear aims no matter if we hit or missed
+        @wait 0 = think ulocal(ul-clear-aims, %#); 
+
+###     Unwield no matter if we hit or missed
+        @wait 0 = &combat-wielded %#; 
+
+###     Clear locks no matter if we hit or missed
+        @unlock/drop %q1;
+        @unlock/give %q1
+      }, 
+
+##    Can't find the target
+      0?????, {@pemit %# = I don't know who you want to throw at.}, 
+
+##    Haven't aimed yet
+      ?0????, {@pemit %# = You need to 'aim' at your target first.}, 
+
+##    Not a valid target -- not allowed to throw at that
+      ??0???, {@pemit %# = You're not allowed to attack [goodname(%q0)].},  
+
+##    Waiting period hasn't expired yet
+      ???0??, {@pemit %# = You must wait [sub(u(u-time-till-throw, %#), secs())] 
+                          seconds before you can throw anything at anyone.}, 
+
+##    Not enough energy
+      ????0?, {@pemit %# = You don't have enough energy to throw that.}, 
+ 
+##    Not enough energy
+      ?????0, {@pemit %# = You cannot throw that. }, 
+
+##    ERROR
+      *, {@combat/error %# = #12/cmd-throw, throw %0, Q9=%q9}; 
+    
+    @wait 0 = @notify me;
+  }
+-
+
+#----------------------------------------
+# SHOOT target
+# 
+# Shoot an ammo-driven ranged weapon at someone. 
+# Requires a prior aim.
+# 
+#----------------------------------------
+#&cmd-shoot #12 = $shoot *: 
+#----------------------------------------
+#  @wait me = {
+#    think setq(0, locate(%#, %0, n)); 
+#    think setq(1, u(u-weapon-wielded, %#)); 
+#
+#    think setq(9, 
+#      [isdbref(%q0)]
+#      [u(u-is-wielding-a-shoot-weapon, %#)]
+#      [u(u-is-aimed-at-someone, %#)]
+#      [u(u-is-valid-combatant, %q0)]
+#      [u(u-can-shoot-now, %#)]
+#      [u(u-has-ammo, u(u-weapon-wielded, %#))]
+#      [u(u-has-shoot-energy, %#)]
+#    ); 
+#
+#    @select %q9 = 
+#
+##    NOMINAL CASE
+#      1111111, {
+#       Timestamp the player
+#        &last-combat %# = secs(); 
+#
+#       Get wielded weapon for attacker
+#       think setq(1, u(u-weapon-wielded, %#)); 
+#
+#       Find the ammo that is being used
+#        think setq(2, ulocal(ul-ammo-loaded, %q1)); 
+#
+#       Get damage class verb for attacker's weapon
+#        think setq(8, u(u-verb-damage-class, %q1, ranged));
+#
+#       Get damage class verb for attacker's ammo
+#        think setq(4, u(u-verb-damage-class, %q2, default(%q2/damage-class, piercing)));
+#
+#       Roll some dice now
+#        think setq(5, ulocal(ul-shoot-success, %#, %q1, %q0, 0)); 
+#        think setq(6, u(u-shoot-level-of-success, %q5)); 
+#
+#       Subtract energy
+#        think take_energy(%#, u(u-energy-cost-shoot-%q6), energy); 
+#
+#       Print out combat stats, if activated
+#        @pemit %# = switch(hastag(%#, combatstats), 1, 
+#                           COMBAT: %q6 (%q5 successes) for shoot); 
+#        @pemit %# = switch(hastag(%#, combatstatus), 1, combatstatus(%#)); 
+#
+#       Trigger the victim's AAttack routine, and pass it useful information
+#        @pemit %q0 = switch(hasflag(%q0, puppet), 1, 
+#          {Triggered your AAttack with %r
+#                   %%0 = %0 -- attacker's dbref %r
+#                   %%1 = %1 -- dbref of attacker's weapon %r
+#                   %%2 = %2 -- BONUS, SUCCESS, FAILURE, or BOTCH}); 
+# We pass the AMMO to the routine, rather than the weapon. 
+#        @trigger %q0/AAttack = %#, %q2, %q6, %q5; 
+#
+# Trigger the weapon's AAttack routine, and pass it useful information
+#        @trigger %q2/AAttack = %q0, %q1, %q6, %q5; 
+#
+#####   Processing specific to success level ...
+#        @select %q6 = 
+#
+#        SUCCESS, {
+#          @remit %L = 
+#            [capstr(goodname(%#))] aims %p [goodname(%q1)] and %q4 
+#            [goodname(%q0)] with %p [goodname(%q2)].; 
+#
+#         pick a hit location : victim, attacker, weapon, successes, success level
+#          think setq(7, ulocal(ul-hit-location, %q0, %#, %q1, %q5, %q6)); 
+#          @remit %L = 
+#            [goodname(%q0)] takes a hit to the 
+#               [u(#15/u-bodyloc-description, %q7)]! ;
+#
+#         damage!!
+#          think setq(8, u(u-damage-amount, %#, %q2, %q5)); 
+#          think setq(9, default(%q2/damage-class, piercing)); 
+#          @damage %q0/%q7 = %q8 x %q9 by %#; 
+#        }, 
+#
+#        BONUS, {
+#          @remit %L = 
+#            [capstr(goodname(%#))] %q8 %p [goodname(%q1)] and nails [goodname(%q0)] 
+#            hard with %p [goodname(%q2)]!; 
+#
+#         pick a hit location : victim, attacker, weapon, successes, success level
+#          think setq(7, ulocal(ul-hit-location, %q0, %#, %q1, %q5, %q6)); 
+#          @remit %L = 
+#            [goodname(%q0)] takes a hit to the 
+#               [u(#15/u-bodyloc-description, %q7)]! ;
+#
+#         damage!!
+#          think setq(8, u(u-damage-amount, %#, %q2, %q5)); 
+#          think setq(9, default(%q2/damage-class, piercing)); 
+#          @damage %q0/%q7 = %q8 x %q9 by %#; 
+#        }, 
+#
+#        FAILURE, {
+#          @remit %L = 
+#            [capstr(goodname(%#))] misses [goodname(%q0)] with %p [goodname(%q2)].; 
+#        }, 
+#
+#        BOTCH, {
+#          @remit %L = 
+#            [capstr(goodname(%#))] tries to hit [goodname(%q0)] with %p 
+#            [goodname(%q2)], but %s misses terribly!; 
+#        }, 
+#
+#       ERROR: unexpected success level
+#        {
+#          @remit %L = 
+#            COMBAT: [capstr(goodname(%#))] has found a bug in the combat system. 
+#                    The staff is being notified.; 
+#          @combat/error #12/cmd-attack, attack %0, Inner @select: %q6(%q5 successes); 
+#        }; 
+#
+###     Destroy the ammo no matter if we hit or missed
+#        @wait 0 = @zap %q2; 
+#
+###     Clear the loaded attribute so that the weapon hasn't any ammo
+#        @wait 0 = &loaded %q1; 
+#
+###     Clear aims no matter if we hit or missed
+#        @wait 0 = think ulocal(ul-clear-aims, %#); 
+#
+#      }, 
+#
+##    Can't find the target
+#      0??????, {@error %# = locate %q0}, 
+#
+##    Not wielding a weapon they can shoot with
+#      ?0?????, {@pemit %# = You can't shoot anything with a 
+#                            [goodname(u(u-weapon-wielded, %#))].}, 
+#
+##    Haven't aimed yet
+#      ??0????, {@pemit %# = You need to 'aim' at your target first.}, 
+#
+##    Not a valid target -- not allowed to shoot at that
+#      ???0???, {@pemit %# = You're not allowed to attack [goodname(%q0)].},  
+#
+##    Waiting period hasn't expired yet
+#      ????0??, {@pemit %# = You must wait [sub(u(u-time-till-shoot, %#), secs())] 
+#                            seconds before you can shoot anyone.}, 
+#
+##    No ammunition loaded (arrows, sling bullets, etc.)
+#      ?????0?, {@pemit %# = There's nothing in your [goodname(u(u-weapon-wielded, %#))] 
+#                            to shoot!}, 
+#
+##    Not enough energy
+#      ??????0, {@pemit %# = You don't have enough energy to shoot. You 
+#			    should go eat something.}, 
+#
+##    ERROR
+#      *, {@combat/error %# = #12/cmd-shoot, shoot %0, Q9=%q9}; 
+#    
+#    @wait 0 = @notify me;
+# }
+#-
+
+
+
+#=============================================================================
+# UFUNCTIONS
+#=============================================================================
+
+#----------------------------------------
+# U(U-CAN-AIM-NOW, player)
+# 
+# Returns 1 if the player is allowed to aim now; else, 0.
+# Condition is based on the amount of time since he last acted and 
+# includes factors such as the player's Reflex and Coordination.
+# 
+#----------------------------------------
+&u-can-aim-now #12 = 
+#----------------------------------------
+  gte(secs(), u(u-time-till-aim, %0))
+-
+
+
+#----------------------------------------
+# U(U-TIME-TILL-AIM, player)
+# 
+# Returns the 'secs()' format time at which the player is allowed to try
+# to aim.
+#
+#----------------------------------------
+&u-time-till-aim #12 = 
+#----------------------------------------
+  add(default(%0/last-combat, 0), u(u-seconds-till-aim, %0))
+-
+
+
+#----------------------------------------
+# U(U-SECONDS-TILL-AIM, player)
+# 
+# Returns the number of seconds a player must wait before he aims, after
+# he has just used a combat command.
+#
+# Waiting period is 3 * (10 - (Reflex + Coordination)) seconds.
+# That's 18 seconds for an average character, +/- 3 seconds per point of 
+# Reflex or Coordination above or below 3.
+# 
+#----------------------------------------
+&u-seconds-till-aim #12 = 
+#----------------------------------------
+  round(mul(v(Combat-Multiplier),
+    max(5, 
+      sub(
+        mul(3, sub(10, add(attribute(%0, Reflex), attribute(%0, Coordination)))), 
+        default(%0/modifier-aim-speed, 0)
+      )
+    )
+  ),0)
+-
+
+
+#----------------------------------------
+# U(U-IS-AIMED-AT-SOMEONE, player)
+# 
+# Returns 1 if the player is aiming at someone, or 0 if not.
+# 
+#----------------------------------------
+&u-is-aimed-at-someone #12 = 
+#----------------------------------------
+  not(strmatch(u(u-aimed-at, %0), #-1))
+-
+
+#----------------------------------------
+# U(U-AIMED-AT, player)
+# 
+# Returns the dbref(s) of whomever the player is aiming at.
+# 
+#----------------------------------------
+&u-aimed-at #12 = 
+#----------------------------------------
+  trim(default(%0/combat-aimed-at, #-1))
+-
+
+
+#----------------------------------------
+# U(U-IS-AIMED-AT-BY-SOMEONE, player)
+# 
+# Returns 1 if the player is being aiming at by someone, or 0 if not.
+# 
+#----------------------------------------
+&u-is-aimed-at-by-someone #12 = 
+#----------------------------------------
+  not(strmatch(u(u-aimed-at-by, %0), #-1))
+-
+
+#----------------------------------------
+# U(U-AIMED-AT-BY, player)
+# 
+# Returns the dbref(s) of whomever is aiming at the player.
+# 
+#----------------------------------------
+&u-aimed-at-by #12 = 
+#----------------------------------------
+  trim(default(%0/combat-aimed-by, #-1))
+-
+
+
+
+
+
+#----------------------------------------
+# U(U-HAS-AIM-ENERGY, player)
+#
+# Returns a 1 if the player has enough energy to attempt to aim.
+# If not, returns a 0.
+# 
+#----------------------------------------
+&u-has-aim-energy #12 = 
+#----------------------------------------
+  or(hastag(%0, free_energy), 
+    gte(getaccount(%0, energy), 
+        u(u-energy-cost-aim-success)
+    )
+  )
+-
+
+##### Energy costs for the attack command, at different levels of success...
+
+&u-energy-cost-aim-bonus #12 = 
+  mul(not(hastag(%0, free_energy)), v(energy-cost-aim-bonus))
+-
+&u-energy-cost-aim-success #12 = 
+  mul(not(hastag(%0, free_energy)), v(energy-cost-aim-success))
+-
+&u-energy-cost-aim-failure #12 = 
+  mul(not(hastag(%0, free_energy)), v(energy-cost-aim-failure))
+-
+&u-energy-cost-aim-botch #12 = 
+  mul(not(hastag(%0, free_energy)), v(energy-cost-aim-botch))
+-
+#-------------------------------------------------------
+# Unaim Command
+# Hastily written by Stephanie Dray since it was missing
+# 
+&cmd-unaim #12=$unaim:
+ think ulocal(ul-clear-aims, %#)
+
+-
+
+#----------------------------------------
+# ULOCAL(UL-CLEAR-AIMS, player)
+#
+# Make the player stop aiming at anyone.
+# 
+#----------------------------------------
+&ul-clear-aims #12 = 
+#----------------------------------------
+  [setq(1, default(%0/combat-aimed-at, #-1))]
+  [set(%q1, combat-aimed-by:[setdiff(get(%q1/combat-aimed-by), %0)])]
+  [set(%0,  combat-aimed-at:[setdiff(get(%0/combat-aimed-at), %q1)])]
+  [setq(9, 
+    switch(isdbref(%q1), 1, 
+      pemit(lcon(loc(%0)), [goodname(%0)] stops aiming at [goodname(%q1)].)
+    )
+  )]
+-
+
+
+
+
+#----------------------------------------
+# U(U-CAN-SHOOT-NOW, player)
+# 
+# Returns 1 if the player is allowed to shoot now; else, 0.
+# Condition is based on the amount of time since he last acted and 
+# includes factors such as the player's Reason and Attention.
+# 
+#----------------------------------------
+&u-can-shoot-now #12 = 
+#----------------------------------------
+  gte(secs(), u(u-time-till-shoot, %0))
+-
+
+
+#----------------------------------------
+# U(U-TIME-TILL-SHOOT, player)
+# 
+# Returns the 'secs()' format time at which the player is allowed to try
+# to shoot.
+#
+#----------------------------------------
+&u-time-till-shoot #12 = 
+#----------------------------------------
+  add(default(%0/last-combat, 0), u(u-seconds-till-shoot, %0))
+-
+
+
+#----------------------------------------
+# U(U-SECONDS-TILL-SHOOT, player)
+# 
+# Returns the number of seconds a player must wait before he shoots, after
+# he has just used a combat command.
+#
+# Waiting period is 5 * (8 - (Reason + Attention)) + weapon-speed seconds.
+# Weapon speed is typically 10-20.
+# That's 20-30 seconds for an average character, +/- 5 seconds per point of 
+# Reason or Attention above or below 3.
+# 
+#----------------------------------------
+&u-seconds-till-shoot #12 = 
+#----------------------------------------
+  round(mul(v(Combat-Multiplier),
+    add(
+      max(5, 
+        mul(5, 
+          sub(
+            sub(8, add(attribute(%0, Reason), attribute(%0, Attention))), 
+            default(%0/modifier-shoot-speed, 0)
+          )
+        )
+      ), 
+      default([u(u-weapon-wielded, %0)]/speed-ranged, 15)
+    )
+  ),0)
+-
+
+
+#----------------------------------------
+# U(U-HAS-SHOOT-ENERGY, player)
+#
+# Returns a 1 if the player has enough energy to attempt to shoot.
+# If not, returns a 0.
+# 
+#----------------------------------------
+&u-has-shoot-energy #12 = 
+#----------------------------------------
+  or(hastag(%0, free_energy), 
+    gte(getaccount(%0, energy), 
+        u(u-energy-cost-shoot-success)
+    )
+  )
+-
+
+##### Energy costs for the attack command, at different levels of success...
+
+&u-energy-cost-shoot-bonus #12 = 
+  mul(not(hastag(%0, free_energy)), v(energy-cost-shoot-bonus))
+-
+&u-energy-cost-shoot-success #12 = 
+  mul(not(hastag(%0, free_energy)), v(energy-cost-shoot-success))
+-
+&u-energy-cost-shoot-failure #12 = 
+  mul(not(hastag(%0, free_energy)), v(energy-cost-shoot-failure))
+-
+&u-energy-cost-shoot-botch #12 = 
+  mul(not(hastag(%0, free_energy)), v(energy-cost-shoot-botch))
+-
+
+
+#----------------------------------------
+# U(U-IS-WIELDING-A-SHOOT-WEAPON, player)
+#
+# Returns 1 if the player is wielding a weapon that can shoot stuff.
+#
+#----------------------------------------
+&u-is-wielding-a-shoot-weapon #12 = 
+#----------------------------------------
+  neq(0, words(xget(u(u-weapon-wielded, %0), ammo)))
+-
+
+
+#----------------------------------------
+# U(U-HAS-AMMO, weapon)
+#
+# Returns 1 if the weapon has appropriate ammo loaded in it; else 0.
+#
+#----------------------------------------
+&u-has-ammo #12 = 
+#----------------------------------------
+  neq(0, words(ulocal(ul-ammo-loaded, %0)))
+-
+
+
+#----------------------------------------
+# ULOCAL(UL-AMMO-LOADED, weapon)
+#
+# Returns the dbref of the first 'ammo' (whatever, really) found in the 
+# weapon.
+#
+# And since the Generic Shoot Weapon nicely prohibits everything but the
+# right ammo, this doesn't have to do anything but return the contents.
+# Filtered so that no ornaments show up, of course.
+#
+#
+#----------------------------------------
+&ul-ammo-loaded #12 = 
+#----------------------------------------
+  first(filter(filter-not-ornament,lcon(%0)))
+-
+#----------------------------------------
+# FILTER(FILTER-NOT-ORNAMENT, list)
+#
+# Returns a list of everything that isn't an ornament in <list>
+#
+#---------------------------------------
+&filter-not-ornament #12=
+#---------------------------------------
+  [not(hastag(%0,ornamental))]
+-
+#----------------------------------------
+# U(U-SHOOT-LEVEL-OF-SUCCESS, #successes)
+#
+# Returns a description of the level of success based on the 
+# number of successes passed in.
+# 
+#----------------------------------------
+&u-shoot-level-of-success #12 = 
+#----------------------------------------
+  switch(1, 
+   lt(%0, 0), BOTCH, 
+   lt(%0, 2), FAILURE, 
+   lt(%0, 5), SUCCESS, 
+              BONUS
+  )
+-
+
+#----------------------------------------
+# ULOCAL(UL-SHOOT-SUCCESS, attacker, attacker's weapon, target, range)
+#
+# Returns the number of successes (or botches, if negative) when the
+# attacker shoots at the target with his weapon.
+# 
+#----------------------------------------
+&ul-shoot-success #12 = 
+#----------------------------------------
+  sub(u(u-shoot-success-attacker, %0, %1, %2), %3)
+-
+&u-shoot-success-attacker #12 = 
+    successes(u(u-shoot-success-attacker-dice, %0, %1), 
+              u(u-shoot-success-attacker-diff, %1, %2))
+-
+&u-shoot-success-attacker-dice #12 = 
+  add(attribute(%0, default(%1/ranged-attribute, Coordination)), 
+      skill(%0, default(%1/ranged-skill, none)), 
+      default(%0/modifier-shooter, 0))
+-
+
+### This name was too long for an attribute, and was causing bugs!
+### &u-shoot-success-attacker-difficulty #12 = 
+
+&u-shoot-success-attacker-diff #12 = 
+  add(default(%0/ranged-difficulty, 6), 
+      ulocal(ul-moving-target-penalty, %1), 
+      default(%1/modifier-shootee, 0), 
+      1)
+-
+&ul-moving-target-penalty #12 = 
+  [setq(0, words(u(u-engaged-by, %0)))]
+
+# if not engaged by someone, they can dodge a bit
+  [switch(%q0, 0, 
+    mul(1, u(u-moving-target-dodge-bonus, %0)), 
+# else, they are immobile and are a sitting duck
+    mul(-1, %q0)
+  )]
+-
+&u-moving-target-dodge-bonus #12 = 
+  successes(min(attribute(%0, perception), 
+                attribute(%0, reflex)), 
+            8)
+-
+
+
+
+# U(U-CAN-THROW-NOW, player)
+# 
+# Returns 1 if the player is allowed to throw now; else, 0.
+# Condition is based on the amount of time since he last acted and 
+# includes factors such as the player's Reason and Attention.
+# 
+#----------------------------------------
+&u-can-throw-now #12 = 
+#----------------------------------------
+  gte(secs(), u(u-time-till-throw, %0))
+-
+
+
+#----------------------------------------
+# U(U-TIME-TILL-THROW, player)
+# 
+# Returns the 'secs()' format time at which the player is allowed to try
+# to throw.
+#
+#----------------------------------------
+&u-time-till-throw #12 = 
+#----------------------------------------
+  add(default(%0/last-combat, 0), u(u-seconds-till-throw, %0))
+-
+
+
+#----------------------------------------
+# U(U-SECONDS-TILL-THROW, player)
+# 
+# Returns the number of seconds a player must wait before he throws, after
+# he has just used a combat command.
+#
+# Waiting period is 5 * (8 - (Reason + Attention)) + weapon-speed seconds.
+# Weapon speed is typically 10-20.
+# That's 20-30 seconds for an average character, +/- 5 seconds per point of 
+# Reason or Attention above or below 3.
+# 
+#----------------------------------------
+&u-seconds-till-throw #12 = 
+#----------------------------------------
+  round(mul(v(Combat-Multiplier),
+    add(
+      max(5, 
+        mul(5, 
+          sub(sub(8, add(attribute(%0, Reason), attribute(%0, Attention))), 
+              default(%0/modifier-throw-speed, 0))
+        )
+      ), 
+      default([u(u-weapon-wielded, %0)]/speed-thrown, 
+        default([u(u-weapon-wielded, %0)]/speed-ranged, 15))
+    )
+  ),0)
+-
+
+
+#----------------------------------------
+# U(U-HAS-THROW-ENERGY, player)
+#
+# Returns a 1 if the player has enough energy to attempt to throw.
+# If not, returns a 0.
+# 
+#----------------------------------------
+&u-has-throw-energy #12 = 
+#----------------------------------------
+  or(hastag(%0, free_energy), 
+    gte(getaccount(%0, energy), 
+        u(u-energy-cost-throw-success)
+    )
+  )
+-
+
+##### Energy costs for the attack command, at different levels of success...
+
+&u-energy-cost-throw-bonus #12 = 
+  mul(not(hastag(%0, free_energy)), v(energy-cost-throw-bonus), 
+      fdiv(default(%1/weight, 4), 4))
+-
+&u-energy-cost-throw-success #12 = 
+  mul(not(hastag(%0, free_energy)), v(energy-cost-throw-success), 
+      fdiv(default(%1/weight, 4), 4))
+-
+&u-energy-cost-throw-failure #12 = 
+  mul(not(hastag(%0, free_energy)), v(energy-cost-throw-failure),
+      fdiv(default(%1/weight, 4), 4))
+-
+&u-energy-cost-throw-botch #12 = 
+  mul(not(hastag(%0, free_energy)), v(energy-cost-throw-botch),
+      fdiv(default(%1/weight, 4), 4))
+-
+
+
+#----------------------------------------
+# U(U-THROW-LEVEL-OF-SUCCESS, #successes)
+#
+# Returns a description of the level of success based on the 
+# number of successes passed in.
+# 
+#----------------------------------------
+&u-throw-level-of-success #12 = 
+#----------------------------------------
+  switch(1, 
+   lt(%0, 0), BOTCH, 
+   lt(%0, 1), FAILURE, 
+   lt(%0, 2), SUCCESS, 
+              BONUS
+  )
+-
+
+#----------------------------------------
+# ULOCAL(UL-THROW-SUCCESS, attacker, attacker's weapon, target, range)
+#
+# Returns the number of successes (or botches, if negative) when the
+# attacker throws at the target with his weapon.
+# 
+#----------------------------------------
+&ul-throw-success #12 = 
+#----------------------------------------
+  sub(u(u-throw-success-attacker, %0, %1, %2), %3)
+-
+&u-throw-success-attacker #12 = 
+  successes(u(u-throw-success-attacker-dice,       %0, %1), 
+            u(u-throw-success-attacker-diff, %1, %2))
+-
+&u-throw-success-attacker-dice #12 = 
+  add(attribute(%0, default(%1/ranged-attribute, Coordination)), 
+      skill(%0, default(%1/ranged-skill, none)), 
+      default(%0/modifier-thrower, 0))
+-
+&u-throw-success-attacker-diff #12 = 
+  add(default(%0/throwing-balance, 6), ulocal(ul-moving-target-penalty, %1), 
+         default(%1/modifier-throwee, 0))
+-
+
+&u-verb-thrown #12 = 
+  default(%0/verb-thrown, 
+    u(u-verb-thrown-random, default(%0/damage-class, bashing))
+  )
+-
+&u-verb-thrown-random #12 = 
+  first(shuffle(default(#15/verbs-thrown-%0, throws)))
+-
+
+
+#=============================================================================
+# CONSTANTS
+#=============================================================================
+
+##### Energy costs for the aim command, at different levels of success...
+
+&energy-cost-aim-bonus #12 = 0
+-
+&energy-cost-aim-success #12 = 0
+-
+&energy-cost-aim-failure #12 = 0.25
+-
+&energy-cost-aim-botch #12 = 0.5
+-
+
+
+##### Energy costs for the shoot command, at different levels of success...
+
+&energy-cost-shoot-bonus #12 = 0
+-
+&energy-cost-shoot-success #12 = 0.25
+-
+&energy-cost-shoot-failure #12 = 0.5
+-
+&energy-cost-shoot-botch #12 = 1
+-
+
+
+##### Energy costs for the throw command, at different levels of success...
+
+&energy-cost-throw-bonus #12 = 0.25
+-
+&energy-cost-throw-success #12 = 1
+-
+&energy-cost-throw-failure #12 = 1
+-
+&energy-cost-throw-botch #12 = 2
+-
+
+&verbs-thrown-bashing #15 = 
+  throws hurls heaves whirls tosses lobs
+-
+&verbs-thrown-piercing #15 = 
+  zooms throws heaves tosses fires
+-
+&verbs-thrown-chopping #15 = 
+  throws hurls wings whirls heaves chucks
+-
+&verbs-thrown-slashing #15 = 
+  throws whirls spirals flashes tosses lobs
+-
+
+
+#=============================================================================
+# GENERIC SHOOT WEAPON
+#=============================================================================
+
+# as #6412
+@@ @create Generic Shoot Weapon 
+-
+
+@@ @rparent #6412 = Generic Weapon
+-
+@aleave #6412 =
+  think setq(0, default(%#/currency, #-1 NO CURRENCY));
+  think setq(1, default(me/ammo, #-1 NO AMMO));
+  @switch [neq(0, member(%q1, %q0, |))]=
+    0, @@ Do nothing, the thing was probably an ornament @@ , 
+    1, &loaded me
+-
+@aenter #6412 = 
+  think setq(0, default(%#/currency, #-1 NO CURRENCY)); 
+  think setq(1, default(me/ammo, #-1 NO AMMO)); 
+  think setq(2, getaccount(%#, %q0)); 
+
+  think setq(9, 
+    [not(hasattr(me, loaded))]
+    [neq(0, member(%q1, %q0, |))]
+    [gte(%q2, 1)]
+    [lte(%q2, 1)]
+    [hastag(%#,ornamental)]
+  );
+
+  @select %q9 = 
+
+# good ammo
+  11110, {
+    @remit room(me) = [goodname(%#)] loaded with [art(%q0)] %q0 and ready!; 
+    &loaded me = %q0
+  }, 
+
+# already load
+  0???0, {
+    @remit room(me) = [goodname(me)] is already loaded.; 
+    @tel %# = loc(me)
+  }, 
+
+# bad ammo type for weapon
+  ?0??0, {
+    @remit room(me) = [goodname(%#)] (%q0) isn't good ammunition for 
+                      [goodname(me)] 
+                      (which takes [edit(%q1, |, %,%b)]).; 
+    @tel %# = loc(me)
+  }, 
+
+# not at least one unit
+  ??0?0, {
+    @remit room(me) = [goodname(%#)] isn't at least one whole unit of %q0.; 
+    @tel %# = loc(me)
+  }, 
+
+# more than one unit of (right) stuff
+  ???00, {
+    @remit room(me) = Separating one of the %q0 from the group.; 
+    think setq(3, separate(sub(%q2, 1), %#, loc(me), num(me))); 
+    @switch hastag(%#, group) = 0, {@tel %# = loc(me)};
+    @resynch %#;
+    @resynch %q3;
+    &loaded me = %q0
+  }, 
+
+# the thing is an ornament
+  ????1, {
+    @@ Do nothing to interfere with the ornament ode
+  },
+
+# error
+  {
+    @tel %# = loc(me); 
+    @qmail *Adam/Aenter on ammo load=
+      The ammo load routine for [name(me)] ([num(me)] [flags(me)]) is broken.
+      r(0)='%q0', r(1)='%q1', r(2)='%q2', r(9)='%q9', %%#=%#
+  }
+-
+
+@set me = !quiet
+-

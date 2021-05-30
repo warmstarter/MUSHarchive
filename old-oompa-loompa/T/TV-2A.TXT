@@ -1,0 +1,12 @@
+@create Master TV Set
+@set Master TV Set=OPAQUE
+@set Master TV Set=NO_COMMAND
+@set Master TV Set=MONITOR
+@set Master TV Set=SAFE
+&CHANNEL Master TV Set=1
+&AVAIL Master TV Set=1
+&STATUS Master TV Set=OFF
+&REC1 Master TV Set=#265
+@ADESCRIBE Master TV Set=@swi [v(status)]=OFF,{@pemit %#=The TV is OFF.},{@pemit %#=[ansi(i,ON THE TV SCREEN:)]%r[center(-,79,-)]%r[center(Channel [v(channel)]%b%b%b%b[get([get([num(me)]/rec[v(channel)])]/name[v(channel)])],79)]%r[center(-,79,-)]%r[get_eval([get([get([num(me)]/rec[v(channel)])]/studio[v(channel)])]/desc)]%r[ansi(h,Other Features:)] [iter([lcon([get([get([num(me)]/rec[v(channel)])]/studio[v(channel)])])],[name(##)])]%r[center(-,79,-)]}
+&FLIP_ON Master TV Set=$flip on:@swi [match([v(status)],ON)]=1,{@pemit %#=The [name(me)] is already ON.},{@oemit %N turns the [name(me)] on.;@pemit %#=You turn the [name(me)] on.;&status me=ON;&ch[v(channel)] [get([num(me)]/rec[v(channel)])]=[cat([get([get([num(me)]/rec[v(channel)])]/ch[v(channel)])],[num(me)])]}
+&FLIP_OFF Master TV Set=$flip off:@swi [match([v(status)],OFF)]=1,{@pemit %#=The [name(me)] is already OFF.},{@oemit %N turns the [name(me)] off.;@pemit %#=You turn the [name(me)] off.;&status me=OFF;&ch[v(channel)] [get([num(me)]/rec[v(channel)])]=[remove([get([get([num(me)]/rec[v(channel)])]/ch[v(channel)])],[num(me)])]}

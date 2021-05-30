@@ -1,0 +1,29 @@
+@@
+@@ Channel Locks
+@@ by Dahan
+@@
+@@ This simple object may manage the locks of several channels.  For simplicities sake, it assumes that the speak, join, and see locks of a channels are the same, and that only admins may modify any channel.  To support a new channel, add the appropriate FNC_* u-function, edit the LIST_CLOCKs attribute, and @trigger the object's STARTUP attribute.
+@@ Be certain that this object is set VISUAL, otherwise it cannot function properly.
+
+
+@create Channel Locks
+
+@set Channel Locks = VISUAL
+@set Channel Locks = WIZARD
+@set Channel Locks = NO_COMMAND
+
+&DB_JAIL Channel Locks=#666
+
+@DESCRIBE Channel Locks=This object handles who may and may not speak on various channels.
+
+&FN_ISADMIN Channel Locks=[orflags(%#,Wr)]
+
+&FNC_ADMIN Channel Locks=[orflags(%#,Wr)]
+&FNC_GUEST Channel Locks=[or(orflags(%#,Wr),not(match([v(DB_Jail)],%l)))]
+&FNC_PUBLIC Channel Locks=[or(orflags(%#,Wr),[not(or(haspower(%#,guest),match([v(DB_Jail)],%l)))])]
+
+&LIST_CLOCKS Channel Locks=FNC_Admin Admin|FNC_Public Public|FNC_Guest Guest
+
+@STARTUP Channel Locks=@dolist [lattr(%!/FNC_*)]={@lock/user:[##] [%!] = [##]/1};th [iter(v(List_Clocks),[clock([rest(##)]/join,@[%!]/[first(##)])][clock([rest(##)]/speak,@[%!]/[first(##)])][clock([rest(##)]/see,@[%!]/[first(##)])][clock([rest(##)]/mod,@[%!]/FN_IsAdmin)],|,)]
+
+@@ End of File

@@ -1,0 +1,140 @@
+@create Game of Uno
+@lock Game of Uno==me
+&ZDESC Game of Uno=Type 'uno help' for instructions. To play, type join uno. To watch the game in progress, type watch uno.%rTo make the computer play, type player join.%rTo make the computer take its turn, (if it's the first player to join) type player start.%rThe top card is a [u(card,first(v(stack)))].%r[switch(v(players),,The game has not started.,switch(v(turn),,The game is over.,u(elist,edit(iter(v(players),[name(##)]\([words(v(hand_##))]\)) ,%b,|),and,|) [switch(words(v(players)),1,is,are)] playing the game.%rIt is [name(v(turn))]'s turn.))]
+&ELIST Game of Uno=squish(ifelse(gt(words(%0,%2),1),iter(extract(%0,1,sub(words(%0,%2),2),%2),##\\\,%b,%2)[extract(%0,dec(words(%0,%2)),1,%2)] %1 [last(%0,%2)],%0))
+@Va Game of Uno=$uno help:@pemit %#=repeat(-,78)%r[u(help)]%r[repeat(-,78)]
+&HELP Game of Uno=The goal of Uno is to get rid of all your cards. In each turn, you must play a card that is either the same color or same name/number as the last card played. If you don't have any card that can be played, you must draw until you do.%r%rThe special cards are "Draw Two" (the next player draws two cards and loses his turn), "Skip" (the next player loses his turn), "Reverse" (the direction of play reverses), "Wild" (can be played any time - changes the color), and "Wild Draw Four" (can only be played if you have no cards of the right color - changes the color, next player draws four cards and loses his turn).%r%rCommands:%rURESET - Reset the game.%rJOIN UNO - Join a game in progress.%rWATCH UNO - Watch a game in progress.%rUNWATCH UNO - Stop watching.%rUINV - Look at your hand.%rUPLAY <card> - Play a card (see 'uno list').%rUWILD <color> - Play a wild card.%rUWDRAW <color> - Play a wild draw four.%rUDRAW - Draw a card.%rUSHUFFLE - shuffle the pile back into the deck.%rUPOINTS - See how many points are in your hand (see 'uno scoring').%rUSTATS - List players with the best average scores in at least 5 games.
+&FULLDECK Game of Uno=r0 g0 b0 y0 r1 r1 g1 g1 b1 b1 y1 y1 r2 r2 g2 g2 b2 b2 y2 y2 r3 r3 g3 g3 b3 b3 y3 y3 r4 r4 g4 g4 b4 b4 y4 y4 r5 r5 g5 g5 b5 b5 y5 y5 r6 r6 g6 g6 b6 b6 y6 y6 r7 r7 g7 g7 b7 b7 y7 y7 r8 r8 g8 g8 b8 b8 y8 y8 r9 r9 g9 g9 b9 b9 y9 y9 rdraw rdraw gdraw gdraw bdraw bdraw ydraw ydraw rskip rskip gskip gskip bskip bskip yskip yskip rrev rrev grev grev brev brev yrev yrev wild wild wild wild wdraw wdraw wdraw wdraw
+&URESET Game of Uno=$ureset:@wipe me/hand_*;&players me;&prize me;&deck me=shuffle(v(fulldeck));&stack me=first(v(deck));&deck me=rest(v(deck));@unlock/use %vc;&turn me;&watchers me;@emit %n resets the game of Uno. The top card is now: [u(card,v(stack))].
+&HAND Game of Uno=u(elist,iter(sort(v(hand_%0)),u(card,##)[ifelse(eq(#@,words(v(hand_%0))),,|)]),and,|)
+&UINV Game of Uno=$uinv:@swi member(v(players),%#)=0,{@pemit %#=You're not in the game.},{@pemit %#=Your cards: [u(hand,%#)].}
+&STACK Game of Uno=bdraw
+&CARD Game of Uno=switch(%0,wild,Wild,wdraw,Wild Draw Four,switch(mid(%0,0,1),r,%xh%xrRed,g,%xh%xgGreen,b,%xh%xbBlue,y,%xh%xyYellow) [switch(after(%0,mid(%0,0,1)),draw,Draw Two,skip,Skip,rev,Reverse,wild,%(Wild%),wdraw,%(Wild Draw Four%),after(%0,mid(%0,0,1)))]%xn)
+&UDRAW Game of Uno=$udraw:@sel 0=member(v(players),%#),{@pemit %#=You're not in the game.},strmatch(v(turn),%#),{@pemit %#=It's not your turn.},{@pemit/list [setdiff(u(watchers),%#)]=%n draws a card.;@pemit %#=You draw a [u(card,first(v(deck)))].;&hand_%# me=cat(v(hand_%#),first(v(deck)));&deck me=rest(v(deck))};@switch [words(v(hand_%#))]=1,{@emit %n grumbles, "Not uno anymore..."};@switch [words(v(deck))]=0,{@tr me/do_shuffle=%#}}
+@Vb Game of Uno=$uno list:@pemit %#=repeat(-,78)%r[u(list)]%r[repeat(-,78)]
+&LIST Game of Uno=The card name consists of a color letter (r, g, b, y) followed by a specifier.%rThe specifier is either a number from 0 to 9, "skip", "rev", or "draw".%r%rExample:%r g0 = Green 0%r rrev = Red Reverse%r ydraw = Yellow Draw Two
+&UPLAY Game of Uno=$uplay *:@sel 0=member(v(players),%#),{@pemit %#=You're not in the game.},strmatch(v(turn),%#),{@pemit %#=It's not your turn.},member(lcstr(v(hand_%#)),lcstr(%0)),{@pemit %#=You don't have that card. Take a look at 'uinv' and 'uno list'.},not(strmatch(%0,w*)),{@pemit %#=Wild cards must be played with 'uwild <color>' or 'uwdraw <color>'.},corbool(strmatch(mid(%0,0,1),mid(first(v(stack)),0,1)),strmatch(mid(%0,1,4),mid(first(v(stack)),1,4))),{@pemit %#=That card doesn't match the color or name/number of the top card.},not(eq(words(v(hand_%#)),1)),{@pemit/list u(watchers)=%n plays a [u(card,lcstr(%0))].%r%xr***%xn %n has won at Uno! %xr***%xn;&turn me;give %n=[v(prize)];&hand_%# me;@pemit/list v(watchers)=Scores:[iter(v(players),%r%b%b[ljust(switch(##,player,player,name(##)),15)][rjust(u(calc_score,v(hand_##)),10)])];@dolist v(players)={&record_## me=[setq(0,v(record_##))][fdiv(setr(1,add(extract(%q0,2,1,/),u(calc_score,v(hand_##)))),setr(2,add(1,last(%q0,/))))]/%q1/%q2};ureset},not(strmatch(%0,*rev)),{&stack me=lcstr(%0) [v(stack)];&hand_%# me=remove(lcstr(v(hand_%#)),lcstr(%0));@pemit/list u(watchers)=%n plays a [u(card,first(v(stack)))].;&players me=revwords(v(players));@pemit %#=Your hand is now: [u(hand,%#)].;&turn me=first(v(players));@pemit/list u(watchers)=It is now [name(v(turn))]'s turn.;@switch [words(v(hand_%#))]=1,{@emit %n screams, "UNO!"};@switch v(turn)=player,{@tr me/playergo}},not(strmatch(%0,*skip)),{&stack me=lcstr(%0) [v(stack)];&hand_%# me=remove(lcstr(v(hand_%#)),lcstr(%0));@pemit/list u(watchers)=%n plays a [u(card,first(v(stack)))].;&players me=rest(v(players)) [first(v(players))];&players me=rest(v(players)) [first(v(players))];@pemit %#=Your hand is now: [u(hand,%#)].;&turn me=first(v(players));@pemit/list u(watchers)=It is now [name(v(turn))]'s turn.;@switch [words(v(hand_%#))]=1,{@emit %n screams, "UNO!"};@switch v(turn)=player,{@tr me/playergo}},not(strmatch(%0,*draw)),{&stack me=lcstr(%0) [v(stack)];&hand_%# me=remove(lcstr(v(hand_%#)),lcstr(%0));@pemit/list u(watchers)=%n plays a [u(card,first(v(stack)))].;&players me=rest(v(players)) [first(v(players))];@pemit [first(v(players))]=You draw a [u(card,first(v(deck)))] and a [u(card,extract(v(deck),2,1))].;&hand_[first(v(players))] me=cat(v(hand_[first(v(players))]),extract(v(deck),1,2));&deck me=extract(v(deck),3,sub(words(v(deck)),2));&players me=rest(v(players)) [first(v(players))];@pemit %#=Your hand is now: [u(hand,%#)].;&turn me=first(v(players));@pemit/list u(watchers)=It is now [name(v(turn))]'s turn.;@switch [words(v(hand_%#))]=1,{@emit %n screams, "UNO!"};@switch v(turn)=player,{@tr me/playergo}},{&stack me=lcstr(%0) [v(stack)];&hand_%# me=remove(lcstr(v(hand_%#)),lcstr(%0));@pemit/list u(watchers)=%n plays a [u(card,first(v(stack)))].;&players me=rest(v(players)) [first(v(players))];@pemit %#=Your hand is now: [u(hand,%#)].;&turn me=first(v(players));@pemit/list u(watchers)=It is now [name(v(turn))]'s turn.;@switch [words(v(hand_%#))]=1,{@emit %n screams, "UNO!"};@switch v(turn)=player,{@tr me/playergo}}
+&UWILD Game of Uno=$uwild *:@sel 0=member(v(players),%#),{@pemit %#=You're not in the game.},strmatch(v(turn),%#),{@pemit %#=It's not your turn.},member(lcstr(v(hand_%#)),wild),{@pemit %#=You don't have a Wild.},member(r g b y,lcstr(mid(%0,0,1))),{@pemit %#=What kind of color is "%0"?},not(eq(words(v(hand_%#)),1)),{@pemit/list u(watchers)=%n plays a wild, but it doesn't matter because%r%xr***%xn %n has won at Uno! %xr***%xn;&hand_%# me;@pemit/list v(watchers)=Scores:[iter(v(players),%r%b%b[ljust(switch(##,player,player,name(##)),15)][rjust(u(calc_score,v(hand_##)),10)])];@dolist v(players)={&record_## me=[setq(0,v(record_##))][fdiv(setr(1,add(extract(%q0,2,1,/),u(calc_score,v(hand_##)))),setr(2,add(1,last(%q0,/))))]/%q1/%q2};ureset;&turn me;give %n=[v(prize)]},{&hand_%# me=remove(v(hand_%#),wild);&stack me=lcstr(mid(%0,0,1))wild [v(stack)];@pemit/list u(watchers)= %n plays a Wild and changes the color to %xh[switch(%0,r*,%xrred,g*,%xggreen,b*,%xbblue,%xyyellow)]%xn.;&players me=rest(v(players)) [first(v(players))];@pemit %#=Your hand is now: [u(hand,%#)].;&turn me=first(v(players));@pemit/list u(watchers)=It is now [name(v(turn))]'s turn.;@switch [words(v(hand_%#))]=1,{@emit %n screams, "UNO!"};@switch v(turn)=player,{@tr me/playergo}}
+&NOMATCH Game of Uno=not(words(iter(v(hand_%0),switch(corbool(strmatch(##,wild),strmatch(mid(##,0,1),mid(first(v(stack)),0,1)),candbool(strmatch(after(##,mid(##,0,1)),after(first(v(stack)),mid(first(v(stack)),not(strmatch(##,wdraw))),0,1)))),1,x))))
+&UWDRAW Game of Uno=$uwdraw *:@sel 0=member(v(players),%#),{@pemit %#=You're not in the game.},strmatch(v(turn),%#),{@pemit %#=It's not your turn.},member(lcstr(v(hand_%#)),wdraw),{@pemit %#=You don't have a Wild Draw Four.},not(match(v(hand_%#),strtrunc(first(v(stack)),1)*)),{@pemit %#=You have another card that you can play.},member(r g b y,lcstr(mid(%0,0,1))),{@pemit %#=What kind of color is "%0"?},not(eq(words(v(hand_%#)),1)),{@pemit/list u(watchers)=%n plays a Wild Draw Four, but it doesn't matter because%r%xr***%xn %n has won at Uno! %xr***%xn;&hand_%# me;@pemit/list v(watchers)=Scores:[iter(v(players),%r%b%b[ljust(switch(##,player,player,name(##)),15)][rjust(u(calc_score,v(hand_##)),10)])];@dolist v(players)={&record_## me=[setq(0,v(record_##))][fdiv(setr(1,add(extract(%q0,2,1,/),u(calc_score,v(hand_##)))),setr(2,add(1,last(%q0,/))))]/%q1/%q2};ureset;&turn me;give %n=[v(prize)]},{&hand_%# me=remove(v(hand_%#),wdraw);&stack me=lcstr(mid(%0,0,1))wdraw [v(stack)];@pemit/list u(watchers)=%n plays a Wild Draw Four and changes the color to %xh[switch(%0,r*,%xrred,g*,%xggreen,b*,%xbblue,%xyyellow)]%xn.;&players me=rest(v(players)) [first(v(players))];@pemit [first(v(players))]=You draw a [u(card,first(v(deck)))], a [u(card,extract(v(deck),2,1))], a [u(card,extract(v(deck),3,1))], and a [u(card,extract(v(deck),4,1))].;&hand_[first(v(players))] me=cat(v(hand_[first(v(players))]),extract(v(deck),1,4));&deck me=extract(v(deck),5,sub(words(v(deck)),4));&players me=rest(v(players)) [first(v(players))];@pemit %#=Your hand is now: [u(hand,%#)].;&turn me=first(v(players));@pemit/list u(watchers)=It is now [name(v(turn))]'s turn.;@switch [words(v(hand_%#))]=1,{@emit %n screams, "UNO!"};@switch v(turn)=player,{@tr me/playergo}}
+&HDESC Game of Uno=The amazing game of Uno is here.
+@Desc Game of Uno=[u(zdesc)]
+&START Game of Uno=$join uno:@swi member(v(players),%#)=0,{@emit %n joins the game of uno.;@swi hasattr(me,turn)=0,{&turn me=%#};&hand_%# me=extract(v(deck),1,7);&players me=cat(v(players),%#);&deck me=extract(v(deck),8,sub(words(v(deck)),7));@pemit %#=Your hand: [u(hand,%#)].;&watchers me=%# [u(watchers)]},{@pemit %#=You are already in the game!}
+&WATCH Game of Uno=$watch uno:@pemit %#=You watch the game of uno.;@oemit %#=%n watches the game of uno.;&watchers me=setunion(v(watchers),%#)
+@Vi Game of Uno=(
+@Vo Game of Uno=)
+@Vc Game of Uno=#4769
+&PLAYERGO Game of Uno=@switch/all [u(cango,num(me))][words(v(hand_player))] [u(playercard,gt(words(setr(0,filter(prefix_filter,u(hand_player)))),0),gt(words(setr(1,filter(suffix_filter,u(hand_player)))),0))]=0* *,{&hand_player me=v(hand_player) [first(v(deck))];&deck me=rest(v(deck));@pemit/list v(watchers)=ifelse(strmatch(words(v(hand_player)),2),%vn grumbles\, "Not uno anymore..."%r,)%vn draws a card.;@tr me/playergo},11 *,{@pemit/list u(watchers)=%xr***%xn %vn wins the uno game!%xr***%xn;&hand_player me;@pemit/list v(watchers)=Scores:[iter(v(players),%r%b%b[ljust(switch(##,player,player,name(##)),15)][rjust(u(calc_score,v(hand_##)),10)])];@dolist v(players)={&record_## me=[setq(0,v(record_##))][fdiv(setr(1,add(extract(%q0,2,1,/),u(calc_score,v(hand_##)))),setr(2,add(1,last(%q0,/))))]/%q1/%q2};ureset},12 *,{@pemit/list u(watchers)=%vn screams, "UNO!"},1* *rev,{@pemit/list v(watchers)=%vn plays a [u(card,%q7)].;&players me=first(revwords(v(players))) [rest(revwords(v(players)))];&turn me=first(v(players));@pemit/list v(watchers)=It is now [name(v(turn))]'s turn.;&hand_player me=[remove(v(hand_player),first(%q7))];&stack me=%q7 [v(stack)];@switch v(turn)=player,{@tr me/playergo}},1* *skip,{@pemit/list v(watchers)=%vn plays a [u(card,%q7)];&stack me=%q7 [v(stack)];&players me=rest(v(players)) [first(v(players))];&players me=rest(v(players)) [first(v(players))];&turn me=first(v(players));@pemit/list v(watchers)=It is now [name(v(turn))]'s turn.;&hand_player me=[remove(v(hand_player),first(%q7))];@switch v(turn)=player,{@tr me/playergo}},1* ?draw,{@pemit/list v(watchers)=%vn plays a [u(card,%q7)];&stack me=%q7 [v(stack)];&players me=rest(v(players)) [first(v(players))];@pemit first(v(players))=You draw a [u(card,first(v(deck)))] and a [u(card,first(rest(v(deck))))].;&hand_[first(v(players))] me=extract(v(deck),1,2) [v(hand_[first(v(players))])];&deck me=rest(rest(v(deck)));&players me=rest(v(players)) [first(v(players))];&turn me=first(v(players));@pemit/list v(watchers)=It is now [name(v(turn))]'s turn.;&hand_player me=[remove(v(hand_player),first(%q7))];@switch v(turn)=player,{@tr me/playergo}},1* wild ?,{&players me=rest(v(players)) [first(v(players))];&stack me=%q5wild [v(stack)];@pemit/list v(watchers)=%vn plays a wild and changes the color to [ansi(h%q5,grab(red blue green yellow,%q5*))][setq(7,first(%q7))].;&turn me=first(v(players));@pemit/list v(watchers)=It is now [name(v(turn))]'s turn.;&hand_player me=[remove(v(hand_player),first(%q7))];@switch v(turn)=player,{@tr me/playergo}},1* wdraw ?,{&players me=rest(v(players)) [first(v(players))];&stack me=%q5wdraw [v(stack)];@pemit/list v(watchers)=%vn plays a wild draw four and changes the color to [ansi(h%q5,grab(red blue green yellow,%q5*))][setq(7,first(%q7))].;@pemit first(v(players))=You draw a [u(card,setr(3,first(v(deck))))], [u(card,setr(4,first(rest(v(deck)))))], [u(card,setr(8,extract(v(deck),3,1)))] and a [u(card,setr(9,extract(v(deck),4,1)))].;&hand_[first(v(players))] me=extract(v(deck),1,4) [v(hand_[first(v(players))])];&Deck me=after(v(Deck),extract(v(deck),1,4));&players me=rest(v(players)) [first(v(players))];&turn me=first(v(players));@pemit/list v(watchers)=It is now [name(v(turn))]'s turn.;&hand_player me=[remove(v(hand_player),first(%q7))];@switch v(turn)=player,{@tr me/playergo}},1* ??,{@pemit/list v(watchers)=%vn plays a [u(card,%q7)].;&players me=rest(v(players)) [first(v(players))];&stack me=%q7 [v(stack)];&turn me=first(v(players));@pemit/list v(watchers)=It is now [name(v(turn))]'s turn.;&hand_player me=[remove(v(hand_player),first(%q7))];@switch v(turn)=player,{@tr me/playergo}}
+&PLAYERJOIN Game of Uno=$player join:&players me=v(players) player;@emit %vn joins the uno game.;&hand_player uno=extract(v(deck),1,7);&deck uno=after(v(deck),extract(v(deck),1,7))
+&PLAYERSTART Game of Uno=$player start:@tr me/playergo
+&PLAYERCARD Game of Uno=setr(7,switch(%0%1,1?,first(shuffle(%q0)),?1,first(shuffle(%q1)),[first(shuffle(filter(wild_filter,v(hand_player))))] [setr(5,first(shuffle(iter(v(hand_player),ifelse(strmatch(##,w*),,mid(##,0,1))))))]))
+&WILD_FILTER Game of Uno=strmatch(%0,w*)
+&CANGO Game of Uno=gt(words(edit(iter(v(hand_player),corbool(strmatch(##,wild),strmatch(##,wdraw),strmatch(mid(##,0,1),mid(first(v(stack)),0,1)),candbool(strmatch(delete(##,0,1),delete(first(v(stack)),0,1)),not(strmatch(##,wdraw))))),0,)),0)
+@Vn Game of Uno=Player
+&PREFIX_FILTER Game of Uno=strmatch(mid(%0,0,1),mid(first(v(stack)),0,1))
+&SUFFIX_FILTER Game of Uno=candbool(strmatch(delete(%0,0,1),delete(first(v(stack)),0,1)),not(strmatch(%0,w*)))
+&SHUFFLE Game of Uno=$shuffle:@tr me/do_shuffle=%#
+&CALC_SCORE Game of Uno=[setq(9,0)][parse(%0,setq(9,add(%q9,switch(##,w*,50,?r*,20,?s*,20,?d*,20,delete(##,0,1)))))]%q9
+&USTATS Game of Uno=$ustats:@pemit %#=[space(4)][ljust(Top Uno Players,31)]Games[space(4)]Points[space(3)]Average%r[repeat(-,60)][parse(extract(sortby(comp_records,filter(filter_5games,parse(lattr(me/record_#*),name(after(##,RECORD_))/[v(##)]|)player/[v(record_player)],|),|),1,10,|),%r[rjust(#@,2)].%b[ljust(first(##,/),25)][rjust(last(##,/),10)][rjust(extract(##,3,1,/),10)][rjust(round(extract(##,2,1,/),2),10)],|)]%r[repeat(-,60)]
+&RECORD_PLAYER Game of Uno=41.749261/70598/1691
+&RECORD_#3417 Game of Uno=18.449275/3819/207
+&RECORD_#4187 Game of Uno=32.032258/993/31
+&RECORD_#3 Game of Uno=28.16129/1746/62
+&RECORD_#5091 Game of Uno=28.607143/1602/56
+&UPOINTS Game of Uno=$upoints:@pemit %#=switch(hasattr(me,hand_%#),0,You're not playing uno.,Your hand contains [u(calc_score,v(hand_%#))] points.)
+&RECORD_#737 Game of Uno=37.3/373/10
+&RECORD_#5062 Game of Uno=25.275862/1466/58
+&RECORD_#5581 Game of Uno=39.83908/3466/87
+&RECORD_#4 Game of Uno=43.631579/1658/38
+&UNWATCH Game of Uno=$unwatch uno:@switch 0=member(v(watchers),%#),@pemit %#=You're not in the game.,member(v(players),%#),{@pemit %#=You stop watching the game of uno.;@oemit %#=%n stops watching the game of uno.;&watchers me=remove(v(watchers),%#)},@pemit %#=Don't quit watching while you're playing. Use uleave or ureset to quit.
+&FILTER_5GAMES Game of Uno=gt(last(%0,/),4)
+&COMP_RECORDS Game of Uno=sign(sub(extract(%0,2,1,/),extract(%1,2,1,/)))
+&SCORING Game of Uno=$uno scoring:@pemit %#=[repeat(-,78)]%rPoints are bad in this version of Uno. At the end of the game, each card in your hand is counted against you as follows:%r%t* Number cards are counted at face value.%r%t* Draw Two, Skip, and Reverse cards are counted as 20 points each.%r%t* Wild and Wild Draw Four cards are counted as 50 points each.%rThe winner receives 0 points.%r[repeat(-,78)]
+&RECORD_#1389 Game of Uno=42.517857/2381/56
+&RECORD_#1334 Game of Uno=0/0/1
+&USTATS_ALL Game of Uno=$ustats/all:@pemit %#=[space(4)][ljust(All Uno Players,31)]Games[space(4)]Points[space(3)]Average%r[repeat(-,60)][parse(sortby(comp_records,parse(lattr(me/record_#*),name(after(##,RECORD_))/[v(##)]|)player/[v(record_player)],|),%r[ifelse(u(filter_5games,##),rjust(setr(0,add(1,%q0)),2).%b,space(4))][ljust(first(##,/),25)][rjust(last(##,/),10)][rjust(extract(##,3,1,/),10)][rjust(round(extract(##,2,1,/),2),10)],|)]%r[repeat(-,60)]
+&RECORD_#3186 Game of Uno=26.223214/2937/112
+&RECORD_#6471 Game of Uno=49/343/7
+&RECORD_#2494 Game of Uno=170/170/1
+&RECORD_#8442 Game of Uno=84.75/339/4
+&RECORD_#2576 Game of Uno=53.333333/640/12
+&RECORD_#8910 Game of Uno=42.568562/12728/299
+&RECORD_#8539 Game of Uno=124/372/3
+&RECORD_#9241 Game of Uno=0/0/1
+&RECORD_#5845 Game of Uno=25/75/3
+&RECORD_#5630 Game of Uno=72/72/1
+&RECORD_#7974 Game of Uno=180/180/1
+&RECORD_#9330 Game of Uno=28.636364/315/11
+&RECORD_#9403 Game of Uno=103.666667/311/3
+&RECORD_#2247 Game of Uno=18.5/37/2
+&RECORD_#1037 Game of Uno=34.72/2604/75
+&RECORD_#5465 Game of Uno=5.333333/16/3
+&RECORD_#7896 Game of Uno=0/0/1
+&RECORD_#68 Game of Uno=19.117647/325/17
+&RECORD_#9565 Game of Uno=29.5/118/4
+&RECORD_#2955 Game of Uno=107.5/860/8
+&RECORD_#9871 Game of Uno=31/961/31
+&RECORD_#2344 Game of Uno=0/0/1
+&RECORD_#3694 Game of Uno=10/40/4
+&RECORD_#7868 Game of Uno=45.666667/137/3
+&RECORD_#5557 Game of Uno=103/103/1
+&RECORD_#8531 Game of Uno=53/53/1
+&RECORD_#3861 Game of Uno=0/0/4
+&RECORD_#5431 Game of Uno=40/40/1
+&RECORD_#10327 Game of Uno=7/7/1
+&RECORD_#10582 Game of Uno=69/69/1
+&RECORD_#4921 Game of Uno=57.666667/173/3
+&RECORD_#5572 Game of Uno=41/82/2
+&RECORD_#9432 Game of Uno=46.058824/783/17
+&RECORD_#9248 Game of Uno=45/90/2
+&RECORD_#3967 Game of Uno=143/286/2
+&RECORD_#2175 Game of Uno=37.533333/1126/30
+&RECORD_#10227 Game of Uno=33.945455/1867/55
+&RECORD_#7492 Game of Uno=29.192308/759/26
+&RECORD_#7778 Game of Uno=50.777778/1371/27
+&RECORD_#4516 Game of Uno=36.511111/1643/45
+&RECORD_#5871 Game of Uno=30.183333/5433/180
+&RECORD_#10322 Game of Uno=91.4/1371/15
+&RECORD_#6022 Game of Uno=37.222222/335/9
+&RECORD_#1387 Game of Uno=46.333333/139/3
+&RECORD_#10456 Game of Uno=37.959596/3758/99
+&RECORD_#7453 Game of Uno=53/53/1
+&RECORD_#7667 Game of Uno=57/741/13
+&RECORD_#6121 Game of Uno=28.875/231/8
+&RECORD_#6523 Game of Uno=86.5/173/2
+&RECORD_#9655 Game of Uno=77/77/1
+&RECORD_#10323 Game of Uno=88/88/1
+&RECORD_#8439 Game of Uno=63/567/9
+&RECORD_#10997 Game of Uno=87/261/3
+&RECORD_#10723 Game of Uno=48.5/97/2
+&RECORD_#10998 Game of Uno=10.666667/32/3
+&RECORD_#10996 Game of Uno=40/40/1
+&RECORD_#4984 Game of Uno=52.666667/474/9
+&RECORD_#8526 Game of Uno=83.428571/584/7
+&RECORD_#9832 Game of Uno=20/60/3
+&RECORD_#10636 Game of Uno=45.5/91/2
+&RECORD_#9546 Game of Uno=24/24/1
+&RECORD_#10278 Game of Uno=28.5/57/2
+&RECORD_#148 Game of Uno=88/264/3
+&RECORD_#8048 Game of Uno=52.466667/787/15
+&RECORD_#9339 Game of Uno=0/0/1
+&RECORD_#9261 Game of Uno=0/0/4
+&RECORD_#9225 Game of Uno=0/0/1
+&RECORD_#9752 Game of Uno=25.666667/77/3
+&RECORD_#9974 Game of Uno=36.5/365/10
+&RECORD_#9215 Game of Uno=23/46/2
+&RECORD_#2461 Game of Uno=0/0/1
+&RECORD_#1788 Game of Uno=0/0/1
+&RECORD_#10364 Game of Uno=27/54/2
+&RECORD_#140 Game of Uno=22.928241/9905/432
+&RECORD_#9414 Game of Uno=28.5/399/14
+&RECORD_#10956 Game of Uno=32.333333/582/18
+&DO_SHUFFLE Game of Uno=@pemit/list v(watchers)=name(%0) shuffles the uno deck.;&deck me=shuffle(v(deck) [iter(rest(v(stack)),switch(1,strmatch(##,?wild),wild,strmatch(##,?wdraw),wdraw,##))]);&stack me=first(v(stack))
+&USHUFFLE Game of Uno=$ushuffle:@tr me/do_shuffle=%#
+&DECK Game of Uno=wdraw r8 yskip r9 g7 gskip y2 g5 wdraw g9 g5 y9 y7 gdraw g8 b4 brev b9 grev bskip r1 r3 b5 r7 g0 y5 gskip y4 g6 ydraw b2 rdraw y8 g4 r7 y2 b1 g1 gdraw b5 r5 r4 r0 r4 b8 r6 g4 r2 wild r8 g9 g3 y4 brev y1 wdraw wdraw bdraw y3 bskip g6 b9 y7 ydraw rrev rskip r6 wild b8 b3 y5 y0 g2 y6 g1 yrev r5 y9 g2 wild b3 b0 b6 yskip r1 rskip b1 b2 y8 yrev r3 rdraw y3 wild b4 y1 g8 b7 grev rrev r2 g7 r9 y6 b6 g3 b7
+&RECORD_#9216 Game of Uno=25/25/1
+@set Game of Uno=OPAQUE
+@set Game of Uno=VISUAL
+@set Game of Uno=SAFE
+@set Game of Uno=COMMANDS
+

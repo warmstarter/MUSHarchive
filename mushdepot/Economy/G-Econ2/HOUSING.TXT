@@ -1,0 +1,55 @@
+@create Housing Unit Parent
+@lock/Basic Housing Unit Parent==me
+@lock/Use Housing Unit Parent=canuse/1
+@set Housing Unit Parent = WIZARD
+@set Housing Unit Parent = SAFE
+@set Housing Unit Parent = NO_COMMAND
+&BETWEEN Housing Unit Parent=[and([gte(%0,%1)],[lte(%0,%2)])]
+&CMD_FARM_LIST Housing Unit Parent=$farm list:th [pemit(%#,[ansi(v(border_color),[repeat(=,76)])]%r[center([ansi(v(title_color),[name(me)] Farm List)],76)]%r[ansi(v(border_color),[repeat(=,76)])]%r [iter([edit([v(farm_list)],|,%b)],[ljust(##,8)][name(##)]%r)][ansi(v(border_color),[repeat(=,76)])])]
+&CMD_PUMP_LIST Housing Unit Parent=$pump list:th [pemit(%#,[ansi(v(border_color),[repeat(=,76)])]%r[center([ansi(v(title_color),[name(me)] Pump List)],76)]%r[ansi(v(border_color),[repeat(=,76)])]%r [iter([edit([v(pump_list)],|,%b)],[ljust(##,8)][name(##)]%r)][ansi(v(border_color),[repeat(=,76)])])]
+&CMD_SEND_WORKERS Housing Unit Parent=$send workers *=*:th [switch([u(fun_issystem,[secure(%0)])][lte(%1,[add([v(remaining_power)],[v(WORKERS_[v(SYSTEM_%0)])])])][isnum(%1)],111,[switch([gte(%1,0)],1,[u(fun_transfer_power,%0,[ceil(%1)])],0,[pemit(%#,Number must be above 0.)])],011,[pemit(%#,That is not a system.)],101,[pemit(%#,You do not have that many free workers.)],001,[pemit(%#,That is not a system.)],[pemit(%#,Argument must be a number.)])]
+&CMD_SET_FARM Housing Unit Parent=$set farm *:th [switch([strmatch([v(farm_list)],*|%0|*)],1,[set(me,farm:%0)][pemit(%#,The new source of food is [name(%0)].)],0,[pemit(%#,Invalid farm.)])]
+&CMD_SET_MAX_YIELD Housing Unit Parent=$set max yield *:th [switch([hasflag(%#,Wiz)],1,[set(me,max_reactor:%0)][pemit(%#,[name(me)] can now have a yield of up to %0 food.)],0,[pemit(%#,Permission denied.)])]
+&CMD_SET_PUMP Housing Unit Parent=$set pump *:th [switch([strmatch([v(pump_list)],*|%0|*)],1,[set(me,pump:%0)][pemit(%#,The new source of water is [name(%0)].)],0,[pemit(%#,Invalid pump.)])]
+&CMD_SET_WORKFORCE Housing Unit Parent=$set workforce to *:th [switch([lte(%0,[v(max_reactor)])][gte(%0,0)],01,{[pemit(%#,The housing unit cannot hold that many people.%rPlease chose a number between 0 and [v(max_reactor)].)]},10,[pemit(%#,You cannot have under 0 people.)],00,[pemit(%#,You cannot have under 0 people.)],11,{[u(fun_set_reactor,[secure(%0)])]})]
+&CMD_UNSET_FOOD Housing Unit Parent=$unset food *:th [switch([hasflag(%#,Wiz)],1,[switch([hasattr(me,FOOD_%0)],1,[wipe(me/food_%0)][pemit(%#,No longer able to send food to [name(%0)] %(%0%))],0,[pemit(%#,Not currently sending food to there.)])],0,[pemit(%#,Permission denied.)])]
+&CREDITS Housing Unit Parent=Dave@GalacticMUSH [EMAIL: davemilford@home.com] [ICQ: 8516328]
+&CURRENT_POWER_NUM Housing Unit Parent=1
+@DESCRIBE Housing Unit Parent=[set(me,REMAINING_POWER:[v(reactor_setting)])][set(me,SYSTEMS:)]%b[ansi(u(border_color),[repeat(_,74)]%r/)]%b[ljust([ansi(v(name_color),[v(type)] Housing Unit)],73)][ansi(u(border_color),\\%r|[repeat(-,74)]|%r|)]%b[ljust([ansi(v(title_color),Owner:)] [v(owner)],73)][ansi(u(border_color),|%r|)]%b[ljust([ansi(v(title_color),Maximum Capacity:)] [v(max_reactor)] workers,73)][ansi(u(border_color),|%r|[repeat(-,74)]|%r|%b)][ljust([ansi(v(title_color),Water Source%b%b%b:)] [switch([hasattr(me,pump)],1,[name([u(pump)])]%b%b%([u(pump)]%),0,None)],73)][ansi(u(border_color),|%r|%b)][ljust([ansi(v(title_color),Water Available:)] [switch([hasattr(me,pump)],1,[u(fun_water_available)][switch(name(u(pump)),*Warehouse*,%b[ansi(hb,%[)][ansi(ny,Stores)][ansi(hb,%])])],0,None)],36)][ljust([ansi(v(title_color),Water Needed:)] [switch([hasattr(me,pump)],1,[u(fun_show_water_needed)],None Set)],37)][ansi(u(border_color),|%r|[repeat(-,74)]|%r|%b)][ljust([ansi(v(title_color),Food Source%b%b%b%b:)] [switch([hasattr(me,farm)],1,[name([u(farm)])]%b%b%([u(farm)]%),0,None)],73)][ansi(u(border_color),|%r|%b)][ljust([ansi(v(title_color),Food Available%b:)] [switch([hasattr(me,farm)],1,[u(fun_food_available)][switch(name(u(farm)),*Warehouse*,%b[ansi(hb,%[)][ansi(ny,Stores)][ansi(hb,%])])],0,None)],36)][ljust([ansi(v(title_color),Food Needed%b:)] [switch([hasattr(me,farm)],1,[u(fun_show_food_needed)],None Set)],37)][ansi(u(border_color),|%r|[repeat(-,74)]|%r|)]%b[ljust([ansi(v(title_color),Current Workers:)] [v(reactor_setting)]%b%([mul([fdiv([v(reactor_setting)],[v(max_reactor)])],100)]%%%),73)][ansi(u(border_color),|%r|)]%b[ljust([ansi(v(title_color),Locations:)],73)][if([lattr(me/WORKERS_*)],{[ansi(u(border_color),|%r|%b)][iter([lattr(me/WORKERS_*)],[set(me,SYSTEM_[v(current_power_num)]:[edit(##,WORKERS_,)])][ljust({[ansi(v(subtitle_color),[v(current_power_num)]:)][name([edit(##,WORKERS_,)])]},39)][ljust([ansi(nc,[u(##)])],4)][rjust([ansi(u(border_color),|%r|)],34)][u(fun_calc_power,[u(##)])][set(me,SYSTEMS:[v(systems)] [v(current_power_num)])][set(me,CURRENT_POWER_NUM:[inc([v(current_power_num)])])])]},{[ansi(u(border_color),|%r|%b)][ljust(None.,73)][ansi(u(border_color),|%r|)]})][ansi(u(border_color),[repeat(-,74)]|%r|)]%b[ljust([ansi(v(title_color),Free Workers%b:)]%b[v(remaining_power)],73)][ansi(v(border_color),|%r|)]%b[ljust([ansi(v(title_color),Worker Health:)] [u(fun_show_worker_health)] %([mul([fdiv([v(worker_health)],10)],100)]%%%),73)][ansi(v(border_color),|%r\\[repeat(_,74)]/)][set(me,CURRENT_POWER_NUM:1)]
+@set Housing Unit Parent/DESCRIBE=no_command visual
+&FARM Housing Unit Parent=[v(none)]
+&FARM_LIST Housing Unit Parent=|
+&FUN_CALC_POWER Housing Unit Parent=[set(me,REMAINING_POWER:[sub([v(remaining_power)],%0)])]
+&FUN_CALC_WATER_NEEDED Housing Unit Parent=[v(set_max_capacity)]
+&FUN_CALC_WORKER_HEALTH Housing Unit Parent=[set(me,health_buffer:[v(worker_health)])][switch([gte([u(fun_water_available)],[v(reactor_setting)])][gte([u(fun_food_available)],[v(reactor_setting)])],11,[set(me,health_buffer2:10)][switch([lt([v(health_buffer)],[v(health_buffer2)])],1,[u(fun_improve_health)],0,[set(me,worker_health:10)])],10,[u(fun_hurt_health)],01,[u(fun_hurt_health)],00,[u(fun_hurt_health)])]
+&FUN_CHECK_POWER Housing Unit Parent=[iter([lattr(me/WORKERS_*)],[set(me,REMAINING_POWER:[sub([v(remaining_power)],[u(##)])])])]
+&FUN_DELETE_FOOD Housing Unit Parent=[set(u(farm),storage_food:[sub([get(u(farm)/storage_food)],[round(fdiv(v(reactor_setting),400),2)])])][trigger(u(farm)/fun_calc_capacity_used)][trigger(u(farm)/fun_calc_capacity_remaining)]
+&FUN_DELETE_WATER Housing Unit Parent=[set(u(pump),storage_water:[sub([get(u(pump)/storage_water)],[round(fdiv(v(reactor_setting),400),2)])])][trigger(u(pump)/fun_calc_capacity_used)][trigger(u(pump)/fun_calc_capacity_remaining)]
+&FUN_FOOD_AVAILABLE Housing Unit Parent=[u(fun_food_supplied)]
+&FUN_FOOD_SUPPLIED Housing Unit Parent=[switch(strmatch(name(u(farm)),*Warehouse*),1,[if(hasattr(u(farm),storage_food),[mul(get(u(farm)/storage_food),400)],0)],[if(hasattr(u(farm),food_[num(me)]),[get([u(farm)]/food_[num(me)])],0)])]
+&FUN_HURT_HEALTH Housing Unit Parent=[switch([strmatch([v(worker_health)],0)],0,[set(me,worker_health:[sub([v(worker_health)],0.4)])][emit(The workers at [name(me)] demand food and water.)],1,[emit(The workers at [name(me)] demand food and water.%r1 worker has died.)][set(me,current_capacity:[sub([v(current_capacity)],1)])][set(me,max_capacity:[sub([v(max_capacity)],1)])]
+&FUN_IMPROVE_HEALTH Housing Unit Parent=[set(me,worker_health:[add([v(worker_health)],0.2)])][emit(The workers' health at [name(me)] improves.)]
+&FUN_ISSYSTEM Housing Unit Parent=[hasattr(me,SYSTEM_%0)]
+&FUN_SET_FOOD Housing Unit Parent=[set(me,food_%0:0)][pemit(%#,[name(me)] can now send food to [name(%0)] %(%0%))]
+&FUN_SET_REACTOR Housing Unit Parent=[set(me,reactor_setting:%0)][pemit(%#,The [name(me)] can now hold %0 workers.%rWorkforce now at [mul([fdiv([v(reactor_setting)],[v(max_reactor)])],100)]%%.)][set(me,REMAINING_POWER:%0)][u(fun_check_power)][switch([lte([v(remaining_power)],0)],1,[iter([lattr(me/WORKERS_*)],[set(me,##:0)])][pemit(%#,Global workers shortage. Resetting allocations.)])]
+&FUN_SHOW_FOOD_NEEDED Housing Unit Parent=[switch([gt([v(reactor_setting)],[u(fun_food_available)])],1,[ansi(nr,[v(reactor_setting)])],0,[ansi(ng,[v(reactor_setting)])])]
+&FUN_SHOW_WATER_NEEDED Housing Unit Parent=[switch([gt([v(reactor_setting)],[u(fun_water_available)])],1,[ansi(nr,[v(reactor_setting)])],0,[ansi(ng,[v(reactor_setting)])])]
+&FUN_SHOW_WORKER_HEALTH Housing Unit Parent=[if([strmatch([v(worker_health)],0)],[ansi(hr,Dying)])][if([u(between,[v(worker_health)],0.1,4.9)],[ansi(hr,Bad)])][if([u(between,[v(worker_health)],5.0,7.5)],[ansi(hy,Fair)])][if([u(between,[v(worker_health)],7.6,8.9)],[ansi(hg,Good)])][if([u(between,[v(worker_health)],9.0,10.0)],[ansi(hg,Excellent)])]
+&FUN_TRANSFER_POWER Housing Unit Parent=[set(me,WORKERS_[v(SYSTEM_%0)]:%1)][pemit(%#,System %0 %([name([v(SYSTEM_%0)])]%) now has %1 workers.)][set(me,REMAINING_POWER:[v(reactor_setting)])][u(fun_check_power)][if(lt(sub(v(workers_[v(system_%0)]),get(v(system_%0)/used_workers)),0),[iter([lattr(v(system_%0)/PRODUCING_*)],[set(v(system_%0),##:0)])][remit(loc(v(system_%0)),Worker shortage, resetting allocations.)][trigger(v(system_%0)/fun_calc_used_workers)])]
+&FUN_WATER_AVAILABLE Housing Unit Parent=[u(fun_water_supplied)]
+&FUN_WATER_NEEDED Housing Unit Parent=[fdiv([v(reactor_setting)],2)]
+&FUN_WATER_SUPPLIED Housing Unit Parent=[switch(strmatch(name(u(pump)),*Warehouse*),1,[if(hasattr(u(pump),storage_water),[mul(get(u(pump)/storage_water),400)],0)],[if(hasattr(u(pump),water_[num(me)]),[get([u(pump)]/water_[num(me)])],0)])]
+&HEALTH_BUFFER Housing Unit Parent=10
+&HEALTH_BUFFER2 Housing Unit Parent=10
+&MAX_REACTOR Housing Unit Parent=200
+&OWNER Housing Unit Parent=Administration Housing Corp.
+&PUMP Housing Unit Parent=[v(none)]
+&PUMP_LIST Housing Unit Parent=|
+&REACTOR_SETTING Housing Unit Parent=0
+&REMAINING_POWER Housing Unit Parent=0
+&SET_MAX_CAPACITY Housing Unit Parent=100
+&SWEEP Housing Unit Parent=[u(fun_calc_worker_health)][if(strmatch(name(u(farm)),*Warehouse*),[u(fun_delete_food)])][if(strmatch(name(u(pump)),*Warehouse*),[u(fun_delete_water)])]
+&SYSTEMS Housing Unit Parent=
+&TYPE Housing Unit Parent=Type VI
+&VERSION Housing Unit Parent=3.0
+&WORKER_HEALTH Housing Unit Parent=10

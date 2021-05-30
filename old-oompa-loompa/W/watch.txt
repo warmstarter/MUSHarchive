@@ -1,0 +1,180 @@
+#############################################################################
+# +watch
+#   Idea Taken from PaxMagica (mellers1.psych.berkeley.edu 7911)
+#   Coded by Mark Hassman (October 1996)
+#   Formated by Mark Hassman (December 1996)
+#
+#  Note: capstr() in the tiny servers is foobar IMO. Correct format
+#  for adding/deleting locations should be Xxxx  in the names. If you
+#  do not want to deal with this, replace the capstr occurences in
+#  the code with lcstr(capstr(X)) where X is the variable acted upon.
+#############################################################################
+# Help 
+#  The +watch system allows players to view activity in locations 
+#  without being physically present. 
+#  Commands:
+#   +watchlist     
+#        Lists all viewable locations. These are used for <place>
+#        in all of the commands.
+#   +watching [<place>]     
+#        Lists those places watching either <place> or
+#        the current location if no argument is given.
+#   +watches        
+#        Lists all the locations you are watching
+#   +watch <on/off> <place>
+#        Turns the watch on or off for a particular place. Activity is
+#        prefixed by 'In Ooc>' where OOC is the current place.
+#   +watchlook <place>
+#        Looks at a <place>. Returns the description and contents.
+#   +watchlookat <place>/<thing> 
+#        Looks at an object in the indicated place.
+#   
+#  Admin Help
+#  Commands:
+#   +watch add place <place>/<dbref>=<prefix>
+#        Adds a place to the +watchlist.  Place is used for the placename,
+#        dbref is the dbref of the location and prefix is the text added
+#        to the @prefix of that location. The string In is prepended to
+#        to the text, > is appended to the prefix text.
+#   +watch del place <place>
+#        Deletes a place from the current list of +watch'able places.
+##############################################################################
+
+# Create the Objects we will need
+@create Watch Command Module
+-
+@create Watch Data Module
+-
+# lock the objects so others can't pick them up.
+@lock Watch Command Module=me
+-
+@lock Watch Data Module=me
+-
+
+# Set up the necessary flags.
+@set Watch Command Module=STOP
+-
+@set Watch Command Module=SAFE
+-
+@set Watch Command Module=COMMANDS
+-
+@set Watch Data Module=SAFE
+-
+
+# Comment the following line if your code owner is wiz with inherit
+# flag set
+@set Watch Command Module=Inherit
+-
+
+### Command Code ###
+
+# Add a new place to the watchable list. (admin only command)
+
+&CMD-ADD-PLACE Watch Command Module=$+watch add place */*=*:@switch 
+[hasflag(%#,Wizard)]=0,{@pemit %#=Permission Denied.},{@switch 
+hasattr(%1,forwardlist)=1,{@pemit %#=Location already has a forwardlist. 
+Aborted.},{@set %1=Audible;&PLACE_%0 [u(data)]=%1;@prefix %1=In 
+[capstr(%2)]>;@pemit %#=<Watch> Place added.}}
+-
+
+# Delete a watchable place (admin only command)
+
+&CMD-DEL-PLACE Watch Command Module=$+watch del place *:@switch 
+hasflag(%#,Wizard)=0,{@pemit %#=Permission Denied.},{@switch 
+hasattr([u(data)],PLACE_%0)=0,{@pemit %#=I don't think that place 
+exists.},{@set [u([u(data)]/place_%0)]=!audible;@forwardlist 
+[u([u(data)]/place_%0)];&place_%0 [u(data)];@pemit %#=<Watch> Place deleted.}}
+-
+
+# Start watching a location
+
+&CMD-WATCH-ON Watch Command Module=$+watch on *:@switch 
+hasattr(u(data),PLACE_%0)=0,{@pemit %#=I don't recognize that place. Try 
+'+watchlist'.},{[setq(0,[u(u(data)/PLACE_%0)])];@forwardlist 
+%q0=[setunion(u(%q0/forwardlist),%#)];&watching 
+%q0=[setunion(u(%q0/watching),%#)];&watching 
+%#=[setunion(u(%#/watching),capstr(%0))];@pemit %#=<Watch> You are now watching 
+[capstr(%0)]}
+-
+
+# Quit Watching a location
+
+&CMD-WATCH-OFF Watch Command Module=$+watch off *:@switch 
+hasattr(u(data),PLACE_%0)=0,{@pemit %#=I don't recognize that place. Try 
+'+watchlist'.},{[setq(0,[u(u(data)/PLACE_%0)])];@forwardlist 
+%q0=[setdiff(u(%q0/forwardlist),%#)];&watching 
+%q0=[setdiff(u(%q0/watching),%#)];&watching 
+%#=[setdiff(u(%#/watching),capstr(%0))];@pemit %#=<Watch> You are no longer 
+watching [capstr(%0)]}
+-
+
+# What can I watch?
+
+&CMD-WATCHLIST Watch Command Module=$+watchlist:@pemit %#=Watchable Places: 
+[iter(lattr(u(data)/PLACE_*),capstr(edit(##,PLACE_,)))]
+-
+
+# What are you watching?
+
+&CMD-WATCHES Watch Command Module=$+watches:@switch 
+hasattr(%#/watching)=0,{@pemit %#=<Watch> You are not watching any 
+location.},{@pemit %#=<Watch> You are watching: [u(%#/watching)]}
+-
+
+# Check to see who is watching your current location
+
+&CMD-WATCHING Watch Command Module=$+watching:@switch 
+hasattr(%l,watching)=0,{@pemit %#=<Watch> No one is watching your 
+location.},{@pemit %#=<Watch> Connected Listeners in your location are: 
+[iter(u(%l/watching),switch(hasflag(##,connect),1,[name(##)]))]}
+-
+
+# Check who else is watching a location
+
+&CMD-WATCHING-PLACE Watch Command Module=$+watching *:@switch 
+hasattr(u(data),PLACE_%0)=0,{@pemit %#=<Watch> I can't find that place. See 
++watchlist.},{@pemit %#=<Watch> Players watching [capstr(%0)]: 
+[iter(u(u(u(data)/place_%0)/watching),switch(hasflag(##,connect),1,[name(##)]))]
+}
+-
+
+# Look at something in a location you are currently watching
+
+&CMD-WATCHLOOK-THING Watch Command Module=$+watchlookat */*:@switch 
+hasattr(u(data),PLACE_%0)=0,{@pemit %#=<Watch> I can't find that location. See 
++watchlist.},{[setq(0,u(u(data)/PLACE_%0))][setq(1,locate(%#,%1,n))];@switch/fir
+st %q1=#-1,@pemit %#=<Watch> I don't see that.,#-2,@pemit %#=<Watch> I don't 
+know which one you mean.,@pemit %#=<Watch> View of 
+[capstr(%1)]%r%t[u(%q1/desc)]}
+-
+
+# View the desc & contents of a location
+
+&CMD-WATCHLOOK Watch Command Module=$+watchlook *:@switch 
+hasattr(u(data),PLACE_%0)=0,{@pemit %#=<Watch> I can't find that location. See 
++watchlist.},{[setq(0,u(u(data)/PLACE_%0))];@pemit %#=<Watch> View of 
+[capstr(%0)]%r[u(%q0/desc)]%r[u(%q0/succ)]%rContents:%r[iter(lcon(%q0),switch(
+or(hasflag(##,connect),strmatch(type(##),THING)),1,[name(##)]%r))]}
+-
+
+# Purges forwardlists completely, triggered by an admin command.
+
+&TR-FWD-REMOVE Watch Data Module=@forwardlist %0
+-
+
+## Data
+#  To add places that are 'watchable' prior to uploading this file,
+#  add the attributes like the following. Make sure to include the
+#  hyphen on a new line after any additional settings.
+#  You may want to change the dbref listed below to reflect your
+#  OOC Room if you have one or another name.
+
+&PLACE_OOC Watch Data Module=#18
+-
+
+# Set the data object dbref. You may want to hand edit this with
+# the dbref of the object containg the data for the watch system
+
+&DATA Watch Command Module=[num(watch command module)]
+-
+

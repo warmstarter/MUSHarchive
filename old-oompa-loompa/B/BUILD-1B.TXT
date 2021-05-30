@@ -1,0 +1,29 @@
+@create Builder Helper
+@lock Builder Helper==*[owner(me)]
+&BUILD Builder Helper=$*=*:@force [owner(me)]=@dig %1={[escape(first(get(builder/%0)))]},{[escape(rest(get(builder/%0)))]};@trigger me/%0msgs
+&N Builder Helper=North;n South;s
+&NMSGS Builder Helper=@force [owner(me)]={@succ North=You walk North.;@osucc North=walks North.;@odrop North=arrives from the South.;North;@succ South=You walk South.;@osucc South=walks South.;@odrop South=arrives from the North.}
+&S Builder Helper=South;s North;n
+&W Builder Helper=West;w East;e
+&E Builder Helper=East;e West;w
+&U Builder Helper=Up;u Down;d
+&D Builder Helper=Down;d Up;u
+&SMSGS Builder Helper=@force [owner(me)]={@succ South=You walk South.;@osucc South=walks South.;@odrop South=arrives from the North.;South;@succ North=You walk North.;@osucc North=walks North.;@odrop North=arrives from the South.}
+&WMSGS Builder Helper=@force [owner(me)]={@succ West=You walk West.;@osucc West=walks West.;@odrop West=arrives from the East.;West;@succ East=You walk East.;@osucc East=walks East.;@odrop East=arrives from the West.}
+&EMSGS Builder Helper=@force [owner(me)]={@succ East=You walk East.;@osucc East=walks East.;@odrop East=arrives from the West.;East;@succ West=You walk West.;@osucc West=walks West.;@odrop West=arrives from the East.}
+&UMSGS Builder Helper=@force [owner(me)]={@succ Up=You climb Up the stairway.;@osucc Up=climbs Up the stairway.;@odrop Up=arrives from below.;Up;@succ Down=You climb Down the stairway.;@osucc Down=climbs Down the stairway.;@odrop Down=arrives from above.}
+&DMSGS Builder Helper=@force [owner(me)]={@succ Down=You climb Down the stairway.;@osucc Down=climbs Down the stairway.;@odrop Down=arrives from above.;Down;@succ Up=You climb Up the stairway.;@osucc Up=climbs Up the stairway.;@odrop Up=arrives from below.}
+@Desc Builder Helper=Just type (exit abbrev)>>(name of new room), where exit abbrev is n,s,w,e,nw,ne,sw,se,u, or d, and the room will be created with forward and backward exits, and succ, osucc, and odrop messages set on both exits.%rFeel free to modify exit names and success messages, or even add your own, just model after the ones that are already there.  All that needs to be set are an attribute for the names of the two exits (i.e.: N:North;n South;s), and an attribute for the success messages.%r%rNOTE: This object is (initially) set sticky and will go to room #0 if you drop it.%r%rPlease talk to Shiala if you find any bugs or have any comments.
+&NW Builder Helper=NorthWest;nw SouthEast;se
+&NE Builder Helper=NorthEast;ne SouthWest;sw
+&SW Builder Helper=SouthWest;sw NorthEast;ne
+&SE Builder Helper=SouthEast;se NorthWest;nw
+&NWMSGS Builder Helper=@force [owner(me)]={@succ NorthWest=You walk NorthWest.;@osucc NorthWest=walks NorthWest.;@odrop NorthWest=arrives from the SouthEast.;NorthWest;@succ SouthEast=You walk SouthEast.;@osucc SouthEast=walks SouthEast.;@odrop Southeast=arrives from the NorthWest.}
+&NEMSGS Builder Helper=@force [owner(me)]={@succ NorthEast=You walk NorthEast.;@osucc NorthEast=walks NorthEast.;@odrop NorthEast=arrives from the SouthWest.;NorthEast;@succ SouthWest=You walk SouthWest.;@osucc SouthWest=walks SouthWest.;@odrop Southwest=arrives from the NorthEast.}
+&SWMSGS Builder Helper=@force [owner(me)]={@succ SouthWest=You walk SouthWest.;@osucc SouthWest=walks SouthWest.;@odrop SouthWest=arrives from the NorthEast.;SouthWest;@succ NorthEast=You walk NorthEast.;@osucc NorthEast=walks NorthEast.;@odrop Northeast=arrives from the SouthWest.}
+&SEMSGS Builder Helper=@force [owner(me)]={@succ SouthEast=You walk SouthEast.;@osucc SouthEast=walks SouthEast.;@odrop SouthEast=arrives from the NorthWest.;SouthEast;@succ NorthWest=You walk NorthWest.;@osucc NorthWest=walks NorthWest.;@odrop Northwest=arrives from the SouthEast.}
+@Succ Builder Helper=Before using this object you must first type the following commands:%r@chown [num(me)]=me%r@set [num(me)]=!halted%r@set [num(me)]=inherit%r@lock/use [num(me)]=me%r%rThen LOOK at it for instructions.
+@Aclone Builder Helper=&owner me=%N;@lock me=*[v(owner)];@name me=[v(owner)]'s builder;@link me=#0;@set me=chown_ok;@set me=sticky;@pemit [v(owner)]=Your builder has been created.  Please type `get [num(me)]'
+&OWNER Builder Helper=[owner(me)]
+@set Builder Helper=INHERIT
+&CREDITS Builder Helper=I don't know who originally wrote the code, but if you ever find him (or her), thank them for writing this code!

@@ -1,0 +1,38 @@
+@create Master WHO List
+@link Master WHO List=#2
+@lock Master WHO List=#2
+@set Master WHO List=!NO_COMMAND
+@set Master WHO List=INHERIT
+@set Master WHO List=OPAQUE
+@set Master WHO List=WIZARD
+@set Master WHO List=SAFE
+@set Master WHO List=ROYALTY
+&EANN Master WHO List=$@eann *:@swi [gte([get(%#/rank)],12)]=1,{@dolist [filter(Empire_Filter,lwho())]=@pe ##=[ansi(r,Official [get(%#/empire)] Empire Announcement from %n:)] %0},0,{@pe %#=Permission Denied.}
+&WHO-1 Master WHO List=$who:&record me=[ifelse(lt(words(lwho()),get(me/record)),get(me/record),words(lwho()))];@pemit %#=[u(header)][iter(lwho(),switch(u(can_see,##),1,{%r[u(who_entry,##)]}))]%r[u(footer)]%r[ansi(hm,There are [words(lwho())] players connected.)]%r[ansi(hm,The record is [get(me/record)] players connected.)]%r[ansi(r,Wizard)] - [ansi(hy,Royalty)] - [ansi(c,Builder)] - [ansi(hg,Space Admin)] - [ansi(hb,Theme Admin)] - [ansi(hc,Judge)] - [ansi(b,Player)]
+@SEX Master WHO List=[switch(poss(%0),his,M,her,F,its,O)]
+&LINE2 Master WHO List=[repeat([ansi(c,~)],79)]
+&LINE Master WHO List=[repeat([ansi(r,*)],79)]
+&EENTRY Master WHO List=[ansi(switch(u(Flag,%0),JUDGE,hc,SPACE,hg,HEAD,hm,THEME,hb,WIZARD,r,ROYALTY,hy,BUILDER,c,b),ljust(Name(%0),15))][ansi(y,ljust(get(%0/Alias),7))] [ansi(r,rjust(u(Onfor,%0),9))] [ansi(m,rjust(u(Idle,%0),4))] [ansi(g,ljust(get(%0/Class),15))] [ansi(hr,ljust(get(%0/Organization),20))]
+&EHEADER Master WHO List=[ansi(hc,Name%b%b%b%b%b%b%b%b%b%b%b%bAlias%b%b%b%bOn For%b%b%bIdle%b%b%b%b%bClass[space(11)]Organization)]%r[ansi(hb,repeat(~,79))]
+&EWHO Master WHO List=$ewho:@pemit %#=[u(EHeader)][iter(filter(Empire_Filter,lwho()),switch(u(Can_See,%#,##),1,%r[u(EEntry,##)]))]%r[ansi(hm,There are [words(filter(Empire_Filter,lwho()))] players in Empire [get(%#/Empire)] connected.)]%r[ansi(r,Wizard)] - [ansi(hy,Royalty)] - [ansi(c,Builder)] - [ansi(hg,Space Admin)] - [ansi(hc,Judge)] - [ansi(b,Player)] - [ansi(hb,Theme Admin)]
+&ONFOR Master WHO List=[ufun(fun_time,conn(name(%0)))]
+&FUN_TIME Master WHO List=[setq(0,div(%0,3600))][switch(gt(%q0,9),0,0)]%q0:[setq(1,[div(sub(%0,[mul(div(%0,3600),3600)]),60)])][switch(gt(%q1,9),0,0)]%q1:[setq(2,[sub(%0,[mul(div(%0,60),60)])])][switch(gt(%q2,9),0,0)]%q2
+@DESCRIBE Master WHO List=Project: Who List.
+&WHO_ENTRY Master WHO List=[switch(get(%0/PlayStatus),BLD,ansi(c,BLD),WIZ,ansi(r,WIZ),ROY,ansi(hy,ROY),SPC,ansi(hg,SPC),OOC,ansi(hc,OOC),%bIC,ansi(hg,%bIC),GOD,ansi(hr,GOD),THM,ansi(hb,THM),ansi(hx,ljust(#$,3)))] [switch(ucstr(get(%0/Sex)),M*,ansi(hb,M),N*,ansi(c,N),F*,ansi(hm,F),ansi(hx,O))]%b%b [ansi(switch(u(Flag,%0),SPACE,hg,HEAD,hm,THEME,hb,WIZARD,r,ROYALTY,hy,BUILDER,c,JUDGE,hc,b),ljust(Name(%0),15))] [ansi(y,ljust(get(%0/Alias),5))] [ansi(r,rjust(u(Onfor,%0),9))] [ansi(m,rjust(u(Idle,%0),4))] [ansi(g,ljust(get(%0/Class),14))] [ansi(hr,ljust(get(%0/Empire),14))]
+&FOOTER Master WHO List=[repeat([ansi(c,~)],79)]
+&HEADER Master WHO List=%t%t%t%t%b[ansi(hb,**)][ansi(hr,T)][ansi(c,r)][ansi(hy,e)][ansi(g,k)][ansi(r,W)][ansi(hc,a)][ansi(y,r)][ansi(hg,s)][ansi(hb,**)]%r[ansi(hc,Sta)] [ansi(hc,Sex)] [ansi(hc,Name)][space(12)][ansi(hc,Alias)][space(2)][ansi(hc,On For)][space(3)][ansi(hc,Idle)][space(5)][ansi(hc,Class)][space(10)][ansi(hc,Empire)]%r[u(line2)]
+&EMPIRE_FILTER Master WHO List=[switch(get(%0/Empire),get(%#/Empire),1,0)]
+&SEE_ALL Master WHO List=[or(hasflag(%0,wizard),haspower(%0,see_all))]
+&IDLESCALE Master WHO List=[switch(lt(%0,60),1,seconds,switch(lt(%0,3600),1,minutes,switch(lt(%0,86400),1,hours,days)))]
+&DAYS Master WHO List=[div(%0,86400)]
+&CAN_SEE Master WHO List=[or(u(see_all),not(hidden(%1)))]
+&MINUTES Master WHO List=[switch(lt(div(mod(%0,3600),60),10),1,0[div(mod(%0,3600),60)],div(mod(%0,3600),60))]
+&HOURS Master WHO List=[switch(lt(div(mod(%0,86400),3600),10),1,0[div(mod(%0,86400),3600)],div(mod(%0,86400),3600))]
+@IDLE Master WHO List=[ufun(fun_time,idle(%0))]
+&FLAG Master WHO List=[switch(get(%0/Class),Builder,BUILDER,switch(get(%0/admin),space,SPACE,switch(get(%0/admin),head,HEAD,switch(get(%0/admin),theme,THEME,switch(hasflag(%0,Judge),1,JUDGE,switch(hasflag(%0,WIZARD),1,WIZARD,switch(hasflag(%0,Royalty),1,ROYALTY,,OTHER)))))))]
+@VC Master WHO List=$eall:@pemit %#=[u(EALL_HEADER)][iter(filter(Empire_Filter,lsearch(all, type, player)),switch(u(Can_See,%#,##),1,%r[u(EALL_ENTRY,##)]))]%r[ansi(hm,There are [words([filter(Empire_Filter,lsearch(all, type, player)])])] players in Empire [get(%#/empire)]%r[ansi(r,Wizard)] - [ansi(hy,Royalty)] - [ansi(c,Builder)] - [ansi(hg,Space Admin)] - [ansi(hm,Empire Head)] - [ansi(b,Player)] - [ansi(hb,Theme Admin)]
+&EALL_HEADER Master WHO List=[ansi(hb,repeat(-,79))]%r[center(StarWars-StarTrek,79)]%r[center([eval(%#,empire)] Members,79)]%r[ansi(hb,repeat(-,79))]%r[ansi(c,Name%b%b%b%b%b%b%b%b%b%b%bAlias%bDivision%b%b%b%b%b%bClass%b%b%b%b%b%b%b%b%b%bOrganization%b%b%b%b%b%bConn.)]%r[ansi(hr,repeat(~,79))]
+&EALL_ENTRY Master WHO List=[ansi(switch(u(Flag,%0),JUDGE,hc,SPACE,hg,HEAD,hm,THEME,hb,WIZARD,r,ROYALTY,hy,BUILDER,c,b),ljust(Name(%0),15))][ansi(y,ljust(get(%0/Alias),6))][ansi(r,ljust(mid(get(%0/Division),0,14),14))][ansi(g,ljust(get(%0/class),15))][ansi(hr,ljust(get(%0/organization),17))][switch(conn(%0),-1,{[ansi(hc,[ljust(mid([get(%0/last)],3,7),5)])]},{[ansi(c,[ljust(Connected,5)])]})]
+&RECORD Master WHO List=3
+@VD Master WHO List=$eall *:@pemit %#=[u(EALL_HEADER)][iter(lsearch(all, type, player),switch(get(*##/Empire),%0,{%r[edit([u(EALL_ENTRY,##)],%r,)]},[squish({})]))]%r[ansi(r,Wizard)] - [ansi(hy,Royalty)] - [ansi(c,Builder)] - [ansi(hg,Space Admin)] - [ansi(hm,Empire Head)] - [ansi(b,Player)] - [ansi(hb,Theme Admin)]
+&EALL_FILTER Master WHO List=[switch(get(%0/Empire),%0,1,0)]

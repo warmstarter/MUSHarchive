@@ -1,0 +1,32 @@
+@create PARENT: Ship Zone
+@link PARENT: Ship Zone=[loc(owner(me))]
+@lock/Zone PARENT: Ship Zone==[owner(me)]
+@lock/Basic PARENT: Ship Zone==[owner(me)]
+@set PARENT: Ship Zone = DARK
+@set PARENT: Ship Zone = INHERIT
+@set PARENT: Ship Zone = LINK_OK
+@set PARENT: Ship Zone = OPAQUE
+@set PARENT: Ship Zone = WIZARD
+@set PARENT: Ship Zone = SAFE
+@set PARENT: Ship Zone = MONITOR
+&ALERT PARENT: Ship Zone=BLUE
+&WHITE-1 PARENT: Ship Zone=$white alert:@pemit %#=Initiating [ansi(hw,WHITE)] alert.;@zemit %!=[ansi(hw,::: WHITE ALERT ::: ::: WHITE ALERT ::: ::: WHITE ALERT :::)]%rWhite alert has been initiated by %n. All hands abandon ship!;&alert me=[ansi(hw,WHITE)]
+&BLUE-1 PARENT: Ship Zone=$blue alert:@pemit %#=Initiating [ansi(hb,BLUE)] alert.;@zemit %!=[ansi(hb,### BLUE ALERT ### ### BLUE ALERT ### ### BLUE ALERT ###)]%rBlue alert has been initiated by %n. All hands prepare for docking or landing.;&alert me=[ansi(hb,BLUE)]
+&INTRUDER-1 PARENT: Ship Zone=$intruder alert:@pemit %#=Initiating [ansi(hr,INTRUDER)] alert.;@zemit %!=[ansi(hr,||| INTRUDER ALERT ||| ||| INTRUDER ALERT |||)]%rIntruder alert has been initiated by %n. All hands prepare to repel boarder(s).;&alert me=[ansi(hr,INTRUDER)]
+&CLOAK-1 PARENT: Ship Zone=$cloak alert:@pemit %#=Initiating [ansi(y,CLOAK)] alert.;@zemit %!=[ansi(y,/// INTRUDER ALERT \\\ /// INTRUDER ALERT \\\)]%rCloak alert has been initiated by %n. All hands prepare for cloaked flight mode.;&alert me=[ansi(y,CLOAK)]
+&RED-1 PARENT: Ship Zone=$red alert:@pemit %#=Initiating [ansi(fhr,RED)] alert.;@zemit %!=[ansi(fhr,=== RED ALERT === === RED ALERT === === RED ALERT ===)]%rRed alert has been initiated by %n. All hands to battlestations!;&alert me=[ansi(fhr,RED)]
+&YELLOW-1 PARENT: Ship Zone=$yellow alert:@pemit %#=Initiating [ansi(hy,YELLOW)] alert.;@zemit %!=[ansi(hy,*** YELLOW ALERT *** *** YELLOW ALERT *** *** YELLOW ALERT ***)]%rYellow alert has been initiated by %n. All hands be prepared in the event that a emergency situation arises.;&alert me=[ansi(hy,YELLOW)]
+&GREEN-1 PARENT: Ship Zone=$green alert:@pemit %#=Initiating [ansi(hg,GREEN)] alert.;@zemit %!=[ansi(hg,+++ GREEN ALERT +++ +++ GREEN ALERT +++ +++ GREEN ALERT +++)]%rGreen alert has been initiated by %n. All hands stand down from alert.;&alert me=[ansi(hg,GREEN)]
+&ASLEEP PARENT: Ship Zone=[ljust(Asleep,7)][ansi(g,|)][ljust(mid(cat(class(%0),name(%0)),0,20),20)][ansi(g,|)][ljust(get(%0/race),10)][ansi(g,|)][mid(name(loc(%0)),0,26)]%r
+&AWAKE PARENT: Ship Zone=[ansi(hc,[ljust(Awake,7)])][ansi(g,|)][ansi(hc,[ljust(mid(cat(class(%0),name(%0)),0,20),20)])][ansi(g,|)][ansi(hc,[ljust(get(%0/race),10)])][ansi(g,|)][ansi(hc,[ljust([mid(name(loc(%0)),0,26)],26)]%r)]
+&LOCATE PARENT: Ship Zone=$locate *:[pemit(%#,You say, "Computer, locate %0.")][oemit(%L/%#,%n says, "Computer, locate %0.")][switch([isinzone([num(*%0)],[zone(loc(*%#))])],1,{[remit([loc(%#)],[ansi(b,The computer chirps, ")][ansi(g,[class(*%0)] [name(*%0)] is located at [name([loc(*%0)])])][ansi(b,")].)]},0,{[switch([hastype(*%0,player)],1,[remit([loc(%#)],[ansi(b,The computer chirps, ")][ansi(g,[class(*%0)] [name(*%0)] is not onboard the [v(shipname)].)][ansi(b,")])],#-1,[remit([loc(%#)],The computer chirps, "[ansi(c,%0 is not onboard the [v(shipname)])].")])]})]
+&LISTON PARENT: Ship Zone=$list onboard:@pemit %#=You say, "Computer, list onboard.";@oemit %L/%#=%n says, "Computer, list onboard";@pemit %#=[u(bar)]%r%b[ljust(Status,7)][ansi(g,|)][ljust(Name,20)][ansi(g,|)][ljust(Race,10)][ansi(g,|)] Location%r[ansi(g,--------+[repeat(-,20)]+[repeat(-,10)]+[repeat(-,27)])];@pemit %#=[space(1)][iter(pinzone([zone(loc(%#))]),[ifelse(isconn(##),u(awake,##),u(asleep,##))])];@wait 1=@pemit %#=[u(endbar)]
+&LISTON2 PARENT: Ship Zone=$$List onboard:@pemit %#=You say, "Computer, list onboard.";@oemit %L/%#=%n says, "Computer, list onboard";@pemit %#=[u(bar)]%r%b[u(entry)]%r[u(endbar)]
+&BAR PARENT: Ship Zone=%b[ansi(b,[repeat(_,5)])][space(45)][ansi(b,[repeat(_,17)]%r[ansi(b,\()][ansi(b,[repeat(_,5)])][ansi(b,|)]%b[ansi(r,Internal Sensors)]%b[ansi(g,[time()])]%b[ansi(b,|)][ansi(b,[repeat(_,17)])][ansi(b,\))]%r
+&ENDBAR PARENT: Ship Zone=%b[ansi(b,[repeat(_,5)])][space(13)][ansi(b,[repeat(_,22)][space(14)][ansi(b,[repeat(_,9)])]%r[ansi(b,\()][ansi(b,[repeat(_,5)])][ansi(b,|)]%b[ansi(g,[get(me/shipname)])]%b[ansi(b,|)][ansi(b,[repeat(_,22)])][ansi(b,|)]%b[ansi(g,LCARS [rand(9)][rand(9)][rand(9)][rand(9)]%b[ansi(b,|)][ansi(b,[repeat(_,9)])][ansi(b,\))]
+&ENTRY PARENT: Ship Zone=[iter([pinzone(me)],[ansi(g,[name(##)])]%r)]
+&LIGHTS_ON PARENT: Ship Zone=$raise:@remit %l=[name(%#)] says, "Computer raise lights.";@swi [true(xget(%l,DIM_STAT))][true(xget(%l,desc_copy))]=0*,{&DIM_STAT %l=Bright},*0,{@cpa %l/desc=%l/desc_copy},**0,;@swi [setq(0,[xget(%l,DIM_STAT)])][strmatch(%q0,Dim)][strmatch(%q0,Dark)]=00,{@remit %l=The Computer says, "[ansi(c,Illumination already at it's maximum intensity.)]"},01,{@remit %l=The Computer says, "[ansi(c,Illumination intensity increased to 50%%)]." as the lights of the room increase.;&DIM_STAT %l=Dim;@desc %l=[xget(%l,dim_desc)];@set %l=!dark},10,{@remit %l=The Computer says, "[ansi(c,Illumination raised maximum)]." as the lights increase to full lighting.;&DIM_STAT %l=Bright;@desc %l=[xget(%l,desc_copy)];@wipe %l/describe;@set %l=dark}
+&LIGHTS_OFF PARENT: Ship Zone=$dim:@remit %l=[name(%#)] says, "Computer dim lights.";@swi [true(xget(%l,DIM_STAT))][true(xget(%l,desc_copy))]=0*,{&DIM_STAT %l=Bright},*0,{@cpa %l/desc=%l/desc_copy},;@swi [setq(0,[xget(%l,DIM_STAT)])][strmatch(%q0,Dim)][strmatch(%q0,Dark)]=00,{&dim_stat %l=Dim;@desc %l=[xget(%l,dim_desc)];@remit %l=The Computer says, "[ansi(c,Illumination intensity decreased to 50%%.)]" as the lights to the room dim.},10,{@remit %l=The Computer says, "[ansi(c,Illumination intensity decreased to 0%%.)]" as the lights shifts off and darkness shrouds the room.;&DIM_STAT %l=Dark;@set %l=dark;@desc %l=Darkness prevails everywhere.},01,{@remit %l=The computer says, "[ansi(c,Illumination already at is lowest setting.)]"}
+&INTERCOM-1 PARENT: Ship Zone=$int *:@zemit %!=[ansi(hb,<)][ansi(hy,Intercom)][ansi(hb,>)] [switch(mid(%0,0,1),:,[ansi(hg,[name(%#)])]%b[ansi(hr,[mid(%0,1,strlen(%0))])],;,[ansi(hg,[name(%#)])][ansi(hr,[mid(%0,1,strlen(%0))])],{[ansi(hg,[name(%#)])] [ansi(r,says%, ")][ansi(hr,%0)][ansi(r,")]})]
+&LIST_MOTD PARENT: Ship Zone=$+motd:@pemit %#=[ansi(hb,repeat(~*,39))]%r[v(motd)]%rType `+Motd' to see this message again.%r[ansi(hb,repeat(~*,39))]
+&SET_MOTD PARENT: Ship Zone=$+setmotd *:&motd me=%0;@pemit %#=MOTD Changed.

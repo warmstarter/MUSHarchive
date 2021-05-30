@@ -1,0 +1,47 @@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@
+@@    Project Status Tracker
+@@    Coded by BEM@Granite
+@@    Platform:  TinyMUSH 2.2.3
+@@    Purpose:  To help staff and builders track the progress of various
+@@                      projects on a busy MUSH.
+@@
+@@    Features: The ability to view, set, edit and remove project information.
+@@    
+@@              CMD-TRACKER-HELP is the help file and may be adapted to your
+@@    your game's +help or +staffhelp system.
+@@
+@@
+@@    Notes:        &CANUSE uses a special softcoded function FN_ISSTAFF.  
+@@    Our Current version is:          
+@@
+@@                  &FN_ISSTAFF Global Functions=orflags(%0,Wi)
+@@
+@@             
+@@    This code may be redistributed freely, so long as the &credits 
+@@    @comment remain in tact
+@@
+
+
+@create Project Status Tracker=10
+@lock Project Status Tracker=CANUSE/1
+&CANUSE Project Status Tracker=[or(isstaff(%#),hasflag(%#/BUILDER))] 
+&CMD-SETPROJECT Project Status Tracker=$+setproject */*/*:@switch hasattr(me,setq(0,list-[edit(secure(%0),%B,_)])%q0)=1, @pemit %#=Project '%0' already exists., {&%q0 [parent(me)]=secure(%0)|%1|%2; @pemit %#=Entry for '%0' created.}
+&CMD-VIEWPROJECTS Project Status Tracker=$+viewprojects: @pemit %#=repeat(=,78)%R[ljust(Project,25)] [ljust(Coder,20)] [ljust(STATUS,26)]%R[repeat(=,78)]; @dolist lattr(parent(me)/list-*)=@pemit %#=ljust(extract(v(##),1,1,|),26) [ljust(extract(v(##),2,1,|),20)] [ljust(extract(v(##),3,1,|),26)];@wait 1=@pemit %#=repeat(=,78)%r
+&CMD-EDITPROJECT Project Status Tracker=$+editproject */*=*: @switch hasattr(me,setq(0,list-[edit(%0,%B,_)])%q0)=0, @pemit %#=No project '%0' listed., {@switch %1=who, {&%q0 [parent(me)]=replace(v(%q0),2,%2,|); @pemit %#=Who set to '%2'.},status, {&%q0 [parent(me)]=replace(v(%q0),3,%2,|); @pemit %#=Status set to '%2'.},@pemit %#=Field should be /who or /status.}
+&CMD-DELETEPROJECT Project Status Tracker=$+deleteproject *: @switch hasattr(me,setq(0,list-[edit(%0,%B,_)])%q0)=0, @pemit %#=No project '%0' listed., {&%q0 [parent(me)]; @pemit %#=Project '%0' deleted.}
+&CMD-TRACKER_HELP Project Status Tracker=$+trackerhelp:@pemit %#=[repeat(=,78)]%R[center(Project Tracker Help,78, )]%R%T+setproject <project name>/<coder name>/<status>%R%T+viewprojects%R%T+editproject <project name>/who=<coder name>%R%T+editproject <project name>/status=<status>%R%T+deleteproject <project name>%R%T+trackerhelp -- Gets this screen.%R%RThe project name, and the other fields, can have spaces in them.%R%Rby BEM@Granite%R[repeat(=,78)]
+@comment Project Status Tracker=This code may be redistributed freely, so long as the &credits and @comment remain in tact.%RPurpose:  To help staff and builders track the progress of various projects on a busy MUSH.
+&CREDITS Project Status Tracker=%R%TProject Status Tracker by BEM@Granite July 1997%RPlatform:  TinyMUSH 2.2.3
+@set Project Status Tracker=INHERIT
+@set Project Status Tracker=COMMANDS
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@
+@@      Create the parent object and @parent 
+
+@create PARENT: Project Status Tracker=10
+
+@parent Project Status Tracker=PARENT: Project Status Tracker 
+
+

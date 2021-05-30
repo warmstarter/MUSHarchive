@@ -1,0 +1,25 @@
+@@ Global ToDo System
+@@ For the purpose of keeping track of tasks, this system allows one to
+@@ add a task, and others to comment on the task as it is worked on until
+@@ completion.
+@@ Coded by Pym@SW: Galaxy <ender@his.com>, 1999.
+@@ Works on TinyMUSH with ansi enabled. No other mods need to be made
+@@ I think, Penn should work well too. Just quote this file in.
+
+@create ToDo Command Object
+@create ToDo Database
+@fo me=@va ToDo Command Object=[num(ToDo Database)]
+
+&DO_TODO ToDo Command Object=$+todo:@pemit %#=[ansi(gh,ljust(==< To DO List>,75,=))]%r%r##.....Desc.........................Last Touched..................# Notes[iter(lattr(%va/TODO_*),%r[ljust(mid(##,5,6),7)][ljust(mid(first(setr(0,get(%va/##)),|),0,28),29)][ljust(switch(words(setr(4,last(%q0,|)),@),0,[ansi(g,None since creation.)],convsecs(extract(u(fun_nexttolast,%q4,@),2,1,^))),30)][switch(setr(6,words(extract(%q0,5,1,|),@)),0,0,sub(%q6,1))])]%r[ansi(gh,rjust(< mudname() >==,75,=))]
+
+&DO_TODO_ADD ToDo Command Object=$+todo/add *=*:@switch [hasattr(%va,TODO_%0)]=0,{&todo_[get(%va/COUNT)] %va=%0|%#|[secs()]|%1|;@pemit %#=You have added a ToDo about '%0'.;&count %va=[add(get(%va/COUNT),1)]},1,{&TODO_%0 %va=[get(%va/TODO_%0)]%#^[secs()]^%1@;@pemit %#=You add to ToDo entry %0.}
+
+&DO_TODO_DETAILS ToDo Command Object=$+todo *:@pemit %#=[switch(hasattr(%va,TODO_%0),0,No such ToDo.,{[setq(0,get(%va/TODO_%0))][setq(1,extract(setr(8,last({%q0},|)),1,sub(words(%q8,@),1),@))][ansi(gh,ljust(==< To Do Detail >,75,=))]%r[extract(%q0,1,1,|)] %(submitted by [name(extract(%q0,2,1,|))]%)%r[convsecs(extract(%q0,3,1,|))]%r%r[extract(%q0,4,1,|)]%r[repeat(.,75)][iter({%q1},{%r[ansi(gh,%[[name(extract({##},1,1,^))] - [extract(convsecs(extract({##},2,1,^)),2,2)]%])] [extract({##},3,1,^)]},@)]%r[ansi(gh,rjust(< mudname() >==,75,=))]})]
+
+&DO_TODO_FINISH ToDo Command Object=$+todo/done *=*:@switch [hasattr(%va,TODO_%0)]=0,@pemit %#=No such ToDo.,&DONE_TODO_%0 %va=[get(%va/TODO_%0)]|%#|%1;&TODO_%0 %va;@pemit %#=ToDo #%0 resolved with reason '%1'.
+
+@tel ToDo Database=ToDo Command Object
+@set ToDo Command Object=commands
+@set ToDo Command Object=safe
+
+@pemit me=>>> ToDo Machine Done!

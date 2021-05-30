@@ -1,0 +1,205 @@
+#  Author:  Ellan West  (Ellan@Lost Tribes [lost.strange.com 1066])
+#  Format:  Ellan West (12/30/96)
+###################################################################################
+#  The Exit parenting system was originally the brainchild of Port@Soucon Mush
+#  It has been extensively rewritten in the ensuing 6 years.
+#
+#  It's function is to provide routines and messages for exits that replace the
+#  normal succ, osucc, odrop messages and are tailored for humans, dogs, cats, 
+#  horses, birds, boats, wagons and 'other'. 
+#
+#  To set up an exit for this parent,  
+#         @parent <exitname> = #72 for land/buildings 
+#                          or  #73 for sea/water. 
+#                          or  #300 for a sky exit
+#  For an exit that is at the interface between land & sea, land & sky, or sea & sky
+#  the best results seem to be by using the parent for the destination terrain.
+#
+#  Remove any old succ, osucc, odrop , drop from the exits as they will override the
+#  custom-species messages. 
+#
+#  Two new attributes are needed to complete the process:
+#         &place <exitname>=<phrase telling where the exit goes>
+#         &place2 <exitname>=<phrase telling where the exit comes from>
+#
+#  Example: For an exit leading from a kitchen to a porch,
+#         &place <out>=the porch, just outside the old screen door
+#         &place2 <out>=inside the house, from the kitchen
+#
+#  The &place and &place2 phrases can be very complex, the code passes on most standard
+#  substitutions and will evaluate simple functions that are written on the local exit.
+#  You can use switch() and u() but not @switch.
+# 
+#  CREDITS: Port@Soucon Sioned@Soucon Tragor@PernMUSH Jenessa@Conspiracy!
+##########################################################################################
+#  CONFIGURATION NOTES:
+#
+#  Before posting the above as a helpscreen, be sure to edit the dbref numbers.
+#
+#  The attribute &species, &place and &place2 need to be reserved.
+#  @attribute/access species=wizard !private !hidden !internal
+#
+#  &place and &place2 do not need special settings, they are read only by the exit
+#  they are written on, and any player needs to be able to write them on their own exits. 
+# 
+##########################################################################################     
+#  Create the primary parent (Only parent, if you have no sea or sky rooms)
+@create Exit: Land parent=1
+-
+#  Generic desc for transparent child exits. (This is overridden by local descriptions.)
+@Desc Exit: Land parent=You look and see...
+-
+#  Generic filter for audible child exits.
+@Filter Exit: Land parent=* has connected.
+                         ,* has disconnected.
+                         ,* has left.
+                         ,* has arrived.
+                         ,* goes home.
+                         ,*grows ears* 
+-
+# Formulas that evaluate enactor gender and species to select random verbs and combine them
+# with the child exit's &place and/or &place2 to emit custom phrases in place of standard
+# @succ, @osucc, @odrop (No @drop is provided, though it would be fairly easy to create one.
+# The logic being to avoid spam, and leave @drop universally available for the local builder
+# to enhance terrain with 'panoramic' text describing one's transit through an exit.
+@Succ  Exit: Land parent = You [setq(0,default(%#/species,none))]
+                    [edit(first(index(u(r(0)),|,add(rand(words(u(r(0)),|)),1),1)),_,space(1))]
+                    towards [u(place)].
+-
+@Osucc Exit: Land parent = [setq(0,default(%#/species,none))]
+                    [edit(rest(index(u(r(0)),|,add(rand(words(u(r(0)),|)),1),1)),_,space(1))]
+                    towards [u(place)].
+-
+@Odrop Exit: Land parent = [setq(0,default(%#/species,none))]
+                    [edit(rest(index(u(r(0)),|,add(rand(words(u(r(0)),|)),1),1)),_,space(1))] 
+                    over from [u(place2)].
+-
+#  The default location phrase (Notice that there is no closing period on these phrases. 
+#  That is provided in the code above.)
+&PLACE  Exit: Land parent=this place
+-
+&PLACE2 Exit: Land parent=the other place
+-
+#  And default verbs for items or players with no &species set.
+&NONE Exit: Land parent=move moves
+-
+#  Verb lists for the most common &species possibilities. Delete lines you won't use
+#  or add more before uploading. This new format makes it fairly easy to add more 
+#  options as long as the verbs are edited in pairs of the form 'singularverb pluralverb|'. 
+&ELF Exit: Land parent=walk walks|stride strides|saunter saunters|move moves|hurry 
+                    hurries|stroll strolls|step steps|walk_lightly walks_lightly 
+-
+&TROLL Exit: Land parent=walk walks|stride strides|saunter saunters|move moves|hurry 
+                    hurries|stroll strolls|step steps
+-
+&HUMAN Exit: Land parent=walk walks|stride strides|saunter saunters|move moves|hurry 
+                    hurries|stroll strolls|step steps
+-
+&WORM Exit: Land parent=slither slithers|slink slinks|slide slides|wriggle 
+                    wriggles|squiggle squiggles|crawl crawls|slip slips
+-
+&BUG Exit: Land parent=creep creeps|crawl crawls|sneak sneaks|infest infests|invade 
+                   invades|encroach encroaches
+-
+#  Notice that birds fly even on the ground, in this sample. If you wish, you can 
+#  insert more groundish verb sets, and make them only fly in the sky, by moving
+#  this &bird onto the sky parent.  Either works nicely.
+&BIRD Exit: Land parent=flit flits|fly flies|flap flaps|wing wings|soar soars|swoop 
+                   swoops|drift drifts|glide glides|coast coasts|dart darts|wheel 
+                   wheels|bank banks|sail sails 
+-
+&HORSE Exit: Land parent=trot trots|walk walks|canter canters|lope lopes|romp 
+                   romps|move moves|run runs|hurry hurries|gallop gallops
+-
+&WOLF Exit: Land parent=trot trots|walk walks|lope lopes|romp romps|move moves|run 
+                   runs|pad pads|hurry hurries|slink slinks|slip slips|stalk 
+                   stalks|saunter saunters
+-
+#  Notice that you can have verb pairs with multiple words as long as they are in the form
+#  singular_verb_phrase plural_verb_phrase|
+&CAT Exit: Land parent=slink slinks|walk walks|romp romps|move moves|run runs|pad 
+                   pads|stalk stalks|slink_stealthily slinks_stealthily|romp_playfully 
+                   romps_playfully|purr_and_pad purrs_and_pads|move_sinuously moves_sinuously
+-
+#  Notice that you can use functions to refer to similar verb lists, to save retyping:
+&DOG Exit: Land parent=[u(wolf)]
+-
+&FOX Exit: Land parent=[u(cat)]
+-
+&PRESERVER Exit: Land parent=[u(bird)]
+-
+#  Notice that you can have really-really-really personalized verb sets for individual
+#  species or even individual members of a species (By setting species to panther1 or wolf2)
+&PANTHER Exit: Land parent=pad pads|slink slinks|move_fluidly moves_fluidly|move 
+                   moves|walk walks|prowl prowls|pad_on_silent_feet 
+                   pads_on_silent_feet|gingerly_pick_your_way gingerly_picks_%p_way|romp 
+                   romps|run runs|stalk stalks|tread treads|pad_stealthily
+                   pads_stealthily|move_silently moves_silently|pad_silently 
+                   pads_silently|pace paces|run runs|slink_stealthily 
+                   slinks_stealthily|move_sinuously 
+                   moves_sinuously|move_with_a_twitch_of_your_tail 
+                   moves_with_a_twitch_of_%p_tail|plod plods|fade fades
+-
+#  Notice that you can provide default verbs for non living things.... And that you .need.
+#  These even if you do create the sea parent.
+&BOAT Exit: Land parent=tack tacks|glide glides|float floats|sail sails|move 
+                   moves|drift drifts
+-
+&WAGON Exit: Land parent=roll rolls|move moves|wheel wheels
+-
+@set Exit: Land parent=PARENT_OK
+-
+@set Exit: Land parent=SAFE
+-
+############################ Sea Parent ##################################################
+# Create the sea exit, so that normally striding things swim instead
+@create Exit: Sea Parent=1
+-
+#  With default messages incase no species is set...
+&NONE Exit: Sea Parent=float floats
+-
+#  Notice that you need to use the same &attribute names you used on the land parent
+#  for any species you expect to find in the sea rooms and that you can lock on SPECIES:X
+#  to keep species out, or in their areas. (Including underwater fish, as below)
+&HUMAN Exit: Sea Parent=paddle paddles|splash splashes|float floats|swim swims|paddle paddles
+-
+&ELF Exit: Sea Parent=paddle paddles|glide glides|splash 
+                  splashes|float floats|swim swims|paddle paddles|glide glides
+-
+&TROLL Exit: Sea Parent=paddle paddles|splash splashes|float floats|swim swims|paddle paddles
+-
+&FISH1 Exit: Sea Parent=dive dives|float floats|swim swims|move moves|drift 
+                  drifts|splash splashes
+-
+&FISH2 Exit: Sea Parent=[u(fish1)]
+-
+@set Exit: Sea Parent=PARENT_OK
+-
+@set Exit: Sea Parent=SAFE
+-
+################################ Sky Parent ##############################################
+#  If you have separate sky, create this last part, otherwise, delete the following lines.
+@create Exit: Sky Parent=1
+-
+#  Make it embarrasing for unwinged or non levitation types to be here :)
+&NONE Exit: Sky Parent=fall falls
+-
+#  If you have elves or magicians or spacesuits....
+&ELF Exit: Sky Parent=glide glides|soar soars|lift lifts|swoop swoops|bank banks|drift drifts
+-
+&HUMAN Exit: Sky Parent=fall falls
+-
+&TROLL Exit: Sky Parent=fall falls
+-
+##  End of SKY
+# 
+#  Set up the sub-type exit parents to inherit the main attribs of the 
+#  main exit parent.  If you are not using sky or sea parents, merely
+#  delete the appropriate lines which follow.
+@parent Exit: Sky Parent=Exit: Land parent
+-
+@parent Exit: Sea Parent=Exit: Land parent
+-
+@pemit me=>> Exit parent installation complete.
+-
+##############################  End ########################################

@@ -1,0 +1,400 @@
+@@
+@@ MUSH resources/money system
+@@   Concept, Design, and Code by Javelin
+@@   Originally for (now defunct) Riverworld MUSH
+@@   Copyright (c) 2000 by Alan Schwartz ("Javelin")
+@@   May be distributed under the same terms as PennMUSH
+@@
+@@ NO SUPPORT IS PROVIDED. GOOD LUCK.
+@@ 
+@@ The concept:
+@@
+@@ Players may control a wide variety of resources. We keep track
+@@ of how much of each resource a player carries, and implement code
+@@ which allows players to give resources to one another, 
+@@ drop resources, or destroy resources. A resource might be
+@@ wood, money, brandy, etc.
+@@
+@@ In addition, rooms which have the Dspace parent room in their
+@@ parent list may contain attributes of the form RES_<NAME>
+@@ These attribs contain the number of units of that resource
+@@ that can be extracted from the room, and optionally a list
+@@ of ability:minimum's that must be met.
+@@ If so, the +gather <name> command can be used to get
+@@ a unit of the resource. 
+@@
+@@
+@@ Implementation:
+@@
+@@ We'll store resources on the player, in the RESOURCES attribute
+@@ We'd like to store them in this format:
+@@   Name:Amt Name:Amt Name:Amt
+@@ A major potential problem is that we'll run out of space in the
+@@ attribute, so we're going to abbreviate resource names with
+@@ numbers, which we'll look up on the Resource DB:
+@@   Res#:Amt Res#:Amt etc.
+@@
+@@ The resource db will contain an attribute for each resource number
+@@ in play. The contents will include the resource name, singular
+@@ unit name, plural unit name, and weight per unit, in case we
+@@ want to enforce that.
+@@
+@@ We'll also need some admin commands to create a new resource
+@@ at runtime.
+
+@@
+@@ Create the basic objects
+@@
+
+@create Resource Commands
+@set Commands=safe
+@desc commands=This object contains the commands for the resource system
+@startup commands=@drain me; @notify me
+@tr commands/startup
+@set commands=!no_command
+@set command=wizard
+
+@create Resource Functions
+@desc functions=This object contains the functions for the resource system
+@set func=safe
+@listen func=Created: Object *.
+@aahear func=&db me=%0; @listen me; @aahear me
+@fo func=@create Resource DB
+@fo func=drop Resource DB
+@listen func=Created: Object *.
+@aahear func=&par me=%0; @listen me; @aahear me
+@fo func=@create Resource Parent
+@fo func=drop Resource Parent
+
+@desc DB=This object contains the database for the resources system%r
+	Resources are stored in numbered attributes, and include
+	resource name, singular unit, plural unit, and weight in pounds,
+	separated by colons. Resources attributes are R1...
+        The NEXTR attrib stores the next available number.
+@set db=safe
+&NEXTR db=1
+
+@desc Parent=This is the parent object for dropped resources.
+@set parent=safe
+@succ parent=You pick up [name(me)].
+@osucc parent=picks up [name(me)].
+@asucc parent=+resources/qset %#/[v(type)]=+[v(amt)]; @dest me; @dest me
+@fail parent=You can't carry that much.
+&amt parent=0
+&canget parent=[u(cancarry,%#,v(amt),v(rtype))]
+@parent parent=func
+
+@parent commands=functions
+
+@@
+@@ Some basic functions for working with the db
+@@
+
+@@ Get the list of resource numbers
+&fn_resources func=[lattr([v(db)]/R*)]
+
+@@ Given a resource number, get its name, singular, plural, or weight
+&fn_resname func=[extract(get([v(db)]/%0),1,1,:)]
+&fn_ressing func=[extract(get([v(db)]/%0),2,1,:)]
+&fn_resplur func=[extract(get([v(db)]/%0),3,1,:)]
+&fn_reswgt func=[extract(get([v(db)]/%0),4,1,:)]
+
+@@ Given a resource number and an amount, return the amount and units
+&fn_resfmt func=[switch(1,eq(%1,0),no [u(fn_resplur,%0)],%1,
+	one [u(fn_ressing,%0)],%1 [u(fn_resplur,%0)])]
+
+@@ Given a resource name, return matching resource numbers
+&fil_name func=[strmatch(u(fn_resname,%0),%q0)]
+&fn_matches func=[setq(0,%0)][filter(fil_name,u(fn_resources))]
+
+@@ Return the list of resource numbers sorted by name
+&fn_resourcesbyname func=[setq(0,u(fn_resources))]
+	[munge(mn_namesort,map(fn_resname,%q0),%q0)]
+&mn_namesort func=[sort(%0)]
+
+@@ Are you an admin?
+&isadmin func=[orflags(%0,Wr)]
+@@ Are you a resource object? We must have the same owner and I'm your home
+&isresobj func=[and(strmatch(owner(%0),owner(me)),strmatch(home(%0),num(me)))]
+
+@@ Can %0 carry %1 of %2?
+&cancarry func=1
+
+@@
+@@ Admin commands:
+@@
+@@ +resources/info		list all resources
+@@ +resources/info <name>	list info on named resource
+@@ +resources/delete <name>	delete resource
+@@ +resources/add <name>=<sing>,<plur>,<wgt>	add resource
+@@ +resources/set <player>/<name>=[+|-]<amt>
+@@
+@@ NB: +resources/set can be run by admin or by resource objects
+@@ A resource object basically runs it from its asucc.
+@@
+
+&fmt_res func=1 [u(fn_ressing,%0)] of [u(fn_resname,%0)] weighs [u(fn_reswgt,%0)] lbs.
+
+&do_info command=$+resources/info:
+	@pemit %#=[switch(u(isadmin,%#),0,Permission denied.,
+	Defined resources:%r[table(map(fn_resname,u(fn_resourcesbyname)),15)])]
+
+&do_info_one command=$+resources/info *:
+	@pemit %#=[iter(u(fn_matches,%0),%r[u(fmt_res,##)])]
+
+&do_delete command=$+resources/delete *:
+	@wait me={
+	  @switch 0=[u(isadmin,%#)],
+	    {@pemit %#=Permission denied.; @notify me},
+	   [eq(words(u(fn_matches,%0)),1)],
+	    {@pemit %#=Unknown or ambiguous resource.; @notify me},
+	   { &[u(fn_matches,%0)] [v(db)];
+	     @pemit %#=Resource %0 deleted;
+	     @notify me
+	   }
+	}
+
+&do_add command=$+resources/add *=*,*,*:
+	@wait me={
+	  @switch 0=[u(isadmin,%#)],
+	    {@pemit %#=Permission denied.; @notify me},
+	    {&R[get([v(db)]/NEXTR)] [v(db)] = %0:%1:%2:%3;
+	     &NEXTR [v(db)] = [add(1,get([v(db)]/NEXTR))];
+	     @pemit %#=Resource %0 added.;
+	     @notify me;
+	    }
+        }
+
+&do_set command=$+resources/set */*=*:
+	@wait me={
+	  @switch 0=[or(u(isresobj,%#),u(isadmin,%#))],
+	    {@pemit %#=Permission denied.; @notify me},
+	   [setq(0,locate(%#,%0,TP*))][not(strmatch(%q0,#-1))],
+	    {@pemit %#=I can't find %0; @notify me},
+	   [setq(1,ulocal(fn_matches,%1))][eq(words(%q1),1)],
+	    {@pemit %#=Unknown or ambiguous resource %1.; @notify me},
+           [setq(3,ulocal(fn_resname,%q1))][setq(2,mid(%2,1,strlen(%2)))][not(strmatch(%2,+*))],
+	    { &RESOURCES %q0=[ulocal(fn_add,get(%q0/RESOURCES),%q1,%q2)];
+	      @pemit %#=Added %q2 to [name(%q0)]'s %q3.;
+	      @pemit %q0=%N grants you %q2 more %q3.;
+	      @notify me
+	    },
+	   [not(strmatch(%2,-*))],
+	    { &RESOURCES %q0=[ulocal(fn_subtract,get(%q0/RESOURCES),%q1,%q2)];
+	      @pemit %#=Subtracted %q2 from [name(%q0)]'s %q3.;
+	      @pemit %q0=%N takes %q2 %q3 from you.;
+	      @notify me
+	    },
+	   { &RESOURCES %q0=[ulocal(fn_replace,get(%q0/RESOURCES),%q1,%2)];
+	      @pemit %#=Set [name(%q0)]'s %q3 to %2.;
+	      @pemit %q0=%N sets your %q3 to %2.;
+	      @notify me
+	   }
+	}
+
+@@ For use by objects, this one doesn't show the source.
+&do_qset command=$+resources/qset */*=*:
+	@wait me={
+	  @switch 0=[or(u(isresobj,%#),u(isadmin,%#))],
+	    {@pemit %#=Permission denied.; @notify me},
+	   [setq(0,locate(%#,%0,TP*))][not(strmatch(%q0,#-1))],
+	    {@pemit %#=I can't find %0; @notify me},
+	   [setq(1,ulocal(fn_matches,%1))][eq(words(%q1),1)],
+	    {@pemit %#=Unknown or ambiguous resource %1.; @notify me},
+           [setq(3,ulocal(fn_resname,%q1))][setq(2,mid(%2,1,strlen(%2)))][not(strmatch(%2,+*))],
+	    { &RESOURCES %q0=[ulocal(fn_add,get(%q0/RESOURCES),%q1,%q2)];
+	      @pemit %#=Added %q2 to [name(%q0)]'s %q3.;
+	      @pemit %q0=You have %q2 more %q3.;
+	      @notify me
+	    },
+	   [not(strmatch(%2,-*))],
+	    { &RESOURCES %q0=[ulocal(fn_subtract,get(%q0/RESOURCES),%q1,%q2)];
+	      @pemit %#=Subtracted %q2 from [name(%q0)]'s %q3.;
+	      @pemit %q0=You lose %q2 %q3.;
+	      @notify me
+	    },
+	   { &RESOURCES %q0=[ulocal(fn_replace,get(%q0/RESOURCES),%q1,%2)];
+	      @pemit %#=Set [name(%q0)]'s %q3 to %2.;
+	      @pemit %q0=You have %2 %q3.;
+	      @notify me
+	   }
+	}
+
+
+@@ 
+@@ Player commands:
+@@
+@@ +i(nventory)			list carried resources
+@@ +drop <amt> <name>		drop some (get is handled with 'get')
+@@ +give <player>=<amt> <name>	give some
+@@ +use <amt> <name>		consume some
+@@
+
+&do_inventory command=$+inventory:
+	@pemit %#=You're carrying:%r[table(iter(get(%#/RESOURCES),
+	  [u(fn_resname,before(##,:))]:[after(##,:)]),25)]
+	  
+&do_i command=$+i:
+	@pemit %#=You're carrying:%r[table(iter(get(%#/RESOURCES),
+	  [u(fn_resname,before(##,:))]:[after(##,:)]),25)]
+
+&do_i_admin command=$+i *:
+	@pemit %#=[switch(0,u(isadmin,%#),Permission denied.,
+		   [setq(0,locate(%#,%0,TP*))][comp(%q0,#-1)],
+		   I can't find %0,
+		   [name(%q0)] carries:%r
+		[table(iter(get(%q0/RESOURCES),
+	  [u(fn_resname,before(##,:))]:[after(##,:)]),25)])]
+
+@@ How much %1 does %0 have?
+&fn_hasres func=[setq(0,get(%0/RESOURCES))]
+	[setq(1,after(extract(%q0,match(%q0,%1:*),1),:))]
+	[switch(gt(%q1,0),1,%q1,0)]
+
+@@ Use up some resources
+&do_use command=$+use * *:
+	@wait me={
+	  @switch 1=[lt(%0,1)],
+	    {@pemit %#=You can only use up positive amounts.; @notify me},
+	   [lt(u(fn_hasres,%#,ulocal(fn_matches,%1)),%0)],
+	    {@pemit %#=You don't have %0 %1.; @notify me},
+	   {@pemit %#=You use up [setq(0,ulocal(fn_matches,%1))]
+	     [ulocal(fn_resfmt,%q0,%0)] of [ulocal(fn_resname,%q0)].;
+	    &RESOURCES %#=[ulocal(fn_subtract,get(%#/RESOURCES),ulocal(fn_matches,%1),%0)];
+	    @notify me}
+	}
+
+@@ Drop resources. This is a tricky command because it creates
+@@ a resources object which must be suitably programmed.
+&do_drop command=$+drop * *:
+	@wait me={
+	  @switch 1=[lt(%0,1)],
+	    {@pemit %#=You can only drop positive amounts.; @notify me},
+	   [lt(u(fn_hasres,%#,ulocal(fn_matches,%1)),%0)],
+	    {@pemit %#=You don't have %0 %1.; @notify me},
+	   {@pemit %#=You drop [setq(0,ulocal(fn_matches,%1))]
+	     [setq(1,[ulocal(fn_resfmt,%q0,%0)] of [ulocal(fn_resname,%q0)])]
+	     %q1.;
+	    &RESOURCES %#=[ulocal(fn_subtract,get(%#/RESOURCES),ulocal(fn_matches,%1),%0)];
+	    @va me=[create(%q1,10)];
+	    @parent %va=[v(par)];
+	    &type %va=%1;
+	    &rtype %va=%q0;
+	    &amt %va=%0;
+	    @set %va=dest_ok;
+	    @set %va=no_command;
+	    @set %va=quiet;
+	    @power %va=see_all;
+	    @desc %va=%q1;
+	    @lock %va=canget/1;
+	    @tel %va=%l;
+	    @notify me}
+	}
+	
+
+@@ Give away some resources 
+&do_give command = $+give *=* *:
+	@wait me={
+	  @switch 1=
+	   [setq(9,locate(%#,%0,Pn))][strmatch(%q9,#-1)],
+	    {@pemit %#=I don't see %0 here.; @notify me},
+	   [and(hastype(%q9,player),not(hasflag(%q9,connected)))],
+	    {@pemit %#=You can't give to disconnected players.; @notify me},
+           [lt(%1,1)],
+	    {@pemit %#=You can only give positive amounts.; @notify me},
+	   [setq(0,ulocal(fn_matches,%2))][lt(u(fn_hasres,%#,%q0),%1)],
+	    {@pemit %#=You don't have %1 %2.; @notify me},
+	   [not(u(cancarry,%q9,%1,%q0))],
+	    {@pemit %#=[subj(%q9)] can't carry that much.; @notify me},
+	   {@remit %l=%N gives [name(%q9)]
+	     [ulocal(fn_resfmt,%q0,%1)] of [ulocal(fn_resname,%q0)].;
+	    &RESOURCES %#=[ulocal(fn_subtract,get(%#/RESOURCES),%q0,%1)];
+	    &RESOURCES %q9=[ulocal(fn_add,get(%q9/RESOURCES),%q0,%1)];
+	    @notify me}
+	}
+
+@@ Given a resource list and a resource and an amount,
+@@ subject the amount from the resource and return the list
+&fn_subtract func=[setq(0,match(%0,%1:*))][setq(1,extract(%0,%q0,1))]
+	[setq(2,max(0,sub(after(%q1,:),%2)))]
+	[extract(%0,1,sub(%q0,1))]%b
+	[switch(0,%q0,,%q2,,[before(%q1,:)]:%q2)]%b
+	[extract(%0,add(%q0,1),words(%0))]
+
+&fn_add func=[setq(0,match(%0,%1:*))][setq(1,extract(%0,%q0,1))]
+	[setq(2,add(after(%q1,:),%2))]
+	[extract(%0,1,sub(%q0,1))]%b
+	[switch(0,%q0,%1:%2,%q2,,%1:%q2)]%b
+	[extract(%0,add(%q0,1),words(%0))]
+
+&fn_replace func=[setq(0,match(%0,%1:*))]
+	[extract(%0,1,sub(%q0,1))]%b
+	[switch(0,%2,,%1:%2)]%b
+	[extract(%0,add(%q0,1),words(%0))]
+
+
+
+@@
+@@ Encumbrance addition to MUSH resource system
+@@
+@@ The concept:
+@@
+@@ The MUSH resource system includes a field for the weight of each
+@@ resource in some arbitrary unit (pounds). This code adds in
+@@ these ufuns:
+@@
+@@ fn_encumb(player)     -> Report the # of pounds player carries
+@@ fn_maxencumb(player)  -> Report the # of pounds player can carry
+@@ cancarry(player,amt,resource) -> 1 if player can pick 'em up
+@@
+
+@@ fn_maxencumb on Riverworld is based on the player's Strength stat:
+@@  (10 * str * str)
+@@   1 = 10 lbs
+@@   2 = 40 lbs
+@@   3 = 90 lbs
+@@   4 = 160 lbs
+@@   5 = 250 lbs
+@@ but administrators can carry as much as they want
+&fn_maxencumb func=[switch(u(isadmin,%0),1,9999999,[setq(0,ulocal(getstrength,%0))][mul(10,mul(%q0,%q0))])]
+
+&getstrength func=[setq(0,get(%0/ATTRIBS))][after(extract(%q0,match(%q0,strength:*),1),:)]
+
+@@ fn_encumb just iterates over what they're carrying, adding up
+&fn_encumb func=[fold(add_nums,map(get_wgts,get(%0/RESOURCES)))]
+&add_nums func=[add(%0,%1)]
+&get_wgts func=[mul(after(%0,:),u(fn_reswgt,before(%0,:)))]
+
+@@ cancarry decides if encumb + weight desired < maxencumb
+&cancarry func=[not(gt(add(u(fn_enbum,%0),mul(%1,u(fn_reswgt,%2))),u(fn_maxencumb,%0)))]
+
+
+@@
+@@ cangather(player,ability:minimum list)
+@@ Return 1 if player has all the minimum abilities listed
+@@
+&cangather resource functions = [setq(9,%0)][fold(fn_and,%1,1)]
+&fn_and resource func = [and(%0,u(check,%1))]
+&check resource functions=[not(lt(ulocal(#143/getval,%q9,before(%0,:)),after(%0,:)))]
+
+@@
+@@ +gather <resource>
+@@
+
+&do_gather resource commands = $+gather *:
+	@wait me={
+	  @switch 1=
+	    [not(member(lparent(%l),#22))]
+	     {@pemit %#=You can't find any of that here.; @notify me},
+	    [setq(0,default(%l/res_%0,0))][setq(1,first(%q0))][setq(2,rest(%q0))][lt(%q1,1)],
+	     {@pemit %#=You can't find any of that here.; @notify me},
+	    [not(ulocal(cangather,%#,%q2))],
+	     {@pemit %#=You seem to lack enough ability to do that.; @notify me},
+	    [setq(3,ulocal(fn_matches,%0))][not(u(cancarry,%#,1,%q3))],
+	     {@pemit %#=You can't carry that much.; @notify me},
+           {
+	    @pemit %#=You gather one [u(fn_ressing,%q3)] of [u(fn_resname,%q3)].;
+	    &RESOURCES %#=[ulocal(fn_add,get(%#/RESOURCES),%q3,1)];
+	    &RES_%0 %l=[sub(%q1,1)] %q2;
+	    @notify me}
+	}

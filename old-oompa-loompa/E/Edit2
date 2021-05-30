@@ -1,0 +1,49 @@
+iter([get(#70/sector[get(#71/sector)])],[get(##/xcoord)]|[get(##/ycoord)]|[get(##/zcoord)]|[elements([get(#51/space_icons)],[match([get(#51/space_types)],[get(##/object_type)])])]
+
+1.024|0.0015|3.010| 3|0|3| 2|2|2| 1|0|1| 0|0|2| 0|0|0|[ansi(hy,*)]
+
+get(space sep element)
+extract 1(pipe element)
+extract 2(pipe element)
+extract 4(pipe element)
+
+&map_line[(round(extract(element2))]
+
+
+&map_line2=
+
+replace(round((x coord))=object
+
+
+&test_24 #71=$test24:@dol [get(#70/sector[get(#71/sector)])]=&map_line
+[round([get(##/ycoord)],0)] #71=
+
+
+[mid(
+[get(#72/map_line[round([get(##/ycoord)],0)])],
+[add(33,[round([get(##/xcoord)],0)])],1)]
+,
+
+[elements([get(#51/space_icons)]
+,[match([get(#51/space_types)],[get(##/object_type)])])])]
+
+&CMD_SHOW_MAP #72$=map4:@dolist lattr(#71/map_LINE*)=@pemit %#=[eval(get(#71/##))]
+&CMD_SHOW_MAP2 #72=$=map5:@dolist lattr(me/map_LINE*)=@pemit %#=[eval(get(me/##))]
+
+&test3 =$test3:@dol [get(#70/sector[get(#71/sector)])]=&map_line[round([get(##/ycoord)],0)] #73=[mid([get(#72/map_line[round([get(##/ycoord)],0)])],0,[add(33,[round([get(#/xcoord)],0)])])][elements([get(#51/space_icons)],[match([get(#51/space_types)],[get(##/object_type)])])][mid([get(#72/map_line[round([get(##/ycoord)],0)])],[add(35,[round([get(##/xcoord)])])],35)]
+
+
+
+&cmd_map #76=$=map:@dolist lattr(/map_line*)=@pemit %#=[eval(get(me/##))]
+
+@dol [get(#70/sector[get(#76/sector)])]=[@sw ([round([get(##/xcoord)],0)][round([get(##/ycoord)],0)]=00,&map_line0 ##= ,@dol [get(#70/sector[get(#76/sector)])]=&map_line[round([get(##/ycoord)],0)] #73=[mid([get(#72/map_line[round([get(##/ycoord)],0)])],0,[add(33,[round([get(#/xcoord)],0)])])][elements([get(#51/space_icons)],[match([get(#51/space_types)],[get(##/object_type)])])][mid([get(#72/map_line[round([get(##/ycoord)],0)])],[add(35,[round([get(##/xcoord)])])],35)])]
+
+
+
+&CMD_test_MAP #75=$=test:@dol [get(#50/sector[get(#76/sector)])]=[@sw ([round([get(##/xcoord)],0)][round([get(##/ycoord)],0)]=00,nothing,@dol [get(#50/sector[get(#76/sector)])]=&map_line[round([get(##/ycoord)],0)] #76=[mid([get(#74/map_line[round([get(##/ycoord)],0)])],0,[add(33,[round([get(##/xcoord)],0)])])][elements([get(#74/space_icons)],[match([get(#74/space_types)],[get(##/object_type)])])][mid([get(#74/map_line[round([get(##/ycoord)],0)])],[add(35,[round([get(##/xcoord)])])],35)])]
+@dolist lattr(#76/map_LINE*)=@pemit %#=[eval(get(#76/##))]
+
+@dol [get(#50/sector[get(#76/sector)])]=[@sw ([round([get(##/xcoord)],0)][round([get(##/ycoord)],0)]=00,nothing,@dol [get(#50/sector[get(#76/sector)])]=&map_line[round([get(##/ycoord)],0)] #76=[mid([get(#74/map_line[round([get(##/ycoord)],0)])],0,[add(33,[round([get(##/xcoord)],0)])])][elements([get(#74/space_icons)],[match([get(#74/space_types)],[get(##/object_type)])])][mid([get(#74/map_line[round([get(##/ycoord)],0)])],[add(35,[round([get(##/xcoord)])])],35)])]
+
+
+think @dol [get(#50/sector[get(#76/sector)])]=[@sw [round([get(##/xcoord)],0)][round([get(##/ycoord)],0)]=00,nothing,@dol [get(#50/sector[get(#76/sector)])]=&map_line[round([get(##/ycoord)],0)] #76=[mid([get(#74/map_line[round([get(##/ycoord)],0)])],0,[add(33,[round([get(##/xcoord)],0)])])][elements([get(#74/space_icons)],[match([get(#74/space_types)],[get(##/object_type)])])][mid([get(#74/map_line[round([get(##/ycoord)],0)])],[add(35,[round([get(##/xcoord)])])],35)])]

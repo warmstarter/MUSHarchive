@@ -1,0 +1,42 @@
+@@  Conference Table 1.11
+@@  
+@@  Coded for TinyMUX.   This object also works as a parent.  This code could 
+@@  also be fairly easily ported to another server type, if it doesn't 
+@@  already work, which it should. (I think.)
+@@  
+@@  Changes from 1.0:  Cleaned it up, streamlining where possible, and 
+@@  removed all ansi. 
+@@  
+@@  Changes from 1.1:  Modified attribute setting commands for added security.
+@@  
+@@  Send questions and comments to jpmg@primenet.com.
+@@  
+@create Conference Table
+@desc Conference Table=A stack of upturned crates have been placed around an old card table.  Several thick candles, rapidly melting away, provide a small amount of illumination.  A half-finished pizza in a delivery box has been pushed to the side to make room for a large scroll and a fountain pen. 
+@adesc Conference Table=@pemit %#=[center(Type 'cthelp' for help with this object.,78)]
+@lock Conference Table==me
+@elock Conference Table=#0
+@set Conference Table=!NO_COMMAND
+&CMD-AGENDA Conference Table=$agenda:@pemit %#=[center(%b[time()]%b,78,=)]%r%r[ifelse(v(chair),[name(v(chair))] is the current chair.,There is no current chair. Type 'chair' to take it.)][iter(lattr(me/item_*),%r%r[ucstr(before(after(##,_),-))] ([name(after(##,-))]): [v(##)])]%r%r[repeat(=,78)]
+&CMD-CLEAR_AGENDA Conference Table=$clear agenda:@switch %#=v(chair),{@emit -- %N has cleared the agenda for this meeting. [iter(lattr(me/item_*),[set(me,##:)])][set(me,chair:)]},@pemit %#=Only the chairperson may clear the agenda. If the table is no longer in use use 'reset'.)
+&CMD-CHAIR Conference Table=$chair:@switch 1=hasattr(me,chair),@pemit %#=[name(v(chair)] is already the chairperson for this meeting.,@emit -- %N takes the chair. [set(me,chair:%#)]
+&CMD-CLEAR_CHAIR Conference Table=$clear chair:@switch %#=v(chair),@emit -- %N relinquishes the chair.[set(me,chair:)],@pemit %#=Only the current chair may use this command.
+&CMD-ADD_ITEM Conference Table=$add item *=*:&item_[secure(objeval(%#,%0))]-%# me=-- [secure(objeval(%#,%1))];@pemit %#=Item added.
+&CMD-DEL_ITEM Conference Table=$del item *,*:think [setq(0,secure(objeval(%#,%0)))][setq(1,pmatch(secure(objeval(%#,%1))))];@switch [hasattr(me,item_%q0-%q1)]:[or(hasattr(me,item_%q0-%#),match(%#,v(chair)))]=1:1,{@pemit %#=Item cleared.;&item_%q0-%q1 me},1:0,{@pemit %#=You must be the author of the item or the chair person in order to delete it.},@pemit %#=I don't see an item by that name.
+&CMD-VOTE Conference Table=$vote *:&vote_%# me=-- [secure(objeval(%#,%0))];@pemit %#=Vote tallied.
+&CMD-VOTE_ANON Conference Table=$vote/anon *:@pemit %#=Anonymous vote tallied.;@switch 1=match(%0,*y*),&anon_tally1 me=[inc(v(anon_tally1))],match(%0,*n*),&anon_tally2 me=[inc(v(anon_tally2))],&anon_tally3 me=[inc(v(anon_tally3))]
+&ANON_TALLY1 Conference Table=0
+&ANON_TALLY2 Conference Table=0
+&ANON_TALLY3 Conference Table=0
+&CMD-VOTES Conference Table=$votes:@pemit %#=[repeat(=,78)]%r[iter(lattr(me/vote_*),%r%b%b[name(after(##,_))]: [after(v(##),--)])]%r%r%b%b\[Anon. Results\] In Favor: [v(anon_tally1)]%b%b%bOpposed: [v(anon_tally2)]%b%b%bAbstaining: [v(anon_tally3)]%r%b%bTotal Voting: [add(v(anon_tally1),v(anon_tally2),v(anon_tally3),words(lattr(me/vote_*)))]%b%b%bTotal Present: [empty(me)][iter(lcon(%l),switch(1,hasflag(##,connected),push(me,##),))][items(me)][empty(me)]%r[repeat(=,78)]
+&CMD-CLEAR_VOTES Conference Table=$clear votes:@switch %#=v(chair),@emit  -- %N clears the results of the vote.[iter(lattr(me/vote_*),[set(me,##:)])][set(me,anon_tally1:0)][set(me,anon_tally2:0)][set(me,anon_tally3:0)],@pemit %#=Only the current chair may use this command.
+&CMD-CTHELP Conference Table=$cthelp:@pemit %#=[center(%bConference Table Help%b,78,=)]%r%r%b%bagenda[space(18)]Shows the items on the agenda and the current%r[space(26)]chairperson.%r%b%bclear agenda[space(12)]Clear all items on the current agenda.%r%b%bchair[space(19)]Take up the duties of the chairperson.%r%b%bclear chair[space(13)]Vacate the position of chairperson.%r%b%bvote 'option/text'[space(6)]Make a public vote.%r%b%bvote/anon 'yes/no/ab'[space(3)]Vote anonymously. Anything other than 'y' 'yes'%r[space(26)]'n' or 'no' is counted as abstaining.%r%b%bvotes[space(19)]Lists and tallys all votes.%r%b%bclear votes[space(13)]Clear the voting results. Chair only.%r%b%badd item 'title'='note'[space(5)]Add an item to the agenda, where 'title'%r[space(30)]is one word.%r%b%bdel item 'title', 'person'[space(2)]Delete an item. Chair or author only.%r[space(30)](Person may be 'me'.)%r%b%breset[space(19)]Resets the table completely.%r%r[repeat(=,78)]
+&CMD-RESET Conference Table=$reset:@emit -- %N prepares to reset the table... ;@pemit %#=Type 'confirm reset' if you wish to continue.[set(me,confirm_reset:1)]
+&CONFIRM_RESET Conference Table=0
+&CMD-CONFIRM_RESET Conference Table=$confirm reset:@switch 1=v(confirm_reset),@emit -- %N resets the conference table. [set(me,anon_tally1:0)][set(me,anon_tally2:0)][set(me,anon_tally3:0)][iter(lattr(me/vote_*),[set(me,##:)])][iter(lattr(me/item_*),[set(me,##:)])][set(me,chair:)][set(me,confirm_reset:0)],@pemit %#=Please type 'reset' first.
+&CREDITS Conference Table=Send bug reports or suggestions to jpmg@primenet.com.
+@set Conference Table/credits=visual
+@wait 3=@pemit %#=Conference Table complete! Look at it for instructions.
+@@  
+@@  -- END OF FILE --
+

@@ -1,0 +1,104 @@
+From: bethmo@microsoft.com
+Message-Id: <9303302340.AA17072@netmail.microsoft.com>
+Subject: Re: Another handy bit of code
+Date: Tue Mar 30 15:41:14 1993
+
+Thank you, Hangover, for posting that.  It always fascinates me to see the
+different ways that people approach a given project.  Comparing it to
+this one I wrote a while ago for ValdeMUSH finally prompted me to send
+out mine.
+
+I give free permission to reuse this code, but if you do, please add a
+credits line to the help.
+
+The first version of it used secs() to give each message a unique attribute
+name.  When I found out that the MUSH server doesn't recycle attribute
+names, I changed it to use sequential numbers and reuse the ones that
+get deleted, to help cut down on memory usage.
+
+Note the use of semaphores in posting/removing messages.  I haven't tested
+it, but it looks like Hangover's code can lose a message if two people try
+to post at the same time (or further apart if the queue is overfull).
+
+Mine doesn't have a command to clear all notes from the board, that's a
+good idea.  It wouldn't be hard to add one.
+
+I use an editor that doesn't allow lines over 250 characters, hence the
+use of @edits in source code for uploading.
+
+  - Annalyn
+
+P.S.  I'd be happy to discuss use of semaphores if people on this list
+are interested.  They're an extremely useful tool in MUSH, but the
+documentation is confusing and intimidating and makes them seem way
+more complex then they really are.
+
+--------------------------------------------------------------------------
+
+@@ key = one word key
+@@ &keylist = list of keys
+@@ &authlist = list of authors
+@@ &notelist = list of attribute names. All three must keep in sync.
+
+@create bb
+@desc bb=A bulletin board with various notes posted on it. Instructions: type
+'bb help'.%rNotes currently posted: [first(v(keylist))] [iter(rest(v(keylist)),
+-- ##)]
+
+&post bb=$bb post *=*:@wait me={@va me=[edit(edit(edit(secure(v(0)),*,),?,),
+space(1),_)];@switch 0=[strlen(v(va))],{badkey},[match(v(keylist),v(va))],
+{doit},{sorry}}
+@edit bb/post=badkey,{@pemit %#=Illegal key.;@notify me}
+@edit bb/post=sorry,{@pemit %#=Sorry, there's already a note with key '%va'.;
+@notify me}
+@edit bb/post=doit,{@vb me=[switch(v(free),,N[add(words(v(keylist)),1)],first(v
+(free)))];&free me=[rest(v(free))];&keylist me=[v(keylist)] %va;doit2}
+@edit bb/post=doit2,{&authlist me=[v(authlist)] %#;&notelist me=[v(notelist)]
+%vb;&%vb me=postit;@pemit %#=Posted: %va.;@notify me}
+@edit bb/post=postit,{Key: %va[space(5)]Poster: %N[space(5)]Time: [time()]%r[v
+(1)]}
+
+&readall bb=$bb readall:@pemit %#=[v(line)];@dolist v(notelist)={@pemit %#=[v
+(##)]%r[v(line)]}
+&readnone bb=$bb read:@pemit %#=You must specify a key. To read all notes, use
+'bb readall'.
+&read bb=$bb read *:@switch match(v(keylist),v(0))=0,{@pemit %#=No matching
+notes.},{@switch or(pos(?,v(0)),pos(*,v(0)))=0,{readone},{wildsetup=
+{wildswitch,{wildloop}}}}
+@edit bb/read=readone,{@pemit %#=[v(line)]%r[v(extract(v(notelist),match(v
+(keylist),v(0)),1))]%r[v(line)]}
+@edit bb/read=wildsetup,{@pemit %#=[v(line)];@dolist v(keylist)}
+@edit bb/read=wildswitch,{@switch match(##,v(0)))=>0}
+@edit bb/read=wildloop,{@pemit %#=[v(extract(v(notelist),match(v(keylist),##),
+1))]%r[v(line)]}
+
+&remove bb=$bb remove *:@wait me={@va me=[match(v(keylist),v(0))];@switch v
+(va)=0,{sorry},{@switch isauth=0,{notauth},{doit}}}
+@edit bb/remove=isauth,{or(hasflag(v(#),wizard),not(comp(extract(v(authlist),v
+(va),1),v(#))))}
+@edit bb/remove=sorry,{@pemit %#=No note matches '%0'.;@notify me}
+@edit bb/remove=notauth,{@pemit %#=Only the note's author or a wizard can
+remove a note.;@notify me}
+@edit bb/remove=doit,{@vb me=[extract(v(notelist),v(va),1)];&keylist me=[s(u
+(delete,v(keylist),v(va)))];&authlist me=[s(u(delete,v(authlist),v(va)))];
+doit2}
+@edit bb/remove=doit2,{&notelist me=[s(u(delete,v(notelist),v(va)))];&%vb me=;
+&free me=[v(free)] %vb;@pemit %#=Note removed.;@notify me}
+
+&delete bb=[extract(v(0),1,sub(v(va),1))] [extract(v(0),add(v(va),1),words
+(v(0)))]
+
+&help bb=$bb help:@pemit %#=[v(line)]%rBulletin Board Help%r
+@edit bb/help=$,{%rTo read all the notes, 'bb readall'.}
+@edit bb/help=$,{%rTo read specific note, 'bb read <key>' (may contain
+wildcards)}
+@edit bb/help=$,{%rTo post a note, 'bb post key=message' (key must be unused)}
+@edit bb/help=$,{%rTo remove a note, 'bb remove <key>' (must be author or
+wizard)}
+@edit bb/help=$,{%r[v(line)]}
+
+&line bb=--------------------------------------------------------------------
+
+@startup bb=@drain me;@notify me
+--------------------------------------------------------------------------
+_______________________________________________________________________________

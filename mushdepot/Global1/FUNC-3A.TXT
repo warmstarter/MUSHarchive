@@ -1,0 +1,19 @@
+@create Function Machine
+@link Function Machine=#2
+@lock Function Machine==*[owner(me)]
+@set Function Machine=!NO_COMMAND
+@set Function Machine=OPAQUE
+@set Function Machine=SAFE
+@set Function Machine=ROYALTY
+&SEXFUNC Function Machine=[switch(%0,me,{[xget(*%#,sex)]},{[switch([loc(*%0)],%l,{[xget(*%0,sex)]},{[xget(%0,sex)]}
+&FACTIONFUNC Function Machine=[switch(%0,me,{[xget(*%#,faction)]},{[switch([loc(*%0)],%l,{[xget(*%0,faction)]},{[xget(%0,faction)]}
+&HPOINTFUNC Function Machine=[switch(%0,me,{[xget(*%#,hpoint)]},{[switch([loc(*%0)],%l,{[xget(*%0,hpoint)]},{[xget(%0,hpoint)]}
+@DESCRIBE Function Machine=Global defined functions Race(),rank(),title(), and position() are defined here.  Feel free to add any more that you may need.
+&TITLEFUNC Function Machine=[switch(%0,me,{[xget(*%#,title)]},{[switch([loc(*%0)],%l,{[xget(*%0,title)]},{[xget(%0,title)]}
+&PSTN Function Machine=[switch(%0,me,{[xget(*%#,position)]},{[switch([loc(*%0)],%l,{[xget(*%0,position)]},{[xget(%0,position)]}
+&RACEFUNC Function Machine=[switch(%0,me,{[xget(*%#,race)]},{[switch([loc(*%0)],%l,{[xget(*%0,race)]},{[xget(%0,race)]}
+@STARTUP Function Machine=@function faction=#4,factionfunc;@function race=#4,racefunc;@function rank=#4,ranking;@function title=#4,titlefunc;@function position=#4,pstn;@function hpoint=#4,hpointfunc;@function clan=#4,clanfunc;@function class=#4,classfunc;@function empire=#4,empirefunc;@function status=#4,statusfunc;@function sex=#4,sexfunc;@function insult=#1491,u_insult
+&RANKING Function Machine=[switch(%0,me,{[xget(*%#,rank)]},{[switch([loc(*%0)],%l,{[xget(*%0,rank)]},{[xget(%0,rank)]}
+&EMPIREFUNC Function Machine=[switch(%0,me,{[xget(*%#,empire)]},{[switch([loc(*%0)],%l,{[xget(*%0,empire)]},{[xget(%0,empire)]}
+&CLASSFUNC Function Machine=[switch(%0,me,{[xget(*%#,class)]},{[switch([loc(*%0)],%l,{[xget(*%0,class)]},{[xget(%0,class)]}
+&STATUSFUNC Function Machine=[switch(%0,me,{[xget(*%#,status)]},{[switch([loc(*%0)],%l,{[xget(*%0,status)]},{[xget(%0,status)]}

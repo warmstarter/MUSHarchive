@@ -1,0 +1,16 @@
+This code creates a dart board in whatever room
+you are standing in when you enter the below code.
+Original author of this code unknown.
+
+&DAT-POLITICIAN here=Netcom
+&CMD-SET-DART-PHOTO here=$+set dart photo=*:@pemit/contents me=%N digs around in the box of photos near the bar, and pins the photo of %0 to the centre of the dart board.;&dat-politician me=%0
+&CMD-SET-DART-SCORE here=$+set dart score=*:@switch isnum(%0)=1,{[setq(0,trunc(%0))];&dat-dart-score me=%q0;@pemit/contents me=%N gets a bit of chalk and put %q0 as the score to be played to, on the dart board.},{@pemit %#=You write %0 on the dart score board, and Mike laughs.}
+&DAT-DART-SCORE here=100
+&CMD-THROW-DART here=$+throw dart:@switch v(dat-dartsgame)=1,,{@pemit/contents me=%N starts a new game of darts.;&dat-dartsgame me=1;@dolist lattr(me/score-*)=&## me};@pemit/contents me=%N throws a dart at the dart board;[setq(0,switch(rand(20),0,50,1,40,2,40,3,20,4,20,5,20,6,20,7,10,8,10,9,10,10,10,11,10,12,10,13,10,1))];@pemit/contents me=%N's dart lands in the %q0 ring and %s writes up the score.;&score-%# me=[add(v(score-%#),%q0)];@switch gt(v(score-%#),v(dat-dart-score))=1,{@pemit/contents me=%N's score is greater than the winning score. %N has just won the game.};@switch eq(%q0,50)=1,@pemit/contents me=%N's dart landed in the photo of [v(dat-politician)].
+&VIEW_SCORE_BOARD here=The chalkboard beside the darts board holds the score:%r%rPlay to: [v(dat-dart-score)]%rCurrent scores:%r%b[iter(lattr(me/score*),Name: [ljust(name(after(##,SCORE-)),20)] Score: [v(##)]%r)]%r[repeat(-,76)]
+&CMD-START-DART-GAME here=$+start dart game:@switch v(dat-dartsgame)=1,{@pemit %#=You have to end the old game first.},{@pemit/contents me=%N starts a new game of darts.;&dat-dartsgame me=1;@dolist lattr(me/score-*)=&## me}
+&CMD-END-DART-GAME here=$+end dart game:@switch v(dat-dartsgame)=1,{@pemit/contents me=%N ends the game of darts.;&dat-dartsgame me=;@dolist lattr(me/score-*)=&## me},@pemit %#=There is no current game.
+&DAT-DARTSGAME here=1
+&LH_DARTS here=%b[ljust(+set dart photo=<someone>,30)]Traditionally, a politician's face was put%r[space(31)]in the centre of the dart board.%r%b[ljust(+set dart score=<score>,30)]Sets the score to be played to. Numbers only.%r%b[ljust(+throw dart,30)]Throws a dart at the dart board.%r%b[ljust(+start dart game,30)]Starts a new game, wiping any old scores.%r%b[ljust(+end dart game,30)]Ends the dart game, wiping any old scores.%r%b[ljust(+view score board,30)]Shows the scores.%r
+think Old Description being erased: [get(here/describe)]
+@desc here=[u(lh_darts)]
