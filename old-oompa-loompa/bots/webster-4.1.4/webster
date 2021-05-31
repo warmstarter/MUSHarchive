@@ -1,0 +1,276 @@
+#!/usr/bin/perl
+# Webster 4.1.3
+# Webster - a MUSH spellchecking robot.
+# Rewritten by Raevnos (Shawn Wagner - raevnos@pennmush.org)
+# Based off of Webster 3.4 by Javelin.
+
+require 5.005; # Make sure we have a fairly recent version of perl 5.
+# Declare global variables that are set in the section below.
+use vars qw($host $ispell_prog $local_dict $port $spelling_log
+						$web_name $web_pass $DEBUG $DOLOG $dict_server $server_type);
+
+####################################################
+# User-configurable stuff and run-time options
+# Most of these need to be set by you.
+####################################################
+
+# Where is the MUSH?
+$host = 'localhost';
+$port = 4201;
+
+# What's the char to log in to?
+$web_name = 'Webster';
+$web_pass = 'webby'; # CHANGE THIS!
+
+# Where's the ispell program, the local dictionary,
+# and the place to log misspelled words?
+$ispell_prog = "ispell";
+$local_dict = "local.dict"; # You might have to specify the full path to
+$spelling_log = "webspell.log"; # these files.
+
+# What DICT server do we use to define words?
+$dict_server = "dict.org";
+
+# Setting this to 0 will disable logging. The $spelling_log file
+# can grow to be quite large - turn off this option if you're
+# cramped for disk space, or don't care to see what's marked
+# as bad words that shouldn't be for your MUSH.
+$DOLOG = 0;
+
+# Setting this to 1 will produce some extra log files.
+# Use only if you're having problems with getting Webster
+# to work. Otherwise, leave it set to 0.
+$DEBUG = 0;
+
+#############################################################
+# End of user-configurable stuff
+# Try to avoid editing anything below this line.
+#############################################################
+
+use strict;
+use Net::Telnet 3; # Some places have a old, different Net::Telnet.
+use Net::Dict;
+use IO::Handle;
+use IO::File;
+use IPC::Open2;
+use Text::ParseWords;
+use subs qw(spell spell_parse_line lookup error); # Predeclare subroutines.
+# Declare global variables used below that shouldn't be touched
+# by the user.
+use vars qw($pid $session $LOG $SPELL $TOSPELL $safe_web_pass);
+
+$TOSPELL = new IO::Handle;
+$SPELL = new IO::Handle;
+$LOG = new IO::File if $DOLOG;
+
+$server_type = "generic";
+
+$SIG{CHLD} = \&REAPER;
+$SIG{USR1} = \&RELOAD;
+
+if ($DOLOG) {
+  # Open up the log file.
+  $LOG->open($spelling_log, "a")
+    or  die "Couldn't open $spelling_log: $!\n";
+  $LOG->autoflush(1);
+}
+
+# Open up a two-way pipe to the spelling program.
+$pid = open2 $SPELL, $TOSPELL, $ispell_prog, '-a', "-p$local_dict";
+# Read in ispell's first line, which is just version info.
+$_ = <$SPELL>;
+warn "Starting $_" if $DEBUG; # Print it out, for debugging.
+
+# Escape regexp metacharacters from the password.
+$safe_web_pass = quotemeta $web_pass;
+
+# Start a big loop so that Webster keeps trying to reconnect to the
+# MUSH if it fails.
+while (1) {
+  $session = new Net::Telnet(Host=>$host, Port=>$port, Timeout=>30,
+														 Errmode=>'return', Cmd_remove_mode=>0,
+														 Output_record_separator=>"\n",
+														 Input_record_separator=>"\n");
+  my $login_prompt = "WHO";
+  my $timeout= 1;
+  my $shutdown = 0;
+  my $counter = 0;
+  if ($DEBUG) {
+    $session->input_log("input.log");
+    $session->output_log("output.log");
+    $session->dump_log("dump.log");
+  }
+  sleep 300, redo unless $session;
+  
+  # Get to the login prompt
+  while (1) {
+    $_ = $session->get(Timeout=>$timeout);
+    $session->close, exit 0 if $session->eof;
+    last if /$login_prompt/o;
+  }
+  # Log in and go home
+  $session->print("connect $web_name $web_pass");
+  $session->print("home");
+  $session->print("think WEBSTERCONF: [version()]");
+  
+  # Loop and wait for data read. If so, parse it.
+  until ($session->eof) {
+    $_ = $session->getline(Timeout=>$timeout);
+    # Don't idle out. Of course, if you @power the Webster char
+    # idle and hide, you won't have to worry about this.
+    if ($counter++ > 1800) {
+      $session->print("think I'm not idle!");
+      $counter = 0;
+    }
+    # If I see GOODBYE <password>, quit.
+    $shutdown = 1, last if /^GOODBYE $safe_web_pass$/o;
+    if (/^WEBSTERCONF: (\w+)/) {
+      $server_type = $1;
+    }
+    # Otherwise, if I'm paged something, parse it
+    if (/^(.*) pages: (.*)/) {
+			my($player,$command,$name,@text) = ($1, split(" ", $2));
+			if ($name eq "Misspelled") {
+				$name = "Checking user input for misspelled words";
+			} else {
+				$name = "Checking $name for misspelled words";
+			}
+  
+			{
+				# If the first word of the page is "spell", spellcheck the
+				#rest.
+				spell($player, $name, \@text), last if $command eq "spell";
+				# If it's define, look it up.
+	    lookup($player, \@text), last if $command eq "define";
+				error($player);
+			}
+    }
+  }
+	
+  # Time to log out 
+  $session->print("QUIT");
+  # Get any exit messages
+  until ($session->eof) {
+    $_ = $session->get(Timeout=>$timeout);
+    warn "$_\n" if $DEBUG;
+  }
+  warn "\nWebster completed\n";
+  $session->close;
+	
+  # If this is a full shutdown, exit the program
+  if ($shutdown) {
+    $LOG->close if $DOLOG;
+    kill 9, $pid;  # Just to be on the safe side, we'll make sure 
+    $SPELL->close;  # the ispell process quits.
+    $TOSPELL->close;
+    exit 0;
+  }
+ 
+  # Otherwise, wait for a while and then come back later.
+  sleep 300;
+}
+
+###########################################################################
+#
+# Subrouting lookup - interface to DICT server.
+#
+sub lookup {
+  my ($player, $words) = @_;
+  my (@defs, $string, $DICT, $t, %dbs, @t);
+  my $found = 0;
+
+  $DICT = new Net::Dict($dict_server);
+
+  if (!defined $DICT) { # Couldn't connect to the DICT server. Hrm 
+    $session->print("\@pemit/silent *$player=Dictionary unavailable");
+    return;
+  }
+
+  %dbs = $DICT->dbs();
+
+  @defs = map { $DICT->define($_) } parse_line('\s+', 0, "@$words");
+
+  foreach my $word (@defs) {
+    foreach my $def (@$word) {
+      my ($db, $d) = @$def;
+      chomp $d;
+      $d =~ s/([\[\]\%\(\)\\,])/\\$1/og;
+      if ($server_type eq "PennMUSH") {
+        $d =~ s/\{([^\}]*)\}/\\{[tagwrap(a, xch_cmd="+define \\"$1\\"", ansi(h, \{$1\}))]\\}/og;
+      } else {
+        $d =~ s/\{([^\}]*)\}/\\{[ansi(h, \{$1\})]\\}/og;
+      }
+      $d =~ s/\n/\%r/og;
+      $db =~ s/([\[\]\{\}\%\(\)\\])/\\$1/og;
+      $db =~ s/\n/\%r/og;
+      $session->print("\@pemit/silent *$player=Definition from $dbs{$db}\%r$d");
+      $found = 1;
+    }
+  }
+
+  if (!$found) {
+    $session->print("\@pemit/silent *$player=No definitions found.");
+  }
+  $DICT->quit;
+}
+
+###########################################################################
+#
+# Subroutine spell - interface to Unix ispell(1)
+#
+sub spell {
+  my ($plr, $atr, $text) = @_;
+  my (@answer, $ret);
+  
+  foreach (@$text) {
+    $TOSPELL->print("^$_\n");
+    while (<$SPELL>) { # And read the output.
+      chomp;
+      last if $_ eq undef; # Exit the loop on the blank line
+      # ispell prints after the last word so we know when to quit.
+      warn "Reading $_ from ispell.\n" if $DEBUG;
+      $ret = spell_parse_line $_;
+      push @answer, $ret if $ret ne undef;
+    }
+  }
+  if (@answer) {
+    $session->print("\@pemit/silent *$plr=$atr:\%r@answer");
+    map {s/\%r/\n/} @answer if $DOLOG; # Pretty up the log file.
+    $LOG->print(@answer) if $DOLOG;
+  } else {
+    $session->print("\@pemit/silent *$plr=$atr: None found.");
+  }
+}
+
+sub spell_parse_line {
+  my $first = substr $_[0], 0, 1; # Get the first letter of the string.
+  if ($first eq '&' or $first eq '?') { # It was a bad word.
+    my @line = split " ", $_[0];
+    return " Word: $line[1]. Suggestions: @line[4..$#line].\%r";
+  }
+  if ($first eq '#') { # A bad word, with no suggestions.
+    my @line = split " ", $_[0];
+    return " Word: $line[1]. No Suggestions.\%r";
+  }
+  return; # Other lines don't require any return value.
+}
+
+sub error {
+    my $player = shift;
+    $session->print("\@pemit/silent *$player=Sorry, I don't know how to do that.");
+}
+
+sub REAPER {
+  $SIG{CHLD} = \&REAPER;
+  wait;
+}
+
+sub RELOAD {
+	$SPELL->close;
+	$TOSPELL->close;
+	kill 9, $pid;
+	$LOG->print("Reloading $local_dict at ", scalar localtime, "\n") if $DOLOG;
+	$pid = open2 $SPELL, $TOSPELL, $ispell_prog, '-a', "-p$local_dict";
+  $SIG{USR1} = \&RELOAD;
+}
+

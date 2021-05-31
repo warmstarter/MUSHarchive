@@ -1,0 +1,57 @@
+@create +Log Commands
+@set +log = Wizard
+@lock +log = #2
+@link +log = #2
+@lock/use +log = regplayer/1
+@desc +log = 
+  This object supports Javelin's IC logging system. It provides commands
+  to enable logging in a room (+log/on), disable logging in a room (+log/off),
+  and check the logging status of a room (+log). In addition, it periodically
+  turns off logging in rooms where no one's present any longer.
+  It requires a Wizard bit in order to set/unset the LOGGING flag on rooms.
+
+&ISLOGGED +log =
+  [switch(type(%0),ROOM,hasflag(%0,logging),THING,strmatch(flags(%0),*l*),0)]
+
+@ACONNECT +log =
+  @switch u(islogged,%l)=1,
+    {@pemit %#=\\[LOGGING\\] The room you are in is currently being logged. 
+     Use +log/off to turn off logging.}
+
+@ADISCONNECT +log = 
+   @switch 1=[and(u(islogged,%l),eq(words(filter(fil_connected,lcon(%l))),0))],
+     {@set %l=!logging}
+
+&DO_LOG_OFF +log = $+log/off: 
+    @switch/first 0=[strmatch(flags(%l),*l*)], 
+        {@pemit %#=This room isn't being logged.}, 
+      {@remit %l=%N deactivates logging for '[name(%l)]'.; @set %l=!logging}
+
+&DO_LOG_ON +log = $+log/on: 
+     @switch/first 1=
+        [hasflag(room(%#),OOC)], 
+         {@pemit %#=You can not log while in an OOC room.}, 
+        [hasflag(%l,Logging)], 
+         {@pemit %#=This room is already being logged.}, 
+       {@remit %l=%N activates logging for '[name(%l)]'.; @set %l=logging}
+
+&DO_LOG +log = $+log: 
+   @pemit %#=[switch(1,hasflag(room(%#),OOC),
+                       The area is OOC and can't be logged.,
+                     u(islogged,%l),[name(%l)] is being logged.,
+                     [name(%l)] is not being logged.)]
+
+&REGPLAYER +log = 
+   [and(hastype(%#,PLAYER),
+        not(hasflag(%#,unregistered)),
+        not(haspower(%#,guest)))]
+
+&FIL_CONNECTED +log = [hasflag(%0,connected)]
+
+&CLEANUP +log = 
+  @dol [lsearch(all,eval,\\[hasflag(##,logging)\\])]=
+    {@switch 0=[words(filter(fil_connected,lcon(##)))], @set ##=!logging}; 
+  @tr me/startup
+
+@STARTUP +log = @wait 900=@tr me/cleanup
+

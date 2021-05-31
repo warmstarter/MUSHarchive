@@ -1,0 +1,13 @@
+@create IRC Commands
+@link IRC Commands = #2
+@parent IRC Commands=#8
+@lock/Basic IRC Commands==#312|=#3
+&CMD_HELP IRC Commands=$=help:@pemit %#=This is the gateway to the IRC channel irc.nabiki.com #shoujoai. Commands:[u(Help,@chan/who Chat,Sees who is on the channel locally.)][u(Help,=names,Sees who is on the channel remotely.)][u(Help,@chan/on Chat,Starts listening to the channel.)][u(Help,@chan/off Chat,Stops listening to the channel.)][u(Help,+chat <message>,Sends a message to the channel.)]%r[u(Help,=whois <name>,Shows information about remote <name>.)][u(Help,=msg <name> <message>,Sends a private message to remote <name>.)]
+&CMD_MSG IRC Commands=$=msg * *:@switch conn(owner(me))=-1, {@pemit %#=Sorry, the IRC robot is not connected.}, {@pemit %#=Sending "%1" to %0...;@pemit owner(me)=MSG %# %n %0 %1}
+&CMD_NAMES IRC Commands=$=names:@switch conn(owner(me))=-1, {@pemit %#=Sorry, the IRC robot is not connected.}, {@pemit %#=Fetching NAMES list...;@pemit owner(me)=NAMES %#}
+&CMD_WHOIS IRC Commands=$=whois *:@switch conn(owner(me))=-1, {@pemit %#=Sorry, the IRC robot is not connected.}, {@pemit %#=Fetching WHOIS information for %0...;@pemit owner(me)=WHOIS %# %0}
+@DESCRIBE IRC Commands=Commands for interfacing with the IRC robot.
+@set IRC Commands/DESCRIBE=no_command visual
+@FOLLOWERS IRC Commands=
+@set IRC Commands/FOLLOWERS=no_command no_inherit no_clone wizard
+&HELP IRC Commands=%r%b%b[ljust(%0,25)] - %1

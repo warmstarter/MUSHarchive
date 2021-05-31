@@ -1,0 +1,124 @@
+@create Combat Control
+@set Combat Control=WIZARD
+@set Combat Control=LINK_OK
+&REMOBJ Combat Control = @va me=[remove(v(va),v(0))]; @tr clock[mid(flip(v(0)),0,1)]/rem=[v(0)]
+&LOCKS Combat Control = @clock1|@clock2|@clock0|@clock3|@clock4|@clock5|@clock6|@clock7|@clock8|@clock9
+&ADDWEAP Combat Control = &weapon me=[v(weapon)] [v(0)]
+&REMWEAP Combat Control = &weapon me=[remove(v(weapon),v(#))]
+&BREAK Combat Control = 0
+&HIT Combat Control = 85
+&QUALITY Combat Control = 100
+&LENGTH Combat Control = -20
+&WEIGHT Combat Control = 3
+&ATK3 Combat Control = @remit [room(v(1))]=COMBAT: %5 attacks %4.;@switch lte(rand(100),add(div(add(xget(v(1),ap),xget(v(1),hp)),2),xget(v(3),length)))=0 ,{@remit [room(v(1))]=COMBAT: %5 misses %4.},{@remit [room(v(1))]=COMBAT: %5 hits %4.; &uses %3=[sub(xget(v(3),uses),1)]; @tr %3/breakfun; @map [v(armor)]=[not(not(member(lcon(v(0)),##)))]; @switch and(member(v(maplist),1),gte(rand(4),1))=0,{@pemit %0=COMBAT: You take %6 points of damage.;&hp %0=[sub(xget(v(0),hp),v(6))]},{@remit [room(v(0))]=COMBAT: %4 takes the hit on [poss(v(0))] [name(extract(v(armor),member(v(maplist),1),1))].; @va [extract(v(armor),member(v(maplist),1),1)]=[sub(xget(extract(v(armor),member(v(maplist),1),1),va),v(6))];@tr [extract(v(armor),member(v(maplist),1),1)]/hit}; @tr me/deathcheck=%0,%4,%1; @tr me/startrecover=%1}
+&ATK2 Combat Control = @select 0=[gte(xget(v(1),ap),xget(v(3),weight))],{@remit [room(v(1))]=COMBAT: %5 is too weak to lift [poss(v(1))] [name(v(3))].},[not(match(v(0),#-1))],{@select 0=[member(v(va),v(6))],{@pemit %1=COMBAT: [name(v(6))] isn't combat-ready.},[and(match(room(v(1)),room(v(6))),hasflag(owner(v(6)),connected))],{@pemit %1=COMBAT: You don't see that player here.},[lte(idlesecs(v(6)),5)],{@pemit %1=COMBAT: [name(v(6))] is idle.},{@fo %1=[v(2)];&ap %1=[sub(xget(v(1),ap),div(xget(v(3),weight),2))];@tr [v(traceobj)]/attack=%6,%1,%2,[time()],%3;@tr me/atk3=%6,%1,%2,%3,[name(v(6))],%5,[die(2,div(add(div(xget(v(1),ap),5),xget(v(3),weight)),3))]}},[member(v(va),v(0))],{@pemit %1=COMBAT: %4 isn't combat-ready.},[and(match(room(v(0)),room(v(1))),hasflag(owner(v(0)),connected))],{@pemit %1=COMBAT: You don't see that player here.},[lte(idlesecs(v(0)),5)],
+@edit Combat Control/atk2=$,{{@pemit %1=COMBAT: %4 is idle. Try again later.},{@fo %1=[v(2)];&ap %1=[sub(xget(v(1),ap),div(xget(v(3),weight),2))];@tr [v(traceobj)]/attack=%0,%1,%2,[time()],%3;@tr me/atk3=%0,%1,%2,%3,%4,%5,[die(2,div(add(div(xget(v(1),ap),5),xget(v(3),weight)),3))]}}
+&ATK Combat Control = $atk *: @map [v(weapon)] =[not(not(member(lcon(v(#)),##)))]; @tr me/atk2 = [locate(room(v(#)),first(revwords(secure(v(0)))),P*)], %#, [secure(v(0))], [strcat(#,first(after(cat(extract(v(weapon),member(v(maplist),1),1),num(me)),#)))], [name(locate(room(v(#)),first(revwords(secure(v(0)))),P*))], [name(v(#))], [num(strcat(*,first(revwords(secure(v(0))))))]
+&ADDARMOR Combat Control = &armor me=[v(armor)] [v(0)]
+@DESCRIBE Combat Control = Javelin's MCS v3.0%rMaster Room wiz-object to handle all player commands and combat housekeeping. Should be set: WLzi. @ulocked to combat-ready players.
+&ADD Combat Control = @switch match(v(va),v(0))=0,{@va me=[v(va)] [v(0)]; @tr clock[mid(flip(v(0)),0,1)]/add=[v(0)]}
+@STARTUP Combat Control = @dol [v(hplist)]={@tr me/hprec=##}; @dol [v(splist)]={@tr me/sprec=##}; @dol [v(aplist)]={@tr me/aprec=##}
+&STARTRECOVER Combat Control = @switch or(member(v(hplist),v(0)),eq(xget(v(0),hp),xget(v(0),maxhp)))=0,{&hplist me=[v(hplist)] [v(0)]; @tr me/hprec=%0};@switch or(member(v(aplist),v(0)),eq(xget(v(0),ap),xget(v(0),maxap)))=0,{&aplist me=[v(aplist)] [v(0)]; @tr me/aprec=%0}; @switch or(member(v(splist),v(0)),eq(xget(v(0),sp),xget(v(0),maxsp)))=0,{&splist me=[v(splist)] [v(0)]; @tr me/sprec=%0}
+&HPREC Combat Control = @wait [v(waittime)]={@switch member(v(hplist),v(0))=0,{},{@tr me/hpheal=%0;@tr me/hprec=%0}}
+&APREC Combat Control = @wait [v(waittime)]={@switch member(v(aplist),v(0))=0,{},{@tr me/apheal=%0;@tr me/aprec=%0}}
+&SPREC Combat Control = @wait [v(waittime)]={@switch member(v(splist),v(0))=0,{},{@tr me/spheal=%0;@tr me/sprec=%0}}
+&HPHEAL Combat Control = &hp %0=[add(xget(v(0),hp),v(hprate))];@tr me/hpcheck=%0;@pemit %0=COMBAT: You begin to feel better.
+&HPCHECK Combat Control = @switch gte(xget(%0,hp),xget(%0,maxhp))=1,{&hp %0=xget([v(0)],maxhp); &hplist me=[remove(v(hplist),v(0))]}
+&HPRATE Combat Control = 10
+&APHEAL Combat Control = &ap %0=[add(xget(v(0),ap),v(aprate))];@tr me/apcheck=%0;@pemit %0=COMBAT: You feel your strength returning.
+&APCHECK Combat Control = @switch gte(xget(%0,ap),xget(%0,maxap))=1,{&ap %0=xget([v(0)],maxap); &aplist me=[remove(v(aplist),v(0))]}
+&APRATE Combat Control = 10
+&SPHEAL Combat Control = &sp %0=[add(xget(v(0),sp),v(sprate))];@tr me/spcheck=%0;@pemit %0=COMBAT: You feel your power returning.
+&SPCHECK Combat Control = @switch gte(xget(%0,sp),xget(%0,maxsp))=1,{&sp %0=xget([v(0)],maxsp); &splist me=[remove(v(splist),v(0))]}
+&SPRATE Combat Control = 10
+&WAITTIME Combat Control = 10800
+&EFFIC Combat Control = 5
+&STATUS Combat Control = $status:@pemit %#={%b%b%bHitpoints: [xget(v(#),hp)]/[xget(v(#),maxhp)]%tAttack points: [xget(v(#),ap)]/[xget(v(#),maxap)]%rSpell points: [xget(v(#),mana)]/[xget(v(#),maxmana)]%tExperience: [xget(v(#),exp)]}
+&DEATHCHECK Combat Control = @select xget(v(0),hp)=<1, {@tr me/dead=%0}, <10, {@remit [loc(v(0))]=COMBAT: %1 is near death.; @tr me/startrecover=%0}, <30, {@remit [loc(v(0))]=COMBAT: %1 looks weak.; @tr me/startrecover=%0}, <50, {@remit [loc(v(0))]=COMBAT: %1 doesn't look so good.; @tr me/startrecover=%0}, <70, {@remit [loc(v(0))]=COMBAT: %1 looks a little beat up.; @tr me/startrecover=%0}, {@remit [loc(v(0))]=COMBAT: %1 stills looks hardy.; @tr me/startrecover=%0}
+&DEAD Combat Control = @remit [loc(v(0))]={COMBAT: [name(v(0))] dies.}; @tr [v(traceobj)]/death=%0,[name(v(0))],[loc(v(0))],[time()],%1; &killed me=[v(killed)] [name(v(0))]([switch(flags(v(0)),*P*,P,O)]); @dol size exp hp ap sp maxap maxsp maxhp=&## [v(0)]; @dol splist hplist aplist=&## me=[remove(v(##),v(0))]; @tr me/remobj=%0; @tr me/add2; @tel [v(0)]=[v(heaven)]
+&DEFEND Combat Control = $defend *:@select 0=[gt(xget(v(#),ap),v(0))], {@pemit %#=You don't have enough attack points for that.}, [gt(v(0),0)], {@pemit %#=Invalid number of attack points.}, {&hp %#=[add(xget(v(#),hp),div(v(0),v(defendratio)))]; &ap %#=[sub(xget(v(#),ap),v(0))]; @remit [room(v(#))]=COMBAT: %N strikes a defensive posture.; @tr me/startrecover=%#}
+&DEFENDRATIO Combat Control = 1
+&REMPLYR Combat Control = @va me=[remove(v(va),num(strcat(*,v(0))))]; @tr clock[mid(flip(num(strcat(*,v(0)))),0,1)]/rem=[num(strcat(*,v(0)))]
+&FLEE Combat Control = $flee *:@select 0=[gte(xget(v(#),ap),5)], {@pemit %#=You don't have enough strength to flee.}, [lt(rand(100),add(50,div(xget(v(#),ap),5)))], {@remit [room(v(#))]=COMBAT: %N tries to disengage, but can't get away.; &ap %#=[sub(xget(v(#),ap),5)]}, [lt(rand(100),add(40,div(xget(v(#),hp),5)))], {@remit [room(v(#))]=COMBAT: %N panics and flees blindly.; @fo %#=go [name(extract(lexits(loc(v(#))),add(1,rand(words(lexits(loc(v(#)))))),1))]; &ap %#=[sub(xget(v(#),ap),5)]}, {@remit [room(v(#))]=COMBAT: %N panics and tries to run.; @fo %#=go [secure(v(0))]; &ap %#=[sub(xget(v(#),ap),5)]}; @tr me/startrecover=%#
+&TRACEOBJ Combat Control = #18798
+&HEAVEN Combat Control = #10220
+&ADD2 Combat Control = @lock me=[v(locks)]; @ulock me=[v(locks)]
+&ADDEXP Combat Control = @dol [lnum(10)]={@switch [and(lt(xget(v(0),exp),mul(mul(add(1,##),add(1,##)),10)),gte(add(xget(v(0),exp),v(1)),mul(mul(add(1,##),add(1,##)),10)))]=1,{@pemit %0=Your practice has made you stronger.; &maxap %0=[add(xget(v(0),maxap),5)]; &maxhp %0=[add(xget(v(0),maxhp),5)]; @tr [v(traceobj)]/level=%0,[add(xget(v(0),exp),v(1))],[time()]}; &exp %0=[add(xget(v(0),exp),v(1))]
+think ***Next Object***
+@create Aux Combat Item manager
+@set Aux Combat Item manager=WIZARD
+@set Aux Combat Item manager=LINK_OK
+&combcontrol aux combat item manager=#2593
+&HEALTHINGS Aux Combat Item manager = #16339
+&ADDHEAL Aux Combat Item manager = &healthings me=[remove(v(healthings),v(0))] [v(0)]
+&DESTHEAL Aux Combat Item manager = $!heal:&healthings me=[remove(v(healthings),v(0))]
+&DESTWEAP Aux Combat Item manager = $!weapon: @switch member(xget(v(combcontrol),weapon),v(#))=0,{},{&weapon [v(combcontrol)]=[remove(xget(v(combcontrol),weapon),v(#))]}
+&DESTARMOR Aux Combat Item manager = $!armor:@switch member(xget(v(combcontrol),armor),v(#))=0,{},{@tr shlock/remlck=%#; @tr armlock/remlck=%#; &armor [v(combcontrol)]=[remove(xget(v(combcontrol),armor),v(#))]}
+@DESCRIBE Aux Combat Item manager = Javelin's MCS v2.0%rManages weapon/armor/healing objects, mostly their destruction. Should be set wizard, kept in master room.
+&HEAL Aux Combat Item manager = $heal * *:@switch and(and(not(not(match(xget(v(combcontrol),va),v(0)))),not(not(match(v(healthing s),v(#))))),gte(sub(xget(v(0),maxhp),xget(v(0),hp)),v(1)))=1, {&hp %0=[add(xget(v(0),hp),v(1))]; @pemit %0=COMBAT: Your wounds heal some.}
+think ***NEW OBJECT***
+@create Judge thing
+@set Judge thing=WIZARD
+@set Judge thing=LINK_OK
+&combcontrol judge thing=#2593
+&OBJSTATUS Judge thing = $objstatus *:@switch match(xget(v(combcontrol),va),v(0))=0, {@pemit %#=[v(0)] ([name(v(0))]) is not a combat-ready object.}, {@tr me/status2=[name(v(0))],[v(0)],%#}
+&OBJDECOMBAT Judge thing = $objdecombat *:@dol ap sp hp maxap maxsp maxhp=&## %0; @tr [v(combcontrol)]/remobj=%0; @pemit %#=[name(v(0))] (%0) is no longer combat-ready.
+&OBJSETUP Judge thing = $objsetup *=*/*/*:&hp [locate(v(#),v(0),T*)]=%1; &maxhp [locate(v(#),v(0),T*)]=%1; &ap [locate(v(#),v(0),T*)]=%2; &maxap [locate(v(#),v(0),T*)]=%2; @dol [v(attribs)]={@atrlock [locate(v(#),v(0),T*)]/##=on};@pemit %#={Object [locate(v(#),v(0),T*)] set up with hp: %1, ap: %2};@switch locate(v(#),v(0),T*)=#-1, {@pemit %#=ERROR: Object not found, not set up.}, {@tr [v(combcontrol)]/add=[locate(v(#),v(0),T*)]
+@DESCRIBE Judge thing = Javelin's MCS v2.0%rMaster-room wizobject for judges to control/monitor combat. Provides info on a buncha stuff, allows enable/disable of combat system, setup of players by hand, modify player stats, etc.
+&STATUS Judge thing = $status *:@switch match(xget(v(combcontrol),va),pmatch(v(0)))=0,{@pemit %#=[capstr(v(0))] is not combat-ready.},{@tr me/status2=name(pmatch(v(0))),pmatch(v(0)),%#}
+&STATUS2 Judge thing = @pemit %2={Status of [capstr(v(0))]:%r%t%b%b%bHitpoints: [xget(v(1),hp)]/[xget(v(1),maxhp)]%tAttack points: [xget(v(1),ap)]/[xget(v(1),maxap)]%r%tSpell points: [xget(v(1),mana)]/[xget(v(1),maxmana)]%tExperience: [xget(v(1),exp)]}
+&LIST Judge thing = $list *:@tr me/list[secure(v(0))]=%#
+&LISTPLAYERS Judge thing = @map xget(v(combcontrol),va)=[switch(hasflag(##,player),1,name(##),##)]; @pemit %0={Combat-ready players/obj#'s: [v(maplist)]}
+&LISTKILLS Judge thing = @pemit %0={Killed players: [xget(v(combcontrol),killed)]};@pemit %0=s(xget(v(traceobj),kills))
+&LISTHEALS Judge thing = @pemit %0=Healing players:%rhps:%t[iter(xget(v(combcontrol),hplist),{\[name(##)\]})]%raps:%t[iter(xget(v(combcontrol),aplist),{\[name(##)\]})]
+&COMBAT Judge thing = $comstat *:@switch %0=,{@pemit %#=The combat system is [v(comstat)] and logging is [v(logstat)].},nolog,{@set [v(traceobj)]=HALT; &logstat me=off; @pemit %#=Attacks and spells are not being logged.},log,{@set [v(traceobj)]=!HALT; &logstat me=on; @pemit %#=Attacks and spells are being logged.},on,{&comstat me=on; @set [v(combcontrol)]=!halt; @tr [v(combcontrol)]/add2; @tr [v(combcontrol)]/startup; @pemit %#=Combat enabled for all players.}, restricted, {&comstat me=restricted; @set [v(combcontrol)]=!halt; @tr [v(combcontrol)]/startup; @ulock [v(combcontrol)]=@#2717; @pemit %#=Combat restricted to judges.}, off, {&comstat me=off; @halt [v(combcontrol)]; @pemit %#=Combat system halted.}, {@pemit %#=For help with the comstat command, type 'chelp comstat'.}
+&COMSTAT Judge thing = on
+&ATTRIBS Judge thing = hp ap maxhp maxap exp 
+&SETUP Judge thing = $setup *=*/*:@switch match(xget(strcat(*,v(0)),exp),#-1*)=1,{&exp *%0=0}; &hp *%0=%1; &maxhp *%0=%1; &ap *%0=%2; &maxap *%0=%2; @dol [v(attribs)]={@atrlock *%0/##=on};@pemit %#={Player %0 set up with hp: %1, ap: %2, and exp: [xget(strcat(*,v(0)),exp)]};@tr [v(combcontrol)]/add=num(*%0)
+&ADJUST Judge thing = $adjust */*=*:@va me=num(*%0);@switch 0=[not(not(match(xget(v(combcontrol),va),v(va))))],{@pemit %#=That player is not combat-ready. Use setup <player>=<hp>/<ap>/<sp>.},[member(v(attribs),v(1))],{@pemit %#=Invalid attribute: %1. Valid attribs are: [v(attribs)]},{&[v(1)] *[v(0)]=[v(2)]; @pemit %#={%0's %1 set to %2.}}
+&DECOMBAT Judge thing = $decombat *:@dol ap hp maxap maxhp=&## *%0; @tr [v(combcontrol)]/remplyr=%0; @pemit %#=%0 is no longer combat-ready.
+&LISTATTACKS Judge thing = @pemit %0=s(xget(v(traceobj),attacks))
+&LISTSPELLS Judge thing = @pemit %0=s(xget(v(traceobj),spells))
+&TRACEOBJ Judge thing = #18798
+&LISTWEAPONS Judge thing = @pemit %0={Combat weapons: [iter(xget(v(combcontrol),weapon), {\[cat(name(##),##)\]})]}
+&UNWEAP Judge thing = $unweap *:&weapon [v(combcontrol)]=[remove(xget(v(combcontrol),weapon),v(0))]; @pemit %#=Unweaponed %0 ([name(owner(v(0)))]'s [name(v(0))])
+&LISTARMOR Judge thing = @pemit %0={Combat armor: [iter(xget(v(combcontrol),armor), {\[cat(name(##),##)\]})]}
+&UNARMOR Judge thing = $unarmor *:&armor [v(combcontrol)]=[remove(xget(v(combatcontrol),armor),v(0))]; @tr #6900/remlck=%0; @tr #10500/remlck=%0; @pemit %#=Unarmored %0 ([name(owner(v(0)))]'s [name(v(0))])
+&LISTLEVELS Judge thing = @pemit %0=s(xget(v(traceobj),levels))
+&CLEAR Judge thing = $clear *:@tr me/clear[v(0)]=%#
+&CLEARATTACKS Judge thing = &attacks [v(traceobj)]; @pemit %0=Log of attacks cleared.
+&CLEARSPELLS Judge thing = &spells [v(traceobj)]; @pemit %0=Log of spells cleared.
+&LOGSTAT Judge thing = on
+&LISTPRACTICES Judge thing = @pemit %0=s(xget(v(traceobj),practices))
+&CLEARPRACTICES Judge thing = &practices [v(traceobj)]; @pemit %0=Log of practices cleared.  
+think **New object**
+@create Combat Help System
+@set Combat Help System=QUIET
+&CHELPOBJECTS Combat Help System = Judges may create combat-ready objects and puppets. These objects can execute all combat commands as if they were players.  Judge commands which affect objects include:%r%tobjsetup <obj#> = <hp>/<ap>%r%tobjstatus <obj#>%r%tobjdecombat <obj#>%rThese commands work just like the normal versions(setup, status, and decombat), but must be called with the dbref # of the object. In addition, combat-ready objects show up on the 'list players' as dbref #'s.
+@DESCRIBE Combat Help System = Javelin's MCS v2.0%rObject to run the 'chelp' command for player/judge combat help.
+&judgelock combat help=#2717
+&MAIN1 Combat Help System = $chelp:@pemit %#=Player help is available with 'chelp <topic>' on these topics:%r%r[v(playertopics)]%r; @switch elock(v(judgelock),v(#))=1,@pemit %#=s(v(jhelpstr))
+&PLAYERTOPICS Combat Help System = news attribs commands weapons armor healing status atk defend transfer flee 
+&JUDGETOPICS Combat Help System = values status setup adjust list comstat decombat objects unweap unarmor clear
+&JHELPSTR Combat Help System = Judge help is also available on these topics:%r%r[v(judgetopics)]
+&CHELPSTATUS Combat Help System = The status command can be used by players('status') to see their attributes.%r%rJudges may use 'status <playername>' to see a player's attributes.
+&CHELPHEALING Combat Help System = Hit points and attack points are recovered automatically over time. Just wait. Faster recovery may be possible with certified potions of healing, but that may just be a rumor. :)
+&CHELPARMOR Combat Help System = Armor can protect you from attacks by absorbing damage. Absorb too much damage with it, and it will eventually break.  Only combat-ready armor sold by certified armorers will function in this manner. Caveat emptor. Players may only wear 1 piece of armor and 1 shield at a time.%rCurrently certified armorers: [s(v(armorers))]
+&CHELPATK Combat Help System = atk <weapon-command> <player>%r%rAttacks <player>, activating the $<weapon-command> <player> on the weapon. Hit chance is based on weapon length and attacker attributes. Damage is based on weapon weight and attacker attributes. Attacking reduces the attacker's attack points.
+&CHELPLIST Combat Help System = %b%bThe list command provides judges with occasionally useful information about combat. Use 'list <type>', where type is:%r%tplayers%t%tList all combat-ready players/objects%r%tkills%t%tList killed players%r%theals%t%tList healing players%r%tattacks%t%tList all attacks made%r%tpractices%tList all practices%r%tspells%t%tList all spells cast%r%tweapons%t%tList all combat-ready weapons%r%tarmor%t%tList all combat-ready armor%r%tlevels%t%tList all player level gains
+&CHELPDEFEND Combat Help System = defend <points>%r%rConverts attack points into hit points, simulating the use of your energy to defend yourself from attack. Conversion is on a 1:[xget(#2593,defendratio)] ratio.
+&CHELPATTRIBS Combat Help System = Combat-ready players have 5 attributes:%r%thp%tCurrent hit points(health)%r%tmaxhp%tMaximum hit points%r%tap%tCurrent attack points (strength)%r%tmaxap%tMaximum strength when fully rested%r%texp%tExperience points (earned in combat)
+&CHELPCOMMANDS Combat Help System = Combat commands include:%r%tatk <weapon-comand> <player>%r%tdefend <attack points> %r%tflee <exit name> %r%tstatus%r%rFor detailed help, use 'chelp <commandname>'.
+&CHELPWEAPONS Combat Help System = Weapons increase both the likelihood of hitting a player in combat, and the damage that will be done. Only combat-ready weapons sold by certified weaponsmiths will function in this manner. Caveat emptor. All weapons have commands on them for effect%b(for example 'slash Javelin'). To use a weapon in combat, type 'atk slash javelin'.%rAll weapons have a chance of breaking when used in combat. This chance depends in part on their quality of manufacture.%rCurrently certified weaponsmiths: [s(v(weaponsmiths))]
+&CHELPDECOMBAT Combat Help System = The decombat command makes a player !combat-ready. It should rarely be used, and never when a player has taken an injury. The syntax is: decombat <playername>
+&CHELPCOMSTAT Combat Help System = The comstat command controls the operation of the combat system:%r%tcomstat%t%t%tReturn the status of the system%r%tcomstat on%t%tEnable combat for all players%r%tcomstat restricted%tEnable combat for judges only%r%tcomstat off%t%tHalt the combat controller.%r%rTo prevent players from using combat, use 'comstat restricted' rather than%r'comstat off' whenever possible.%r%rIn addition, the following two commands can be used independent of the above:%r%tcomstat nolog%t%tShut off logging of attacks, spells, and deaths%r%tcomstat log%t%tResume logging (default)
+&CHELPADJUST Combat Help System = %b%bThe adjust command allows judges to modify attributes of combat-ready players. It should not be used to players combat-ready(see chelp setup).%r%b%bThe syntax is: adjust <playername>/<attrib>=<value>, where <attrib> is one of: [xget(#942,attribs)].  Remember to adjust both current and max values if necessary.
+&CHELPSETUP Combat Help System = %b%bJudges can use the setup command as an alternative to the combat setter. The syntax is: setup <playername>=<# of hps>/<# of aps>, for example, setup Javelin=100/100.%r%b%bThis command sets the player combat-ready, and should not be used on players who are already combat-ready. For those players, see chelp adjust.
+&CHELPVALUES Combat Help System = %b%bAll players should start off with about 100 hitpoints, unless they are particularly buff warrior-types. %r%b%bAn average healthy player should have 100 attack points. Sorcerors have fewer, because they have devoted their time to study rather than exercise(50-75), and again, warriors will have considerably more.
+&MAIN2 Combat Help System = $chelp *:@select 0=[not(member(v(playertopics),lcstr(secure(v(0)))))], {@pemit %#=[ucstr(cat(chelp,v(0)))]; @pemit %#=s(v(strcat(chelp,v(0))))}, [not(and(member(v(judgetopics),lcstr(secure(v(0)))),elock(#2717,v(#))))], {@pemit %#=[ucstr(cat(chelp,v(0)))]; @pemit %#=s(v(strcat(chelp,v(0))))}, {@pemit %#=No help on '%0'.}
+&CHELPFLEE Combat Help System = The flee command is used to try to escape combat. Syntax is 'flee <exitname>'. You have a chance of failing to flee, and a chance of fleeing blindly through a random exit. Fleeing costs 5 attack points.
+&CHELPNEWS Combat Help System = New combat features:%r- Players may fight and cast spells to and from horses/vehicles%r- Judges can create combat-ready monsters
+&CHELPUNWEAP Combat Help System = %b%bThe unweap <obj#> command removes the object from the combat system's list of valid weapons. It should be used whenever 'list weapons' shows obvious non-weapon objects on the list.
+&CHELPUNARMOR Combat Help System = %b%bThe unarmor <obj#> command removes the object from the combat system's list of valid armor. It should be used whenever 'list armor' shows obvious non-armor objects in the list.
+&CHELPEXPERIENCE Combat Help System = %b%bThe exp attribute records the amount of physical(not magical) combat experience a player has gained from training.  As players gain experience, they become somewhat stronger and more hardy.%r%b%bExperience can be gained by training at established schools of fighting (not yet available).
+&CHELPCLEAR Combat Help System = Judges can use the clear command to clear one of the logs maintained by the combat system:%r%tclear attacks%tClear the attacks log%r%tclear practices%tClear the practice log%r%tclear spells%tClear the spells log%r%tclear practices%tClear the practice log%rTo view the logs, use the list command.

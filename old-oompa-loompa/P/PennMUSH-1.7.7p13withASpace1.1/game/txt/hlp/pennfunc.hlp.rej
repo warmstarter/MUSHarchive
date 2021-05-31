@@ -1,0 +1,108 @@
+***************
+*** 108,119 ****
+    Dbref functions return a dbref or list of dbrefs related to some value
+    on an object.
+    
+!   con()         entrances()   exit()        followers()   following()   
+!   home()        lcon()        lexits()      loc()         locate()      
+!   lparent()     lplayers()    lsearch()     lvcon()       lvexits()     
+!   lvplayers()   next()        num()         owner()       parent()      
+!   pmatch()      rloc()        rnum()        room()        where()       
+!   zone()
+    
+    See also: DBREF
+  & Information functions
+--- 108,119 ----
+    Dbref functions return a dbref or list of dbrefs related to some value
+    on an object.
+    
+!   children()    con()         entrances()   exit()        followers()   
+!   following()   home()        lcon()        lexits()      loc()         
+!   locate()      lparent()     lplayers()    lsearch()     lvcon()       
+!   lvexits()     lvplayers()   next()        num()         owner()       
+!   parent()      pmatch()      rloc()        rnum()        room()        
+!   where()       zone()
+    
+    See also: DBREF
+  & Information functions
+***************
+*** 1931,1937 ****
+    lpos(<string>, <character>)
+  
+    This function returns a list of the positions where <character> occupies
+!   in <string>, with te first character of the string being 0. Note that
+    this differs from the pos() function, but is consistent with other string
+    functions like mid() and delete().
+  
+--- 1931,1937 ----
+    lpos(<string>, <character>)
+  
+    This function returns a list of the positions where <character> occupies
+!   in <string>, with the first character of the string being 0. Note that
+    this differs from the pos() function, but is consistent with other string
+    functions like mid() and delete().
+  
+***************
+*** 1947,1954 ****
+  & LSEARCH()
+  & SEARCH()
+  & LSEARCHR()
+    lsearch(<player>[, <class>[, <restriction>[, <low>[, <high>]]]])
+    lsearchr(<player>[, <class>[, <restriction>[, <low>[, <high>]]]])
+   
+    This function is similar to the @search command, except it returns
+    just a list of dbref numbers. It is computationally expensive, and
+--- 1947,1956 ----
+  & LSEARCH()
+  & SEARCH()
+  & LSEARCHR()
++ & CHILDREN()
+    lsearch(<player>[, <class>[, <restriction>[, <low>[, <high>]]]])
+    lsearchr(<player>[, <class>[, <restriction>[, <low>[, <high>]]]])
++   children(<object>)
+   
+    This function is similar to the @search command, except it returns
+    just a list of dbref numbers. It is computationally expensive, and
+***************
+*** 1961,1966 ****
+  
+    The possible <class>es and <restriction>s are the same as those accepted
+    by @search. See 'help @search' for information about them.
+      
+    See 'help lsearch2' for more details.
+  & LSEARCH2
+--- 1963,1971 ----
+  
+    The possible <class>es and <restriction>s are the same as those accepted
+    by @search. See 'help @search' for information about them.
++ 
++   children() is exactly the same as lsearch(<me|all>,parent,<object>),
++   using "all" for See_All/Search_All players  and "me" for others.
+      
+    See 'help lsearch2' for more details.
+  & LSEARCH2
+***************
+*** 2572,2580 ****
+    Returns <number> to the power of <exponent>.
+  & POWERS()
+    powers(<object>)
+  
+-   Returns a space-separate list of powers possessed by the object.
+-   If the object does not exist, #-1 will be returned.
+  & QUOTA()
+    quota(<player>)  
+    
+--- 2577,2589 ----
+    Returns <number> to the power of <exponent>.
+  & POWERS()
+    powers(<object>)
++   powers(<object>,<power>)
++ 
++   The first form returns a space-separate list of powers possessed by
++   the object.  If the object does not exist, #-1 will be returned.
++ 
++   The second form attempts to set <power> on <object>, as per @power.
+  
+  & QUOTA()
+    quota(<player>)  
+    

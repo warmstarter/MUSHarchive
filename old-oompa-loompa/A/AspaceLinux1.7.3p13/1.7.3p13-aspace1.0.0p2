@@ -1,0 +1,353 @@
+*** pennmush/hdrs/flags.h	Wed Jan 10 16:59:07 2001
+--- new/hdrs/flags.h	Tue Jan 30 13:48:50 2001
+***************
+*** 152,157 ****
+--- 152,160 ----
+  #define THING_INHEARIT  0x80	/* checks parent chain for ^ patterns */
+  #define THING_Z_TEL     0x100	/* If set on ZMO players may only @tel 
+  				   within the zone */
++ #ifdef ASPACE
++ #define THING_SPACE_OBJECT 0x200 /* For Space Objects */
++ #endif
+  
+  /*--------------------------------------------------------------------------
+   * Room flags
+*** pennmush/hdrs/log.h	Wed Jan 10 16:59:07 2001
+--- new/hdrs/log.h	Tue Jan 30 13:13:47 2001
+***************
+*** 1,5 ****
+--- 1,8 ----
+  #ifndef LOG_H
+  #define LOG_H
++ /* Added for Aspace */
++ #include "options.h"
++ /* End Aspace */
+  
+  /* log types */
+  #define LT_ERR    0
+***************
+*** 10,15 ****
+--- 13,23 ----
+  #define LT_RPAGE  5		/* Obsolete */
+  #define LT_CHECK  6
+  #define LT_HUH    7
++ /* Added for Aspace */
++ #ifdef ASPACE
++ #define LT_SPACE  8
++ #endif
++ /* End Aspace */
+  
+  /* From log.c */
+  extern void start_all_logs _((void));
+diff -c -r pennmush/src/Makefile new/src/Makefile
+*** pennmush/src/Makefile	Wed Jan 10 16:59:08 2001
+--- new/src/Makefile	Tue Jan 30 13:18:02 2001
+***************
+*** 33,39 ****
+  	malias.c match.c memcheck.c move.c mysocket.c parse.c pcre.c player.c plyrlist.c \
+  	predicat.c privtab.c \
+  	rob.c services.c set.c sig.c speech.c strdup.c strtree.c \
+! 	strutil.c timer.c unparse.c utils.c version.c warnings.c wild.c wiz.c
+  
+  H_FILES = ../hdrs/attrib.h ../hdrs/conf.h ../hdrs/copyrite.h ../hdrs/mushdb.h \
+  	  ../hdrs/flags.h ../hdrs/externs.h ../hdrs/case.h \
+--- 33,46 ----
+  	malias.c match.c memcheck.c move.c mysocket.c parse.c pcre.c player.c plyrlist.c \
+  	predicat.c privtab.c \
+  	rob.c services.c set.c sig.c speech.c strdup.c strtree.c \
+! 	strutil.c timer.c unparse.c utils.c version.c warnings.c wild.c wiz.c \
+! 	space_variables.c space_ansi.c space_utils.c \
+! 	space_balance.c space_error.c space_unparse.c \
+! 	space_notify.c space_alert.c space_format.c \
+! 	space_report.c space_iterate.c space_get.c \
+! 	space_put.c space_misc.c space_read.c space_write.c \
+! 	space_set.c space_status.c
+! 
+  
+  H_FILES = ../hdrs/attrib.h ../hdrs/conf.h ../hdrs/copyrite.h ../hdrs/mushdb.h \
+  	  ../hdrs/flags.h ../hdrs/externs.h ../hdrs/case.h \
+***************
+*** 46,52 ****
+  	  ../hdrs/extmail.h ../hdrs/malias.h ../hdrs/extchat.h \
+  	  ../hdrs/htab.h ../hdrs/command.h ../hdrs/htab.h ../hdrs/privtab.h \
+  	  ../hdrs/strtree.h ../hdrs/pcre.h ../hdrs/mysocket.h ../hdrs/mushtype.h \
+!     ../hdrs/boolexp.h
+  
+  # .o versions of above - these are used in the build
+  O_FILES= \
+--- 53,60 ----
+  	  ../hdrs/extmail.h ../hdrs/malias.h ../hdrs/extchat.h \
+  	  ../hdrs/htab.h ../hdrs/command.h ../hdrs/htab.h ../hdrs/privtab.h \
+  	  ../hdrs/strtree.h ../hdrs/pcre.h ../hdrs/mysocket.h ../hdrs/mushtype.h \
+! 	  ../hdrs/boolexp.h  ../hdrs/space.h
+! 
+  
+  # .o versions of above - these are used in the build
+  O_FILES= \
+***************
+*** 112,118 ****
+  version.o \
+  warnings.o \
+  wild.o \
+! wiz.o
+  
+  
+  # This is a dummy target, in case you type 'make' in the source
+--- 120,144 ----
+  version.o \
+  warnings.o \
+  wild.o \
+! wiz.o \
+! space_alert.o \
+! space_ansi.o \
+! space_balance.o \
+! space_error.o \
+! space_format.o \
+! space_get.o \
+! space_iterate.o \
+! space_misc.o \
+! space_notify.o \
+! space_put.o \
+! space_read.o \
+! space_report.o \
+! space_set.o \
+! space_status.o \
+! space_unparse.o \
+! space_utils.o \
+! space_variables.o \
+! space_write.o
+  
+  
+  # This is a dummy target, in case you type 'make' in the source
+***************
+*** 1213,1215 ****
+--- 1239,1260 ----
+  ../hdrs/mushtype.o: ../hdrs/copyrite.h
+  ../hdrs/mushtype.o: ../options.h
+  ../hdrs/boolexp.o: ../hdrs/copyrite.h
++ space_alert.o: ../hdrs/space.h
++ space_ansi.o: ../hdrs/space.h
++ space_balance.o: ../hdrs/space.h
++ space_error.o: ../hdrs/space.h
++ space_format.o: ../hdrs/space.h
++ space_get.o: ../hdrs/space.h
++ space_iterate.o: ../hdrs/space.h
++ space_misc.o: ../hdrs/space.h
++ space_notify.o: ../hdrs/space.h
++ space_put.o: ../hdrs/space.h
++ space_read.o: ../hdrs/space.h
++ space_report.o: ../hdrs/space.h
++ space_set.o: ../hdrs/space.h
++ space_status.o: ../hdrs/space.h
++ space_unparse.o: ../hdrs/space.h
++ space_utils.o: ../hdrs/space.h
++ space_variables.o: ../hdrs/space.h
++ space_write.o: ../hdrs/space.h
++ 
+*** pennmush/src/flags.c	Wed Jan 10 16:59:08 2001
+--- new/src/flags.c	Tue Jan 30 15:33:33 2001
+***************
+*** 29,34 ****
+--- 29,36 ----
+  #include "log.h"
+  #include "confmagic.h"
+  
++ #include "options.h"
++ 
+  #define FLAG_HASH_SIZE 256
+  #define FLAG_HASH_MASK 255
+  
+***************
+*** 149,154 ****
+--- 151,159 ----
+    {"NO_LEAVE", 'N', TYPE_THING, THING_NOLEAVE, F_ANY, F_ANY},
+    {"LISTEN_PARENT", '^', TYPE_THING, THING_INHEARIT, F_ANY, F_ANY},
+    {"Z_TEL", 'Z', TYPE_THING, THING_Z_TEL, F_ANY, F_ANY},
++ #ifdef ASPACE
++   {"SPACE_OBJECT", '+', TYPE_THING, THING_SPACE_OBJECT, F_WIZARD, F_WIZARD },
++ #endif
+  
+    {"ABODE", 'A', TYPE_ROOM, ROOM_ABODE, F_ANY, F_ANY},
+    {"FLOATING", 'F', TYPE_ROOM, ROOM_FLOATING, F_ANY, F_ANY},
+***************
+*** 183,188 ****
+--- 188,205 ----
+  };
+  
+  static FLAG_ALIAS flag_alias_tab[] = {
++ #ifdef ASPACE
++   {"SPACE_OBJEC", "SPACE_OBJECT"},
++   {"SPACE_OBJE", "SPACE_OBJECT"},
++   {"SPACE_OBJ", "SPACE_OBJECT"},
++   {"SPACE_OB", "SPACE_OBJECT"},
++   {"SPACE_O", "SPACE_OBJECT"},
++   {"SPACE_", "SPACE_OBJECT"},
++   {"SPACE", "SPACE_OBJECT"},
++   {"SPAC", "SPACE_OBJECT"},
++   {"SPA", "SPACE_OBJECT"},
++   {"SP", "SPACE_OBJECT"},
++ #endif ASPACE
+    {"CHOWN_O", "CHOWN_OK"},
+    {"CHOWN_", "CHOWN_OK"},
+    {"CHOWN", "CHOWN_OK"},
+*** pennmush/src/funcrypt.c	Wed Jan 10 16:59:09 2001
+--- new/src/funcrypt.c	Tue Jan 30 14:43:17 2001
+***************
+*** 7,18 ****
+--- 7,28 ----
+   */
+  
+  #include "ansi.h"
++ #include "options.h"
+  
++ #ifdef ASPACE
++ extern char *crunch_code _((char *code));
++ extern char *crypt_code _((char *code, char *text, int type));
++ #else
+  static char *crunch_code _((char *code));
+  static char *crypt_code _((char *code, char *text, int type));
++ #endif
+  
+  /* Copy over only alphanumeric chars */
++ #ifdef ASPACE
++ extern char *
++ #else
+  static char *
++ #endif
+  crunch_code(code)
+      char *code;
+  {
+***************
+*** 37,43 ****
+--- 47,57 ----
+    return (output);
+  }
+  
++ #ifdef ASPACE
++ extern char *
++ #else
+  static char *
++ #endif
+  crypt_code(code, text, type)
+      char *code;
+      char *text;
+*** pennmush/src/log.c	Wed Jan 10 16:59:09 2001
+--- new/src/log.c	Tue Jan 30 15:03:17 2001
+***************
+*** 32,37 ****
+--- 32,38 ----
+  #include "dbdefs.h"
+  #include "log.h"
+  #include "confmagic.h"
++ #include "options.h"
+  
+  char *quick_unparse _((dbref object));
+  void start_log _((FILE ** fp, const char *filename));
+***************
+*** 43,49 ****
+  FILE *wizlog_fp;
+  FILE *tracelog_fp;
+  FILE *cmdlog_fp;
+! 
+  
+  char *
+  quick_unparse(object)
+--- 44,52 ----
+  FILE *wizlog_fp;
+  FILE *tracelog_fp;
+  FILE *cmdlog_fp;
+! #ifdef ASPACE
+! FILE *spacelog_fp;
+! #endif
+  
+  char *
+  quick_unparse(object)
+***************
+*** 92,98 ****
+--- 95,107 ----
+    start_log(&wizlog_fp, WIZLOG);
+    start_log(&tracelog_fp, TRACELOG);
+    start_log(&cmdlog_fp, CMDLOG);
++ #ifdef ASPACE
++   start_log(&spacelog_fp, SPACELOG);
++ #endif
+  #else
++ #ifdef ASPACE
++   spacelog_fp =
++ #endif
+    connlog_fp = checklog_fp = wizlog_fp = tracelog_fp = cmdlog_fp = stderr;
+  #endif				/* SINGLE_LOGFILE */
+  }
+***************
+*** 118,123 ****
+--- 127,135 ----
+    end_log(wizlog_fp);
+    end_log(tracelog_fp);
+    end_log(cmdlog_fp);
++ #ifdef ASPACE
++   end_log(spacelog_fp);
++ #endif
+  #endif				/* SINGLE_LOGFILE */
+  }
+  
+***************
+*** 181,186 ****
+--- 193,203 ----
+    case LT_HUH:
+      f = cmdlog_fp;
+      break;
++ #ifdef ASPACE
++   case LT_SPACE:
++     f = spacelog_fp;
++     break;
++ #endif
+    default:
+      f = stderr;
+      break;
+***************
+*** 271,276 ****
+--- 288,300 ----
+  		Name(Owner(Location(player))) : T("bad object"), tbuf1);
+      }
+      break;
++ #ifdef ASPACE
++   case LT_SPACE:
++     strcpy(unp1, quick_unparse(player));
++     strcpy(unp2, quick_unparse(object));
++     do_rawlog(logtype, "SPACE: %s %s %s", unp1, unp2, tbuf1);
++     break;
++ #endif /* ASPACE */
+    default:
+      do_rawlog(LT_ERR, "ERR: %s", tbuf1);
+    }
+***************
+*** 311,316 ****
+--- 335,345 ----
+      case LT_WIZ:
+        lname = "wizard";
+        break;
++ #ifdef ASPACE
++     case LT_SPACE:
++       lname = "space";
++       break;
++ #endif
+      default:
+        lname = "unspecified";
+      }
+***************
+*** 349,354 ****
+--- 378,391 ----
+      start_log(&wizlog_fp, WIZLOG);
+      do_log(LT_ERR, player, NOTHING, T("Wizard log wiped."));
+      break;
++ #ifdef ASPACE
++   case LT_SPACE:
++     end_log(spacelog_fp);
++     unlink(SPACELOG);
++     start_log(&spacelog_fp, SPACELOG);
++     do_log(LT_ERR, player, NOTHING, T("Space log wiped."));
++     break;
++ #endif
+    default:
+      notify(player, T("That is not a valid log."));
+      return;

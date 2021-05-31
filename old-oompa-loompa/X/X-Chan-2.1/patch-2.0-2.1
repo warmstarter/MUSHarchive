@@ -1,0 +1,225 @@
+#####
+# Object patch
+#####
+@name X-Channels 2.0 User Commands=X-Channels 2.1 User Commands
+-
+@name X-Channels 2.0 Admin Commands=X-Channels 2.1 Admin Commands
+-
+#####
+# User patch
+#####
+&cmd_com_version X-Channels 2.1 User Commands=$+com/version:
+@pemit %#=[u(text_version)]
+-
+&cmd_com_join X-Channels 2.1 User Commands=$+com/join *:
+@wait me={
+
+@switch/first 
+[setq(0,u(fnc_match_channel,%0,%#))]
+[gt(match(v(list_channels),%q0),0)]
+[u(fnc_chanok,%q0,%#)]
+[eq(match(v(chan_%q0_list),%#),0)]
+=
+0??,
+{
+  @pemit %#=ERROR: '%0' does not match any known channel or alias.;
+  @notify me
+},
+10?,
+{
+  @pemit %#=ERROR: Permission denied.;
+  @notify me
+},
+110,
+{
+  @pemit %#=ERROR: You are already on that channel.;
+  @notify me
+},
+{
+  &chan_%q0_list [parent(me)]=[setunion(v(chan_%q0_list),%#)];
+  @pemit/list filter(fnc_announce,v(chan_%q0_list))=
+    \[%q0\] [u(fnc_channame,%#,%q0)] has joined this channel.;
+  @notify me
+}
+
+}
+-
+&cmd_com_+ X-Channels 2.1 User Commands=$+com +*:
+@wait me={
+
+@switch/first 
+[setq(0,u(fnc_match_channel,%0,%#))]
+[gt(match(v(list_channels),%q0),0)]
+[u(fnc_chanok,%q0,%#)]
+[eq(match(v(chan_%q0_list),%#),0)]
+=
+0??,
+{
+  @pemit %#=ERROR: '%0' does not match any known channel or alias.;
+  @notify me
+},
+10?,
+{
+  @pemit %#=ERROR: Permission denied.;
+  @notify me
+},
+110,
+{
+  @pemit %#=ERROR: You are already on that channel.;
+  @notify me
+},
+{
+  &chan_%q0_list [parent(me)]=[setunion(v(chan_%q0_list),%#)];
+  @pemit/list filter(fnc_announce,v(chan_%q0_list))=
+    \[%q0\] [u(fnc_channame,%#,%q0)] has joined this channel.;
+  @notify me
+}
+
+}
+-
+&cmd_com_leave X-Channels 2.1 User Commands=$+com/leave *:
+@wait me={
+
+@switch/first 
+[setq(0,u(fnc_match_channel,%0,%#))]
+[gt(match(v(list_channels),%q0),0)]
+[gt(match(v(chan_%q0_list),%#),0)]
+=
+0?,
+{
+  @pemit %#=ERROR: '%0' does not match any known channel or alias.;
+  @notify me
+},
+10,
+{
+  @pemit %#=ERROR: You are not on that channel.;
+  @notify me
+},
+{
+  @pemit/list filter(fnc_announce,v(chan_%q0_list))=
+    \[%q0\] [u(fnc_channame,%#,%q0)] has left this channel.;
+  &chan_%q0_list [parent(me)]=[setdiff(v(chan_%q0_list),%#)];
+  @notify me;
+}
+
+}
+-
+&cmd_com_- X-Channels 2.1 User Commands=$+com -*:
+@wait me={
+
+@switch/first 
+[setq(0,u(fnc_match_channel,%0,%#))]
+[gt(match(v(list_channels),%q0),0)]
+[gt(match(v(chan_%q0_list),%#),0)]
+=
+0?,
+{
+  @pemit %#=ERROR: '%0' does not match any known channel or alias.;
+  @notify me
+},
+10,
+{
+  @pemit %#=ERROR: You are not on that channel.;
+  @notify me
+},
+{
+  @pemit/list filter(fnc_announce,v(chan_%q0_list))=
+    \[%q0\] [u(fnc_channame,%#,%q0)] has left this channel.;
+  &chan_%q0_list [parent(me)]=[setdiff(v(chan_%q0_list),%#)];
+  @notify me;
+}
+
+}
+-
+#####
+# Admin patch
+#####
+&cmd_com_blockchan X-Channels 2.1 Admin Commands=$+com/blockchan *=*:
+@wait me={
+
+@switch/first 0=
+[gt(match(v(list_channels),%0),0)],
+{
+  @pemit %#=ERROR: That channel does not exist.;
+  @notify me
+},
+{
+  &chan_%0_broadcastlock [parent(me)]=%1;
+  @pemit %#=Broadcast lock for channel '%0' set to %1;
+  @notify me
+}
+
+}
+-
+&cmd_com_flush X-Channels 2.1 Admin Commands=$+com/flush *:
+@wait me={
+
+@switch/first 0=
+[setq(0,locate(%#,*%0,p))][isdbref(%q0)],
+{
+  @pemit %#=That isn't a valid playername or dbref.;
+  @notify me
+},
+{
+  @dolist v(list_channels)=
+    {
+      &chan_##_list [parent(me)]=[setdiff(v(chan_##_list),%q0)]
+    };
+  @dolist 1={@pemit %#=[name(%q0)] flushed from the +com system.;@notify me}
+}
+
+}
+-
+#####
+# Data Patch
+#####
+&fnc_announce X-Channels Data Storage=[
+or(
+  not(hasflag(%#,DARK)),
+  u(fnc_canseedark,%0)
+)
+]
+-
+&text_credits X-Channels Data Storage=
+[repeat(=,75)]%r
+[center(X-Channels 2.1 Credits,75)]%r
+[repeat(=,75)]%r
+Version 1.0%t-%tAmethyst @ Mountain Cauldron%r
+%tWritten by Amethyst @ Mountain Cauldron, based on a combination of%r
+%tinterfaces from Ashen-Shugar's com system, and Two Moons's com%R
+%tsystem.%r
+%r
+Version 1.1%t-%tAmethyst @ Mountain Cauldron%r
+%tAdded this credits/history file.%r
+%tAdded +com/showlock%r
+%tAdded suite of commands for locking broadcast ability on a%r
+%t%tLIMITED_BROADCAST channel.%r
+%r
+Version 1.2%t-%tAmethyst @ Mountain Cauldron%r
+%tFixed a bug in +com/leave that prevented leave-messages%r
+%tAdded error checking to +com/addalias and +com/rmalias%r
+%tAdded error checking to +com/setname and +com/rmname%r
+%tFixed a bug in +com/addalias%r
+%r
+Version 1.3%t-%tAmethyst @ Mountain Cauldron%r
+%tSplit admin and user commands into separate objects%r
+%r
+Version 2.0%t-%tLucifer @ Prairie Fire%r
+%tChanged all @com commands to +com%r
+%tAdded +com/flush%r
+%tAdded | (name post-pose) format to channel messages%r
+%tAdded ~ (emit) format to channel messages%r
+%tAdded NO_EMITS and PARANOID flags%r
+%r
+Version 2.1%t-%tLucifer @ Prairie Fire%r
+%tAdded +com/version%r
+%t+com/flush now accepts playernames/aliases as well as dbrefs%r
+%tFixed a typo in +com/blockchan%r
+%tDark-flagged players are no longer seen joining/leaving a channel%r
+[repeat(=,75)]
+-
+&text_version X-Channels Data Storage=
+[repeat(=,75)]%r
+X-Channels version 2.1%r
+[repeat(=,75)]
+-

@@ -1,0 +1,14 @@
+@@ NO_SETQ Patch.
+@@
+@@    This patch should provide some degree of compatiblity with older
+@@ versions of mush without setq. It should work with at least TinyMUSH
+@@ 2.0.8 patchlevel 7. This patch has not been tested except for a very few
+@@ tinymush platforms, so performance might varry.
+
+&lwho  com=[iter(lwho(),switch(1,u(on,##,%0),##|[u(ac,%0)]|%1))]
+&wrap  com=[switch(0,%4,*END*,strlen(%0),,gt(strlen(%0),%1),%0,[extract(%0,1,sub(wordpos(%0,%1),1))]%r%2[space(%3)][u(wrap,extract(%0,wordpos(%0,%1),words(%0)),%1,%2,%3,switch(%4,,20,sub(%4,1)))])]
+
+&who com=$com who:@dolist BEGIN [lwho()] END={@select ## 0=BEGIN 0,@pemit %#=**********%r* Communication Channel Search%r*,END 0,@pemit %#=*%r**********,* [not(and(u(dark),u(both)))],,* [words(u(lchan,switch(1,u(both,%#),##,%#),##))],,@pemit %#=* [ljust(name(##),16)] [ljust(edit(iter(u(gdb,##),switch(#\\#,monitor,M,noalias,A)),%b,),2)] : [u(wrap,u(lchan,switch(1,u(both,%#),##,%#),##),57,*,20)]}
+
+&connect com=$com monitor *onnect:@dolist [iter(lwho(),switch(x [u(gdb,##)] x,* monitor *,##))]=@pemit ##=[switch(1,u(dark,%#),,[gt(words(u(lchan2,%#,##)),0)],\\\[Com\\\] [switch(##,%#,You have,%N has)] %0onnected on: '[squish(u(lchan2,%#,##))]')]
+@trig com/compat

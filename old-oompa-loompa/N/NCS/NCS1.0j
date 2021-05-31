@@ -1,0 +1,31 @@
+think ***JUDGE***
+@create Combat Judge Object
+@link Combat Judge Object = #220
+@lock Combat Judge Object = #4
+@lock/use Combat Judge Object = hasprivs/1
+@set Combat Judge Object=WIZARD
+&SMITH Combat Judge Object=$smith/* *:@select 0=[or(match(v(0),w*),match(v(0),a*))], {@pemit %#=You must use smith/weapon <player> or smith/armor <player>.}, [not(match(v(1),#*))], {&[
+&COMSTAT_RESTRICT Combat Judge Object=@ulock [v(controlobj)]=hasprivs/1; @pemit %0=Combat restricted to admins.; &comstat me=restricted
+&COMSTAT_ON Combat Judge Object=@set [v(functionobj)]=!halt; @tr [v(functionobj)]/startup; @set [v(controlobj)]=!halt; @uunlock [v(controlobj)]; @pemit %0=Combat enabled for all players.; &comstat me=on
+&COMSTAT_OFF Combat Judge Object=@halt [v(functionobj)]; @halt [v(controlobj)]; &comstat me=halted; @pemit %0=Combat system halted. Use 'comstat on' to re-enable.
+&HELPOBJ Combat Judge Object=#272
+&COMSTAT2 Combat Judge Object=$comstat *:@select 1=[match(v(0),on)], {@tr me/comstat_on=%#}, [match(v(0),off)], {@tr me/comstat_off=%#}, [match(v(0),restrict)], {@tr me/comstat_restrict=%#}, [match(v(0),log)], {@set [v(listobj)]=!halt; @pemit %#=Combat logging enabled.}, [match(v(0),nolog)], {@set [v(listobj)]=halt; @pemit %#=Combat logging disabled.}, {@pemit %#=[xget(v(helpobj),chelpcomstat)]}
+&COMSTAT Combat Judge Object=on
+&COMSTAT1 Combat Judge Object=$comstat: @pemit %#=NCS version 1.0 alpha%rCombat system is [v(comstat)] and logging is [switch(hasflag(v(listobj),halt),1,off,on)].
+&CLEARATTACKS Combat Judge Object=&attack_trace [v(listobj)]; @pemit %0=Attack log cleared.
+&CLEAR Combat Judge Object=$clear *:@tr me/clear%0=%#
+&LISTATTACKS Combat Judge Object=@pemit %0=[xget(v(listobj),attack_trace)]
+&LISTHEALS Combat Judge Object=@pemit %0=Healing players:%rHealth:%b%b%b[iter(xget(v(listobj),rec_health),{\[name(##)\]})]%rAgility:%b%b[iter(xget(v(listobj),rec_agility),{\[name(##)\]})]%rStrength:%b[iter(xget(v(listobj),rec_strength),{\[name(##)\]})]
+&LIST Combat Judge Object=$list *:@tr me/list%0=%#
+&HASPRIVS Combat Judge Object=[or(hasflag(v(#),royalty),hasflag(v(#),Wizard))]
+&ATTRIBS Combat Judge Object=strength maxstrength agility maxagility health maxhealth
+&ADJUST Combat Judge Object=$adjust */*=*: @select 0 = [not(match(pmatch(%0),#-1))], {@pemit %#=I can't find that player.}, [member(v(attribs),secure(v(1)))], {@pemit %#=Syntax: adjust <player>/<attrib>=<value>.%rAttrib must be one of: [v(attribs)]}, {&%1 [pmatch(secure(v(0)))] = %2; @pemit %#=[name(pmatch(secure(v(0))))]'s %1 set to %2.}
+@DESCRIBE Combat Judge Object=NCS v1.0 Judge commands.
+&CONTROLOBJ Combat Judge Object=#214
+&LISTOBJ Combat Judge Object=#271
+&FUNCTIONOBJ Combat Judge Object=#480
+&STATUS Combat Judge Object=$status *:@pemit %#=Status of [name(pmatch(v(0)))] ([pmatch(v(0))][flags(pmatch(v(0)))]):%r%tStrength: [xget(pmatch(v(0)),strength)]/[xget(pmatch(v(0)),maxstrength)]%r%t%bAgility: [xget(pmatch(v(0)),agility)]/[xget(pmatch(v(0)),maxagility)]%r%t%b%bHealth: [xget(pmatch(v(0)),health)]/[xget(pmatch(v(0)),maxhealth)]%r%t%b%bWeapon: [xget(pmatch(v(0)),weapon)] - [name(xget(pmatch(v(0)),weapon))]%r%t%bWearing: [iter(xget(pmatch(v(0)),armor),{\[before(##,:)\]:\[name(after(##,:))\](\[after(##,:)\])})]
+&LISTWEAPONS Combat Judge Object=@pemit %0=Weapons: [iter(xget(v(listobj),weapons),{\[name(##)\](##)})]
+&LISTARMOR Combat Judge Object=@pemit %0=Armor: [iter(xget(v(listobj),armor),{\[name(##)\](##)})]
+&UNWEAP Combat Judge Object=$unweap *: &weapons [v(listobj)] = [remove(xget(v(listobj),weapons),secure(v(0)))]; @pemit %#=Unweaponed: [name(owner(secure(v(0))))]'s [name(secure(v(0)))] ([secure(v(0))])
+&UNARMOR Combat Judge Object=$unarmor *: &armor [v(listobj)] = [remove(xget(v(listobj),armor),secure(v(0)))]; @pemit %#=Unarmored: [name(owner(secure(v(0))))]'s [name(secure(v(0)))] ([secure(v(0))])

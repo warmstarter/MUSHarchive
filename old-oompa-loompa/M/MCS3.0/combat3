@@ -1,0 +1,139 @@
+think Combat weapon code
+@create Parent Weapon Maker PWM
+@lock Weapon Maker = me   
+@set Weapon Maker=OPAQUE
+@set Weapon Maker=QUIET
+@set Weapon Maker=HALT
+&BREAKFUN Weapon Maker = @switch and(lte(v(uses),0),gt(rand(100),v(quality)))=1,{@lemit [name(loc(me))]'s [name(me)] shatters!; !weapon; @nuke me}
+&combcontrol weapon maker = #5000
+@APAYMENT Weapon Maker = @name [con(me)]=[extract(v(abbrevs),add(1,member(v(abbrevs),v(va))),1)]; @set [con(me)]=safe; @desc [con(me)]=get(me/desc[v(va)]); &uses [con(me)]=[div(v(quality),5)]; &length [con(me)]=get(me/length[v(va)]); &weight [con(me)]=get(me/weight[v(va)]); &quality [con(me)]=[v(quality)]; &breakfun [con(me)]=get(me/breakfun); @dol length weight uses quality breakfun=@atrlock [con(me)]/##=on; @set [con(me)]=chown_ok; @tr [v(combcontrol)]/addweap=[con(me)]; drop [con(me)]; @create obj
+@COST Weapon Maker = 10
+&QUALNAME Weapon Maker = high
+&FORGE2 Weapon Maker = @va me=%0; @cost me=[max(10,div(mul(mul(1,v(strcat(cost,v(0)))),v(quality)),100))]; @pemit %1=To create a [extract(v(abbrevs),add(member(v(abbrevs),v(0)),1),1)] at [v(qualname)] quality will cost [v(cost)].
+&QUALITY Weapon Maker = 95
+&QUALITYCOM Weapon Maker = $quality *:@switch member(low med high,%0)=0,{@pemit %#=You can only set the quality to low, med, or high.},{&quality me=[min(99,add(mul(32,member(low med high,v(0))),sub(rand(7),3)))]; @pemit %#=Quality is set to %0.; &qualname me=%0}
+&WEIGHTPI Weapon Maker = 15
+&WEIGHTSW Weapon Maker = 15
+&WEIGHTST Weapon Maker = 10
+&WEIGHTCL Weapon Maker = 20
+&WEIGHTDA Weapon Maker = 3
+&LENGTHPI Weapon Maker = 15
+&LENGTHSW Weapon Maker = 10
+&LENGTHST Weapon Maker = 10
+&LENGTHCL Weapon Maker = -5
+&LENGTHDA Weapon Maker = -15
+&COSTPI Weapon Maker = 180
+&COSTSW Weapon Maker = 115
+&COSTST Weapon Maker = 70
+&COSTCL Weapon Maker = 40
+&COSTDA Weapon Maker = 10
+&DESCPI Weapon Maker = A metal pole with an blade
+&DESCST Weapon Maker = A long staff
+&DESCSW Weapon Maker = A finely-tempered sword
+&DESCCL Weapon Maker = A heavy-looking club
+&DESCDA Weapon Maker = A slim dagger
+&ABBREVS Weapon Maker = da dagger cl club st staff sw sword pi pike
+&FORGE Weapon Maker = $forge *:@switch member(v(abbrevs),mid(v(0),0,2))=0,{@pemit %#=I don't know how to forge a %0.},{@tr me/forge2=[mid(v(0),0,2)],%#}
+@DESCRIBE Weapon Maker = A simple weapon maker. It can make daggers, clubs, staves, swords, and pikes.%rCost to the weaponmaker depends on the weapon chosen and the quality.%r%tSet quality with 'quality <low|med|high>'.%r%tCreate the weapon with 'forge <weapon name>'.
+think ***NEW OBJECT***
+@create Parent Armor Maker PAM
+@lock Armor Maker = me 
+@set Armor Maker=OPAQUE
+@set Armor Maker=QUIET
+@set Armor Maker=HALT
+@DESCRIBE Armor Maker = Makes armor, if you're an armorer. 'start armor' starts the process, and 'finish armor' finishes it. More time and and money will produce better armor. To see the current state of the machine, use 'status'. To abort armor in progress, use 'reset armor'.
+@COMMENT Armor Maker = Use secs() to time the process, make only one at a time, set cost, if paid, create armor, and lock to !@armlock. Add its number to armlock. Have a reset command.
+&START Armor Maker = $start armor:@pemit %#=[v(v(status))]; @switch [v(status)]=ready,{&status me=busy; &time0 me=[secs()]}
+&READY Armor Maker = Beginning armor creation.
+&BUSY Armor Maker = Busy. To finish current work now, type 'finish'. To abort work, type 'reset'.
+&STATUS Armor Maker = ready
+&RESET Armor Maker = $reset armor:@pemit %#=Armor maker reset.; @tr me/reset1
+&STATCOM Armor Maker = $status:@switch [v(status)]=busy,{@pemit %#=eval(me,statline)},{@pemit %#=The armor maker is not currently occupied.}
+&TYPE0 Armor Maker = useless piece of scrap
+&TYPE1 Armor Maker = leather armor
+&TYPE2 Armor Maker = chain mail
+&TYPE3 Armor Maker = plate mail
+&FINISH Armor Maker = $finish armor:@switch [v(status)]=ready,{@pemit %#=Nothing to finish.},{@tr me/finish2=%#,[min(3,div(sub(secs(),v(time0)),7200))]
+&COST1 Armor Maker = 20
+&COST2 Armor Maker = 75
+&COST3 Armor Maker = 150
+&STATLINE Armor Maker = Armor maker has been operating for [div(sub(secs(),v(time0)),15)] game-minutes.%rStopping now will produce a [xget(me,strcat(type,min(3,div(sub(secs(),v(time0)),7200))))].
+&FINISH2 Armor Maker = @switch %1=0,{@pemit %0=To stop armor production before any armor is finished, use 'reset'},{@pemit %0=The armor maker will produce a [xget(me,strcat(type,v(1)))] if you give it [xget(me,strcat(cost,v(1)))] now.; @cost me=[xget(me,strcat(cost,v(1)))]}
+@APAYMENT Armor Maker = @switch [v(cost)]=[v(cost1)], {@tr me/produce = %#,[con(me)],[v(desc1)],[v(stats1)],[v(name1)]}, [v(cost2)], {@tr me/produce = %#,[con(me)],[v(desc2)],[v(stats2)],[v(name2)]}, [v(cost3)], {@tr me/produce = %#,[con(me)],[v(desc3)],[v(stats3)],[v(name3)]}, {"Error! See Javelin!; @set me=halt}
+&STATS1 Armor Maker = 30
+&STATS2 Armor Maker = 50
+&STATS3 Armor Maker = 70
+&NAME1 Armor Maker = leather armor
+&NAME2 Armor Maker = chain mail
+&NAME3 Armor Maker = plate mail
+&DESC1 Armor Maker = A set of leather pieces which protect the wearer.
+&DESC2 Armor Maker = A mail shirt and leggings.
+&DESC3 Armor Maker = A suit of armor made from heavy metal plates over a mail shirt and leggings.
+&PRODUCE Armor Maker = @name %1=%4; @desc %1=[v(2)]; @va %1=[v(3)]; @asucc %1=get(me/asc); &hit %1=get(me/hit); @atrlock %1/va=on; @atrlock %1/asuccess=on; @atrlock %1/hit=on; @set %1=chown_ok; @tr #6900/register=%1; drop %1; @create obj; @tr me/reset1
+&RESET1 Armor Maker = &status me=ready; @cost me; &time0 me
+&HIT Armor Maker = @switch lte(v(va),0)=1,{@lemit [name(loc(me))]'s [name(me)] breaks apart.; !armor; @dest me}
+&ASC Armor Maker = @map [remove(xget(#6900,va),num(me))]=[not(comp(loc(##),v(#)))]; @switch member(v(maplist),1)=0,{},{@lemit %N finds that %s can't wear two armors, and drops the [name(me)].; leave}
+think ***NEW OBJECT***
+@create Parent Shld Maker PSM
+@lock Shld Maker = me 
+@set Shld Maker=OPAQUE
+@set Shld Maker=QUIET
+@set Shld Maker=HALT
+&ASC Shld Maker = @map [remove(xget(#10500,va),num(me))]=[not(comp(loc(##),v(#)))]; @switch member(v(maplist),1)=0,{},{@lemit %N finds that %s can't wear two shields, and drops the [name(me)].; leave}
+&HIT Shld Maker = @switch lte(v(va),0)=1,{@lemit [name(loc(me))]'s [name(me)] breaks apart.; !armor; @dest me}
+&RESET1 Shld Maker = &status me=ready; @cost me; &time0 me
+&PRODUCE Shld Maker = @name %1=%4; @desc %1=[v(2)]; @va %1=[v(3)]; @asucc %1=get(me/asc); &hit %1=get(me/hit); @atrlock %1/va=on; @atrlock %1/asuccess=on; @atrlock %1/hit=on; @set %1=chown_ok; @tr #10500/register=%1; drop %1; @create obj; @tr me/reset1
+&DESC3 Shld Maker = A large wooden tower-shield reinforced with metal.
+&DESC2 Shld Maker = A medium-sized shield of braced wood.
+&DESC1 Shld Maker = A small wooden buckler for defense.
+&NAME3 Shld Maker = tower
+&NAME2 Shld Maker = shield
+&NAME1 Shld Maker = buckler
+&STATS3 Shld Maker = 35
+&STATS2 Shld Maker = 25
+&STATS1 Shld Maker = 15
+@APAYMENT Shld Maker = @switch [v(cost)]=[v(cost1)], {@tr me/produce = %#,[con(me)],[v(desc1)],[v(stats1)],[v(name1)]}, [v(cost2)], {@tr me/produce = %#,[con(me)],[v(desc2)],[v(stats2)],[v(name2)]}, [v(cost3)], {@tr me/produce = %#,[con(me)],[v(desc3)],[v(stats3)],[v(name3)]}, {"Error! See Javelin!; @set me=halt}
+&FINISH2 Shld Maker = @switch %1=0,{@pemit %0=To stop shield production before any shield is finished, use 'reset'},{@pemit %0=The shield maker will produce a [xget(me,strcat(type,v(1)))] if you give it [xget(me,strcat(cost,v(1)))] now.; @cost me=[xget(me,strcat(cost,v(1)))]}
+&STATLINE Shld Maker = Shield maker has been operating for [div(sub(secs(),v(time0)),15)] game-minutes.%rStopping now will produce a [xget(me,strcat(type,min(3,div(sub(secs(),v(time0)),2700))))].
+&COST3 Shld Maker = 75
+&COST2 Shld Maker = 30
+&COST1 Shld Maker = 10
+&FINISH Shld Maker = $finish shield:@switch [v(status)]=ready,{@pemit %#=Nothing to finish.},{@tr me/finish2=%#,[min(3,div(sub(secs(),v(time0)),2700))]
+&TYPE3 Shld Maker = reinforced tower shield
+&TYPE2 Shld Maker = strong shield
+&TYPE1 Shld Maker = wooden buckler
+&TYPE0 Shld Maker = useless piece of scrap
+&STATCOM Shld Maker = $status:@switch [v(status)]=busy,{@pemit %#=eval(me,statline)},{@pemit %#=The shield maker is not currently occupied.}
+&RESET Shld Maker = $reset shield:@pemit %#=Shield maker reset.; @tr me/reset1
+&STATUS Shld Maker = ready
+&BUSY Shld Maker = Busy. To finish current work now, type 'finish'. To abort work, type 'reset'.
+&READY Shld Maker = Beginning shield creation.
+&START Shld Maker = $start shield:@pemit %#=[v(v(status))]; @switch [v(status)]=ready,{&status me=busy; &time0 me=[secs()]}
+@COMMENT Shld Maker = Use secs() to time the process, make only one at a time, set cost, if paid, create shield, and lock to !@shlock. Add its number to shlock. Have a reset command.
+@DESCRIBE Shld Maker = Makes shields, if you're an armorer. 'start shield' starts the process, and 'finish shield' finishes it. More time and and money will produce better shields. To see the current state of the machine, use 'status'. To abort shield in progress, use 'reset shield'.
+think ***NEW OBJECT***
+@create Parent Certifier
+@lock Certifier =me 
+@set Certifier=QUIET
+@set Certifier=ENTER_OK
+@set Certifier=HALT
+@set Certifier=LISTENER
+@COST Certifier = 74
+&RECEIVE Certifier = ^* gave you *.:@switch and(hasflag(v(1),chown_ok),v(certflag))=1, {@tr me/process=%1}, {@pemit %#=Not ready or object is not chown_ok.; drop %1}
+&LENGTH Certifier = $length *:@select 1=[v(certflag)], {@pemit %#=You can not change the weight after you've paid. Use 'reset certifier' to reset.}, [and(gte(secure(v(0)),-20),lte(secure(v(0)),20))], {@pemit %#=Length set to: %0; &len me=%0}, {@pemit %#=Valid lengths range from -20 (hands) to 20 (lances)}
+&WEIGHT Certifier = $weight *:@select 1=[v(certflag)], {@pemit %#=You can not change the weight after you've paid. Use 'reset certifier' to reset.}, [and(gte(secure(v(0)),3),lte(secure(v(0)),25))], {@pemit %#=Weight set to: %0; &wgt me=%0}, {@pemit %#=Valid weight range from 3 (hands) to 25 (large swords/maces/axes)}
+&PROCESS Certifier = @chown %0; @set %0=safe; @set %0=!halt; @unlock %0; &weight %0=[v(wgt)]; &length %0=[v(len)]; &quality %0=[v(quality)]; &breakfun %0=get(me/breakfun); &uses %0=[div(v(quality),5)]; @dol length weight uses quality breakfun= @atrlock %0/##=on; @set %0=safe; @set %0=chown_ok; @tr [v(combcontrol)]/addweap=[num(v(0))]; drop %0; &certflag me=0; @cost me
+&combcontrol me=#5000
+@APAYMENT Certifier = @pemit %#=Thank you. Now give the object to me to be stamped.; &certflag me=1
+&BREAKFUN Certifier = @switch and(lte(v(uses),0),gt(rand(100),v(quality)))=1,{@lemit [name(loc(me))]'s [name(me)] shatters!; !weapon; @nuke me}
+&QUALITY Certifier = 93
+&QUALITYCOM Certifier = $quality *:@switch and(not(v(certflag)),member(low med high,v(0)))=0,{@@ You can only set the quality to low, med, or high.},{&quality me=[min(99,add(mul(32,member(low med high,v(0))),sub(rand(7),3)))]; &qualname me=%0}
+&QUALNAME Certifier = high
+&WGT Certifier = 10
+&LEN Certifier = 10
+&PRICECOM Certifier = $price:@tr me/price
+&PRICE Certifier = @emit Price for a weapon of wgt [v(wgt)], len [v(len)], and qual [v(qualname)] is: [ufun(pricefun)]
+&PRICEFUN Certifier = [max(10,div(mul(v(quality),div(mul(mul(add(v(wgt),v(len)),max(0,add(v(wgt),v(len)))),1),5)),100))]
+&RESET Certifier = $reset certifier:@pemit %#=Certifier reset.;&certflag me=0; @cost me
+&CERTFLAG Certifier = 0
+@DESCRIBE Certifier = This machine will allow you to make arbitrary weapons combat-ready. The weapon should be pre-designed with all emits, and should avoid the using the attributes LENGTH, WEIGHT, QUALITY, USES, and BREAKFUN.  Machine commands:%r%tlength <number> - set weapon length.%r%tweight <number> - set weapon weight%r%tquality <high|med|low>%r%tprice - Report the price for certifying the current weapon%r%treset certifier - reset the beast in emergencies.%rAfter setting length, weight, and quality, and checking the price, you should pay the certifier, and then give it the weapon. The weapon should be set chown_ok when you give it to the certifier, which will chown it and return it to you chown_ok for you to chown. Just like your own weapons, you should end up owning the weapon, not the player.

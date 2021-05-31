@@ -1,0 +1,823 @@
+
+This is the most current changes file for PennMUSH. Please look it
+over; each version contains new things which might significantly affect
+the function of your server.  Changes are reported in reverse
+chronological order (most recent first)
+
+[TN] is Thorvald Natvig, a PennMUSH developer
+[TAP] is T. Alexander Popiel, a PennMUSH developer
+[RLM] is Ralph Melton, a former PennMUSH developer
+[NJG] is Nick Gammon, the Win32 porter
+[DW] is Dan Williams, the MacOS porter
+[SW] is Shawn Wagner, a sourcehack
+[2.2] refers to code which originated with the TinyMUSH 2.2 developers
+
+==========================================================================
+
+Version 1.7.2 patchlevel 32                        April 17, 2000
+
+Fixes:
+      * @cpattr from a non-standard attribute to a standard one
+        didn't preserve the AF_STATIC flag, and a subsequent atr_clr
+        could cause a crash.
+
+Version 1.7.2 patchlevel 31                        April 9, 2000
+
+Minor Changes:
+      * The SAY_TOKEN now applies to channels. That is, +public "Hi!
+        will not result in a doubled initial quote any more.
+        Suggested by Tyler Spivey.
+Fixes:
+      * Uninitialized negate_perms in the monitor flag table.
+        Report by Concordia@Beyond the Fire.
+      * Updates to help changes to match CHANGES.
+      * Another way to end up in an object in your inventory has been 
+        fixed. Report by Lensman.
+      * Unused ancient ccflags cruft removed from hints files.
+      * Considerable linting and cleanup. [SW]
+      * MacOS portability improvements. [DW]
+      * You may reset your @alias to itself in different case.
+        Suggested by Bolt.
+
+Version 1.7.2 patchlevel 30                        March 14, 2000
+
+Major Changes:
+      * New US export rules allow us to include shs.c and funcrypt.c
+        in the Penn distribution! Yay!
+      * Code is included in bsd.c for Windows NT users that uses
+        NT's native i/o instead of the bsd socket layer for
+        much improved performance. If you want it, edit src/bsd.c
+        and uncomment the define at the top. [NJG]
+Minor Changes:
+      * New eplayer, eroom, eexit, eobject classes for searches,
+        like Tiny. By Rhysem.
+      * @sitelock/access.cnf can now use regexp patterns. By Raevnos.
+      * The Exits() macro is replaced with Source(), Home(), etc.
+        where sensible. By Maverick@M*U*S*H.
+      * Example of bzip2 compression defines in mushcnf.dst by David@M*U*S*H.
+      * shs.c can now be configured to reverse endianness, so you
+        can more easily use win32 dbs on unix (or vice versa) without
+        password hassles. This is in mush.cnf. [NJG]
+      * JUMP_OK no longer allows anyone to @tel an exit into your room.
+        You must control the destination or have the open_anywhere 
+        power in order to do this now. Report by rodregis.
+Fixes:
+      * Calling do_log with LT_TRACE resulted in no logging. Report by David.
+      * MacOS (and general) portability improvements, suggested by [DW]
+      * help for before(), after() notes case-sensitivity. By Audumla.
+      * hasflag() didn't work with MONITOR. Report by Mystery8.
+      * A little more linting. [NJG]
+      * Fixed help reference to 'global functions'. Report by Falor.
+      * Some gmalloc fixes around missing newlines. Report by Raevnos
+      * Improvements to help switch(). Report by Omozali.
+      * Buffer overflow in @wall fixed. Report by rodregis.
+      * Fixed (I think) the FreeBSD/Linux problem of not finding
+        sigchld/sigcld and similar ilk. Hints for FreeBSD are back.
+      * Crash bug in @link fixed. Report by Howie@New Frontier TrekMUSH
+
+Version 1.7.2 patchlevel 29                        January 23, 2000
+
+Fixes:
+      * src/sig.c didn't include config.h. As a result, some systems
+        with sigaction that didn't keep signal handlers installed
+        (some linuxes) would crash very quickly on the second SIGALARM.
+
+Version 1.7.2 patchlevel 28                        January 14, 2000
+
+Minor Changes:
+      * New 'deny_silent' option for access.cnf sites.
+        Turns off logging of denied connection/creation/guest/register
+        from a site, to prevent logfile spamming by twinks.
+        Reported by Kludge-BC.
+      * TFPREFIX attribute, if set, is used in place of FugueEdit>
+        in @decomp/tf. [SW]
+      * @grep/print no longer requires you to be set ANSI. Suggested 
+        by Philip Mak.
+      * Improved reporting of function invocation limit. [TAP]
+      * /noeval switch added to think command.
+      * Changes to enhance portability to Mac 68k platform and others
+        that need < 32k of local data per function. [DW]
+      * Objects are only considered to be listening if they're
+        connected players, puppets, have an @listen set, or
+        are things/rooms with MONITOR flags. Previously, things/rooms
+        with ^patterns in attributes were considered listeners, even if
+        they weren't MONITOR. Suggested by Luke.
+Fixes:
+      * gmalloc.c updated from 1987 version to 1995 version. By Gepht.
+      * help corrections for shl and shr by Vexon@M*U*S*H.
+      * help corrections for @clock by Krad@M*U*S*H.
+      * RLIMIT_NOFILE bug fixed by Susan Thorne.
+      * Eliminated variables named 'new' to promote easier C++
+        compiles. Suggested by Gepht.
+      * Compiling with CSRI_TRACE works again. [TAP]
+      * signal stuff broken out to src/sig.c to allow link w/info_slave.
+      * strcasecmp and friends prototyped better in externs.h. [DW]
+      * Overzealous test for inherit flag on zoned objects corrected
+        by Nveid.
+      * Clearing an @attribute'd attribute's value on some object
+        and later manipulating the attribute could corrupt the
+        @attribute table in some cases. Fix suggested by Kami@SW2.
+      * Nested pemits could truncate one another. Reported by Alierak.
+      * Channel messages didn't correctly set %#. Reported by Saberwind.
+      * info_slave used ident even if use_ident was off in the 
+        mush.cnf file. Reported by Rhysem.
+
+Version 1.7.2 patchlevel 27                        September 22, 1999
+
+Minor Changes:
+      * Added Raevnos's sitelock/name patch to allow removing names
+        with @sitelock/name !<name> and to fix a display bug.
+      * bsd.c, info_slave.c, and player.c now deal in IP addresses as well
+        as hostnames (which can be spoofed), providing more reliable logging
+        and access control. IP addresses are stored in the LASTIP attrib
+        on players, as per LASTSITE. Suggested by David@M*U*S*H.
+      * Hidden connections are announced as per DARK ones. Suggested 
+        by Julianna@ATS.
+      * New /noisy switch to @cemit prepends <Channel> to message.
+        Suggested by Spork@M*U*S*H.
+Fixes:
+      * help vmul() incorrectly defined the dot product (which vdot() does).
+        Reported by [SW].
+      * Typo fixed in help @set3. Reported by Logain@ATS
+      * Typo fixed in help @emit. Reported by Rhysem@M*U*S*H.
+      * Various help fixes by mith, Big Spoon, and Krad@M*U*S*H.
+      * @function now works for mortals as the help indicates. Report by mith.
+      * @log/wipe should be @logwipe in comments in mushcnf.dst. 
+        Report by Spork@M*U*S*H.
+      * Object names are now limited to 256 characters. Fixes some
+        buffer overflow issues.
+
+Version 1.7.2 patchlevel 26                        July 18, 1999
+
+Minor changes:
+      * @verb didn't save stack args before dealing with the WHAT/OWHAT
+        msgs, as TinyMUSH does. Changed to emulate TinyMUSH.
+        Reported by Angel. [SW]
+Fixes:
+      * The noeval-eqsplit fix cause weirdness with attribute setting by
+        directly connected players when specifying the obj by function.
+        Fixed. Reported by Julienna@ATS.
+      * Wizards couldn't modify atrlock'd attribs without breaking the 
+        lock first. [SW]
+      * @find by Wizards showed all garbage objects. Reported by mith.
+
+
+Version 1.7.2 patchlevel 25                        July 10, 1999
+
+Minor changes:
+      * New 'nofixed' command restriction, by popular demand.
+      * CONFIGURATION messages in netmush.log shortened to CONFIG.
+        Suggested by mith.
+      * Attributes with the Wizard flag can no longer by created/modified
+        by any non-wizard, even that attribute's owner. Reported by
+        Kurt Fitzner.
+      * @pcreate now shows the dbref of created player. Suggested by
+        Oderus.
+      * When you receive an @mail message, you're now told the number.
+        Suggested by Rak@M*U*S*H, among others.
+      * The @toad command has been removed. The security issues it
+        presents, though not unsolvable, aren't worth solving just to
+        provide Wizards with a humiliating alternative to @newpassword.
+Fixes: 
+      * %q0-%q9 were not preserved during evaluation of player-message
+        attributes (DESC, SUCC, DROP, etc.) Reported by Geoff Gerrietts
+      * Added some hints from FreeBSD. Suggested by Lord Argon of mux.net.
+      * Better Configure handling of library paths. 
+      * 'nogagged' wasn't working correctly in restrict_command. Fixed.
+      * @search on rooms sometimes reported a null room. Reported by mith.
+      * Nearly all source files now include conf.h (which includes options.h), 
+        and do so before any other PennMUSH header file except config.h 
+        and copyrite.h.  Suggested by Joel Ricketts.
+      * Fixed a few comparisons of <= db_top. Reported by Kurt Fitzner.
+      * @oemit <obj>=<message> was emitting to the enactor's location,
+        rather than to <obj>'s location, as it should have been. Fixed that
+        and fixed help oemit() which documented this wrong behavior.
+        Reported by Kurt Fitzner.
+      * An 8-bit-unclean construction in bsd.c fixed by Christoper/Chicago.
+      * p/noeval <message> (repaging) eval'd message anyway.
+      * Args to $commands that looked like functions were being eval'd
+        even if not in brackets. Reported by [SW]. [TAP]
+      * @lock/listen could cause weird pose corruption. Reported by
+        David@M*U*S*H. [SW]
+      * Clarification of wiz_noenter in mush.cnf suggested by 
+        Interloper@M*U*S*H.
+      * Bug in orflags/andflags could cause weird results with toggles.
+        Like nospoof players tested positive for 'J'. Reported by Saberwind.
+      * Bug in make customize fixed. Reported by Saberwind.
+      * References to a PASSWORD attribute removed from help. Reported by
+        Saberwind.
+      * Fixed db_top bug in search/lsearch reported by Saberwind.
+      * @halt code was screwy. Reported by Krad@M*U*S*H
+      * Wizards could grant @powers to God. Reported by Saberwind.
+      * delete() with negative position arg could crash. Reported by
+        Ashen-Shugar.
+      * @clone of an exit while inside an object could have unpredictable
+        effects. Reported by Andy@RobotechMUSH
+      * Typo in help aposs() fixed. Reported by Philip Mak.
+      * @hide now defaults to @hide/on. Reported by Saberwind.
+      * ldelete() added help list functions. Reported by Rak@M*U*S*H
+      * @attribute/rename didn't update the attribute's name quite right.
+        Reported by mith.
+      * @clone by a room didn't properly set the cloned object's location.
+        Reported by Philip Mak.
+
+Version 1.7.2 patchlevel 24                        April 5, 1999
+
+Fixes:
+      * @search/lsearch didn't behave right when given an upper range
+        argument of exactly the highest dbref in the db. Reported by
+        [SW].
+      * Unlinked and HOME-linked exits were mishandled during dbcks, 
+        just like variably-linked ones in pl23. Reported by [SW].
+      * Help fixes. [TAP]
+
+        
+Version 1.7.2 patchlevel 23                        April 2, 1999
+
+Fixes:
+      * The NoLeave() macro was misdefined, but also not used (whew).
+        Now it's defined right and used.
+      * Giving a / without a switch to commands caused unpredictable
+        behavior. Fixed. Report by Broncalo@Dune III.
+      * Variable-linked exits were mishandled during dbcks, resulting in
+        them being relinked to their source rooms.
+      * @grep/iprint showed the hilighted matches in the same case as 
+        the pattern was given, rather than the case there were in the
+        attribute. Reported by Philip Mak.
+      * The LAST attribute was set differently when players created and
+        when the later connected. The latter case wasn't appropriately
+        prepending single-digit dates with a 0, which fouls up convtime()
+        calls on LAST. Noted by [SW].
+
+
+Version 1.7.2 patchlevel 22                        March 19, 1999
+
+Minor changes:
+      * More extensive macro cleanup, based on a patch by David@M*U*S*H
+      * Notable for your own code: Inherit() is now Inheritable(),
+        DarkLegal() checks if something's ok to be invisible when it's DARK,
+        Destroyed() is now IsGarbage(), and some other new helpful macros
+        can be found in hdrs/dbdefs.h
+      * Objects now store their creation cost, not their 'value' (which
+        used to be cost/5 - 1, and had relevance for sacrificing, a now
+        obsolete concept). There is no longer a limit on how much you
+        can spend to create an object, and it's all refunded when the
+        object is recycled. Reported by David@M*U*S*H.
+
+Fixes:
+      * Two memory leaks and one unbalanced mem_check fixed. [SW]
+      * @oemit <room>/<object> was broken in many ways. 
+        Reported by [SW].
+      * Help @drop/@odrop/@adrop updated to mention use on exits.
+        Suggested by Stewart Evans.
+      * God using @logwipe and giving the wrong password crashed the MUSH.
+        [SW]
+      * search() was behaving as lsearchr() not lsearch(). Noted by
+        KMoon.
+      * Bad range arguments for @search and lsearch() now give an
+        error message and don't charge the player. [SW].
+      * Help @search3 had a typo. Fixed by Halatir@M*U*S*H.
+      * Restricting the 'goto' command now also restricts movement
+        through exits. Suggested by Christopher Poff.
+      * Objects and rooms now notify their contents when they start/stop 
+        listening. Report by [RLM].
+      * Error in help for @channel referring to @config. Krad@M*U*S*H
+
+
+Version 1.7.2 patchlevel 21                   February 16, 1999
+
+Minor changes:
+      * The restart script now tries to determine its own directory,
+        so it may not require editing to set GAMEDIR any more.
+        Idea by David@M*U*S*H.
+      * Various @find/@search/@entrances commands charged you the
+        FIND_COST even if you didn't have permission to run the command.
+        We don't do that any more. Report by Jonathan Booth.
+      * $command and ^listen pattern matching is now case-insensitive
+        even when the attrib is set REGEXP, unless the attrib is set
+        CASE. In the past, glob matching was case-insensitive and
+        regexp matching was case-sensitive, which cause problems if
+        you tried to regexp match a disabled standard command.
+        Now you've got full flexibility. This may break any current
+        regexp-based $command or ^listen matching that relies on
+        case sensitivity (set those attributes CASE). We now also
+        have a new insensitive regmatch function: regmatchi()
+        Report by Jonathan Booth.
+
+Fixes:
+      * Anyone could @chan/priv channels, even if they didn't pass
+        the modlock. Report by David@M*U*S*H.
+      * DARK disconnects are now shown correctly on chat channels.
+        Really this time. :) Report by Broncalo@Dune III
+      * help for CONNECTED flag updated. Report by matcat@M*U*S*H
+      * Using @kick within a user-defined command could crash the MUSH.
+        Reported by Kludge-BC. [TAP]
+
+
+Version 1.7.2 patchlevel 20                   January 26, 1999
+
+Minor changes:
+      * Many expression replaced with macros by David@M*U*S*H.
+Fixes:
+      * @mail/silent/urgent didn't set the message urgent. 
+        Patch by Halatir@M*U*S*H.
+      * You could get free coins by repeatedly killing your objects.
+        Reported by Max@M*U*S*H. [TAP]
+      * You could rename a channel to a name already in use.
+        Reported by David@M*U*S*H.
+
+
+Version 1.7.2 patchlevel 19                   December 2, 1998
+
+Minor changes:
+      * The main select() polling loop now times out every second,
+        so we will reliably call local_timer() and handle alarms
+        every second. Suggested by [NJG].
+      * 'make' now performs a make in game/txt, assuring that help
+        indices are rebuilt after a patch. Suggested by Broncalo@Dune III.
+
+Fixes:
+      * Crash in using @cpattr with standard attribs fixed.
+        Reported by Atuarre@ATS.
+
+
+Version 1.7.2 patchlevel 18                   November 25, 1998
+
+Minor changes:
+      * Guest players don't receive a paycheck any more. Suggested by
+        Kyieren@M*U*S*H
+      * look_helper() internal function now uses privtabs. As an
+        epiphenomenon, @set obj/attr=locked is now synonymous to
+        @atrlock obj/attr=on. Suggested by [SW].
+
+Fixes:
+      * Win32 compile fixes. [NJG]
+      * DARK disconnects are now shown correctly on chat channels.
+        Report by Broncalo@Dune III
+      * Quiet players no longer see 'Title set.' messages when
+        using @chan/title. Patch by Halatir@M*U*S*H.
+      * @cpattr/@mvattr now copy attribute flags. Report by Jon Booth.
+      * Some compiler warnings fixed by Atuarre.
+      * The 1 and 5 minute dump warning messages weren't being used.
+      * When matching regexp's, later parenthesized subexpressions 
+        weren't correctly assigned to %-vars when earlier ones 
+        were empty. Report by Geoff Gerrietts. [TAP]
+      * Some messages as a result of looking at a room were being
+        placed onto the wrong queue, so remote viewers (@listen *,
+        @pemit/remit to somewhere) would get things out of order.
+        Reported by David@M*U*S*H. 
+      * Help added for functions() and fixed for timestring(). 
+        Report by Geoff Gerrietts.
+      * soundex() misbehavior for very short words fixed.
+        Report by kmoon.
+      * @attribute/access acted as if it were always /retroactive. [SW]
+      * Changes of flags on a standard attribute were lost across
+        restarts. Reported by [SW].
+      * lcstr, ucstr, capstr, and encrypt and decrypt in the 
+        "real" funcrypt.c are now ansi-aware. The former 3 preserve
+        ansi formatting, while the latter two strip it. You must download
+        a new version of funcrypt.c from ftp.pennmush.org (USA/Canada)
+        or export.pennmush.org -- it is not patched herein. 
+        Reported by Ashen-Shugar.
+
+
+Version 1.7.2 patchlevel 17                   November 11, 1998
+
+Minor changes:
+      * Newly created players now have a default uselock of =me.
+      * Number of available file descriptors is printed in startup log.
+        Suggested by Doogie@ATS Trekmush.
+      * The @chat/@cemit commands can no longer be used by gagged players.
+
+Fixes:
+      * Adding functions in funlocal.c shouldn't produce compiler warnings.
+        Patch by Halatir@M*U*S*H
+      * log(0) or ln(0) could crash non-IEEE compliant math libraries.
+        Reported by Drakwil and Talos at SNW.
+      * csrimalloc wouldn't compile with glibc. Fix by Mike Selewski.
+      * Order of checks for number of file descriptors changed to
+        do better on POSIX and hybrid systems like FreeBSD. Suggested by
+        Doogie@ATS Trekmush.
+
+
+Version 1.7.2 patchlevel 16                   October 17, 1998
+
+Fixes:
+      * table() could be used to crash the MUSH. Report by Ashen-Shugar. [TAP]
+      * whisper/list didn't work. Report by Kamala@ATS TrekMUSH, via
+        Mikey@M*U*S*H 
+      * andflags(player,C) checked for the (useless) CHOWN_OK flag
+        rather than the COLOR flag. Its now been special-cased to
+        check COLOR on players. This is a kludge, but probably worth it.
+      * Top of admin WHO now lists 'Loc #' not 'Room #', as that's more
+        accurate. Suggested by Saberwind.
+      * @log/wipe returns as @logwipe. Its absence was reported by 
+        Nveid@M*U*S*H.
+      * Date in hdrs/version.h now y2k compliant.
+
+
+Version 1.7.2 patchlevel 15                   September 7, 1998
+
+Fixes:
+      * @emits weren't propagated through AUDIBLE exits. Report by Nammyung.
+      * Building w/o ROYALTY_FLAG defined works again. Report by Scott Weber.
+      * When matching $ or ^ patterns with the REGEXP attribute flag set,
+        a failed match would then be improperly checked for normal 
+        matching as well. Reported by Jason Rhodes.
+      * Attribute flags weren't listed in @decomp. Reported by
+        Jonathan Booth.
+      * Make customize never got updated to match the new mushcnf/restart
+        system. Now it has. Reported by Manic@FinalFrontier
+      * @edit now works on attribs starting with _. Reported by Jason Rhodes.
+      * Help files should work better on Win32. Reported by Miphon. [TAP]
+
+
+Version 1.7.2 patchlevel 14                   August 4, 1998
+
+Minor Changes:
+      * You may @parent to an object you control via ZMO, even if you
+        don't own it. Patch by Halatir@M*U*S*H
+      * In lsearch() and @search, you may refer to object types
+        in either the singular (ROOM) or plural (ROOMS).
+      * Most chat messages now include the name of the channel. 
+        Suggested by Philip Mak.
+
+Fixes:
+      * Long @chat messages crashed the server. Reported first by Rusty
+        and Siris@M*U*S*H. [TN]
+      * Setting the ZONE flag on a non-zonelocked player should give
+        a warning, and wasn't. Reported by Halatir@M*U*S*H
+      * @@ was parsing its argument. No longer. [RLM]
+      * The @config listing was weird w.r.t. compression. [TN]
+      * @shutdown/reboot could cause a crash if a player had an
+        OUTPUTPREFIX or OUTPUTSUFFIX set.
+      * Hint to linux users about undefining I_MALLOC when using
+        gmalloc. Reported by Kyle Forbes.
+      * @shutdown/reboot now calls local_shutdown(). Reported by Kyle Forbes.
+      * When loading a db in which an object with dbref n has attributes
+        owned by players with dbrefs > n, the attribute ownership was
+        reset to GOD. This should no longer happen unless the owner 
+        really is invalid. Most recently noted by [SW].
+      * Exits that have contents (corrupt!) are fixed up in dbck.
+      * dbck is run whenever the db is loaded.
+      * objeval() help fixed. Reported by Yeechi Chen.
+      * Compiling without ROYALTY_FLAG defined was broken. Reported by
+        Scott Weber.
+      * Sufficiently tricky use of locks could cause a crash due to
+        massive function invocation or recursion. Reported by Atuarre. [TN]
+
+
+Version 1.7.2 patchlevel 13                   July 7, 1998
+
+Minor changes:
+      * @mail/file now shows the folder name of the destination folder
+        as well as its number. Suggested by Julianna@ATS TrekMUSH
+
+Fixes:
+      * Problems with ANSI causing Pueblo to bleed have been identified
+        and fixed!
+      * Bug with cwho() fixed. Report by Tripsis@M*U*S*H. [TAP]
+      * 'make diffs' in Makefile updated to use prcs and to produce
+        diffs for patches without Index: lines which may confuse
+        non-POSIX versions of patch.  
+      * Fixed typo in options.h reported by Kyle Forbes.
+      * Comments in src/services.c and src/filecopy.c are now C-style,
+        not C++ style. Some compilers were puking on these, even though 
+        WIN32 wasn't defined and the preprocessor should've ignored this 
+        stuff. Go figure.
+      * Side-effect functions like pemit() didn't obey the restrictions
+        on the corresponding command (like @pemit), and setting attributes
+        with @set could get around restrictions on ATTRIB_SET. 
+        Reported by Scott Weber. [TAP]
+      * Help for t() and elock() clarified by Octavian@M*U*S*H.
+      * next() could be used on an object in a room that the player
+        didn't control to get the room inventory. Reported by Octavian@M*U*S*H
+      * hint/aux.sh has been renamed hints/a-u-x.sh. This means it won't
+        be properly recommended by Configure on A/UX systems, but Win32
+        programs often puke on files name 'aux.*' because they're braindead,
+        and there are lots more Win32 users than A/UX users. Bummer.
+      * When A was inside B, and @listen B=*, A would hear everything
+        in B's room (good) except B's own speech (bad). Report by 
+        Nemesis @ Beast Wars 2
+      * help exits clarified by Nammyung@M*U*S*H
+      * help comp() clarified by Halatir@M*U*S*H
+      * @squota without a limit now shows the victim's quota in addition
+        to asking what it should be set to. This more closely matches
+        the old behavior of @squota without a limit being treated as
+        @quota. Reported by Matt@M*U*S*H
+      * @chan/what on a nonexistent channel didn't produce any
+        feedback. Reported by Octavian@M*U*S*H.
+      * Typo in help zone master rooms corrected. Report by Matt@M*U*S*H.
+
+
+Version 1.7.2 patchlevel 12                   June 11, 1998
+
+Fixes:
+      * GAGGED players could pose/semipose. Reported by Jorhan@M*U*S*H. [TN]
+      * convsecs() help clarified.
+      * @decomp obj/attr didn't work if you couldn't examine the object
+        even if the attribute was visible. Reported by Jonathan Booth.
+      * make customize had a problem with the way it handled the
+        hlp directory. It now creates a real hlp directory, but makes
+        all the standard hlp files symlinks to the distributed ones.
+        (It used to make the hlp/ directory a symlink, which did bad
+        things with 'txt/Makefile'. Report by Gasparin Balazs.
+      * help control rewritten to clarify the real algorithm.
+        Suggested by [SW].
+      * Configure is more flexible when determining if you're
+        building under cygwin. Reported by Miphon.
+      * zfun() worked, but gave an error message anyway. Fix by Rob@DuneIII
+      * hdrs/regexp.h renamed to hdrs/myregexp.h to avoid conflict
+        with standard regexp.h header file in cygwin.
+
+
+Version 1.7.2 patchlevel 11                   May 25, 1998
+
+Changes:
+      * The PennMUSH copyright notice has been changed, as the
+        licensing terms for TinyMUD/TinyMUSH 2.0 have changed,
+        and to update the TinyMUSH 2.2 part of the copyright and
+        the PennMUSH part as well. 'help copyright' now gives the
+        copyright, and it's in COPYRITE and hdrs/copyrite.h.
+        The licensing terms are now shorter, but practically very similar.
+ 
+Fixes:
+      * Possible infinite loop (with disk-filling output!) in @dbck
+        with certain types of DB corruption fixed.  Report by RLM and
+        Arathorn@CDI.  [TAP]
+      * @undest intermittent crash-bug fixed. Report by Arathorn. [TAP]
+      * regmatch() crash-bug fixed. Report by Tavoan@ATS. [TAP]
+      * Ansi bleeding problem fixed. Report by Atuarre@ATS. [TAP]
+      * The embedded version of mkindx used by Win32 builds had a bug - 
+        some global variables weren't getting properly reset.
+        Fix by Stephane Thibault.
+      * Help for @oxmove added. Report by Bray Roned@ATS.
+      * isnum() was broken if tinymath was defined. Report by Daniel Peters.
+      * portmsg needed MUSH_IP_ADDR, which is now runtime configured.
+        It no longer does (see comment in portmsg.c if you need this
+        functionality). Report by Daniel Peters.
+      * Help for dig() and lnum() clarified by Andre Leopold.
+
+
+Version 1.7.2 patchlevel 10                   April 24, 1998
+
+Fixes:
+      * MANIFEST updated to reflect the deletion of src/nmalloc.c
+
+
+Version 1.7.2 patchlevel 9                    April 21, 1998
+
+Fixes:
+      * Myopic flag didn't work unless Pueblo support was on. Reported by
+        Rhysem@M*U*S*H.
+      * help debug referred to can_debug, a now-obsolete power.
+        Reported by Rodimus Prime @ TF2005.
+      * @chown to a Zone Master didn't work. The @chown code has been
+        rewritten to be easier to read. Report by Trispis@M*U*S*H.
+      * open_anywhere was mis-listed in help powers2. Report by Trispis.
+      * nmalloc.c is removed, and Win32 compiles should be a bit easier.
+      * Win32 build no longer limited to 64 sockets; 256 instead. [NJG]
+
+
+Version 1.7.2 patchlevel 8                    April 2, 1998
+
+Fixes: 
+      * round() could crash on very big numbers on some systems.
+        Reported by Atuarre@ATS.
+      * Problem with exits getting a contents list in certain 
+        conditions fixed. Reported by Atuarre@ATS. [TAP]
+      * Problems with puppets and Pueblo fixed. Report by Mop-Boy.
+      * mkindx problem with dos text files fixed. [NJG]
+      * Order of include files in htab.c was wrong, caused compilation
+        problems on SCO Openserver. Reported by Flame.
+      * On Win32, the MUSH could quit without flushing its buffers. [NJG]
+      * When inside of an object with @listen *, you didn't see things
+        when the object did a 'look'. Reported by Vedui.
+      * Warnings in rwho.c eliminated. [NJG]
+      * More fooling around with mymalloc.h to help the Win32 compile.
+        Suggested by NJG.
+      * open_everywhere power get left off help powers list at some point.
+        Reported by Steven@Champions.
+      * Error message for joining a non-existant channel was different
+        from that for joining a channel that exists but you can't
+        see. Reported by Octavian@M*U*S*H.
+      * get()'ing an attribute that isn't set now returns an error 
+        message only if the default permissions don't allow you to 
+        get it. This allows get(player/ALIAS) to always work, returning
+        an empty string if the player has no ALIAS. [TAP].
+      * base_room mush.cnf option got left out.
+      * dbck didn't check for disconnected rooms correctly. Noted by
+        Rhysem.
+
+
+Version 1.7.2 patchlevel 7                    March 10, 1998
+
+Fixes:
+      * Typo fixed in pennflag.hlp. Report by Keith Howell.
+      * Bug in mid() that could cause crashes on some OS's when using
+        bad arguments fixed. Report by Yanek@DragonStarMUSH. [TAP]
+      * @wait obj=command fails when tiny_math is defined. Report by Yanek.
+      * With tiny_math defined and tiny_booleans not defined, 
+        strings in booleans weren't being treated as 1. Report by Yanek.
+      * @decompile now shows @powers, too. Report by Jonathan Booth.
+
+
+Version 1.7.2 patchlevel 6                    March 8, 1998
+
+Fixes:
+      * src/mymalloc.c now includes config.h correctly. [NJG]
+      * @zemit would change zones of objects while running.
+        Report by Steve Sanderlin and Vedui.
+      * Minor cosmetic bug in @config/list. Reported by Mike Wesson
+      * @chown'ing an object to a Zone player doesn't reduce the Zone
+        player's quota, but @chown'ing an object back from a Zone player
+        should reduce yours (and didn't). Report by Vedui.
+
+
+Version 1.7.2 patchlevel 5                    March 2, 1998
+
+Fixes:
+      * @cloning an object on a channel could crash the MUSH. Report by
+        Mordak@ATS.
+      * You couldn't add 2 objects with the same name to a channel.
+        Report by Mordak@ATS.
+      * Help for inc() fixed. Brian@M*U*S*H
+      * On Win32, the text file indexes are now properly sorted,
+        and things work ok if you don't have a text file defined. [NJG]
+      * Wiz objects couldn't add players to channels. Report by Mike@M*U*S*H
+      * Compile problem with fork and win32 fixed. [TAP]
+      * You shouldn't get nospoof notification from your own emits. [TN]
+      * You no longer get nospoof notification from every @chat, only
+        from @cemit.
+      * @lock obj=here or @lock obj=exit failed. Report by Luke@M*U*S*H
+      * The MUSH announces where it's sending stderr when it starts up. [NJG]
+      * If there was nothing on the queue, and no user activity,
+        the MUSH could wait as long as 999 seconds before checking to
+        see if it should do anything (like a dump, a shutdown, idling
+        someone out, etc.) This has been changed to 5 seconds.
+        Report by NJG.
+      * Encryption buffer for SHS encryption was too small, could cause
+        password problems. [NJG]
+
+
+Version 1.7.2 patchlevel 4                    February 24, 1998
+
+Fixes:
+      * Fixed a few more compiler warnings under Win32. [NJG]
+      * Output to a non-ANSI, non-COLOR player could cause crashes.
+        Reported by Vedui.
+
+
+Version 1.7.2 patchlevel 3                    February 22, 1998
+
+Fixes
+       * Fixed a slew of compiler warnings under Win32. [NJG]
+       * Jonathan Booth Removed a few #ifdef EVENTS that lingered.
+       * Room names weren't shown bold to people who had ANSI
+         but not COLOR set. Report by Sylvia
+       * Added help alias pueblo() for pueblo. Suggested by Vedui.
+       * Fixed some problems with ansi() and tf reported by Vedui.
+       * @readcache could cause crashes. First report by Mop-Boy.
+       * src/tcl.c is now better located by Configure. [TN]
+
+
+Version 1.7.2 patchlevel 2                    February 19, 1998
+
+Fixes:
+       * Reading of compressed dbs didn't work right. Report by Roger Christie
+       * Fix to help to remove reference to @config/globals. Mordak@ATS.
+
+
+Version 1.7.2 patchlevel 1                    February 18, 1998
+
+Fixes:
+       * max_dbref was limited to 256 by mistake. Report by Rhysem@M*U*S*H
+       * restricted_building in mush.cnf didn't work. Does now.
+         Report by Rhysem@M*U*S*H
+       * memchecks for hash tables didn't work right. Report by [SW]
+
+
+Version 1.7.2 patchlevel 0                    February 9, 1998
+
+Major Changes:
+       * Support for the Pueblo MUD client (http://www.chaco.com/pueblo)
+         which allows the MUSH to send html to the client. This is
+         runtime configurable with @enable/@disable and mush.cnf. [TN]
+       * Regular expression support: the REGEXP attribute flag causes
+         attributes to match $ and ^ patterns using regular expressions.
+         regmatch() matches regular expressions. [2.2]
+       * PennMUSH tarfile now unpacks itself in a pennmush/ directory,
+         by popular request. pennmush/ is now the 'top-level' directory;
+         patches should still be applied from within the pennmush/ directory.
+       * More compile-time options are now run-time options:
+          HASPOWER_RESTRICTED, SAFER_UFUN, DUMP_WARNINGS,
+          INDEX_COMMAND, RULES_COMMAND, HATE_DEST (general command rename?),
+          NOISY_WHISPER, POSSESSIVE_GET POSSGET_ON_DISCONNECTED,
+          REALLY_SAFE, DESTROY_POSSESSIONS, NULL_EQ_ZERO,
+          TINY22_BOOLEANS, TINY_TRIM_ORDER,
+          ADEST_ATTRIB, AMAIL, PLAYER_LISTEN, PLAYER_NOAHEAR,
+	  ROOM_CONNECTS, ANSI_NAMES, COMMA_EXIT_LIST, COUNT_ALL,
+	  EXITS_CONNECT_ROOMS, WIZWALL_PREFIX, RWALL_PREFIX, WALL_PREFIX,
+          NO_LINK_TO_OBJECT, QUEUE_PER_OWNER, WIZ_NOAENTER, USE_IDENT,
+	  MUSH_IP_ADDR, MAILER, ANSI_JUSTIFY, PLAYER_NAME_SPACES,
+          NO_FORK, EVENTS, MILITARY_TIME, LOGIN_LIMIT, IDLE_TIMEOUT,
+          RESTRICTED_BUILDING, FREE_OBJECTS, QUOTA, BUILDING_LIMIT,
+          FLAGS_ON_EXAMINE, EX_PUBLIC_ATTRIBS, TINY_ATTRS, FULL_INVIS,
+          SILENT_PEMIT, PLAYER_LOCATE, DO_GLOBALS, GLOBAL_CONNECTS,
+          PARANOID_NOSPOOF, ACCESS_FILE, NAMES_FILE, OBJECT_COST,
+          EXIT_COST, LINK_COST, ROOM_COST, QUEUE_COST, QUOTA_COST,
+          FIND_COST, PAGE_COST, KILL_BASE_COST, KILL_MIN_COST, KILL_BONUS,
+          QUEUE_LOSS, DBTOP_MAX, MAX_OBJECT_ENDOWMENT,
+          MAX_WIZ_OBJECT_ENDOWMENT, MAX_PENNIES, MAX_DEPTH, MAX_PARENTS,
+          PURGE_INTERVAL, DBCK_INTERVAL.
+       * All the functions that used to be optional are now
+         enabled. The increase in code size is negligible, and
+         the decrase in options is a win. We'll probably add 
+         some way to restrict function use in mush.cnf in the future.
+       * The original MUSH chat system is no longer distributed or
+         supported. The OBJECT_CHAT option is thus obsolete.
+         If you've been using the old system, your db will automatically
+         be converted to the new one, but you will need to recreate
+         your channels and readd players to them.
+       * ADD_NO_COMMAND_FLAG has been removed, as few people need
+         to add NO_COMMAND en masse to all their rooms and players
+         any more. Those that do can use MUSHcode for this.
+       * The definitions of GOD, MAX_ARG, have been moved out of options.h, 
+         because redefining these isn't really an option you want to exercise.
+       * dune.h is no more. Raise a glass to it.
+       * Non-standard attributes that are created by objects are set to 
+         no_command by default. This improves security in many common cases, 
+         but may require your object code to @set the attribute !no_command
+         after it creates it, if the attribute is meant to contain
+         a $command. Attributes set by players themselves (typed directly
+         from a socket) still work as they used to, as do standard
+         attributes (@va-@vz, for example). [TN]
+       * Hash table code has been tightened up. [TN]
+       * New option: tiny_math. Treat strings as 0 in math functions
+         rather than errors. This is handy for Tinymush compatibility,
+         even though it may make real errors harder to find.
+         Suggested by Ashen Shugar.
+
+Minor Changes:
+       * idlesecs() now returns the number of seconds idle for the least
+         idle connection of the player.
+       * conn() now returns number of seconds connected for the longest
+         connected connection of the player.
+       * I wrote the COPYRITE file some time ago, but forgot to include
+         it in the dist. Oops!
+       * UFAIL/OUFAIL/AUFAIL is here. Suggested by Mike Affourtit.
+       * controls() is now ok if you are See_All; you don't need to 
+         actually control the object you're testing. Reported by RLM.
+       * If you're allowing empty attributes, ICLOC is set to ""
+         on newly created players, instead of " ", to permit testing
+         with hasattrval. Suggested by Jonathan Booth. [TN]
+       * Improvements to FPE handling on FreeBSD. By Jason Young.
+       * New switch /noeval for @mail. Suggested by Mop Boy.
+       * The "dbcomp" directive in mush.cnf has been removed.
+         "compress_suffix" has been added. Databases are now specified
+         without compression suffixes.
+       * You are warned if you fail to define an option in the config file.
+         Suggested by TN.
+       * @config can now list config options in logical groups.
+       * mail.c has been removed. extmail.c is used directly instead.
+
+Fixes:
+       * hasattr/get/xget/eval now are less likely to tell a player something
+         they're not privileged to know about the existence of attributes. [TN]
+       * The big_que function has been renamed parse_que. The parse_que
+         function (which just called big_que) is gone.
+       * FAQ updated, as well as other references to pennmush.tinymush.org.
+       * Giving a negative argument to convsecs() would crash Win32.
+         As there's no reason to ever do that, you now can't. 
+         Reported by Javin@DynamixMUSH
+       * dist2d and dist3d now return floating point numbers when
+         FLOATING_POINTS is defined, as they said they would.
+       * help for pi() now refers to it as 3.141593, which is what
+         the function actually produces, due to rounding. Report by Vedui.
+       * help for beep() notes that royalty can use it to. Report by Vedui.
+       * Using a maildb that referred to db#s that didn't exist
+         in the object db (e.g., replacing your object db with minimal.db
+         without removing the maildb) would crash the server.
+         Now the server fixes up invalid messages after loading maildb
+         Report by TN.
+       * Connect screen and other cached text files should now be
+         automatically terminated with CRLF, so windows and other
+         telnet programs will see them correctly. Report by many. [TN]
+       * The separator in iter() is now parsed. Report by Ashen-Shugar.
+       * match(foo,>) always returned 1; similar problems with matchall,
+         grab, graball, strmatch, and elements. Report by Ashen-Shugar.
+       * Objects listening for channel broadcasts with ^<chan> *: didn't
+         work. Now they do.
+       * When you disabled a command in order to override it in MUSHcode,
+         calling the command with switches didn't work. 
+         Reported by Ben Kenobi. Patch by Eyal Sagi and TN.
+       * Calls to cut in utils/mkcmds.sh relied on "-f 2" working like
+         "-f2". On at least Ultrix 4.4, it doesn't. Report by Cwilla.
+       * Link strdup.o to info_slave because some systems need
+         strdup! Report by Cwilla.
+       * Some help file typos cleaned up by Ken Ray.
+       * exit() used to work on non-rooms. Not anymore. Report by
+         Trispis@MUSH101 
+       * All header files now idempotent.
+       * @tel me=home or @tel home now works in all cases where 'home'
+         works. Report by Vedui.

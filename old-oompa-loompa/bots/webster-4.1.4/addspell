@@ -1,0 +1,24 @@
+#!/bin/csh -f
+#
+# Utility to add a word to the local spelling lists if it's not already
+# there. 
+
+set DICTDIR=/dunemush/mush/social/Webster
+set DICTFILE=local.dict
+set TMPFILE=/tmp/dict
+
+if (!(-e $DICTDIR/$DICTFILE)) then
+	echo Creating blank dictionary.
+	cp /dev/null $DICTDIR/$DICTFILE
+endif
+
+set word=`grep -w "$1" $DICTDIR/$DICTFILE`
+
+if ($word == "") then
+	echo $1 >> $DICTDIR/$DICTFILE
+	sort $DICTDIR/$DICTFILE > $TMPFILE
+	mv $TMPFILE $DICTDIR/$DICTFILE
+	echo $1 added to $DICTDIR/$DICTFILE
+else
+	echo $1 already in dictionary.
+endif

@@ -1,0 +1,295 @@
+.TH LOGEDIT 1 LOCAL
+.SH NAME
+logedit \- trim logs of MUSH events
+.SH SYNOPSIS
+.LP
+\fBlogedit\fR 
+[-acdlmnpstwAIO:%] [-f [-]world] [-o [outputfile]] [-r regexp] [-x name] 
+[-y name] [-F filename] [-W [<col>[,<first>[,<rest>]]]] filename
+.br
+.SH DESCRIPTION
+.LP
+The \fBlogedit\fR program is a tool designed to help players and admins
+of role-playing MUSHes trim down logs of role-playing events on the
+MUSH. It takes a log file (indicated by 'filename' or from stdin) and
+produces as output another file (by default 'filename.log') after
+optionally removing a number of typical things which are annoying in
+logs.
+.nf
+
+	Logedit *always* strips the following things from logs:
+	\- Messages beginning with GAME: or MAIL:
+	\- Nospoof []'s
+	\- * has connected, disconnected, or reconnected messages
+	\- Huh? (Type help for help)
+	\- Flag set. and Doing set.
+	\- Any line appearing twice in succession (simple SPAM)
+	\- Anything between a pair of '#log' lines. This allows you, while
+	  logging, to 'think #log', thus indicating that what follows
+	  (until you 'think #log' again) is to be stripped by logedit.
+.fi
+.SH OPTIONS
+.LP
+These options control what is to be stripped from the log:
+.TP
+\fB\-a\fR
+Remove @wall/@rwall/@wizwall messages
+.TP
+\fB\-c\fR
+Remove @chat messages from all channels
+.TP
+\fB\-d\fR
+Remove DOING/WHO lists
+.TP
+\fB\-f\fR [-]world
+This option supports tinyfugue logging. -f world will put \fBonly\fR
+output from "world" into the log; -f -world will skip output from "world"
+when making the log. You can specify either multiple worlds to include,
+or multiple -worlds to skip, each with its own -f switch. If only one
+world is specified to include, tf's ---- World <name> ---- messages will
+not be printed. If more than one world is specified to include, the 
+messages will be printed. (If you wanna be sure they're not there,
+use a regexp like "^---- World .* ----$" in your .logeditrc.
+.TP
+\fB\-l\fR
+Remove * has arrived and * has left messages
+.TP
+\fB\-m\fR
+Remove @mail messages read while logging
+.TP
+\fB\-p\fR
+Remove pages to you and from you
+.TP
+\fB\-q\fR
+Quick-edit. Removes all lines except those which start with a player's
+name (thus, usually leaving you only player actions.) This switch 
+implies others, as it also auto-removes all pages, whispers, leave/arrive
+messages, admin and broadcast messages, channels, and WHO/DOINGs.
+It's a very good idea
+to use the -y <name> switch with this option, as well, particularly
+for short logs. This switch is often used with -n, since it tends to
+stand alone, though you could probably combine it just fine with your
+.logeditrc.
+.TP
+\fB-r\fR <regexp>
+Remove the regular expression (as per ex, grep, etc)
+which follows the switch. You can have multiple
+regexps, but each needs its own switch, e.g.
+\fBlogedit\fR -r foo -r "[Bb]ar\\." myfile
+.TP
+\fB-t\fR
+Terse mode: room descriptions are removed, and contents lists
+are shoved onto a single line. This mode requires that the log
+be taken by someone who can see db#s - usually an admin, a
+see_all player (in PennMUSH), or possibly a mortal if the whole
+log takes place in rooms they own.
+.TP
+\fB-w\fR
+Remove whispers to you and from you
+.TP
+\fB-x\fR <name>
+Remove anything by <name>. Like -r, you can stack these,
+but you must use multiple -x's, too, e.g.
+\fBlogedit\fR -apw -x Paul -x Javelin myfile
+.TP
+\fB\-A\fR
+Remove any ANSI codes in the from the log.
+.TP
+\fB\-O\fR
+Remove "o-spam", the messages you get when 20 players all leave
+a room, one after the other, giving you 20 osucc/odrop messages.
+Essentially removes any consecutive lines in which everything
+but the first word (a player's name) matches.
+.TP
+\fB\-:\fR
+Remove any lines starting with : or " characters.
+Useful for people stuck logging from telnet.
+.TP
+\fB\-%\fR
+Remove any lines starting with % characters. These are usually
+messages from tinyfugue telling you about activity in other worlds
+or whatever.
+.LP
+These options modify the output in useful ways:
+.TP
+\fB-s\fR
+Include statistics at the end of the log. These statistics
+include line and word counts on the original and new files
+(so you can see how much you trimmed), a list of all
+players who spoke or acted during the event (with numbers for
+how often they spoke (VERBOSITY) or acted (ACTION) - speaking
+counts as an action), and players who appear to have been
+on-line or present, but said nothing.
+.TP
+\fB-y\fR <name>
+Convert 'You say,' to '<name> says,' to give the log
+a third-person view.
+.TP
+\fB-I\fR
+Insert blank lines between log lines. This improves readability
+of the log significantly, at the cost of making it longer to
+print, etc. Room descs, contents lists, etc, are kept together.
+This switch added by Christian Scarborough.
+.TP
+\fB-W \fR[<col>[,<first>[,<rest>]]]
+Word wrap long lines, resulting in no line longer than <col> characters.
+For each word-wrapped paragraph, indent the first line <first> spaces,
+and all other lines <rest> spaces. Any of the parameters can be
+left out: if no <col> is specified, 72 is assumed. <first> and <rest>
+default to 0.
+Word wrap will, of course, fail
+miserably if you have words longer than <col> characters. 
+There must be a space between -W and the numbers.
+.LP
+Finally, these options control the use of the configuration file,
+input and output files, or provide program help:
+.TP
+\fB-n\fR
+Ignore the settings in the configuration file (.logeditrc by default)
+Command-line switches always take precedence over configuration
+file settings, and work like toggles, i.e., if statistics are set on
+in the configuration file, logedit -s will turn them off. Use the -n
+switch in situations where there might be multiple configuration files.
+.TP
+\fB\-o\fR [filename]
+Use "filename" as the output file for the editted log, instead of
+the default <inputfile>.log. If "filename" is omitted, the output
+is sent to stdout.
+.TP
+\fB\-F\fR filename
+Use "filename" as the configuration file, in place of ~/.logeditrc.
+.TP
+\fB\-h, -H, -?\fR
+Show help. The help display lists all logedit switches, and their
+values as defined in the configuration file. 
+Because this display is longer than many screens, running logedit without
+arguments provides a paged version of the same display.
+.TP
+\fB\-\fR
+If "-" is used as the last item on the command line in place of an 
+input filename, logedit will read from the stdin, and write to
+the stdout, unless a different file is specified with -o.
+This allows logedit to function as a filter in a pipe.
+.SH EXAMPLE
+.LP
+\fBlogedit\fR joust
+.LP
+\fBlogedit\fR -o joust.log joust
+.LP
+\fBlogedit\fR -o joust.log - < joust
+.LP
+\fBlogedit\fR - < joust > joust.log
+.LP
+cat joust.log | \fBlogedit\fR - > joust.log
+.LP
+Trim the file joust using the default settings in .logeditrc,
+and write the result to joust.log. All five commands will produce
+the same result, and the last three illustrate the use of logedit
+as a filter for stdin and stdout.
+.LP
+\fBlogedit\fR -n -aw -x John -r OOC -y Javelin joust
+.LP
+Trim the file joust, ignoring .logeditrc, skipping any actions by John
+and any lines containing the string "OOC", converting "You say" to
+"Javelin says", and write the result to joust.log
+.LP
+\fBlogedit\fR -n -q -y Javelin -o joust.stripped joust
+.LP
+Quick-trim the file joust, ignoring .logeditrc, converting "You say" to
+"Javelin says" and writing the output to joust.stripped. The output
+will contain only lines with player actions.
+.SH CONFIGURATION FILE
+.LP
+The configuration file (.logeditrc by default) is used to store
+your most common settings and preferences for logedit. It may contain
+any number of lines, but each line must be one of the following types:
+.TP
+#
+Lines beginning with '#' are comments.
+.TP
+switches=<switches>
+Specifies switches to use. The list should be just like the
+command-line form, but with no '-' character, e.g.
+switches=apw 
+You may not use the -f, -o, -r, -x, -y, or -W switches in this way.
+Instead:
+.TP
+remove=<regexp>
+Specifies a unix regular expression to strip from all logs.
+Any line containing the expression will be removed.
+This is equivalent to the -r command-line switch.
+Use one remove line per regexp.
+For more information about regexps, see the man pages for
+ex, sed, or grep.
+.TP
+exclude=<name>
+Specifies the name of a player to exclude (gag) in the log.
+All lines starting with the <name> are removed.
+Use a separate exclude line for each name.
+.TP
+world=<name>
+Specifies a single tinyfugue world from which output is to be kept.
+Output from all other worlds is skipped. Takes precedence over
+-world lines.
+.TP
+-world=<name>
+Specifies a tinyfugue world from which output is to be skipped.
+You can have multiple -world lines, one for each world to skip.
+.TP
+wrap=<col>[,<first>[,<rest>]]
+Specifies how to wrap long lines. The column at which to wrap
+is given by <col>, and is required. The optional parameters
+<first> and <rest> set the number of spaces to indent the first
+line in the wrapped paragraph and the rest of the lines, respectively,
+and default to 0. To indicate a <rest> and no <first> (for hanging
+indentation), either wrap=<col>,0,<rest> or wrap=<col>,,<rest>
+is acceptable.
+.TP
+you=<name>
+Specifies how you would like "You" in "You say," to be translated.
+.LP
+Logedit will report any other kind of line as an warning, to aid
+in the proper creation of the configuration file, but will go ahead
+and process the log anyway.
+.LP
+The -n command-line switch causes \fBlogedit\fR to ignore the configuration
+file, should you wish to override it on occasion.
+.SH BUGS
+.LP
+There may be some discrepancies in the handling of spoofed emits.
+Because some MUSHes (notably the one I run) use []'s for MUSH-coded
+chat channels, the whole removal of nospoof stuff is a question I've
+been reconsidering. Anyway, the use of the -q flag may make spoofed
+emits get handled differently than normal.
+.LP
+When editing multi-world logs using the -f switch, logedit assumes that
+any text before the first world change should be preserved in the log.
+.SH AUTHOR
+.LP
+Logedit was written by Alan Schwartz (aka Paul@DuneMUSH, Javelin)
+.LP
+Alan can be reached as: alansz@cogsci.berkeley.edu
+.nf
+Or at: Dept. of Psychology
+       University of California 
+       Berkeley, CA 94720
+.fi
+.LP
+The SunOS port, and the -i command-line option (now -I) were added by
+Christian Scarborough.
+.LP
+Lorrie Wood (Chani@DuneMUSH) has been invaluable in providing real-world
+tests of beta versions of logedit, ideas for improvements and new
+switches, and general moral support. :)
+.LP
+Thanks are due to all users who've suggested improvements or
+bugfixes. If you port logedit to another system, please send me mail
+telling me about changes you had to make (especially to get the
+regexp stuff working) so I can incorporate them.
+.LP
+Logedit is released into the public domain, with the provision
+that this code or modifications thereof can not be sold or
+used commercially.
+.SH VERSION
+.LP
+This is \fBlogedit\fR version 2.5.

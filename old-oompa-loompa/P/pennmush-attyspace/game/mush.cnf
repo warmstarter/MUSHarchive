@@ -1,0 +1,638 @@
+# configuration file for PennMUSH
+#
+# The directives in this file control the behavior of your MUSH
+# If you change any of them while your MUSH is running, you can
+# cause the MUSH to re-read this file by sending it a SIGHUP
+# signal. Typically, one does this by using 'ps' to determine the
+# MUSH's process id#, and then issuing a: kill -1 pid#
+# command.
+
+####
+#### ESSENTIALS
+####
+
+# name of your MUSH. 
+#_Please_ change this. 
+# You _MUST_ if you're using RWHO.
+mud_name	ATS PennMUSH Public Release
+
+# the port it's running on.
+port	1701
+
+# Should we listen only on a specific IP address? If your host has
+# multiple IP addresses, put the ip address to listen on here
+# Example: ip_addr 128.32.243.78
+# Otherwise, just leave it blank.
+ip_addr
+
+# Should the MUSH attempt to resolve IP numbers to hostnames?
+# If yes, you'll see hostnames on the wizard WHO. If no, IP numbers.
+# No makes sense if you're running PennMUSH at home and don't have
+# a DNS server you can access.
+use_dns	no
+
+# Databases
+# These are, respectively, where to read a database, where to
+# write a database, where to put a panic dump (performed if
+# the MUSH determines it's going to crash, where to put MUSH mail,
+# and where to keep information about the chat system.
+# Filenames are relative to the game/ directory.
+#
+# Do NOT put compression suffixes at the end of the files.
+# That's handled below
+#
+input_database	data/indb
+output_database	data/outdb
+crash_database	data/PANICDB
+mail_database	data/maildb
+chat_database	data/chatdb
+
+# Database compression
+# When your databases are dumped, they can be dumped in a compressed
+# format to save disk space, or uncompressed for speed.
+# To use a compression program, you must know the name of the
+# program that compresses, the name of the program that uncompresses,
+# and the suffix that the compression program adds.
+#
+# Most people can just use one of the following:
+#
+# Use these 3 lines for no compression. Required on win32.
+#compress_program
+#uncompress_program
+#compress_suffix
+#
+# Use these 3 lines for gzip compression
+#compress_program gzip
+#uncompress_program gunzip
+#compress_suffix .gz
+#
+# Use these 3 lines for Unix compress compression
+#compress_program compress
+#uncompress_program uncompress
+#compress_suffix .Z
+#
+# Use these 3 lines for bzip2 compression
+#compress_program bzip2
+#uncompress_program bunzip2
+#compress_suffix .bz2
+#
+compress_program
+uncompress_program
+compress_suffix
+
+# Room where new players are created.
+player_start
+
+# The master room. Exits here are global, as are commands on
+# objects here. This only is used if globals is set to "yes".
+master_room	2
+
+# The base room. Any room that can be reached from this room
+# through exits is considered a 'connected room'.
+# See also: exits_connect_rooms
+base_room
+
+
+###
+### Limits, costs, and other constants
+###
+
+# name of the monetary units
+money_singular	DBCredit
+money_plural	DBCredits
+
+# Should there be a limit on how long players can be idle?
+# If you want one, set idle_timeout to the 
+# number of minutes a player may idle before getting disconnected.
+# If you don't, set it to 0.
+idle_timeout	60
+
+# Should there be a limit on the number of logins the MUSH
+# can accept? If your operating system has a limited number of
+# file descriptors per process, you should set this to 
+# that number - 8. If not, or if you like to live dangerously,
+# set this to 0.
+max_logins	240
+
+# How much MUSH money do players get when they're created?
+starting_money	150
+
+# How much MUSH money do players get each day they log in?
+paycheck	50
+
+# If quotas are enforced, how much players get by default
+starting_quota	1
+
+# number of commands a player can have queued. Prevents runaway machines
+# from getting out of hand.
+player_queue_limit	100
+
+# the number of commands run from the queue when there is no net activity
+queue_chunk	3
+
+# the number of commands run from the queue when there is net activity
+active_queue_chunk	1
+
+# the maximum level of recursion allowed in functions
+function_recursion_limit	50
+
+# the maximum number of functions that can be invoked
+function_invocation_limit	2500
+
+# How many channels total can be created?
+# This doesn't allocate memory, it just sets a maximum.
+max_channels	200
+
+# How many channels can each non-admin create? Set this to some number
+# higher than zero to allow mortals to create channels.
+max_player_chans
+
+# What's the maximum number of levels of parenting allowed
+max_parents	10
+
+# How much does it cost a mortal to create a channel?
+chan_cost	1000
+
+# How likely should it be that noisy whispers are noticed by other
+# players in the room? (Others see: John whispers to Mary.)
+# Use a number from 0 to 100
+whisper_loudness	100
+
+# the highest allowable dbref -- you can't build more than this
+# many objects. if you don't want such a limit, leave this set
+# to 0.
+max_dbref	40000
+
+# If you kill someone, you can spend up to 100 coins; the chance
+# of killing them is the number of coins you spend. What's the
+# minimum number of coins that must be spent, and the default
+# number if no number is given?
+kill_min_cost	10
+kill_default_cost	10
+
+# How much to various commands cost:
+find_cost	100
+page_cost
+
+# How many objects are equal to 1 quota, if quotas are used
+quota_cost	1
+
+# How much deposit is required to queue a command?
+queue_cost	10
+
+# One out of how many commands that are queued will cost the
+# player a coin?
+queue_loss	63
+
+# What does it cost to build various things?
+room_cost	1
+object_cost	1
+link_cost
+exit_cost	1
+
+# If you've got USE_WARNINGS defined, set this to the number
+# of seconds between MUSH-wide topology
+# warning checks. Default is 3600 (1 hour). If you set this to 0,
+# timed MUSH-wide checks will be disabled.
+warn_interval	3600
+
+# The password that must be given to do an @logwipe. You must also
+# be God, of course. CHANGE THIS.
+log_wipe_passwd	frap
+
+###
+### Dump stuff
+###
+
+# How often should the database be dumped, in seconds?
+# 3600 is once an hour, and probably the most frequent you'd ever want.
+# On a large MUSH, consider at most once every 3-6 hours.
+# This cannot be a multiple of any of the timer.c parameters
+# (so keep it an even number of hours).
+dump_interval	3600
+
+# should I fork a concurrent process to do database dumps?
+# If I do, your memory requirements will double during the dump.
+# If I don't, the MUSH will pause while it dumps.
+# If you're low on memory, don't do this.
+# If you're on Win32, don't do this; fork() is not defined.
+forking_dump	yes
+
+# If you're not forking, you get a bunch of messages that you
+# can set to warn players when the dump is 5 minutes away,
+# 1 minute away, in progress, and finished. You can 
+# comment out whatever messages you don't want.
+dump_warning_5min	GAME: Database dump in 5 minutes.
+dump_warning_1min	GAME: Database dump in 1 minute.
+dump_message	GAME: Dumping database. Game may freeze for a few minutes.
+dump_complete	GAME: Dump complete. Time in.
+
+
+### 
+### Filenames
+###
+
+# Text files shown on connection, as message of the day,
+# as wizard message of the day, on quit, to newly created players,
+# when logins are disabled, when player creation is disabled,
+# and when a guest logs in.
+connect_file	txt/connect.txt
+motd_file	txt/motd.txt
+wizmotd_file	txt/wizmotd.txt
+quit_file	txt/quit.txt
+newuser_file	txt/newuser.txt
+down_file	txt/down.txt
+register_create_file	txt/register.txt
+guest_file	txt/guest.txt
+
+# The equivalent files in html, shown to Pueblo clients.
+connect_html_file	txt/connect.html
+motd_html_file	txt/motd.html
+wizmotd_html_file	txt/wizmotd.html
+quit_html_file	txt/quit.html
+newuser_html_file	txt/newuser.html
+down_html_file	txt/down.html
+register_create_html_file	txt/register.html
+guest_html_file	txt/guest.html
+
+# the big text files and corresponding index files
+# comment out any that you don't want (except help and news)
+events_file txt/events.txt
+events_index txt/events.idx
+#index_file txt/index.txt
+#index_index txt/index.idx
+rules_file txt/rules.txt
+rules_index txt/rules.idx
+help_file	txt/help.txt
+help_index	txt/help.idx
+news_file	txt/news.txt
+news_index	txt/news.idx
+
+
+### Config directives for RWHO. 
+### If you want to send connection/disconnection information to a
+### mudwho server, you must set rwho to "yes" and fill in the information
+### about the server. You'll have to ask the server's administrator
+### for an rwho password.
+rwho	no
+rwho_dump_interval	241
+rwho_host	littlewood.math.okstate.edu
+rwho_info_port	6889
+rwho_password	getyours
+
+### Config directive for IDENT.
+### If you want to do ident (RFC1143) looksup, set use_ident to "yes"
+### and select an ident_timeout to determine how long the MUSH
+### should wait for a response, in seconds. If you're using
+### INFO_SLAVE (in options.h), this is how long the info_slave waits.
+use_ident	no
+ident_timeout	5
+
+###
+### Logging
+###
+
+# log all commands. Makes big, big command.log files. Use only for
+# debugging, generally.
+log_commands	no
+
+# log commands which produce "Huh?"
+log_huhs	no
+
+# log forces done by wizards
+log_forces	no
+
+# log wizwalls
+log_walls	no
+
+###
+### Logins
+###
+
+# Support the pueblo MUSH client and allow html to be sent to it
+pueblo	no
+
+# allow non-wizard/royalty logins
+logins	yes
+
+# allow guest logins
+guests	yes
+
+# allow players to create/register characters at the login screen
+# If you turn this off, neither "create" nor "register" will work.
+# Use access.cnf if you want to disable creation for specific sites
+# or disable creation but enable registration for everyone.
+player_creation	yes
+
+# If you use the shs password system, and your database was created
+# on a little-endian hardware architecture (such as an intel PC),
+# set this to 'yes'. If your database was created on a big-endian
+# hardware architecture (most non-intel systems), set this to 'no'.
+# If you port a db with shs passwords between systems, and the
+# passwords don't work, try changing this setting.
+reverse_shs	yes
+
+###
+### Master Room and @aconnect/disconnect
+###
+
+# enable global exits and commands?
+globals	yes
+
+# check zones and the master room for aconnect/adisconnect?
+global_connects	yes
+
+# trigger @aconnect/@adisconnect in the room?
+room_connects	yes
+
+###
+### Options affecting commands and functions
+### (See also restrict_command to restrict command use)
+###
+
+# prevent computationally expensive commands
+daytime	no
+
+# restrict haspower() to see_all players?
+haspower_restricted	no
+
+# prevent objects from evaluating ufuns on more privileged objects. [++]
+safer_ufun	yes
+
+# use @recycle instead of @destroy, because @dest is easy to confuse
+# with @desc. [+]
+hate_dest	no
+
+# default whisper to whisper/noisy instead of whisper/silent
+noisy_whisper	yes
+
+# is possessive get (get players's object) allowed?
+possessive_get	yes
+
+# what if the player is disconnected?
+possessive_get_d	no
+
+# SAFE absolutely prevents destruction, even with @nuke
+really_safe	yes
+
+# When a player is nuked, his SAFE objects are @chowned to God.
+# If this is set to "yes", his non-safe objects are destroyed
+# If this is set to "no", they are chowned to God
+destroy_possessions	yes
+
+# Can we @link to an object?
+link_to_object	no
+
+# Keep queue limits on a per-owner rather than pwer-object basis?
+# That is, is an object runaway when its owner's total queue is too
+# high, rather than when the object's queue is too high?
+owner_queues	yes
+
+# If this is yes, DARK wizards do not trigger AENTER/ALEAVE when they move.
+# If it's no, they are just like anybody else.
+wiz_noaenter	yes
+
+# require builder bits in order to build?
+restricted_building	yes
+
+# if builder bits are required, allow people to @create objects
+# without them anyway?
+free_objects	yes
+
+# should say/pose by a DARK wizard be anonymous ('Someone says...')?
+full_invis	yes
+
+# allow players to located each other with @whereis and loc()?
+player_locate	yes
+
+###
+### TinyMUSH compatibility
+###
+
+# Should we treat a missing number as 0 in things like add(3,)?
+# For TinyMUSH compatibility, the answer is 'no'.
+null_eq_zero	yes
+
+# In PennMUSH, strings and db#s larger than #0 have traditionally
+# been considered true (1) in boolean functions like and(), or(), etc.
+# In TinyMUSH, strings and db#s evaluate as false (0)
+# Should we emulate TinyMUSH?
+tiny_booleans	no
+
+# TinyMUSH's trim function is: 
+#   trim(<string> [,<trim style> [,<trim character>]])
+# PennMUSH's trim function has been:
+#    trim(<string>[,<character to trim>[,<trim style>]])
+# Should we emulate TinyMUSH? [+ for new MUSHes]
+tiny_trim_fun	no
+
+# show attributes in TinyMUSH format (FOO(#4v): test) rather than
+# PennMUSH format (FOO [#4v]: test)?
+tiny_attrs	no
+
+# In Tiny, strings used in math expressions evaluate to 0,
+# so eq(asdfa,0) = 1, gt(asdf,0) = 0, etc.
+# In Penn, using strings where numbers should be is traditionally an
+# error (returning #-1 ARGUMENT MUST BE NUMBER or similar)
+# Do you want the TinyMUSH behavior?
+tiny_math	no
+
+# should @pemit default to @pemit/silent, like TinyMUSH?
+silent_pemit	yes
+
+###
+### Attributes
+###
+
+# enable the adestroy attribute, triggered when an object is nuked?
+adestroy	no
+
+# enable the amail attribute for admin, triggered when they receive
+# @mail? This does no mail loop checking. [-]
+amail	no
+
+# does @listen work on players?
+player_listen	yes
+
+# does @ahear work on players? If player_listen is yes, and
+# player_ahear is no, sound outside the player can be heard by her
+# inventory, but her @ahear isn't executed.
+player_ahear	yes
+
+# Should we trigger the @startup attribute on startup?
+# You always want to, unless you need to disable some
+# malicious code on an @startup. This does not affect the
+# @restart command, which will work even if this is "no".
+startups	yes
+
+
+###
+### Cosmetic stuff
+###
+
+# show room/object/player names in bold for ansi players?
+ansi_names	yes
+
+# should ljust(), rjust(), center(), and table() ignore ansi when
+# figuring out how to justify a string?
+ansi_justify	yes
+
+# show exit lists with commas (a, b, and c)?
+comma_exit_list	no
+
+# count hidden players when WHO reports total connected?
+count_all	yes
+
+# are rooms with any exits considered connected, and thus not required
+# to have the FLOATING flag set on them?
+exits_connect_rooms	yes
+
+# Prefixes for various broadcast messages
+wizwall_prefix	Wizard Announcement:
+rwall_prefix	Admin Announcement:
+wall_prefix	MUSH Announcement:
+
+# can players have names with spaces in them?
+player_name_spaces	yes
+
+# report time in 24-hour format?
+military_time	yes
+
+# show expanded flag name list when you examine an object?
+flags_on_examine	yes
+
+# show visual attributes when you examine an object you don't own?
+# (like examine/full in TinyMUSH)
+ex_public_attribs	yes
+
+# What should page a b c = message do?
+# If blind_page is yes, page defaults to page/blind (a,b,c each get separate
+# pages with no evidence that it was a multipage). If blind_page is no,
+# page defaults to page/list (a single page goes to a,b,c and they can
+# see that they all received it.
+blind_page	no
+
+# should NOSPOOF notification include the dbref of the spoofer
+# as well as the name?
+paranoid_nospoof	yes
+
+###
+### Default flags for newly created stuff
+###
+
+# -- Default flags for exits
+
+# Uncommenting this will cause the exit default to be DARK (like in TinyMUD):
+#   no exits show up on the "Obvious exits" list.
+# exit_flags dark
+
+# Uncommenting this will cause all exits to be TRANSPARENT by default
+#   (if you look through them, you will see the description of the next room)
+# exit_flags transparent
+
+# -- Default flags for rooms
+
+# Uncommenting this will cause all rooms to be TRANSPARENT by default.
+#   Each obvious exit in a transparent room is displayed on a line by
+#   itself, in the format:
+#   <Exit name> leads to <Destination name>
+#   instead of having all exits strung out in one row.
+# room_flags transparent
+
+# Objects which are NO_COMMAND will not be checked for $commands. 
+#   Making this a default may speed up your server somewhat. This is
+#   definitely a good idea for rooms and players, and, depending on
+#   the compostion of your database, probably a good idea for things.
+room_flags	no_command
+
+# -- Default flags for players
+
+# Players who are ENTER_OK can be given stuff.
+player_flags	ansi
+
+# Players who are ANSI see attribute names hilighted.
+player_flags	ansi
+
+# See the explanation for rooms and no_command.
+player_flags	ansi
+
+
+# Players who are INHERIT allow all their objects to control them.
+# player_flags inherit
+
+
+
+# -- Default flags for things
+
+# For example, you can't see through OPAQUE things.
+# thing_flags opaque
+
+# See the explanation for rooms and no_command.
+thing_flags	no_command
+
+###
+### Restrictions on usage
+###
+
+#
+# Commands to restrict
+# Syntax: restrict_command <command> <restriction>
+# <restriction> is *one* of:
+#	nobody		Totally disable the command
+#	nogagged	Gagged players can't use it
+#	nofixed		Fixed players can't use it
+#	noguest		Guests can't use it
+#	noplayer	Player objects can't use it (things, rooms, exits may)
+#	admin		Must be roy or wiz to use it
+#	wizard		Must be wiz to use it
+#	god		Must be god to use it
+# You can use multiple restrictions on the same command to restrict
+# to, for example, nongagged nonguests, by using more than one
+# restrict_command line for that command. 
+
+# Don't let guests mess with the database
+# (This replaces the HARSH_GUEST compile-time define)
+# The "ATTRIB_SET" command controls the setting of attributes with
+#  @attr obj=value or &attr obj=value
+restrict_command	@set noguest
+
+restrict_command	ATTRIB_SET noguest
+
+restrict_command	@chown noguest
+
+restrict_command	@chzone noguest
+
+restrict_command	@cpattr noguest
+
+restrict_command	@mvattr noguest
+
+restrict_command	@edit noguest
+
+restrict_command	@gedit noguest
+
+restrict_command	@parent noguest
+
+restrict_command	@wipe noguest
+
+restrict_command	@unlink noguest
+
+restrict_command	@link noguest
+
+restrict_command	@lock noguest
+
+restrict_command	@unlock noguest
+
+restrict_command	read nobody
+
+restrict_command	rob nobody
+
+restrict_command	@toad nobody
+
+restrict_command	slay nobody
+
+
+
+
+# Don't allow kill (slay still works)
+restrict_command	kill nobody
+

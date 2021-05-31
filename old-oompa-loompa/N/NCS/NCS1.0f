@@ -1,0 +1,27 @@
+@create Parent Weapon Forge PWF
+@link Parent Weapon Forge PWF = #220
+@lock Parent Weapon Forge PWF = #4
+&FUNCTIONOBJ Parent Weapon Forge PWF=#480
+&TEMP Parent Weapon Forge PWF=#23
+&PAID Parent Weapon Forge PWF=no
+@PAYMENT Parent Weapon Forge PWF=Thank you. You may now forge the weapon.
+@APAYMENT Parent Weapon Forge PWF=&paid me=yes
+&DO_FORGE Parent Weapon Forge PWF=$forge *: @wait me={&temp me=[switch(match(v(0),#*),1,v(0),locate(v(#),v(0),T*))]; @select 0=[match(v(paid),yes)], {@pemit %#=You have to pay me first.;@notify me}, [match(owner(v(temp)),v(#))], {@pemit %#=You must own the weapon to forge it.; @notify me}, {@tr me/forge=%#,[v(temp)]}}
+&FORGE Parent Weapon Forge PWF=@tr [v(functionobj)]/makeweap=%1,[v(length)],[v(weight)],[v(type)]; @pemit %0=[name(v(1))] (%1) is forged.; &paid me=no; @notify me
+&RESET Parent Weapon Forge PWF=$reset forge: &paid me=no
+&TYPECOST Parent Weapon Forge PWF=[add(add(switch(strmatch(v(type),*blunt*),1,div(v(weight),2),0),switch(strmatch(v(type),*point*),1,10,0)),add(switch(strmatch(v(type),*edge*),1,v(length),0),switch(strmatch(v(type),*thrown*),1,div(add(v(length),v(weight)),2),0)))]
+&WEIGHT Parent Weapon Forge PWF=2
+&DO_WEIGHT2 Parent Weapon Forge PWF=$weight *:@wait me={@switch %0=<1, {@pemit %#=Why would anyone want a weapon that weighs so little?}, >50, {@pemit %#=Kinda heavy, don't you think?}, {&paid me=no; &weight me=%0; @cost me=[u(pricefun)]; @pemit %#=Weight set to: %0}; @notify me}
+&DO_WEIGHT1 Parent Weapon Forge PWF=$weight: @pemit %#=To set a weapon's weight, use 'weight <weight>', where <weight> is in pounds.
+&LENGTH Parent Weapon Forge PWF=12
+&DO_LENGTH2 Parent Weapon Forge PWF=$length *: @wait me={@switch %0=<1, {@pemit %#=Why would anyone want a weapon that small?}, >120, {@pemit %#=Yeah, right.}, {&length me=%0; @cost me=[u(pricefun)]; @pemit %#=Length set to: %0}; @notify me}
+&DO_LENGTH1 Parent Weapon Forge PWF=$length : @pemit %#=To set a weapon's length, use 'length <length>', where <length> is length in inches.
+@COST Parent Weapon Forge PWF=30
+@SEMAPHORE Parent Weapon Forge PWF=-1
+&DO_TYPE1 Parent Weapon Forge PWF=$type: @pemit %#=To set a weapon's type, use 'type <type>', where <type> is one of: [v(types)]. Weapons can have multiple types (for example, knives might be point edge thrown), but each type adds to the cost of the weapon. To remove a type, use 'type !<type>'.
+&DO_TYPE2 Parent Weapon Forge PWF=$type *: @wait me={@select 1=[and(match(v(0),!*),member(v(types),after(v(0),!)))], {&type me=[remove(v(type),after(v(0),!))]; &paid me=no; @pemit %#=Type is now set to: [v(type)]}, [not(not(member(v(types),v(0))))], {&type me=[remove(v(type),v(0))] [v(0)]; &paid me=no; @pemit %#=Type is now set to: [v(type)]}, {@pemit %#=That is not a valid type. Use one of: [v(types)]}; @cost me=[u(pricefun)]; @notify me}
+&TYPE Parent Weapon Forge PWF=edge point
+&PRICE Parent Weapon Forge PWF=$price:@cost me=[u(pricefun)]; @pemit %#=Weapon type: [v(type)]%tLength: [v(length)]%tWeight: [v(weight)]%rPrice for this weapon: [v(cost)]
+&PRICEFUN Parent Weapon Forge PWF=[add(add(v(weight),div(v(length),2)),u(typecost))]
+&TYPES Parent Weapon Forge PWF=blunt point edge
+@DESCRIBE Parent Weapon Forge PWF=Forging a weapon:%r1. Create the weapon and set up any neat things you want on it. %r%b%b%bThe smith must own the weapon.%r2. Set the forge to the proper 'type', 'length' and 'weight'.%r3. Type 'price' to get the weapon price. Pay the forge.%r4. Type 'forge <db# or weapon name> while you're holding the weapon.

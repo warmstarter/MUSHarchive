@@ -1,0 +1,195 @@
+@@ Communication System 3.0			   (Sun Jun 05  22:44:28 1994)
+@@
+@@      Version: As most mush code changes and evolves with time, one realizes
+@@ its nearly impossible to figure out or even remember what you've changed
+@@ from version to version. Version numbers rapidly become pointless under
+@@ these situations, and because of this I will just be using a date released
+@@ as the version. A little side point, because I don't use version numbers I
+@@ can't point to a big version number to prove I've spent a mind boggling
+@@ number of hours writing this. I can however ask you to trust that I have,
+@@ and honor my work by mailing any bug reports, suggestions, or anything which
+@@ you find interesting to find me.
+@@    Disclaimer: This "script" could possibly cause damage to whatever
+@@ mush/computer this is run on even tho its intent is to provide a secure,
+@@ fast, and totally functional communication system. Use this at your *OWN*
+@@ risk.
+@@    Installation: This script should install a com pretty much automatically
+@@ for any versions of mush with setq(). I do have earlier versions which
+@@ should run on any version of mush which has lwho() which you may obtain by
+@@ mailing me. Back to the actual installation, its a simple three steps.
+@@    1. @create Com
+@@    2. @set Com = (correct permissions)
+@@    3. /quote this file.
+@@ (To work with Dark Wizards, @set com = Royalty | Wizard. For the function
+@@  locks to get attrs off other objects, @set Lock DB = Royalty | Wizard.)
+@@
+@@                                               Adrick@mankato.msus.edu
+@set me=quiet
+&queuemax me =4000
+@lock/use com=com
+@lock     com=me
+@force    com=@switch num(player db)=#-1,\{@create Player DB;&db me=num(player db);@set player db=halt\},\{&db me=num(player db);@set player db=halt\}
+@force    com=@switch num(lock db)=#-1,\{@create Lock DB;&lock me=num(lock db);@set lock db=halt\},\{&lock me=num(lock db);@set lock db=halt\}
+@force    com=@switch v(special)=,&special me=[num(me)]
+&canuse   com=[and(member(type(%#),PLAYER),not(member(v(jerk),%#)))]
+&install  me =** Installing [mid(%0[space(20)],0,20)] **
+@force    com=&timestamp me=Last installed: [secs()] [time()]
+
+@@
+@@ Com Messages.
+@@ 
+:[u(install,Messages)]
+&msg_noton   com=Com: Sorry, You are not on that channel right now.
+&msg_none    com=Com: Sorry, You are currently not on any channels.
+&msg_words   com=Com: Channels may only be one word long.
+&msg_mayjoin com=Com: Sorry, That channel is currently locked.
+&msg_default com=Com: Channel '[ucstr(first(%0))]' has been set as default.
+&msg_monitor com=Com: You can not talk on the monitor channel.
+&msg_exist   com=Com: Player(s) '[u(lexist,%0)]' don't seem to exist.
+&msg_owner   com=Com: Sorry, you don't own your default channel.
+&msg_locked  com=Com: Channel '[ucstr(first(%0))]' doesn't have a lock.
+&msg_perm    com=Com: You don't have permission to use that.
+&msg_add     com=Com: Player(s) '[iter(%0,name(*##))]' have been set %1 on channel %2.
+
+@@
+@@ Com Functions
+@@
+:[u(install,Functions)] 
+&words    com=[eq(1,words(%0))]
+&wiz      com=[hasflag(%0,wizard)]
+&both     com=[or(u(wiz,%0),u(roy,%0))]
+&locked   com=[gt(words(get(v(lock)/l-[first(%0)])),0)]
+&roy      com=[or(hasflag(%0,royalty),member(v(special),%0))]
+&lexist   com=[squish(iter(%0,switch(#-1,num(*##),##)))]
+&exist    com=[switch(iter(%0,num(*##)),*#-1*,0,1)]
+&dark     com=[and(u(both,%0),or(hasflag(%0,dark),hasflag(%0,haven)))]
+&gdb      com=[get(v(db)/dbref-[first(%0 %#)])]
+&first    com=[first(get(v(db)/dbref-%#))]
+&onchan   com=[and(words(%1),match(u(gdb,%0),first(%1)))]
+&lwho     com=[switch(%0,MONITOR,,iter(lwho(),switch(1,u(onchan,##,%0),##_%0)))]
+&match  com=[first([extract(u(gdb),match(u(gdb),first(%0)),1)] [extract(u(gdb),match(u(gdb),*[first(%0)]*),1)])]
+&format com=[setq(7,name(%0))][setq(8,edit(squish(%2),%r,\%r))][setq(9,mid(r(8),1,3999))]\[[capstr(lcstr(after(%1,_)))]\] [switch([first(%2)] %0,:*,[r(7)] [r(9)],;*,[r(7)][r(9)],* [before(%1,_)],You say\, "[r(8)]",[r(7)] says\, "[r(8)]")]
+&wrap     com=[setq(7,)][iter(rest(lnum(add(1,words(%0)))),switch([setq(8,add(r(7),strlen(extract(%0,##,1))))][gt(r(8),%1)],1,%r%2[space(%3)][extract(%0,##,1)][setq(7,strlen(extract(%0,##,1)))],[extract(%0,##,1)][setq(7,add(1,r(8)))]))]
+&owner    com=[and(eq(1,words(%1)),switch(X [get(v(lock)/l-[first(%1)])] 1,*[u(wiz,%0)],1,*!%0!*,0,*[u(roy,%0)],1,*-%0-*,1,0))]
+&convert com=[iter(get(v(lock)/%0),switch(%1 ##,*1* -*-,*[name(edit(##,-,))]*,*2* #*,name(##),*3* !*!,![name(edit(##,!,))]!))]
+&lmayjoin com=[iter(%1,switch(1,u(mayjoin,%0,##),##))]
+&mayjoin  com=[and(eq(1,words(%1)),switch(X [get(v(lock)/l-[first(%1)])] 1,*[u(wiz,%0)],1,*!%0!*,0,*[u(roy,%0)],1,*[gt(u(v(lock)/fun_[first(%1)],%0),0)],1,*-%0-*,1,* %0 *,1,* -*- *,0,* #* *,0,1))]
+
+@@
+@@ This Mayjoin limits the com to only "locked" channels.
+@@
+@@ &mayjoin com=[and(eq(1,words(%1)),switch(X [get(v(lock)/l-[first(%1)])] 1,*[u(wiz,%0)],1,*!%0!*,0,*[u(roy,%0)],1,X %b1,0,*[gt(u(v(lock)/fun_[first(%1)],%0),0)],1,*-%0-*,1,* %0 *,1,* -*- *,0,* #* *,0,1))]
+@@ &msg_mayjoin com=Com: That channel doesn't exist or is currently locked.
+
+@@
+@@ General Com Commands
+@@
+:[u(install,General Commands)]
+&talk com=$com *=*:@dolist [u(lwho,u(match,%0))]=@pemit before(##,_)=[u(format,%#,##,%1)];@pemit %#=[switch(u(match,%0),,v(msg_noton),MONITOR,v(msg_monitor))]
+
+&short com=$=*:@dolist [u(lwho,u(first))]=@pemit before(##,_)=[u(format,%#,##,%0)];@pemit %#=[switch(u(first),,v(msg_none),MONITOR,v(msg_monitor))]
+
+&spoof com=$spoof *=*:@dolist [switch(0,u(both,%#),,u(lwho,u(match,%0)))]=@pemit before(##,_)=\[[first(capstr(lcstr(after(##,_))))]\] [squish(%1)];@pemit %#=[switch([u(match,%0)] 0,0,v(msg_noton),MONITOR 0,v(msg_monitor),* [u(both,%#)],v(msg_perm))]
+
+&list com=$com list:@pemit %#=**********%r* Communication Channel List%r*%r* [ljust(name(%#),16)] : [switch(u(gdb,%#),,rest(v(msg_none)),u(wrap,squish(u(gdb,%#)),57,*,20))]%r*%r**********
+
+&who com=$com who:@pemit %#=**********%r* Communication Channel Search%r*[setq(0,u(gdb,%#))][setq(4,iter(lwho(),switch(0,[setq(1,u(gdb,##))][not(and(u(both,%#),words(r(1))))],setq(2,[r(2)]%r* [ljust(name(##),16)] : [u(wrap,r(1),57,*,20)]),not(u(dark,##)),,[setq(4,setinter(r(0),r(1)))][words(r(4))],,setq(2,[r(2)]%r* [ljust(name(##),16)] : [u(wrap,r(4),57,*,20)]))))][r(2)]%r*%r**********
+
+&who2 com=$com who *:@pemit %#=**********%r* Communication Channel Search%r*[setq(0,u(gdb,%#))][setq(4,iter(%0,u(match,##)))][setq(3,iter(lwho(),switch(0,not(and(u(dark,##),not(u(both,%#)))),,[setq(1,setinter(setinter(r(0),u(gdb,##)),r(4)))][words(r(1))],,setq(2,[r(2)]%r* [ljust(name(##),16)] : [u(wrap,r(1),57,*,20)]))))][r(2)]%r*%r**********
+
+&add com=$com +*:@dolist [switch(1,or(not(eq(1,words(%0))),u(onchan,%#,%0)),,not(u(mayjoin,%#,%0)),,u(dark,%#),%#_[first(%0)],%#_[first(%0)] [u(lwho,%0)])]=@pemit before(##,_)=[u(format,%#,##,:has [switch(1,u(dark,%#),*QUIETLY* joined,joined)] this channel.)];@pemit %#=[switch(0,eq(words(%0),1),v(msg_words),u(mayjoin,%#,%0),v(msg_mayjoin),not(u(onchan,%#,%0)),u(msg_default,%0))];&dbref-%# [v(db)]=[switch(1,not(u(mayjoin,%#,%0)),u(gdb,%#),words(%0),[ucstr(first(%0))] [remove(u(gdb,%#),ucstr(first(%0)))],u(gdb,%#))]
+
+&sub com=$com -*:@dolist [switch(1,u(dark,%#),%#_[u(match,%0)],u(lwho,u(match,%0)))][switch(%0,MONITOR,%#_MONITOR)]=@pemit before(##,_)=[u(format,%#,##,:has [switch(1,u(dark,%#),*QUIETLY* left,left)] this channel.)];@pemit %#=[switch(u(match,%0),,v(msg_noton))];&dbref-%# [v(db)]=[remove(ucstr(u(gdb,%#)),u(match,%0))]
+
+@@
+@@ Com Connecting Commands.
+@@
+:[u(install,Connecting Commands)]
+&connect com=$com monitor *onnect:@dolist [iter(lwho(),extract(##,u(onchan,##,MONITOR),1))]=@pemit ##=[switch(1,u(dark,%#),,[setq(1,remove(setinter(u(gdb,%#),u(gdb,##)),MONITOR))][gt(words(r(1)),0)],\\\[Com\\\] [switch(##,%#,You have,%N has)] %0onnected on: '[squish(r(1))]')]
+
+@aconnect com=@dolist [iter(lwho(),extract(##,u(onchan,##,MONITOR),1))]=@pemit ##=[switch(1,u(dark,##),,[setq(1,remove(setinter(u(gdb,%#),u(gdb,##)),MONITOR))][gt(words(r(1)),0)],\[Com\] [switch(##,%#,You have,%N has)] connected on: '[squish(r(1))]')]
+
+@adisconnect com=@dolist [iter(lwho(),extract(##,u(onchan,##,MONITOR),1))]=@pemit ##=[switch(1,u(dark,##),,[setq(1,remove(setinter(u(gdb,%#),u(gdb,##)),MONITOR))][gt(words(r(1)),0)],\[Com\] [switch(##,%#,You have,%N has)] disonnected on: '[squish(r(1))]')]
+
+@@
+@@ Locked Channel Commmands.
+@@
+:[u(install,Lock Commands)]
+&l_create com=$comlock create*=*:@select 0=[u(both,%#)],@pemit %#=v(msg_perm),[u(words,%1)],@pemit %#=v(msg_words),[not(u(locked,%1))],@pemit %#=Com: That channel already has a lock.,{&l-[first(%1)] [v(lock)]=-%#-;@pemit %#=Com: Channel '[capstr(lcstr(first(%1)))]' has been created.}
+
+&l_destroy com=$comlock destroy*=*:@select 0=[u(owner,%#,%1)],@pemit %#=v(msg_perm),[u(words,%1)],@pemit %#=v(msg_words),[u(locked,%1)],@pemit %#=u(msg_locked,%1),{&l-[first(%1)] [v(lock)]=;&fun_[first(%1)] [v(lock)];@pemit %#=Com: Channel '[capstr(lcstr(first(%1)))]' has been destroyed.}
+
+&l_flag com=$comlock *=*:@select 0=[not(member(CREATE DESTROY FUNC,ucstr(first(%0))))],@@ ignore,[member(OWNER PLAYER EXCLUDE REMOVE,ucstr(first(%0)))],@pemit %#=Huh?  (Type "help" for help.),[words(u(first))],@pemit %#=v(msg_none),[comp(flags(%#),v(n))],@dolist lattr(me)=&## me,[u(locked,u(first))],@pemit %#=u(msg_locked,u(first)),[u(owner,%#,u(first))],@pemit %#=v(msg_owner),[u(exist,%1)],@pemit %#=u(msg_exist,%1),{&l-[u(first)] [v(lock)]=[setdiff(get(v(lock)/l-[u(first)]),iter(%1,-[num(*##)]- [num(*##)] ![num(*##)]!))] [iter(%1,switch(%0,*owner*,-[num(*##)]-,*player*,[num(*##)],*exclude*,![num(*##)]!))];@pemit %#=u(msg_add,%1,switch(%0,*owner*,OWNER,*player*,PLAYER,*exclude*,EXCLUDE,REMOVE),u(first))}
+
+&l_func com=$comlock func*=*:@select 0=[words(u(first))],@pemit %#=v(msg_none),[u(locked,u(first))],@pemit %#=u(msg_locked,u(first)),[u(owner,%#,u(first))],@pemit %#=v(msg_owner),{&fun_[u(first)] [v(lock)]=[switch(%1,,,\\\[[squish(%1)]\\\])];@pemit %#=[switch(%1,,Com: Function lock on [u(first)] removed.,Com: Set. '\\\[[squish(%1)]\\\]')]}
+
+@@
+@@ Ye Status Commands
+@@
+&status com=$comlock status:@dolist BEGIN [lattr(v(lock))] END=@select ## 1=BEGIN 1,@pemit %#=[repeat(=,22)] Locked Channels Status Report [repeat(=,22)],END 1,@pemit %#=[repeat(=,75)],*[u(owner,%#,after(##,-))],@pemit %#=[ljust(mid(after(##,-),0,10),10)]: [u(wrap,u(convert,##,123),63,,12)][switch(get(v(lock)/fun_[after(##,-)]),,,%r[space(12)][get(v(lock)/fun_[after(##,-)])])]
+&statchan com=$comlock status *:@pemit %#=[switch(0,u(locked,%0),u(msg_locked,%0),u(owner,%#,%0),v(msg_owner),[center(%b[capstr(lcstr(first(%0)))] Channel Status Report%b,75,=)]%rOwners%b%b%b : [u(wrap,u(convert,l-[first(%0)],1),64,,10)]%rPlayers%b%b :  [u(wrap,u(convert,l-[first(%0)],2),64,,10)]%rExcluded%b : [u(wrap,u(convert,l-[first(%0)],3),64.,10)]%rFunction%b : [switch(get(v(lock)/fun_[first(%0)]),,*NONE*,get(v(lock)/fun_[first(%0)]))]%r[repeat(=,75)])]
+
+@@
+@@ Com Misc Stuff
+@@
+@@ Find com: Could give inacurate results if the combination of 10 player's
+@@           channels is more then 4k.
+&find com=$com find:@pemit %#=Com: Search started (could be a while);@trig me/find_2=%#,{[lattr(v(db))]}
+&find_2 com=@switch [extract(%1,1,20)]=,{@pemit %0=**********%r* Communations Channel List%r*%r* [u(wrap,%2,73,*,1)]%r*%r**********},{@trig me/find_2=%0,{[extract(%1,21,3999)]},{[setunion(setunion(%2,iter(extract(%1,1,10),u(lmayjoin,%0,get(v(db)/##)))),iter(extract(%1,11,10),u(lmayjoin,%0,get(v(db)/##))))]}}
+
+:[u(install,Misc Commands)]
+&purge_fun com=[iter(get(v(lock)/%0),switch(##,#*,[num(*[name(##)])],[mid(##,0,1)][num(*[name(edit(edit(##,-,),!,))])][mid(##,0,1)]))]
+&purge_fun2 com=[iter(u(gdb,%0),switch(1,u(mayjoin,%0,##),##))]
+
+@startup com=@dolist [lattr(v(lock))] END={@switch ##=END,{@edit [v(lock)]/*=#-1,;@trig me/purge_2=#-1},FUN_*,,&## [v(lock)]=[u(purge_fun,##)]}
+
+&purge com=$com purge:@switch 0=[u(both,%#)],@pemit %#=v(msg_perm),{@dolist [lattr(v(lock))] END={@switch ##=END,{@edit [v(lock)]/*=#-1,;@pemit %#=Com: Purge 1 of 4 Completed (Player DB);@trig me/purge_2=%#},FUN_*,,&## [v(lock)]=[u(purge_fun,##)]}}
+
+&purge_2 com=@dolist [iter(edit(lattr(v(db)),DBREF-,),switch(type(##),PLAYER,,##))] END={@switch ##=END,{@pemit %0=Com: Purge 2 of 4 Completed (Lock DB);@trig me/purge_3=%0},&dbref-## [v(db)]}
+
+&purge_3 com=@dolist [lattr(v(lock))] END=@switch ## 0=END 0,{@pemit %0=Com: Purge 3 of 4 Completed (Functions);@trig me/purge_4=%0,[lattr(v(db))]},FUN_* [words(get(v(lock)/l-[after(##,FUN_)]))],{@pemit %0=Com: Function for channel '[after(##,FUN_)]' purged;&## [v(lock)]}
+
+&purge_4 com=@dolist [extract(%1,1,20)] END=@select ## 0=END [words(extract(%1,21,3999))],{@pemit %0=Com: Purge 4 of 4 Completed (Player Channels)},END 0,{@trig me/purge_4=%0,[extract(%1,21,3999)]},{&## [v(db)]=[u(purge_fun2,after(##,-))]}
+
+@@
+@@ Com Help
+@@
+:[u(install,Help)]
+&help_general  com=$com help:@pemit %#=u(desc)
+&help_plus     com=$+help com:@pemit %#=u(desc)
+@desc com==========================================================================%r A Simple Communication System%b%b%b (HINT: Try Joining the Public Channel)%r - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -%r Com <Channel> = <Msg> : Broadcasts <Msg> on <Channel>. Prepending <Msg>%r[space(25)]with a ":" or ";" posses the message%r = <Message>[space(11)]: Shortcut to broadcast to your default channel.%r Com +<Channel>[space(8)]: Adds a channel to your list of channels.%r Com -<Channel>[space(8)]: Removes a channel from your list of channels.%r Com List[space(14)]: Lists all the channels your currently on.%r Com Who[space(15)]: Lists everyone on all the channels your on.%r Com Who <Channel>%b%b%b%b : Lists everyone on a certain channel.%r Com Help <Topic>[space(6)]: Help on commands (Topics: Comlock, Misc & Info)%r%r Note:%b Channels may be abbreviated except for on the "com +" command.%r=========================================================================
+&help_misc com=$com help misc:@pemit %#==========================================================================%r Misc Commands[space(33)](All the *SLOW* commands)%r - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -%r Com Find%b%b%b : Lists all channels everyone is on. Ignores all channels%r[space(15)]you may not join (locked channels).%r Com Purge%b%b : Does a set of 4 purges upon the com databases. (Wiz only)%r[space(15)]1. Removes all non-players from the Lock DB.%r[space(15)]2. Removes all non-players from the Player DB.%r[space(15)]3. Removes orphaned function locks for locked channels.%r[space(15)]4. Removes players from channels they may not join.%r=========================================================================
+&help_comlock com=$com help comlock:@pemit %#==========================================================================%r Comlock Commands[space(29)](Channel Locking Commands)%r - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -%r Comlock Create = <Channel>%b%b%b%b : Creates a lock for <Channel>.%r Comlock Destroy = <Channel>%b%b%b : Destroy a lock for <Channel>.%r Comlock <Status> = <Player(s)> : Sets the status of player(s) on your%r[space(34)]default channel. Status may be: Owner,%r[space(34)]Player, Exclude, or Remove.%r Comlock Func = <function()>%b%b%b : Sets the function on your default%r[space(34)]channel which people must pass 2 join.%r[space(34)](1=Mayjoin, with \%# passed as \%0)%r Comlock Status[space(17)]: List all locked channels you controll.%r Comlock Status <Channel>[space(7)]: Gives detailed info about a channel.%r=========================================================================
+
+&help_info com=$com help info:@pemit %#=[repeat(=,73)]%r Communication System Information[space(20)](Info on internals)%r - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -%r Number of attributes used: [words([lattr(me)] [lattr(v(db))] [lattr(v(lock))])]%r Number of Players in db:%b%b [words(lattr(v(db)))]%r[switch(1,or(or(or(and(hasflag(owner(me),wizard),hasflag(me,inherit)),and(hasflag(owner(me),royalty),hasflag(me,inherit))),hasflag(me,wizard)),hasflag(me,royalty)),,%bLimitations:[space(15)]Probably won't work with dark wizards.%r)] Config options:[space(12)][u(wrap,switch(v(config),,*None*,v(config)),44,,28)]%r Last Installed:[space(12)][convsecs(extract(v(timestamp),3,1))] ([div(sub(secs(),extract(v(timestamp),3,1)),86400)] days ago)%r People with special privs: [u(wrap,iter(v(special),{[name(##)](##)}),44,,28)]%r Installed by:[space(14)][name(owner(me))]([owner(me)])%r Programed by:[space(14)]Adrick@mankato.msus.edu%r[repeat(=,73)]
+
+@@
+@@ Compatability Section (and do &config stuff)
+@@
+:[u(install,Compatability Stuff)]
+
+@@ PERNMUSH
+@switch [version()]=#-1*,{&l_func com=[edit(get(com/l_func),\\\\\\,\\)];&connect com}
+
+@@ TINYMUSH
+@switch [version()]=TinyMUSH *,{@aconnect com;@adisconnect com}
+
+@@
+@@ Test for missing or broken functions.
+@@
+&squish com=1 [iter(rest(lnum(add(1,words(%0)))),extract(%0,##,1))]
+&ljust com=1 [mid(%0[space(%1)],0,%1)]
+&center com=1 [mid([repeat(=,div(sub(%1,strlen(%0)),2))]%0[repeat(=,%1)],0,%1)]
+&remove com=[not(member(remove(BUG%bB,B),B))] [edit(%0,%1,)]
+&compat com=@dolist center squish remove ljust=@switch/first [first(u(##))] [##()]=* #-1 FUNCTION (*) NOT FOUND,{&config me=[v(config)] NO_[ucstr(##)];&## com=[rest(v(##))];@edit me/*={##\(},{u\(##\,};@edit me/*={##(},{u(##,}},0 *,{&config me=[v(config)] BUGGY_[ucstr(##)];&## com=[rest(v(##))];@edit me/*={##\(},{u\(##\,};@edit me/*={##(},{u(##,}},{&config me=[v(config)] HAS_[ucstr(##)];&## me};&compat me
+@switch [setq(,)]=#-1*,:** WARNING: Use NO_SETQ patch[space(6)]**
+@force com=&config me=[switch(version(),Tiny*,TINYMUSH,PENNMUSH)] NO_@SELECT
+@force com=@edit com/*=@select,@switch/first
+@force com=@select 1=1,\{@edit me/config=NO_@SELECT,HAS_@SELECT;@edit com/*=@switch/first,@select\}
+@switch [setq(,)]=#-1*,,@trig com/compat
+
+@force com=@wait 4=@dolist iter(lattr(me),switch(v(##),$*,,##))=@set me/##=no_command
+:[u(install,Done!)]
+&install me
+@lock/use com=canuse/1
+@set me = !quiet

@@ -1,0 +1,198 @@
+This is the example of a combat system, from Fast Jack MUSH.
+It is more attack-oriented than DuneMUSH's NCS, and requires the 
+following flags to be added to the MUSH code : WEAPON, ARMOR, and
+COMBAT. It was coded on pennmush-1.50.p9 and I have no idea if
+it will work with 2.0.
+@create Combat System
+@link Combat System = #4
+@lock Combat System = #4
+@set Combat System = STARTUP
+&CORPSEMAKER Combat System=@clone #315;&cdeb me=[num(generic)];@name 
+generic=Corpse of [name(%0)];&namer corpse=[name(%0)];@tel corpse=%1;@dol 
+[lcon(%0)]=@tel ##=[v(cdeb)]
+&UNWIELD Combat System=$unwield:@swi [get(%#/wield)]=#313,@pemit %#=But you're 
+not wielding anything!,{@pemit %#=You stop wielding your 
+[name([get(%#/wield)])].;@oemit %L/%#=%N relaxes %p stance and puts away %p 
+[name([get(%#/wield)])].;&wield %#=#313}
+&WIELDER Combat System=$wield *:@swi [u(hasweap,%#,%0)]=>0,{@pemit %#=You 
+ready a [name([rnum(%#,%0)])].;&wield %#=[u(weapnum,%#,%0)];@oemit %L/%#=%N 
+brandishes a [name([rnum(%#,%0)])]},@pemit %#=I don't think that's a weapon.
+&BRAWLMA_4 Combat System=smashing the opponent viciously
+&BRAWLMA_3 Combat System=getting a good shot in
+&BRAWLMA_2 Combat System=hitting with a *crunch*--a few teeth come out
+&BRAWLMA_1 Combat System=*smack* ; a crushing and effective hit
+&BRAWLMA_0 Combat System=landing a solid blow with a meaty sound
+&BRAWLMO_3 Combat System=aims a backhand
+&BRAWLMO_4 Combat System=jumps and pummels away
+&BRAWLMO_2 Combat System=screams and charges
+&BRAWLMO_1 Combat System=elbows and swings around
+&BRAWLMO_0 Combat System=swings wildly
+&BRAWLM_4 Combat System=jump and pummel away
+&BRAWLM_3 Combat System=aim a heavy backhand
+&BRAWLM_2 Combat System=scream and charge
+&BRAWLM_1 Combat System=elbow and swing around
+&BRAWLM_0 Combat System=swing wildly
+&BLADEMA_4 Combat System=cutting some main cables, which rapidly spurt 
+lifeblood
+&BLADEMA_3 Combat System=landing the point with a hollow *thok*
+&BLADEMA_2 Combat System=leaving their intestines hanging out. 'Are those 
+mine?!?' Uh oh
+&BLADEMA_1 Combat System=splattering blood on the pavement
+&BLADEMA_0 Combat System=drawing a thin line of scarlet
+&BLADEMO_4 Combat System=slashes away doggedly
+&BLADEMO_3 Combat System=tosses a blade
+&BLADEMO_2 Combat System=fillets away
+&BLADEMO_0 Combat System=slashes viciously
+&BLADEMO_1 Combat System=chops quickly -- a gleam on the blade
+&BLADEM_4 Combat System=slash away berserkly
+&BLADEM_3 Combat System=throw a blade
+&BLADEM_2 Combat System=fillet away
+&BLADEM_1 Combat System=chop quickly -- a gleam on the blade
+&BLADEM_0 Combat System=slash viciously
+&CARRYWEAP Combat 
+System=[switch([lcstr([name([get(%0/wield)])])],[lcstr(%1)]*,[switch([member([l
+con(%0)],[get(%0/wield)])],>0,1,[switch([get(%0/wield)],#313,1,0)])],0)]
+&GUNMA_4 Combat System=blasting out some assortment of vital organs.
+&GUNMO_4 Combat System=grins wickedly and plinks away
+&GUNM_4 Combat System=grin wickedly and plink
+&GUNMA_3 Combat System=making a nasty bleeding gulch in their leg
+&GUNMO_3 Combat System=draws a bead and shoots
+&GUNM_3 Combat System=draw a bead and shoot
+&GUNMO_2 Combat System=pulls back the bolt and fires
+&GUNMA_2 Combat System=punching a solid charnal hole
+&GUNM_2 Combat System=pull back the bolt and fire
+&GUNMA_1 Combat System=peppering the victim with a nasty assortment of ragged 
+wounds
+&GUNMO_1 Combat System=growls and burns a clip
+&GUNM_1 Combat System=burn a clip while growling
+&GUNMA_0 Combat System=ripping chunks of flesh in an undescribable carnage.
+&GUNMO_0 Combat System=blazes away with fiery eyes
+&GUNM_0 Combat System=blaze away with dogged determination
+&WARMOR Combat 
+System=[extract([iter([lcon(%0)],[switch([hasflag(##,armor)],1,##)])],1,1)]
+&HEAVEN Combat System=#311
+&HASARMOR Combat 
+System=[strlen([iter([lcon(%0)],[switch([hasflag(##,armor)],1,1)])])]
+&CHECKER Combat System=@select 0=>[get(%0/bruise)], {&fatal 
+%0=[sub([get(%0/fatal)],[abs([get(%0/bruise)])])];&bruise %0=0;@pemit %0=Ow! 
+that hurt!;@tr me/checker=%0},>[get(%0/fatal)], {@pemit %0=You have 
+died.;@remit [loc(%0)]=[name(%0)] has died a bloody painful death.;@tr 
+me/corpsemaker=%0,[loc(%0)];@tel %0=[v(heaven)]}
+&DAMAGE Combat System=@swi [u(hasarmor,%1)]=>0,{@swi 
+[get([u(warmor,%1)]/remains)]=>0,{&bruise 
+%1=[sub([get(%1/bruise)],[div([add([rand([get(%2/damage)])],1)],2)])];@remit 
+[loc(%1)]=[name(%1)]'s [name([u(warmor,%1)])] stops some of the 
+damage!;&remains 
+[u(warmor,%1)]=[sub([get([u(warmor,%1)]/remains)],[div([add([rand([get(%2/damag
+e)])],1)],2)])];@tr me/checker=%1},{@pemit %1=Your armor breaks!;@remit 
+[loc(%1)]=Some of [name(%1)]'s armor is destroyed.;@tel 
+[u(warmor,%1)]=[v(heaven)]}},{@swi [get(%2/dtype)]=f*,{&fatal 
+%1=[sub([get(%1/fatal)],[add([rand([get(%2/damage)])],1)])];@tr 
+me/checker=%1},{&bruise 
+%1=[sub([get(%1/bruise)],[add([rand([get(%2/damage)])],1)])];@tr 
+me/checker=%1}}
+&HITFUN Combat 
+System=[sub([add([get(%0/[get(%2/type)])],[rand(11)])],[add([get(%1/dodge)],[ra
+nd(12)])])]
+&WEAPNUM Combat 
+System=[switch([rnum(%0,%1)],*-1*,0,[switch([hasflag([rnum(%0,%1)],weapon)],1,[
+rnum(%0,%1)],0)])]
+&HASWEAP Combat 
+System=[strlen([iter([lcon(%0)],[switch([lcstr([edit([name(##)],%b,_)])],[edit(
+[lcstr(%1)],%b,_)]*,[switch([hasflag(##,weapon)],1,##)])])])]
+&ATTACK Combat System=$attack * with *:@switch/first [rnum(%L,%0)]=*-1*,@pemit 
+%#=Who do you want to attack?,{@select 0=[hasflag(%#,combat)], {@pemit %#=You 
+don't have a combat flag!}, [hasflag([rnum(%L,%0)],combat)] , {@pemit %#=That 
+is not avalid target.} , [u(whofun,%#,[rnum(%L,%0)])] , {@pemit %#=Either you 
+or your target is not In Character.} , [not([hasflag(%L,haven)])], {@pemit 
+%#=Combat is not allowed in this room.} , [u(playconnect,[rnum(%L,%0)])], 
+{@pemit %#=You may not attack sleeping players.} , [u(carryweap,%#,%1)], 
+{@pemit %#=You either don't have that weapon or are not wielding it.} , {@swi 
+[u(hitfun,%#,[rnum(%L,%0)],[get(%#/wield)])]=>0,{@tr 
+me/damage=%#,[rnum(%L,%0)],[get(%#/wield)];@pemit %#=You 
+[v([get([get(%#/wield)]/type)]m_[rand(5)])] at [name([rnum(%L,%0)])] 
+[v([get([get(%#/wield)]/type)]ma_[rand(5)])].;@pemit [rnum(%L,%0)]=%N 
+[v([get([get(%#/wield)]/type)]mo_[rand(5)])] at you 
+[v([get([get(%#/wield)]/type)]ma_[rand(5)])].;@dolist 
+[edit([edit([lcon(%L)],%#,)],[rnum(%L,%0)],)]={@pemit ##=%N 
+[v([get([get(%#/wield)]/type)]mo_[rand(5)])] at [name([rnum(%L,%0)])] 
+[v([get([get(%#/wield)]/type)]ma_[rand(5)])].}},{@pemit %#=You 
+[v([get([get(%#/wield)]/type)]m_[rand(5)])] at [name([rnum(%L,%0)])] but 
+miss.;@pemit [rnum(%L,%0)]=%N [v([get([get(%#/wield)]/type)]mo_[rand(5)])] at 
+you but misses badly.;@dol 
+[edit([edit([lcon(%L)],%#,)],[rnum(%L,%0)],)]={@pemit ##=%N 
+[v([get([get(%#/wield)]/type)]mo_[rand(5)])] at [name([rnum(%L,%0)])] but 
+misses.}}}}
+&PLAYCONNECT Combat 
+System=[switch([type(%0)],PLAYER,[switch([hasflag(%0,connected)],1,1,0)])]
+&WHOFUN Combat System=[switch([who(%0)],IC,[switch([who(%1)],IC,1,0)],0)]
+&DO_HEAL Combat System=@dolist [lwho()]={@swi [rand(2)]=0,{@swi 
+[get(##/bruise)]=<[get(##/max)],{&bruise ##=[u(bruiseheal,##)];@pemit ##=You 
+feel a little better.}},{@swi [get(##/fatal)]=<[get(##/max)],{&fatal 
+##=[u(fatalheal,##)];@pemit %#=Some of your bleeding stops.}}};@tr me/do_wait
+&DO_WAIT Combat System=@wait 600=@tr me/do_heal
+&CDEB Combat System=#96
+@STARTUP Combat System=@tr me/do_wait
+&FATALHEAL Combat 
+System=[switch([get(%0/max)],>[add([get(%0/fatal)],4)],[add([get(%0/fatal)],4)]
+,[get(%0/max)])]
+&BRUISEHEAL Combat 
+System=[switch([get(%0/max)],>[add([get(%0/bruise)],10)],[add([get(%0/bruise)],
+10)],[get(%0/max)])]
+&STATS Combat System=$stat*:@pemit %#=%r[repeat(=,77)]%rCharacter Statistics 
+for 
+%N%r[repeat(=,77)]%r[u(dodgefun,[get(%#/dodge)])]%r[u(gunfun,[get(%#/gun)])]%r[
+u(brawlfun,[get(%#/brawl)])]%r[u(bladefun,[get(%#/blade)])]%r[u(netfun,[get(%#/
+netrun)])]%r%r[u(condfun,[get(%#/bruise)],[get(%#/fatal)],[get(%#/max)])]%r%rYo
+u are currently wielding a [name([get(%#/wield)])].%r%r[repeat(=,77)]
+&DODGEFUN Combat System=[switch(%0,0,You are as immobile as dirt.,1,Your 
+reflexes are pathetic.,2,You are very slow.,3,You are as quick as your average 
+couch potato.,4,You are unathletic.,5,You are fairly well-exercised.,6,You are 
+quick on your feet.,7,You are faster than your average bear.,8,You are fleet 
+of foot.,9,You are a world-class sprinter.,10,You are blindingly fast.,11,Your 
+reflexes are honed beyond belief.,>11,You are so quick the world seems 
+slow.,*error no attribute*)]
+&GUNFUN Combat System=[switch(%0,0,You don't even know what a gun IS.,1,You 
+could maybe hit the side of a barn.,2,You are pretty unskilled with 
+guns.,3,Your abilities at shooting are a bit rusty.,4,You are an average 
+shot.,5,You could probably shoot pretty well.,6,You're a trained 
+marksman.,7,You're an excellent shot.,8,You're a military-class sniper.,9,Your 
+marksmanship is unrivaled.,>9,Your skill with guns is legendary.,*error no 
+attribute*)]
+&BRAWLFUN Combat System=[switch(%0,0,You cut yourself frequently.,1,You often 
+drop blades when you fight with them.,2,You know very little about 
+knife-fighting.,3,You are an average blade-fighter.,4,You are a fair 
+knife-fighter.,5,You could throw blades in the circus.,6,You are a 
+military-trained knife fighter.,7,Your skill with blades is quite good.,8,Your 
+skill with blade weapons is world-class.,9,You are unrivaled in blade 
+combat.,>9,Your blade skill is higher than most DuneMUSH characters!,*error no 
+attribute*)]
+&BLADEFUN Combat System=[switch(%0,0,You don't even know how to make a 
+fist.,1,You fight like a girl.,2,You are a weakling.,3,You could fight but you 
+would get your ass kicked.,4,You know how to fight unarmed.,5,You're a trained 
+pugilist.,6,You're a golden-gloves class boxer.,7,You're a karate 
+black-belt.,8,You could take on a boxing champ.,9,Two words: Bruce 
+Lee.,>9,You're a unequalled brawler. Get off the steroids.,*error no 
+attribute*)]
+&NETFUN Combat System=[switch(%0,0,With practice you might learn how to 
+operate a calculator.,1,You should stay away from tricky machinery.,2,You can 
+barely operate a computer.,3,You haven't used a computer in years.,4,You can 
+sorta understand cyberdecks.,5,You're an average nethack.,6,You're a 
+professional netrunner.,7,You're earning a name for yourself in 
+cyberspace.,8,You are a world-class cyberspace cowboy.,9,You're one of the 
+best netrunners--ever.,>9,You're cyberspace skills beat most AI's.,*error no 
+attribute*)]
+&CONDFUN Combat System=[switch(%1,%2,[switch(%0,%2,You feel 
+fine.,>[div(%0,2)],You're a bit bruised.,>[div(%0,4)],You're lightly 
+wounded.,You're barely injured--just a few scratches.)],>[div(%1,2)],You're 
+seriously wounded.,>[div(%1,3)],You're heavily wounded. Better stop 
+fighting.,>[div(%1,4)],You're CRITICALLY wounded.,<5,You're on death's 
+door--and knocking.,You're lightly wounded.)]
+ 
+You need to create a Generic Corpse (with whatever you want that corpse to do, as well as an object named Fists.
+ 
+Good Luck! and remember free code defeats fascist pricks.
+ 
+Devin Murphy
+devin@beamlab.ps.uci.edu
+Mephisto@FastJack

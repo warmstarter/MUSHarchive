@@ -1,0 +1,36 @@
+This file documents changes in quickbuild.
+
+Version 1.07
+* ZMRs and parent rooms, when created by quickbuild, are now dug and (for ZMRs)
+  zone-locked before any other rooms. Other rooms are no longer zone-locked.
+  These rooms are now dug even when there's no code for them.
+* Code on rooms is now run just after the room is dug, rather than
+  when returning to the room to perform links. This means you shouldn't
+  expect your ROOM.* attribs to be available.
+* ROOM.* attribs now stomp non-word chars (like accented chars)
+
+Version 1.06
+* @lock/zone all rooms on creation. This allows use of ROOM ZONE:
+  without warnings.
+
+Version 1.05
+* Print the graph as a comment at the top of the file.
+
+Version 1.04
+* Parent/zone rooms/exits can now be generated in-line, rather than
+  specifying external dbrefs.
+
+Version 1.03
+* Removed the @wait syncs (which never worked that well), since
+  players can set attribs on themselves with evaluation
+  by using @set
+
+Version 1.02
+* Updated to work with the new Graph (v0.2 and later) API
+
+Version 1.01
+* Fix: Exits were not correctly linked to destination rooms with 
+  spaces in their names 
+
+Version 1.0
+* Initial quickbuild release

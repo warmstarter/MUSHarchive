@@ -1,0 +1,10 @@
+usenm=false
+i_malloc='undef'
+i_malloc='undef'
+d_sigcld='undef'
+d_sigchld='define'
+d_huge='define'
+d_huge_val='define'
+d_int_max='undef'
+d_maxdouble='define'
+d_maxint='define'

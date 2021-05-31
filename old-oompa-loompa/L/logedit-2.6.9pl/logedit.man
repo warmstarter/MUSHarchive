@@ -1,0 +1,462 @@
+
+
+
+LOGEDIT(1)                    1994                     LOGEDIT(1)
+
+
+
+NAME
+     logedit - trim logs of MUSH events
+
+SYNOPSIS
+     logedit [-acdghilmnpqstvwACHINOPRST] [-b  filename]  [-f  [-
+     ]world]  [-o [outputfile]] [-k regexp] [-r regexp] [-x name]
+     [-y  name]  [-F  filename]  [-W  [<col>[,<first>[,<rest>]]]]
+     filename
+
+DESCRIPTION
+     The logedit program is a tool designed to help  players  and
+     admins of role-playing MUSHes trim down logs of role-playing
+     events on the MUSH.  It  takes  a  log  file  (indicated  by
+     'filename'  or  from  stdin)  and produces as output another
+     file (by default 'filename.log') after optionally removing a
+     number of typical things which are annoying in logs.
+
+          Logedit *always* strips the following things from logs:
+          - Messages beginning with GAME: or MAIL:
+          - * has connected, disconnected, or reconnected messages
+          - Huh? (Type help for help)
+          - Flag set. and Doing set.
+          - Any line appearing twice in succession (simple SPAM)
+          - Anything between a pair of '#log' lines. This allows you, while
+            logging, to 'think #log', thus indicating that what follows
+            (until you 'think #log' again) is to be stripped by logedit.
+
+OPTIONS
+     These options control what is to be stripped from the log:
+
+     -a   Remove @wall/@rwall/@wizwall messages
+
+     -c   Remove @chat messages from all channels
+
+     -d   Remove DOING/WHO lists
+
+     -f [-]world
+          This option supports tinyfugue logging. -f  world  will
+          put  only  output  from "world" into the log; -f -world
+          (or -f !world) will skip output from "world" when  mak-
+          ing  the log. You can specify either multiple worlds to
+          include, or multiple -worlds to skip, each with its own
+          -f  switch.  If only one world is specified to include,
+          tf's ----  World  <name>  ----  messages  will  not  be
+          printed.  If  more  than  one  world  is  specified  to
+          include, the messages will be printed. (If you wanna be
+          sure  they're not there, use a regexp like "^---- World
+          .* ----$" in your .logeditrc.
+
+     -k <regexp>
+          Keep lines which match <regexp> in  the  log,  even  if
+          they'd  normally  be stripped out by some other switch.
+
+
+
+5,                      Last change: June                       1
+
+
+
+
+
+
+LOGEDIT(1)                    1994                     LOGEDIT(1)
+
+
+
+          Perl-style regular expressions (a  superset  of  egrep-
+          style  regular  expressions) are used, which means that
+          ()'s, []'s, and {}'s must be escaped with a   in  order
+          to match them literally.  Suggested by Lorrie Wood.
+
+     -l   Remove * has arrived, * has left, and * goes home  mes-
+          sages
+
+     -m   Remove @mail messages read while logging
+
+     -p   Remove pages to you and from you
+
+     -q   Quick-edit. Removes all lines except those which  start
+          with  a  player's  name (thus, usually leaving you only
+          player actions.) This switch implies -a,  -c,  -d,  -p,
+          -w, and -T.  It's a very good idea to use the -y <name>
+          switch with this  option,  as  well,  particularly  for
+          short  logs. This switch adds substantially to the time
+          required to edit the log.
+
+     -r <regexp>
+          Removes lines matching  the  regular  expression  which
+          follows  the switch. You can have multiple regexps, but
+          each needs its own switch,  e.g.   logedit  -r  foo  -r
+          "[Bb]ar\." myfile
+
+     -t   Terse mode: room descriptions are removed, and contents
+          lists are shoved onto a single line. This mode requires
+          that the log be taken by someone who  can  see  db#s  -
+          usually  an  admin,  a see_all player (in PennMUSH), or
+          possibly a mortal if the whole log takes place in rooms
+          they own.
+
+     -w   Remove whispers to you and from you
+
+     -x <name>
+          Remove anything by  <name>.  Like  -r,  you  can  stack
+          these,  but  you  must  use  multiple  -x's,  too, e.g.
+          logedit -apw -x Paul -x Javelin myfile
+
+     -A   Remove any ANSI codes in the from the log.
+
+     -C   Remove any lines starting with % characters. These  are
+          usually  messages  from  tinyfugue  telling  you  about
+          activity in other worlds or whatever.
+
+     -M   Merge puppets into the log.  This  switch  removes  the
+          "puppet>"  tag  at  the beginnings of lines, and leaves
+          the rest of the line in the log, handy for  people  who
+          log  RP  done  with puppets. It is somewhat intelligent
+          about converting puppet> you ... into  puppet  ...,  as
+          well.   Since  this processing occurs *after* stripping
+
+
+
+5,                      Last change: June                       2
+
+
+
+
+
+
+LOGEDIT(1)                    1994                     LOGEDIT(1)
+
+
+
+          the log, one could preserve *only* puppet-talk  in  the
+          log  by  using  logedit -M -r '.*' -k '.*>' <filename>.
+          This switch suggested by David Johnson (Willem@Dune).
+
+     -N   Remove NOSPOOF'd emits - lines which begin with [text].
+          This  is also useful for stripping out chat channels on
+          MUSHes which use []'s to enclose  channel  names.  This
+          switch takes precedence over -S.
+
+     -O   Remove "o-spam", the messages you get when  20  players
+          all  leave  a  room, one after the other, giving you 20
+          osucc/odrop messages.  Essentially removes any consecu-
+          tive  lines  in  which everything but the first word (a
+          player's name) matches.
+
+     -P   Remove output from puppets from the  log.  This  switch
+          takes precedence over -M.
+
+     -R   Remove any lines starting with : or " characters.  Use-
+          ful for people stuck logging from telnet.
+
+     -S   Remove only the [text] at the beginning of lines  which
+          start  with  such  patterns,  but leave the rest of the
+          line. This is the "spoof" flag,  as  it  de-NOSPOOFs  a
+          log.  If  you use a MUSH which uses []'s for chat chan-
+          nels, though, it'll make any chatting  appear  to  take
+          place  in the room.  -T Remove the "timestamp" messages
+          which  you  see  when  someone  pages  you  and  you're
+          idle/haven, or when you page someone who's idle/haven.
+
+     These options modify the output in useful ways:
+
+     -g   When used with the -I switch, this causes  output  from
+          the  same  player/puppet  to  be  grouped  together and
+          single-spaced, which produces very nice-looking output.
+          Technically,  it causes output lines beginning with the
+          same word to be grouped together, so if you keep rwalls
+          or  channels  in the log, consecutive lines on the same
+          channel wil lbe grouped together.
+
+     -s   Include statistics at the end of the log. These statis-
+          tics  include line counts on the original and new files
+          (so you can see how much you trimmed), a  list  of  all
+          players  who  spoke  or  acted during the event (with a
+          count of how often they acted), and players who  appear
+          to have been on-line or present, but said nothing.
+
+     -y <name>
+          Convert 'You say,' to '<name> says,' to give the log  a
+          third-person view.
+
+     -I   Insert blank lines between  log  lines.  This  improves
+
+
+
+5,                      Last change: June                       3
+
+
+
+
+
+
+LOGEDIT(1)                    1994                     LOGEDIT(1)
+
+
+
+          readability  of  the  log significantly, at the cost of
+          making it longer to print, etc.  Room  descs,  contents
+          lists,  etc,  are kept together.  This switch suggested
+          by Christian Scarborough. See also -g.
+
+     -W [<col>[,<first>[,<rest>]]]
+          Word wrap long lines, resulting in no line longer  than
+          <col>  characters.   For  each  word-wrapped paragraph,
+          indent the first line <first>  spaces,  and  all  other
+          lines  <rest> spaces. Any of the parameters can be left
+          out: if no <col> is specified, 72 is  assumed.  <first>
+          and  <rest>  default  to 0.  Word wrap will, of course,
+          fail miserably if you  have  words  longer  than  <col>
+          characters.  There  must  be a space between -W and the
+          numbers.
+
+     Finally, these options control the use of the  configuration
+     file, input and output files, or provide program help:
+
+     -b <filename>
+          Build a new-style configuration file called <filename>,
+          using  the  parameters  given by the other command-line
+          switches and the current config file. An  easy  way  to
+          build  a  config  file  is  just  to run logedit -b, by
+          itself, which'll build .logeditrc in your  home  direc-
+          tory. Edit this file and follow the instructions in it.
+
+     -i   Read the log from the stdin, instead of from a file  on
+          the command line. This makes logedit usable as a pipe.
+
+     -n   Ignore  the  settings   in   the   configuration   file
+          (.logeditrc  by  default)  Command-line switches always
+          take precedence over configuration file  settings,  and
+          work  like  toggles,  i.e., if statistics are set on in
+          the configuration file, logedit -s will turn them  off.
+          Use  the  -n  switch in situations where there might be
+          multiple configuration files.
+
+     -o [filename]
+          Use "filename" as the output file for the editted  log,
+          instead  of  the default <inputfile>.log. If "filename"
+          is omitted, the output is sent to stdout.
+
+     -v   Verbose - chatter a bunch while processing the log,  to
+          show a bit of how logedit thinks about things.
+
+     -F filename
+          Use "filename" as the configuration file, in  place  of
+          ~/.logeditrc.
+
+     -h, -H
+          Show help. The help display lists all logedit switches,
+
+
+
+5,                      Last change: June                       4
+
+
+
+
+
+
+LOGEDIT(1)                    1994                     LOGEDIT(1)
+
+
+
+          and  their values as defined in the configuration file.
+          Because this display is longer than many screens,  run-
+          ning logedit without arguments provides a paged version
+          of the same display.
+
+     -    If "-" is used as the last item on the command line  in
+          place  of an input filename, logedit will read from the
+          stdin, and write to the stdout, unless a different file
+          is  specified with -o.  This allows logedit to function
+          as a filter in a pipe.
+
+     -1   Process the log assuming it's  from  a  PennMUSH  1.50.
+          Unless  you've  changed  it in the config file, this is
+          the default.  If you usually MUSH on TinyMUSH 2.0,  you
+          can  set  2.0=on  in the config file, and use -1 as you
+          need it.
+
+     -2   Process the log assuming it's from a TinyMUSH  2.0.  If
+          you usually MUSH on a TinyMUSH, consider setting 2.0=on
+          in the config file.
+
+EXAMPLE
+     logedit joust
+
+     logedit -o joust.log joust
+
+     logedit -o joust.log - < joust
+
+     logedit - < joust > joust.log
+
+     cat joust.log | logedit - > joust.log
+
+     Trim  the  file  joust  using  the   default   settings   in
+     .logeditrc, and write the result to joust.log. All five com-
+     mands will produce the  same  result,  and  the  last  three
+     illustrate  the  use  of  logedit  as a filter for stdin and
+     stdout.
+
+     logedit -n -aw -x John -r OOC -y Javelin joust
+
+     Trim the  file  joust,  ignoring  .logeditrc,  skipping  any
+     actions  by  John and any lines containing the string "OOC",
+     converting "You say" to "Javelin says", and write the result
+     to joust.log
+
+     logedit -n -q -y Javelin -o joust.stripped joust
+
+     Quick-trim the file joust, ignoring  .logeditrc,  converting
+     "You  say"  to  "Javelin  says"  and  writing  the output to
+     joust.stripped. The output  will  contain  only  lines  with
+     player actions.
+
+
+
+
+5,                      Last change: June                       5
+
+
+
+
+
+
+LOGEDIT(1)                    1994                     LOGEDIT(1)
+
+
+
+CONFIGURATION FILE
+     Beginning with version 2.6pl, logedit uses a  new  and  more
+     descriptive configuration file. The easiest way to produce a
+     config file that you like  is  to  run  logedit  -b  <config
+     filename>, and edit the resulting file.
+
+     If you are upgrading from an  earlier  version  of  logedit,
+     your old-style configuration file will be read in correctly.
+     As above, the -b switch can be used to convert the old  con-
+     fig file into the new format.
+
+     The -n command-line switch causes logedit to ignore the con-
+     figuration file, should you wish to override it on occasion.
+
+     The -F <filename> command-line switch causes logedit to  use
+     <filename>  as its configuration file instead of the default
+     file.
+
+BUGS
+     Because some MUSHes (notably the one I  run)  use  []'s  for
+     MUSH-coded  chat  channels,  you  can't  always  distinguish
+     between those kind of chat channels and NOSPOOF emits.  This
+     affects -N and -S.
+
+     The -M switch doesn't currently do checking to be sure  that
+     you've really got a puppet name, and not a line like ----->,
+     so it may do odd things to odd lines.
+
+     When editing multi-world logs using the -f  switch,  logedit
+     assumes  that  any text before the first world change should
+     be preserved in the log.
+
+     Logedit has as many switches as ls. :)
+
+AUTHOR
+     Logedit was written by  Alan  Schwartz  (aka  Paul@DuneMUSH,
+     Javelin)
+
+     Alan can be reached as: alansz@cogsci.berkeley.edu
+     Or at: Dept. of Psychology
+            University of California
+            Berkeley, CA 94720
+
+     Lorrie Wood (Chani@DuneMUSH) has been invaluable in  provid-
+     ing  real-world tests of beta versions of logedit, ideas for
+     improvements and new switches, spaghetti, and general  moral
+     support. :)
+
+     Thanks are due to all users who've suggested improvements or
+     bugfixes.
+
+
+
+
+
+5,                      Last change: June                       6
+
+
+
+
+
+
+LOGEDIT(1)                    1994                     LOGEDIT(1)
+
+
+
+COPYLEFT
+     Copyright     (C)     1993,     1994      Alan      Schwartz
+     <alansz@cogsci.berkeley.edu>
+
+     This program is  free  software;  you  can  redistribute  it
+     and/or  modify  it under the terms of the GNU General Public
+     License as published by the Free Software Foundation; either
+     version 2 of the License, or (at your option) any later ver-
+     sion.
+
+     This program is distributed in the hope that it will be use-
+     ful, but WITHOUT ANY WARRANTY; without even the implied war-
+     ranty of MERCHANTABILITY or FITNESS FOR  A  PARTICULAR  PUR-
+     POSE.  See the GNU General Public License for more details.
+
+     You should have received a copy of the  GNU  General  Public
+     License  along  with this program; if not, write to the Free
+     Software Foundation,  Inc.,  675  Mass  Ave,  Cambridge,  MA
+     02139, USA.
+
+VERSION
+     This is logedit version 2.6.7pl.  The  most  recent  version
+     can always be found at mellers1.psych.berkeley.edu.
+
+NAME
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+5,                      Last change: June                       7
+
+
+
+
+
+

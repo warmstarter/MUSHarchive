@@ -1,0 +1,29 @@
+@create Trace Object
+&PRACTICE Trace Object = &practices me=[v(practices)]%%r[name(v(1))] (%1) practiced against [name(v(0))] (%0)%%r%%tOn: %3%%t Command: %2 (%4)
+&LEVEL Trace Object = &levels me=[v(levels)]%%r[name(v(0))] (%0) made %1 exps on %2
+&SPELL Trace Object = &spells me=[v(spells)]%%r[name(v(1))] (%1) spelled [name(v(0))] (%0)%%r%%tSpell: %2 (Power: %3, Damage: %4)%%r%%tOn: %5
+&ATTACK Trace Object = &attacks me=[v(attacks)]%%r[name(v(1))] (%1) attacked [name(v(0))] (%0) on %3%%r%%tCommand: %2 (%4)
+@DEATH Trace Object = &kills me=[v(kills)]%%r%1 (%0) killed by [name(v(4))] (%4)%%r%%tAt: [name(v(2))] (%2)%%r%%tOn: %3
+@DESCRIBE Trace Object = This object logs combat events if it's !HALT.
+think **NEW OBJECT**
+&ADD Clock0 = @va me=[cat(remove(v(va),v(0)),v(0))]; @tr me/relock
+&REM Clock0 = @va me=[remove(v(va),v(0))]; @tr me/relock
+&RELOCK Clock0 = @map [v(va)]=|##; @lock me=@[v(judgelock)][v(maplist)]; @ulock me=@[v(judgelock)][v(maplist)]
+@dol lnum(9)=@cpattr clock0/add=clock[add(##,1)]/add
+@dol lnum(9)=@cpattr clock0/rem=clock[add(##,1)]/rem
+@dol lnum(9)=@cpattr clock0/relock=clock[add(##,1)]/relock
+@dol lnum(10)=&judgelock clock##=#3740
+think ***NEW OBJECT***
+@create Combat Setter
+@lock Combat Setter = me
+@set Combat Setter=WIZARD
+&HP Combat Setter = 100
+&AP Combat Setter = 100
+&MAXAP Combat Setter = 100
+&MAXHP Combat Setter = 100
+&attribs combat setter=ap hp maxap maxhp
+&combcontrol combat setter=#5000
+&SETUP Combat Setter = &exp %0=0; @atrlock %0/exp=on; @dol [v(attribs)] ={&## %0=[v(##)];@atrlock %0/##=on}; @tr [v(combcontrol)]/add=%0; @pemit %0=You are now combat-ready.
+@Ause Combat Setter = @select 1=[not(hasflag(v(#),player))], {@pemit %#=Only players can be set for combat}, [not(not(member(xget(v(combcontrol),va),v(0))))], {@pemit %0=You are already combat-ready.}, {@tr me/setup=%0}
+@DESCRIBE Combat Setter = To make yourself combat-ready, 'use setter'%rWARNING: This process is irreversible, and death under the combat system%ris permanent character death%b(you must retire the character).%rOnce you have used the setter, type 'chelp' for help. Be sure to also read%revents combat and all sub-topics.
+@COMMENT Combat Setter = Javelin's MCS v2.0 Combat Setter - makes a player combat-ready, with starting stats.

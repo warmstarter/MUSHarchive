@@ -1,0 +1,436 @@
+# Aura object v1.0 - coded by Amethyst @ Mountain Cauldron
+#
+# Commands:
+#
+# +aura				-	show current personal auras
+# +aura <thing>			-	check auras of <thing>
+#
+# +aura/help			-	show help on +aura
+# +aura/list			-	list all available auras
+# +aura/add <aura>		-	add <aura> to your aura
+# +aura/remove <aura>		-	remove <aura> from your aura
+#
+# +saura/help			-	show help on +saura
+# +saura/list			-	list all auras in the system
+# +saura <thing>		-	list auras set on <thing>
+# +saura/add <thing>=<aura>	-	add <aura> to <thing>
+# +saura/remove <thing>=<aura>	-	remove <aura> from <thing>
+#
+# +saura/dice <thing>=<dice> <diff>
+#					set the dice and diff for an aura roll
+# +saura/addgrp <thing>=<group>	-	add <thing> to an aura group
+# +saura/remgrp	<thing>=<group>	-	remove <thing> from an aura group
+#
+# +saura/new <group>=<aura>/<meaning>
+#				-	add a new aura to the system
+# +saura/cancel <group>=<aura>	-	cancel an aura from the system
+# +saura/newgrp <group>		-	add a new aura group to the system
+# +saura/cancelgrp <group>	-	cancel an aura group from the system
+#
+# Protected attributes:
+#
+# Auras		- |-delimited list of color:meaning
+# Aura_roll	- <dice> <difficulty>
+# Aura_groups	- space-delimited list of special aura groups
+#
+#@create Aura Users Object
+#-
+#@create Aura Admin Object
+#-
+#@create Aura Data Object
+#-
+#@parent Aura Users Object=Aura Data Object
+#-
+#@parent Aura Admin Object=Aura Data Object
+#-
+#@set Aura Users Object=INHERIT
+#-
+#@set Aura Admin Object=INHERIT
+#-
+#@desc Aura Users Object=Coded by Amethyst @ Mountain Cauldron
+#-
+#@desc Aura Admin Object=Coded by Amethyst @ Mountain Cauldron
+#-
+#@desc Aura Data Object=Coded by Amethyst @ Mountain Cauldron
+#-
+#
+# Aura data storage
+#
+&fnc_isadministrator Aura Data Object=
+[or(hasflag(%#,wizard),hasflag(%#,admin))]
+-
+&fnc_roll_check Aura Data Object=
+[setq(0,0)]
+[setq(1,iter(
+ lnum(%0),
+ setq(0,add(%q0,switch(
+  [setq(1,add(rand(10),1))]1,
+  [eq(%q1,1)],-1,
+  [gte(%q1,%1)],1,
+  1,0
+ )))
+))]
+%q0
+-
+&fnc_select_auras Aura Data Object=
+[setq(0,)]
+[setq(1,%0)]
+[rest([iter(
+  lnum(%1),
+  [setq(2,extract(%q1,add(rand(words(%q1,|)),1),1,|))]
+  [setq(0,setunion(%q0,%q2,|))]
+  [setq(1,setdiff(%q1,%q2,|))]
+)]%q0,|)]
+-
+&fnc_check_list Aura Data Object=
+[setq(0,ulocal(
+ fnc_roll_check,
+ first(get(%#/aura_roll)),
+ rest(get(%#/aura_roll))
+))]
+[switch(%q0,
+  0,None,
+  [setq(1,switch(sign(%q0),1,get(%0/auras),ulocal(auras_all)))]
+  [ulocal(fnc_select_auras,%q1,abs(%q0))]
+)]
+-
+&fnc_available Aura Data Object=
+[setq(0,)]
+[setq(1,iter(
+  get(%0/aura_groups),
+  setq(0,setunion(%q0,v(auras_##),|))
+))]
+[rest(%q0,|)]
+-
+&fnc_find_match Aura Data Object=
+[switch(num(*%0),#-1,locate(%#,%0,ain),num(*%0))]
+-
+#
+# Aura user commands
+#
+&cmd_+aura Aura Users Object=$+aura:@pemit %#=
+Current auras:
+[iter(get(%#/auras),
+  %r[first(##,:)][repeat(%b,sub(32,strlen(first(##,:))))]-%t[rest(##,:)]
+,|)]
+-
+&cmd_+aura_target Aura Users Object=$+aura *:@pemit %#=
+[switch(
+  [setq(0,locate(%#,%0,n))]
+  [min(eq(words(get(%#/aura_roll)),2),first(get(%#/aura_roll)))]
+  :%q0,
+  0:*,{You cross your eyes, but can't see anything unusual.},
+  ?:#-1,{You see the distinctive aura of empty air.},
+  ?:#-2,{You get confused trying to look at two auras at once.},
+  [name(%q0)]'s auras:
+    [setq(1,ulocal(fnc_check_list,%q0))]
+    [switch(
+      %q1,
+      None,%rNone,
+      [iter(
+        %q1,
+        %r[first(##,:)][repeat(%b,sub(32,strlen(first(##,:))))]-%t[rest(##,:)],
+      |)]
+    )]
+)]
+-
+&cmd_+aura_help Aura Users Object=$+aura/help:@pemit %#=
+[repeat(*,75)]%r
+[center(Aura object v1.0 - coded by Amethyst @ Mountain Cauldron,75)]%r
+[repeat(*,75)]%r
++aura%t%t%t%t-%tshow current personal auras%r
++aura <thing>%t%t%t-%tcheck auras of <thing>%r
+%r
++aura/help%t%t%t-%tshow help on +aura%r
++aura/list%t%t%t-%tlist all available auras%r
++aura/add <aura>%t%t-%tadd <aura> to your aura%r
++aura/remove <aura>%t%t-%tremove <aura> from your aura%r
+[repeat(*,75)]
+-
+&cmd_+aura_list Aura Users Object=$+aura/list:@pemit %#=
+Available auras:
+[iter(
+  ulocal(fnc_available,%#),
+  %r[first(##,:)][repeat(%b,sub(32,strlen(first(##,:))))]-%t[rest(##,:)]
+,|)]
+-
+&cmd_+aura_add Aura Users Object=$+aura/add *:
+@switch/first 
+[setq(0,ulocal(fnc_available,%#))]0=
+[setq(1,match(%q0,%0:*,|))]%q1,
+{
+  @pemit %#=Sorry, but there is no aura '%0' available to you.
+},
+{
+  &auras %#=[setq(2,setunion(get(%#/auras),extract(%q0,%q1,1,|),|))]
+    [switch(mid(%q2,0,1),|,rest(%q2,|),%q2)];
+  @pemit %#=You add '%0' to your auras.
+}
+-
+&cmd_+aura_remove Aura Users Object=$+aura/remove *:
+@switch/first 
+[setq(0,get(%#/auras))]0=
+[setq(1,match(%q0,%0:*,|))]%q1,
+{
+  @pemit %#=Sorry, but you don't have '%0' set in your auras.
+},
+[match(ulocal(fnc_available,%#),%0:*,|)],
+{
+  @pemit %#=Sorry, but you aren't allowed to remove that aura.
+},
+{
+  &auras %#=[ldelete(%q0,%q1,|)];
+  @pemit %#=You remove '%0' from your auras.
+}
+-
+#
+# Aura admin commands
+#
+@lock/use Aura Admin Object=FNC_ISADMINISTRATOR/1
+-
+&cmd_+saura_help Aura Admin Object=$+saura/help:@pemit %#=
+[repeat(*,75)]%r
+[center(Aura object v1.0 - coded by Amethyst @ Mountain Cauldron,75)]%r
+[repeat(*,75)]%r
++saura/help%t%t%t-%tshow help on +saura%r
++saura/list%t%t%t-%tlist all auras in the system%r
++saura <thing>%t%t%t-%tlist auras set on <thing>%r
++saura/add <thing>=<aura>%t-%tadd <aura> to <thing>%r
++saura/remove <thing>=<aura>%t-%tremove <aura> from <thing>%r
+%r
++saura/dice <thing>=<dice> <diff>%r
+%t%t%t%t-%tset the dice and diff for checking%r
++saura/addgrp <thing>=<group>%t-%tadd <thing> to an aura group%r
++saura/remgrp <thing>=<group>%t-%tremove <thing> from an aura group%r
+%r
++saura/new <group>=<aura>/<meaning>%t%r
+%t%t%t%t-%tadd a new aura to the system%r
++saura/cancel <group>=<aura>%t-%tcancel an aura from the system%r
++saura/newgrp <group>%t%t-%tadd a new aura group to the system%r
++saura/cancelgrp <group>%t-%tcancel an aura group from the system%r
+[repeat(*,75)]
+-
+&cmd_+saura_list Aura Admin Object=$+saura/list:@pemit %#=
+Available auras:
+[iter(
+  ulocal(auras_all),
+  %r[first(##,:)][repeat(%b,sub(32,strlen(first(##,:))))]-%t[rest(##,:)]
+,|)]
+-
+&cmd_+saura_target Aura Admin Object=$+saura *:@pemit %#=
+[switch(
+  [setq(0,ulocal(fnc_find_match,%0))]%q0,
+  #-1,{You see the distinctive aura of empty air.},
+  #-2,{You get confused trying to look at two auras at once.},
+  [name(%q0)]'s auras:
+    [iter(
+      get(%q0/auras),
+      %r[first(##,:)][repeat(%b,sub(32,strlen(first(##,:))))]-%t[rest(##,:)],
+    |)]
+)]
+-
+&cmd_+saura_add Aura Admin Object=$+saura/add *=*:
+@switch/first 
+[setq(0,ulocal(fnc_find_match,%0))]
+[setq(1,ulocal(auras_all))]0=
+[setq(2,match(%q1,%1:*,|))]
+[not(match(#-1 #-2,%q0))],
+{
+  @pemit %#=I don't see that here.
+},
+%q2,
+{
+  @pemit %#=Sorry, but there is no aura '%1'.
+},
+{
+  &auras %q0=[setq(3,setunion(get(%q0/auras),extract(%q1,%q2,1,|),|))]
+    [switch(mid(%q3,0,1),|,rest(%q3,|),%q3)];
+  @pemit %#=You add '%1' to [name(%q0)]'s auras.
+}
+-
+&cmd_+saura_remove Aura Admin Object=$+saura/remove *=*:
+@switch/first 
+[setq(0,ulocal(fnc_find_match,%0))]
+[setq(1,get(%q0/auras))]0=
+[setq(2,match(%q1,%1:*,|))]
+[not(match(#-1 #-2,%q0))],
+{
+  @pemit %#=I don't see that here.
+},
+%q2,
+{
+  @pemit %#=Sorry, but [name(%q0)] don't have '%1' set in their auras.
+},
+{
+  &auras %q0=[ldelete(%q1,%q2,|)];
+  @pemit %#=You remove '%1' from [name(%q0)]'s auras.
+}
+-
+&cmd_+saura_dice Aura Admin Object=$+saura/dice *=* *:
+@switch [setq(0,ulocal(fnc_find_match,%0))]
+0=
+[not(match(#-1 #-2,%q0))],
+{
+  @pemit %#=I don't see that here.
+},
+[gte(%1,0)],
+{
+  @pemit %#=It would be silly to give them negative dice.
+},
+[and(lte(%2,10),gte(%2,1))],
+{
+  @pemit %#=Please use a difficulty between 1 and 10.
+},
+{
+  &aura_roll %q0=%1 %2;
+  @pemit %#=You give [name(%q0)] aura viewing (%1 diff %2).
+}
+-
+&cmd_+saura_addgrp Aura Admin Object=$+saura/addgrp *=*:
+@switch/first 
+[setq(0,ulocal(fnc_find_match,%0))]
+0=
+[not(match(#-1 #-2,%q0))],
+{
+  @pemit %#=I don't see that here.
+},
+[match(v(aura_groups),%1)],
+{
+  @pemit %#=Sorry, but there is no '%1' aura group.
+},
+{
+  &aura_groups %q0=[setunion(get(%q0/aura_groups),%1)];
+  @pemit %#=You add [name(%q0)] to the '%1' aura group.
+}
+-
+&cmd_+saura_remgrp Aura Admin Object=$+saura/remgrp *=*:
+@switch/first 
+[setq(0,ulocal(fnc_find_match,%0))]
+0=
+[not(match(#-1 #-2,%q0))],
+{
+  @pemit %#=I don't see that here.
+},
+[match(get(%q0/aura_groups),%1)],
+{
+  @pemit %#=Sorry, but [name(%q0)] isn't a member of the '%1' aura group.
+},
+{
+  &aura_groups %q0=[setdiff(get(%q0/aura_groups),%1)];
+  @pemit %#=You remove [name(%q0)] from the '%1' aura group.
+}
+-
+&cmd_+saura_new Aura Admin Object=$+saura/new *=*/*:
+@switch/first 
+0=
+[match(v(aura_groups),%0)],
+{
+  @pemit %#=Sorry, but '%0' isn't a valid aura group.
+},
+[not(match(v(auras_all),%1:*))],
+{
+  @pemit %#=Sorry, but '%1' is already being used.
+},
+{
+  &auras_%0 [parent(me)]=[setq(0,setunion(v(auras_%0),%1:%2,|))]
+    [switch(mid(%q0,0,1),|,rest(%q0,|),%q0)];
+  @pemit %#=You add the aura '%1 - %2' to the '%0' aura group.
+}
+-
+&cmd_+saura_cancel Aura Admin Object=$+saura/cancel *=*:
+@switch/first 
+0=
+[match(v(aura_groups),%0)],
+{
+  @pemit %#=Sorry, but '%0' isn't a valid aura group.
+},
+[setq(0,match(v(auras_%0),%1:*))]%q0,
+{
+  @pemit %#=There is no aura '%1' for the '%0' aura group.
+},
+{
+  &auras_%0 [parent(me)]=[ldelete(v(auras_%0),%q0,|)];
+  @pemit %#=You remove the '%1' aura from the '%0' aura group.
+}
+-
+&cmd_+saura_newgrp Aura Admin Object=$+saura/newgrp *:
+@switch/first 
+0=
+[not(match(v(aura_groups),%0))],
+{
+  @pemit %#=Sorry, but there is already a '%0' group.
+},
+{
+  &aura_groups [parent(me)]=[setunion(v(aura_groups),%0)];
+  @pemit %#=You add the '%0' aura group.
+}
+-
+&cmd_+saura_cancelgrp Aura Admin Object=$+saura/cancelgrp *:
+@switch/first 
+0=
+[match(v(aura_groups),%0)],
+{
+  @pemit %#=There is no '%0' aura group to remove.
+},
+{
+  &auras_%0 [parent(me)]=;
+  &aura_groups [parent(me)]=[setdiff(v(aura_groups),%0)];
+  @pemit %#=You remove the '%0' aura group.
+}
+-
+#
+# Core aura data
+#
+&aura_groups Aura Data Object=
+General Restricted Vampires Weres Mages
+-
+&auras_all Aura Data Object=
+[setq(0,)]
+[setq(1,iter(
+  v(aura_groups),
+  setq(0,setunion(%q0,v(auras_##),|))
+))]
+[rest(%q0,|)]
+-
+&auras_general Aura Data Object=
+Orange:Afraid|
+Purple:Aggressive|
+Red:Angry|
+Brown:Bitter|
+Light Blue:Calm|
+Pink:Compassionate|
+Lavender:Conservative|
+Gray:Depressed|
+Deep Red:Lustful|
+Light Green:Distrustful|
+Crimson:Enraged|
+Dark Green:Envious|
+Violet:Excited|
+Rose:Generous|
+Vermilion:Happy|
+Black:Hateful|
+Yellow:Idealistic|
+White:Innocent|
+Blue:Love|
+Green:Obsessed|
+Silver:Sad|
+Gold:Spiritual|
+Dark Blue:Suspicious|
+Mottled shifting:Confused|
+Sharp Flickering:Daydreaming|
+Hypnotic Swirling:Psychotic
+-
+&auras_restricted Aura Data Object=
+Black Veined:Diabolist|
+Pale:Pale|
+Bright:Bright
+-
+&auras_vampires Aura Data Object=
+Rapidly Rippling:Frenzy|
+-
+&auras_weres Aura Data Object=
+Rapidly Rippling:Frenzy
+-
+&auras_mages Aura Data Object=
+Myriad Sparkles:Magic Use
+-

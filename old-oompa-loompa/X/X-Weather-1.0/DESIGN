@@ -1,0 +1,74 @@
+########################################################################
+#                                                                      #
+#     This file contains instructions for designing a flow-control     #
+#  system for your game. Please read it all, as omitting parts of      #
+#  the procedure may cause the system to work erratically, or not      #
+#  at all. A carefully thought-out design is a must for an efficient   #
+#  weather system.                                                     #
+#                                                                      #
+########################################################################
+
+     X-Weather is a dynamic weather system - parts of the system can affect
+how other parts behave. The weather system has two main types of objects:
+Global Objects, which are set up by the X-Weather scripts, and Weather
+Objects, which you must set up yourself. The Global Objects contain the code
+necessary to run the system, while the Weather Objects hold the descriptions
+and the current weather status. Each area of your game that has it's own
+general area (a specific village, etc.) and is separated by a fair distace
+from other areas should have it's own Weather Object.
+     First, you need to design the flow pattern for your game. This should be
+a basic weather map, showing how weather moves around your world. Does it
+go from west to east? Are there mountains it must flow around? Drawing a
+map of your game world, and circling the weather areas, then drawing arrows
+between them, may be helpful with this step. There is only one thing that you
+must avoid. You cannot have a circular loop (there should be no way to end up
+where you started by following the arrows in the proper direction). If you
+end up with a circular loop, the sequencing of the system will be thrown
+completely off.
+     Now, for each area on your map, you must create a Weather Object. Each
+Weather Object is descended from the Master Weather Parent (most are simple
+children, some are farther removed; see the next paragraph). Once you have
+created all of the Weather Objects, you must transfer your flow design to
+them. For each object, set Depends_prev to a space-separated list of all
+objects whose arrows terminate at that area. Now, set each object's
+Depends_next to a similar list, only this time make it a list of the objects
+that are at the end of any arrows origionating with this object. Now you
+must set two attributes on the Semaphore: areas_list and areas_report.
+Areas_list is a space-separated list of all the Weather Objects. Areas_report
+is a list of all the objects that end a 'chain' - this is any object that does
+NOT have any outgoing arrows (ie, it's depends_next attribute is empty). The
+last code-related task you need to do is to set up the references on the
+Global Data Object. This requires 2 parts: a list of the 'names' of the
+Weather Objects must be placed in Name_list, and a set of attributes in the
+form <name>_number: <dbref> (ie, for 'village (#547)', &village_number Global_
+Data_Object=#547). These names are the values that are acceptable to place
+in a room's Weather_Obj attribute (more information on this later).
+     X-Weather does not currently come with any weather descriptions built
+in. You must describe each weather type as appropriate to your game. There
+are 3 sections: Wind, Sky (including precipitation), and Temp. Each of these
+can have a value from 1..7, with 1 (arbitrarily) being the worst. (High
+winds, heavy rain, very cold temperature. A hurricane :) The descriptions
+are stored on the separate weather objects, and take the form section_level
+(ie sky_1). These descriptions are accessed by +weather and +predict.
+     If you have enough areas that have similar terrain/weather descriptions,
+you may wish to create a Weather Type Object. Normally, Weather Objects are
+@parented to the Master Weather Parent. However, if you have 5 mountain
+regions (for example), which are physically distinct, but whose weather looks
+the same (same descriptions), you would @create a Mountain Weather Parent,
+@parent that to the Master Weather Parent, and @parent the Weather Objects to
+the Mountain Weather Parent. You would set all the descriptions on the 
+Mountian Weather Parent, and the area Weather Objects would inherit these
+directly.
+     Each room that that has weather (usually all outdoor rooms) needs to
+have an attribute 'Weather_Obj' set on it, with a value that matches one of
+the names on the name_list of the Global Data Object. If it is left empty,
+the error message "No weather - are you inside?" will be returned. If the
+name does not match any of those on the Global Data Object, the error "Bad
+Weather Object - please notify the owner of this room" is returned. This
+attribure must also be VISUAL, so that the system can read it without needing
+wizard permissions.
+     Once you have run the main script files, set up all the Weather Objects,
+set your flow design in the system, given weather descs, indexed the objects
+on the Global Data Object, and set the weather object references on rooms,
+you are ready to start the system.
+

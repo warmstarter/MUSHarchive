@@ -1,0 +1,169 @@
+@@ mlink.txt version 1.0
+
+@@ ONE NOTE: I do *NOT* support MushLink by page or @mail. If you are
+@@ having a problem getting MushLink or the associated code to work on
+@@ your site, e-mail me at: tf2005@aptlabta.wpi.edu and I will try and
+@@ help when I have time. When I'm logged on at 2k5, I'm busy with other
+@@ things and will not respond to pages or @mails concerning MushLink.
+@@
+@@ I do not at all support MushLink if you want to run your own copy
+@@ of the hardcode. If you want to do so, please be aware that you 
+@@ should be at least minimally familiar with C and UNIX.
+
+@@ MushLink is a robot that connects several MU*s together, similar to an 
+@@ RWHO server (except a good deal simpler to run and having less potential 
+@@ for causing havoc on one of the MU*s). This current version allows 
+@@ cross-MUSH page, @mail/+mail, WHO, and lists the numerical IP addresses 
+@@ of the various MU*s it's connected to. 
+@@
+@@ If you want to run your own version of MushLink, please name the robot 
+@@ something else (see mlink.c) and edit the softcode below as appropriate. 
+@@ If you would like to have your MU* added to the MushLink listing, put 
+@@ in the softcode below (READ IT ALL FIRST!) and then send e-mail as 
+@@ directed at the end of this file. 
+@@
+@@ A sample configuration file for mlink.c (link.worlds) should be
+@@ available at the same ftp site where you got this file.
+@@
+@@ This version should work smoothly on PennMUSH, TinyMUSH, DarkZone MUSH, 
+@@ MUSE, MUX, and probably variants as well with minor changes. Read the 
+@@ comments in mlink.c if you want to know how it works, it's fairly trivial 
+@@ if you know any C and any mushcode. 
+@@
+@@ MushLink is running at TF2k5, aptlabta.wpi.edu 5555, if you're 
+@@ interested in seeing how it works.
+@@
+@@ --Naomi
+@@ Cyclonus@TF2k5
+@@ tf2005@aptlabta.wpi.edu
+
+@@ NOTE
+@@ The following functions MUST be present on your MU* for MushLink to 
+@@ work properly. If they aren't, and you really really want ML, e-mail 
+@@ me with the list of functions and any replacement ones, the type of 
+@@ server code that you're running, and I'll consider adding functionality 
+@@ for you if I have time. Feel free to hack mlink.c and send me your 
+@@ mods if I don't.
+@@
+@@ flags(*<name>) - return flags on player <name>. First flag must be P 
+@@      (for player).
+
+@@ NOTE FOR MUX:
+@@	an unprivileged player cannot get the flags() of another player
+@@	on MUX. The only way I've found around this so far is to
+@@	give MushLink see_all power on MUX. Whether you want to do this
+@@	or not is up to you; I don't believe that MushLink is easily 
+@@	hackable, but I haven't tested it rigorously enough to offer any
+@@	sort of guarantee. 
+
+@@ mid(<string>,<0>,<n>) - to return the first n characters of <string>
+@@ ljust(<string>,<n>) - return <string>, padded with spaces if needed to 
+@@      fill a total of n characters 
+@@
+
+@@ You must also have the @emit and @pemit commands. Additionally, spacing
+@@ for MLWHO will be somewhat messy unless you have either the @npemit 
+@@ command or the lit() function. I have not found a standard TinyMush
+@@ alternative for these two; if you do, e-mail me!
+
+
+@@ Now to create the MushLink character. MushLink should be pagelocked to 
+@@ the globals object, itself, and you. NOTE: on TinyMUSH or MUX, you 
+@@ CANNOT pagelock MushLink, as it will not be able to @pemit to anyone.
+
+@@ On MushLink, you will need three
+@@ special attributes: CSECS, which is used as a u-function in order to 
+@@ make the uptimes/downtimes of the worlds connected come out nicely;
+@@ ONFOR, which is similarly used to return the amount of time someone
+@@ has been connected in a nice format; and MLFINGER, which needs to 
+@@ @pemit MushLink the word 'START', then invoke +finger (or whatever 
+@@ equivalent you use on your MUSH), then @pemit MushLink with 'END'. 
+
+@@ You will also want the attribute MLINFO, which works the same way as
+@@ MLFINGER does, and is used to let people get some summary information 
+@@ about your MUSH and what kind of place it is.
+
+@@ If you look at the C code, you will notice that START and END are the 
+@@ SOFTPREFIX and SOFTSUFFIX defined at the beginning there. If MushLink 
+@@ doesn't see START, it will lag out without  transmitting the +finger. 
+@@ If it doesn't see END after having seen START,  it will go into a loop 
+@@ for about 10 seconds and then break out, which while non-catastrophic 
+@@ is annoying. Don't do that. :>
+@@
+@@ If MushLink is used a lot on your MUSH, it will run out of money
+@@ (depending on how much you give and how much you charge for pages/
+@@ remote @pemits). You may need to give ML No_Pay or a similar power, or
+@@ just set up a system to give ML some more money regularly.
+@@
+@@ A common mod that you may wish to make is to add hide power and put an
+@@ @hide/on in the aconnect, so that MushLink doesn't take up permanent
+@@ and visible residence in the BotSpot. ;)
+
+@pcreate MushLink=<password>
+@power *mushlink=idle
+@aconnect *mushlink=@doing +help mushlink for info about me!
+
+&CSECS *mushlink=[Switch(And(Isnum(%0),Gte(%0,0)),1,[Setq(6,[Div(%0,29030400)]y)][Setq(5,[Mod(Div(%0,2419200),12)]m)][Setq(0,[Mod(Div(%0,604800),4)]w)][Setq(1,[Mod(Div(%0,86400),7)]d)][Setq(2,Mod(Div(%0,3600),24))][Setq(3,Mod(Div(%0,60),60))][Setq(4,Mod(%0,60))][Squish(Iter([r(6)] [r(5)] [r(0)] [r(1)],Switch(##,0*,,##)))] [rjust(r(2),2,0)]:[rjust(r(3),2,0)]:[rjust(r(4),2,0)],-1)]
+
+&ONFOR *mushlink=[Switch(Conn(*%0),-1,Not Connected.,U(CSECS,Conn(*%0)))]
+
+&DO_MLFINGER *mushlink=$+mlfinger *:@pemit me=START;+finger %0;@wait 2=@pemit me=END;
+
+&DO_MLINFO *mushlink=$+mlinfo:@pemit me=START;@pemit me=TELL YOUR GOD TO PUT INFO ABOUT THIS MUSH HERE!!;@wait 2=@pemit me=END;
+
+@SET *mushlink=!NO_COMMAND
+
+
+@@ This is the MushLink globals object. It should be owned by MushLink and
+@@ should NOT be given any special powers or privileges. Put this object
+@@ in your Master Room.
+@@
+@@ Note: These globals use the following functions. Change them as 
+@@ appropriate for your MU*:
+@@ mudname() - expected to return name of MU
+@@ pmatch(<name>) - returns dbref # of name if name is a player
+@@ conn(<player>) - expected to return -1 if player is not connected
+
+@create MushLink Globals
+@lock MushLink Globals==me
+@desc MushLink Globals=Globals used with the MushLink robot. Do NOT give this object any special privileges, and keep it owned by the MushLink character.
+&DO_MLWORLDS MushLink Globals=$mlworlds:@pemit *MushLink=RWORLDSrequest:%N
+&DO_ML MushLink Globals=$ml*:@switch conn(pmatch(MushLink))=-1,{@pemit %#=Sorry, but MushLink is not connected to [mudname()] right now. Please try again later.}
+&DO_MLFINGER MushLink Globals=$mlfinger *@*:@pemit *MushLink=RFINGERrequest:%N:{%0}:{%1}
+&DO_MLINFO MushLink Globals=$mlinfo *:@pemit *MushLink=RINFOrequest:%N:{%0}
+&DO_MLWHO MushLink Globals=$mlwho *:@pemit *MushLink=RWHOrequest:%N:{%0}
+&DO_MLMAIL MushLink Globals=$mlmail *@*=*:@pemit *MushLink=RMAILrequest:%n:{%0}:{%1}:{%2}
+&DO_MLPAGE MushLink Globals=$mlpage *@*=*:@pemit *MushLink=RPAGErequest:%n:{%0}:{%1}:{%2}
+&DO_MLPAGE2 MushLink Globals=$mlp *@*=*:@pemit *MushLink=RPAGErequest:%n:{%0}:{%1}:{%2}
+&DO_MLCREDITS MushLink Globals=$mlcredits:@pemit %#={[repeat(-,75)]%R[center(< MushLink Credits >,75)]%R[repeat(-,75)]%RMushLink (mlink.c) was originally written by David P. Albert (Aslan@MicroMuse). It was modified for DarkZone by Kalkin@DarkZone and then modified to support a variety of servers and documented by Cyclonus@2k5. MushLink is maintained by Cyclonus <tf2005@aptlabta.wpi.edu>; contact that address for information on how to get your MUSH on the list.%R[repeat(-,75)]}
+
+
+@@ Now for +help on MushLink. Uncomment the line you need to use.
+@@
+@@ Here's the +help if you use the NiftyHelp system (shameless plug here :)
+@@ addhelp mushlink=MushLink is a robot, meaning a computer program that logs in to a player. It links several MUSHes together and allows players on all of them to do WHOs, page, @mail, and +finger across all the connected MU*s.%R%RCommands:%R%Bmlworlds - list of MUSHes that MushLink is connected to.%R%Bmlinfo <world> - a brief summary about <world>%R%Bmlwho <world> - shows you the WHO listing from <world>%R%Bmlpage <name>@<world>=<message> - pages <message> to that person%R%Bmlfinger <name>@<world> - shows you <name>'s +finger%R%Bmlmail <name>@<world>=<message> - sends <name> an @mail message%R%Bmlcredits - the credits for MushLink :)
+@@
+@@ Here's the line for a more standard global.
+@@&HELP_MUSHLINK MushLink Globals=$+help mushlink:@pemit %#=MushLink is a robot, meaning a computer program that logs in to a player. It links several MUSHes together and allows players on all of them to do WHOs, page, @mail, and +finger across all the connected MU*s.%R%RCommands:%R%Bmlworlds - list of MUSHes that MushLink is connected to.%R%Bmlinfo <world> - a brief summary about <world>%R%Bmlwho <world> - shows you the WHO listing from <world>%R%Bmlpage <name>@<world>=<message> - pages <message> to that person%R%Bmlfinger <name>@<world> - shows you <name>'s +finger%R%Bmlmail <name>@<world>=<message> - sends <name> an @mail message%R%Bmlcredits - the credits for MushLink :)
+
+@@ If this is PennMUSH or DarkZone, lets pagelock MushLink by uncommenting
+@@ this line:
+
+@@@lock/Page *mushlink==mushlink globals|=*mushlink
+
+@@ Then you need to send an e-mail message to tf2005@aptlabta.wpi.edu with 
+@@ the following:
+@@
+@@ Name of your MUSH
+@@ Name of your MUSH as you would like it to appear on the mlworlds listing 
+@@ (no more than 8 characters long)
+@@ Password of the MushLink character
+@@ Numerical IP address of your MUSH including port
+@@ What kind of MU* it is (Penn, Tiny, Darkzone, MUSE, MUX, etc)
+@@ What @mail/+mail system you use. Currently supported variants:
+@@	@mail person=subj/mesg; @mail person=mesg;
+@@	@mail person=subj, -mesg, @mail/send;
+@@	+mail person=mesg; +smail person=mesg;
+@@	+mail person=subj, -mesg, +send
+@@ Whether you have @npemit and/or lit().
+@@ 

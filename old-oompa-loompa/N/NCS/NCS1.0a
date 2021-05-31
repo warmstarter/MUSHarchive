@@ -1,0 +1,26 @@
+think ***ARMOR MAKER***
+@create Parent Armor Smithy PAS
+@link Parent Armor Smithy PAS = here
+@lock Parent Armor Smithy PAS = me
+&ARMORSTR Parent Armor Smithy PAS=[sub(div(u(pricefun),v(scalefactor)),rand(div(div(u(pricefun),v(scalefactor)),5)))]
+&SCALEFACTOR Parent Armor Smithy PAS=2
+&MAKE Parent Armor Smithy PAS=@tr [v(functionobj)]/makearmor=%1,[v(type)],[v(material)],[u(armorstr,v(type),v(material))]; @pemit %0=[name(v(1))] (%1) is made.;&paid me=no; @notify me
+&DO_MAKE Parent Armor Smithy PAS=$make *: @wait me={&temp me=[switch(match(v(0),#*),1,v(0),locate(v(#),v(0),T*))]; @select 0=[match(v(paid),yes)], {@pemit %#=You have to pay me first.;@notify me}, [match(owner(v(temp)),v(#))], {@pemit %#=You must own the weapon to make it.; @notify me}, {@tr me/make=%#,[v(temp)]}}
+&LOOKUPNAME Parent Armor Smithy PAS=[extract(bracers greaves helmet shield shirt,member(v(types),v(0)),1)]
+@COST Parent Armor Smithy PAS=72
+&PRICEFUN Parent Armor Smithy PAS=[mul(v(scalefactor),mul(extract(2 2 3 3 4,member(v(types),v(type)),1),extract(2 4 8 12,member(v(materials),v(material)),1)))]
+&PRICE Parent Armor Smithy PAS=$price: @cost me=[u(pricefun)]; @pemit %#=Price for [v(material)] [u(lookupname,v(type))]: [v(cost)].
+@PAYMENT Parent Armor Smithy PAS=Thank you. You may now make the armor.
+@APAYMENT Parent Armor Smithy PAS=&paid me=yes
+&MATERIAL Parent Armor Smithy PAS=plate
+&PAID Parent Armor Smithy PAS=no
+&TYPE Parent Armor Smithy PAS=shield
+@SEMAPHORE Parent Armor Smithy PAS=-1
+&DO_MATERIAL2 Parent Armor Smithy PAS=$material *:@wait me={@select 0=[member(v(materials),lcstr(v(0)))], {@pemit %#=I only recognize these materials: [v(materials)].; @notify me}, {&material me=[lcstr(v(0))]; &paid me=no; @pemit %#=Material is now set to [v(material)].; @notify me}}
+&DO_TYPE2 Parent Armor Smithy PAS=$type *: @wait me={@select 0=[member(v(types),lcstr(v(0)))], {@pemit %#=I only recognize these types: [v(types)].; @notify me}, {&type me=[lcstr(v(0))]; &paid me=no; @pemit %#=Type is now set to: [v(type)].; @notify me}}
+&DO_MATERIAL1 Parent Armor Smithy PAS=$material: @pemit %#=To set the material of armor, use 'material <material>', where <material> is one of: [v(materials)].
+&DO_TYPE1 Parent Armor Smithy PAS=$type: @pemit %#=To set the type of armor, use 'type <type>', where <type> is one of: [v(types)].
+&FUNCTIONOBJ Parent Armor Smithy PAS=#480
+&TYPES Parent Armor Smithy PAS=arms legs head shield body
+&MATERIALS Parent Armor Smithy PAS=cloth leather mail plate
+@DESCRIBE Parent Armor Smithy PAS=Making armor:%r1. Create the armor and set up any neat things you want on it%r%b%b%bThe armorer must own the weapon.%r2. Select the 'type' and 'material' for the armor.%r3. Type 'price' to get the armor price. Pay the smithy.%r4. Type 'make <db# or armor name> while you're holding the armor.

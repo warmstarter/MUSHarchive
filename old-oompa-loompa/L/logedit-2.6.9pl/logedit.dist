@@ -1,0 +1,1256 @@
+#!/usr/local/bin/perl 
+'di';
+'ig00';
+#
+# $Header: /home/alansz/src/logedit/logedit-dev/RCS/logedit.dist,v 1.13 1995/04/24 01:00:40 alansz Exp alansz $
+#
+# Perl version of logedit
+#
+# This perl script is also its own manual page. Make a link from the
+# script in the binary directory to "logedit.1" in the man1 directory
+# to install the manpage.
+#
+#
+# logedit - automatic beautifying of MU* logs
+# Copyright (C) 1993, 1994 Alan Schwartz <alansz@cogsci.berkeley.edu>
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#
+
+#$unix = 1;
+
+$version = "2.6.9pl";
+$conf_file = $ENV{"HOME"}."/.logeditrc";
+$LINE =
+"-----------------------------------------------------------------------\n";
+chop($maildelim=$LINE);
+$doing_end{"tiny"} = 'Players logged in.$';
+$doing_end{"penn"} = 'There.*player.*connected.$';
+$doing_start = 'Player Name.*On For';
+$say{"tiny"} = '^You say ';
+$say{"penn"} = '^You say, ';
+
+&syntax, exit 0 if ($#ARGV == -1 && -t STDIN);
+&myGetopts('ab~cdef:ghijk:lmno~pqr:stuvwx:y:zABCDEF:GHIJKLMNOPQRSTUVW~XYZ12');
+undef $opt_2 if $opt_1;
+$mushtype  = ($opt_2 ? "tiny" : "penn");
+$conf_file = shift(@opt_F) if @opt_F;
+$opt_b[0] = $conf_file if $opt_b;
+$opt_o[0] = "-" if $opt_o;
+
+print "Editing a ${mushtype}mush log, using $conf_file for instructions\n" if $opt_v;
+&process_config_file($conf_file) unless $opt_n;
+
+&syntax, exit 0 if ($opt_h || $opt_H);
+
+print "Building new config file: $opt_b[0]\n" if (@opt_b && $opt_v);
+&make_config($opt_b[0]) if @opt_b;
+
+if ($opt_q) {
+  $opt_p = 1;
+  $opt_w = 1;
+  $opt_d = 1;
+  $opt_a = 1;
+  $opt_l = 1;
+  $opt_c = 1;
+  $opt_T = 1;
+}
+
+&set_lists;
+&set_files;
+
+if (($opt_s || $opt_q || $opt_t) && defined($PRE)) {
+  print "Prescanning log to build up name information\n" if $opt_v;
+  &prescan;
+}
+@opt_W = split(",",$opt_W[0]) if @opt_W;
+
+print "Producing log header\n" if $opt_v;
+&header;
+print "Editing log\n" if $opt_v;
+&logedit;
+print "Calculating statistics\n" if ($opt_s && $opt_v);
+&footer if $opt_s;
+exit 0;
+
+sub strip { @strips =(@strips,@_); }
+
+# Go through all the options and set up the @keeps and @strips
+# lists.
+sub set_lists {
+	&strip("^MAIL:");
+	&strip("^GAME:");
+	&strip("has .*connected.\$");
+	&strip('^Huh\? \(Type .?help.? for help');
+	&strip("(Flag|Doing|-)+ [Ss]et.\$");
+	$opt_a && &strip("^Admin: ");
+	$opt_a && &strip("^Broadcast: ");
+	$opt_a && &strip("^Announcement: ");
+	$opt_c && &strip("^<.*> ");
+	$opt_l && &strip(" has left.\$");
+	$opt_l && &strip(" has arrived.\$");
+        $opt_l && &strip(" goes home.\$");
+	$opt_p && &strip("^From afar,");
+	$opt_p && &strip("pages(,|:) ");
+	$opt_p && &strip("^You paged");
+	$opt_p && &strip("^Long distance to ");
+	&strip(@opt_r);
+        $opt_w && &strip("whispers(,|:) ");
+	$opt_w && &strip("^You whisper:? ");
+	$opt_w && &strip("^You sense:? ");
+	$opt_w && &strip("senses:");
+	grep(s/^/^/,@opt_x);
+	&strip(@opt_x);
+	$opt_C && &strip('^%');
+	$opt_R && &strip('^(:|")');
+	$opt_N && &strip('^\[.*\] ');
+	$opt_P && &strip("^.*> ");
+	$opt_T && &strip("^\[\d+:\d+\] \w+ message sent to");
+	$opt_T && &strip("^(Idle|Haven|Away) message from");
+	@keeps = @opt_k;
+	@keep_worlds = (@keep_worlds,grep(/^[^-!]/, @opt_f));
+	@strip_worlds = (@strip_worlds,grep(s/^[-!](.*)/$1/, @opt_f));
+}
+
+# Handle the config file
+sub process_config_file {
+	local($config_file) = shift(@_);
+        unless (-r $config_file) {
+	  warn "Unable to open $config_file, continuing.\n";
+	  return;
+        }
+	die "Error opening $config_file\n" unless open(CONF,$config_file);
+	$_ = <CONF>;
+	if (/logedit ([\.\d]+)/i) {
+	  if ($1 < 2.6) {
+	    &read_old_config;	
+	  } else {
+	    &read_new_config;
+	  }
+	} else {
+	  &read_old_config;
+ 	}
+}
+
+# Open up the input and output files
+sub set_files {
+  # Input: via command line, or stdin
+  if (@ARGV) {
+    @ARGV = ($ARGV[0]);
+    open(PRE,"$ARGV[0]") || warn "Unable to prescan input\n";
+    $infilename = $ARGV[0];
+    $PRE = 1;
+  } else {
+    $infilename = "stdin";
+    @ARGV = ();
+  }
+  if (@opt_o) {
+    if ($opt_o[0] eq "-") {
+      open(OUT,">&STDOUT") || die "Can't dup stdout!\n";
+      $outfilename = "stdout";
+    } else {
+      open(OUT,">$opt_o[0]") || die "Unable to open $opt_o[0] for output\n";
+      $outfilename = $opt_o[0];
+    }
+  } elsif (@ARGV) {
+    local($out) = $ARGV[0] . ".log";
+    open(OUT,">$out") || die "Unable to open $out for output\n";
+    $outfilename = $out;
+  } else {
+    open(OUT,">&STDOUT") || die "Can't dup stdout!\n";
+    $outfilename = "stdout";
+  }
+}
+
+# Handle the header
+sub header {
+  $OLD = select OUT;
+  print "Log edited with Logedit $version on ", `date`, "\n";
+  print "Using configuration file $conf_file\n" unless $opt_n;
+  print "Editing out:";
+  # Here we go
+  print " \@admin" if $opt_a; 
+  print " \@chat" if $opt_c;
+  print " DOING/WHO" if $opt_d;
+  print " arrive/left" if $opt_l;
+  print " \@mail" if $opt_m;
+  print " pages" if $opt_p;
+  print " roomdescs" if $opt_t;
+  print " whispers" if $opt_w;
+  print " ANSI" if $opt_A;
+  print " tf-messages" if $opt_C;
+  print " NOSPOOF" if $opt_N;
+  print " O-spam" if $opt_O;
+  print " Puppets" if $opt_P;
+  print " Raw-telnet" if $opt_R;
+  print " Timestamps" if $opt_T;
+  print "\n";
+  print "Regexp stripping: ", join(", ",@opt_r), "\n" if @opt_r;
+  print "Excluding players: ", join(" ",@excludes), "\n" if @excludes;
+  print "Keeping in: ", join(" ", @keeps), "\n" if @keeps;
+  print "Using only these tf-worlds: ", join(" ",@keep_worlds), "\n" if @keep_worlds;
+  print "Ignoring these tf-worlds: ", join(" ",@strip_worlds), "\n" if @strip_worlds;
+  print "Logged by $opt_y[0]\n" if @opt_y;
+  print "Quickstrip mode\n" if $opt_q;
+  print "Word-wrapping at ",join(", ",@opt_W),"\n" if @opt_W;
+  print "Statistics at end of log\n" if $opt_s;
+  print $LINE;
+  select($OLD); 
+}
+
+# Prescan the input in order to determine player/puppet names!
+# What's a player/puppet?
+# * Anybody who says anything
+# * Anybody who does certain actions
+# * Anybody who connects/disconnects/leaves/arrives
+# * Anybody who appears on a WHO list
+# * Anybody with (#*P*) or (#*p*) after their name
+# * Beware of ANSI!
+sub prescan {
+  local(@actions) = ('^(\S+) smile', '^(\S+) frown', '^(\S+) chuckle', 
+                     '^(\S+) rotf', '^(\S+) grin', '^(\S+) wave', 
+		     '^(\S+) laugh', '^(\S+) nod', '^(\S+) giggle');
+  local($actprog);
+  $actprog = <<EOP;
+ACTLOOP: {
+EOP
+  for $act (@actions) {
+    $actprog .= <<EOP;
+        if (/$act/) {
+	  last ACTLOOP if \$allnames{\$1};
+          \@player_names = \&setpush(\$1,\@player_names);
+EOP
+    $actprog .= <<EOP if $opt_v;
+	  print "'\$1' did a player-like action, so let's say it's a player\n"; 
+EOP
+    $actprog .= "last ACTLOOP; } ";
+  }
+  $actprog .= "}";
+  local($indoing);
+  print "Prescanning the log to build a name list\n" if $opt_v;
+  @player_names = &setpush("You",@player_names);
+  @player_names = &setpush($opt_y[0],@player_names) if @opt_y;
+  while (<PRE>) {
+      $origlines++;
+      s/\033\[[\d;]*[A-Za-z]//go;  # Strip ansi codes, I hope
+      s/^GAME:\s*//o;
+      s/^Announcement:\s*//o;
+      s/^Broadcast:\s*//o;
+      s/^Admin:\s*//o unless $opt_2;
+      s/^<.*>\s*//o;
+      s/^Suspect\s*//o;
+      if (/^(\w+)>/) {
+	# It's a puppet
+	next if $allnames{$1};
+        print "'$1' is likely to be a puppet\n" if $opt_v;
+	@puppet_names = &setpush($1,@puppet_names);
+        next;
+      } 
+      # Deal with WHO/DOING
+      if (/$doing_end{$mushtype}/o) {
+	undef $indoing;
+        next;
+      } 
+      if (/$doing_start/o) {
+	$indoing = 1;
+	next;
+      }
+      if ($indoing) {
+	# First word is a name
+ 	next if $allnames{&firstword($_)};
+        print "'", &firstword($_), "' was in a WHO, therefore a player\n" if $opt_v;
+        @player_names = &setpush(&firstword($_),@player_names);
+        next;
+      }
+      if (/(.*) says,? ".*"/o) {
+        next if $allnames{$1};
+        if ($1 =~ / /) {
+	  # Two-word name - must be a puppet, eh?
+ 	  print "'$1' spoke, but players have 1-word names. A puppet.\n" if $opt_v;
+	  @puppet_names = &setpush($1,@puppet_names);
+	} else {
+	  print "'$1' spoke, probably a player.\n" if $opt_v;
+	  @player_names = &setpush($1,@player_names);
+        }
+	next;
+      }
+      if (/(.*) has (left|arrived)\./o) {
+	next if $allnames{$1};
+        if ($1 =~ / /) {
+	  # Two-word name - must be a puppet, eh?
+ 	  print "'$1' moved, but players have 1-word names. A puppet.\n" if $opt_v;
+	  @puppet_names = &setpush($1,@puppet_names);
+	} else {
+	  print "'$1' moved, probably a player.\n" if $opt_v;
+	  @player_names = &setpush($1,@player_names);
+        }
+        next;
+      }
+      if (/(.*) goes home\./o) {
+	next if $allnames{$1};
+        if ($1 =~ / /) {
+	  # Two-word name - must be a puppet, eh?
+ 	  print "'$1' went home, but players have 1-word names. A puppet.\n" if $opt_v;
+	  @puppet_names = &setpush($1,@puppet_names);
+	} else {
+	  print "'$1' went home, probably a player.\n" if $opt_v;
+	  @player_names = &setpush($1,@player_names);
+        }
+        next;
+      }
+      if (/(.*) has .*connected\./o) {
+	next if $allnames{$1};
+	print "'$1' connected or disconnected - that's a player.\n" if $opt_v;
+	@player_names = &setpush($1,@player_names);
+        next;
+      }
+      if (/(\S+)\(#\d+\w*P\w*\)/o) {
+	next if $allnames{$1};
+        print "'$1' has a P flag, and is therefore a player.\n" if $opt_v;
+        @player_names = &setpush($1,@player_names);
+        next;
+      }
+      if (/(\S+)\(#\d+\w*p\w*\)/o) {
+	next if $allnames{$1};
+        print "'$1' has a p flag, and is therefore a puppet.\n" if $opt_v;
+        @puppet_names = &setpush($1,@puppet_names);
+        next;
+      }
+      # Handle actions
+      eval $actprog;
+      die $@ if $@;
+  }
+}
+
+sub firstword {
+  local(@l) = split(" ",$_[0]);
+  return $l[0];
+}
+
+# push onto a list, but don't duplicate!
+sub setpush { 
+  $allnames{$_[0]} = "0 but true";
+  @_;
+}
+
+
+# Handle the footer
+
+# The real work
+# A loop over these steps:
+# 1. If we are forced to keep the line, keep it and goto 3.
+# 2. If we are forced to strip the line, strip and get next line
+# 3. If we've still got the line, process it and print it
+sub logedit {
+  local($prog,$inlog,$indoing);
+  local($keepit,$keepprog,$stripprog,$goodname,$expr,$name);
+
+ # set up loop, and handle #log's
+ $prog = <<EOP;
+ \$nextline = <>;
+LOOP:
+  while (\$nextline) {
+      (\$lastline, \$_) = (\$_, \$nextline);
+      \$nextline = <>;
+      next LOOP if /^\s*\$/; # ditch blank lines here
+      \$inlog = !\$inlog, next LOOP if /^#log/;
+      next LOOP if \$inlog;
+      \$alreadyedited = 1, next LOOP if /^Log edited with Logedit/;
+      \$alreadyedited = 0, next LOOP if (\$alreadyedited &&
+			/^----------------------------/);
+      next LOOP if \$alreadyedited;
+EOP
+
+ # Worlds
+      if (@opt_f) {
+	$prog .= <<EOP;
+	  if (/^---- World (.*) ----/o) {
+EOP
+	    $prog .= "\$inbadworld = 0;" if @strip_worlds;
+	foreach $world (@strip_worlds) {
+	  $prog .=<<EOP;
+	    \$inbadworld = 1, next LOOP if \$1 eq $world;
+EOP
+	}
+	$prog .="\$inbadworld = 1;" if @keep_worlds;
+	foreach $world (@keep_worlds) {
+	  $prog .=<<EOP;
+	    \$inbadworld = 0 if \$1 eq $world;
+EOP
+	}
+	$prog .= <<EOP;
+	}
+	next LOOP if \$inbadworld;
+EOP
+      }
+
+ # DOING/WHO
+      if ($opt_d) {
+  $prog .= <<EOP;
+        \$indoing=0, next LOOP if /$doing_end{$mushtype}/o;
+	\$indoing=1 if /$doing_start/o;
+	next LOOP if \$indoing;
+EOP
+      }
+
+  # @mail
+     if ($opt_m) {
+  $prog .= <<EOP;
+       \$inmail = 0, next LOOP if (/$maildelim/o && (\$inmail == 2));
+       \$inmail = 1, next LOOP if (/$maildelim/o && (\$nextline =~ /From:/));
+       \$inmail = 2 if /$maildelim/o;
+	next LOOP if \$inmail;
+EOP
+     }
+
+  # ANSI removal
+  if ($opt_A) {
+    $prog .= <<'EOP';
+      s/\033\[[\d;]*[A-Za-z]//go;
+EOP
+  }
+
+ # Setup
+  $prog .= "\$firstword = \&firstword(\$_);" if ($opt_t || $opt_I || $opt_q || $opt_s);
+
+ # Room descs
+   if ($opt_t) {
+     $prog .= <<EOP;
+       \$inroom = 0 if (/^Contents:/o || /^Exits:/o || /^Obvious exits:/o ||
+			\$allnames{\$firstword});
+       \$inroom = 1, \$newlines++, print OUT if /\(#\\d+R\\w*\)/o;
+       next LOOP if \$inroom;
+       \$incontents = 0, \$newlines++, print OUT "\\n" if (\$incontents && (/^Exits:/o || /^Obvious exits:/o
+			|| \$allnames{\$firstword}));
+       \$incontents = 1 if /^Contents:/o;
+       chop, \$_ .= " " if \$incontents;
+EOP
+  }
+
+  # Regexps to keep at all costs!
+  $prog .= "\$keepit = 0;";
+  if (@keeps) {
+  $prog .= <<EOP;
+	KEEP: {
+EOP
+  foreach $expr (@keeps) {
+    $prog .= <<EOP;
+      \$keepit=1,last KEEP if /$expr/;
+EOP
+  }
+  $prog .= " } ";
+  }
+  $prog .= <<EOP;
+    \$keepit=1 if /^[a-z]/o;
+EOP
+  $prog .= "unless (\$keepit) {";
+  if ($opt_q || $opt_s) {
+    $prog .= <<EOP;
+	\$goodname = 0;
+	GOODNAME: {
+	   \$goodname = 1, \$allnames{\$firstword}++, last GOODNAME if /^\\w/ && \$allnames{\$firstword};
+EOP
+  }
+  $prog .= "}" if ($opt_s && ! $opt_q);
+  if ($opt_q) {
+    foreach $name (@puppet_names) {
+	$prog .= <<EOP;
+	\$goodname = 1, last GOODNAME if /^$name/;
+EOP
+    }
+    $prog .= "} next LOOP unless (\$goodname);";
+  }
+  foreach $expr (@strips) {
+    $prog .= <<EOP;
+	\$_ = \$lastline, next LOOP if /$expr/o;
+EOP
+  }
+  $prog .= "} ";
+        # Output processing - wraps, you say, blank lines, etc.
+	$prog .= 's/^\[.*\] (.*)/\1/o;' if $opt_S;
+	if ($opt_M) {
+	   $prog .= <<'EOP';
+		s/^([^<]+)> You say(.*)/\1 says\2/o;
+		s/^([^<]+)> You (.*)/\1 \2/o;
+		s/^[^<]+> (.*)/\1/o;
+EOP
+	}
+        # You say conversion
+        if (@opt_y) {
+	  $prog .= <<'EOP';
+		if (/^You say/) {
+		  s/^You say/$opt_y[0] says/o;
+		  $firstword = $opt_y[0];
+		}
+EOP
+	}
+        $prog .= "next if \$lastline eq \$_;";
+	$prog .= "next if \&spam_match(\$lastline,\$_);" if $opt_O;
+	# Blank lines and output grouping
+	# Fix this to handle exits right!
+	if ($opt_I) {
+	    $prog .= <<EOP;
+		\$inexits = 0 unless /leads to/;
+		\$inexits = 1, \$incontents = 0 if 
+			(/^Obvious exits:/ ||  /^Exits:/);
+		\$incontents = 0 if (\$incontents && 
+			\$allnames{\$firstword});
+		\$incontents = 1 if /^Contents:/;
+EOP
+          if ($opt_g) {
+	    $prog .= <<EOP;
+	  \$newlines++, print OUT "\\n" unless (\$inexits || \$incontents || (\$firstword eq \&firstword(\$lastline)));
+EOP
+	  } else {
+	     $prog .= <<EOP;
+ 		\$newlines++, print OUT "\\n" unless (\$incontents || \$inexits);
+EOP
+          }
+	}
+        # Wrapping
+        if (@opt_W) {
+            $prog .= "\&wrap_print(\$_,\@opt_W);";
+        } else {
+            $prog .= "print OUT; \$newlines++;";
+        }
+  $prog .= " } ";
+  eval $prog;
+  die $@ if $@;
+}
+
+sub spam_match {
+  # Given two lines, decide if they are "o-spam", this way:
+  # 1. Remove the first word of each line
+  # 2. Remove all pronouns in each line
+  # 3. See if they're the same
+  local($l1,$l2) = @_;
+  $l1 =~ s/^\S+\s+(.*)/$1/;
+  $l2 =~ s/^\S+\s+(.*)/$1/;
+  $l1 =~ s/ (him|her|his|he|she) //g;
+  $l2 =~ s/ (him|her|his|he|she) //g;
+  return $l1 eq $l2;
+}
+
+sub wrap_print {
+  local($line,$wrapcol,$ind1,$indrest) = @_;
+  local($cc) = $ind1;
+  local($word);
+  chop($line);
+  local(@words) = split(" ",$line);
+  print OUT " " x $ind1;
+  foreach $word (@words) {
+    $cc=$indrest, $newlines++,
+      print OUT "\n", " " x $indrest
+	if ($cc + length($word) > $wrapcol);
+    print OUT $word, " ";
+    $cc += length($word) + 1;
+  }
+  $newlines++, print OUT "\n";
+}
+
+#
+# Read in a new-style config file. Syntax: &read_new_config(filename)
+#
+sub read_new_config {
+    local($op,$val);
+    while (<CONF>) {
+        next if /^#/;
+        next if /^$/;
+        chop;
+        if (/(.)\S*\s*=\s*(.*)/) {
+            $op = $1; $val = $2;
+            if ($val =~ /^on/io) {
+                eval "\$opt_$op = 1 unless \$opt_$op";
+            } elsif ($2 =~ /^off/i) {
+                eval "undef \$opt_$op unless \$opt_$op";
+            } elsif ($2) {
+                # List-type one
+                eval "push(\@opt_$op,\$val)";
+            }
+        }
+    }
+}
+
+#
+# Read in an old-style config file (for compatibility)
+# People will hopefully run logedit -b to convert to new file, though
+# Syntax: &read_old_config(filename)
+#
+sub read_old_config {
+    local($ele);
+    while (<CONF>) {
+        next if /^#/;
+        next if /^$/;
+        chop;
+        if (/sw.*=\s*(.*)/) {
+            local(@list) = unpack("C*",$1);
+            foreach $ele (@list) {
+		$ele = pack("C",$ele);
+                eval "\$opt_$ele = 1";
+            }
+        } elsif (/you\s*=\s*(.*)/) {
+            push(@opt_y,$1);
+        } elsif (/exclude\s*=\s*(.*)/) {
+            unshift(@opt_x,split(" ",$1));
+        } elsif (/remove\s*=\s*(.*)/) {
+            unshift(@opt_r,$1);
+	} elsif (/wrap\s*=\s*(.*)/) {
+	    unshift(@opt_W,$1);
+        } elsif (/world\s*=\s*(.*)/) {
+            foreach $ele (split(" ",$1)) {
+                if ($ele =~ /^!/) {
+                    unshift(@strip_worlds,substr($ele,1));
+                } else {
+                    unshift(@keep_worlds,$ele);
+                }
+            }
+        }
+    }
+}
+
+
+#
+# Write out a syntax display
+#
+sub syntax {
+  print "Logedit $version - by Alan Schwartz\n";
+  print "Syntax: logedit [-acdghilmnpqstvwACHINOPRST] [-b file] [-f [-]world]\n";
+  print "                [-o [file]] [-k regexp] [-r regexp] [-x name] [-y name]\n";
+  print "                [-F file] [-W [<col>[,<first>[,<rest>]]]] filename\n";
+
+  print &onoff('a'), " -a\tRemove \@wall/\@rwall/\@wizwall\n";
+  print &onoff('b'), " -b <file>\tBuild a new config file\n";
+  print &onoff('c'), " -c\tRemove \@channels\n";
+  print &onoff('d'), " -d\tRemove DOING/WHO lists\n";
+  print &onoff('f'), " -f <world>\tUse output from <world> (-<world> to skip world)\n";
+  print &onoff('g'), " -g\tGroup output from some player when using -I\n";
+  print &onoff('i'), " -i\tRead input from the stdin instead of a file\n";
+  print &onoff('k'), " -k <regexp>\tKeep lines matching this regexp\n";
+  print &onoff('l'), " -l\tRemove * has arrived and * has left\n";
+  print &onoff('m'), " -m\tRemove \@mail read during logging\n";
+  print &onoff('n'), " -n\tIgnore configuration file (~/.logeditrc)\n";
+  print "      -o [<file>]\tUse <file> as output file, instead of filename.log\n\t\t\tIf no <file> is specified, write to stdout\n";
+  print &onoff('p'), " -p\tRemove pages to you and from you\n";
+  print &onoff('q'), " -q\tQuick-strip everything but player actions!\n";
+  print &onoff('r'), " -r\tRemove lines containing the given regexp\n";
+  print &onoff('s'), " -s\tInclude stats on attendance and such\n";
+  print &onoff('t'), " -t\tRemove room descriptions/contents (admin/see_all log req.)\n";
+  if ($unix) {
+  	print "<Press any key for more>\n";
+  	system('stty raw -echo');
+  } else {
+	print "<Press return for more>\n";
+  }
+  exit if (getc(STDIN) eq "\cC");
+  system('stty -raw echo') if ($unix);
+  print &onoff('v'), " -v\tChatter verbosely while processing logs\n";
+  print &onoff('w'), " -w\tRemove whispers to you and from you\n";
+  print &onoff('x'), " -x\tRemove anything by <name>\n";
+  print &onoff('y'), " -y\tConvert 'You say,' to '<name> says,'\n";
+  print &onoff('A'), " -A\tRemove ANSI codes\n";
+  print &onoff('C'), " -C\tRemove tf Client lines (starting with %)\n";
+  print &onoff('I'), " -I\tInsert a blank line between each action in the log\n";
+  print &onoff('M'), " -M\tMerge puppets - remove puppet>, but leave the rest\n";
+  print &onoff('N'), " -N\tRemove lines with Nospoof markers []\n";
+  print &onoff('O'), " -O\tRemove O-spam (successive osucc/odrop messages)\n";
+  print &onoff('P'), " -P\tRemove Puppet output\n";
+  print &onoff('R'), " -R\tRaw telnet mode - remove lines starting with : or \"\n";
+  print &onoff('S'), " -S\tSpoof mode - remove just the []'s from the front of lines\n";
+  print &onoff('T'), " -T\tRemove Timestamped messages: \@idle/\@away/\@haven\n";
+  print &onoff('W'), " -W [<wrap-column>[,<first line indent>[,<hanging indent>]]]\n         Word-wrap the log at the specified column, with optional indents\n";
+  if ($opt_2) {
+    print "(off) -1\tAssume log is from PennMUSH 1.50\n";
+  } else {
+    print " (on) -1\tAssume log is from PennMUSH 1.50\n";
+  }
+  print &onoff('2'), " -2\tAssume log is from TinyMUSH 2.0\n";
+}
+
+sub onoff {
+  local($op) = $_[0];
+  $prog = <<EOP;
+    return (\$opt_$op || \@opt_$op) ? " (on)" : "(off)";
+EOP
+  return eval $prog;
+}
+
+#
+# Write out a new-style config file. Syntax: &make_config(filename)
+#
+sub make_config {
+    local($config_file) = shift(@_);
+    if (-r $config_file) {
+       print STDERR "Are you sure you want to create a new config file, overwriting $config_file?\nContinue [y/n]: ";
+       $yn = <STDIN>;
+       if ($yn !~ /^y/i) {
+	 print STDERR "Ok, not overwriting $config_file, continuing.\n";
+         return;
+       }
+    }
+    open(FILE,">$config_file") || die "Can't create $config_file: $!\n";
+    local($old);
+    $old = select(FILE);
+    print "# Config file for logedit $version\n";
+    local(@date) = localtime(time);
+    local($date) = $date[4] + 1 . "/$date[3]/$date[5]";
+    print "# Built from command line on $date\n";
+    print "# The names of the options *ARE* case-sensitive\n";
+    print "# For toggle options, 'on' means strip, and 'off' means don't.\n";
+    print "#\n";
+    print "# Strip admin chatter (\@rwall, \@wizwall)\n";
+    print "admin=", ($opt_a ? "on" : "off"), "\n";
+    print "# Build new config file every time we run\n";
+    print "# This causes logedit to 'remember' your last settings\n";
+    print "# BE SURE YOU WANT THIS! IF YOU DON'T, COMMENT IT OUT\n";
+    print "build=", (@opt_b ? $opt_b[0] : ""), "\n";
+    print '# Strip MUSH chat channels (the <> kind)', "\n";
+    print "chat=", ($opt_c ? "on" : "off"), "\n";
+    print "# Strip DOING/WHO lists\n";
+    print "doing=", ($opt_d ? "on" : "off"), "\n";
+    # e is available
+    print "# Tinyfugue worlds to always include, or to strip (-world)\n";
+    @keep_worlds && print "worlds=@keep_worlds\n";
+    @strip_worlds && print "worlds=@strip_worlds\n";
+    @keep_worlds || @strip_worlds || print "worlds=\n";
+    print "# Group output from same player together when using -I\n";
+    print "group_output=", ($opt_g ? "on" : "off"), "\n";
+    # h, j available
+    print "# Keep lines matching these regexps in the log, no matter what!\n";
+    print "# (Use one keep= line per regexp)\n";
+    if (@opt_k) {
+        foreach $expr (@opt_k) {
+            print "keep=$expr\n";
+        }
+    } else {
+        print "keep=\n";
+    }
+    print "# Strip leaving/arriving messages\n";
+    print "leave=", ($opt_l ? "on" : "off"), "\n";
+    print "# Strip \@mail\n";
+    print "mail=", ($opt_m ? "on" : "off"), "\n";
+    print "# Strip pages to and from you\n";
+    print "page=", ($opt_p ? "on" : "off"), "\n";
+    print "# Quick-strip everything but player actions\n";
+    print "quick=", ($opt_q ? "on" : "off"), "\n";
+    print "# Strip these regular expressions (one line per regexp)\n";
+    if (@opt_r) {
+        foreach $expr (@opt_r) {
+            print "regexp=$expr\n";
+        }
+    } else {
+        print "regexp=\n";
+    }
+    print "# Include statistics at the end of the log\n";
+    print "statistics=", ($opt_s ? "on" : "off"), "\n";
+    print "# Terse mode - strip room descriptions\n";
+    print "terse=", ($opt_t ? "on" : "off"), "\n";
+    # u available
+    print "# Verbose: chatter while we process the log\n";
+    print "verbose=", ($opt_v ? "on" : "off"), "\n";
+    print "# Strip whispers to and from you\n";
+    print "whisper=", ($opt_w ? "on" : "off"), "\n";
+    print "# Exclude any actions by given player (one line per player)\n";
+    if (@excludes) {
+        foreach $expr (@excludes) {
+            print "exclude=$expr\n";
+        }
+    } else {
+        print "exclude=\n";
+    }
+    print "# Convert 'You say' to '<Name> says'. List name here\n";
+    print "you=$opt_y[0]\n";
+    # z available
+    print "# Strip ANSI codes from logs\n";
+    print "ANSI=", ($opt_A ? "on" : "off"), "\n";
+    # B available
+    print "# Remove tinyfugue Client messages starting with %\n";
+    print "CLIENT_TF=", ($opt_C ? "on" : "off"), "\n";
+    # D, E, G, H available
+    print "# Insert a blank line between each action in log\n";
+    print "# (see also -g/group puppet above)\n";
+    print "INSERT=", ($opt_I ? "on" : "off"), "\n";
+    # J, K, L, M available
+    print "# Remove just the puppet> beginning of lines which start like\n";
+    print "# that, so logs taken from puppets will look more normal\n";
+    print "MERGE_PUPPETS=", ($opt_M ? "on" : "off"), "\n";
+    print '# Strip all lines with Nospoof markers [] at the beginning', "\n";
+    print '# Warning - some MUSHes use [] for chat channels', "\n";
+    print '# See also SPOOF, below.', "\n";
+    print "NOSPOOF=", ($opt_N ? "on" : "off"), "\n";
+    print "# Strip O-Message spam (successive osucc/odrop messages)\n";
+    print "OSPAM=", ($opt_O ? "on" : "off"), "\n";
+    print "# Strip Puppet output\n";
+    print "PUPPET=", ($opt_P ? "on" : "off"), "\n";
+    # Q available
+    print '# Strip Raw telnet stuff (lines starting with " or :)', "\n";
+    print "RAW_TELNET=", ($opt_R ? "on" : "off"), "\n";
+    print '# Remove just the []s from lines which start with them',"\n";
+    print '# This de-NOSPOOFs a log. Warning - some MUSHes use []',"\n";
+    print '# for chat channels, and this will make channel messages appear',"\n";
+    print '# as if they are in the room!', "\n";
+    print "SPOOF=", ($opt_S ? "on" : "off"), "\n";
+    print "# Strip Timestamped messages: \@idle/\@away/\@haven\n";
+    print "TIMESTAMPED=", ($opt_T ? "on" : "off"), "\n";
+    # U, V available
+    print "# Wrap log: Syntax can be:\n";
+    print "# WRAP=72     (wrap at column 72)\n";
+    print "# WRAP=75,5   (wrap at 75, indent first line by 5 spaces)\n";
+    print "# WRAP=70,0,2 (wrap at 70, no first indent, hanging indent of 2)\n";
+    print "WRAP=$opt_W[0]\n";
+    # X, Y, Z available
+    print "# Assume log came from a TinyMUSH 2.0, rather than PennMUSH 1.50\n";
+    print "2.0=", ($opt_2 ? "on" : "off"), "\n";
+    select($old);
+}
+
+
+# Print out stats for a log
+sub footer {
+  print OUT "---------------------LOG ENDS - STATISTICS----------------\n";
+  print OUT "Original file ($infilename): $origlines lines\n";
+  print OUT "This file ($outfilename): $newlines lines\n";
+  print OUT "Player Statistics:\n";
+  printf OUT "%-30s%10s\n", "PLAYER", "# of ACTIONS";
+  foreach (sort keys %allnames) {
+    printf OUT "%-30s%10d\n", $_, $allnames{$_} if $allnames{$_} > 0;
+  }
+  print OUT "\nQuiet players:\n";
+  local(@quiet) = grep($allnames{$_} == 0,sort keys %allnames);
+  local($quiet) = join(", ",@quiet);
+  &wrap_print($quiet,72,0,0);
+  print OUT "\n";
+}
+
+
+# Usage:
+#      do Getopts('a:b~c'); # -a requires arg. -b has optional arg
+#                           # & -c not. 
+# For argless switches, sets $opt_<switch>. For arg'd switches,
+# @opt_<switch> is set to list of stuff passed via multiple uses of
+# the switch.
+# Argless switches may be clustered.
+
+sub myGetopts {
+    local($argumentative) = @_;
+    local(@args,$_,$first,$rest);
+    local($errs) = 0;
+    local($[) = 0;
+
+    @args = split( / */, $argumentative );
+    while(@ARGV && ($_ = $ARGV[0]) =~ /^-(\S)(\S*)/) {
+	($first,$rest) = ($1,$2);
+	$pos = index($argumentative,$first);
+	if($pos >= $[) {
+	    if($args[$pos+1] eq '~') {  # Arg is optional 
+		shift(@ARGV);
+		if($rest eq '') {
+		    ++$errs unless @ARGV;
+		    $rest = shift(@ARGV);
+		}
+		if ($rest =~ /^-/) {
+		  # Oops - another switch. Put it back
+		  unshift(@ARGV,$rest);
+		  eval "\$opt_$first = 1";
+	        } elsif (! $rest) {
+		  # Last switch
+		  eval "\$opt_$first = 1";
+		} else {
+		  eval "\@opt_$first = (\@opt_$first,\$rest);";
+		}
+	    } elsif($args[$pos+1] eq ':') { # Arg is required
+		shift(@ARGV);
+		if($rest eq '') {
+		    ++$errs unless @ARGV;
+		    $rest = shift(@ARGV);
+		}
+		die "Switch -$first requires an argument!\n" if ($rest eq '');
+		eval "\@opt_$first = (\@opt_$first,\$rest);";
+	    }
+
+	    else {
+		eval "\$opt_$first = 1";
+		if($rest eq '') {
+		    shift(@ARGV);
+		}
+		else {
+		    $ARGV[0] = "-$rest";
+		}
+	    }
+	}
+	else {
+	    print STDERR "Unknown option: $first\n";
+	    ++$errs;
+	    if($rest ne '') {
+		$ARGV[0] = "-$rest";
+	    }
+	    else {
+		shift(@ARGV);
+	    }
+	}
+    }
+    $errs == 0;
+}
+
+1;
+##############################################################################
+
+	# These next few lines are legal in both Perl and nroff.
+
+.00;			# finish .ig
+ 
+'di			\" finish diversion--previous line must be blank
+.nr nl 0-1		\" fake up transition to first page again
+.nr % 0			\" start at page 1
+'; __END__ ############# From here on it's a standard manual page ############
+.TH LOGEDIT 1 "June 5, 1994"
+.AT 3
+.SH NAME
+logedit \- trim logs of MUSH events
+.SH SYNOPSIS
+.LP
+\fBlogedit\fR 
+[-acdghilmnpqstvwACHINOPRST] [-b filename] [-f [-]world]
+[-o [outputfile]] [-k regexp]
+[-r regexp] [-x name] 
+[-y name] [-F filename] [-W [<col>[,<first>[,<rest>]]]] filename
+.br
+.SH DESCRIPTION
+.LP
+The \fBlogedit\fR program is a tool designed to help players and admins
+of role-playing MUSHes trim down logs of role-playing events on the
+MUSH. It takes a log file (indicated by 'filename' or from stdin) and
+produces as output another file (by default 'filename.log') after
+optionally removing a number of typical things which are annoying in
+logs.
+.nf
+
+	Logedit *always* strips the following things from logs:
+	\- Messages beginning with GAME: or MAIL:
+	\- * has connected, disconnected, or reconnected messages
+	\- Huh? (Type help for help)
+	\- Flag set. and Doing set.
+	\- Any line appearing twice in succession (simple SPAM)
+	\- Anything between a pair of '#log' lines. This allows you, while
+	  logging, to 'think #log', thus indicating that what follows
+	  (until you 'think #log' again) is to be stripped by logedit.
+.fi
+.SH OPTIONS
+.LP
+These options control what is to be stripped from the log:
+.TP
+\fB\-a\fR
+Remove @wall/@rwall/@wizwall messages
+.TP
+\fB\-c\fR
+Remove @chat messages from all channels
+.TP
+\fB\-d\fR
+Remove DOING/WHO lists
+.TP
+\fB\-f\fR [-]world
+This option supports tinyfugue logging. -f world will put \fBonly\fR
+output from "world" into the log; -f -world 
+(or -f !world) will skip output from "world"
+when making the log. You can specify either multiple worlds to include,
+or multiple -worlds to skip, each with its own -f switch. If only one
+world is specified to include, tf's ---- World <name> ---- messages will
+not be printed. If more than one world is specified to include, the 
+messages will be printed. (If you wanna be sure they're not there,
+use a regexp like "^---- World .* ----$" in your .logeditrc.
+.TP
+\fB\-k\fR <regexp>
+Keep lines which match <regexp> in the log, even if they'd normally
+be stripped out by some other switch. Perl-style regular expressions
+(a superset of egrep-style regular expressions)
+are used, which means that ()'s, []'s, and {}'s must be escaped with
+a \ in order to match them literally.
+Suggested by Lorrie Wood.
+.TP
+\fB\-l\fR
+Remove * has arrived, * has left, and * goes home messages
+.TP
+\fB\-m\fR
+Remove @mail messages read while logging
+.TP
+\fB\-p\fR
+Remove pages to you and from you
+.TP
+\fB\-q\fR
+Quick-edit. Removes all lines except those which start with a player's
+name (thus, usually leaving you only player actions.) This switch 
+implies -a, -c, -d, -p, -w, and -T.
+It's a very good idea
+to use the -y <name> switch with this option, as well, particularly
+for short logs. This switch adds substantially to the time required
+to edit the log.
+.TP
+\fB\-r\fR <regexp>
+Removes lines matching the regular expression
+which follows the switch. You can have multiple
+regexps, but each needs its own switch, e.g.
+\fBlogedit\fR -r foo -r "[Bb]ar\\." myfile
+.TP
+\fB\-t\fR
+Terse mode: room descriptions are removed, and contents lists
+are shoved onto a single line. This mode requires that the log
+be taken by someone who can see db#s - usually an admin, a
+see_all player (in PennMUSH), or possibly a mortal if the whole
+log takes place in rooms they own.
+.TP
+\fB\-w\fR
+Remove whispers to you and from you
+.TP
+\fB\-x\fR <name>
+Remove anything by <name>. Like -r, you can stack these,
+but you must use multiple -x's, too, e.g.
+\fBlogedit\fR -apw -x Paul -x Javelin myfile
+.TP
+\fB\-A\fR
+Remove any ANSI codes in the from the log.
+.TP
+\fB\-C\fR
+Remove any lines starting with % characters. These are usually
+messages from tinyfugue telling you about activity in other worlds
+or whatever.
+.TP
+\fB\-M\fR
+Merge puppets into the log. This switch removes the "puppet>" tag
+at the beginnings of lines, and leaves the rest of the line in the
+log, handy for people who log RP done with puppets. It is somewhat
+intelligent about converting puppet> you ... into puppet ..., as well.
+Since this processing occurs *after* stripping the log, one could
+preserve *only* puppet-talk in the log by using 
+logedit -M -r '.*' -k '.*>' <filename>.
+This switch suggested by David Johnson (Willem@Dune).
+.TP
+\fB\-N\fR
+Remove NOSPOOF'd emits - lines which begin with [text]. This is also
+useful for stripping out chat channels on MUSHes which use []'s to
+enclose channel names. This switch takes precedence over -S.
+.TP
+\fB\-O\fR
+Remove "o-spam", the messages you get when 20 players all leave
+a room, one after the other, giving you 20 osucc/odrop messages.
+Essentially removes any consecutive lines in which everything
+but the first word (a player's name) matches.
+.TP
+\fB\-P\fR
+Remove output from puppets from the log. This switch takes precedence
+over -M.
+.TP
+\fB\-R\fR
+Remove any lines starting with : or " characters.
+Useful for people stuck logging from telnet.
+.TP
+\fB\-S\fR
+Remove only the [text] at the beginning of lines which start with
+such patterns, but leave the rest of the line. This is the "spoof"
+flag, as it de-NOSPOOFs a log. If you use a MUSH which uses []'s
+for chat channels, though, it'll make any chatting appear to take
+place in the room.
+\fB\-T\fR
+Remove the "timestamp" messages which you see when someone pages you
+and you're idle/haven, or when you page someone who's idle/haven.
+.LP
+These options modify the output in useful ways:
+.TP
+\fB\-g\fR
+When used with the \fB\-I\fR switch, this causes output from the
+same player/puppet to be grouped together and single-spaced, which
+produces very nice-looking output. Technically, it causes output lines
+beginning with the same word to be grouped together, so if you keep
+rwalls or channels in the log, consecutive lines on the same channel
+wil lbe grouped together.
+.TP
+\fB\-s\fR
+Include statistics at the end of the log. These statistics
+include line counts on the original and new files
+(so you can see how much you trimmed), a list of all
+players who spoke or acted during the event (with a count of
+how often they acted), 
+and players who appear to have been
+on-line or present, but said nothing.
+.TP
+\fB\-y\fR <name>
+Convert 'You say,' to '<name> says,' to give the log
+a third-person view.
+.TP
+\fB\-I\fR
+Insert blank lines between log lines. This improves readability
+of the log significantly, at the cost of making it longer to
+print, etc. Room descs, contents lists, etc, are kept together.
+This switch suggested by Christian Scarborough. See also -g.
+.TP
+\fB\-W \fR[<col>[,<first>[,<rest>]]]
+Word wrap long lines, resulting in no line longer than <col> characters.
+For each word-wrapped paragraph, indent the first line <first> spaces,
+and all other lines <rest> spaces. Any of the parameters can be
+left out: if no <col> is specified, 72 is assumed. <first> and <rest>
+default to 0.
+Word wrap will, of course, fail
+miserably if you have words longer than <col> characters. 
+There must be a space between -W and the numbers.
+.LP
+Finally, these options control the use of the configuration file,
+input and output files, or provide program help:
+.TP
+\fB\-b\fR <filename>
+Build a new-style configuration file called <filename>, using the
+parameters given by the other command-line switches and the current
+config file. An easy way to build a config file is just to 
+run logedit -b, by itself, which'll build .logeditrc in your home
+directory. Edit this file and follow the instructions in it.
+.TP
+\fB\-i\fR
+Read the log from the stdin, instead of from a file on the command
+line. This makes logedit usable as a pipe.
+.TP
+\fB\-n\fR
+Ignore the settings in the configuration file (.logeditrc by default)
+Command-line switches always take precedence over configuration
+file settings, and work like toggles, i.e., if statistics are set on
+in the configuration file, logedit -s will turn them off. Use the -n
+switch in situations where there might be multiple configuration files.
+.TP
+\fB\-o\fR [filename]
+Use "filename" as the output file for the editted log, instead of
+the default <inputfile>.log. If "filename" is omitted, the output
+is sent to stdout.
+.TP
+\fB\-v\fR
+Verbose - chatter a bunch while processing the log, to show a bit
+of how logedit thinks about things.
+.TP
+\fB\-F\fR filename
+Use "filename" as the configuration file, in place of ~/.logeditrc.
+.TP
+\fB\-h, -H\fR
+Show help. The help display lists all logedit switches, and their
+values as defined in the configuration file. 
+Because this display is longer than many screens, running logedit without
+arguments provides a paged version of the same display.
+.TP
+\fB\-\fR
+If "-" is used as the last item on the command line in place of an 
+input filename, logedit will read from the stdin, and write to
+the stdout, unless a different file is specified with -o.
+This allows logedit to function as a filter in a pipe.
+.TP
+\fB\-1\fR
+Process the log assuming it's from a PennMUSH 1.50. Unless you've 
+changed it in the config file, this is the default.
+If you usually MUSH on TinyMUSH 2.0, you can set 2.0=on in the config
+file, and use -1 as you need it.
+.TP
+\fB\-2\fR
+Process the log assuming it's from a TinyMUSH 2.0. If you usually
+MUSH on a TinyMUSH, consider setting 2.0=on in the config file.
+.SH EXAMPLE
+.LP
+\fBlogedit\fR joust
+.LP
+\fBlogedit\fR -o joust.log joust
+.LP
+\fBlogedit\fR -o joust.log - < joust
+.LP
+\fBlogedit\fR - < joust > joust.log
+.LP
+cat joust.log | \fBlogedit\fR - > joust.log
+.LP
+Trim the file joust using the default settings in .logeditrc,
+and write the result to joust.log. All five commands will produce
+the same result, and the last three illustrate the use of logedit
+as a filter for stdin and stdout.
+.LP
+\fBlogedit\fR -n -aw -x John -r OOC -y Javelin joust
+.LP
+Trim the file joust, ignoring .logeditrc, skipping any actions by John
+and any lines containing the string "OOC", converting "You say" to
+"Javelin says", and write the result to joust.log
+.LP
+\fBlogedit\fR -n -q -y Javelin -o joust.stripped joust
+.LP
+Quick-trim the file joust, ignoring .logeditrc, converting "You say" to
+"Javelin says" and writing the output to joust.stripped. The output
+will contain only lines with player actions.
+.SH CONFIGURATION FILE
+.LP
+Beginning with version 2.6pl, \fBlogedit\fR uses a new and more descriptive
+configuration file. The easiest way to produce a config file that you
+like is to run \fBlogedit\fR -b <config filename>, and edit the resulting
+file.
+.LP
+If you are upgrading from an earlier version of \fBlogedit\fR, your old-style
+configuration file will be read in correctly. As above, the -b switch
+can be used to convert the old config file into the new format.
+.LP
+The -n command-line switch causes \fBlogedit\fR to ignore the configuration
+file, should you wish to override it on occasion.
+.LP
+The -F <filename> command-line switch causes \fBlogedit\fR to use <filename>
+as its configuration file instead of the default file.
+.SH BUGS
+.LP
+Because some MUSHes (notably the one I run) use []'s for MUSH-coded
+chat channels, you can't always distinguish between those kind of 
+chat channels and NOSPOOF emits. This affects -N and -S.
+.LP
+The -M switch doesn't currently do checking to be sure that you've
+really got a puppet name, and not a line like ----->, so it may
+do odd things to odd lines.
+.LP
+When editing multi-world logs using the -f switch, logedit assumes that
+any text before the first world change should be preserved in the log.
+.LP
+\fBLogedit\fR has as many switches as \fBls\fR. :)
+.SH AUTHOR
+.LP
+Logedit was written by Alan Schwartz (aka Paul@DuneMUSH, Javelin)
+.LP
+Alan can be reached as: alansz@cogsci.berkeley.edu
+.nf
+Or at: Dept. of Psychology
+       University of California 
+       Berkeley, CA 94720
+.fi
+.LP
+Lorrie Wood (Chani@DuneMUSH) has been invaluable in providing real-world
+tests of beta versions of logedit, ideas for improvements and new
+switches, spaghetti, and general moral support. :)
+.LP
+Thanks are due to all users who've suggested improvements or bugfixes.
+.SH COPYLEFT
+.LP
+Copyright (C) 1993, 1994 Alan Schwartz <alansz@cogsci.berkeley.edu>
+.LP
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+.LP
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+.LP
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+.SH VERSION
+.LP
+This is \fBlogedit\fR version 2.6.7pl.
+The most recent version can always be found at mellers1.psych.berkeley.edu.
+.SH NAME
+.ex

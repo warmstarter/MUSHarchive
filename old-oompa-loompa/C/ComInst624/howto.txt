@@ -1,0 +1,438 @@
+                                     Index
+I.	How do I set up the ComSystem for my system?
+	A.	Auto Configuration
+	B.	Compatability
+
+II.	How do I configure the Comsystem once it is set up?
+	A.	Enabling/Disabling Commands
+	B.	Enabling/Disabling +COM (talking) options
+		1.  How to use personalized aliases/titles/etc.
+		2.  Why you'd want to disable them.
+	C.	Enabling/Disabling +CONFIG(urations)
+		1.  Personalized Aliases when using the comsystem
+		2.  Personalized Titles when using the comsystem
+		3.  Spoofing and Other options when using the comsystem
+	D.	Defining who is a wizard.
+	E.	Defining what the help command is and how it works
+	F.	Setting up global aliases for channel names
+	G.	Typecasting channel names with caps/small letters
+	H.	How players can use aliases on channels and settings to do so
+	I.	General Questions/Answers of what the comsystem can/can't do
+
+
+Section I:	How do I set up the ComSystem for my system?
+
+	The AshCom (Comsystem/Chatsystem) is currently in version 6.20 as this 
+document is being written.  It has a wide variety of commands/abilities that
+can be configured to suit nearly every need.
+
+	AUTO CONFIGURATION:
+	The comsystem autoconfigures when loading into the mush using
+	a TF /quote formatted file.  This format will work with any
+	method of /quoting in as the file has no TF specific codes.
+
+	COMPATABILITY:
+	The comsystem is compatable with every flavor of MU *EXCEPT* the 
+	PENN (1.6.x) and higher.  The reason for this is the newest PENN
+	has high-level argument control testing (which is not necessarilly
+	a bad thing) but it returns STRING values for NUMERIC operands
+	(which is a bad thing) which effecively breaks a fair portion of
+	the code.  PENN (1.6.x) also doesn't parse u() correctly when dealing
+	with passing arguments which results in erranious results to null 
+	passing of variables (which again, breaks various things on the
+	comsystem).  A fair portion of the comsystem should still work on PENN
+	1.6.x, but it was not designed around their new parser so is not 
+	guarenteed to work fully.  If there is tremendous desire to have
+	a PENN 1.6.x compatable version, one can be written in time.
+
+        *NEW ISSUES!!!*
+        Version 6.24 and later is FULLY compatable with PENN and should work
+        without a hitch.  I know for a fact it works now fully with 
+        PENN 1.7+ versions but may still be broken with 1.6.x because of again,
+        the u() parser bug.
+
+Section II:	How do I configure the Comsystem once it is set up?
+
+	The AshCom (Comsystem/Chatsystem) is designed around complete
+(or near complete) flexability.  It allows the controlling wizard to configure 
+every option and suboption on the comsystem.
+
+	ENABLE/DISABLE COMMANDS:
+	The comsystem comes built-in with a +WENABLE and +WDISABLE command
+	which enables and disables every command on the comsystem respectively.
+	This disabling will make the command inactive to everyone.  This can
+	be done on every command *EXCEPT* the +WENABLE, +WDISABLE, and 
+	+SETWIZARD commands.
+
+	ENABLE/DISABLE +COM (TALKING) OPTIONS:
+	The comsystem comes built-in with a +WOPTIONS command that will
+	enable/disable every single option of the +COM.  These options are
+	speaking ("), posing (:), alias talking (!), and the like.  These
+	can be done by typing in +help (or whatever you defined help to be)
+	and +com... ie: +help +com.  Check out +help +WOPTIONS on how to
+	disable/reenable the various +COM options.  
+	*NOTE* Wizards can still use disabled +COM options.
+
+	**Added Feature**  
+	In version 6.22 and higher, there exists a command
+	called +WDEFCOMOPT that will allow a wizard to re-define the 
+	options (ie: special characters like : " ; etc) that are used by
+	the comsystem.  This allows a bit more flexability.
+
+	ENABLING/DISABLING +CONFIG(URATIONS):
+	There are a few commands to enable/disable various configurations.
+		+WCONFIG:
+		This is used to enable/disable options that mortals can use
+		with the +CONFIG option.  Ie: if you do not want to allow
+		users to use NOSPOOF, you can disable NOSPOOF this way.  Refer
+		to the +help on +WCONFIG for the syntax and format.
+
+		+WSETUP:
+		This is used to define global characteristics of the comsystem.
+		This includes making the comsystem return error information
+		for non-existant commands for the help amung other things.
+
+		+WALIASCHAN:
+		This is used to specify what channels a player will see ALIASES
+		on.  If you do *NOT* want users to be able to see the users
+		of the channels you specify alias only, then you *NEED* to
+		disable the +CONFIG option NOALIAS. (Wizards can still use it)
+		Players can force the use of their alias on any channel with
+		the use of alias option in the comsystem. (found by typing
+		+help +com).  They can make this option their default by using
+		&CDEF me=<character option>
+
+		&CALIAS-<channel>:
+		This attribute will allow players to use their alias on the
+		specified channel *IF* they have set up their +CONFIG parameter
+		USE_ALIAS.  This gives users a better control of the comsystem
+		as this will allow the use of the channel alias in junction
+		with all the other +com options available to them.
+		*NOTE*  You need to disable the +CONFIG option NOSPOOF so that
+		mortals can not see who is using the alias!
+
+	DEFINING WHO IS A WIZARD:
+	The comsystem has a built-in way that it recognizes who a wizard is.
+	(A wizard is defined as someone who has full access and rights to
+	wizard powers on the ComSystem).  This can be established by typing:
+	+SETWIZARD <function>.  An example would be if you want admins and
+	wizards to be noticed as wizards, you would type this:
+	+SETWIZARD %[or(hasflag(%%0,wizard),hasflag(%%0,admin))]
+	(You *MUST* escape out brackets ([) and percents (%) for it to work)
+	Check out +help on +setwizard for more information.
+	*NOTE* The owner of the comsystem has unlimited access to +SETWIZARD
+	for defining even if they do not match the lock of what a wizard is.
+	This is for security reasons.
+
+	DEFINING WHAT THE HELP COMMAND IS AND HOW IT WORKS:
+	The comsystem has a built-in way to define what it recognizes as it's
+	help command.  This is because MUX and some other systems either have
+	a hard-coded +HELP command (that would override the soft-coded one
+	the comsystem uses) or they have global +help that interacts badly
+	with the comsystem.  To redefine the help command of the comsystem
+	you would type:  +WDEFHELP <command>.
+	For example:     +WDEFHELP +CHELP
+	And from that point on, you would use +chelp for any of the comsystem
+	help.  This can be defined and redefined at the wizard's leasure.
+
+  	SETTING UP GLOBAL ALIASES FOR CHANNEL NAMES:
+	Version 6.20 allows something new for channels.  It allows you to 
+	specify an unlimited number of aliases for channel names.  What 
+	this means is if you want to alias the channel 'Emergency' to '911',
+	you can use the +WGALIAS command to set this up.  The syntax would
+	be:  +WGALIAS Emergency=911
+	The +WGALIAS allows you to list all current aliases, delete aliases,
+	and will notify you of aliases for non-existant channels by putting
+	a *D* before each entry for easy of viewing.  It also uses the
+	paging value (so you can see the output a page at a time - see
+	the help on +setpage to set this up.  The default is '10').
+	For extensive help on how to use the +WGALIAS, look at the +help
+	for +WGALIAS.  For personalized aliases (what people see as
+	you talk/use the comsystem) check help on +CONFIG for the
+	&CALIAS attribute.
+
+	TYPECASTING CHANNEL NAMES WITH CAPS/SMALL LETTERS:
+	For those who don't like the format of each channel name being
+	started with a capital letter and followed by lower case, you can
+	now specify exactly how  you want the specific channel formatted.
+	The only limitation is you can not specify a DIFFERENT name than
+	the channel.  So if the name of the channel is 'Fred' you can't
+	typecast it to 'Eugine'.  It would have to still be 'Fred' but
+	in whatever typecast you want.  For Example: 'FRED', 'FrEd', 'fred',
+	'freD', etc.  The command for this is:  +WRENAME
+	Example: +WRENAME public=PuBlIc
+	Then instead of showing:
+	[Public] Somebody waves
+	It will show:
+	[PuBlIc] Somebody waves
+
+	HOW PLAYERS CAN USE ALIASES ON CHANNELS AND SETTINGS TO DO SO:
+	Players have a high variety of control for aliases.  This can be
+	seen by looking at the +help for +config (+config4 and +config5
+	explain it in detail).  
+		Setting aliases for use on all channels:
+		&CALIAS <player>=Aliasname
+		&CALIAS <player>=Alias1@Alias2@Alias3 (To randomly choose alias)
+		(NOTE: These will not be checked in junction with USE_ALIAS
+		 on the +CONFIG option)
+		In the above, the '@' seperator will tell the comsystem to
+		randomly pick which alias to use whenever they speak.
+
+		&CALIAS-<channelname> <player>=Aliasname
+		This *IS* used in junction with the +CONFIG option USE_ALIAS.
+		This also overrides the default &CALIAS attribute so neither
+		that or the randomized aliases will work for this specified
+		channelname.
+
+		+CONFIG NOALIAS
+		If available, this will allow users to see real names on the
+		channel WHO of channels that were specified to show only
+		aliases (See +help on +WALIASCHAN).  If this is not set
+		(the default) then players will only see aliases on the WHO
+		of whatever channels were defined by +WALIASCHAN.
+
+	GENERAL QUESTIONS/ANSWERS OF WHAT THE COMSYSTEM CAN/CAN'T DO:
+	Q: The system is too complicated.  Can't I have it so it just allows
+	   people to join/leave channels and talk?
+	A: Yes.  You can +WDISABLE every option on the comsystem to suit your
+	   needs. In fact, you can disable it to the point of just talking
+	   on it as a bare-bone system.  And yes, it will show the users
+	   what is disabled or not. ((+help index or +comindex) and +comstatus)
+
+	Q: What if I don't want users to be able to make channels?
+	A: There are various ways to disable users from making channels.
+	   1: You can use +WVALID to specify exactly what channels are allowed
+	      for creation. (wizards override the values thus can use any name)
+	   2: You can use +WINVALID to specify what channels are *NOT* allowed
+	      for creation. (again, wizards override this value).  +WINVALID
+	      is unique over +WVALID in the fact it accepts wildcards.  So
+	      entering +WINVALID/ADD * will in effect make all channel names
+	      invalid (thus disabling channel creation)
+	   3: You can use +WMAXCHAN to specify how many channels are allowed.
+	      A value of '0' specifies UNLIMITED channels, so use a '1' to
+	      disable any channel creation.
+	   4: +WDISABLE +CHAN then just +CREATE locked channels that you
+	      desire.  To make locked channels to pass various locks you
+	      can use +addlock or the wizard command +waddlock (which allows
+	      you to make your own function lock).  It uses a boolean value
+	      to check.  return of '1' means success and '0' means failure.
+	      The player's dbrief# attempting to pass is passed as a '%0'.
+	      Check the +help on +addlock and +waddlock for the formatting.
+	   It is probably preferred that if you you desire to lock channel
+	   creation that you use +WINVALID or +WMAXCHAN
+
+	Q: I wish I could set up a channel named '1' instead of using 'One'.
+	A: Use +WGALIAS to set up the alias of '1' for channel 'One'.
+	   You can also set up multiple aliases for 'One' so have fun.
+
+	Q: It sucks.  I don't like the [Rp-info] I get for the RP-Info channel.
+	A: Use +WRENAME to rename rp-info to 'RP-Info' then you'll see
+	   [RP-Info] for the channel name.
+
+	Q: How do I make the channel system display an error when someone
+	   types in the wrong +help command?
+	A: You can use +WSETUP to turn on DEFINE_ERRHELP.  This turns on
+	   error trapping on the comsystem. (It defaults to OFF).
+
+	Q: How do I purge players from every channel?
+	A: Make sure before you @nuke someone that you use +WREMOVE to
+	   remove that player from all the channels.  Otherwise, you'll have
+	   to use +WIPE to remove them from each channel specifically.
+	   +LISTPUB and +LISTPRIV will let wizards know of what channels
+	   have invalid players.  An invalid player is a dbrief# on the list
+	   that is not of type PLAYER.
+
+	Q: How can I put an object on the channel?
+	A: The comsystem is uselocked to the LAST attribute.  Wizards can set
+	   this attribute so just put gibberish in the LAST attribute on
+	   the object for it to be able to join/leave/talk on channels.
+	   Keep in mind, that objects appear on channels as 'invalid' players.
+
+	Q: Ok, but will the object be able to talk on the channel?
+	A: Yes, this was a bug in 6.20 that was fixed in 6.21 and later vers.
+
+	Q: Can I disable the comsystem from specific users?
+	A: Yes, there is a wizard command +WUSRLOCK that will disable/enable
+	   users from using the comsystem.  It in effect adds them to the
+	   pre-existing uselock so they can't pass it.
+
+	Q: How do users see what channels they can join?
+	A: There are various ways to do this.  There is a +LISTPUB that will
+	   show what PUBLIC channels (not locked/private) they can join.
+	   There is also a +LISTALL (6.20 and higher) that will allow the
+	   user to see ALL channels that they can join.  Channels that are
+	   locked but joinable by the player shows up as a [j].  When wizards
+	   do a +LISTALL they can see all channels.  Locked channels are
+	   described by a [L].  Joinable by a [j].  Though you don't have
+	   to set a lock for wizards to join channels. +wchanjoin joins
+	   wizards as owners to locked channels w/o passing locks.
+
+	Q: How can I make myself invisible on a given channel?
+	A: You can either go DARK (wizard only), or you can use +WCLOAK
+	   to cloak on specific channels.
+
+	Q: Can I define how a wizard goes dark?  My machine is unique.
+	A: Currently I have only run into a few people with alternate
+	   systems required for this.  MURE and RhostMUSH are the two
+	   that I have run into.  Both are pre-configured with version
+	   6.22 to take this into account, but currently there is
+	   no on-line option to change what the dark flag does.  If
+	   there is a large need it will be in the next revision.
+	   (It probably will be anyway - that is Version 6.23 )
+
+	Q: How can I see the configuration of the comsystem or people?
+	A: +COMSTATUS shows the current statistics of the comsystem.
+	   +ALIAS[/<player>] will show you the aliases a player is using.
+	   +WSHOWCONFIG <player> will show you the player's configurations.
+	   +WSHOWCONFIG without options gives you the global configurations.
+
+	Q: How can I make my own personal aliases on the comsystem?
+	A: The comsystem comes with a quick command of '=' that does a few 
+	   very nice things.
+	   1:  It allows a user to speak on the last channel they spoke on.
+	       (they need +CONFIG LASTCHAN to be on for this)
+	       otherwise it will default to what channel they have specified
+	       as a +DEFAULT (check +help +default).  The default channel
+	       for +DEFAULT is public.
+	   2:  It allows users to use their personal channel alias for the
+	       comsystem.  For example, if you used the comsystem to +alias
+	       your 'Spamofheavenandearth' channel to 'sofhe', you can then
+	       do =sofhe <whatever> to talk on the comsystem.  The '=' uses
+	       the same options for speaking that +com uses.  Check out help
+	       on '=', '+alias', and '+default' for all the options.  If the
+	       alias isn't matched up, it'll assume you want to just talk
+	       on the default channel.
+
+	Q: How do I add/remove owners from a comsystem?  
+	A: You can add/remove lists of owners or users to locked channels 
+	   by using the +WOWNER/+WUSER commands.  Check the +help on these.  
+	   If you control (are an owner) of the locked channel, you can also 
+	   use +OWNER/+USER commands.  Again, check the help on these.
+
+	Q: How do I purge/destroy channels?
+	A: If you are an owner of a locked channel, you can use +destroy.
+	   As a wizard, you can destroy any channel (locked or public) by use
+	   of the +wdestroy command.  Check +help on these for options.
+
+	Q: What if I want another player to own a channel?
+	A: +chown it to them.  It accepts a list of users or *NO* users.
+	   You can use NO users for a non-controlled (except by wizards) chan.
+
+	Q: We don't have a monitoring system, can we use yours?
+	A: Sure!  You need to add +moncon to the master room's @aconnect and
+	   +monuncon to the master room's @adisconnect.  Then each wizard
+	   can use the toggle +monset to set themselves on/off the monitor.
+
+	Q: Wizards is a public channel.  Can I lock it without losing it?
+	A: Yup!  Just +wlock Wizards and it's now a locked channel.
+	   You can also unlock locked channels by use of +wunlock.
+
+	Q: I have a wizards channel.  And I want the same players on an
+	   admin's channel.  Can I just copy them over then add the extra
+	   admins afterwords?
+	A: Yes!  Use the +CPCHAN command to copy wizards to admin.  It will
+	   copy all users, locks, and options on that channel (minus aliases
+	   and the like) to admin.  Then just add the admin you want to using
+	   either +wowner or +wuser respectively.
+
+	Q: Our error message isn't the normal Huh?  (Type "help" for help.)
+	   messages.  Do I have to edit the comsystem?
+	A: Nope.  There is a +werrorset command that will define how your
+	   system recognizes an error message.  To see what the error message
+	   is currently set to, check out +comstatus or just type +werrorset
+	   without arguments.
+
+	Q: I only have version 5.2 of the comsystem and want the 6.20 version
+	   but don't want to lose any of my settings.  Is this a lot of work?
+	A: No.  You just load into the mush the new version then type
+	   +WINSTALL <dbrief#> where the dbrief# is the number of the *OLD*
+	   comsystem.  Don't worry if you screw it up.  The comsystem has
+	   built in checking to see if it's a valid comsystem and not itself.
+	   This will save all existing configurations.
+
+	Q: Actually, I have 6.16.  Do I have to load the entire comsystem to
+	   upgrade?
+	A: Nope!  Just load in the patch and use +WPATCH to install it.
+	   It will save all your configurations.
+
+	Q: How do I see what channels I belong to?
+	A: Use +LISTCHAN.  Check the +help on it for the options it has.
+
+	Q: There's so many commands!  Is there a quick listing of them?
+	A: Yes.  You an use +listref to give you every command you have
+	   access to and a short description of what each command does.
+
+	Q: Nifty.  However, I was hoping for a syntax listing.
+	A: In the next version there will be a +listsyntax command.
+	   It will do just what +listref does but show syntax instead.
+
+	Q: I have a 50 line terminal package.  Can I increase how many lines
+	   shows up with +listpub, +listall, and the like?
+	A: Yup.  Set your +setpage value to whatever you want.  48 is the
+	   maximum and 10 is the minimum as well as the default.
+
+	Q: How do I set up personal aliases for the comsystem?
+	A: Use the comsystem's built in +ALIAS command.  Check +help on it.
+
+	Q: No, no.  Not those aliases, I mean aliases that show up on the
+	   channel when you do +com channel=whatever.
+	A: Ah. Check out +help +config for a list of configurations.
+	   In this help is how to set up channel-based aliases which is
+	   what you want here.
+
+	Q: I accidently set up a channel 'Vampire' and really meant to make
+	   it called 'Vampyres'.  
+	A: No problem.  Just use +mvchan to rename the channel.  It moves all
+	   locks for it. 
+
+	Q: Ack!  I don't want to leave my locked channel (or can't) and I'm
+	   getting spammed to death on it!
+	A: +quiet the channel. (+quiet is a toggle)
+
+	Q: In fact, I'm trying to code and I don't want to leave 25 channels
+	   just to stop the spam!
+	A: Easy, use the +coding toggle to suppress all output.
+
+	Q: My channel defaults to Public whenever I use the '='?  How can
+	   I change this?
+	A: Two ways actually...
+	   1: +default <channel> to specify a new default channel to use or
+	   2: +config lastchan=on to use the last channel you spoke on.
+
+	Q: How do I get a list of valid channel names?
+	A: Use +VALID.  It'll show 'UNLIMITED' if you can use any name.
+
+	Q: How do I get a list of all available commands?
+	A: Use either +comindex or +help index
+
+	Q: How do I make channels?
+	A: Two ways actually
+	   1: Use +chan to join/leave/create public channels.  It will
+	      create the channel if it previously didn't exist otherwise
+	      it will just join you to the preexisting channel.  You also
+	      use +chan to leave the public channel.  See +help for options.
+	   2: Use +create to make locked channels.  It will set you up as
+	      an owner of the channel.  You then can use +OWNER and +USER
+	      to set up any additional owners and users of your new channel.
+	      If you want people to join/leave on their own if they pass
+	      a specific lock, you can use +addlock (or +waddlock if you're
+	      a wizard). See help on +create, +addlock, and +waddlock
+	      When they want to join or leave, they then use the command
+	      +chanjoin.  this will join them and/or remove them as owners
+	      or users (depending how they were set up on the channel). The
+	      default is 'users'.  If they want to see if they can access
+	      the channel, they can either use +LISTALL or +LISTCHAN.  Both
+	      shows what locked channels they have access to.
+
+	Q: What are my current configurations?
+	A: To see the aliases you have and maintain them, use +ALIAS
+	   To see your current configurations, use +comstatus
+
+	Q: Why can't I make channel names starting with numbers?
+	A: The comsystem uses attribute-names for channels.  As such,
+	   you're locked in to whatever that mush recognizes as valid
+	   attributes.  You can, however, have a wizard use +wrename
+	   to rename the attribute using capitals or the like *or*
+	   use +wgalias to set up aliases that may contain numbers
+	   or any character at all (for the most part) for an alternate
+	   name of that given alias.

@@ -1,0 +1,446 @@
+#
+# Patch name: iclog
+# Patch version: 1.0
+# Author's name: Javelin
+# Author's email: dunemush@pennmush.org
+# Version of PennMUSH: 1.7.2p14
+# Date patch made: 8/6/98
+# Author is willing to support (yes/no): no
+# Patch format: diff -c
+#
+# This is a contributed PennMUSH patch. Its use is subject to the
+# same restrictions found in PennMUSH's hdrs/copyrite.h file.
+#
+# No warranty is given for this patch. It is not necessarily going
+# to work on your system, with any version of PennMUSH other than
+# the one above, etc.
+#
+# If the author given above was willing to support the patch, you
+# should write to the author if you have any questions or problems. Do
+# *NOT* send email messages to Javelin or any PennMUSH mailing list about
+# this patch!
+#
+# Below this line is the author's description of the patch,
+# followed by the patch itself. If the patch is in context diff
+# format, you'll probably apply it by typing: patch < patchfile
+# in your top-level MUSH directory, unless instructed otherwise
+# below.
+#
+
+This patch is part of the iclog system and is described in the
+README that comes with that system. It adds a new log file
+ICLOG (defined at compile-time) and a macro IC_LOGGING that,
+when defined, enables the OOC and LOGGING room flags and
+the LOGGING thing flag.
+
+Apply with patch -p1. GNU patch is recommended.
+
+
+*** 0.31/options.h.dist Fri, 10 Jul 1998 10:16:53 -0500 dunemush (pennmush/d/36_options.h. 1.4 640)
+--- 0.31(w)/options.h.dist Thu, 06 Aug 1998 10:58:56 -0500 dunemush (pennmush/d/36_options.h. 1.4 640)
+***************
+*** 181,186 ****
+--- 181,192 ----
+   */
+  #define ROYALTY_FLAG /* */
+  
++ /* 
++  * Define the following to enable the IC logging system, including
++  * the ICLOG file (see below), and the OOC and LOGGING flags
++  */
++ #define IC_LOGGING /* */
++ 
+  
+  /*------------------------------ DB ----------------------------------*/
+  
+***************
+*** 340,344 ****
+--- 346,351 ----
+  #define WIZLOG    "log/wizard.log"
+  #define TRACELOG  "log/trace.log"
+  #define CMDLOG    "log/command.log"
++ #define ICLOG     "log/ic.log"
+  
+  #endif
+*** 0.31/hdrs/dbdefs.h Sun, 08 Mar 1998 11:37:13 -0600 dunemush (pennmush/d/51_dbdefs.h 1.2 640)
+--- 0.31(w)/hdrs/dbdefs.h Thu, 06 Aug 1998 10:51:53 -0500 dunemush (pennmush/d/51_dbdefs.h 1.2 640)
+***************
+*** 152,157 ****
+--- 152,163 ----
+  #define Inherit(x)   ((Typeof(x) == TYPE_PLAYER) || (Flags(x) & INHERIT) || \
+  		      (Flags(Owner(x)) & INHERIT) || Wizard(x))
+  
++ #ifdef IC_LOGGING
++ #define Ooc(x)		(IS(x, TYPE_ROOM, ROOM_OOC))
++ #define Logging(x)	(!Ooc(x) && (IS(x,TYPE_ROOM,ROOM_LOGGING) || \
++ 			  IS(x,TYPE_THING,THING_LOGGING)))
++ #endif
++ 
+  /*--------------------------------------------------------------------------
+   * Other db stuff
+   */
+***************
+*** 298,303 ****
+--- 304,312 ----
+  #define LT_RPAGE  5
+  #define LT_CHECK  6
+  #define LT_HUH    7
++ #ifdef IC_LOGGING
++ #define LT_IC     8
++ #endif
+  
+  /* tokens for locks */
+  #define NOT_TOKEN '!'
+*** 0.31/hdrs/externs.h Mon, 15 Jun 1998 08:54:16 -0500 dunemush (pennmush/e/1_externs.h 1.3.1.2.1.1 640)
+--- 0.31(w)/hdrs/externs.h Thu, 06 Aug 1998 10:51:54 -0500 dunemush (pennmush/e/1_externs.h 1.3.1.2.1.1 640)
+***************
+*** 77,82 ****
+--- 77,85 ----
+  extern FILE *tracelog_fp;
+  extern FILE *cmdlog_fp;
+  extern int restarting;
++ #ifdef IC_LOGGING
++ extern FILE *iclog_fp;
++ #endif
+  extern struct mail *desc_mail _((dbref player));
+  #ifdef SUN_OS
+  extern int f_close _((FILE * file));
+*** 0.31/hdrs/flags.h Fri, 13 Feb 1998 14:31:28 -0600 dunemush (pennmush/e/3_flags.h 1.1 640)
+--- 0.31(w)/hdrs/flags.h Thu, 06 Aug 1998 10:51:54 -0500 dunemush (pennmush/e/3_flags.h 1.1 640)
+***************
+*** 137,142 ****
+--- 137,143 ----
+  #define THING_PUPPET	0x10	/* echoes to its owner */
+  #define THING_LISTEN	0x20	/* checks for ^ patterns */
+  #define THING_NOLEAVE	0x40	/* Can't be left */
++ #define THING_LOGGING	0x40000000 /* Interior is logged */
+  
+  /*--------------------------------------------------------------------------
+   * Room flags
+***************
+*** 160,165 ****
+--- 161,168 ----
+  #ifdef UNINSPECTED_FLAG
+  #define ROOM_UNINSPECT 0x1000	/* Not inspected */
+  #endif
++ #define ROOM_OOC	0x4000000	/* OOC, players can't log */
++ #define ROOM_LOGGING	0x8000000	/* Interior is being logged */
+  
+  
+  /*--------------------------------------------------------------------------
+*** 0.31/src/bsd.c Fri, 10 Jul 1998 10:16:53 -0500 dunemush (pennmush/e/30_bsd.c 1.6.1.1.1.1.1.1.1.2 640)
+--- 0.31(w)/src/bsd.c Thu, 06 Aug 1998 10:51:53 -0500 dunemush (pennmush/e/30_bsd.c 1.6.1.1.1.1.1.1.1.2 640)
+***************
+*** 209,214 ****
+--- 209,217 ----
+  FILE *wizlog_fp;
+  FILE *tracelog_fp;
+  FILE *cmdlog_fp;
++ #ifdef IC_LOGGING
++ FILE *iclog_fp;
++ #endif
+  
+  static const char *connect_fail = "Either that player does not exist, or has a different password.\r\n";
+  static const char *create_fail = "Either there is already a player with that name, or that name is illegal.\r\n";
+***************
+*** 428,433 ****
+--- 431,439 ----
+    start_log(&wizlog_fp, WIZLOG);
+    start_log(&tracelog_fp, TRACELOG);
+    start_log(&cmdlog_fp, CMDLOG);
++ #ifdef IC_LOGGING
++   start_log(&iclog_fp, ICLOG);
++ #endif
+  #else
+    connlog_fp = checklog_fp = wizlog_fp = tracelog_fp = cmdlog_fp = stderr;
+  #endif				/* SINGLE_LOGFILE */
+***************
+*** 514,519 ****
+--- 520,528 ----
+    end_log(wizlog_fp);
+    end_log(tracelog_fp);
+    end_log(cmdlog_fp);
++ #ifdef IC_LOGGING
++   end_log(iclog_fp);
++ #endif
+  #endif				/* SINGLE_LOGFILE */
+  
+  #ifdef CSRI
+***************
+*** 561,566 ****
+--- 570,578 ----
+    end_log(wizlog_fp);
+    end_log(tracelog_fp);
+    end_log(cmdlog_fp);
++ #ifdef IC_LOGGING
++   end_log(iclog_fp);
++ #endif
+  #endif				/* SINGLE_LOGFILE */
+    newerr = fopen(errlog, "a");
+    if (!newerr) {
+***************
+*** 579,584 ****
+--- 591,599 ----
+    start_log(&wizlog_fp, WIZLOG);
+    start_log(&tracelog_fp, TRACELOG);
+    start_log(&cmdlog_fp, CMDLOG);
++ #ifdef IC_LOGGING
++   start_log(&iclog_fp, ICLOG);
++ #endif
+  #else
+    connlog_fp = checklog_fp = wizlog_fp = tracelog_fp = cmdlog_fp = stderr;
+  #endif				/* SINGLE_LOGFILE */
+*** 0.31/src/flags.c Wed, 11 Mar 1998 09:24:40 -0600 dunemush (pennmush/e/48_flags.c 1.3 640)
+--- 0.31(w)/src/flags.c Thu, 06 Aug 1998 10:51:53 -0500 dunemush (pennmush/e/48_flags.c 1.3 640)
+***************
+*** 157,162 ****
+--- 157,163 ----
+    {"DESTROY_OK", 'd', TYPE_THING, THING_DEST_OK, F_ANY, F_ANY},
+    {"PUPPET", 'p', TYPE_THING, THING_PUPPET, F_ANY, F_ANY},
+    {"NO_LEAVE", 'N', TYPE_THING, THING_NOLEAVE, F_ANY, F_ANY},
++   {"LOGGING", 'l', TYPE_THING, THING_LOGGING, F_ROYAL, F_ROYAL},
+  
+    {"ABODE", 'A', TYPE_ROOM, ROOM_ABODE, F_ANY, F_ANY},
+    {"FLOATING", 'F', TYPE_ROOM, ROOM_FLOATING, F_ANY, F_ANY},
+***************
+*** 167,172 ****
+--- 168,175 ----
+  #ifdef UNINSPECTED_FLAG
+    {"UNINSPECTED", 'u', TYPE_ROOM, ROOM_UNINSPECT, F_ROYAL, F_ROYAL},
+  #endif
++   {"OOC", 'O', TYPE_ROOM, ROOM_OOC, F_ROYAL, F_ROYAL},
++   {"LOGGING", 'l', TYPE_ROOM, ROOM_LOGGING, F_ROYAL, F_ROYAL},
+  
+    {"CLOUDY", 'x', TYPE_EXIT, EXIT_CLOUDY, F_ANY, F_ANY},
+  
+***************
+*** 996,1001 ****
+--- 999,1010 ----
+    {"MONITOR", 'M', TYPE_ROOM, ROOM_LISTEN, F_ANY},
+    {NULL, '\0', 0, 0, 0}
+  };
++ static FLAG log_table[] =
++ {
++   {"LOGGING", 'l', TYPE_ROOM, ROOM_LOGGING, F_ROYAL},
++   {"LOGGING", 'l', TYPE_THING, THING_LOGGING, F_ROYAL},
++   {NULL, '\0', 0, 0, 0}
++ };
+  
+  void
+  set_flag(player, thing, flag, negate, hear, listener)
+***************
+*** 1027,1032 ****
+--- 1036,1060 ----
+        return;
+      }
+    }
++   if (!strcmp (f->name, "LOGGING"))
++     {
++       for (f = log_table; f->name != NULL; f++)
++ 	if (Typeof (thing) == f->type)
++ 	  break;
++       if (f->name == NULL)
++ 	{
++ 	  notify (player, "Permission denied.");
++ 	  return;
++ 	}
++     }
++ 
++   if ((f->flag == ROOM_LOGGING) && (f->type == TYPE_ROOM) &&
++       IS (thing, TYPE_ROOM, ROOM_OOC))
++     {
++       notify (player, "You can't make OOC rooms log.");
++       return;
++     }
++ 
+    if (!can_set_flag(player, thing, f, negate)) {
+      notify(player, "Permission denied.");
+      return;
+***************
+*** 1092,1097 ****
+--- 1120,1131 ----
+  	break;
+        }
+      }
++       if (((f->flag == ROOM_LOGGING) && (f->type == TYPE_ROOM)) ||
++ 	  ((f->flag == THING_LOGGING) && (f->type == TYPE_THING))) {
++         sprintf(tbuf1,"[LOGGING] Room '%s' is no longer being logged.",
++ 	Name(thing));
++ 	notify_except (Contents (thing), NOTHING, tbuf1);
++       }
+      if (((f->flag == QUIET) && (f->type == NOTYPE)) ||
+  	(!Quiet(player) && !Quiet(thing)))
+        notify(player, "Flag reset.");
+***************
+*** 1150,1155 ****
+--- 1184,1195 ----
+  	break;
+        }
+      }
++       if (((f->flag == ROOM_LOGGING) && (f->type == TYPE_ROOM)) ||
++ 	  ((f->flag == THING_LOGGING) && (f->type == TYPE_THING))) {
++         sprintf(tbuf1,"[LOGGING] Room '%s' is now being logged.",
++ 	Name(thing));
++ 	notify_except (Contents (thing), NOTHING, tbuf1);
++       }
+      if (((f->flag == QUIET) && (f->flag == NOTYPE)) ||
+  	(!Quiet(player) && !Quiet(thing)))
+        notify(player, "Flag set.");
+*** 0.31/src/log.c Fri, 13 Feb 1998 14:32:30 -0600 dunemush (pennmush/f/11_log.c 1.1 640)
+--- 0.31(w)/src/log.c Thu, 06 Aug 1998 10:51:53 -0500 dunemush (pennmush/f/11_log.c 1.1 640)
+***************
+*** 33,38 ****
+--- 33,41 ----
+  void end_log _((FILE * fp));
+  void do_rawlog _((int logtype, const char *fmt,...));
+  
++ #ifdef IC_LOGGING
++ extern time_t mudtime;
++ #endif
+  
+  char *
+  quick_unparse(object)
+***************
+*** 147,152 ****
+--- 150,160 ----
+    case LT_HUH:
+      f = cmdlog_fp;
+      break;
++ #ifdef IC_LOGGING
++   case LT_IC:
++     f = iclog_fp;
++     break;
++ #endif
+    default:
+      f = stderr;
+      break;
+***************
+*** 238,243 ****
+--- 246,257 ----
+  		"bad object", tbuf1);
+      }
+      break;
++ #ifdef IC_LOGGING
++   /* Log the player #, room #, and mud time */
++   case LT_IC:
++       do_rawlog(LT_IC, "[%d/%d/%d] %s", player, object, mudtime, tbuf1);
++     break;
++ #endif
+    default:
+      do_rawlog(LT_ERR, "ERR: %s", tbuf1);
+    }
+***************
+*** 286,291 ****
+--- 300,311 ----
+      endlog(wizlog_fp);
+      unlink(WIZLOG);
+      start_log(&wizlog_fp, WIZLOG);
++ #ifdef IC_LOGGING
++   } else if (!strcasecmp(log_name, "ic")) {
++     endlog(iclog_fp);
++     unlink(ICLOG);
++     start_log(&iclog_fp, ICLOG);
++ #endif
+    } else {
+      notify(player, "That is not a valid log.");
+      return;
+*** 0.31/src/move.c Mon, 23 Feb 1998 14:31:54 -0600 dunemush (pennmush/f/18_move.c 1.2 640)
+--- 0.31(w)/src/move.c Thu, 06 Aug 1998 10:51:53 -0500 dunemush (pennmush/f/18_move.c 1.2 640)
+***************
+*** 88,93 ****
+--- 88,99 ----
+  	  did_it(what, old, NULL, NULL, "OXLEAVE", NULL, NULL, where);
+  	did_it(what, where, "ENTER", NULL, "OENTER", "has arrived.",
+  	       "AENTER", where);
++ #ifdef IC_LOGGING
++ 	if (Logging(old))
++       do_log(LT_IC,what,old,"%s has left.",Name(what));
++ 	if (Logging(where))
++       do_log(LT_IC,what,where,"%s has arrived.",Name(what));
++ #endif
+        } else {
+  	/* non-listeners only trigger the actions not the messages */
+  	did_it(what, old, NULL, NULL, NULL, NULL, "ALEAVE", old);
+***************
+*** 199,204 ****
+--- 205,214 ----
+  
+    /* autolook */
+    look_room(player, loc, 2);
++ #ifdef IC_LOGGING
++   if (Logging(loc)) 
++     notify(player,"[LOGGING] The room is currently logging. Use +log/off to turn off logging.");
++ #endif
+    deep--;
+  }
+  
+*** 0.31/src/speech.c Fri, 10 Jul 1998 10:16:53 -0500 dunemush (pennmush/f/34_speech.c 1.3 640)
+--- 0.31(w)/src/speech.c Thu, 06 Aug 1998 10:54:03 -0500 dunemush (pennmush/f/34_speech.c 1.3 640)
+***************
+*** 127,132 ****
+--- 127,137 ----
+    notify(player, tprintf("You say, \"%s\"", tbuf1));
+    notify_except(db[loc].contents, player,
+  		tprintf("%s says, \"%s\"", spname(player), tbuf1));
++ 
++ #ifdef IC_LOGGING
++   if (Logging(loc))
++   do_log(LT_IC,player,loc,"%s says, \"%s\"",spname(player),tbuf1);
++ #endif
+  }
+  
+  void
+***************
+*** 558,563 ****
+--- 563,574 ----
+    else
+      notify_except(db[loc].contents, NOTHING,
+  		  tprintf("%s%s", spname(player), tbuf1));
++ 
++ #ifdef IC_LOGGING
++   if (Logging(loc))
++   do_log(LT_IC,player,loc,"%s%s%s",spname(player),
++          !space ? " " : "", tbuf1);
++ #endif
+  }
+  
+  void
+***************
+*** 1320,1325 ****
+--- 1331,1340 ----
+  
+    /* notify everybody */
+    notify_anything(player, na_loc, (void *) loc, ns_esnotify, 0, tbuf1);
++ #ifdef IC_LOGGING
++   if (Logging(loc))
++     do_log(LT_IC, player, loc, "%s", tbuf1);
++ #endif
+  }
+  
+  void
+***************
+*** 1354,1359 ****
+--- 1369,1378 ----
+  	       tprintf("You remit, \"%s\" in %s", arg2, rmno));
+        }
+        oemit_notify_except(room, player, room, arg2);
++ #ifdef IC_LOGGING
++   if (Logging(room))
++       do_log(LT_IC,player,room,"%s",arg2);
++ #endif
+      }
+    }
+  }
+***************
+*** 1393,1398 ****
+--- 1412,1421 ----
+    } else {
+      notify(player, tprintf("You lemit: \"%s\"", tbuf1));
+      oemit_notify_except(room, player, room, tbuf1);
++ #ifdef IC_LOGGING
++   if (Logging(room))
++     do_log(LT_IC,player,room,"%s",tbuf1);
++ #endif
+    }
+  }
+  

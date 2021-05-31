@@ -1,0 +1,43 @@
+@@ NO_SETQ Patch.
+@@
+@@    This patch should provide some degree of compatiblity with older
+@@ versions of mush without setq. It should work with at least TinyMUSH
+@@ 2.0.8 patchlevel 7. This patch has not been tested except for a very few
+@@ tinymush platforms, so performance might varry.
+
+@set me=quiet
+@lock/use com=com
+@@
+@@ Patch for no-setq()
+@@
+@@ Functions
+@@
+&format com=\[[capstr(lcstr(after(%1,_)))]\] [switch([first(%2)] %0,:*,[name(%0)] [mid(squish(%2),1,3999)],;*,[name(%0)][mid(squish(%2),1,3999)],* [before(%1,_)],You say\, "[squish(%2)]",[name(%0)] says\, "[squish(%2)]")]
+&wrap com=[switch(0,%4,*END*,strlen(%0),,gt(strlen(%0),%1),%0,[extract(%0,1,sub(wordpos(%0,%1),1))]%r%2[space(%3)][u(wrap,extract(%0,wordpos(%0,%1),words(%0)),%1,%2,%3,switch(%4,,20,sub(%4,1)))])]
+
+@@
+@@ Commands
+@@
+&who com=$com who:@dolist BEGIN [lwho()] END=@select ## 0=BEGIN 0,@pemit %#=**********%r* Communication Channel Search%r*,END 0,@pemit %#=*%r**********,*[not(and(u(both,%#),words(u(gdb,##))))],@pemit %#=* [ljust(name(##),16)] : [u(wrap,u(gdb,##),57,*,20)],not(u(dark,##)),,*[words(setinter(u(gdb,%#),u(gdb,##)))],,@pemit %#=* [ljust(name(##),16)] : [u(wrap,setinter(u(gdb,%#),u(gdb,##)),57,*,20)] 
+
+&who2 com=$com who *:@dolist BEGIN [lwho()] END=@select ## 0=BEGIN 0,@pemit %#=**********%r* Communication Channel Search%r*,END 0,@pemit %#=*%r**********,not(and(u(dark,##),not(u(both,%#)))),,[switch(words(%0),words(iter(%0,u(match,##,u(match,%#,#\#)))),1,0)],,@pemit %#=* [ljust(name(##),16)] : [u(wrap,setinter(u(gdb,##),iter(%0,u(match,%#,#\#))),57,*,20)]
+
+@@
+@@ Com Connecting Commands.
+@@
+&connect com=$com monitor *onnect:@dolist [iter(lwho(),extract(##,u(onchan,##,MONITOR),1))]=@pemit ##=[switch(1,u(dark,%#),,[gt(words(u(remove,setinter(u(gdb,%#),u(gdb,##)),MONITOR)),0)],\\\[Com\\\] [switch(##,%#,You have,%N has)] %0onnected on: '[u(remove,setinter(u(gdb,%#),u(gdb,##)),MONITOR)]')]
+
+@aconnect com=@dolist [iter(lwho(),extract(##,u(onchan,##,MONITOR),1))]=@pemit ##=[switch(1,u(dark,##),,[gt(words(u(remove,setinter(u(gdb,%#),u(gdb,##)),MONITOR)),0)],\[Com\] [switch(##,%#,You have,%N has)] connected on: '[u(remove,setinter(u(gdb,%#),u(gdb,##)),MONITOR)]')]
+
+@adisconnect com=@dolist [iter(lwho(),extract(##,u(onchan,##,MONITOR),1))]=@pemit ##=[switch(1,u(dark,##),,[gt(words(u(remove(setinter(u(gdb,%#),u(gdb,##)),MONITOR)),0)],\[Com\] [switch(##,%#,You have,%N has)] disconnected on: '[u(remove,setinter(u(gdb,%#),u(gdb,##)),MONITOR)]')]
+
+@@
+@@ Compat/Conversion Stuff
+@@
+@force com=&config me=[get(com/config)] NO_SETQ
+@force com=@swich v(config)=*NO_@SELECT*,{@edit me/*=@select,@switch/first}
+@switch version()=Tiny*,{@aconnect com;@adisconnect com},&connect com
+@trig com/compat
+@force com=@wait 4=@dolist iter(lattr(me),switch(v(##),$*,,##))=@set me/##=no_command
+@lock/use com=canuse/1
+@set me = !quiet

@@ -1,0 +1,14 @@
+@@ This file can be quoted in and the resulting object placed in the Master
+@@ Room, or the +DEFINE_CMD and +SPELL_CMD attributes can be copied and placed
+@@ on an appropriatly powered (see_all and pemit_all) object already in the
+@@ Master Room.
+@create Webster's Code
+@set Webster's Code = switch(version(), *PennMUSH*, !NO_COMMAND, COMMANDS)
+@set Webster's Code = SAFE
+@power Webster's Code = see_all
+@power Webster's Code = pemit_all
+&+DEFINE_CMD Webster's Code=$+define *:@switch/first conn(webster)=>0, {@pemit/silent %#=+DEFINE: Searching...; @pemit/silent *webster=%n pages: define FOO %0}, @pemit/silent %#=Sorry\, the dictionary is temporarily unavailable.
+&+SPELL_CMD Webster's Code=$+spell *:@switch/first 0=gt(conn(Webster), 0), @pemit/silent %#=Spellcheck failed: Webster is unavailable right now., strmatch(%0, */*), {@pemit/silent %#=+SPELL: Spellcheck in progress: %0; @pemit/silent *Webster=%n pages: spell Misspelled %0}, [setq(1, before(%0, /))][setq(2, after(%0, /))][t(setr(0, locate(%#, %q1, *)))], @pemit/silent %#=I can't see %q1 here., visible(%#, %q0/%q2), @pemit/silent %#=You aren't allowed to check that., {@pemit/silent %#=+SPELL: Spellcheck in progress: %0; @pemit/silent *Webster=%n pages: spell %q1/%q2 [secure(edit(edit(edit(edit(xget(%q0, %q2), \%r, %b), \%t, %b), \%b, %b), \%R, %b))]}
+&VERSION Webster's Code=4.1.4
+
+

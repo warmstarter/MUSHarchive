@@ -1,0 +1,452 @@
+{
+  "ACCESS", SWITCH_ACCESS
+}
+,
+{
+  "ADD", SWITCH_ADD
+}
+,
+{
+  "ALL", SWITCH_ALL
+}
+,
+{
+  "ATTRIBS", SWITCH_ATTRIBS
+}
+,
+{
+  "BAN", SWITCH_BAN
+}
+,
+{
+  "BLIND", SWITCH_BLIND
+}
+,
+{
+  "BRIEF", SWITCH_BRIEF
+}
+,
+{
+  "CHECK", SWITCH_CHECK
+}
+,
+{
+  "CHOWN", SWITCH_CHOWN
+}
+,
+{
+  "CLEAR", SWITCH_CLEAR
+}
+,
+{
+  "CMD", SWITCH_CMD
+}
+,
+{
+  "COMMANDS", SWITCH_COMMANDS
+}
+,
+{
+  "CONN", SWITCH_CONN
+}
+,
+{
+  "CONNECT", SWITCH_CONNECT
+}
+,
+{
+  "CONNECTED", SWITCH_CONNECTED
+}
+,
+{
+  "CONTENTS", SWITCH_CONTENTS
+}
+,
+{
+  "COSTS", SWITCH_COSTS
+}
+,
+{
+  "COUNT", SWITCH_COUNT
+}
+,
+{
+  "DATABASE", SWITCH_DATABASE
+}
+,
+{
+  "DB", SWITCH_DB
+}
+,
+{
+  "DEBUG", SWITCH_DEBUG
+}
+,
+{
+  "DECOMPILE", SWITCH_DECOMPILE
+}
+,
+{
+  "DEFAULTS", SWITCH_DEFAULTS
+}
+,
+{
+  "DELETE", SWITCH_DELETE
+}
+,
+{
+  "DESC", SWITCH_DESC
+}
+,
+{
+  "DISABLE", SWITCH_DISABLE
+}
+,
+{
+  "DOWN", SWITCH_DOWN
+}
+,
+{
+  "DSTATS", SWITCH_DSTATS
+}
+,
+{
+  "EMIT", SWITCH_EMIT
+}
+,
+{
+  "ENABLE", SWITCH_ENABLE
+}
+,
+{
+  "ERR", SWITCH_ERR
+}
+,
+{
+  "EXITS", SWITCH_EXITS
+}
+,
+{
+  "FILE", SWITCH_FILE
+}
+,
+{
+  "FIRST", SWITCH_FIRST
+}
+,
+{
+  "FLAGS", SWITCH_FLAGS
+}
+,
+{
+  "FOLDER", SWITCH_FOLDER
+}
+,
+{
+  "FOO", SWITCH_FOO
+}
+,
+{
+  "FORWARD", SWITCH_FORWARD
+}
+,
+{
+  "FSTATS", SWITCH_FSTATS
+}
+,
+{
+  "FULL", SWITCH_FULL
+}
+,
+{
+  "FUNCTIONS", SWITCH_FUNCTIONS
+}
+,
+{
+  "FWD", SWITCH_FWD
+}
+,
+{
+  "GAG", SWITCH_GAG
+}
+,
+{
+  "GLOBALS", SWITCH_GLOBALS
+}
+,
+{
+  "HEADER", SWITCH_HEADER
+}
+,
+{
+  "HERE", SWITCH_HERE
+}
+,
+{
+  "HIDE", SWITCH_HIDE
+}
+,
+{
+  "ILIST", SWITCH_ILIST
+}
+,
+{
+  "INVENTORY", SWITCH_INVENTORY
+}
+,
+{
+  "IPRINT", SWITCH_IPRINT
+}
+,
+{
+  "JOIN", SWITCH_JOIN
+}
+,
+{
+  "LIST", SWITCH_LIST
+}
+,
+{
+  "LOCATION", SWITCH_LOCATION
+}
+,
+{
+  "ME", SWITCH_ME
+}
+,
+{
+  "MOD", SWITCH_MOD
+}
+,
+{
+  "MORTAL", SWITCH_MORTAL
+}
+,
+{
+  "MOTD", SWITCH_MOTD
+}
+,
+{
+  "MUTE", SWITCH_MUTE
+}
+,
+{
+  "NAME", SWITCH_NAME
+}
+,
+{
+  "NEXT", SWITCH_NEXT
+}
+,
+{
+  "NO", SWITCH_NO
+}
+,
+{
+  "NOEVAL", SWITCH_NOEVAL
+}
+,
+{
+  "NOISY", SWITCH_NOISY
+}
+,
+{
+  "NOSPACE", SWITCH_NOSPACE
+}
+,
+{
+  "NOTIFY", SWITCH_NOTIFY
+}
+,
+{
+  "NUKE", SWITCH_NUKE
+}
+,
+{
+  "OFF", SWITCH_OFF
+}
+,
+{
+  "ON", SWITCH_ON
+}
+,
+{
+  "OUTSIDE", SWITCH_OUTSIDE
+}
+,
+{
+  "OVERRIDE", SWITCH_OVERRIDE
+}
+,
+{
+  "PANIC", SWITCH_PANIC
+}
+,
+{
+  "PARANOID", SWITCH_PARANOID
+}
+,
+{
+  "PLAYERS", SWITCH_PLAYERS
+}
+,
+{
+  "PORT", SWITCH_PORT
+}
+,
+{
+  "POSE", SWITCH_POSE
+}
+,
+{
+  "PRINT", SWITCH_PRINT
+}
+,
+{
+  "PRIVS", SWITCH_PRIVS
+}
+,
+{
+  "PURGE", SWITCH_PURGE
+}
+,
+{
+  "QUICK", SWITCH_QUICK
+}
+,
+{
+  "QUIET", SWITCH_QUIET
+}
+,
+{
+  "READ", SWITCH_READ
+}
+,
+{
+  "REBOOT", SWITCH_REBOOT
+}
+,
+{
+  "REGISTER", SWITCH_REGISTER
+}
+,
+{
+  "RENAME", SWITCH_RENAME
+}
+,
+{
+  "RETROACTIVE", SWITCH_RETROACTIVE
+}
+,
+{
+  "ROOM", SWITCH_ROOM
+}
+,
+{
+  "ROOMS", SWITCH_ROOMS
+}
+,
+{
+  "ROYALTY", SWITCH_ROYALTY
+}
+,
+{
+  "SEE", SWITCH_SEE
+}
+,
+{
+  "SELF", SWITCH_SELF
+}
+,
+{
+  "SEND", SWITCH_SEND
+}
+,
+{
+  "SET", SWITCH_SET
+}
+,
+{
+  "SILENT", SWITCH_SILENT
+}
+,
+{
+  "SKIPDEFAULTS", SWITCH_SKIPDEFAULTS
+}
+,
+{
+  "SPEAK", SWITCH_SPEAK
+}
+,
+{
+  "STATS", SWITCH_STATS
+}
+,
+{
+  "SUMMARY", SWITCH_SUMMARY
+}
+,
+{
+  "TAG", SWITCH_TAG
+}
+,
+{
+  "TELEPORT", SWITCH_TELEPORT
+}
+,
+{
+  "TF", SWITCH_TF
+}
+,
+{
+  "THINGS", SWITCH_THINGS
+}
+,
+{
+  "TITLE", SWITCH_TITLE
+}
+,
+{
+  "TRACE", SWITCH_TRACE
+}
+,
+{
+  "UNCLEAR", SWITCH_UNCLEAR
+}
+,
+{
+  "UNFOLDER", SWITCH_UNFOLDER
+}
+,
+{
+  "UNTAG", SWITCH_UNTAG
+}
+,
+{
+  "URGENT", SWITCH_URGENT
+}
+,
+{
+  "WHAT", SWITCH_WHAT
+}
+,
+{
+  "WIPE", SWITCH_WIPE
+}
+,
+{
+  "WIZ", SWITCH_WIZ
+}
+,
+{
+  "WIZARD", SWITCH_WIZARD
+}
+,
+{
+  "YES", SWITCH_YES
+}
+,
+{
+  "ZONE", SWITCH_ZONE
+}
+,

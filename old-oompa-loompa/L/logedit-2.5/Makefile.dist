@@ -1,0 +1,52 @@
+#
+# Makefile for logedit 
+# by Alan Schwartz
+#
+
+# C compiler
+#CC=gcc
+CC=cc
+
+# Compilation flags
+#CFLAGS=
+CFLAGS=-g
+
+# Optimization flags
+#OPTFLAGS=-O
+OPTFLAGS=
+
+# Curses - If your system supports the curses or cursesX library,
+# the syntax display (logedit -?) will be conveniently paged for you.
+# However, this can increase the size of the executable by 30-90k
+# (unoptimized, before stripping), so you may prefer to just pipe to
+# a pager of your choice. CursesX is larger than Curses.
+# Word has it that Irix systems don't like curses. Your mileage may vary.
+# If want to use the the cursesX library, uncomment these 2 lines:
+#DEFS=-DCURSESX
+#LIBS=-lcursesX
+# If want to use the the curses library, uncomment these 2 lines:
+#DEFS=-DCURSES
+#LIBS=-lcurses -ltermcap
+# Otherwise (no curses), use these lines:
+DEFS=
+LIBS=
+
+# Program to use for installing
+#INSTALL=/usr/bin/install -c
+INSTALL=cp
+
+# Where to put the executable (EXEDIR) and the unformatted man page (MANDIR)
+# Set MANDIR to /dev/null for no manual page
+EXEDIR=/cogsci/grad/alansz/bin
+#EXEDIR=/usr/local/bin
+MANDIR=/cogsci/grad/alansz/bin
+#MANDIR=/usr/local/man/man1
+#MANDIR=/dev/null
+
+logedit: logedit.c logedit.h
+	${CC} ${CFLAGS} ${OPTFLAGS} ${DEFS} -o logedit logedit.c ${LIBS}
+
+install: logedit
+	${INSTALL} logedit ${EXEDIR}
+	${INSTALL} logedit.1 ${MANDIR}
+
