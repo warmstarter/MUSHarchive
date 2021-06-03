@@ -1,0 +1,1963 @@
+diff -Nur tinymush-3.0p3/src/autoconf.h.in chic/src/autoconf.h.in
+--- tinymush-3.0p3/src/autoconf.h.in	Mon Oct 22 05:44:17 2001
++++ chic/src/autoconf.h.in	Wed Mar 20 17:08:37 2002
+@@ -420,6 +420,9 @@
+ typedef int	dbref;
+ typedef int	FLAG;
+ typedef int	POWER;
++#ifdef REALITY_LEVELS
++typedef int     RLEVEL;
++#endif /* REALITY_LEVELS */
+ typedef char	boolexp_type;
+ typedef char	IBUF[16];
+ 
+diff -Nur tinymush-3.0p3/src/command.c chic/src/command.c
+--- tinymush-3.0p3/src/command.c	Mon Oct 22 05:44:20 2001
++++ chic/src/command.c	Wed Mar 20 17:03:19 2002
+@@ -757,6 +757,11 @@
+ 	CA_NO_SLAVE|CA_GBL_BUILD|CA_NO_GUEST|CA_PLAYER,
+ 	PCRE_ROBOT,	CS_TWO_ARG,		
+ 	NULL,			NULL,		do_pcreate},
++#ifdef REALITY_LEVELS
++{(char *)"@rxlevel",		NULL,		CA_WIZARD,
++	0,		CS_TWO_ARG|CS_INTERP,
++	NULL,			NULL,		do_rxlevel},
++#endif /* REALITY_LEVELS */
+ {(char *)"@search",		NULL,		CA_PUBLIC,
+ 	SRCH_SEARCH,	CS_ONE_ARG|CS_NOINTERP,	
+ 	NULL,			NULL,		do_search},
+@@ -804,6 +809,11 @@
+ {(char *)"@trigger",		trig_sw,	CA_GBL_INTERP,
+ 	0,		CS_TWO_ARG|CS_ARGV,	
+ 	NULL,			NULL,		do_trigger},
++#ifdef REALITY_LEVELS
++{(char *)"@txlevel",		NULL,		CA_WIZARD,
++	0,		CS_TWO_ARG|CS_INTERP,
++	NULL,			NULL,		do_txlevel},
++#endif /* REALITY_LEVELS */
+ {(char *)"@unlink",		NULL,		CA_NO_SLAVE|CA_GBL_BUILD,
+ 	0,		CS_ONE_ARG|CS_INTERP|CS_FUNCTION,	
+ 	NULL,			NULL,		do_unlink},
+@@ -3020,6 +3018,20 @@
+ 		   tprintf("Descs avail: %10d", maxfds));
+ #endif
+ }
++
++#ifdef REALITY_LEVELS
++static void list_rlevels(player)
++dbref player;
++{
++	int i;
++	raw_notify(player, "Reality levels:");
++	for(i = 0; i < mudconf.no_levels; ++i)
++		raw_notify(player, tprintf("    Level: %s Value: 0x%04x Desc: %s",
++			mudconf.reality_level[i].name, mudconf.reality_level[i].value,
++			mudconf.reality_level[i].attr));
++}
++#endif /* REALITY_LEVELS */
++
+ /* ---------------------------------------------------------------------------
+  * do_list: List information stored in internal structures.
+  */
+@@ -3050,6 +3062,9 @@
+ #define LIST_TEXTFILES  24
+ #define LIST_PARAMS	25
+ #define LIST_CF_RPERMS	26
++#ifdef REALITY_LEVELS
++#define LIST_RLEVELS	27
++#endif /* REALITY_LEVELS */
+ /* *INDENT-OFF* */
+ 
+ NAMETAB list_names[] = {
+@@ -3079,6 +3094,9 @@
+ {(char *)"switches",		2,	CA_PUBLIC,	LIST_SWITCHES},
+ {(char *)"textfiles",		1,	CA_WIZARD,	LIST_TEXTFILES},
+ {(char *)"user_attributes",	1,	CA_WIZARD,	LIST_VATTRS},
++#ifdef REALITY_LEVELS
++{(char *)"rlevels",			1,	CA_PUBLIC,	LIST_RLEVELS},
++#endif /* REALITY_LEVELS */
+ { NULL,				0,	0,		0}};
+ 
+ /* *INDENT-ON* */
+@@ -3185,6 +3203,11 @@
+ 	case LIST_PARAMS:
+ 		list_params(player);
+ 		break;
++#ifdef REALITY_LEVELS
++	case LIST_RLEVELS:
++		list_rlevels(player);
++		break;
++#endif /* REALITY_LEVELS */
+ 	default:
+ 		display_nametab(player, list_names,
+ 				(char *)"Unknown option.  Use one of:", 1);
+diff -Nur tinymush-3.0p3/src/command.h chic/src/command.h
+--- tinymush-3.0p3/src/command.h	Mon Oct 22 05:44:20 2001
++++ chic/src/command.h	Wed Mar 20 17:03:19 2002
+@@ -160,6 +160,10 @@
+ CMD_NO_ARG(do_logrotate);		/* Rotate the logfile */
+ CMD_NO_ARG(do_sql_connect);		/* Create a SQL db connection */
+ CMD_ONE_ARG(do_sql);			/* Execute a SQL command */
++#ifdef REALITY_LEVELS
++CMD_TWO_ARG(do_rxlevel);		/* set Rx Levels */
++CMD_TWO_ARG(do_txlevel);		/* set Tx Levels */
++#endif /* REALITY_LEVELS */
+ 
+ typedef struct hookentry HOOKENT;
+ struct hookentry {
+diff -Nur tinymush-3.0p3/src/comsys.c chic/src/comsys.c
+--- tinymush-3.0p3/src/comsys.c	Mon Oct 22 05:44:22 2001
++++ chic/src/comsys.c	Wed Mar 20 17:03:19 2002
+@@ -626,7 +626,11 @@
+ 	cap->channel->charge_collected += cap->channel->charge;
+ 	giveto(cap->channel->owner, cap->channel->charge);
+ 
++#ifdef COMTITLE_TOGGLE
++	if (cap->title && mudconf.use_comtitles) {
++#else
+ 	if (cap->title) {
++#endif
+ 	    tp = tbuf;
+ 	    safe_str(cap->title, tbuf, &tp);
+ 	    safe_chr(' ', tbuf, &tp);
+@@ -704,7 +708,11 @@
+     /* Note that even if the player is already on this channel,
+      * we do not inherit the channel title from other aliases.
+      */
++#ifdef COMTITLE_TOGGLE
++    if (title_str && *title_str && mudconf.use_comtitles)
++#else
+     if (title_str && *title_str)
++#endif
+ 	cap->title = (char *) strdup(munge_comtitle(title_str));
+     else
+ 	cap->title = NULL;
+@@ -747,7 +755,11 @@
+ 			player);
+ 	}
+ 
++#ifdef COMTITLE_TOGGLE
++	if (title_str && mudconf.use_comtitles) {
++#else
+ 	if (title_str) {
++#endif
+ 	    notify(player,
+ 		  tprintf("Channel '%s' added with alias '%s' and title '%s'.",
+ 			  chp->name, alias_str, cap->title));
+@@ -759,7 +771,11 @@
+ 
+     } else {
+ 
++#ifdef COMTITLE_TOGGLE
++	if (title_str && mudconf.use_comtitles) {
++#else
+ 	if (title_str) {
++#endif
+ 	    notify(player,
+   	      tprintf("Alias '%s' with title '%s' added for channel '%s'.",
+ 		      alias_str, cap->title, chp->name));
+@@ -1414,7 +1430,11 @@
+     if (cap->title)
+ 	XFREE(cap->title, "do_comtitle.title");
+ 
++#ifdef COMTITLE_TOGGLE
++    if (!title || !*title || !mudconf.use_comtitles) {
++#else
+     if (!title || !*title) {
++#endif
+ 	notify(player, tprintf("Title cleared on channel %s.",
+ 			       cap->channel->name));
+ 	return;
+diff -Nur tinymush-3.0p3/src/conf.c chic/src/conf.c
+--- tinymush-3.0p3/src/conf.c	Mon Oct 22 05:44:24 2001
++++ chic/src/conf.c	Wed Mar 20 17:03:19 2002
+@@ -389,6 +389,18 @@
+ 	    mudstate.global_regs[i] = NULL;
+ 	    mudstate.glob_reg_len[i] = 0;
+ 	}
++#ifdef REALITY_LEVELS
++	mudconf.no_levels = 0;
++	mudconf.def_room_rx = 1;
++	mudconf.def_room_tx = ~(RLEVEL)0;
++	mudconf.def_player_rx = 1;
++	mudconf.def_player_tx = 1;
++	mudconf.def_exit_rx = 1;
++	mudconf.def_exit_tx = 1;
++	mudconf.def_thing_rx = 1;
++	mudconf.def_thing_tx = 1;
++	mudconf.use_comtitles = 1;
++#endif /* REALITY_LEVELS */
+ #else
+ 	mudconf.paylimit = 10000;
+ 	mudconf.digcost = 10;
+@@ -543,6 +555,39 @@
+ 	return -1;
+ }
+ 
++
++#ifdef REALITY_LEVELS
++/*
++ * ---------------------------------------------------------------------------
++ * * cf_rlevel: Set reality level.
++ */
++
++CF_HAND(cf_rlevel)
++{
++	CONFDATA *mc = (CONFDATA *)vp;
++	int i;
++
++	if(mc->no_levels >= 32)
++		return 1;
++	for(i=0; *str && !isspace(*str); ++str)
++		if(i < 8)
++			mc->reality_level[mc->no_levels].name[i++] = *str;
++	mc->reality_level[mc->no_levels].name[i] = '\0';
++	mc->reality_level[mc->no_levels].value = 1;
++	StringCopy(mc->reality_level[mc->no_levels].attr, "DESC"); 
++	for(; *str && isspace(*str); ++str);
++	for(i=0; *str && isdigit(*str); ++str)
++		i = i * 10 + (*str - '0');
++	if(i)
++		mc->reality_level[mc->no_levels].value = (RLEVEL) i;
++	for(; *str && isspace(*str); ++str);
++	if(*str)
++		StringCopy(mc->reality_level[mc->no_levels].attr, str);
++	mc->no_levels++;
++	return 0;
++}
++#endif /* REALITY_LEVELS */
++
+ /*
+  * ---------------------------------------------------------------------------
+  * * cf_int: Set integer parameter.
+@@ -1510,6 +1552,18 @@
+ {(char *)"wizard_motd_file",		cf_string,	CA_STATIC,	CA_GOD,		(int *)mudconf.wizmotd_file,	SBUF_SIZE},
+ {(char *)"wizard_motd_message",		cf_string,	CA_GOD,		CA_WIZARD,	(int *)mudconf.wizmotd_msg,	GBUF_SIZE},
+ {(char *)"zone_recursion_limit",	cf_int,		CA_GOD,		CA_PUBLIC,	&mudconf.zone_nest_lim,		0},
++#ifdef REALITY_LEVELS
++{(char *)"reality_level",		cf_rlevel,	CA_STATIC,	CA_PUBLIC,	(int *)&mudconf, 0},
++{(char *)"def_room_rx",			cf_int,		CA_WIZARD,	CA_PUBLIC,	&mudconf.def_room_rx, 0},
++{(char *)"def_room_tx",			cf_int,		CA_WIZARD,	CA_PUBLIC,	&mudconf.def_room_tx, 0},
++{(char *)"def_player_rx",		cf_int,		CA_WIZARD,	CA_PUBLIC,	&mudconf.def_player_rx, 0},
++{(char *)"def_player_tx",		cf_int,		CA_WIZARD,	CA_PUBLIC,	&mudconf.def_player_tx, 0},
++{(char *)"def_exit_rx",			cf_int,		CA_WIZARD,	CA_PUBLIC,	&mudconf.def_exit_rx, 0},
++{(char *)"def_exit_tx",			cf_int,		CA_WIZARD,	CA_PUBLIC,	&mudconf.def_exit_tx, 0},
++{(char *)"def_thing_rx",		cf_int,		CA_WIZARD,	CA_PUBLIC,	&mudconf.def_thing_rx, 0},
++{(char *)"def_thing_tx",		cf_int,		CA_WIZARD,	CA_PUBLIC,	&mudconf.def_thing_tx, 0},
++{(char *)"use_comtitles",		cf_int,		CA_GOD,		CA_PUBLIC,	&mudconf.use_comtitles, 0},
++#endif /* REALITY_LEVELS */
+ { NULL,					NULL,		0,		0,		NULL,				0}};
+ 
+ /* *INDENT-ON* */
+diff -Nur tinymush-3.0p3/src/db.h chic/src/db.h
+--- tinymush-3.0p3/src/db.h	Mon Oct 22 05:44:29 2001
++++ chic/src/db.h	Wed Mar 20 17:03:19 2002
+@@ -100,6 +100,9 @@
+ #define	F_MUCK		4	/* TinyMUCK format */
+ #define F_MUX		5	/* TinyMUX format */
+ #define F_TINYMUSH	6	/* TinyMUSH 3.0 format */
++#ifdef REALITY_LEVELS
++#define F_RLEVELS	64	/* w/ reality levels */
++#endif /* REALITY_LEVELS */
+ 
+ #define	V_MASK		0x000000ff	/* Database version */
+ #define	V_ZONE		0x00000100	/* ZONE/DOMAIN field */
+@@ -162,6 +165,11 @@
+ 	POWER 	powers;		/* ALL: Powers on object */
+ 	POWER	powers2;	/* ALL: even more powers */
+ 
++#ifdef REALITY_LEVELS
++	RLEVEL	rxlevel;	/* ALL: Rx Levels */
++	RLEVEL	txlevel;	/* ALL: Tx Levels */
++#endif /* REALITY_LEVELS */
++
+ 	int	name_length;	/* ALL: Length of name string */
+ 
+ 	int	stack_count;	/* ALL: number of things on the stack */
+@@ -199,6 +207,10 @@
+ #define Flags3(t)		db[t].flags3
+ #define Powers(t)		db[t].powers
+ #define Powers2(t)		db[t].powers2
++#ifdef REALITY_LEVELS
++#define RxLevel(t)		db[t].rxlevel
++#define TxLevel(t)		db[t].txlevel
++#endif /* REALITY_LEVELS */
+ #define NameLen(t)		db[t].name_length
+ #define	Home(t)			Link(t)
+ #define	Dropto(t)		Location(t)
+@@ -233,6 +245,10 @@
+ #define s_Flags3(t,n)		db[t].flags3 = (n)
+ #define s_Powers(t,n)		db[t].powers = (n)
+ #define s_Powers2(t,n)		db[t].powers2 = (n)
++#ifdef REALITY_LEVELS
++#define s_RxLevel(t, n)		db[t].rxlevel = (n)
++#define s_TxLevel(t, n)		db[t].txlevel = (n)
++#endif /* REALITY_LEVELS */
+ #define s_NameLen(t,n)		db[t].name_length = (n)
+ #define	s_Home(t,n)		s_Link(t,n)
+ #define	s_Dropto(t,n)		s_Location(t,n)
+diff -Nur tinymush-3.0p3/src/db_rw.c chic/src/db_rw.c
+--- tinymush-3.0p3/src/db_rw.c	Mon Oct 22 05:44:31 2001
++++ chic/src/db_rw.c	Wed Mar 20 17:03:19 2002
+@@ -255,7 +255,11 @@
+ 
+ 	if (((g_format == F_MUSH) && (g_version != 2)) ||
+ 	    (g_format == F_MUSE) || (g_format == F_MUX) ||
+-	    (g_format == F_TINYMUSH)) {
++#ifdef REALITY_LEVELS
++		((g_format & ~F_RLEVELS) == F_TINYMUSH)) {
++#else
++    	(g_format == F_TINYMUSH)) {
++#endif /* REALITY_LEVELS */
+ 		if ((c = getc(f)) != '\n')
+ 			ungetc(c, f);
+ 	}
+@@ -1002,7 +1006,11 @@
+ 		newf2 |= WATCHER;
+ 	    }
+ 
++#ifdef REALITY_LEVELS
++	} else if ((db_format & ~F_RLEVELS) == F_TINYMUSH) {
++#else
+ 	} else if (db_format == F_TINYMUSH) {
++#endif /* REALITY_LEVELS */
+ 		newf1 = f1;
+ 		newf2 = f2;
+ 		newf3 = f3;
+@@ -1455,7 +1463,11 @@
+ 
+ 		    ch = getc(f); /* 2nd char selects type */
+ 
+-		    if ((ch == 'V') || (ch == 'X') || (ch == 'T')) {
++#ifdef REALITY_LEVELS
++			if ((ch == 'V') || (ch == 'X') || (ch == 'T') || (ch == 't')) {
++#else
++            if ((ch == 'V') || (ch == 'X') || (ch == 'T')) {
++#endif /* REALITY_LEVELS */
+ 
+ 			/* The following things are common across 2.x, MUX,
+ 			 * and 3.0.
+@@ -1495,6 +1507,15 @@
+ 		    /* More generic switch. */
+ 
+ 		    switch (ch) {
++#ifdef REALITY_LEVELS
++			case 't':	/* 3.0 VERSION */
++			    g_format = F_TINYMUSH | F_RLEVELS;
++			    read_3flags = (g_version & V_3FLAGS);
++			    read_powers = (g_version & V_POWERS);
++			    read_new_strings = (g_version & V_QUOTED);
++			    g_version &= V_MASK;
++			    break;
++#endif /* REALITY_LEVELS */
+ 			case 'T':	/* 3.0 VERSION */
+ 			    g_format = F_TINYMUSH;
+ 			    read_3flags = (g_version & V_3FLAGS);
+@@ -1713,7 +1734,11 @@
+ #endif
+ 		case '!':	/* MUX entry/MUSH entry/MUSE non-zoned entry */
+ 			if (deduce_version) {
++#ifdef REALITY_LEVELS
++				g_format = F_TINYMUSH | F_RLEVELS;
++#else
+ 				g_format = F_TINYMUSH;
++#endif /* REALITY_LEVELS */
+ 				g_version = 1;
+ 				deduce_name = 0;
+ 				deduce_zone = 0;
+@@ -1947,6 +1972,20 @@
+ 					f2 = getref(f);
+ 					s_Powers(i, f1);
+ 					s_Powers2(i, f2);
++#ifdef REALITY_LEVELS
++					if(g_format & F_RLEVELS)
++					{
++						f1 = getref(f);
++						f2 = getref(f);
++						s_RxLevel(i, f1);
++						s_TxLevel(i, f2);
++					}
++					else
++					{
++						s_RxLevel(i, 1);
++						s_TxLevel(i, isRoom(i) ? ~(RLEVEL)0 : 1);
++					}
++#endif /* REALITY_LEVELS */
+ 				}
+ 				
+ 				/* ATTRIBUTES */
+@@ -2071,6 +2110,13 @@
+ 	if (flags & V_POWERS) {
+ 		putref(f, Powers(i));
+ 		putref(f, Powers2(i));
++#ifdef REALITY_LEVELS
++		if(db_format & F_RLEVELS)
++		{
++			putref(f, RxLevel(i));
++			putref(f, TxLevel(i));
++		}
++#endif /* REALITY_LEVELS */
+ 	}
+ 	/* write the attribute list */
+ 
+@@ -2132,7 +2178,11 @@
+ 	al_store();
+ #endif /* MEMORY_BASED */
+ 
++#ifdef REALITY_LEVELS
++	switch (format & ~F_RLEVELS) {
++#else
+ 	switch (format) {
++#endif /* REALITY_LEVELS */
+ 	case F_TINYMUSH:
+ 		flags = version;
+ 		break;
+@@ -2145,7 +2195,12 @@
+ #endif
+ 	i = mudstate.attr_next;
+ 	/* TinyMUSH 2 wrote '+V', MUX wrote '+X', 3.0 writes '+T'. */
++#ifdef REALITY_LEVELS
++	/* TM3 + Rlevels writes 't' */
++	fprintf(f, "+%c%d\n+S%d\n+N%d\n", (format & F_RLEVELS)?'t':'T', flags, mudstate.db_top, i);
++#else
+ 	fprintf(f, "+T%d\n+S%d\n+N%d\n", flags, mudstate.db_top, i);
++#endif /* REALITY_LEVELS */
+ 	fprintf(f, "-R%d\n", mudstate.record_players);
+ 	
+ 	/* Dump user-named attribute info */
+diff -Nur tinymush-3.0p3/src/dbconvert.c chic/src/dbconvert.c
+--- tinymush-3.0p3/src/dbconvert.c	Mon Oct 22 05:44:31 2001
++++ chic/src/dbconvert.c	Wed Mar 20 17:03:19 2002
+@@ -36,7 +36,11 @@
+ {
+ 	const char *cp;
+ 
++#ifdef REALITY_LEVELS
++	switch (fmt & ~F_RLEVELS) {
++#else
+ 	switch (fmt) {
++#endif /* REALITY_LEVELS */
+         case F_TINYMUSH:
+ 	        cp = "TinyMUSH-3";
+ 		break;
+@@ -235,7 +239,11 @@
+ 			db_ver = 3;
+ 		fprintf(mainlog_fp, "Output: ");
+ 		info(F_TINYMUSH, db_flags, db_ver);
++#ifdef REALITY_LEVELS
++		db_write(stdout, F_TINYMUSH | F_RLEVELS, db_ver | db_flags);
++#else
+ 		db_write(stdout, F_TINYMUSH, db_ver | db_flags);
++#endif /* REALITY_LEVELS */
+ 	}
+ 	CLOSE;
+ 	exit(0);
+diff -Nur tinymush-3.0p3/src/externs.h chic/src/externs.h
+--- tinymush-3.0p3/src/externs.h	Mon Oct 22 05:44:32 2001
++++ chic/src/externs.h	Wed Mar 20 17:03:19 2002
+@@ -93,6 +93,13 @@
+ 			const char *));
+ extern void	FDECL(notify_except2, (dbref, dbref, dbref, dbref,
+ 			 const char *));
++#ifdef REALITY_LEVELS
++extern void FDECL(notify_except_rlevel, (dbref, dbref, dbref, const char *, int));
++extern void FDECL(notify_except2_rlevel, (dbref, dbref, dbref, dbref, 
++			const char *));
++extern void FDECL(notify_except2_rlevel2, (dbref, dbref, dbref, dbref,
++			const char *));
++#endif /* REALITY_LEVELS */
+ extern int	FDECL(check_filter, (dbref, dbref, int,
+ 			const char *));
+ extern void	FDECL(notify_check, (dbref, dbref, const char *, int));
+diff -Nur tinymush-3.0p3/src/functions.c chic/src/functions.c
+--- tinymush-3.0p3/src/functions.c	Mon Oct 22 05:44:40 2001
++++ chic/src/functions.c	Wed Mar 20 17:03:19 2002
+@@ -14,7 +14,9 @@
+ #include "command.h"
+ #include "functions.h"
+ #include "ansi.h"
+-
++#ifdef REALITY_LEVELS
++#include "levels.h"
++#endif /* REALITY_LEVELS */
+ #ifdef FLOATING_POINTS
+ #ifndef linux                   /* linux defines atof as a macro */
+ double atof();
+@@ -3713,6 +3715,139 @@
+ 	}
+ }
+ 
++#ifdef REALITY_LEVELS
++FUNCTION(fun_hasrxlevel)
++{
++	dbref it;
++	RLEVEL rl;
++
++	it = match_thing(player, fargs[0]);
++	if (!Good_obj(it)) {
++		safe_str("#-1 NOT FOUND", buff, bufc);
++		return;
++	}
++	rl = find_rlevel(fargs[1]);
++	if (!rl) {
++		safe_str("#-1 INVALID RLEVEL", buff, bufc);
++		return;
++	}
++	if (Examinable(player, it)) {
++		if ((RxLevel(it) & rl) == rl) {
++			safe_chr('1', buff, bufc);
++		} else {
++			safe_chr('0', buff, bufc);
++		}
++	} else {
++		safe_noperm(buff, bufc);
++	}
++}
++
++FUNCTION(fun_hastxlevel)
++{
++	dbref it;
++	RLEVEL rl;
++
++	it = match_thing(player, fargs[0]);
++	if (!Good_obj(it)) {
++		safe_str("#-1 NOT FOUND", buff, bufc);
++		return;
++	}
++	rl = find_rlevel(fargs[1]);
++	if (!rl) {
++		safe_str("#-1 INVALID RLEVEL", buff, bufc);
++		return;
++	}
++	if (Examinable(player, it)) {
++		if ((TxLevel(it) & rl) == rl) {
++			safe_chr('1', buff, bufc);
++		} else {
++			safe_chr('0', buff, bufc);
++		}
++	} else {
++		safe_noperm(buff, bufc);
++	}
++}
++
++FUNCTION(fun_rxlevel)
++{
++	dbref it;
++	char levelbuff[2048];
++	int i;
++	RLEVEL lev;
++
++	it = match_thing(player, fargs[0]);
++	if (!Good_obj(it)) 
++	{
++		safe_str("#-1 NOT FOUND", buff, bufc);
++		return;
++	}
++	if (Examinable(player, it))
++	{
++		lev = RxLevel(it);
++		levelbuff[0]='\0';
++		for(i = 0; i < mudconf.no_levels; ++i)
++			if((lev & mudconf.reality_level[i].value) == mudconf.reality_level[i].value)
++			{
++				strcat(levelbuff, mudconf.reality_level[i].name);
++				strcat(levelbuff, " ");
++			}
++		safe_tprintf_str(buff, bufc, "%s", levelbuff);
++	}
++	else
++		safe_noperm(buff, bufc);
++}
++
++FUNCTION(fun_txlevel)
++{
++	dbref it;
++	char levelbuff[2048];
++	int i;
++	RLEVEL lev;
++
++	it = match_thing(player, fargs[0]);
++	if (!Good_obj(it)) 
++	{
++		safe_str("#-1 NOT FOUND", buff, bufc);
++		return;
++	}
++	if (Examinable(player, it))
++	{
++		lev = TxLevel(it);
++		levelbuff[0]='\0';
++		for(i = 0; i < mudconf.no_levels; ++i)
++			if((lev & mudconf.reality_level[i].value) == mudconf.reality_level[i].value)
++			{
++				strcat(levelbuff, mudconf.reality_level[i].name);
++				strcat(levelbuff, " ");
++			}
++		safe_tprintf_str(buff, bufc, "%s", levelbuff);
++	}
++	else
++		safe_noperm(buff, bufc);
++}
++
++FUNCTION(fun_cansee)
++{
++	dbref who, what;
++	
++	who = match_thing(player, fargs[0]);
++	what = match_thing(player, fargs[1]);
++	if(!Good_obj(who) || !Good_obj(what))
++	{
++		safe_str("#-1 NOT FOUND", buff, bufc);
++		return;
++	}
++	if(IsReal(who, what))
++	{
++		safe_chr('1', buff, bufc);
++	}
++	else
++	{
++		safe_chr('0', buff, bufc);	
++	}
++}
++#endif /* REALITY_LEVELS */
++
+ FUNCTION(fun_delete)
+ {
+     char *s, *savep;
+@@ -6013,6 +6148,9 @@
+ {"BEFORE",	fun_before,	0,  FN_VARARGS,	CA_PUBLIC},
+ {"BNAND",	fun_bnand,	2,  0,		CA_PUBLIC},
+ {"BOR",		fun_bor,	2,  0,		CA_PUBLIC},
++#ifdef REALITY_LEVELS
++{"CANSEE",	fun_cansee,	2,	0,		CA_WIZARD},
++#endif /* REALITY_LEVELS */
+ {"CAPSTR",	fun_capstr,	-1, 0,		CA_PUBLIC},
+ {"CASE",	fun_case,	0,  FN_VARARGS|FN_NO_EVAL,
+ 						CA_PUBLIC},
+@@ -6084,6 +6222,10 @@
+ {"HASATTRP",	fun_hasattrp,	2,  0,		CA_PUBLIC},
+ {"HASFLAG",	fun_hasflag,	2,  0,		CA_PUBLIC},
+ {"HASPOWER",    fun_haspower,   2,  0,          CA_PUBLIC},
++#ifdef REALITY_LEVELS
++{"HASRXLEVEL",	fun_hasrxlevel, 2,	0,	CA_PUBLIC},
++{"HASTXLEVEL",	fun_hastxlevel, 2,	0,	CA_PUBLIC},
++#endif /* REALITY_LEVELS */
+ {"HASTYPE",	fun_hastype,	2,  0,		CA_PUBLIC},
+ {"HOME",	fun_home,	1,  0,		CA_PUBLIC},
+ #ifdef PUEBLO_SUPPORT
+@@ -6215,6 +6357,9 @@
+ {"RLOC",	fun_rloc,	2,  0,		CA_PUBLIC},
+ {"ROOM",	fun_room,	1,  0,		CA_PUBLIC},
+ {"ROUND",	fun_round,	2,  0,		CA_PUBLIC},
++#ifdef REALITY_LEVELS
++{"RXLEVEL", fun_rxlevel,1,	0,		CA_PUBLIC},
++#endif /* REALITY_LEVELS */
+ {"S",		fun_s,		-1, 0,		CA_PUBLIC},
+ {"SCRAMBLE",	fun_scramble,	1,  0,		CA_PUBLIC},
+ {"SEARCH",	fun_search,	-1, 0,		CA_PUBLIC},
+@@ -6273,6 +6418,9 @@
+ {"TRIGGER",	fun_trigger,	0,  FN_VARARGS, CA_PUBLIC},
+ {"TRIM",	fun_trim,	0,  FN_VARARGS,	CA_PUBLIC},
+ {"TRUNC",	fun_trunc,	1,  0,		CA_PUBLIC},
++#ifdef REALITY_LEVELS
++{"TXLEVEL", fun_txlevel,1,	0,		CA_PUBLIC},
++#endif /* REALITY_LEVELS */
+ {"TYPE",	fun_type,	1,  0,		CA_PUBLIC},
+ {"U",		fun_u,		0,  FN_VARARGS,	CA_PUBLIC},
+ {"UCSTR",	fun_ucstr,	-1, 0,		CA_PUBLIC},
+diff -Nur tinymush-3.0p3/src/game.c chic/src/game.c
+--- tinymush-3.0p3/src/game.c	Mon Oct 22 05:44:42 2001
++++ chic/src/game.c	Wed Mar 20 17:03:19 2002
+@@ -20,6 +20,10 @@
+ #include "alloc.h"
+ #include "slave.h"
+ 
++#ifdef REALITY_LEVELS
++#include "levels.h"
++#endif /* REALITY_LEVELS */
++
+ extern void NDECL(init_attrtab);
+ extern void NDECL(init_cmdtab);
+ extern void NDECL(cf_init);
+@@ -880,6 +884,61 @@
+ 	}
+ }
+ 
++#ifdef REALITY_LEVELS
++void notify_except_rlevel(loc, player, exception, msg, xflags)
++dbref loc, player, exception;
++const char *msg;
++int xflags;
++{
++	dbref first;
++
++	if (loc != exception && IsReal(loc, player))
++		notify_check(loc, player, msg,
++		  (MSG_ME_ALL | MSG_F_UP | MSG_S_INSIDE | MSG_NBR_EXITS_A| xflags));
++	DOLIST(first, Contents(loc)) {
++		if (first != exception && IsReal(first, player)) {
++			notify_check(first, player, msg,
++				     (MSG_ME | MSG_F_DOWN | MSG_S_OUTSIDE | xflags));
++		}
++	}
++}
++
++void notify_except2_rlevel(loc, player, exc1, exc2, msg)
++dbref loc, player, exc1, exc2;
++const char *msg;
++{
++	dbref first;
++
++	if ((loc != exc1) && (loc != exc2) && IsReal(loc, player))
++		notify_check(loc, player, msg,
++		  (MSG_ME_ALL | MSG_F_UP | MSG_S_INSIDE | MSG_NBR_EXITS_A));
++	DOLIST(first, Contents(loc)) {
++		if (first != exc1 && first != exc2 && IsReal(first, player)) {
++			notify_check(first, player, msg,
++				     (MSG_ME | MSG_F_DOWN | MSG_S_OUTSIDE));
++		}
++	}
++}
++
++void notify_except2_rlevel2(loc, player, exc1, exc2, msg)
++dbref loc, player, exc1, exc2;
++const char *msg;
++{
++	dbref first;
++
++	if ((loc != exc1) && (loc != exc2) && IsReal(loc, player))
++		notify_check(loc, player, msg,
++		  (MSG_ME_ALL | MSG_F_UP | MSG_S_INSIDE | MSG_NBR_EXITS_A));
++	DOLIST(first, Contents(loc)) {
++		if (first != exc1 && first != exc2 
++			&& IsReal(first, player) && IsReal(first, exc2)) {
++			notify_check(first, player, msg,
++				     (MSG_ME | MSG_F_DOWN | MSG_S_OUTSIDE));
++		}
++	}
++}
++#endif /* REALITY_LEVELS */
++
+ void notify_except2(loc, player, exc1, exc2, msg)
+ dbref loc, player, exc1, exc2;
+ const char *msg;
+@@ -1097,7 +1156,11 @@
+ 		unlink(mudconf.crashdb);
+ 		f = tf_fopen(mudconf.crashdb, O_WRONLY | O_CREAT | O_TRUNC);
+ 		if (f != NULL) {
++#ifdef REALITY_LEVELS
++			db_write(f, F_TINYMUSH | F_RLEVELS, UNLOAD_VERSION | UNLOAD_OUTFLAGS);
++#else
+ 			db_write(f, F_TINYMUSH, UNLOAD_VERSION | UNLOAD_OUTFLAGS);
++#endif /* REALITY_LEVELS */
+ 			tf_fclose(f);
+ 		} else {
+ 			log_perror("DMP", "FAIL", "Opening crash file",
+@@ -1128,7 +1191,11 @@
+ 
+ 		if (f != NULL) {
+ 			/* Write a flatfile */
++#ifdef REALITY_LEVELS
++			db_write(f, F_TINYMUSH | F_RLEVELS, UNLOAD_VERSION | UNLOAD_OUTFLAGS);
++#else
+ 			db_write(f, F_TINYMUSH, UNLOAD_VERSION | UNLOAD_OUTFLAGS);
++#endif /* REALITY_LEVELS */
+ 			tf_fclose(f);
+ 		} else {
+ 			log_perror("DMP", "FAIL", "Opening flatfile",
+@@ -1154,7 +1221,11 @@
+ 		f = tf_fopen(tmpfile, O_WRONLY | O_CREAT | O_TRUNC);
+ 		if (f != NULL) {
+ 			/* Write a flatfile */
++#ifdef REALITY_LEVELS
++			db_write(f, F_TINYMUSH | F_RLEVELS, UNLOAD_VERSION | UNLOAD_OUTFLAGS);
++#else
+ 			db_write(f, F_TINYMUSH, UNLOAD_VERSION | UNLOAD_OUTFLAGS);
++#endif /* REALITY_LEVELS */
+ 			tf_fclose(f);
+ 		} else {
+ 			log_perror("DMP", "FAIL", "Opening killed file",
+@@ -1188,7 +1259,11 @@
+ 		strcat(outfn, ".gz");
+ 		f = tf_popen(tprintf("%s > %s", mudconf.compress, tmpfile), O_WRONLY);
+ 		if (f) {
++#ifdef REALITY_LEVELS
++			db_write(f, F_TINYMUSH | F_RLEVELS, OUTPUT_VERSION | OUTPUT_FLAGS);
++#else
+ 			db_write(f, F_TINYMUSH, OUTPUT_VERSION | OUTPUT_FLAGS);
++#endif /* REALITY_LEVELS */
+ 			tf_pclose(f);
+ 			rename(mudconf.outdb, prevfile);
+ 			if (rename(tmpfile, outfn) < 0)
+@@ -1201,7 +1276,11 @@
+ 	} else {
+ 		f = tf_fopen(tmpfile, O_WRONLY | O_CREAT | O_TRUNC);
+ 		if (f) {
++#ifdef REALITY_LEVELS
++			db_write(f, F_TINYMUSH | F_RLEVELS, OUTPUT_VERSION | OUTPUT_FLAGS);
++#else
+ 			db_write(f, F_TINYMUSH, OUTPUT_VERSION | OUTPUT_FLAGS);
++#endif /* REALITY_LEVELS */
+ 			tf_fclose(f);
+ 			rename(mudconf.outdb, prevfile);
+ 			if (rename(tmpfile, mudconf.outdb) < 0)
+@@ -1391,7 +1470,11 @@
+ 
+ 	match = 0;
+ 	while (thing != NOTHING) {
++#ifdef REALITY_LEVELS
++		if ((thing != player) && IsReal(thing, player) &&
++#else
+ 		if ((thing != player) &&
++#endif
+ 		    (atr_match(thing, player, type, str, raw_str,
+ 			       check_parent) > 0)) {
+ 		        match = 1;
+diff -Nur tinymush-3.0p3/src/levels.c chic/src/levels.c
+--- tinymush-3.0p3/src/levels.c	Thu Jan  1 01:00:00 1970
++++ chic/src/levels.c	Wed Mar 20 17:03:19 2002
+@@ -0,0 +1,440 @@
++#ifdef REALITY_LEVELS
++/*
++ * levels.c - Reality levels stuff
++ */
++
++#include "copyright.h"
++#include "autoconf.h"
++
++#include "db.h"
++#include "attrs.h"
++#include "mudconf.h"
++#include "externs.h"
++#include "command.h"
++#include "powers.h"
++#include "alloc.h"
++#include "match.h"
++#include "levels.h"
++
++extern void FDECL(cf_log_notfound, (dbref, char *, const char *, char *));
++
++/*
++ * ---------------------------------------------------------------------------
++ * * rxlevel_description: Return an mbuf containing the RxLevels of the thing.
++ */
++
++char *rxlevel_description(player, target)
++dbref player, target;
++{
++	RLEVEL rl;
++	char *buff, *bp;
++	int otype;
++	int i;
++
++	/*
++	 * Allocate the return buffer 
++	 */
++
++	otype = Typeof(target);
++	bp = buff = alloc_mbuf("power_description");
++
++	/*
++	 * Store the header strings and object type 
++	 */
++
++/*	safe_mb_str((char *)"RxLevel:", buff, &bp); */
++	
++	rl = RxLevel(target);
++	for (i = 0; i < mudconf.no_levels; ++i)
++		if((rl & mudconf.reality_level[i].value) == mudconf.reality_level[i].value)
++		{
++			if(i)
++				safe_mb_chr(' ', buff, &bp);
++			safe_mb_str(mudconf.reality_level[i].name, buff, &bp);
++		}
++
++	/*
++	 * Terminate the string, and return the buffer to the caller 
++	 */
++
++	*bp = '\0';
++	return buff;
++}
++
++/*
++ * ---------------------------------------------------------------------------
++ * * txlevel_description: Return an mbuf containing the TxLevels of the thing.
++ */
++
++char *txlevel_description(player, target)
++dbref player, target;
++{
++	RLEVEL tl;
++	char *buff, *bp;
++	int otype;
++	int i;
++
++	/*
++	 * Allocate the return buffer 
++	 */
++
++	otype = Typeof(target);
++	bp = buff = alloc_mbuf("power_description");
++
++	/*
++	 * Store the header strings and object type 
++	 */
++
++/*	safe_mb_str((char *)"TxLevel:", buff, &bp); */
++	
++	tl = TxLevel(target);
++	for (i = 0; i < mudconf.no_levels; ++i)
++		if((tl & mudconf.reality_level[i].value) == mudconf.reality_level[i].value)
++		{
++			if(i)
++				safe_mb_chr(' ', buff, &bp);
++			safe_mb_str(mudconf.reality_level[i].name, buff, &bp);
++		}
++
++	/*
++	 * Terminate the string, and return the buffer to the caller 
++	 */
++
++	*bp = '\0';
++	return buff;
++}
++
++RLEVEL find_rlevel(name)
++	char *name;
++{
++	int i;
++	
++	for(i=0; i < mudconf.no_levels; ++i)
++		if(!strcasecmp(name, mudconf.reality_level[i].name))
++			return mudconf.reality_level[i].value;
++	return 0;
++}
++
++void do_rxlevel(player, cause, key, object, arg)
++    dbref player, cause;
++    int key;
++    char *object, *arg;
++{
++	dbref thing;
++	int negate, i;
++	RLEVEL result, ormask, andmask;
++	char lname[9];
++
++	if (!arg || !*arg) {
++		notify_quiet(player, "I don't know what you want to set!");
++		return;
++	}
++	
++	/* find thing */
++	if ((thing = match_controlled(player, object)) == NOTHING)
++		return;
++
++	ormask = 0;
++	andmask = ~ormask;	
++	while(*arg)
++	{
++		negate = 0;
++		while(*arg && isspace(*arg))
++			arg++;
++		if(*arg == '!')
++		{
++			negate = 1;
++			++arg;
++		}
++		for(i=0; *arg && !isspace(*arg); ++arg)
++			if(i < 8)
++				lname[i++] = *arg;
++		lname[i] = '\0';
++		if(!lname[0])
++		{
++			if(negate)
++				notify(player, "You must specify a reality level to clear.");
++			else
++				notify(player, "You must specify a reality level to set.");
++			return;
++		}
++		result = find_rlevel(lname);
++		if(!result)
++		{
++			notify(player, "No such reality level.");
++			continue;
++		}
++		if(negate)
++		{
++			andmask &= ~result;
++			notify(player, "Cleared.");
++		}
++		else
++		{
++			ormask |= result;
++			notify(player, "Set.");
++		}
++	}
++	s_RxLevel(thing, RxLevel(thing) & andmask | ormask);
++}
++
++void do_txlevel(player, cause, key, object, arg)
++    dbref player, cause;
++    int key;
++    char *object, *arg;
++{
++	dbref thing;
++	int negate, i;
++	RLEVEL result, ormask, andmask;
++	char lname[9];
++
++	if (!arg || !*arg) {
++		notify_quiet(player, "I don't know what you want to set!");
++		return;
++	}
++	
++	/* find thing */
++	if ((thing = match_controlled(player, object)) == NOTHING)
++		return;
++
++	ormask = 0;
++	andmask = ~ormask;	
++	while(*arg)
++	{
++		negate = 0;
++		while(*arg && isspace(*arg))
++			arg++;
++		if(*arg == '!')
++		{
++			negate = 1;
++			++arg;
++		}
++		for(i=0; *arg && !isspace(*arg); ++arg)
++			if(i < 8)
++				lname[i++] = *arg;
++		lname[i] = '\0';
++		if(!lname[0])
++		{
++			if(negate)
++				notify(player, "You must specify a reality level to clear.");
++			else
++				notify(player, "You must specify a reality level to set.");
++			return;
++		}
++		result = find_rlevel(lname);
++		if(!result)
++		{
++			notify(player, "No such reality level.");
++			continue;
++		}
++		if(negate)
++		{
++			andmask &= ~result;
++			notify(player, "Cleared.");
++		}
++		else
++		{
++			ormask |= result;
++			notify(player, "Set.");
++		}
++	}
++	s_TxLevel(thing, TxLevel(thing) & andmask | ormask);
++}
++
++/*
++ * ---------------------------------------------------------------------------
++ * * decompile_rlevels: Produce commands to set reality levels on target.
++ */
++
++void decompile_rlevels(player, thing, thingname)
++dbref player, thing;
++char *thingname;
++{
++	char *buf;
++	buf = rxlevel_description(player, thing);
++	notify(player, tprintf("@rxlevel %s=%s", strip_ansi(thingname), buf));
++	free_mbuf(buf);
++	buf = txlevel_description(player, thing);
++	notify(player, tprintf("@txlevel %s=%s", strip_ansi(thingname), buf));
++	free_mbuf(buf);
++}
++
++int *desclist_match(player, thing)
++dbref player;
++dbref thing;
++{
++	RLEVEL match;
++	int i, j;
++	ATTR *at;
++	static int descbuffer[33];
++
++	descbuffer[0] = 1;
++	match = RxLevel(player) & TxLevel(thing);
++	for(i = 0; i < mudconf.no_levels; ++i)
++		if((match & mudconf.reality_level[i].value) == mudconf.reality_level[i].value)
++		{
++			at = atr_str(mudconf.reality_level[i].attr);
++			if(at)
++			{
++				for(j = 1; j < descbuffer[0]; ++j)
++					if(at->number == descbuffer[j])
++						break;
++				if(j == descbuffer[0])
++					descbuffer[descbuffer[0]++] = at->number;
++			}
++		}
++	return descbuffer;
++}
++
++/* ---------------------------------------------------------------------------
++ * did_it_rlevel: Have player do something to/with thing, watching the attributes
++ * 'what' is actually ignored, the desclist match being used instead.
++ */
++void did_it_rlevel(player, thing, what, def, owhat, odef, awhat, args, nargs)
++dbref player, thing;
++int what, owhat, awhat, nargs;
++char *args[];
++const char *def, *odef;
++{
++	char *d, *buff, *act, *charges, *bp, *str, *preserve[MAX_GLOBAL_REGS];
++	dbref loc, aowner;
++	int num, aflags, alen, need_pres, preserve_len[MAX_GLOBAL_REGS];
++	int i, *desclist;
++	char found_a_desc;
++
++	need_pres = 0;
++
++	/* message to player */
++
++	if (what > 0) {
++	  /* Get description list */
++	  desclist = desclist_match(player, thing);
++	  found_a_desc = 0;
++	  for(i = 1; i < desclist[0]; ++i)
++	  {
++		d = atr_pget(thing, desclist[i], &aowner, &aflags, &alen);
++		if (*d) {
++			found_a_desc = 1;	/* No need for the 'def' message */
++			need_pres = 1;
++			save_global_regs("did_it_save", preserve,
++					 preserve_len);
++			buff = bp = alloc_lbuf("did_it.1");
++			str = d;
++			exec(buff, &bp, 0, thing, player, EV_EVAL | EV_FIGNORE | EV_TOP,
++			     &str, args, nargs);
++			*bp = '\0';
++#ifdef PUEBLO_SUPPORT
++			if ((aflags & AF_HTML) && Html(player)) {
++				char *buff_cp = buff + strlen(buff);
++				safe_crlf(buff, &buff_cp);
++				notify_html(player, buff);
++			} else
++				notify(player, buff);
++#else
++			notify(player, buff);
++#endif /* PUEBLO_SUPPORT */
++			free_lbuf(buff);
++		} 
++		free_lbuf(d);
++	  }
++	  if(!found_a_desc)
++	  {
++	  	/* No desc found... try the default desc (again) */
++	  	/* A_DESC or A_HTDESC... the worst case we look for it twice */
++		d = atr_pget(thing, what, &aowner, &aflags, &alen);
++		if (*d) {
++			found_a_desc = 1;	/* No need for the 'def' message */
++			need_pres = 1;
++			save_global_regs("did_it_save", preserve,
++					 preserve_len);
++			buff = bp = alloc_lbuf("did_it.1");
++			str = d;
++			exec(buff, &bp, 0, thing, player, EV_EVAL | EV_FIGNORE | EV_TOP,
++			     &str, args, nargs);
++			*bp = '\0';
++#ifdef PUEBLO_SUPPORT
++			if ((aflags & AF_HTML) && Html(player)) {
++				char *buff_cp = buff + strlen(buff);
++				safe_crlf(buff, &buff_cp);
++				notify_html(player, buff);
++			} else
++				notify(player, buff);
++#else
++			notify(player, buff);
++#endif /* PUEBLO_SUPPORT */
++			free_lbuf(buff);
++		} else if(def) {
++			notify(player, def);
++		}
++		free_lbuf(d);
++	  } /* !found_a_desc */
++	} else if ((what < 0) && def) {
++		notify(player, def);
++	}
++
++	/* message to neighbors */
++
++	if ((owhat > 0) && Has_location(player) &&
++	    Good_obj(loc = Location(player))) {
++		d = atr_pget(thing, owhat, &aowner, &aflags, &alen);
++		if (*d) {
++			if (!need_pres) {
++				need_pres = 1;
++				save_global_regs("did_it_save", preserve,
++						 preserve_len);
++			}
++			buff = bp = alloc_lbuf("did_it.2");
++			str = d;
++			exec(buff, &bp, 0, thing, player, EV_EVAL | EV_FIGNORE | EV_TOP,
++			     &str, args, nargs);
++			*bp = '\0';
++			if (*buff)
++				notify_except2_rlevel2(loc, player, player, thing,
++				       tprintf("%s %s", Name(player), buff));
++			free_lbuf(buff);
++		} else if (odef) {
++			notify_except2_rlevel2(loc, player, player, thing,
++				       tprintf("%s %s", Name(player), odef));
++		}
++		free_lbuf(d);
++	} else if ((owhat < 0) && odef && Has_location(player) &&
++		   Good_obj(loc = Location(player))) {
++		notify_except2_rlevel2(loc, player, player, thing,
++			       tprintf("%s %s", Name(player), odef));
++	}
++
++	/* If we preserved the state of the global registers, restore them. */
++
++	if (need_pres)
++		restore_global_regs("did_it_restore", preserve, preserve_len);
++		
++	/* do the action attribute */
++
++	if (awhat > 0 && IsReal(thing, player)) {
++		if (*(act = atr_pget(thing, awhat, &aowner, &aflags, &alen))) {
++			charges = atr_pget(thing, A_CHARGES, &aowner, &aflags, &alen);
++			if (*charges) {
++				num = atoi(charges);
++				if (num > 0) {
++					buff = alloc_sbuf("did_it.charges");
++					sprintf(buff, "%d", num - 1);
++					atr_add_raw(thing, A_CHARGES, buff);
++					free_sbuf(buff);
++				} else if (*(buff = atr_pget(thing, A_RUNOUT, &aowner, &aflags, &alen))) {
++					free_lbuf(act);
++					act = buff;
++				} else {
++					free_lbuf(act);
++					free_lbuf(buff);
++					free_lbuf(charges);
++					return;
++				}
++			}
++			free_lbuf(charges);
++			wait_que(thing, player, 0, NOTHING, 0, act, args, nargs,
++				 mudstate.global_regs);
++		}
++		free_lbuf(act);
++	}
++}
++#endif /* REALITY_LEVELS */
+diff -Nur tinymush-3.0p3/src/levels.h chic/src/levels.h
+--- tinymush-3.0p3/src/levels.h	Thu Jan  1 01:00:00 1970
++++ chic/src/levels.h	Wed Mar 20 17:03:19 2002
+@@ -0,0 +1,18 @@
++/* levels.h - Reality levels */
++
++#include "copyright.h"
++
++#ifndef __LEVELS_H
++#define	__LEVELS_H
++
++#include "htab.h"
++#include "db.h"
++
++#define IsReal(R, T)	((R) == (T) || (RxLevel(R) & TxLevel(T)))
++
++extern char *	FDECL(rxlevel_description, (dbref, dbref));
++extern char *	FDECL(txlevel_description, (dbref, dbref));
++extern void		FDECL(decompile_rlevels, (dbref, dbref, char *));
++extern RLEVEL	FDECL(find_rlevel, (char *));
++
++#endif /* __LEVELS_H */
+diff -Nur tinymush-3.0p3/src/look.c chic/src/look.c
+--- tinymush-3.0p3/src/look.c	Mon Oct 22 05:44:44 2001
++++ chic/src/look.c	Wed Mar 20 17:03:19 2002
+@@ -17,6 +17,10 @@
+ #include "alloc.h"
+ #include "ansi.h"
+ 
++#ifdef REALITY_LEVELS
++#include "levels.h"
++#endif /* REALITY_LEVELS */
++
+ static void FDECL(show_a_desc, (dbref, dbref, const char *));
+ extern void FDECL(ufun, (char *, char *, int, int, int, dbref, dbref));
+ 
+@@ -51,13 +55,23 @@
+     /* make sure there is at least one visible exit */
+ 
+     foundany = 0;
++#ifdef REALITY_LEVELS
++	isdark = Dark(loc) || !IsReal(player, loc);
++#else
+     isdark = Dark(loc);
++#endif /* REALITY_LEVELS */
+     ITER_PARENTS(loc, parent, lev) {
+ 	if (!Has_exits(parent))
+ 	    continue;
+ 	DOLIST(thing, Exits(parent)) {
++#ifdef REALITY_LEVELS
++		if(((Light(thing) && !Dark(thing)) || (!Dark(thing) && !isdark))
++			&& IsReal(player, thing))
++		{
++#else
+ 	    if ((Light(thing) && !Dark(thing)) ||
+ 		(!Dark(thing) && !isdark)) {
++#endif /* REALITY_LEVELS */
+ 		foundany = 1;
+ 		break;
+ 	    }
+@@ -77,8 +91,14 @@
+     ITER_PARENTS(loc, parent, lev) {
+ 	if (Transparent(loc)) {
+ 	    DOLIST(thing, Exits(parent)) {
++#ifdef REALITY_LEVELS
++		if (((Light(thing) && !Dark(thing)) || (!Dark(thing) && !isdark))
++			&& IsReal(player, thing))
++		{
++#else
+ 		if ((Light(thing) && !Dark(thing)) ||
+ 		    (!Dark(thing) && !isdark)) {
++#endif /* REALITY_LEVELS */
+ 		    strcpy(buff, Name(thing));
+ 		    for (e = buff; *e && (*e != ';'); e++) ;
+ 		    safe_ansi_normal(buff, &e);
+@@ -102,8 +122,14 @@
+ 	    }
+ 	} else {
+ 	    DOLIST(thing, Exits(parent)) {
++#ifdef REALITY_LEVELS
++		if (((Light(thing) && !Dark(thing)) || (!Dark(thing) && !isdark))
++			&& IsReal(player, thing))
++		{
++#else
+ 		if ((Light(thing) && !Dark(thing)) ||
+-		    (!Dark(thing) && !isdark)) {
++			(!Dark(thing) && !isdark)) {
++#endif /* REALITY_LEVELS */
+ 		    e1 = buff1;
+ 		    /* chop off first exit alias to display */
+ 		    if (buff != e)
+@@ -198,7 +223,11 @@
+ 
+ 	/* check to see if he can see the location */
+ 
++#ifdef REALITY_LEVELS
++	can_see_loc = (!Dark(loc) && IsReal(player, loc) ||
++#else
+ 	can_see_loc = (!Dark(loc) ||
++#endif /* REALITY_LEVELS */
+ 		       (mudconf.see_own_dark && Examinable(player, loc)));
+ 
+ 	/* check to see if there is anything there */
+@@ -760,11 +788,19 @@
+ 	}
+ 
+ 	if (obey_terse && Terse(player))
++#ifdef REALITY_LEVELS
++		did_it_rlevel(player, thing, A_NULL, "You see nothing special.",
++#else
+ 		did_it(player, thing, A_NULL, "You see nothing special.",
++#endif /* REALITY_LEVELS */
+ 		       A_ODESC, NULL, A_ADESC, (char **)NULL, 0);
+ 	else
+ #ifndef PUEBLO_SUPPORT
++#ifdef REALITY_LEVELS
++		did_it_rlevel(player, thing, A_DESC, "You see nothing special.",
++#else
+ 		did_it(player, thing, A_DESC, "You see nothing special.",
++#endif /* REALITY_LEVELS */
+ 		       A_ODESC, NULL, A_ADESC, (char **) NULL, 0);
+ #else
+ 		show_a_desc(player, thing, "You see nothing special.");
+@@ -789,12 +825,20 @@
+ 	if (Html(player)) {
+ 		got2 = atr_pget(loc, A_HTDESC, &aowner, &aflags, &alen);
+ 		if (*got2)
++#ifdef REALITY_LEVELS
++			did_it_rlevel(player, loc, A_HTDESC, msg, A_ODESC, NULL,
++#else
+ 			did_it(player, loc, A_HTDESC, msg, A_ODESC, NULL,
++#endif /* REALITY_LEVELS */
+ 			       A_ADESC, (char **) NULL, 0);
+ 		else {
+ 		    	if (indent)
+ 		    		raw_notify_newline(player); 
++#ifdef REALITY_LEVELS
++				did_it_rlevel(player, loc, A_DESC, msg, A_ODESC, NULL,
++#else
+ 		    	did_it(player, loc, A_DESC, msg, A_ODESC, NULL,
++#endif /* REALITY_LEVELS */
+ 			       A_ADESC, (char **) NULL, 0);
+ 			if (indent)
+ 				raw_notify_newline(player);
+@@ -804,7 +848,11 @@
+ 	else {
+ 		if (indent)
+ 			raw_notify_newline(player);
++#ifdef REALITY_LEVELS
++		did_it_rlevel(player, loc, A_DESC, msg, A_ODESC, NULL,
++#else
+ 		did_it(player, loc, A_DESC, msg, A_ODESC, NULL,
++#endif /* REALITY_LEVELS */
+ 		       A_ADESC, (char **) NULL, 0);
+ 		if (indent)
+ 			raw_notify_newline(player);
+@@ -1002,6 +1051,10 @@
+ 	/* If we found something, go handle it */
+ 
+ 	if (Good_obj(thing)) {
++#ifdef REALITY_LEVELS
++		if(!IsReal(player, thing))
++			return;
++#endif /* REALITY_LEVELS */
+ 		switch (Typeof(thing)) {
+ 		case TYPE_ROOM:
+ 			look_in(player, thing, look_key);
+@@ -1057,6 +1110,14 @@
+ 	buf = power_description(player, thing);
+ 	notify(player, tprintf("Powers  = %s", buf));
+ 	free_mbuf(buf);
++#ifdef REALITY_LEVELS
++	buf = rxlevel_description(player, thing);
++	notify(player, tprintf("RxLevel = %s", buf));
++	free_mbuf(buf);
++	buf = txlevel_description(player, thing);
++	notify(player, tprintf("TxLevel = %s", buf));
++	free_mbuf(buf);
++#endif /* REALITY_LEVELS */
+ 	buf = atr_get(thing, A_LOCK, &aowner, &aflags, &alen);
+ 	bool = parse_boolexp(player, buf, 1);
+ 	free_lbuf(buf);
+@@ -1320,6 +1381,16 @@
+ 		notify(player, buf2);
+ 		free_mbuf(buf2);
+ 
++#ifdef REALITY_LEVELS
++		/* Show Rx and Tx levels */
++
++		buf2 = rxlevel_description(player, thing);
++		notify(player, buf2);
++		free_mbuf(buf2);
++		buf2 = txlevel_description(player, thing);
++		notify(player, buf2);
++		free_mbuf(buf2);
++#endif /* REALITY_LEVELS */
+ 	}
+ 
+ 	if (!((key & EXAM_OWNER) || (key & EXAM_BRIEF)))
+diff -Nur tinymush-3.0p3/src/match.c chic/src/match.c
+--- tinymush-3.0p3/src/match.c	Mon Oct 22 05:44:48 2001
++++ chic/src/match.c	Wed Mar 20 17:03:19 2002
+@@ -11,6 +11,9 @@
+ #include "match.h"
+ #include "attrs.h"
+ #include "powers.h"
++#ifdef REALITY_LEVELS
++#include "levels.h"
++#endif /* REALITY_LEVELS */
+ 
+ #define	CON_LOCAL		0x01	/* Match is near me */
+ #define	CON_TYPE		0x02	/* Match is of requested type */
+@@ -25,6 +28,13 @@
+ dbref what;
+ int confidence;
+ {
++#ifdef REALITY_LEVELS
++	/* Check is the object is visible */
++	if(Good_obj(what) && (confidence & CON_LOCAL) &&
++		!IsReal(md.player, what) && what != Location(md.player))
++		return;
++#endif /* REALITY_LEVELS */
++
+ 	/* Check for type and locks, if requested */
+ 
+ 	if (md.pref_type != NOTYPE) {
+diff -Nur tinymush-3.0p3/src/move.c chic/src/move.c
+--- tinymush-3.0p3/src/move.c	Mon Oct 22 05:44:49 2001
++++ chic/src/move.c	Wed Mar 20 17:03:19 2002
+@@ -12,6 +12,9 @@
+ #include "attrs.h"
+ #include "externs.h"
+ #include "powers.h"
++#ifdef REALITY_LEVELS
++#include "levels.h"
++#endif /* REALITY_LEVELS */
+ 
+ extern void NDECL(match_zone_exit);
+ 
+@@ -52,7 +55,11 @@
+ 	quiet = (!(Wizard(loc) ||
+ 		   (!Dark(thing) && !Dark(loc)) ||
+ 		   (canhear && !(Wizard(thing) && Dark(thing))))) ||
++#ifdef REALITY_LEVELS
++		(hush & HUSH_LEAVE) || !IsReal(loc, thing);
++#else
+ 		(hush & HUSH_LEAVE);
++#endif /* REALITY_LEVELS */
+ 	oattr = quiet ? A_NULL : A_OLEAVE;
+ 	aattr = (!quiet || (mudconf.dark_actions && !(hush & HUSH_LEAVE))) ?
+ 	    A_ALEAVE : A_NULL;
+@@ -75,7 +82,11 @@
+ 	if (!quiet && !Blind(thing) && !Blind(loc)) {
+ 		if ((!Dark(thing) && !Dark(loc)) ||
+ 		    (canhear && !(Wizard(thing) && Dark(thing)))) {
++#ifdef REALITY_LEVELS
++			notify_except2_rlevel(loc, thing, thing, cause,
++#else
+ 			notify_except2(loc, thing, thing, cause,
++#endif /* REALITY_LEVELS */
+ 				       tprintf("%s has left.", Name(thing)));
+ 		}
+ 	}
+@@ -112,7 +123,11 @@
+ 	quiet = (!(Wizard(loc) ||
+ 		   (!Dark(thing) && !Dark(loc)) ||
+ 		   (canhear && !(Wizard(thing) && Dark(thing))))) ||
++#ifdef REALITY_LEVELS
++		(hush & HUSH_ENTER) || (!IsReal(loc, thing));
++#else
+ 		(hush & HUSH_ENTER);
++#endif /* REALITY_LEVELS */
+ 	oattr = quiet ? A_NULL : A_OENTER;
+ 	aattr = (!quiet || (mudconf.dark_actions && !(hush & HUSH_ENTER))) ?
+ 	    A_AENTER : A_NULL;
+@@ -135,7 +150,11 @@
+ 	if (!quiet && canhear &&
+ 	    !Blind(thing) && !Blind(loc) &&
+ 	    !(Dark(thing) && Wizard(thing))) {
++#ifdef REALITY_LEVELS
++		notify_except2_rlevel(loc, thing, thing, cause,
++#else
+ 		notify_except2(loc, thing, thing, cause,
++#endif /* REALITY_LEVELS */
+ 			       tprintf("%s has arrived.", Name(thing)));
+ 	}
+ }
+@@ -441,6 +460,15 @@
+ 		/* EMPTY */
+ 		break;
+ 	}
++
++#ifdef REALITY_LEVELS
++	/* If the exit doesn't see the player, don't allow them through */
++	if(!IsReal(exit,player))
++	{
++		notify(player,"You can't go that way.");
++		return;
++	}
++#endif
+ 
+ 	if (Good_obj(loc) && could_doit(player, exit, A_LOCK)) {
+ 		switch (Typeof(loc)) {
+diff -Nur tinymush-3.0p3/src/mudconf.h chic/src/mudconf.h
+--- tinymush-3.0p3/src/mudconf.h	Mon Oct 22 05:44:49 2001
++++ chic/src/mudconf.h	Wed Mar 20 17:03:19 2002
+@@ -235,6 +235,23 @@
+ 	int	stack_lim;	/* Max number of items on an object stack */
+ 	int	struct_lim;	/* Max number of defined structures for obj */
+ 	int	instance_lim;	/* Max number of struct insances for obj */
++#ifdef REALITY_LEVELS
++	int no_levels;			/* Number of reality levels */
++	struct rlevel_def {
++		char name[9];		/* Rlevel name */
++		RLEVEL value;		/* Rlevel bitmask */
++		char attr[33];		/* desc attribute */
++	} reality_level[32];	/* Reality levels */
++	RLEVEL	def_room_rx;	/* Default room RX level */
++	RLEVEL	def_room_tx;	/* Default room TX level */
++	RLEVEL	def_player_rx;	/* Default player RX level */
++	RLEVEL	def_player_tx;	/* Default player RX level */
++	RLEVEL	def_exit_rx;	/* Default exit RX level */
++	RLEVEL	def_exit_tx;	/* Default exit TX level */
++	RLEVEL	def_thing_rx;	/* Default thing RX level */
++	RLEVEL	def_thing_tx;	/* Default thing TX level */
++	int	use_comtitles;  /* Ignore comtitles when 0 */
++#endif /* REALITY_LEVELS */
+ #endif	/* STANDALONE */
+ };
+ 
+diff -Nur tinymush-3.0p3/src/netcommon.c chic/src/netcommon.c
+--- tinymush-3.0p3/src/netcommon.c	Mon Oct 22 05:44:51 2001
++++ chic/src/netcommon.c	Wed Mar 20 17:03:19 2002
+@@ -717,7 +717,14 @@
+ 
+ 	temp = mudstate.curr_enactor;
+ 	mudstate.curr_enactor = player;
++#ifdef REALITY_LEVELS
++	if(loc == NOTHING)
++		notify_check(player, player, buf, key);
++	else
++		notify_except_rlevel(loc, player, player, buf, 0);
++#else
+ 	notify_check(player, player, buf, key);
++#endif /* REALITY_LEVELS */
+ 	free_lbuf(buf);
+ 
+ #ifdef USE_COMSYS
+@@ -835,7 +842,14 @@
+ 		key = MSG_INV;
+ 		if ((loc != NOTHING) && !(Hidden(player) && Can_Hide(player)))
+ 			key |= (MSG_NBR | MSG_NBR_EXITS | MSG_LOC | MSG_FWDLIST);
++#ifdef REALITY_LEVELS
++		if(loc == NOTHING)
++			notify_check(player, player, buf, key);
++		else
++			notify_except_rlevel(loc, player, player, buf, 0);
++#else
+ 		notify_check(player, player, buf, key);
++#endif /* REALITY_LEVELS */
+ 		free_mbuf(buf);
+ 
+ #ifdef USE_MAIL
+@@ -932,7 +946,14 @@
+ 		key = MSG_INV;
+ 		if ((loc != NOTHING) && !(Hidden(player) && Can_Hide(player)))
+ 			key |= (MSG_NBR | MSG_NBR_EXITS | MSG_LOC | MSG_FWDLIST);
++#ifdef REALITY_LEVELS
++        if(loc == NOTHING)
++            notify_check(player, player, buf, key);
++        else
++            notify_except_rlevel(loc, player, player, buf, 0);
++#else
+ 		notify_check(player, player, buf, key);
++#endif /* REALITY_LEVELS */
+ 		raw_broadcast(WATCHER | FLAG_WORD2,
+ 			      (char *)"GAME: %s has partially disconnected.",
+ 			      Name(player));
+diff -Nur tinymush-3.0p3/src/object.c chic/src/object.c
+--- tinymush-3.0p3/src/object.c	Mon Oct 22 05:44:52 2001
++++ chic/src/object.c	Wed Mar 20 17:03:19 2002
+@@ -490,6 +490,26 @@
+ 	s_Flags(obj, objtype | f1);
+ 	s_Flags2(obj, f2);
+ 	s_Flags3(obj, f3);
++#ifdef REALITY_LEVELS
++	switch(objtype)
++	{
++		case TYPE_ROOM:
++			s_RxLevel(obj,mudconf.def_room_rx);
++			s_TxLevel(obj,mudconf.def_room_tx);
++			break;
++		case TYPE_PLAYER:
++			s_RxLevel(obj,mudconf.def_player_rx);
++			s_TxLevel(obj,mudconf.def_player_tx);
++			break;
++		case TYPE_EXIT:
++			s_RxLevel(obj,mudconf.def_exit_rx);
++			s_TxLevel(obj,mudconf.def_exit_tx);
++			break;
++		default:
++			s_RxLevel(obj,mudconf.def_thing_rx);
++			s_TxLevel(obj,mudconf.def_thing_tx);
++	}
++#endif /* REALITY_LEVELS */
+ 	s_Owner(obj, (self_owned ? obj : owner));
+ 	s_Pennies(obj, value);
+ 	Unmark(obj);
+diff -Nur tinymush-3.0p3/src/predicates.c chic/src/predicates.c
+--- tinymush-3.0p3/src/predicates.c	Mon Oct 22 05:44:54 2001
++++ chic/src/predicates.c	Wed Mar 20 17:03:20 2002
+@@ -22,6 +22,10 @@
+ #include "htab.h"
+ #include "db_sql.h"
+ 
++#ifdef REALITY_LEVELS
++#include "levels.h"
++#endif /* REALITY_LEVELS */
++
+ extern dbref FDECL(match_thing, (dbref, char *));
+ extern int FDECL(do_command, (DESC *, char *, int));
+ extern void NDECL(dump_database);
+@@ -269,10 +273,18 @@
+ 	 */
+ 
+ 	if (can_see_loc) {
++#ifdef REALITY_LEVELS
++		return ((!Dark(thing) && IsReal(player, thing)) ||
++#else
+ 		return (!Dark(thing) ||
++#endif /* REALITY_LEVELS */
+ 			(mudconf.see_own_dark && MyopicExam(player, thing)));
+ 	} else {
++#ifdef REALITY_LEVELS
++		return ((Light(thing) && !Dark(thing) && IsReal(player, thing)) ||
++#else
+ 		return ((Light(thing) && !Dark(thing)) ||
++#endif /* REALITY_LEVELS */
+ 			(mudconf.see_own_dark && MyopicExam(player, thing)));
+ 	}
+ }
+@@ -1841,17 +1849,29 @@
+ 			     &str, args, nargs);
+ 			*bp = '\0';
+ 			if (*buff)
++#ifdef REALITY_LEVELS
++				notify_except2_rlevel2(loc, player, player, thing,
++#else
+ 				notify_except2(loc, player, player, thing,
++#endif
+ 				       tprintf("%s %s", Name(player), buff));
+ 			free_lbuf(buff);
+ 		} else if (odef) {
++#ifdef REALITY_LEVELS
++			notify_except2_rlevel2(loc, player, player, thing,
++#else
+ 			notify_except2(loc, player, player, thing,
++#endif
+ 				       tprintf("%s %s", Name(player), odef));
+ 		}
+ 		free_lbuf(d);
+ 	} else if ((owhat < 0) && odef && Has_location(player) &&
+ 		   Good_obj(loc = Location(player))) {
++#ifdef REALITY_LEVELS
++		notify_except2_rlevel2(loc, player, player, thing,
++#else
+ 		notify_except2(loc, player, player, thing,
++#endif
+ 			       tprintf("%s %s", Name(player), odef));
+ 	}
+ 
+@@ -1862,7 +1882,11 @@
+ 		
+ 	/* do the action attribute */
+ 
++#ifdef REALITY_LEVELS
++	if (awhat > 0 && IsReal(thing, player)) {
++#else
+ 	if (awhat > 0) {
++#endif
+ 		if (*(act = atr_pget(thing, awhat, &aowner, &aflags, &alen))) {
+ 			charges = atr_pget(thing, A_CHARGES, &aowner, &aflags, &alen);
+ 			if (*charges) {
+diff -Nur tinymush-3.0p3/src/speech.c chic/src/speech.c
+--- tinymush-3.0p3/src/speech.c	Mon Oct 22 05:44:57 2001
++++ chic/src/speech.c	Wed Mar 20 17:03:20 2002
+@@ -145,25 +145,49 @@
+ 	switch (key) {
+ 	case SAY_SAY:
+ 		notify(player, tprintf("You say \"%s\"", message));
++#ifdef REALITY_LEVELS
++		notify_except_rlevel(loc, player, player,
++			tprintf("%s says \"%s\"", Name(player), message), 0);
++#else
+ 		notify_except(loc, player, player,
+ 			  tprintf("%s says \"%s\"", Name(player), message));
++#endif /* REALITY_LEVELS */
+ 		break;
+ 	case SAY_POSE:
++#ifdef REALITY_LEVELS
++		notify_except_rlevel(loc, player, -1,
++			tprintf("%s %s", Name(player), message), 0);
++#else
+ 		notify_all_from_inside(loc, player,
+ 				   tprintf("%s %s", Name(player), message));
++#endif /* REALITY_LEVELS */
+ 		break;
+ 	case SAY_POSE_NOSPC:
++#ifdef REALITY_LEVELS 
++		notify_except_rlevel(loc, player, -1,
++			tprintf("%s%s", Name(player), message), 0);
++#else
+ 		notify_all_from_inside(loc, player,
+ 				    tprintf("%s%s", Name(player), message));
++#endif /* REALITY_LEVELS */
+ 		break;
+ 	case SAY_EMIT:
+ 	        if (!say_flags || (say_flags & SAY_HERE) ||
+ 		    ((say_flags & SAY_HTML) && !(say_flags & SAY_ROOM))) {
+ 			if (say_flags & SAY_HTML) {
++#ifdef REALITY_LEVELS
++				notify_except_rlevel(loc, player, -1,
++					message, MSG_HTML);
++#else
+ 				notify_all_from_inside_html(loc, player,
+ 							    message);
++#endif /* REALITY_LEVELS */
+ 			} else {
++#ifdef REALITY_LEVELS
++				notify_except_rlevel(loc, player, -1, message, 0);
++#else
+ 				notify_all_from_inside(loc, player, message);
++#endif /* REALITY_LEVELS */
+ 			}
+ 		}
+ 		if (say_flags & SAY_ROOM) {
+@@ -181,10 +205,20 @@
+ 			}
+ 			if (Typeof(loc) == TYPE_ROOM) {
+ 			    if (say_flags & SAY_HTML) {
++#ifdef REALITY_LEVELS
++				notify_except_rlevel(loc, player, -1,
++					message, MSG_HTML);
++#else
+ 				notify_all_from_inside_html(loc, player,
+ 							    message);
++#endif /* REALITY_LEVELS */
+ 			    } else {
++#ifdef REALITY_LEVELS
++				notify_except_rlevel(loc, player, -1,
++					message, 0);
++#else
+ 				notify_all_from_inside(loc, player, message);
++#endif /* REALITY_LEVELS */
+ 			    }
+ 			}
+ 		}
+--- tinymush-3.0p3/src/look.c	Wed Mar 20 17:49:21 2002
++++ chic/src/look.c	Wed Mar 20 17:53:40 2002
+@@ -2040,6 +2040,9 @@
+ 	if (!wild_decomp) {
+ 		decompile_flags(player, thing, thingname);
+ 		decompile_powers(player, thing, thingname);
++#ifdef REALITY_LEVELS
++		decompile_rlevels(player, thing, thingname);
++#endif
+ 	}
+ 
+ 	/* If the object has a parent, report it */
+--- tinymush-3.0p3/src/Makefile.in	Mon Oct 22 05:44:16 2001
++++ chic/src/Makefile.in	Wed Mar 20 18:02:50 2002
+@@ -100,6 +100,9 @@
+ 
+ # Miscellaneous options. Add/subtract the definitions if you want to
+ # add or subtract a feature.
++#   -DREALITY_LEVELS	Defining this allows several concurrent descriptions
++#			to be defined for each room/exit. This was created
++#			with the World of Dorkness' Umbra etc. in mind.
+ #   -DPUEBLO_SUPPORT	Defining this allows support of the Pueblo client.
+ #			It is a recommended parameter.
+ #   -DUSE_COMSYS	Defining this allows the built-in chat channels
+@@ -138,7 +141,7 @@
+ #			heavy-duty source code debugging and no other
+ #			tools are available to you.
+ #
+-MISC_DEFS = -DPUEBLO_SUPPORT -DUSE_COMSYS -DUSE_MAIL -DFLOATING_POINTS
++MISC_DEFS = -DPUEBLO_SUPPORT -DUSE_COMSYS -DUSE_MAIL -DFLOATING_POINTS -DREALITY_LEVELS
+ 
+ # You might want to change the size of the user-named attribute hash table.
+ #
+--- tinymush-3.0p3/src/Makefile.in	Wed Mar 20 18:04:00 2002
++++ chic/src/Makefile.in	Wed Mar 20 18:06:35 2002
+@@ -103,6 +103,8 @@
+ #   -DREALITY_LEVELS	Defining this allows several concurrent descriptions
+ #			to be defined for each room/exit. This was created
+ #			with the World of Dorkness' Umbra etc. in mind.
++#   -DCOMTITLE_TOGGLE	Defining this allows the allowing/disallowing of
++#			comtitles from the MUSH's config file.
+ #   -DPUEBLO_SUPPORT	Defining this allows support of the Pueblo client.
+ #			It is a recommended parameter.
+ #   -DUSE_COMSYS	Defining this allows the built-in chat channels
+@@ -141,7 +143,7 @@
+ #			heavy-duty source code debugging and no other
+ #			tools are available to you.
+ #
+-MISC_DEFS = -DPUEBLO_SUPPORT -DUSE_COMSYS -DUSE_MAIL -DFLOATING_POINTS -DREALITY_LEVELS
++MISC_DEFS = -DPUEBLO_SUPPORT -DUSE_COMSYS -DUSE_MAIL -DFLOATING_POINTS -DREALITY_LEVELS -DCOMTITLE_TOGGLE
+ 
+ # You might want to change the size of the user-named attribute hash table.
+ #
+@@ -239,17 +239,17 @@
+ 	  db.c db_rw.c stringutil.c object.c conf.c flags.c htab.c \
+ 	  compat.c file_c.c player_c.c bsd.c alloc.c comsys.c mail.c \
+           mguests.c powers.c newconc.c funceval.c regexp.c quota.c \
+-	  db_empty.c db_msql.c db_mysql.c
++	  db_empty.c db_msql.c db_mysql.c levels.c
+ D_OBJ	= create.o game.o help.o look.o match.o move.o player.o predicates.o \
+ 	  rob.o set.o speech.o wiz.o walkdb.o timer.o boolexp.o log.o cque.o \
+ 	  unparse.o eval.o command.o wild.o netcommon.o functions.o vattr.o \
+ 	  db.o db_rw.o stringutil.o object.o conf.o flags.o htab.o \
+           compat.o file_c.o player_c.o bsd.o alloc.o comsys.o mail.o \
+-          mguests.o powers.o newconc.o funceval.o regexp.o quota.o
++          mguests.o powers.o newconc.o funceval.o regexp.o quota.o levels.o
+ D_INC	= copyright.h flags.h help.h htab.h interface.h match.h functions.h \
+ 	  command.h config.h db.h externs.h mudconf.h misc.h \
+ 	  vattr.h file_c.h alloc.h attrs.h mguests.h powers.h slave.h \
+-	  regexp.h bitstring.h db_sql.h
++	  regexp.h bitstring.h db_sql.h levels.h
+ 
+ # Purify stuff.
+ PUREDIR = /local/src/purify-4.0.1-sunos4
+--- tinymush-3.0p3/src/README.RX	Wed Mar 20 18:19:41 2002
++++ tinymush-3.0b21/src/README.RX	Fri Nov 16 18:29:05 2001
+@@ -0,0 +1,57 @@
++
++# by Bo (Charon@Chicago), diffs & docs by Azundris (Callisto@Chicago)
++# comments and corrections to Azundris <hacks@azundris.com>
++#
++# sample snippet to go in your <mushname>.conf
++# reality_level Name bitcode name-of-desc-for-this-level
++# this example for World of Dimness (umbra, obfuscation, etc.)
++reality_level Real 1
++reality_level Obf1 2
++reality_level Obf2 4
++reality_level Obf3 8 OBFDESC
++reality_level Obf4 16 OBFDESC
++reality_level Obf5 32 OBFDESC
++reality_level Obf6 64 OBFDESC
++reality_level Obf7 128 OBFDESC
++reality_level Obf8 256 OBFDESC
++reality_level Obf9 512 OBFDESC
++reality_level Obf10 1024 OBFDESC
++reality_level Umbra 2048 UMBRADESC
++reality_level Fae 4096 FAEDESC
++reality_level Shadow 8192 SHADOWDESC
++reality_level Spy 16384
++reality_level All 65535
++
++def_exit_rx 2045
++def_exit_tx 2045
++
++# allow comtitles? (0/1)
++use_comtitles 0
++
++# end conf-snippet ---------------------------8<-------------------------------
++
++Affected files:
++autoconf.h
++command.c
++command.h
++compat.c
++comsys.c
++conf.c
++db.h
++db_rw.c
++dbconvert.c
++externs.h
++functions.c
++game.c
++levels.c
++levels.h
++look.c
++match.c
++move.c
++mudconf.h
++netcommon.c
++object.c
++patchlevel.h
++predicates.c
++set.c
++speech.c
+--- tinymush-3.0p3/src/patchlevel.h	Wed Mar 20 19:08:13 2002
++++ tinymush-3.0p3-rl/src/patchlevel.h	Wed Mar 20 19:11:44 2002
+@@ -3,7 +3,11 @@
+ 
+ #include "copyright.h"
+ 
++#ifdef REALITY_LEVELS
++#define MUSH_VERSION		"3.0rl"         /* with RL patch */
++#else
+ #define	MUSH_VERSION		"3.0"		/* Base version number */
++#endif
+ #define PATCHLEVEL		3		/* Patch sequence number */
+ #define	MUSH_RELEASE_DATE	"10/21/2001"	/* Source release date */
+ 

@@ -1,0 +1,1563 @@
+& help
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=--> Staff +Help <-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+Abils          Alts           Approve        Auras          BB             
+Bit            Backgrounds    CharCheck      CharGen        Chart          
+Check          Clear          Dark           Findcommand    Forms          
+Function List  Helpers        Join           JNote          JRoll          
+Kinks          Languages      List           Map            People         
+Phones         Players        Purge          Race           Search         
+Sections       Set            Shutdown       Staff          Stats          
+Taxi           Time           Timeon         Tutorial       Vote           
+Weapons        Who            XP             
+-=-=-=-=-=-=-=-=-=-=-=-=-=-> End: Staff +Help <-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+& abils
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-> Abilities Help <--=-=-=-=-=-=-=-=-=-=-=-=-=--
+ This is a very large command set, dealing with all aspects of managing
+ abilities in this environment.  As such, the following sub-topics
+ are available to help make this entire command set more easily
+ understandable.
+ 
+ abils definitions     Definitions of the items to be used in commands.
+ abils management      How to add/delete/etc abilities.
+ abils modifying       How to modify abilities.
+ abils complex         Advanced, complex items to set on abilities.
+ abils miscellaneous   Things that don't fit anywhere else.
+ abils examples        Examples for all of the commands.
+ abils notes           Author's notes 
+=-=-=-=-=-=-=-=-=-=-=-=-=-> End: Abilities Help <--=-=-=-=-=-=-=-=-=-=-=-=-
+
+& abils definitions
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-> Abilities Help <--=-=-=-=-=-=-=-=-=-=-=-=-=--
+ This is an alphabetical listing of all terms used elsewhere in this
+ command set.  Use it to look up something which doesn't make sense. 
+ Note that this +shelp section has 9 pages in it.
+ 
+ <ability name>
+     The name of the ability to add (ie: Animal Ken).  Note that several
+     symbols are not allowed in ability names.
+     These include: ( ) * / - + @ < > ^ | : 
+
+ <ability to check>
+     The ability which will be looked at to determine if the character
+     has access to the restricted ability.
+
+ <ability to restrict>
+     The ability which will now have limited access by characters during
+     the chargen process.
+ 
+ {continued in '+shelp abils definitions2'}
+=-=-=-=-=-=-=-=-=-=-=-=-=-> End: Abilities Help <--=-=-=-=-=-=-=-=-=-=-=-=-
+
+& abils definitions2
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-> Abilities Help <--=-=-=-=-=-=-=-=-=-=-=-=-=--
+ <description>
+     This section is a description of the ability, what it gives the
+     possessor of the ability.  Note that while the examples use very
+     short descriptions, the description can actually be much longer.
+
+ <explanation required>
+     This tells if an explanation is required when this ability is chosen
+     in chargen.  Valid choices here are 'Yes' or 'No'.
+
+ <function>
+     This particular item is possibly the most complex item in all of chargen.
+     Usually, it will be very simple in usage, though it can become extremely
+     complex.  Basic usage would be (for example) when a Vampire resets
+     his/her Courage, and Willpower must be reset.  This is done by adding
+     Courage and Self Control.  For this example, a valid function would be:
+ 
+         courage+self_control
+ 
+ {continued in '+shelp abils definitions3'}
+=-=-=-=-=-=-=-=-=-=-=-=-=-> End: Abilities Help <--=-=-=-=-=-=-=-=-=-=-=-=-
+
+& abils definitions3
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-> Abilities Help <--=-=-=-=-=-=-=-=-=-=-=-=-=--
+     Note the use of an '_' character in Self Control. No spaces are allowed
+     in ability names, nor are any other math symbols (or internal symbols).
+     These include: ( ) * / - + @ < > ^ | :
+     More complex functions are allowed.  However, these expressions must
+     be completely parenthesized. This means that you may not use such
+     expressions as:
+ 
+         courage+conscience+self_control
+ 
+     However, you may use:
+ 
+         (courage+conscience)+self_control
+ 
+     Note, though, that you must not put () around the entire expression,
+     meaning that this is invalid:
+ 
+         ((courage+conscience)+self_control)
+ 
+ {continued in '+shelp abils definitions4'}
+=-=-=-=-=-=-=-=-=-=-=-=-=-> End: Abilities Help <--=-=-=-=-=-=-=-=-=-=-=-=-
+
+& abils definitions4
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-> Abilities Help <--=-=-=-=-=-=-=-=-=-=-=-=-=--
+     The following symbols may be used in building your function:
+         ()  Used to surround a sub-expression in your function.
+         ^   Used to raise something to a power (exponent).
+         *   Used to multiply two terms together.
+         /   Used to divide one term by another.
+         +   Used to add two terms together.
+         -   Used to subtract one term from another. Note that there is
+             *NO* negative, this is exclusively a minus sign.
+
+ <function number>
+     Each trigger ability can have up to 5 lookups and 5 functions
+     performed when it is set.  This is useful for (for example)
+     Changelings.  When a Changeling sets his/her Seeming, his/her
+     Willpower, Banality, and Glamour are all also set.  Each of
+     these is a separate lookup.
+ 
+ {continued in '+shelp abils definitions5'}
+=-=-=-=-=-=-=-=-=-=-=-=-=-> End: Abilities Help <--=-=-=-=-=-=-=-=-=-=-=-=-
+
+& abils definitions5
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-> Abilities Help <--=-=-=-=-=-=-=-=-=-=-=-=-=--
+ <lookup list>
+     This list must be in a very specific format, or else it will fail.
+     First, every item in the list must be a value which may be chosen
+     in chargen. If it is not, the lookup list will not be set. Second,
+     the list must look like this:
+ 
+         item1|value1^item2|value2^etc
+ 
+     Due to server limits, no more than 10 item|value pairs may be set up
+     at a time.  If you have more than 10 item|value pairs, use a second
+     or third lookup list. An example lookup list would be one that is used
+     for Garou when they select their tribe.  If Black Furies get a
+     Willpower of 3, and Bone Gnawers get a Willpower of 2, and these are
+     the only tribes allowed, then this would be a valid lookup list:
+ 
+         Black Fury|3^Bone Gnawers|2
+ 
+     Also valid would be:
+ 
+ {continued in '+shelp abils definitions6'}
+=-=-=-=-=-=-=-=-=-=-=-=-=-> End: Abilities Help <--=-=-=-=-=-=-=-=-=-=-=-=-
+
+& abils definitions6
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-> Abilities Help <--=-=-=-=-=-=-=-=-=-=-=-=-=--
+         Bone Gnawers|2^Black Fury|3
+ 
+     As you can, see, order doesn't matter. To use the first lookup list
+     and put it in the whole command, making it the first lookup performed,
+     this would be used:
+  
+         +abils/lookup Garou:Tribe:Willpower:1:Black Fury|3^Bone Gnawers|2
+
+ <lookup number>
+     Each trigger ability can have up to 5 lookups and 5 functions
+     performed when it is set.  This is useful for (for example)
+     Changelings.  When a Changeling sets his/her Seeming, his/her
+     Willpower, Banality, and Glamour are all also set.  Each of
+     these is a separate lookup.
+ 
+ {continued in '+shelp abils definitions7'}
+=-=-=-=-=-=-=-=-=-=-=-=-=-> End: Abilities Help <--=-=-=-=-=-=-=-=-=-=-=-=-
+
+& abils definitions7
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-> Abilities Help <--=-=-=-=-=-=-=-=-=-=-=-=-=--
+ <modify ability>
+     When a player goes through chargen, setting certain abilities causes
+     others to be changed.  For instance, when a mortal sets his/her
+     Conscience, his/her Humanity must be recalculated.  In this example,
+     Conscience is the trigger ability, and Humanity is the modify
+     ability.  Note that these are used exclusively in chargen, and not
+     at all by the +set command.
+
+ <option nummber>
+     A number from 1 to 5.
+
+ <option type>
+     Either 'lookup','compute', or 'restrict'
+
+ <parent skill>
+     Some skills require you to have another before you can purchase them.
+     As an example, Singing might require Performing.  The parent skill
+     is the skill one must have before purchasing this skill in chargen.
+ 
+ {continued in '+shelp abils definitions8'}
+=-=-=-=-=-=-=-=-=-=-=-=-=-> End: Abilities Help <--=-=-=-=-=-=-=-=-=-=-=-=-
+
+& abils definitions8
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-> Abilities Help <--=-=-=-=-=-=-=-=-=-=-=-=-=--
+ <race>         
+     This is the name of an already existing race which will get access
+     to this ability. Specifying 'Base' will give all races access to
+     this ability
+
+ <restriction number>
+     A number from 1 to 5.
+
+ <restrictions>
+     The values which can be chosen during chargen which will let the
+     character have access to the restricted ability. This list is
+     separated by the | symbol.  An example list would be:
+            Get of Fenris|Glass Walkers|Red Talons
+ 
+ <section>
+     This is the section of the character sheet this skill belongs on.
+     For instance, Strength belongs on Phys-Attrs. Setting this
+     correctly helps the +sheet command work much better in the long run.
+ 
+ {continued in '+shelp abils definitions9'}
+=-=-=-=-=-=-=-=-=-=-=-=-=-> End: Abilities Help <--=-=-=-=-=-=-=-=-=-=-=-=-
+
+& abils definitions9
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-> Abilities Help <--=-=-=-=-=-=-=-=-=-=-=-=-=--
+ <trigger ability>
+     When a player goes through chargen, setting certain abilities causes
+     others to be changed.  For instance, when a mortal sets his/her
+     Conscience, his/her Humanity must be recalculated.  In this example,
+     Conscience is the trigger ability, and Humanity is the modify
+     ability.  Note that these are used exclusively in chargen, and not
+     at all by the +set command.
+
+ <valid values>
+     This is a | separated list of values which may be chosen in chargen.
+     Examples include:
+         Get of Fenris|Glass Walkers
+         1|2|3|4|5
+=-=-=-=-=-=-=-=-=-=-=-=-=-> End: Abilities Help <--=-=-=-=-=-=-=-=-=-=-=-=-
+
+& abils management
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-> Abilities Help <--=-=-=-=-=-=-=-=-=-=-=-=-=--
+ +abils/add <race>:<ability name>:<valid values>:<explanation required>:
+            <parent skill>:<section>:<description>
+     Add <ability name> to <race>'s list of abilities.
+ 
+ +abils/del <race>:<ability name>
+     Remove ability name from <race>'s list of abilities.  Note that
+     this does NOT remove it selectively.  In other words, if the
+     knowledge 'Rituals' is on the race 'Betebase', you may not prevent
+     Garou from having this knowledge by typing in
+     '+abils/del garou:rituals'.  You MUST remove it from Betebase,
+     not Garou.
+ 
+ +abils/view <race>:<ability name>
+     Views the named ability
+=-=-=-=-=-=-=-=-=-=-=-=-=-> End: Abilities Help <--=-=-=-=-=-=-=-=-=-=-=-=-
+
+& abils modifying
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-> Abilities Help <--=-=-=-=-=-=-=-=-=-=-=-=-=--
+ +abils/clear <race>:<ability name>:<option type>:<option number>
+    Use this command to remove a previously set lookup, compute, or
+    restrict option.
+ 
+ +abils/defcost <race>:<ability name>:<default cost>
+    This command lets you specify a default cost for an ability.  For
+    instance, if virtually everybody who takes 'Alertness' for 3 points,
+    then setting a default cost of 3 points would mean that unless the
+    player specifies something different, he/she will get 3 points of
+    Alertness.
+ 
+ +abils/desc <race>:<ability name>:<description>
+    Sets the description for the named ability
+ 
+ +abils/explain <race>:<ability name>:<explanation required>
+    Sets whether or not the ability requires an explanation
+ 
+ {continued in '+shelp abils modifying2'}
+=-=-=-=-=-=-=-=-=-=-=-=-=-> End: Abilities Help <--=-=-=-=-=-=-=-=-=-=-=-=-
+
+& abils modifying2 
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-> Abilities Help <--=-=-=-=-=-=-=-=-=-=-=-=-=--
+ +abils/frcost <race>:<ability name>:<freebie cost>
+    This command lets you set how much a specific ability should cost
+    (in freebie points) to be raised one point with freebies.  For
+    instance, Gnosis (for the shifters) requires 2 freebies to go up one
+    point, but is in the pools section, which normally requires one freebie
+    to go up one point.  This lets individual abilities be different.
+ 
+ +abils/parent <race>:<ability name>:<parent skill>
+    Sets the parent skill for the ability.  Note that leaving the parent
+    skill blank removes the parent skill
+ 
+ +abils/section <race>:<ability name>:<section>
+    This command lets you say that even though an ability is in one section,
+    it should draw points from some other section.  For instance, Gypsies
+    have an ability called 'Element', which belongs in the top section.
+    However, this ability should take its points from freebie points.
+ 
+ +abils/values <race>:<ability name>:<valid values>
+    Sets the valid values for selection in chargen
+=-=-=-=-=-=-=-=-=-=-=-=-=-> End: Abilities Help <--=-=-=-=-=-=-=-=-=-=-=-=-
+
+& abils complex
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-> Abilities Help <--=-=-=-=-=-=-=-=-=-=-=-=-=--
+ +abils/compute <race>:<trigger ability>:<modify ability>:
+                <function number>:<function>
+     Use this command to set a function on an ability for when it is
+     changed in chargen.
+ 
+ +abils/lookup  <race>:<trigger ability>:<modify ability>:<lookup number>:
+                <lookup list>
+     Use this command to set up a list of things that can happen when
+     an ability is changed in chargen.
+ 
+ +abils/restrict <race>:<ability to restrict>:<ability to check>:
+                <restriction number>:<restrictions>
+     Use this command to set restrictions on an ability.  Note that if any
+     of these restrictions are passed, the character is considered to have
+     passed all of them.
+=-=-=-=-=-=-=-=-=-=-=-=-=-> End: Abilities Help <--=-=-=-=-=-=-=-=-=-=-=-=-
+
+& abils miscellaneous
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-> Abilities Help <--=-=-=-=-=-=-=-=-=-=-=-=-=--
+ +abils/rename <race>:<old ability name>:<new ability name>
+     Use this command to change the name of an ability from
+     <old ability name> to <new ability name>.  
+ 
+ +abils/search <ability name>
+         This command searches through all races for any ability name
+         which begins with <ability name>.  Use this to help locate and/or
+         change duplicates.
+=-=-=-=-=-=-=-=-=-=-=-=-=-> End: Abilities Help <--=-=-=-=-=-=-=-=-=-=-=-=-
+
+& abils examples
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-> Abilities Help <--=-=-=-=-=-=-=-=-=-=-=-=-=--
+ Adding ability examples:
+ 
+  +abils/add base:Alertness:1|2|3|4|5:No::Talents:Seeing things
+      This command adds the ability 'Alertness', making it available
+      to everybody.  The only values which can be chosen during chargen
+      are the numbers 1 through 5.  When taking this ability, the player
+      does not need to provide an explanation for the ability.  There is
+      no ability which must be purchased before this ability may be
+      purchased.  This ability belongs in Talents.  It also has a
+      description (and therefore, a +explain) of 'Seeing things'.
+ 
+  +abils/add mage:Essence:Infinite|Questing:No::Top:Your essence
+      This command adds the ability 'Essence', making it available to
+      mages only.  The only values which can be chosen during chargen
+      are 'Infinite' and 'Questing'.  When taking this ability, the
+      player does not need to provide an explanation for the ability.
+      There is no ability which needs to be purchased before this
+      ability may be purchased.  This ability belongs in the top
+      section of the character sheet.  It also has a description (and
+      therefore, a +explain) of 'Your essence'.
+ 
+ {continued in '+shelp abils examples2'}
+=-=-=-=-=-=-=-=-=-=-=-=-=-> End: Abilities Help <--=-=-=-=-=-=-=-=-=-=-=-=-
+
+& abils examples2
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-> Abilities Help <--=-=-=-=-=-=-=-=-=-=-=-=-=--
+  +abils/add base:Mild Phobia:1:Yes::Flaws:What are you afraid of?
+      This command adds the ability 'Mild Phobia', making it available
+      to everybody.  The only value which may be chosen during chargen
+      is 1.  When taking this ability, the player needs to provide an
+      explanation for it (in this case, what is the player afraid of?).
+      There is no ability which must be purchased before this ability
+      may be purchased.  This ability belongs in the flaws section of
+      the character sheet.  It also has a description (and therefore,
+      a +explain) of 'What are you afraid of?'.
+  
+  +abils/add garou:Silver Tolerance:5|7:No::Merits:You're immune to silver
+      This command adds the ability 'Silver Tolerance', making it
+      available to garou only.  The only values which may be chosen
+      during chargen are 5 and 7.  When taking this ability, the
+      player does not need to provide an explanation for this ability.
+      There is no ability which needs to be purchased before this
+      ability may be purchased.  This ability belongs in the Merits
+      section of the character sheet.  It also has a description (and
+      therefore, a +explain) of 'You're immune to silver'.
+ 
+ {continued in '+shelp abils examples3'}
+=-=-=-=-=-=-=-=-=-=-=-=-=-> End: Abilities Help <--=-=-=-=-=-=-=-=-=-=-=-=-
+
+& abils examples3
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-> Abilities Help <--=-=-=-=-=-=-=-=-=-=-=-=-=--
+  +abils/add base:Singing:1|2|3|4|5:No:Performing::SecSkills:You can sing
+      This command adds the ability 'Singing', making it available to
+      everybody.  The only values which may be chosen during chargen
+      are the numbers 1 through 5.  When taking this ability, the
+      player does not need to provide an explanation for this ability.
+      The player must purchase 'Performance' before being able to
+      purchase any level of Singing.  This ability belongs in the
+      SecSkills section of the character sheet.  It also has a description
+      (and therefore, a +explain) of 'You can sing'.
+ 
+  +abils/lookup Garou:Tribe:Willpower:1:Black Fury|3^Bone Gnawers|2
+      This command adds a lookup list, so that whenever a Garou going
+      through chargen sets his/her tribe to either 'Black Fury' or
+      'Bone Gnawers', his/her willpower is also reset to 3 or 2,
+      respectively.
+=-=-=-=-=-=-=-=-=-=-=-=-=-> End: Abilities Help <--=-=-=-=-=-=-=-=-=-=-=-=-
+
+& abils notes
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-> Abilities Help <--=-=-=-=-=-=-=-=-=-=-=-=-=--
+ Now is where I've got to explain a little bit.  There's some heavy
+ restrictions on the <function> part of +abils/compute.  This is due
+ to two things: my limitations, and the limitations of mux to do more.
+ I WILL try to improve it in the future, but not for a very long time.
+ Please don't ask me to, as it will only irritate me, and frustrate
+ you.  I'm sorry for sounding so uncaring here, but I KNOW this will
+ be a question which many will ask.  All I can say is that if you
+ don't have enough of a math background to construct those <function>'s,
+ please find somebody who does.  It's not terribly abnormal for math.
+ It just looks that way to non-math people.
+ 
+ Thank you.
+=-=-=-=-=-=-=-=-=-=-=-=-=-> End: Abilities Help <--=-=-=-=-=-=-=-=-=-=-=-=-
+
+& alts
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=--> Alts +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+ Usage:
+   +alts <name>
+ 
+ Shows potential alts for a player based on their IP.
+
+ Copyleft: Charon@ChicaGo
+-=-=-=-=-=-=-=-=-=-=-=-=-=--> End: Alts +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+& approve
+=-=-=-=-=-=-=-=-=-=-=-=-=-=--> Approve +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-=
+ Usage:
+   +approve/list
+ 
+ This command will show a list of everybody currently waiting in the
+ approval queue.  Players get on this listing one of two ways: Either they
+ complete chargen, or they get disapproved when a staffer uses
+ '+bg/disapprove'.
+ 
+ To remove somebody from this list, simply '+bg/approve' the character.
+  
+ See also:
+ +shelp backgrounds
+ +shelp charcheck
+=-=-=-=-=-=-=-=-=-=-=-=-=-> End: Approve +Help <--=-=-=-=-=-=-=-=-=-=-=-=--
+
+& auras
+=-=-=-=-=-=-=-=-=-=-=-=-=-=--> Auras +SHelp <-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+ Apart from the 5 aura layers or levels a player has an aspect for the
+ aura. This is set by the CG upon selection of the race: Normal for most,
+ Bright for Shifters, Sparkling for Mages, Rapidly Shifting for Fae, Pale
+ for Vampires. Certain Merits can also modify the aspect: A Vampire with
+ Deceptive Aura would have a Normal aspect; a Mortal+ with the Pale Aura
+ Merit would have a Pale aura and so on. To set it use the %xh+set%xn
+ command. Example:
+     +set John:Aura_Aspect:Bright
+
+ Staff can read anyone's aura. As <target> you can also specify distant
+ objects, in the form *Player or #dbref.
+  
+ Commands: auras
+ Copyleft: Charon@Chicago
+=-=-=-=-=-=-=-=-=-=-=-=-=-> End: Auras +SHelp <-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+& backgrounds
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-> Backgrounds <--=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+ +bg/approve <name>
+     Approve <name> for roleplay.  <name> will be notified when this
+     is done.
+ 
+ +bg/check <name>
+     Check the background information for <name>
+ 
+ +bg/disapprove <name>
+     Disapprove <name> for roleplay.  <name> will be notified when
+     this is done.
+ 
+ +bg/note/set <name>:<some notes on this char's background>
+     Sets notes on a character, to help other staffers know why someone
+     wasn't approved or was approved or to clarify some points in the
+     background.  This command clears all previous notes.
+ 
+ +bg/note/add <name>:<more notes on this char's background>
+     This command is the same as '+bg/note/set', except it does not
+     clear out previous notes.
+=-=-=-=-=-=-=-=-=-=-=-=-=--> End: Backgrounds <--=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+& bbwiz
+==============================================================================
+               Wizard Commands for Myrddin's Bulletin Board 4.0
+------------------------------------------------------------------------------
+     +bbnewgroup <title>             Creates a new group.
+     +bbcleargroup <#>               Clears group <#> and all it's messages.
+     +bblock <#>=<lock>/<key>        Locks group <#>. Lock can be 'flag' or
+                                       an attribute name.
+                                       Examples: +bblock 4=flag/wizard
+                                                 +bblock 5=race/were
+     +bbwritelock <#>=<lock>/<key>   Same as above, but controls who may write
+                                       to the group.
+     +bbconfig                       Shows values of all config parameters.
+                                       See '+shelp bbconfig' for help on
+                                       config parameters and how to set them.
+------------------------------------------------------------------------------
+See also: +shelp bbconfig
+==============================================================================
+
+& bbconfig
+==============================================================================
+          Configuration Parameters for Myrddin's Bulletin Board 4.0
+------------------------------------------------------------------------------
+There are two types of configuration parameters: global and group.  Global
+configuration parameters affect the BB system as a whole, while group 
+configuration parameters affect a single Group.
+To set a global parameter:
+  
+     +bbconfig <param>=<value>       Sets global config parameter.
+  
+Global Parameters:
+  
+     timeout            This sets the default timeout (in days) for any new
+                          groups created. A timeout of '0' means messages
+                          won't timeout. (ex. +bbconfig timeout=30)
+     autotimeout        If you don't have a way to trigger the TR_TIMEOUT
+                          attribute on the bbpocket (daily) to clean out
+                          expired messages, you can use the autotimeout param
+                          instead. Setting this param 'on' enables the BB's
+                          built in timer. Set this param to 'off' to disable.
+------------------------------------------------------------------------------
+See '+shelp bbconfig2' for info on Group parameters
+==============================================================================
+
+& bbconfig2
+==============================================================================
+          Configuration Parameters for Myrddin's Bulletin Board 4.0
+------------------------------------------------------------------------------
+To set a Group parameter:
+  
+     +bbconfig <#>/<param>=<value>   Sets config parameter for board <#>.
+  
+Group Parameters:
+  
+     anonymous          Setting this value turns the Group 'anonymous'.  This
+                          means that any future posting's 'Author' field will
+                          have the value of this param instead of the name of
+                          the author. Wizards will also see the actual name of
+                          author.  (examples:
+                          +bbconfig newspaper/anonymous=NewsPaper Staff,
+                          +bbconfig house rules/anonymous=The Staff)
+     timeout            Sets the default timeout value for the Group.  Any new
+                          messages will have this new value.  A value of '0'
+                          means messages won't timeout.
+==============================================================================
+
+& bit
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-> +Bit +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-=--
+ Usage: +bit <Your Staff Position>
+ 
+ Use this command to change what your position shows up as in the staff 
+ listings.
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-> End: +Bit +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+& charcheck
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-> CharCheck +Help <-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+ +charcheck <name>
+
+     Use this command to show all the information on a character all
+     at once.  This includes: +bg/check, +sheet, +explain/review, 
+     +jnote/view, +finger, and the character's current description.
+     
+     Warning: The output from this command is extremely long, so it
+              should only be used on characters who do not light up
+	      in red on '%xh+check%xn'!
+=-=-=-=-=-=-=-=-=-=-=-=--> End: CharCheck +Help <-=-=-=-=-=-=-=-=-=-=-=-=--
+
+& chargen
+=-=-=-=-=-=-=-=-=-=-=-=-=-=--> CharGen +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-=
+ This character generation system is fairly unique in many ways.
+ 
+ 1) Every race has what is called a base race.  This race may even be the
+    race named 'Base'.  This race has things which are common to %xhall%xn
+    races.  As an example, anotehr race named 'BeteBase' might be created,
+    which would be a base race for all shapeshifters, and have all the
+    things which make the shifters unique.  From there, Garou, Bastet,
+    Gurahl, etc, would be created.  BeteBase would have its base race set
+    to 'Base', which has things which are common to %xhall%xn characters.
+ 2) Setting which races can be used in chargen.  For instance, nobody
+    should ever be set to be 'Base' for the race type.
+ 3) Setting which races are apponly.  On a mage dominated mux, mages should
+    be able to be made as easily as walking into chargen.  This is user
+    settable which ones can be easily done, and which ones need to applied
+    for.
+ 
+ See also:
+  +shelp abils      +shelp list       +shelp chargen problems
+  +shelp race       +shelp sections   +shelp set
+  +shelp tutorial   +shelp chargen notes
+=-=-=-=-=-=-=-=-=-=-=-=-=-> End: CharGen +Help <--=-=-=-=-=-=-=-=-=-=-=-=--
+
+& chargen problems
+=-=-=-=-=-=-=-=-=-=-=-=-> CharGen Problems +Help <--=-=-=-=-=-=-=-=-=-=-=--
+ A few issues exist in this chargen which to resolve would have made
+ more problems than would have been solved.
+ 
+ 1) Gypsies, when they take an element, spend 7 freebies.  If they
+    reset their element, they spend ANOTHER 7 freebies. I couldn't
+    find a way to make this chargen handle this problem correctly.
+ 2) Shapeshifters and Mages have restrictions in one area placed on
+    them by another area.  Shapeshifters may not take rites at a
+    level above their skill in Rituals, and Mages may not take
+    Spheres(Powers) above their Arete.  The code couldn't be set up
+    to handle this without much more problems than it was worth.
+ 3) Players must have at least as many freebies remaining as the
+    flaws they are trying to adjust.  For instance, if they are trying
+    to do '+adjust amnesia:2' or '+adjust amnesia:-2', they must have
+    at least 2 freebiespoints.  This is due to the fact that if they
+    try to do the second one (+adjust amnesia:-2), they may have
+    already spent the freebies the flaw gave them.  This prevents
+    such a cheat.
+=-=-=-=-=-=-=-=-=-=-=-> End: CharGen Problems +Help <--=-=-=-=-=-=-=-=-=-=-
+
+& chargen notes
+=-=-=-=-=-=-=-=-=-=-=-=-=-=--> CharGen Notes <--=-=-=-=-=-=-=-=-=-=-=-=-=-=
+ Currently, specialties are not implemented.  I don't have plans to
+ implement them at this time, though with high enough demand, I may
+ be persuaded to do so in the future.
+=-=-=-=-=-=-=-=-=-=-=-=-=-> End: CharGen Notes <--=-=-=-=-=-=-=-=-=-=-=-=--
+
+& chart
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-> Chart +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-=
+Usage: +chart/login   <player>
+       +chart/idle    <player>
+       +chart/average <player>
+ 
+ Statistics: gives a person's login time/idle time/average for each day
+             of the last week.
+ 
+ Commands: +people +players
+=-=-=-=-=-=-=-=-=-=-=-=-=--> End: Chart +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=
+
+& check
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-> +check +Help <-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+  +check [<player>]
+
+  +check renders a brief summary on a character's attribute setup.
+  There is no point in reading the output of '%xh+charcheck%xn' or
+  even thinking of approving a char while sie still lights up red
+  in the output of this command!
+
+  Likewise, %xhall%xn staffers must check their locks with this command!
+
+  Copyleft:  Charon@Chicago + Callisto@Chicago
+-=-=-=-=-=-=-=-=-=-=-=-=-> End: +check +Help <-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+& clear
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-> Clear +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+ Usage:
+  +clear <name>:<race>
+ 
+  Use this command to allow <name> to go through chargen as <race>.  Note
+  that only one race at a time may be set for this.  In other words, a
+  player may not be cleared to go through chargen as both a Vampire and
+  a Garou.
+ 
+  In order to remove the ability of <name> to go through chargen as an
+  application only race, simply set <race> to 0.
+=-=-=-=-=-=-=-=-=-=-=-=-=--> End: Clear +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+& dark
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-> Dark +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-=--
+ Commands:
+  +darken      Sets you dark
+  +semi-dark   Sets you dark and puts up an idle message
+  +dark        Sets you dark and pagelocks you to all except staff
+  +undark      Sets you visible and un-pagelocks you
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-> End: Dark +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+& findcommand
+=-=-=-=-=-=-=-=-=-=-=-=-=-> Findcommand +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=
+ Usage: +findcommand <command>
+ 
+ Find the object a command is stored on. <command> is a substring of a
+ command's name.  This will only find commands store according to the
+ MIAM convention (&DO_commandname dbref=$\[+\]commandname:blabla).
+ Callisto uses this to make coding easier; if you're not a codewiz;
+ it'll possibly be irrelevant to your work.
+ 
+ Copyleft: Callisto@Chicago
+=-=-=-=-=-=-=-=-=-=-=-=-> End: Findcommand +Help <--=-=-=-=-=-=-=-=-=-=-=-=
+
+& forms
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-> Forms +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+ +forms/add <race>:<tribe or ALL>:<form name>:<lookup list>
+     <race>         The race which gets these adjustments with this form.
+     <tribe or ALL> The tribe which gets these adjustments with this form.
+                    This option would be used mostly with the Bastet, as
+                    certain tribes of Bastet have different form
+                    adjustments than other tribes.
+     <form name>    This is the name of the form which can be assumed, such
+                    as Homid, Crinos, etc.
+     <lookup list>  This portion of the command uses the exact same format
+                    as '+abils/add'.  See '+shelp abils definitions5' for
+                    a full description of how to set this up.  This is
+                    simply a list of all stats which change from homid.
+                    Note that you should specify all attributes which
+                    change in ANY form, so as to avoid accidentally having
+                    a player get the wrong stats for a form.
+ +forms/del <race>:<tribe or ALL>:<form name>
+     This uses the same format as above, but is used to delete a form.
+ +forms/list <race>:<tribe or ALL>
+     This produces a listing of available forms.
+ +forms/view <race>:<tribe or ALL>:<form name>
+     This shows a given form and all statistic adjustments which are made
+     when this form is used.
+=-=-=-=-=-=-=-=-=-=-=-=-=--> End: Forms +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+& function list
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-> Functions List <--=-=-=-=-=-=-=-=-=-=-=-=-=--
+getabil        gettext        hasabil        setabil
+=-=-=-=-=-=-=-=-=-=-=-=-=-> End: Functions List <--=-=-=-=-=-=-=-=-=-=-=-=-
+
+& getabil
+=-=-=-=-=-=-=-=-=-=-=-=-=-=--> Getabil +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-=
+ getabil(dbref,ability name)
+ 
+ This function will return the number value of dbref's skill level in
+ <ability name>.  ie: If John's strength is 3, then getabil(*John,strength)
+ will give you 3.  Note that any non-number value will always return a 0
+ from this function.
+=-=-=-=-=-=-=-=-=-=-=-=-=-> End: Getabil +Help <--=-=-=-=-=-=-=-=-=-=-=-=--
+
+& gettext
+=-=-=-=-=-=-=-=-=-=-=-=-=-=--> Gettext +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-=
+ gettext(dbref,ability name)
+ 
+ This function will return whatever is stored for <ability name>, so is a
+ good way to retrieve fullname, or concept, or whatever that is not
+ numeric.
+=-=-=-=-=-=-=-=-=-=-=-=-=-> End: Gettext +Help <--=-=-=-=-=-=-=-=-=-=-=-=--
+
+& hasabil
+=-=-=-=-=-=-=-=-=-=-=-=-=-=--> Gettext +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-=
+ hasabil(dbref,ability name)
+ 
+ This function returns 1 if <dbref> has the ability named <ability name>,
+ 0 otherwise.
+=-=-=-=-=-=-=-=-=-=-=-=-=-> End: Gettext +Help <--=-=-=-=-=-=-=-=-=-=-=-=--
+
+& helpers
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-> +helpers +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-=
+ For a player to show up in the output of the '%xh+helpers%xn' command
+ (as described in the players' '%xh+help%xn'), they simply need to be
+ @set HAVEN.  Also, please set (and lock where appropriate) their BIT
+ to indicate their fields of expertise.  Staffers should %xhnot%xn be set
+ HAVEN.
+=-=-=-=-=-=-=-=-=-=-=-=-=-> End: +helpers +Help <--=-=-=-=-=-=-=-=-=-=-=-=-
+
+& set
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-> +Set +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-=--
+ Usage:
+  +set name:ability:value
+ 
+ Use this command to set a statistic on any player or object.  Any ability
+ which has already been entered is a valid ability to set.  Examples are:
+ 
+ +set Bast:Race:Vampire
+ +set Pedersen:Str:4
+ +set Tehuti:Concept:Vampire Wizard
+ +set 'Kheret:Willpower:4/4
+ 
+ Note that this command is also used to remove an ability from a sheet.
+ Simply set <value> to 0, and it will be removed.
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-> End: +Set +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+& setabil
+=-=-=-=-=-=-=-=-=-=-=-=-=-=--> Setabil +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-=
+ setabil(dbref,ability name,new value,section)
+ 
+ This will return a new &STATS attribute for <dbref>.  It is used to change
+ a value on a sheet in the following fashion:
+ 
+  &STATS %%#=\[setabil(%%#,strength,3)]
+   %xhor%xn
+  &STATS %%#=\[setabil(%%#,fullname,Jonathan Smith)]
+ 
+ It will accept any value, and plug it in for you.
+ 
+ Note that <section> is optional, and not suggested for normal use.
+=-=-=-=-=-=-=-=-=-=-=-=-=-> End: Setabil +Help <--=-=-=-=-=-=-=-=-=-=-=-=--
+
+& join
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=--> +Join +Help <-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+ Commands:
+  +join <name>      Will teleport you to <name>'s location
+  +summon <name>    Will teleport <name> to you
+  +unsummon <name>  Will teleport <name> to where <name> was summoned from
+-=-=-=-=-=-=-=-=-=-=-=-=-=-> End: +Join +Help <-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+& jnote
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-> JNote +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+ +jnote/clear <name>:<title of note>
+     Removes the note titled <title of note> from <name>'s judgenotes.
+ 
+ +jnote/edit <name>:<title of note>:<old note text>:<new note text>
+     Edits the note on <name> which is titled <title of note>, changing
+     <old note text> to <new note text>.
+ 
+ +jnote/list <name>
+     Shows a list of the judgenotes on <name>
+ 
+ +jnote/set <name>:<title of note>:<note>
+     Sets a judgenote on named titled <title of note>, use <note> as
+     the information to be set.
+ 
+ +jnote/view <name>:<title of note>
+     Shows you the note titled <title of note> which is on the player
+     named <name>.
+=-=-=-=-=-=-=-=-=-=-=-=-=--> End: JNote +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+& jroll
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-> JRoll +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+ This command is best described by example, and hopefully, the following
+ examples will be enough:
+ 
+     +jroll jane:strength+brawl=joe:dexterity+dodge
+     +jroll jane:strength+brawl=6
+     +jroll 6=joe:dex+dodge
+     +jroll 6=6
+     +jroll jane:per+firearms+uzi:accuracy=joe:dexterity+dodge
+     +jroll jane:dex+melee+-1=5
+ 
+ All of the above examples are valid +jroll commands.
+ +jroll sends its results exclusively to the staffer doing the roll.
+=-=-=-=-=-=-=-=-=-=-=-=-=--> End: JRoll +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+& kinks
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-> Kinks +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+ Note: the three /-forms (+kink/add, +kink/rem, +kink/def) can also be
+       used without the / for compatibility to Isle's system.
+ 
+ Note: +explain is rerouted through +kind/def for numeric values.
+ 
+ Help:      +kinks
+ Copyleft:  Callisto@Chicago, inspired by Thorn's at IsleOfShadows
+-=-=-=-=-=-=-=-=-=-=-=-=-=-> End: Kinks +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+& languages
+-=-=-=-=-=-=-=-=-=-=-=-=-=-> Languages +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-=
+ The attribute DEFAULT_LANGUAGE on the Languages System object indicates
+ the default MUSH language (English in this case). This language should NOT
+ be available in Chargen.
+ 
+ Commands that use the language system will revert to their default
+ behaviour when the current language (attribute LANGUAGE on a player) is
+ cleared or set to the default language. +say is routed through
+ say/pose/@emit in this case.
+ 
+ Setting a language on a player is done with the %xh+set%xn command,
+ prefixing the language name with 'Lang_'. Valid values are between 0 and 6
+ Example:
+    +set John:Lang_French:4
+ 
+ Commands: Languages (+lang/set, +say), tt, mutter, whisper
+ Copyleft: Callisto@Chicago & Charon@Chicago
+-=-=-=-=-=-=-=-=-=-=-=-=-> End: Languages +Help <--=-=-=-=-=-=-=-=-=-=-=-=-
+
+& list
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-> List +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-=--
+ Usage: Viewing chargen information
+ 
+ +list           Views a listing of all sections available in the &STATS 
+                 attribute of a player.
+ +list <section> Views a listing of all %xhpossible%xn attributes in a 
+                 given section.
+ +list <race>:<section>
+                 Views a list of all %xhpossible%xn attributes in a given
+                 section for a given race.
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-> End: List +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+& map
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-> map +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+Usage: +map/create
+ 
+ Creates a map from the MUSHes' data that features all streets (all those
+ that can be reached from other streets, starting at MAP_CENTRE. MAP_CENTRE
+ must be set to your first IC street; it is located on the 'map' object).
+ Positions X/Y/Z will be added on all street objects (Z is for sewers, caves
+ or other things that make your map 3D).
+ 
+ NOTE: All streets will be @chown'd to a builder character named the same
+       as the MUSH (as returned by the mudname() function). It is a good
+       idea to alias this builder "MUSH".
+ 
+ !!!!  WARNING:  Since this character now owns your grid, it is *vital*
+                 for her not to get idle-nuked after grid-"completion!"
+ 
+                     @set MUSH=staff
+ 
+                 will do the job.  Do it *now*!
+ 
+ NOTE: For a place to be recognized as a street, it has to be accessible
+       from another street going north, south, east, west, up, down,
+       northwest, northeast, southwest or southeast.  These exits are
+       also required by +compass.
+ 
+ NOTE: For the +map command to be able to determine which street the
+       building a player in is near, all rooms must have an "OUT" exit.
+ 
+ Commands:  +map
+ Variables: MAP_CENTRE (the dbref on the first IC street, set on 'map')
+ Copyleft:  Callisto@Chicago
+=-=-=-=-=-=-=-=-=-=-=-=-=-=--> End: Map +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+& people
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-> People +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-=
+Usage: +people
+ 
+ Statistics: how many people were on each day last week?
+ 
+ Commands: +chart  +players
+=-=-=-=-=-=-=-=-=-=-=-=-=--> End: people +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=
+
+& phones
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-> Phones +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-=
+ Usage: +dial <player>
+        +answer
+        +hangup
+        +phone/*
+ 
+ The first form informs <player> that a call is waiting for them;
+ PHONE_PENDING will be set on either party containing the dbref of
+ the other. Any previous PHONE_PENDING will be cleared on the caller
+ (as if they'd hung up before calling). The receiving party will have
+ PHONE_ANS set (this is required so that the caller cannot use +answer,
+ s/b, after a +dial to force the recipient to pick up the phone).
+ 
+ The second form will try to answer the call; if the recipient's
+ PHONE_PENDING points to a party whose PHONE_PENDING references
+ them back, PHONE_PENDING is cleared on the both parties; instead,
+ PHONE will be set with the othe party's dbref.  If PHONE_PENDING
+ on the alleged caller is unset or set to another dbref, they have
+ given up on the recipient and called/tried to call another party.
+ PHONE_ANS is then cleared.
+ 
+ The third form clears PHONE on both if a line is up; otherwise,
+ PHONE_PENDING is cleared on the enactor.
+ 
+ The forms of the fourth form reset PHONE_ANS on the enactor, and
+ PHONE_PENDING on both parties (caller only if still equal to enactor).
+ 
+ The @adisconnect on the phone clears PHONE, PHONE_PENDING and
+ PHONE_ANS on each player disconnecting from the game.
+ 
+ "+dial" is aliased to "call" and "+phone " for convenience/compatibility.
+ "+psay" is aliased to "+talk" for the same reason.
+ 
+ Commands: phones (+dial, +answer, +phone/*, +hangup, +talk, +talkq)
+ Copyleft: Callisto@Chicago
+=-=-=-=-=-=-=-=-=-=-=-=-=--> End: Phones +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=
+
+& purge
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-> Purge +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+ Commands:
+ +purge/scan         Shows a listing of all idle characters
+ +purge/players      Removes all idle characters, leaves their objects
+ +purge/wipe         Removes all idle characters and their objects
+ 
+Wizard Only Commands:
+ +purge/max <days>   Sets how many days players can go on vacation
+ +purge/days <days>  Sets how many days go by before a player is idle
+                     purged.
+ 
+To avoid having someone @nuked:
+  @set the player=vacation (when going on vacation, this is a temporary
+      setting which will be cleared once the player logs in again)
+  @set the player=head (for builder character types, this is a permanent
+      setting, but does not give them special powers)
+  Give the player a staff bit.  This is a permanent setting, and makes them
+      able to use all of the +shelp commands.
+=-=-=-=-=-=-=-=-=-=-=-=-=--> End: Purge +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+& players
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-> Players +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-=
+Usage: +players
+ 
+ Gives a list of all registered players and the time and site of their
+ last connect.  This command is theoretically available to players, but
+ the site information will be stripped if +players is invoked by someone
+ not flagged WIZARD.
+ 
+ Commands: +chart  +people
+ Copyleft: Callisto@Chicago
+-=-=-=-=-=-=-=-=-=-=-=-=--> End: Players +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=
+
+& race
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-> Race +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-=--
+ Usage: Viewing and altering information for races in chargen
+ 
+ +race/apponly <name> Sets the race so that people must apply to become
+                      a member of that race
+ +race/noapp <name>   Sets the race so that anybody may become a member of
+                      that race
+ +race/show <name>    Set a race so that users can see it as they go
+                      through chargen
+ +race/noshow <name>  Set a race so that users can not see it as they go
+                      through chargen
+ +race/list           Shows you a listing of all available races
+ +race/safe <name>    Makes a race indestructible by +race/destroy
+ +race/view <name>    View more detailed information on <name>
+ +race/info <name>:<info>
+                      Sets the information which appears in +race/view
+ ***Wizard Commands***
+ +race/create <name>:<base>
+                      Create a new race in chargen named <name>, who's
+                      base is <base> \{See +SHelp Chargen for more info\}
+ +race/destroy <name> Destroys a race.  Note that this command can not be
+                      stopped or undone.  Use with extreme care.
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-> End: Race +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+& search
+=-=-=-=-=-=-=-=-=-=-=-=-=-=--> Search +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+ Usage: +search <ability name> <operator> <value>
+ 
+ Ability Name    This is an ability to search all objects for.
+ Operator        This is currently one of the following: <, <=, =, >=, >
+                 See examples below.
+ Value           The value to search for.
+ 
+ +search strength>3
+                 This shows a list of all characters whose Strength is
+                 greater than 3.
+ +search race=Garou
+                 This shows a list of all Garou characters.
+ +search understand_howl=?*
+                 This shows a list of all characters who have the ability
+                 'Understand_Howl'.
+=-=-=-=-=-=-=-=-=-=-=-=-=--> End: Search +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=
+
+& sections
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-> Sections +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=--
+ Usage:
+ 
+  +sections/max <race>:<section>:<max>       Use this command to set the
+                 maximum value a character of <race> may set an ability
+                 from <section> to in chargen.  For example, to make the
+                 maximum player settable physical attribute to 4 (where
+                 the player is mortal), use
+                   +sections/max mortal:phys-attrs:4
+ 
+  +sections/points <race>:<section>:<points> Use this command to set the
+                 number of points which a player of race <race> has to
+                 devote to <section>.  For example, to say that mortals
+                 have 6 points to devote to physical attributes, use
+                   +sections/points mortal:phys-attrs:6
+ 
+  +sections/view <race>:<section>  Use this command to view the information
+                 for <race>'s <section>.  For example, to view the
+                 information for Mortal Physical Attributes, use
+                   +sections/view mortal:phys-attrs
+ 
+ {continued in '+shelp sections2'}
+=-=-=-=-=-=-=-=-=-=-=-=-=-> End: Sections +Help <--=-=-=-=-=-=-=-=-=-=-=-=-
+
+& sections2
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-> Sections +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=--
+  +sections/defcost <race>:<section name>:<default cost>
+            Use this command to specify how much it costs to raise an
+            ability from this section by one point.  This is normally used
+            to say that secondary abilities cost 0.5 points.
+ 
+  +sections/frcost <race>:<section name>:<freebie cost>
+            Use this command to set a freebie cost for an entire section,
+            rather than just a single ability, as can be done with
+            +abils/frcost (see '+shelp abils5' for more information).
+ 
+  +sections/section <race>:<section name>:<section>
+            Use this command to set the point source for an entire
+            section, rather than just a single ability, as can be done with
+            +abils/section (see '+shelp abils5' for more information).
+            Note that this command is normally used to tell chargen to use
+            the points from talents when people are setting up secondary
+            talents, etc.
+=-=-=-=-=-=-=-=-=-=-=-=-=-> End: Sections +Help <--=-=-=-=-=-=-=-=-=-=-=-=-
+
+& shutdown
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-> Shutdown +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=--
+ +shutdown <number of minutes>
+      Will shutdown the mux in <number of minutes>, doing an @wall every
+      minute until then.
+=-=-=-=-=-=-=-=-=-=-=-=-=-> End: Shutdown +Help <--=-=-=-=-=-=-=-=-=-=-=-=-
+
+& staff
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-> Staff +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+ +staff
+
+     This shows the list of connected staffers.
+     See '%xh+help colours%xn'.
+ 
+ +staff/add <name>:<bit>:<position>
+     This adds <name> to the staff listings as a <bit>.  Bit must be
+     Wizard, Admin, or Judge.  In addition, this also sets the position
+     which appears in the staff listings.
+     
+ +staff/del <name>
+     This command removes a player from the staff listings.
+ 
+     IMPORTANT NOTE: This command does NOT confer the flag, simply
+                     puts the player on the staff listings.  This
+                     means that if you add somebody in as a Wizard,
+                     Admin, or Judge, you must still use
+                     '@set name=bit', or if you remove somebody from
+                     staff listings, you must still use
+                     '@set name=!bit'.
+=-=-=-=-=-=-=-=-=-=-=-=-=--> End: Staff +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+& stats
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-> +stats +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+ +stats/list [<player>]
+ +stats [<player>/][<section>]
+ 
+ This command lists individual sections of the character sheet.
+  
+ A list of valid sections can be obtained using the first form of
+ the command (for a particular player if given).
+  
+ The second form shows a section (defaults to the primary attributes)
+ for a specific player (defaults to yourself).  If both a player and
+ a section are given, they must be separated using the : or the /
+ character.
+
+ Copyleft:  Charon@Chicago
+=-=-=-=-=-=-=-=-=-=-=-=-=--> End: +stats +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+& taxi
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-> +taxi +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+ Usage: +taxi
+ 
+ In addition to hailing a taxi, this will also tell you how many and which
+ cabs are free.  Use this for analysis if a player complains that they can
+ never get a cab.  If in doubt, create another taxi; instructions are set
+ on the taxi-parent.
+ 
+ TAXI_PARENT on the CInfo-object must be set with the dbref of the parent
+ for taxis.
+ 
+ While the taxi is going places in 'driveto' mode, ROUTE (on the taxi-child)
+ will contain the dbrefs of the places the taxi yet has to go to. This list
+ of course will get progressively shorter.
+ 
+ In 'cruise' mode, the taxi constantly re-checks which places are busy (in
+ case someone's moved), and will then randomly pick on of those locations
+ and go (@tel) there.
+ 
+ Variables:  TAXI_PARENT
+ Commands:   +taxi
+ Copyleft:   Callisto@Chicago
+=-=-=-=-=-=-=-=-=-=-=-=-=--> End: +taxi +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+& time
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-> +time +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+ Usage: +time \[<player>|mush\] (player-level command)
+ 
+ The first form gives the time and date in the game world (IC time)
+ as well as the phase of the moon for our shiftery friends.
+ (Code-wizzies: For this, FN_GAMETIME is evaluated; if you have Keran's
+ time and weather-thingie, that's where to plug it in.)
+ 
+ The second time gives the Real Life time for where the MUSH server
+ is; this is useful since "Last logged..." times in +finger <player>
+ and @mail datestamps are in MUSH time rather than converted to your
+ local time.
+ 
+ The last form gives the local time where <player> is in Real Life.
+ For this to work, the player must have a valid timezone set:
+ 
+    &TIMEZONE me=CET
+    &TIMEZONE me=1
+ 
+ Both examples would indicate you in the Central-European timezone;
+ the first by name (note: if the MUSH doesn't recognize the name,
+ it will default to GMT -- that's right, it's still GMT, not UTC),
+ the second one by an offset to GMT (Greenwich Mean Time, or UTC).
+ This offset may be a positive or negative float (1,-7,+1.5 etc.).
+ 
+ This code uses MIAM's TIMEZONES list and its MUSHTIME offset.
+ The numeric value for TIMEZONE is not interprete by MIAM and should
+ therefore only by used in special cases.
+ 
+ TIMEZONES is a list of timezones (TZAbbrev:TZFullName:OffsetGMTInSecs)
+ set on the MIAM:MFDO.  MUSHTIME is an attribute indicating the MUSH-clock's
+ offset to GMT in seconds.  It too is set on the MIAM:MFDO.  TIMEZONE is
+ a variable described above that can be set by the individual player to
+ indicate their RL location.  The TIMEZONES list is by no means complete,
+ so expect players to request their timezone be added.
+ 
+ Variables:  TIMEZONES, MUSHTIME, TIMEZONE
+ Functions:  localtime(), localsecs()
+ Commands:   +time +rtime
+ Copyleft:   Callisto@Chicago
+=-=-=-=-=-=-=-=-=-=-=-=-=--> End: +time +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+& timeon
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-> +time +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+ Usage: +timeon \[<player>\]   (player-level command)
+ 
+ Returns the total online time and the online time today for <player>, or
+ for yourself if no <player> is given.
+ 
+ Variables:  TIMEON (seconds on total), TIMEON_CURR (secs() at signon today)
+ Copyleft:   Callisto@Chicago
+-=-=-=-=-=-=-=-=-=-=-=-=--> End: +timeon +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=
+
+& tutorial
+-=-=-=-=-=-=-=-=-=-=-=-=-=-> Tutorial +Help <-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+ This chargen, as you can already see, is a fairly complex one.  As
+ such, I'm providing a step by step example of how I added the Mage
+ race into chargen, making it ready for players to use.
+ 
+ Please read, before reading this tutorial, '+shelp set',
+ '+shelp sections', '+shelp abils', and '+shelp race'.
+ 
+ Note that suggestions on how to improve this tutorial are always
+ welcome.
+ 
+ {continued in '+shelp tutorial1'}
+-=-=-=-=-=-=-=-=-=-=-=-=-> End: Tutorial +Help <-=-=-=-=-=-=-=-=-=-=-=-=-=-
+ 
+& tutorial1
+-=-=-=-=-=-=-=-=-=-=-=-=-=-> Tutorial +Help <-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+*** Create the race, and set it app only (this is normal for many
+    mu*'s, so I'm doing it the same way here).
+ 
++race/create mage:base
++race/apponly mage
+ 
+*** Going over the character sheet and through the book, identify
+    all abilities that do not already exist.  Use '+abils/search'
+    if you aren't sure if the ability already exists.  These are
+    the abilities I found and added (and how I added them).
+ 
+*** Top section information
++abils/add mage:essence:Dynamic|Pattern|Primoridal|Questing:no::Top:This
+           is the "Essence" statistic.  Contact a staffer for more information.
++abils/add mage:tradition:Akashic Brotherhood|Celestial Chorus|Cult of
+           Ecstasy|Dreamspeakers|Euthanatos|Order of Hermes|Sons of Ether|
+           Verbena|Virtual Adepts:no::Top:This is the "Tradition" statistic.
+           Contact a staffer for more information.
+ 
+ {continued in '+shelp tutorial2'}
+-=-=-=-=-=-=-=-=-=-=-=-=-> End: Tutorial +Help <-=-=-=-=-=-=-=-=-=-=-=-=-=-
+ 
+& tutorial2
+-=-=-=-=-=-=-=-=-=-=-=-=-=-> Tutorial +Help <-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+*** Abilities section information
++abils/add mage:mage do:0|1|2|3|4|5:no::Skills:This is the "Do" statistic.
+           Contact a staffer for more information.
++abils/add mage:leadership:0|1|2|3|4|5:no::skills:This is the "Leadership"
+           statistic.  Contact a staffer for more information.
++abils/add mage:technology:0|1|2|3|4|5:no::Skills:This is the "Technology"
+           statistic.  Contact a staffer for more information.
++abils/add mage:cosmology:0|1|2|3|4|5:no::knowledges:This is the "Cosmology"
+           statistic. Contact a staffer for more information.
++abils/add mage:culture:0|1|2|3|4|5:no::Knowledges:This is the "Culture"
+           statistic.  Contact a staffer for more information.
++abils/add mage:lore:0|1|2|3|4|5:no::Knowledges:This is the "Lore" statistic.
+           Contact a staffer for more information.
+ 
+ {continued in '+shelp tutorial3'}
+-=-=-=-=-=-=-=-=-=-=-=-=-> End: Tutorial +Help <-=-=-=-=-=-=-=-=-=-=-=-=-=-
+ 
+& tutorial3
+-=-=-=-=-=-=-=-=-=-=-=-=-=-> Tutorial +Help <-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+*** Powers section information
++abils/add mage:correspondence:0|1|2|3|4|5:no::Powers:This is the
+           "Correspondence" statistic.  Contact a staffer for more information.
++abils/add mage:entropy:0|1|2|3|4|5:no::powers:This is the "Entropy" statistic.
+           Contact a staffer for more information.
++abils/add mage:forces:0|1|2|3|4|5:no::powers:This is the "Forces" statistic.
+           Contact a staffer for more information.
++abils/add mage:life:0|1|2|3|4|5:no::powers:This is the "Life" statistic.
+           Contact a staffer for more information.
++abils/add mage:mind sphere:0|1|2|3|4|5:no::powers:This is the "Mind"
+           statistic. Contact a staffer for more information.
++abils/add mage:Matter:0|1|2|3|4|5:no::powers:This is the "Matter" statistic.
+           Contact a staffer for more information.
++abils/add mage:Prime:0|1|2|3|4|5:no::powers:This is the "Prime" statistic.
+           Contact a staffer for more information.
++abils/add mage:Spirit Sphere:0|1|2|3|4|5:no::powers:This is the "Spirit"
+           statistic. Contact a staffer for more information.
++abils/add mage:Time Sphere:0|1|2|3|4|5:no::powers:This is the "Time"
+           statistic. Contact a staffer for more information.
+ 
+ {continued in '+shelp tutorial4'}
+-=-=-=-=-=-=-=-=-=-=-=-=-> End: Tutorial +Help <-=-=-=-=-=-=-=-=-=-=-=-=-=-
+ 
+& tutorial4
+-=-=-=-=-=-=-=-=-=-=-=-=-=-> Tutorial +Help <-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+*** Pools section information
++abils/add mage:Arete:1|2|3|4|5|6|7|8|9|10:no::Pools:This is the "Arete"
+           statistic.  Contact a staffer for more information.
++abils/add mage:Quintessence:0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17
+           |18|19|20:no::Pools:This is the "Quintessence" statistic. 
+           Contact a staffer for more information.
++abils/add mage:Paradox:0|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17
+           |18|19|20:no::Pools:This is the "Paradox" statistic. 
+           Contact a staffer for more information.
+ 
+ {continued in '+shelp tutorial5'}
+-=-=-=-=-=-=-=-=-=-=-=-=-> End: Tutorial +Help <-=-=-=-=-=-=-=-=-=-=-=-=-=-
+ 
+& tutorial5
+-=-=-=-=-=-=-=-=-=-=-=-=-=-> Tutorial +Help <-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+*** Backgrounds section information
++abils/add mage:arcane:0|1|2|3|4|5:no::backgrounds:This is the "Arcane"
+           statistic.  Contact a staffer for more information.
++abils/add mage:avatar:0|1|2|3|4|5:no::backgrounds:This is the "Avatar"
+           statistic.  Contact a staffer for more information.
++abils/add mage:Mage Destiny:0|1|2|3|4|5:no::backgrounds:This is the "Destiny"
+           statistic.  Contact a staffer for more information.
++abils/add mage:dream:0|1|2|3|4|5:no::backgrounds:This is the "Dream"
+           statistic.  Contact a staffer for more information.
++abils/add mage:Library:0|1|2|3|4|5:yes::backgrounds:This is the "Library"
+           statistic.  Contact a staffer for more information.
++abils/add mage:Node:0|1|2|3|4|5:yes::backgrounds:This is the "Node"
+           statistic.  Contact a staffer for more information.
++abils/add mage:Talisman:0|1|2|3|4|5:yes::backgrounds:This is the "Talisman"
+           statistic.  Contact a staffer for more information.
+ 
+*** End new abilities
+ 
+ {continued in '+shelp tutorial6'}
+-=-=-=-=-=-=-=-=-=-=-=-=-> End: Tutorial +Help <-=-=-=-=-=-=-=-=-=-=-=-=-=-
+ 
+& tutorial6
+-=-=-=-=-=-=-=-=-=-=-=-=-=-> Tutorial +Help <-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+Notice that the spells listed in the Mage 2nd Edition book were NOT
+added at any time. If those are to be added, please feel free to add
+them in now, using the same type of command as has been used above.
+ 
+Notice also that Leadership was added to Mages.  Leadership gets
+placed in different sections for different races (Garou and other
+shifters have it as a skill, Kindred have it as a Talent, Mages as a
+skill).  As such, it must be added individually to each race.
+ 
+The next group of commands is the worst part of the entire chargen
+process.  They all make reference to 'magedbref'.  To find this dbref,
+type '+race/list', and look for Mage.  The dbref will be in the parentheses
+beside 'Mage'.  In the following commands, use that dbref wherever
+you see 'mage dbref'.
+ 
+ {continued in '+shelp tutorial7'}
+-=-=-=-=-=-=-=-=-=-=-=-=-> End: Tutorial +Help <-=-=-=-=-=-=-=-=-=-=-=-=-=-
+ 
+& tutorial7
+-=-=-=-=-=-=-=-=-=-=-=-=-=-> Tutorial +Help <-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+*** Set how many points are given for primary, secondary, and tertiary
+*** attributes in chargen here.
++set magedbref:primattrpoints:7
++set magedbref:secattrpoints:5
++set magedbref:terattrpoints:3
+ 
+*** Set how many points are given for primary, secondary, and tertiary
+*** abilities in chargen here.
++set magedbref:primskillpoints:13
++set magedbref:secskillpoints:9
++set magedbref:terskillpoints:5
+ 
+ {continued in '+shelp tutorial8'}
+-=-=-=-=-=-=-=-=-=-=-=-=-> End: Tutorial +Help <-=-=-=-=-=-=-=-=-=-=-=-=-=-
+ 
+& tutorial8
+-=-=-=-=-=-=-=-=-=-=-=-=-=-> Tutorial +Help <-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+*** Set how many points worth of (respectively) backgrounds, merits,
+*** flaws, powers (for mage, these are spheres), spells, freebies,
+*** miscellaneous stats, and top section information the race gets.
+*** The top section is annoying because some abilities for some races
+*** which are in this section do require points (for instance, Gypsy
+*** Elements require 7 freebie points).  As such, the top section
+*** must have points for such things as IC Age, and the like.  Since
+*** Mages do not have this restriction, I have chosen an absurdly
+*** large number, 1000 in this case, so that players need never worry
+*** about it.
++set magedbref:backgroundspoints:7
++set magedbref:meritspoints:7
++set magedbref:flawspoints:7
++set magedbref:powerspoints:6
++set magedbref:spellspoints:0
++set magedbref:freebiespoints:15
++set magedbref:miscpoints:0
++set magedbref:toppoints:1000
+ 
+ {continued in '+shelp tutorial9'}
+-=-=-=-=-=-=-=-=-=-=-=-=-> End: Tutorial +Help <-=-=-=-=-=-=-=-=-=-=-=-=-=-
+ 
+& tutorial9
+-=-=-=-=-=-=-=-=-=-=-=-=-=-> Tutorial +Help <-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+*** A Mage, by default, gets a willpower of 5, and an arete of 1. 
+*** The easiest way to enforce this type of setting is by using
+*** '+abils/compute' to set those when some other required statistic
+*** is set, as in the following example.  Note that the actual function
+*** is <number>+0.  This is because of how the code works.  When
+*** doing this type of thing, you need to put a '+0' at the end of
+*** the function, to help the code work correctly for you.  Failing
+*** to do so could screw up the &STATS attribute of a player.
++abils/compute mage:tradition:willpower:1:5+0
++abils/compute mage:tradition:arete:2:1+0
+ 
+ {continued in '+shelp tutorial10'}
+-=-=-=-=-=-=-=-=-=-=-=-=-> End: Tutorial +Help <-=-=-=-=-=-=-=-=-=-=-=-=-=-
+ 
+& tutorial10
+-=-=-=-=-=-=-=-=-=-=-=-=-=-> Tutorial +Help <-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+*** Now we tell chargen that Mages secondary skills will take points
+*** from the non-secondaries (ie: sectalents takes points from talents).
+*** In addition, we also tell chargen that secondaries cost 1/2 of a
+*** point to raise.
++sections/section mage:sectalents:talents
++sections/defcost mage:sectalents:0.5
++sections/section mage:secskills:skills
++sections/defcost mage:secskills:0.5
++sections/section mage:secknowledges:knowledges
++sections/defcost mage:secknowledges:0.5
+ 
+ {continued in '+shelp tutorial11'}
+-=-=-=-=-=-=-=-=-=-=-=-=-> End: Tutorial +Help <-=-=-=-=-=-=-=-=-=-=-=-=-=-
+ 
+& tutorial11
+-=-=-=-=-=-=-=-=-=-=-=-=-=-> Tutorial +Help <-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+*** Now we set all freebie point costs for chargen.
++sections/frcost mage:phys-attrs:5
++sections/frcost mage:ment-attrs:5
++sections/frcost mage:soc-attrs:5
++sections/frcost mage:talents:2
++sections/frcost mage:skills:2
++sections/frcost mage:knowledges:2
++sections/frcost mage:sectalents:2
++sections/frcost mage:secskills:2
++sections/frcost mage:secknowledges:2
++sections/frcost mage:backgrounds:1
++sections/frcost mage:pools:1
++sections/frcost mage:powers:1
+ 
+*** These two abilities are in pools, but have very different costs
+*** from other abilities in there.  So, we set their freebie point
+*** cost separately.
++abils/frcost mage:arete:4
++abils/frcost mage:quintessence:0.25
+ 
+ {continued in '+shelp tutorial12'}
+-=-=-=-=-=-=-=-=-=-=-=-=-> End: Tutorial +Help <-=-=-=-=-=-=-=-=-=-=-=-=-=-
+ 
+& tutorial12
+-=-=-=-=-=-=-=-=-=-=-=-=-=-> Tutorial +Help <-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+At this point, the Mage race has been added in, and is now ready to
+be used by players.
+-=-=-=-=-=-=-=-=-=-=-=-=-> End: Tutorial +Help <-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+& vote
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-> +vote +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+ The VOTE_HANDLER must be put in the crontab
+ (%xh@daily cinfo=@trigger me/vote_handler%xn). It gets the time information
+ for the players from the loggin-object's data-files.
+ 
+ XP on the player object are updated through VOTE_HANDLER each RL day --
+ VOTE_CYCLE indicates only how many days you have to wait before voting
+ for the same person again; this value is internally converted to seconds
+ by VOTE_HANDLER.  This XP update considers three factors:  idle hours
+ multiplied by the XP_PER_IDLE factor;  busy hours multiplied by the
+ XP_PER_BUSY factor, and votes multiplied by the XP_PER_VOTE factor.
+ The handler scans for players who have voted, as indicated by the
+ VOTES-list set on the voting player (#dbref_voted_for:secs()_when_voting).
+ It will then filter() this list through FN_VOTEEXPIRY which will process
+ votes cast over VOTE_CYCLE days ago and let younger votes remain untouched.
+ The vote-processing credits the voted for player with XP_PER_VOTE XP and
+ removes the vote from the voter's VOTES-list.
+ 
+ XP_PER_IDLE credits general (theoretical) availability for RP.  Since many
+             people are logged in even when busy at work, this value is
+             usually minute.
+ XP_PER_BUSY credits activity in the MUSH (RP as well as descing etc.).
+             In theory, XP_PER_VOTE could be set to zero and all XP could
+             be handled through activity, but players would likely get cross
+             or might try to simulate activity with client-side spoofs.
+ XP_PER_VOTE credits each "Good RP!"-vote of confidence given by another
+             player.
+ 
+ Commands:  +vote +xp
+ Staffhelp: +xp
+ Variables: VOTE_MAX, VOTE_CYCLE, XP_PER_VOTE, XP_PER_BUSY, XP_PER_IDLE
+            (on the CInfo object); XP, XP_SPENT, VOTES (on player objects)
+ Functions: FN_VOTEEXPIRY, VOTE_HANDLER (both on the CInfo object)
+ Copyleft:  Callisto@Chicago
+=-=-=-=-=-=-=-=-=-=-=-=-=--> End: +vote +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+& vote
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-> +vote +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+=-=-=-=-=-=-=-=-=-=-=-=-=--> End: +vote +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+& weapons
+=-=-=-=-=-=-=-=-=-=-=-=-=-=--> Weapons +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-=
+ Weapons and armor are objects which have stats, no more, no less.  Use
+ the '+set' command (see '+shelp set') for information on how to set the
+ stats on weapons and armor.
+ 
+ To make a new weapon or armor, simply use these steps:
+   @create Weapon/Armor object
+   +set Weapon/Armor object:race:<Use either Weapon or Armor here>
+   Using +set, set the stats on the Weapon/Armor object as needed.
+   @chown the object to the person who will carry/use this item.
+   
+ The following stats are currently in, and may be set:
+ 
+Weapons
+  Accuracy     This is how accurately this weapon may be used.  For
+               instance, a dagger will most often be much more accurate
+               than a two handed sword.
+ {continued in '+shelp weapons2'}
+=-=-=-=-=-=-=-=-=-=-=-=-=-> End: Weapons +Help <--=-=-=-=-=-=-=-=-=-=-=-=--
+
+& weapons2
+=-=-=-=-=-=-=-=-=-=-=-=-=-=--> Weapons +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-=
+  Clip         This is how many extra shots may be carried in a separate
+               clip/quiver arrangement before ammunition runs out of that
+               clip/quiver.
+  Concealed    This is a simple yes or no value to show whether or not
+               the carrier is trying to conceal this weapon.
+  Concealment  This is a number from 1 to 10 showing how difficult it is
+               conceal this particular weapon.  Future code will use
+               this, and expect such a number here, to see how well a
+               weapon is concealed by the carrier.
+  Damage       This is how many extra dice of damage this weapon does when
+               used successfully.
+  Difficulty   This is the difficulty to use this weapon successfully
+               under normal circumstances.
+  Range        This is the range, in yards, a ranged weapon may be fired.
+  Rate         This is how many shots may be fired per round with a ranged
+               weapon.
+ {continued in '+shelp weapons3'}
+=-=-=-=-=-=-=-=-=-=-=-=-=-> End: Weapons +Help <--=-=-=-=-=-=-=-=-=-=-=-=--
+
+& weapons3
+=-=-=-=-=-=-=-=-=-=-=-=-=-=--> Weapons +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-=
+Armor
+  Penalty      This is the dexterity penalty incurred when wearing this
+               armor.
+  Rating       This is the number of soak dice this armor provides.
+=-=-=-=-=-=-=-=-=-=-=-=-=-> End: Weapons +Help <--=-=-=-=-=-=-=-=-=-=-=-=--
+
+& who
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=--> +who +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+  +who
+
+    This shows the list of connected staffers.
+
+  Commands: +staff
+  Player C: +staff, +who
+  Misc:     +help colours
+  Copyleft: Callisto@Chicago
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-> End: +who +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+& xp
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=--> +xp +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+Usage: +xp/spend <player>=<xp>
+       +xp/give  <player>=<xp>
+ 
+ The first form does XP spends; it transfers <xp> XP from unspent to spent
+ XP on <player>.  Remember to +set what they paid for. : )
+ 
+ The second form credits <player> with <xp> XP (for participation in staff-
+ run plots etc.).  Fractional numbers are allowed.
+ Note: these XP do not go through the XP/vote-cycle and become available
+       immediately.  Do not expect anonymity on +xp/give.
+ 
+ Commands: +xp
+ Copyleft: Callisto@Chicago
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-> End: +xp +Help <--=-=-=-=-=-=-=-=-=-=-=-=-=-=
