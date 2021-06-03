@@ -1,0 +1,1614 @@
+ex##################################################################
+#		THIS IS AN ONLINE CHARGEN SYSTEM FOR ADMIN       #
+#               TO MAKE FEATURES AND COMPANIONS WITH             #
+##################################################################
+
+# Where #144 = The entrance to the admin chargen system
+
+@set #144=wizard
+-
+
+&isadmin #144=[or(hasflag(%#, wizard), hasflag(%#, staff))]
+-
+
+@lock #144=isadmin/1
+-
+
+
+@fail #144=%xh%xbOnly qualified admin may use the admin character 
+generation system.%xn
+-
+
+@ofail #144=tries to enter the Admin Character Generation Rooms, but 
+isn't an admin and is blocked at the door.
+-
+
+@succ #144=You go into the Admin Chargen Rooms.%r
+-
+@osucc #144=goes into the Admin Character Generation Rooms.
+-
+@odrop #144=comes in from the Character Room.
+-
+
+# Where #143 = The Admin Character Generation Start Room
+
+@desc #143 =
+%r
+This is an online character generation system for [mudname()] admin 
+only.  Players are locked from entering this room.  
+%xh%xmDO NOT%xn bring any 
+player character into these rooms unless you are configuring that 
+player to be a feature or a companion character.%r%r
+A) Create a character to bring through these rooms:%r
+%b%b%b%B%xg%xh@pcreate <temporary name>=<temporary password>%r%xn
+B) Teleport the character to be configured to this room: 
+%xg%xh%r
+%b%b%b%B@teleport *<temporary name>=here%r%xn
+C) Set your email address on the character to be configured:%r
+%xg%xh%b%b%b%b&email *<temporary name>=<your email address>%r%xn
+D) Log into this newly created character and go to the %xh%xgnext%xn step.%r 
+
+-
+@tag #143=ooc
+
+-
+
+# Where #150= the exit to Room #1/Identity
+
+@set #150=wizard
+-
+
+&is-admin #150=
+  [setq(0, get(#7/staff-dbrefs))]
+  [setq(1, iter(%q0, get(##/email)))]
+  [switch(t(match(%q1, get(%#/email))), 1, 1, 0)]
+-
+
+@lock #150=is-admin/1
+-
+
+@fail #150=Your email address does not match any known wizard or 
+[mudname()] staff person.  You are not authorized to go farther.
+-
+@ofail #150=does not have an email address set on [obj(%#)] that 
+matches any known wizard or [mudname()] staff member and, therefore, 
+cannot go on to the next room.
+-
+@afail #150=@wall/wiz/emit/no_prefix 
+%xrTwink Alert: An apparent non-admin, [name(%#)] ([num(%#)]), is 
+attempting to use the Admin Chargen System in room #143!%xn
+-
+@osucc #150=goes on to the next step.
+
+-
+@odrop #150=comes in from the Admin Character Generation Start Room.
+-
+
+# Where #149 = Admin Character Generation Room 1: Identity
+
+@set #149=wizard
+-
+
+@desc #149= 
+%r 
+
+The first thing you need to do for the character is choose a name 
+and a clan, and  For more information on the noble 
+families, please see: %xh%xgnews noble%xn
+%r%r
+
+When you're ready to choose your name and clan, type: 
+%xh%xgidentity%xn
+%r
+-
+
+&cmd-identity #149=$identity:
+
+# check to make sure that this player hasn't previously been
+#    chargened
+
+@switch [not(hastag(%#, chargened))]=
+
+  0, {@pemit %#=This character has already been configured.  If you 
+                  would like to reconfigure this character, you'll 
+                  have to use your admin character to remove this 
+                  character's 'chargened' tag.  
+                  (@cleartag *<temporary name>=chargened)},
+  1, {@program %#=me/prog-set-name:%xh%xgPlease enter the first 
+                 name of your new character.%xn},
+  {@pemit %#=Error: Admin have been alerted.;
+   @qmail Genjimoto/Bug-identity=Unexpected condition produced 
+          when [name(%#)] typed 'identity' in [loc(%#)]}
+-
+
+# %# = dbref of character being chargened
+# %0 = first name of new character
+
+&prog-set-name #149=
+
+# name the character their desired name
+
+@name %#=%0;
+@name [get(%#/soul)]=Soul for %0;
+@pemit %#=The character's first name is set as: %0;
+    @program %#=me/prog-set-clan:
+           %xh%xgPlease specify the clan to which the character 
+           belongs (if not actively, then by birth).  If the 
+           character is going to be a Gaijin, type 'gaijin'. If 
+           the character is going to be shadow, type 
+           'shadow'. If the character is going to be hellspawn, type 'hell'.
+           If the character is going to be a 
+           deity, type 'none'. %xn%r
+-
+
+# %#= dbref of character
+# %0 = clan
+
+&prog-set-clan #149=
+
+# check to make sure that the player has chosen a valid clan
+
+@switch [t(match(get(#152/advanced-clans), %0, |))]=
+  1, {@@ player specified valid clan! @@;
+      @pemit %#=The character's clan is set to: %0;
+      &clan %#=%0;
+      @program %#=me/prog-set-gender:
+               %xh%xgIs your character male, female, plural, or neuter?%xn%r },
+  0, {@@ player specified an invalid clan! @@;
+      @program %#=me/prog-set-clan:
+               %xh%xgYou have specified an invalid clan.  Valid clan 
+               names include:%r%xb 
+               [columns(get(#152/advanced-clans),25,|)]%xg%r%r
+               Please try again.%xn%r }
+-
+
+# %# = dbref of character
+# %0 = male or female
+
+&prog-set-gender #149=
+
+@switch %0 =
+  m*, {@sex %#=male;
+       @pemit %#=[name(%#)]'s gender has been set to male.;
+       @pemit %#=[u(u-identity-confirm, %# )]},
+  f*, {@sex %#=female;
+       @pemit %#=%N's gender has been set to female.;
+       @pemit %#=%r[u(u-identity-confirm, %# )]},
+  p*, {@sex %#=plural;
+       @pemit %#=%N's gender has been set to plural.;
+       @pemit %#=%r[u(u-identity-confirm, %#)]},
+  n*, {@sex %#=neuter;
+       @pemit %#=%N's gender has been set to neuter.;
+       @pemit %#=%r[u(u-identity-confirm, %#)]},
+
+  {@program %#=me/prog-set-gender:%xh%xgYou've specified an invalid 
+            gender. Please specify either 'male', 'female', 'plural'  
+            or 'neuter'.%r }
+-
+
+&u-identity-confirm #149=
+ %xh%xg%N's profile thus far is:%r%xn
+       First Name: [name(%0)]%r
+       Last Name: Will be clan's name if noble.%r
+       Clan: [get(%0/clan)]%r
+       Gender: [get(%0/sex)]%r%r%xh%xg
+       If you would like to reconfigure any of these variables, 
+       simply type: 'identity'. If these settings are 
+       correct, please move on to the next room.%r
+
+-
+
+# Where Admin Character Generation Room 2: Description = #153
+
+@desc #153=
+%r
+Be prepared to set the age of the character. 16 years is adult under 
+Jade Empire law & 16-20 is the average age of marriage. See %xh%xgnews life 
+expectancy%xn. In establishing your character's physical traits, 
+keep in mind the following hereditary information:
+################## Insert dragon trait pull ##############
+To begin, type: %xh%xgdescription%xn%r
+-
+@set #153=wizard
+-
+@tag #153=ooc
+-
+
+&cmd-configure-description #153=$description:
+
+# b) check to make sure that this player hasn't previously been
+#    chargened
+
+think setq(9, [not(hastag(%#, chargened))]);
+
+@switch %q9=
+
+  0, {@pemit %#=This character has already been configured.  If 
+                you would like to reconfigure the character, 
+                use your admin character to remove the 'chargened' 
+                tag from this character. (@cleartags *%N=chargened) },
+  1, {@program %#=me/prog-set-age:%xh%xgHow old is your character 
+                 (use a number only but if you're creating a God or 
+                  other immortal, you may put down the age that the 
+                  character most appears to be) ?%xn},
+  {@pemit %#=Error: Admin have been alerted.;
+   @qmail Genjimoto/Bug-description=Unexpected condition produced 
+          when [name(%#)] typed 'description' in [loc(%#)]: %q9}
+
+-
+
+
+# %# = character dbref
+# %0 = eye color
+
+&prog-set-age #153=
+
+&age %#=%0;
+@pemit %#=The character's age has been set to: %0;
+@program %#=me/prog-set-eyecolor:%xh%xg%rWhat color is your 
+         character's eyes? (if, for whatever gross reason, your 
+         character wouldn't have an eye color, type 'none')%xn
+-
+
+
+&prog-set-eyecolor #153=
+
+@trait %#/eye color=%0;
+@pemit %#=%N's eye color has been set to: %0;
+@program %#=me/prog-set-haircolor:%xh%xg%rWhat color hair does this 
+         character have? (If, for whatever reason, %N doesn't have 
+         hair, type 'none') %xn
+-
+
+&prog-set-haircolor #153=
+
+@trait %#/hair color=%0;
+@pemit %#=%N's hair color has been set to: %0;
+@program %#=me/prog-set-hairlength:%xh%xg%rHow long is your 
+         character's hair? (If, for whatever reason, %N doesn't  
+         have hair, type 'none') %xn
+-
+&prog-set-hairlength #153=
+
+@trait %#/hair length=%0;
+@pemit %#=Your character's hair length has been set to: %0;
+@program %#=me/prog-set-skincolor:%xh%xg%rDescribe your skin 
+         coloring/complexion (ie. fair, tan, olive):%xn
+-
+
+&prog-set-skincolor #153=
+
+@trait %#/skin color=%0;
+@pemit %#=Your character's skin tone has been set to: %0;
+@program %#=me/prog-set-weight:%xh%xg%rHow much does your 
+         character weigh keeping in mind that the average 
+         measurements of a ################# Bring in half-dragon traits ####
+         (Your answer should be the number of pounds (ie. 170))?%xn
+-
+
+&prog-set-weight #153=
+
+&weight %#=%0;
+@pemit %#=Your character's weight has been set to: %0;
+@program %#=me/prog-set-height:%xh%xg%rHow tall is your character  
+            keeping in mind that the average height of a ################# Bring in half-dragon traits ####  
+            is 5'7" (ie. 5'7")?%xn
+-
+
+&prog-set-height #153=
+
+&height %#=%0;
+@pemit %#=Your character's height has been set to: %0;
+@program %#=me/prog-set-features:%xh%xg%rPlease indicate any 
+         distinguishing traits that your character has (keep it to 
+         half a line.  ie. 'a scar on left cheek' or 'a cane'):%xn
+-
+
+&prog-set-features #153=
+
+&features %#=%0;
+@pemit %#=Your character's distinguishing features has been set to: 
+%0;
+@program %#=me/prog-set-description:%xh%xg%rPlease write a SHORT 
+         description of your character over all that does not, in any 
+         way, reference clothing, jewelry or other non-permanant 
+         features.%xn
+-
+&prog-set-description #153=
+
+&description %#=%0;
+@pemit %#=Your character's description has been set to: %0;
+@pemit %#=%r[u(u-description-confirm, %#)]%r
+-
+
+&u-description-confirm #153=
+%xh%xgYour character's description has been set up as follows:%r%r%xn
+Age: [get(%0/age)]%r
+Eye Color: [trait(%0, eye color)]%r
+Hair Color: [trait(%0, hair color)]%r
+Hair Length: [trait(%0, hair length)]%r
+Skin Color: [trait(%0, skin color)]%r
+Weight: [get(%0/weight)]%r
+Height: [get(%0/height)]%r
+Features: [get(%0/features)]%r
+Description: [get(%0/description)]%r%r
+
+%xh%xgIf these are correct, please go on to the 'next' room. If you'd 
+like to change these variables, you may start again by typing:
+'description'%r%r
+-
+
+# Where #193 is the Admin Chargen Room 3: History
+
+@desc #193=
+%r
+Now it's time to think about %N's history and why %N is in the city 
+of Anarinuell.  See '%xh%xgnews city%xn' and the sub-entries. 
+%r%rYou'll be asked about %N's religion. See '%xh%xgnews 
+religion%xn'. You'll also be asked about %n's city of origin, so 
+you might want to consult the Jade Empire map, if your 
+character is from a city other than Anarinuell.%r%r
+Type: %xh%xgbackground%xn to begin.
+%r
+-
+@set #193=wizard
+-
+@tag #193=ooc
+-
+&cmd-background #193=$background:
+
+# b) check to make sure that this player hasn't previously been
+#    chargened
+
+think setq(9, [not(hastag(%#, chargened))]);
+
+@switch %q9=
+
+  0, {@pemit %#=Your character has already been configured.  If you 
+                  would like to reconfigure your character, you'll 
+                  have to ask permission of an admin and get them to 
+                  remove your 'chargened' tag.},
+  1, {@program %#=me/prog-set-origin:%xh%xgIn what Firan city was 
+                 your character born? (If your character was not 
+                 born in the Jade Empire, type 'foreign city'%xn},
+  {@pemit %#=Error: Admin have been alerted.;
+   @qmail Genjimoto/Bug-background=Unexpected condition produced 
+          when [name(%#)] typed 'background' in [loc(%#)]: %q9}
+-
+
+# %# = dbref of character
+# %0 = Firan city of origin
+
+&prog-set-origin #193=
+
+@switch [t(match(default(#152/advanced-cities, cities), %0, |))]=
+  1, {&birth-city %#=%0;
+      @pemit %#=Your birth city has been set as: %0;
+      @program %#=me/prog-set-religion:%r%xh%xg
+               What religious orientation is your character? 
+               (choices are: Dragon, Atheist, Monotheistic Hellist)%r
+                %xh%xrWARNING: This is going to be public knowlege.  If 
+                your character is secretly a Helluier worshipper, don't put 
+                that here!  Choose a 'front' of atheism or another 
+                deity.%xn},
+  0, {@program %#=me/prog-set-origin:%r%xh%xg
+               You've specified an invalid city of origin.  Valid 
+               cities include:%r%xb 
+               [columns(get(#152/advanced-cities), 25, |)]%xn%r 
+               %xh%xgPlease try again.%xn}
+-
+
+&prog-set-religion #193=
+
+@switch [t(match(get(#152/advanced-religions), %0, |))]=
+  1, {&religious-orientation %#=%0;
+      @switch %0=Monotheistic Hell*, @pemit %#={Keep in mind that 
+                 %N will have to keep %p religious beliefs a secret  
+                 because people in the city would likely stone an 
+                 acknowleged Hellian to death!};
+      @pemit %#=Your character's religious orientation is set as: %0;
+      @program %#=me/prog-set-patron-deity:%r%xh%xg 
+               Who is the patron deity of your character? (If your 
+               character is an atheist, or 
+               a Deity, you may specify 'none'.)%xn},
+  0, {@program %#=me/prog-set-religion:%r%xh%xg
+               You've specified an invalid religion.  Your choices 
+               are:%r%xb 
+               [columns(get(#3073/advanced-religions),25,|)]%xn%r
+               %xh%xg Please try again.%xn}
+-
+
+
+&prog-set-patron-deity #193=
+
+@switch [t(match(get(#152/advanced-deities), %0, |))]=
+
+  1, {&patron-deity %#=%0;
+      @pemit %#=Your patron deity has been set as: %0;
+      @program %#=me/prog-set-background:%r%xh%xg
+               Please describe your character's 
+               background, and do so in the first person 
+               (ie. When I was small . . . ).%xn},
+  0, {@program %#=me/prog-set-patron-deity:%r%xh%xg
+               You've specified an invalid patron deity.  Your 
+               choices are:%r%xb
+               [columns(get(#152/advanced-deities), 25, |)]%r 
+               %xgPlease try again.%xn}
+-
+
+&prog-set-background #193=
+
+&background %#=%0;
+@pemit %#=Your background reads as follows: %0;
+@program %#=me/prog-set-language:%r%xh%xg 
+         What is your character's native language? 
+         (Your choices are: Jade, Shadow or Gaijin.   
+          If %N is a Deity, choose Jade. )%xn
+-
+&prog-set-language #193=
+
+@switch [t(match(get(#152/advanced-languages), capstr(%0)))]=
+  0, {@program %#=me/prog-set-language:%r%xh%xm
+               You've specified an invalid native language.  Your 
+               choices are:%b%xg%r
+               [columns(get(#152/advanced-languages), 20, |)]%r%xm 
+               Please try again.%xn},
+  1, {@skill %#/language/%0=5;
+      &native-language %#=[capstr(%0)];
+      @pemit %#=%r[u(u-background-confirm, %#)]%r}
+
+-
+&u-background-confirm #193=
+%xh%xgYour background variables have been set as follows:%r%r%xn
+City of Origin: [get(%0/birth-city)]%r
+Religious Orientation: [get(%0/religious-orientation)]%r
+Patron Deity: [get(%0/patron-deity)]%r
+Background: [get(%0/background)]%r
+Native Language: [get(%0/native-language)]%r%r
+%xh%xgIf these are set correctly, please go on to the next room (type  
+'n').  If you'd like to change them, you may start again by typing 
+'background', but note that this will overwrite _all_ of the current 
+settings.  Consequently, if the error is small, have your admin 
+character manually adjust the flawed attribute so that you do not 
+have to rewrite everything.%r
+
+-
+# Where #195= Admin Character Generation Room 4: Character Type
+
+@desc #195=
+%r
+%xh%xX%xcLevel I: Features%r%xn
+If the mush were a movie, level I characters would be the stars. 
+Features are head of house, or important to the game, 
+they will be the most skilled and thought out, but 
+also hold more responsibility to the player.  
+Social class is irrelevant to 
+levels. There can be feature beggars and level III nobles.%r
+
+%xh%xX%xcLevel II: Secondary%r%xn
+Secondary are people important to a feature and can become 
+features themseolves with the right amoung of logs and IC pressence.
+These characters are the supporting cast.  They're important and 
+richly detailed characters, but the mush won't fall apart if they 
+aren't played or played regularly.  Again, social status is irrelevant.%r
+
+%xh%xX%xcLevel III: Unknown%r%xn
+Unknown are just that, Unknown people that must make a name for themselves.
+These characters can grow in importance to the mush over time, but 
+they need not be very developed, nor will they be missed if they 
+go.%xn%r%r
+Type (choose) one of the following levels for %N: %xgFeature, 
+Secondary, Unknown%xn%r
+-
+@tag #195=ooc
+-
+@set #195=wizard
+-
+
+&cmd-feature #195=$feature:
+  &level %#=I;
+  @pemit %#=%N will be a Level I Feature Character.%r%r
+         %xhYou may now go on to the %xgnext%xn%xh step.%r
+-
+
+&cmd-secondary #195=$secondary:
+  &level %#=II;
+  @pemit %#=%N will be a Level II Secondary Character.%r%r
+         %xhYou may now go on to the %xgnext%xn%xh step.%r
+-
+&cmd-unknown #195=$unknown:
+  &level %#=III;
+  @pemit %#=%N will be a Level III Unknown Character.%r%r
+         %xhYou may now go on to the %xgnext%xn%xh step.%r
+-
+# where #198=The exit leading to the vocation room
+
+@set #198=wizard
+-
+
+@lock #198=#198
+-
+@fail #198=Checking Configuration. . . 
+-
+# where the Player Character Generation Vocation Room is #4064
+@afail #198=
+  @switch/first [hasattr(%#, level)]=
+   
+   0, {@pemit %#=You may not proceed to the next step until after  
+               you've chosen a level for %N.},
+   {@pemit %#=Access granted.;
+    @tel %#=loc(#198)}
+-
+
+# Where #197 = Admin Character Generation Room 5: Vocation
+
+@desc #197=
+%r
+Now it's time to pick a profession for %N. To see a list of 
+professions available, type %xh%xgvocation list%xn.  
+%r%r
+%xh%xmDO NOT%xn choose a profession for %N that requires code that 
+is, as yet, unwritten.  Nothing frustrates players more than having  
+to nag admin to code things for them.  If you want to create a 
+character with a profession that requires as yet unwritten code, 
+go write the code first and then create this character unless 
+you've been specifically instructed otherwise.
+%r%r
+To choose your character's profession, type: %xh%xgvocation%xn
+%r
+-
+
+@tag #197=ooc
+-
+@set #197=wizard
+-
+
+&cmd-vocations #35=$vocation list:
+
+@pemit %#=%r%xg%xhVocations Available for Pregenerated Characters.%xn%r%r
+[columns([get(#152/advanced-vocations)], 25, |)]%r
+
+-
+
+&cmd-vocation #197=$vocation:
+
+  @program %#=me/prog-set-vocation:%xh%xgWhat profession do you 
+                 choose for your character?%xn
+-
+# %0 = chosen profession
+
+&prog-set-vocation #197=
+
+@switch [t(match(get(#152/advanced-vocations), %0, |))]=
+  0, {@program %#=me/prog-set-vocation:%r%xh%xmYou specified an 
+               invalid vocation.  Please select from the following 
+               list: %r[columns(get(#152/advanced-vocations), 25, |)]%xn},
+  1, {@switch %0=
+       other, {@prog %#=me/prog-set-other-vocation:%xh%xg
+                     You chose 'other' for the profession of %N. 
+                     Please specify your custom profession:%xn},
+       {&vocation %#=%0;
+        &social-status %#=[default(#152/social-status-%0, 2)];
+        @pemit %#=%N's vocation has been set to: %0;
+        @pemit %#=If this is incorrect, please type 'vocation' to 
+               reconfigure.  If it is correct, you may now go on to  
+               the %xh%xgnext%xn step.}}
+-
+&prog-set-other-vocation #197=
+  &vocation %#=%0;
+  &social-status %#=[default(#152/social-status-%0, 2)];
+  @pemit %#=%N's vocation has been set to %0;
+  @pemit %#=If this is incorrect, please type 'vocation' to 
+         reconfigure. If this is correct, you may now go on to 
+         the %xh%xgnext%xn step.
+-
+# Where #200 is the exit leading to the skills room
+
+@set #200=wizard
+-
+
+&has-vocation #200=[hasattr(%#, vocation)]
+-
+@lock #200=has-vocation/1
+-
+@fail #200=You need to set up %N with a vocation before you can go 
+      on to the next step.
+-
+@succ #200=You go on to the next step.%r
+-
+@osucc #200=goes on to the next step.
+-
+@asucc #200=
+   &bonus-skill-points %# = 
+       switch(get(%#/level),
+          I, u(feature-skill-points),
+          II, u(secondary-skill-points),
+          III, u(unknown-skill-points))
+-
+&feature-skill-points #200=30
+-
+&secondary-skill-points #200=20
+-
+&unknown-skill-points #200=10
+-
+# where Admin Character Generation Room 6: Skills is #199
+
+@desc #199=
+%r
+%N (Level [get(%#/level)]) has [get(%#/bonus-skill-points)] 
+remaining points to allocate to skills.%r%r
+For a list of recommended skills for %N, type: %xg%xhrecommended%xn%r
+To see a list of all available skills, see: %xh%xghelp skill list%xn%r
+To see information on a particular skill, see: %xh%xghelp <skill>%xn%r
+To see the skills that %N already has, type: %xh%xgskills%xn%r
+To raise a given skill, type: %xh%xgraise skill%xn%r
+%tor %xh%xgraise <skill>=<number>%xn%r
+%tor %xh%xglower <skill>=<number>%xn%r%r
+Keep in mind that the average in any skill is 0 and the human 
+maximum in any skill is a 10.  If %N is a deity, %s may raise a skill  
+as high as 12. When you're done allocating skill points, 
+type %xh%xgnext%xn.%r  
+-
+@tag #199=ooc
+-
+@set #199=wizard
+-
+# Command: Raise <Skill>=<number>
+
+&cmd-raise-skill-spec #199=$raise *=*:
+
+# Get the real skill name
+think setq(0, clip(skillname(%0))); 
+
+# How many skill points left.
+think setq(1, default(%#/bonus-skill-points, 0)); 
+
+# Determines the max skill level. Determined by if it's a god or not.
+think setq(2, ifelse(match(god, get(%#/vocation)), 12, 10)); 
+
+# Determine final level of skill
+think setq(3, add(skill(%#, %q0), %1)); 
+
+# Figure out if the skill is a raise or a lower.
+think setq(4, ifelse(gt(%1, 0), raise, lower)); 
+
+# Is it a reall skill?
+# Is it a whole, non-zero number?
+# Do you have enough skill points?
+# Will it put you over the skill limit?
+# Will it put the skill under 0?
+think setq(9, t(skillname(%0))[and(isnum(%1), iswhole(%1), %1)][gte(%q1, %1)]
+                 [lte(%q3, %q2)][lte(0, %q3)]); 
+@switch %q9=
+  0????, {@pemit %#='%0' is not a valid skill name. Please see 
+             %xh%xghelp skill list%xn for help.}, 
+  10???, {@pemit %#=You must specify a whole number to %q4 %q0. 
+             You entered '%1'.}, 
+  110??, {@pemit %#=%xh%xmYou only have %q1 to allocate. You'll have to either 
+             lower a skill, or settle for a lower skill.}, 
+  1110?, {@pemit %#=%xh%xmYou can't %q4 that skill by that much or it'd be 
+             over the limit: %q2.%xn}, 
+  11110, {@pemit %#=%xh%xmYou can't %q4 that skill by that much or it will be 
+             less than zero.%xn}, 
+  11111, {@pemit %#=Your %q0 skill has been 
+             [ifelse(gt(%1, 0), raised, lowered)] to %q3.;
+          @skill %#/%q0=%q3; 
+          &bonus-skill-points %#=[sub(%q1, %1)]}, 
+  {@pemit %#=An error has occured. Argument was %q9. Please let a wizard know 
+             ASAP.}
+-
+# Command: Lower <skill name>=<number>
+
+&cmd-lower-skill #199=$lower *=*:
+
+# 'real' skillname.
+think setq(0, clip(skillname(%0))); 
+
+# How many points do they have left?
+think setq(1, default(%#/bonus-skill-points, 0)); 
+
+# Get max level.
+think setq(2, ifelse(match(god, get(%#/vocation)), 12, 10)); 
+
+# End result of the change would be.
+think setq(3, sub(skill(%#, %q0), %1)); 
+
+# Is it lowering or raising?
+think setq(4, ifelse(gt(%1, 0), lower, raise)); 
+
+# Check if it's a valid skill
+# Check if it's a whole non-zero number
+# Make sure there's enough skill points left
+# Make sure it doesn't go over the limit
+# Make sure it doesn't go under 0.
+think setq(9, t(skillname(%0))[and(isnum(%1), iswhole(%1), %1)][gte(%q1, mul(-1, %1))]
+                 [lte(%q3, %q2)][lte(0, %q3)]); 
+@switch %q9=
+  0????, {@pemit %#='%0' is not a valid skill name. Please see 
+             %xh%xghelp skill list%xn for help.}, 
+  10???, {@pemit %#=You must specify a whole number to %q4 %q0. 
+             You entered '%1'.}, 
+  110??, {@pemit %#=%xh%xmYou only have %q1 to allocate. You'll have to either 
+             lower a skill, or settle for a lower skill.}, 
+  1110?, {@pemit %#=%xh%xmYou can't %q4 that skill by that much or it'd be 
+             over the limit: %q2.%xn}, 
+  11110, {@pemit %#=%xh%xmYou can't %q4 that skill by that much or it will be 
+             less than zero.%xn}, 
+  11111, {@pemit %#=Your %q0 skill has been 
+             [ifelse(gt(%1, 0), lowered, raised)] to %q3.;
+          @skill %#/%q0=%q3; 
+          &bonus-skill-points %#=[add(%q1, %1)]}, 
+  {@pemit %#=An error has occured. Argument was %q9. Please let a wizard know 
+             ASAP.}
+-
+
+&cmd-raise-skill #199=$raise skill:
+
+# First, check to see if the player has any bonus-skill-points left to
+# to choose
+
+@switch [gt(default(%#/bonus-skill-points, 0), 0)]=
+
+  0, {@pemit %#=Sorry, but you've got no more points to allocate to 
+             skills.  You'll have to move on to the next step.},
+
+  1, {@program %#=me/prog-raise-skill:%r%xh%xg
+               What is the name of the skill that you'd like to 
+               raise?%xn}
+-
+# %0 = the name of the skill that the player is trying to raise
+
+&prog-raise-skill #199=
+ 
+  think setq(1, clip(%0));
+
+  @switch/first [t(skillname(%0))]
+                [or(and(strmatch(get(%#/vocation), god), 
+                        lte(skill(%#, %0), 12)),
+                    lte(skill(%#, %0), 10))]=
+
+     0?, {@pemit %#=%0 is not a valid skill name.  Please see 
+                 %xh%xghelp skill list%xn for help.},
+     ?0, {@pemit %#=You're not allowed to raise %N's %0 skill 
+                 any higher than [skill(%#, %0)].},
+     11, {@program %#=me/prog-allocate-points:%xh%xg%r
+                   You currently have a %q1 skill of 
+                   [skill(%#, %q1)]. How many points would you like 
+                   to raise this skill by?}
+-
+# %q1 = the skill name
+# %0 = the number of points to raise it
+
+&prog-allocate-points #199=
+
+# Was a number specified?
+# Does the %# have that many points to allocate
+# If the player allocates that many points to the skill will s/he be 
+# over the limit?
+ 
+  think setq(9, [and(isnum(%0), iswhole(%0), gt(%0, 0))]
+                [gte(get(%#/bonus-skill-points), %0)]
+                [or(and(strmatch(get(%#/vocation), god), 
+                        lte(add(skill(%#, %q1), %0), 12)),
+                    lte(add(skill(%#, %q1), %0), 10))]);
+
+  @switch/first %q9=               
+
+   0??, {@program %#=me/prog-allocate-points:%r%xh%xm
+                 You must specify a positive whole number.  Try 
+                 again.%xn},
+   ?0?, {@pemit %#=%r%xh%xmYou only have [get(%#/bonus-skill-points)] to 
+                allocate.  You'll have to start over.%xn },
+   ??0, {@pemit %#=%r%xh%xmYou can't raise that skill by that much or 
+                it'd be over the limit.  You'll have to start over.%xn},
+   111, {@pemit %#=Your %q1 skill has been raised to 
+                [add(skill(%#, %q1), %0)].;
+         @skill %#/%q1=[add(skill(%#, %q1), %0)];
+         &bonus-skill-points %#=[sub(get(%#/bonus-skill-points), %0)] }
+-
+
+&cmd-recommended #199=$recommended:
+  @pemit %#=%r[box(%xh%xmRecommended Skills for %N%xn%r%r
+                 [columns(
+                    get(#152/skills-
+                       [default(%#/vocation, default)]), 22,|)]%r,
+                    75, 2, *)]%r
+-
+
+# where the exit to the next step is #203
+
+&is-finished #203=
+  [eq(get(%#/bonus-skill-points), 0)]
+
+-
+
+@lock #203=is-finished/1
+
+-
+
+@fail #203=You still have [get(%#/bonus-skill-points)] skill 
+            points to allocate.  You can't move on until you're 
+            finished with this phase.
+-
+
+@succ #203=You go on to the next step.%r
+-
+
+@osucc #203=goes on to the next step.
+-
+
+@asucc #203=
+  think setq(0, get(%#/level));
+
+  @switch [get(%#/vocation)]=
+      god, {&bonus-attribute-points %#=[u(deity-attribute-points)]},
+      {&bonus-attribute-points %#=
+          [u([switch(%q0, I, feature, II, secondary, III, unknown)]-attribute-points)]}
+-
+
+@set #203=wizard
+-
+
+&deity-attribute-points #203=96
+-
+
+&feature-attribute-points #203=70
+
+-
+&secondary-attribute-points #203=70
+-
+&unknown-attribute-points #203=70
+-
+
+# Where #202 is the is the Admin Character Generation Room 7:
+# Attributes
+
+@desc #202=
+%r
+%N (Level [get(%#/level)]) has [default(%#/bonus-attribute-points,0)] 
+points to allocate to various attributes.%r%r
+To learn more about attributes, type: %xh%xghelp attributes%xn%r
+To learn more about a specific attribute, type: %xh%xghelp 
+<attribute>%xn%r
+To see %N's current attribute scores, type: %xh%xg@attribs%xn%r%r
+If you want to raise one of %N's attributes, type: %xh%xgraise 
+attribute%xn%r
+%tor %xh%xgraise <attribute>=<number>%xn%r
+If you want to lower one of %N's attributes, type: %xh%xglower 
+attribute%xn%r
+%tor %xh%xglower <attribute>=<number>%xn%r
+(Hint: If you lower one of %N's attributes, you can shift those points to a 
+       different attribute)%r%r
+When you're finished, go on to the %xh%xgnext%xn step.%r
+-
+@set #202=wizard
+-
+@tag #202=ooc
+-
+# Command: raise <attribute>=<number>
+
+&cmd-raise-attr-spec #202=$raise *=*:
+
+# Real attribute name in question
+think setq(0, clip(attrname(%0))); 
+
+# How many bonus points are left.
+think setq(1, default(%#/bonus-attribute-points, 0)); 
+
+# Get the max skill for the person. Determined on if it's a god or not.
+think setq(2, ifelse(match(god, get(%#/vocation)), 12, 10)); 
+
+# Ending attribute level
+think setq(3, add(attribute(%#, %q0), %1)); 
+
+# Determine if it's raised or lowering the attribute
+think setq(4, ifelse(gt(%1, 0), raise, lower)); 
+
+# Is it a valid attribute?
+# Is it a whole, non-zero number?
+# Are there enough attribute points?
+# Will it put the attribute over the max?
+# Will it lower the attribute belowe 0?
+think setq(9, t(attrname(%0))[and(isnum(%1), iswhole(%1), %1)][gte(%q1, %1)]
+                 [lte(%q3, %q2)][lte(0, %q3)]); 
+@switch %q9=
+  0????, {@pemit %#=%xh%xm'%0' is an invalid attribute name. Please 
+             try again.%xn}, 
+  10???, {@pemit %#=You must specify a whole number to %q4 %q0. 
+             You entered '%1'.}, 
+  110??, {@pemit %#=%xh%xmYou only have %q1 to allocate. You'll have to either 
+             lower an attribute, or settle for a lower one.}, 
+  1110?, {@pemit %#=%xh%xmYou can't %q4 that attribute by that much or it'd be 
+             over the limit: %q2.%xn}, 
+  11110, {@pemit %#=%xh%xmYou can't %q4 that attribute by that much or it will be 
+             less than zero.%xn}, 
+  11111, {@pemit %#=Your %q0 attribute has been 
+             [ifelse(gt(%1, 0), raised, lowered)] to %q3.;
+          @attr %#/%q0=%q3; 
+          &bonus-attribute-points %#=[sub(%q1, %1)]}, 
+  {@pemit %#=An error has occured. Argument was %q9. Please let a wizard know 
+             ASAP.}
+-
+# Command: lower <attribute>=<number>
+
+&cmd-lower-attr-spec #202=$lower *=*:
+
+# Real attribute name
+think setq(0, clip(attrname(%0))); 
+
+# Number of attribute points left
+think setq(1, default(%#/bonus-attribute-points, 0)); 
+
+# Determine the max attribute leve.
+think setq(2, ifelse(match(god, get(%#/vocation)), 12, 10)); 
+
+# Find the ending attribute level.
+think setq(3, sub(attribute(%#, %q0), %1)); 
+
+# Is it a lower or raise of the attribute
+think setq(4, ifelse(gt(%1, 0), lower, raise)); 
+
+# Is it a real attribute?
+# Is it a whole non-zero number?
+# Are there enough attribute points left?
+# Will it put the attribute over the max?
+# Will it put the attribute below zero?
+think setq(9, t(attrname(%0))[and(isnum(%1), iswhole(%1), %1)][gte(%q1, mul(-1, %1))]
+                 [lte(%q3, %q2)][lte(0, %q3)]); 
+@switch %q9=
+  0????, {@pemit %#=%xh%xm'%0' is an invalid attribute name. Please 
+             try again.%xn}, 
+  10???, {@pemit %#=You must specify a whole number to %q4 %q0. 
+             You entered '%1'.}, 
+  110??, {@pemit %#=%xh%xmYou only have %q1 to allocate. You'll have to either 
+             lower an attribute, or settle for a lower one.}, 
+  1110?, {@pemit %#=%xh%xmYou can't %q4 that attribute by that much or it'd be 
+             over the limit: %q2.%xn}, 
+  11110, {@pemit %#=%xh%xmYou can't %q4 that attribute by that much or it will be 
+             less than zero.%xn}, 
+  11111, {@pemit %#=Your %q0 attribute has been 
+             [ifelse(gt(%1, 0), lowered, raised)] to %q3.;
+          @attr %#/%q0=%q3; 
+          &bonus-attribute-points %#=[add(%q1, %1)]}, 
+  {@pemit %#=An error has occured. Argument was %q9. Please let a wizard know 
+             ASAP.}
+-
+
+&cmd-raise-attribute #202=$raise attribute:
+  @switch [gt(default(%#/bonus-attribute-points, 0), 0)]=
+    0, {@pemit %#=%r%xh%xmYou have no more points to allocate to %N's 
+               attributes.%xn},
+    1, {@program %#=me/prog-raise-attribute:%xh%xg%r
+           Which attribute would you like to raise?}
+-
+# %0 = the attribute name
+
+&prog-raise-attribute #202=
+
+  think setq(0, attrname(%0));
+  think setq(1, after(%q0,-));
+
+# Is it a valid attribute
+# Can the player raise it any higher?
+
+  @switch/first [t(%q0)]
+                [or(and(strmatch(get(%#/vocation), god), 
+                        lte(attribute(%#, %q1), 12)),
+                    lte(attribute(%#, %q1), 10))]=
+     
+     0?, {@pemit %#=%xh%xmYou've specified an invalid attribute name. 
+                    You'll have to start over.%xn},
+     ?0, {@pemit %#=%xh%xmYou currently have a [attribute(%#, %q1)] 
+                 in your %q1 attribute.  You can't raise it any 
+                 higher than that.%xn},
+     11, {@program %#=me/prog-allocate-points:%r%xh%xg
+                   How many points would you like to allocate to 
+                   to the %q1 attribute?}
+-
+
+# %0 = the number of points to be allocated
+# %q1 = the attribute to be raised
+
+&prog-allocate-points #202=
+
+# Was a number specified?
+# Does the %# have that many points to allocate
+# If the player allocates that many points to the skill will s/he be 
+# over the limit?
+ 
+  think setq(9, [and(isnum(%0), iswhole(%0), gt(%0, 0))]
+                [gte(get(%#/bonus-attribute-points), %0)]
+                [or(and(strmatch(get(%#/vocation), god), 
+                        lte(add(attribute(%#, %q1), %0), 12)),
+                    lte(add(attribute(%#, %q1), %0), 10))]);
+
+  @switch/first %q9=               
+
+   0??, {@program %#=me/prog-allocate-points:%r%xh%xm
+                 You must specify a positive whole number.  Try 
+                 again.%xn},
+   ?0?, {@pemit %#=%r%xh%xmYou only have [get(%#/bonus-attribute-points)] 
+                to allocate.  You'll have to start over.%xn },
+   ??0, {@pemit %#=%r%xh%xmYou can't raise that attribute by that much or 
+                it'd be over the limit.  You'll have to start over.%xn},
+   111, {@pemit %#=Your %q1 attribute has been raised to 
+                [add(attribute(%#, %q1), %0)].;
+         @attr %#/%q1=[add(attribute(%#, %q1), %0)];
+         &bonus-attribute-points %#=[sub(get(%#/bonus-attribute-points), %0)] }
+-
+
+&cmd-lower-attribute #202=$lower attribute:
+  @program %#=me/prog-lower-attribute:%r%xh%xg
+           Which attribute would you like to lower?
+-
+&prog-lower-attribute #202=
+  think setq(0, attrname(%0));
+  think setq(1, after(%q0,-));
+
+  @switch/first [t(%q0)]
+                [gte(%q1, 0)]=
+    0?, {@pemit %#=You've specified an invalid attribute name.  
+                You should type '@attribs' for a list of valid 
+                attributes.},
+    ?0, {@pemit %#=You can't lower your %q1 attribute any lower.},
+    11, {@attr %#/%q1=[sub(attribute(%#, %q1), 1)];
+         &bonus-attribute-points %#=
+                [add(get(%#/bonus-attribute-points), 1)];
+         @pemit %#=Your %q1 attribute has been lowered by one and 
+                you now have [get(%#/bonus-attribute-points)] points 
+                to allocate to your attributes.}
+-
+
+# Where #204 is the Admin Chargen Room 8: Details
+
+@desc #204=
+%r
+Almost done! You'll have to make sure that %N has a home.  Either create 
+and describe a home for %N with your admin character, or choose an 
+existing home for %N.  You'll have to keep the dbref in mind because 
+you'll be asked for it.  You'll also be asked about your character's 
+personality.%r%rTo begin, type: %xh%xgdetails%xn%r%r
+%xh%xgFamily%xn configuration is optional for Level II and Level III characters, 
+and so if they wish to complete chargen, they can exit through the 
+%xh%xgfinished%xn exit when their details are configured.  
+Level I Feature characters will have to go on to the %xh%xgFamily%xn 
+configuration room next.%r
+-
+@tag #204=ooc
+-
+@set #204=wizard
+-
+
+&cmd-details #204=$details:
+  @program %#=me/prog-details:%r%xh%xg
+           Enter the #dbref of your character's In Character Home:%xn
+-
+
+&prog-details #204=
+
+  @switch [isdbref(%0)]=
+    0, {@pemit %#=%r%xh%xm
+               You've input an invalid #dbref.  You'll have to start 
+               again.%xn},
+    1, {&ic-home %#=%0;
+        @pemit %#=Your character's IC Home has been set to: 
+               [name(%0)] (%0);
+        @program %#=me/prog-set-personality:%r%xh%xg
+                 Briefly describe the personality of %N:%xn}
+-
+
+&prog-set-personality #204=
+  &personality %#=%0;
+  @pemit %#=%N's personality has been set to: %0;
+  @program %#=me/prog-set-secrets:%r%xh%xg
+           What secrets does %N carry (these should be specific 
+           so that the player knows something others do not)?
+-
+
+&prog-set-secrets #204=
+  &secrets %#=%0;
+  &original-secrets %#=%0;
+  @pemit %#=%N's secrets have been set to: %0;
+  @tr me/trig-final-configuration = %#
+
+-
+# %0 = %#
+
+&trig-final-configuration #204=
+  @@ Set up Social Points @@;
+  think setq(0, get(%0/social-status));
+  @account/adjust %0/social points=
+    [switch(%q0,1,0,2,10000,3,3000000,4,3000000,5,3000000)];
+  @account/create %0/social points=
+    [switch(%q0,1,0,2,10000,3,3000000,4,3000000,5,3000000)];
+  
+  @@ Set Up Money @@;
+  @account/adjust %0/stenis=
+     [switch(%q0, 1, 10, 2, 50, 3, 100, 4, 2000, 5, 10000)];
+  
+  @@ Add Instruments to the List @@;
+  think setq(9, %0);
+  think setq(1, lattr(parent(%0)/*instrument*));
+  think setq(1, filter(filter-has-skill, %q1));
+  think setq(1, iter(%q1, clip(##)));
+  think setq(1, squish(iter(%q1, edit(##, INSTRUMENT/,))));
+  think setq(1, iter(%q1, ##, %b, |));
+  &instruments_i_know %0=%q1;
+
+  @@ Add Dances to their List @@;
+  &dances_i_know %0=[get(#152/dances-%q0)];
+
+  @@ Add Songs to their list @@;
+  &songs_i_know %0=[get(#152/songs-%q0)];
+
+  @pemit %0=%r%xh%xmFinished Configuring Final details.  If [name(%0)] is a 
+         Level I Feature, [subj(%0)] will have to go into the 
+         %xh%xgFamily%xm room before [subj(%0)] may exit.%xn;
+  @tag %0=detailed
+-
+# %# = %q9
+# %0 = SK-INSTRUMENT/<WHATEVER>
+&filter-has-skill #204=
+ [gt(skill(%q9, clip(%0)), 0)]
+-
+
+# Where #206 is the exit out for finished characters 
+
+&can-leave #206=
+  [and(not(or(strmatch(get(%#/vocation), god), strmatch(get(%#/level),I))),
+       hastag(%#, detailed))]
+-
+@lock #206=can-leave/1
+-
+@set #206=wizard
+-
+@fail #206=%r%xh%xm[switch(get(%#/level), I, You may not exit 
+character generation until %N has configured details and gone on 
+to the family configuration room., II, You may not exit character 
+generation until %N has configured details.)]
+-
+@succ #206=You're done!%r
+-
+@asucc #206=
+  @tag %#=chargened;
+  @bb/post characters/New Character Named %N=
+    {[name(first(get(%#/created)))] created %N and is responsible for 
+     making sure that %N gets equipped (when the time comes) and 
+     added to the @roster (unless [name(first(get(%#/created)))] is 
+     going to play %N.};
+  @cleartag %#=detailed
+-
+
+# where the Family Config room is #208
+
+@desc #208=
+%r
+Whenever practicable, link %N with existing families and characters.  
+To find out the names of families, you may type: 
+%xh%xg @family/lastname <last name>%xn or 
+%xh%xg@family <character's first name>%xn.%r%r
+To configure %N's parents, type: %xh%xgparents%xn%r
+If %N has siblings, type: %xh%xgsiblings%xn%r
+If %N has children, type: %xh%xgchildren%xn%r
+If %N is married, type: %xh%xgspouse%xn%r
+To configure %N's other relationships, type: %xh%xgrelationship%xn%r
+To align %N with a family type: %xh%xgfamily%xn%r
+If you've made a mistake, please type '%xh%xgmistake%xn'%r%r
+When you're finished configuring %N's family, 
+[switch(get(%#/vocation), god, you must proceed to the 
+%xh%xgDeity%xn configuration room., you're done with character 
+generation and may exit by typing %xh%xgFinished%xn.)]%r
+
+-
+&cmd-mistake #208=$mistake:
+ @pemit %#=If you've made a mistake with your parents, you can just 
+  type '%xh%xgparents%xn' and start again.  If you've made a mistake 
+  with setting up %N's spouse, you can type '%xh%xgclear spouse%xn'.  
+  If you've made a mistake with any of the others, you'll have to use  
+  your admin character to fix the mistakes manually.
+-
+
+
+@tag #208=ooc
+-
+@set #208=wizard
+-
+
+&cmd-parents #208=$parents:
+  @program %#=me/prog-set-mother:%r%xh%xg
+           Is %N's mother alive or dead? (type: 'alive', 'dead', or 
+           'missing')
+-
+# %0 = alive or dead
+
+&prog-set-mother #208=
+  @switch %0=
+    alive, {think setq(0, alive);
+            @program %#=me/prog-set-mother2:%r%xh%xg
+              What is %N's mother's name? (put a '?' if %N's mother's 
+                   name is unknown to %p) },
+    dead, {think setq(0, dead);
+           @program %#=me/prog-set-mother2:%r%xh%xg
+              What is %N's mother's name? (put a '?' if %N's mother's 
+                   name is unknown to %p) },
+    missing, {think setq(0, missing);
+              @program %#=me/prog-set-mother2:%r%xh%xg
+              What is %N's mother's name? (put a '?' if %N's mother's 
+                   name is unknown to %p) },
+    {@program %#=me/prog-set-mother:%r%xh%xmYou must type one of the 
+              following: alive, dead, or missing.%xn}
+-
+# Where %q0 = alive, dead, or missing
+# %0 = name of the mother, or ?
+
+&prog-set-mother2 #208=
+  &mother %#=[switch(%q0, alive, %0, dead, %0(d), missing, %0)];
+  @prog %#=me/prog-relationship-mother:%r%xh%xg
+        Please briefly describe %N's relationship with %p mother:
+-
+# Where %0 = description of relationship with mother
+
+&prog-relationship-mother #208=
+  &relationship-mother %#=%0;
+  @prog %#=me/prog-set-father:%r%xh%xn
+           Is %N's father alive or dead? (type: 'alive', 'dead', or 
+           'missing')
+-
+# %0 = alive or dead or missing
+
+&prog-set-father #208=
+  @switch %0=
+    alive, {think setq(0, alive);
+            @program %#=me/prog-set-father2:%r%xh%xg
+              What is %N's father's name? (put a '?' if %N's father's  
+                   name is unknown to %p) },
+    dead, {think setq(0, dead);
+           @program %#=me/prog-set-father2:%r%xh%xg
+              What is %N's father's name? (put a '?' if %N's father's 
+                   name is unknown to %p) },
+    missing, {think setq(0, missing);
+              @program %#=me/prog-set-father2:%r%xh%xg
+              What is %N's father's name? (put a '?' if %N's father's 
+                   name is unknown to %p) },
+    {@program %#=me/prog-set-father:%r%xh%xmYou must type one of the 
+              following: alive, dead, or missing.%xn}
+-
+# Where %q0 = alive, dead, or missing
+# %0 = name of the father, or ?
+
+&prog-set-father2 #208=
+  &father %#=[switch(%q0, alive, %0, dead, %0(d), missing, %0)];
+  @prog %#=me/prog-relationship-father:%r%xh%xg
+        Please briefly describe %N's relationship with %p father:
+-
+&prog-relationship-father #208=
+ &relationship-father %#=%0;
+ @pemit %#=%r%xh%xX%xcConfiguration of Parents Complete.%xn
+-
+
+&cmd-siblings #208=$siblings:
+  @program %#=me/prog-siblings-start:%r%xh%xg
+           What is the name of %N's sibling?
+-
+# %0 is the name of the first sibling
+&prog-siblings-start #208=
+  think setq(0, capstr(%0));
+  @program %#=me/prog-siblings-status:%r%xh%xg
+           Is %q0 alive, dead, or missing?
+-
+# %q0 = sibling name
+# %0 = alive, dead, or missing
+&prog-siblings-status #208=
+
+ think setq(1, lcstr(lattr(%#/sibling*)));
+ think setq(1, squish(iter(%q1, edit(##, sibling,))));
+ think setq(1, last(sortby(sortby-large-num, %q1)));
+ think setq(1, switch(isnum(%q1), 1, inc(%q1), 1));
+ &sibling%q1 %#=[switch(%0, alive, %q0, dead, %q0(d), %q0)];
+ @program %#=me/prog-sibling-relationship:%r%xh%xg
+          Please describe %N's relationship with %q0:
+-
+
+&sortby-large-num #208=[comp(%0, %1)]
+-
+
+# %q0 = name of the sibling
+# %q1 = number of the sibling
+# %0 = description of the relationship
+
+&prog-sibling-relationship #208=
+ &relationship-sibling%q1 %#=%0;
+ think setq(2, lcstr(lattr(%#/sibling*)));
+ think setq(2, iter(%q2, get(%#/##)));
+ @pemit %#=%N's siblings now include: %q2%r;
+ @pemit %#=%r%xh%xmIf you'd like to add another sibling, type 
+       'siblings' again.%xn
+-
+&cmd-children #208=$children:
+  @program %#=me/prog-children-start:%r%xh%xg
+           What is the name of %N's child?
+-
+# %0 is the name of the child
+&prog-children-start #208=
+  think setq(0, capstr(%0));
+  @program %#=me/prog-children-status:%r%xh%xg
+           Is %q0 alive, dead, or missing?
+-
+# %q0 = child name
+# %0 = alive, dead, or missing
+&prog-children-status #208=
+
+ think setq(1, lcstr(lattr(%#/child*)));
+ think setq(1, squish(iter(%q1, edit(##, child,))));
+ think setq(1, last(sortby(sortby-large-num, %q1)));
+ think setq(1, switch(isnum(%q1), 1, inc(%q1), 1));
+ &child%q1 %#=[switch(%0, alive, %q0, dead, %q0(d), %q0)];
+ @program %#=me/prog-children-relationship:%r%xh%xg
+          Please describe %N's relationship with %q0:
+-
+# %q0 = name of the child
+# %q1 = number of the child
+# %0 = description of the relationship
+
+&prog-children-relationship #208=
+ &relationship-child%q1 %#=%0;
+ think setq(2, lattr(%#/child*));
+ think setq(2, iter(%q2, get(%#/##)));
+ @pemit %#=%N's children now include: %q2%r;
+ @pemit %#=%r%xh%xmIf you'd like to add another child, type 
+       'children' again.%xn
+
+-
+&cmd-spouse #208=$spouse:
+  @program %#=me/prog-spouse:%r%xh%xg
+           What is the name of your spouse?
+-
+# %0 = name of spouse
+&prog-spouse #208=
+ think setq(0, capstr(%0));
+ @program %#=me/prog-spouse-status:%r%xh%xg
+          Is %q0 alive, dead, or missing?
+-
+# %0 = alive, dead, or missing
+# %q0 = name of the spouse
+
+&prog-spouse-status #208=
+
+  think setq(1, locate(%#, *%q0, *));
+  
+  @switch [isdbref(%q1)]=
+    0, {&spouse %#=[switch(%0, alive, %q0, dead, %q0(d), %q0)]},
+    1, {@@ Where #222 is the Ritual Command Object @@;
+        @trig #222/trig-marriage=%#, %q0};
+
+  @program %#=me/prog-relationship-spouse:%r%xh%xg
+           Describe %N's relationship with %q0:
+-
+&prog-relationship-spouse #208=
+ &relationship-spouse %#=%0;
+ @pemit %#=%N's spouse set to %q0.
+-
+
+&cmd-clear-spouse #208=$clear spouse:
+  think setq(1, get(%#/spouse));
+  think setq(1, locate(%#, *%q1, *));
+  @dolist %# %q1=
+    {@cleartag ##=married;
+     @zap [get(##/marriage)];
+     &marriage ##=;
+     &spouse ##=};
+  @pemit %#=%r%xh%xm%N's spouse cleared.%xn
+-
+
+
+&cmd-relationships #208=$relationship:
+  @program %#=me/prog-relation-start:%r%xh%xg
+           What is the name of the person that %N has a 
+           relationship with?
+-
+# %0 is the name of the relation
+&prog-relation-start #208=
+  think setq(0, capstr(%0));
+  @program %#=me/prog-relation-status:%r%xh%xg
+           Is %q0 alive, dead, or missing?
+-
+# %q0 = relation name
+# %0 = alive, dead, or missing
+&prog-relation-status #208=
+
+ think setq(1, lcstr(lattr(%#/relationship*)));
+ think setq(1, filter(#35/filter-relationships, %q1));
+ think setq(1, edit(edit(squish(%q1), relationship,), RELATIONSHIP,));
+ think setq(1, last(sort(%q1)));
+ think setq(1, switch(isnum(%q1), 1, inc(%q1), 1));
+ think setq(2, [switch(%0, alive, %q0, dead, %q0(d), %q0)]);
+ &relationship%q1 %#=%q2;
+ @program %#=me/prog-relation-relationship:%r%xh%xg
+          Please describe %N's relationship with %q0:
+-
+# %q0 = name of the relation
+# %q1 = number of the relation
+# %q2 = name of the relation with (d) around it if necessary
+# %0 = description of the relationship
+
+&prog-relation-relationship #208=
+ &relationship-other%q1 %#=%xh%q2%xn.  %0;
+ think setq(2, lattr(%#/relationship*));
+ @pemit %#=%q0 added to %N's relations.;
+ @pemit %#=%r%xh%xmIf you'd like to add another relation, type 
+       'relationship' again.%xn
+-
+&cmd-family #208=$family:
+ @program %#=me/prog-family:%r%xh%xg
+          Enter the #dbref of your character's family object:%xn
+ 
+-
+&prog-family #208=
+
+ @switch [isdbref(%0)]=
+  0, {@pemit %#=%r%xh%xm
+                That's not a valid #dbref. Please start again.%xn},
+  1, {&family %#=%0;
+      think setq(0, %0);
+      think setq(1, %#);
+      @pemit %#=Your character's family object has been set to: 
+             [name(%0)] (%0);
+      @prog %#=me/prog-family-head:%r%xh%xg 
+            Is your character the head of his/her family? (yes or no)%xn}
+-
+# %q0 is dbref of the family object
+
+&prog-family-head #208=
+
+ @switch %0=
+   yes, {[settag(%q1, family-head)]; 
+         &head [get(%#/family)]=[setunion(get(%q0/head),name(%#))];
+         @pemit %#=You have been set as the head of the family.}, 
+   no, {&members [get(%#/family)]=[setunion(get(%q0/members), 
+                     name(%#))];
+        @pemit %#=You have been set up as a member of the family.}
+-
+              
+&cmd-family-lastname #35=$@family/lastname *:
+  think setq(0, search(eplayer=strmatch(get(##/lastname), %0)));
+  @switch [gt(words(%q0), 0)]=
+    0, {@pemit %#=%r%xh%xgThere are no characters that currently 
+               have the last name of %0%xn},
+    1, {think setq(0, iter(%q0, [name(##)]
+                                [switch(1, hastag(##, roster), (r), 
+                                        hasflag(##, connected), (C))], %b,
+|));
+
+        @pemit %#=[box(%r%xh%xgCharacters with the last name of %0:%xn%r%r
+                  [columns(%q0, 20, |)]%r,
+75, 2, *)];
+        @pemit %#=%xh%xr(d) = dead%r(r) = rostered%r(C) = Connected }
+-
+&cmd-family-character #35=$@family *:
+  think setq(0, pmatch(%0));
+  @switch [hastype(%q0, player)]=
+    1, {think setq(1, get(%q0/mother));
+        think setq(1, setunion(%q1, get(%q0/father),|));
+        think setq(2, lattr(%q0/sibling*));
+        think setq(2, iter(%q2, get(%q0/##),%b,|));
+        think setq(3, lattr(%q0/child*));
+        think setq(3, iter(%q3, get(%q0/##),%b,|));
+        think setq(4, [get(%q0/spouse)]);
+        think setq(5, setunion(%q1, %q2, |));
+        think setq(5, setunion(%q5, %q3, |));
+        think setq(5, setunion(%q5, %q4, |));
+        think setq(5, setunion(%q5, [name(%q0)], |));
+        think setq(6, switch(gt(words(get(%q0/lastname)), 0), 1, 
+                      search(eplayer=strmatch(get(%q0/lastname), 
+                                              get(##/lastname))),
+                      Unknown));
+        think setq(6, switch(gt(words(%q6), 1), 1, iter(%q6,name(##),%b,|)));
+        think setq(6, filter(filter-dont-match, %q6, |));
+        think setq(7, lcstr(lattr(%q0/relationship*)));
+        think setq(7, filter(filter-relationships-secret, %q7));
+        think setq(7, iter(%q7, get(%q0/##), %b, |));
+        think setq(7, filter(filter-dont-match, %q7, |));
+        think setq(8, setunion(%q6, %q7, |));
+        think setq(8, filter(filter-noempties, %q8,|));
+       
+        @pemit %#=
+          %r[box(%xh%xgRelationships of [name(%q0)] [get(%q0/lastname)] include:%xn%r%r
+                 Parents: [iter(%q1, ##[switch(hastag(*##, roster), 1,(r))]
+                               [switch(words(%q1,|),#@,,%,)],
+                                |, %b)]%r
+                 Siblings: [iter(%q2, ##[switch(hastag(*##, roster),1,(r))]
+                               [switch(words(%q2,|),#@,,%,)],
+                                 |, %b)]%r
+                 Children: [iter(%q3, ##[switch(hastag(*##,roster),1,(r))]
+                               [switch(words(%q3,|),#@,,%,)],
+                                 |, %b)]%r
+                 Spouse: [iter(%q4, ##[switch(hastag(*##,roster),1,(r))])]%r
+                 Others: [iter(%q8, ##[switch(hastag(*##,roster),1,(r))]
+                               [switch(words(%q8,|),#@,,%,)],
+                               |, %b)]%r, 75, 2, *)]%r
+                 %xh%xr(d) = dead%r(r) = rostered},
+    {@pemit %#=%r%xh%xmI'm sorry but there's no player by that name.%xn}
+
+-
+# %q5 = list of original family members
+
+&filter-dont-match #35=
+  [not(match(%q5, %0, |))]
+                         
+-
+&filter-noempties #35=
+  t(%0)
+-
+# do not show secret relationships
+
+&filter-relationships-secret #35=
+ [and(not(strmatch(%0, relationship-*)),
+ t(words(default(%q0/relationship-other[after(%0,relationship)],))))]
+
+-
+
+&filter-relationships #35=[not(strmatch(%0,relationship-*))]
+
+-
+
+
+# where the exit from the family room is #210
+
+@set #210=wizard
+-
+
+&can-leave #210=
+ [not(strmatch(get(%#/vocation), god))]
+-
+@lock #210=can-leave/1
+-
+@fail #210=%r%xh%xmI'm sorry, but Deities must proceed to the 
+Deity configuration room and may not exit character generation yet.
+%xn
+-
+@succ #210=You're done!%r
+-
+@asucc #210=
+  @tag %#=chargened;
+  @bb/post characters/New Character Named %N=
+    {[name(first(get(%#/created)))] created %N and is responsible for 
+     making sure that %N gets equipped (when the time comes) and 
+     added to the @roster (unless [name(first(get(%#/created)))] is 
+     going to play %N).};
+  @cleartag %#=detailed
+-
+@osucc #210=is finished with Character Generation.
+-
+@odrop #210=comes out fresh from Character Generation.
+-
+# Where #224 is the room leading to the deities room
+
+@set #224=wizard
+-
+&can-enter #224=
+  [strmatch(get(%#/vocation), god)]
+-
+@lock #224=can-enter/1
+-
+@fail #224=%r%xh%xmOnly Gods may enter Deity Configuration.%xn
+-
+@osucc #224=goes into the Deity Configuration Room.
+-
+@asucc #224=@tag %#=deity
+-
+@odrop #224=arrives from the Family Room.
+-
+
+# Where #223 is the Admin Character Generation Room 10: Deities
+
+@desc #223=
+%r
+When the system by which Deities can "cast spells" (for lack of 
+better terminology) is finished, this is the room in which 
+Deities will be allocated their powers, and any special bonus 
+points for raising attributes or skills that may not have been 
+raised appropriately in the previous steps of chargen.  At 
+the moment, however, this system has not even been started, 
+so until then, deity characters will have to languish in here 
+while the admin that will run them go and build their stuff.%r%R
+-

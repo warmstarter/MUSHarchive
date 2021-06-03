@@ -1,0 +1,615 @@
+#############################################################################
+# PORTAL CODE
+#############################################################################
+# Design: Jane Catherine August (Lanya)
+# Code:   Jane Catherine August and Adam Dray
+# 
+
+#############################################################################
+# Written entirely functionally where possible.
+# Requires side-effect functions like pemit(), set(), and settag().
+#
+# "impl" in attribute names refers to "implementation" -- having the lock 
+# code implemented on the object.
+# 
+# The actual locking of objects is done with a call to 
+#    u(u-lock-impl, <unlocker>, <object dbref>, <key dbref>)
+#
+
+#############################################################################
+# TAGS USED:
+#    locked -- the object is locked shut
+#    lockable -- the object has a lock on it (may be locked or unlocked)
+#    masterkey -- the object can lock or unlock any lockable object
+#    broken -- the lock is broken and can't be used anymore
+
+
+#############################################################################
+# ATTRIBUTES USED:
+#    code -- stores a space-delimited list of "codes", which are arbitrarily 
+#            named strings.  A key's code must match a lock's code to open
+#            it.  A lock with no code is openable by any key.  A key with no
+#            code opens no locks.  A key tagged masterkey opens any lock
+#            and overrides the code.
+
+## Generic Door Code
+@create Generic Door=10
+-
+@lock Generic Door=IS-LOCKED/0
+-
+@Osucc Generic Door=heads toward the [after([name(room(me))],--%b)].
+-
+@Ofail Generic Door=tries to open [goodname(%!)], but finds that it's locked.
+-
+@Fail Generic Door=The door seems to be locked.
+-
+@Succ Generic Door=You head toward the [after([name(room(me))],--%b)].
+-
+@Desc Generic Door=A door.
+-
+@Odrop Generic Door=comes into the [after([name(room(me))],--%b)] from another area.
+-
+&TAGS Generic Door=!locked door repairable !closed
+-
+&REGISTRY Generic Door=Generic-Door
+-
+@lock Generic Door/REGISTRY
+-
+&LOCKED Generic Door=[hastag(me, locked)]
+-
+&DESCRIPTION Generic Door=A door.
+-
+&MAXQUALITY Generic Door=2500
+-
+&IS-LOCKED Generic Door=[and(not(hastag(%#, pass)), or(hastag(%!, locked), hastag(%!, barred), 
+                                hastag(%!, gated), hastag(%!, latched), hastag(%!, vehicle)))]
+-
+&IS-CLOSED Generic Door=[hastag(%!, closed)]
+-
+&REPAIR-SKILL Generic Door=locksmithing
+-
+@set Generic Door=WIZARD
+-
+@set Generic Door=UNINSPECTED
+-
+@set Generic Door=PARENT
+-
+
+## Portal Code
+
+@@ @create Portal Code
+-
+#22 is the Portal Code object
+
+
+
+##### LOCKS #####
+
+
+#-----------------------------------------------------------------------------
+&cmd-lock #22 = $lock *:
+#-----------------------------------------------------------------------------
+  think setq(1, ifelse(strmatch(%0, * with *), before(%0, %bwith%b),  %0)); 
+  think setq(2, ifelse(strmatch(%0, * with *),  after(%0, %bwith%b), key)); 
+
+  think [setq(0, %#)]
+        [setq(1, locate(%#, %q1, ein))]
+        [setq(2, locate(%#, %q2, i))]; 
+
+  @lock ifelse(and(
+	   hastag(%q1, lockable), 
+	   strmatch(u(u-which-impl, %q1), door)
+	), %q1, #-1) = IS-LOCKED/0; 
+  think u(u-lock-impl-[isdbref(%q1)]-[isdbref(%q2)], %q0, %q1, %q2)
+-
+
+&u-lock-impl-1-1 #22 = 
+  u(u-lock-impl-[u(u-which-impl, %1)], %0, %1, %2)
+-
+&u-lock-impl-0-0 #22 = 
+  pemit(%0, ansi(hr, lock: what do you want to lock and with what?))
+-
+&u-lock-impl-0-1 #22 = 
+  pemit(%0, ansi(hr, lock: what do you want to lock?))
+-
+&u-lock-impl-1-0 #22 = 
+  pemit(%0, ansi(hr, lock: what do you want to lock it with?))
+-
+
+
+#----------------------------------------
+# u(u-lock-impl-container, <locker dbref>, <container dbref>, <key dbref>)
+# 
+# lock a container
+# 
+&u-lock-impl-container #22 = 
+  [pemit(lcon(loc(%0)), 
+         u(u-lock-msg-
+             [switch([hastag(%1, broken)]
+                     [u(u-key-matches-lock, %1, %2)]
+                     [islocked(%1)]
+                     [hastag(%1, closed)]
+                     [hastag(%1, closable)]
+                     , 
+
+               01011, lock-it
+                     [trigger(%1/alock,%0,%2)]
+                     [settag(%1, locked)], 
+
+               01001, not-closed
+                     [settag(%1, locked)]
+                     [settag(%1, closed)]
+                     [trigger(%1/alock,%0,%2)]
+                     [trigger(me/trig-opaque-container,%1)],
+               01000, lock-it
+                      [settag(%1,locked)]
+                      [trigger(%1/alock,%0,%2)],
+
+               1????, lock-is-broken, 
+               ?0???, key-doesn't-fit, 
+               ??1??, already-locked, 
+                     error
+             )],
+           %0, %1, %2)
+  )]
+-
+
+#----------------------------------------
+# u(u-lock-impl-door, <locker dbref>, <exit dbref>, <key dbref>)
+# 
+# lock an door
+# 
+&u-lock-impl-door #22 = 
+  [pemit(setunion([lcon(loc(%1))],[lcon(loc(%0))]), 
+         u(u-lock-msg-
+             [switch([hastag(%1, broken)]
+                     [u(u-key-matches-lock, %1, %2)]
+                     [islocked(%1)]
+                     [hastag(%1, closed)], 
+
+               0101, lock-it
+                     [settag(%1, locked)]
+                     [trigger(%1/alock,%0,%2)]
+                     [settag(exittwin(%1), locked)], 
+
+               0100, not-closed
+                     [settag(%1, locked)]
+                     [settag(%1, closed)]
+                     [trigger(%1/alock,%0,%2)]
+                     [settag(exittwin(%1), locked)]
+                     [settag(exittwin(%1), closed)], 
+
+               1???, broken, 
+               ?0??, key-doesn't-fit, 
+               ??1?, already-locked, 
+                     error
+             )],
+           %0, %1, %2)
+  )]
+-
+&u-lock-impl-invalid #22 = 
+  pemit(%0, ansi(hr, lock: there isn't a lock there to lock))
+-
+
+&u-lock-msg-lock-it #22 = 
+  ansi(gh, lock: [goodname(%0)] locks [goodname(%1)] with a click.)
+-
+&u-lock-msg-key-doesn't-fit #22 = 
+  ansi(rh, lock: [goodname(%0)] tries to lock [goodname(%1)] but the key doesn't fit.)
+-
+&u-lock-msg-already-locked #22 = 
+  ansi(rh, lock: [goodname(%0)] tries to lock [goodname(%1)] but finds that it is already locked.)
+-
+&u-lock-msg-not-closed #22 = 
+  ansi(gh, lock: [goodname(%0)] closes [goodname(%1)] then locks it with a click.)
+#  ansi(rh, lock: [goodname(%0)] tries to lock [goodname(%1)] but the door isn't closed.)
+-
+&u-lock-msg-broken #22 = 
+  ansi(rh, lock: [goodname(%0)] tries to lock [goodname(%1)] but finds the lock is broken.)
+-
+&u-lock-msg-error #22 = 
+  ansi(mh, lock: an error occurred in the lock code -- please let the staff know)
+-
+
+
+#-----------------------------------------------------------------------------
+&cmd-unlock #22 = $unlock *:
+#-----------------------------------------------------------------------------
+  think setq(1, ifelse(strmatch(%0, * with *), before(%0, %bwith%b),  %0)); 
+  think setq(2, ifelse(strmatch(%0, * with *),  after(%0, %bwith%b), key)); 
+
+  think [setq(0, %#)]
+        [setq(1, locate(%#, %q1, ein))]
+        [setq(2, locate(%#, %q2, i))];
+
+  @lock ifelse(and(
+	   hastag(%q1, lockable), 
+	   strmatch(u(u-which-impl, %q1), door)
+	), %q1, #-1) = IS-LOCKED/0; 
+  think u(u-unlock-impl-[isdbref(%q1)]-[isdbref(%q2)], %q0, %q1, %q2)
+-
+
+&u-unlock-impl-0-0 #22 = 
+  pemit(%0, ansi(hr, unlock: what do you want to lock%, and with what?))
+-
+&u-unlock-impl-0-1 #22 = 
+  pemit(%0, ansi(hr, unlock: what do you want to unlock?))
+-
+&u-unlock-impl-1-0 #22 = 
+  pemit(%0, ansi(hr, unlock: what do you want to unlock it with?))
+-
+&u-unlock-impl-1-1 #22 = 
+  u(u-unlock-impl-[u(u-which-impl, %1)], %0, %1, %2)
+-
+
+# u(u-unlock-impl-container, <unlocker dbref>, <container dbref>, <key dbref>)
+# 
+# unlock a container
+# 
+&u-unlock-impl-container #22 = 
+
+  [pemit(lcon(loc(%0)), 
+    u(u-unlock-msg-
+        [switch([hastag(%1, broken)]
+                [islocked(%1)]
+                [u(u-key-matches-lock, %1, %2)], 
+
+         011, unlock-it
+              [trigger(%1/aunlock,%0,%2)]
+              [settag(%1, !locked)], 
+
+         1??, broken, 
+         ?0?, isn't-locked, 
+         ??0, key-doesn't-fit, 
+              error
+        )], 
+
+      %0, %1, %2)
+  )]
+-
+
+#----------------------------------------
+# u(u-unlock-impl-door, <unlocker dbref>, <exit dbref>, <key dbref>)
+# 
+# unlock a door
+# 
+&u-unlock-impl-door #22 = 
+
+  [pemit([setunion(lcon(loc(%1)),lcon(loc(%0)))], 
+    u(u-unlock-msg-
+        [switch([hastag(%1, broken)]
+                [islocked(%1)]
+                [u(u-key-matches-lock, %1, %2)], 
+
+         011, unlock-it
+              [trigger(%1/aunlock,%0,%2)]
+              [settag(%1, !locked)]
+              [settag(exittwin(%1), !locked)], 
+
+         1??, broken, 
+         ?0?, isn't-locked, 
+         ??0, key-doesn't-fit, 
+              error
+        )], 
+
+      %0, %1, %2)
+  )]
+-
+
+&u-unlock-impl-invalid #22 = 
+  pemit(%0, ansi(hr, lock: there isn't a lock there to unlock))
+-
+
+
+
+&u-unlock-msg-unlock-it #22 = 
+  ansi(gh, unlock: [goodname(%0)] unlocks [goodname(%1)] with a click.)
+-
+&u-unlock-msg-isn't-locked #22 = 
+  ansi(rh, unlock: [goodname(%0)] tries to unlock [goodname(%1)] but it's already unlocked.)
+-
+&u-unlock-msg-key-doesn't-fit #22 = 
+  ansi(rh, unlock: [goodname(%0)] tries to unlock [goodname(%1)] but the key doesn't fit.)
+-
+&u-unlock-msg-broken #22 = 
+  ansi(rh, unlock: [goodname(%0)] tries to unlock [goodname(%1)] but the lock seems to be broken.)
+-
+&u-unlock-msg-error #22 = 
+  ansi(rh, unlock: an error has occurred in the unlock code -- please inform the staff)
+-
+
+
+
+#-----------------------------------------------------------------------------
+&cmd-pass #22 = $pass *:
+#-----------------------------------------------------------------------------
+  think setq(1, ifelse(strmatch(%0, * with *), before(%0, %bwith%b),  %0)); 
+  think setq(2, ifelse(strmatch(%0, * with *),  after(%0, %bwith%b), key)); 
+
+  think [setq(0, %#)]
+        [setq(1, locate(%#, %q1, e))]
+        [setq(2, locate(%#, %q2, i))];
+
+#  @lock ifelse(hastag(%q1, lockable), %q1, #-1) = IS-LOCKED/0; 
+
+  think setq(9, 
+    [isdbref(%q1)]
+    [isdbref(%q2)]
+    [not(hastag(%q1, broken))]
+    [not(hasflag(%#,immobile))]
+    [or(not(islocked(%q1)), u(u-key-matches-lock, %q1, %q2))]
+    [not(strmatch(parent(%q1),#102))]
+  );
+
+  @select %q9 = 
+
+  111111, {
+
+# they pass the locks and stuff -- send them through the exit
+
+    @switch [islocked(%q1)] =
+       0, {
+              @pemit %#=%xr%xhpass: the door is already unlocked, 
+                        so you leave it unlocked.%xn
+          },
+       1, {
+              @pemit %#=%xcpass: you unlock the door and relock 
+                        it behind you.%xn
+          };
+
+#   do the stuff on the starting side of the exit
+#   (doesn't trigger @asuccess though)
+
+    @pemit %# = u(%q1/success); 
+    think setq(8, u(%q1/osuccess)); 
+    @remit %L = switch(%q8,,,%n %q8); 
+
+#   do the teleport
+
+    @tel %# = loc(%q1); 
+
+#   do the stuff on the ending side of the exit
+#   (doesn't trigger @adrop though)
+
+    @pemit %# = u(%q1/drop); 
+    think setq(8, u(%q1/odrop)); 
+    @remit %L = switch(%q8,,,%n %q8); 
+  }, 
+
+# otherwise, give them an error message
+  0?????, { 
+    think u(u-unlock-impl-[isdbref(%q1)]-[isdbref(%q2)], %q0, %q1, %q2)
+  }, 
+
+  ?0????, {
+    think u(u-unlock-impl-[isdbref(%q1)]-[isdbref(%q2)], %q0, %q1, %q2)
+  }, 
+
+  ??0???, {
+    @pemit %# = The door seems to be broken, and therefore impassable.
+  }, 
+
+  ???0??, {
+    @pemit %# = You have been set immobile.
+  },
+
+  ????0?, {
+    @pemit %# = You can't pass through that door. It's locked and you 
+                don't have the right key.
+  }, 
+
+  ?????0, {
+# In this case, the player is attempting to pass a dspace exit.
+    @force %#=%0
+  }, 
+  
+# CATCH-ALL ERROR
+  {
+    @pemit %# = Hrm, something in the code is broken, but you still don't 
+                get to pass through the door.
+  }
+-
+
+
+
+##### BARS #####
+
+#-----------------------------------------------------------------------------
+&cmd-bar #22 = $bar *:
+#-----------------------------------------------------------------------------
+  think [setq(0, %#)]
+        [setq(1, locate(%#, %0, ein))]; 
+
+  think u(u-bar-impl-[isdbref(%q1)], %q0, %q1)
+-
+&u-bar-impl-0 #22 = pemit(%0, u(message-bar-no-bar))
+-
+&u-bar-impl-1 #22 = u(%1/u-bar-impl, %0, %1)
+-
+&message-bar-no-bar #22 = ansi(hr, bar: Which bar are you trying to bar?)
+-
+
+# u(u-bar-impl-container, <barrer dbref>, <container dbref>)
+# 
+# bar a container
+# 
+&u-bar-impl-container #22 = 
+  ifelse(hastag(%1, barred), 
+    pemit(%0, ansi(rh, bar: [goodname(%1)] is already barred.)), 
+# else
+    [settag(%1, barred)]
+    [pemit(%0, ansi(gh, bar: You barred [goodname(%1)].))]
+  )
+-
+
+
+#-----------------------------------------------------------------------------
+&cmd-unbar #22 = $unbar *:
+#-----------------------------------------------------------------------------
+  think [setq(0, %#)]
+        [setq(1, locate(%#, %0, ein))];
+
+  think u(u-unbar-impl-[isdbref(%q1)], %q0, %q1)
+-
+&u-unbar-impl-0 #22 = pemit(%0, u(message-unbar-no-bar))
+-
+&u-unbar-impl-1 #22 = u(%1/u-unbar-impl, %0, %1)
+-
+&message-unbar-no-bar #22 = ansi(hr, unbar: Which bar are you trying to unbar?)
+-
+
+# u(u-unbar-impl-container, <unbarrer dbref>, <container dbref>)
+# 
+# unbar a container
+# 
+&u-unbar-impl-container #22 = 
+  ifelse(hastag(%1, barred), 
+    [settag(%1, !barred)]
+    [pemit(%0, ansi(gh, bar: You unbarred [goodname(%1)].))], 
+# else
+    pemit(%0, ansi(rh, bar: [goodname(%1)] is not barred.)) 
+  )
+-
+
+
+
+##### LATCHES #####
+
+#-----------------------------------------------------------------------------
+&cmd-latch #22 = $latch *:
+#-----------------------------------------------------------------------------
+  think [setq(0, %#)]
+        [setq(1, locate(%#, %0, ein))]; 
+
+  think u(u-latch-impl-[isdbref(%q1)], %q0, %q1)
+-
+&u-latch-impl-0 #22 = pemit(%0, u(message-latch-no-latch))
+-
+&u-latch-impl-1 #22 = u(%1/u-latch-impl, %0, %1)
+-
+&message-latch-no-latch #22 = ansi(hr, latch: Which latch are you trying to latch?)
+-
+&u-latch-impl-container #22 = 
+  ifelse(hastag(%1, latched), 
+    pemit(%0, ansi(rh, latch: [goodname(%1)] is already latched.)), 
+# else
+    [settag(%1, latched)]
+    [pemit(%0, ansi(gh, latch: You latch [goodname(%1)].))]
+  )
+-
+
+
+
+#-----------------------------------------------------------------------------
+&cmd-unlatch #22 = $unlatch *:  
+#-----------------------------------------------------------------------------
+  think [setq(0, %#)]
+        [setq(1, locate(%#, %0, ein))]; 
+
+  think u(u-unlatch-impl-[isdbref(%q1)], %q0, %q1)
+-
+&u-unlatch-impl-0 #22 = pemit(%0, u(message-unlatch-no-latch))
+-
+&u-unlatch-impl-1 #22 = u(%1/u-unlatch-impl, %0, %1)
+-
+&message-unlatch-no-latch #22 = ansi(hr, unlatch: Which latch are you trying to unlatch?)
+-
+&u-unlatch-impl-container #22 = 
+  ifelse(hastag(%1, latched), 
+    pemit(%0, ansi(rh, unlatch: [goodname(%1)] isn't latched.)), 
+# else
+    [settag(%1, !latched)]
+    [pemit(%0, ansi(gh, unlatch: You unlatch [goodname(%1)].))]
+  )
+-
+
+
+
+#############################################################################
+# COMMON U-FUNCTIONS
+#############################################################################
+
+# Does one of the keycodes on one object (like a lock) match 
+# any of the keycodes on another (like a key)?
+# 
+&u-key-matches-lock #22 = 
+  or(u(u-has-no-code, %0), 
+     u(u-has-no-code, %1), 
+     u(u-is-master-key, %0), 
+     u(u-is-master-key, %1), 
+     sign(words(setinter(u(%0/code), u(%1/code))))
+  )
+-
+
+# Return 1 if the object has no keycode and it's lockable.
+# 
+&u-has-no-code #22 = 
+  and(not(hasattr(%0, code)), 
+      hastag(%0, lockable)
+  )
+-
+
+# Return 1 if the object is a master key.
+#
+&u-is-master-key #22 = 
+  hastag(%0, masterkey)
+-
+
+
+# Which implementation should we use for this object?
+# 
+&u-which-impl #22 = 
+  switch([type(%0)]/
+         [hastag(%0, lockable)]
+         [hastag(%0, container)]
+         [and(hastag(%0, door), member(lparent(%0), paccount(doors)))], 
+
+    EXIT/101,   door, 
+    THING/110,  container, 
+    EXIT/?00,   exit,
+                invalid
+  )
+-
+
+# A container or lock is locked if it is tagged 'locked'
+# 
+&u-container-is-locked #22 = 
+  hastag(%0, locked)
+-
+&u-lock-is-locked #22 = 
+  hastag(%0, locked)
+-
+
+# A door is locked if it or its twin is tagged 'locked'
+# 
+&u-door-is-locked #22 = 
+  or(hastag(%0, locked), 
+     hastag(exittwin(%0), locked))
+-
+# An exit is locked if the player doesn't pass it's default lock
+&u-exit-is-locked #22 = 
+   not(elock(%0,%!))
+-
+
+
+# The twin of an exit is the one that leads back.
+# If there's more than one, it returns the first.
+# 
+&ul-exit-twin #22 = 
+  [setq(0, home(%0))]
+  [first(filter(me/filter-returns-to-here, lexits(loc(%0))))]
+-
+&filter-returns-to-here #22 = 
+  [strmatch(loc(%0), %q0)]
+-
+
+# Two hacky triggers to set a container opaque or unopaque when it
+# is opened or closed by being locked or unlocked. :)
+#
+#     --Jeanne
+
+&trig-opaque-container #22 =
+  @set %0=OPAQUE
+-
+&trig-unopaque-container #22 =
+  @set %0=!OPAQUE

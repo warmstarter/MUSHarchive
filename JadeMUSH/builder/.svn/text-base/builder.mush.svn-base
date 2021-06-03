@@ -1,0 +1,817 @@
+#############################################################################
+# BUILDER.MUX -- contains code for builders only
+#############################################################################
+#
+# Builder Commands = #6
+# test Builder Commands = #1761
+
+
+&RCS #6 = 
+  $Id: builder.mux,v 1.18 2001/09/02 02:24:59 dan Exp $
+-
+
+
+# Global semaphores object
+#
+@vS #6 = #51
+-
+# Standard Ufun Library as %vL
+#
+@vL #6 = #52
+-
+# Registry object (data)
+#
+@vR #6 = #137
+-
+
+
+
+
+# @flags <object>
+#
+# Lists all the flags on an object.
+#
+&cmd-flags #6 = $@flags *: 
+  @switch %0 = *=*, {
+    @@ do nothing, let &cmd-flags-set handle it @@
+  }, {
+    @switch setr( 0, locate(%#, %0, *) ) =
+    #-1, {
+      @pemit %# = I don't see that here.
+    },
+    #-2, {
+      @pemit %# = I'm not sure which '%0' you mean.
+    }, {
+      @pemit %# =
+        Flags on [name(%q0)] (%q0 [flags(%q0)]) = [u(%vL/u-lflags, flags(%q0))]
+    }
+  }
+-
+&cmd-flag #6 = $@flag *: 
+  @force %# = @flags %0
+-
+
+
+# @flags <object> = <flag list>
+#
+# Sets (or unsets, if !flag) all the flags in the list.
+#
+&cmd-flags-set #6 = $@flags *=*: 
+  @switch isdbref( setr( 0, locate(%#, %0, *) )) = 0, {
+    @error %# = locate %q0
+  }, {
+    @pemit %# = Flags: '%1'; 
+    @dolist u(u-safeflags, %1) = {
+      @set %q0 = ##
+    };
+    @wait 0 = {
+      @pemit %# =
+        Flags on [name(%q0)] (%q0 [flags(%q0)]) = [u(%vL/u-lflags, flags(%q0))]
+    }
+  }
+-
+
+
+
+# u(u-safeflags, <flag list>)
+#
+# Given a list of flag names, returns a new flag list with certain
+# 'unsafe' flags (wizard, royal, etc.) removed.
+#
+&u-safeflags #6 = 
+  iter(%0,
+    switch(1,
+      strmatch(wizard, ##*),
+        switch(hasflag(%#, wizard), ##), 
+      strmatch(royalty, ##*),
+        switch(hasflag(%#, wizard), ##), 
+      ##
+    )
+  )
+-
+
+
+# @debug <object>
+#
+# If you control the object, chowns it to you if necessary without
+# losing any wizard flag it had, then sets it !halted, verbose, trace,
+# and puppet.  
+#
+# Saves pertinent ownership and flag information for @undebug comand.
+#
+&cmd-debug #6 = $@debug *: 
+  @switch isdbref(setr( 0 , locate(%#, %0, *) )) = 0, {
+    @error %# = locate %q0
+  }, {
+    @switch controls(%#, %q0) = 0, {
+      @pemit %# = You can debug only objects you control.
+    }, {
+      &debug-owner %0 = owner(%q0); 
+      @chown %q0/debug-owner = #1; 
+      &debug-hadwiz %q0 = hasflag(%q0, wizard); 
+      @chown %q0/debug-hadwiz = #1; 
+      @chown %q0 = %#; 
+      @set %q0 = !halt; 
+      @set %q0 = [switch(get(%q0/debug-hadwiz), 1, wizard, !wizard)]; 
+      @set %q0 = verbose; 
+      @set %q0 = trace; 
+      @pemit %# = Debug on.
+    }
+  }
+-
+
+&cmd-undebug #6 = $@undebug *:
+  @switch isdbref(setr( 0 , locate(%#, %0, *) )) = 0, {
+    @error %# = locate %q0
+  }, {
+    @switch [controls(%#, %0)]
+            [and(match(owner(%0/debug-owner), #1), 
+              hasattr(%0/debug-owner)
+            )] = 
+    0?, {
+      @pemit %# = You can only use @debug and @undebug on objects you control.
+    }, 
+    10, {
+      @pemit %# = You weren't debugging that object.
+    },
+    11, {
+      &debug-hadwiz %0 = hasflag(%q0, wizard);
+      @chown %0 = get(%q0/debug-owner);
+      @set %0 = !halt;
+      @set %0 = [switch(get(%q0/debug-hadwiz), 1, wizard, !wizard)];
+      @set %0 = !verbose;
+      @set %0 = !trace;
+      &debug-hadwiz %q0;
+      &debug-owner %q0;
+      @pemit %# = Debug off.
+  }
+-
+
+
+# @tags[/full] <object>
+#
+&cmd-tags-list #6 = $@tags* *: 
+  @switch %1 = *=*,
+  {
+    @@ do nothing @@
+  }, {
+    @switch isdbref(setr( 0, locate(%#, %1, *) )) = 0, {
+      @error %# = locate %q0
+    }, {
+      @pemit %# = [name(%q0)] (%q0 [flags(%q0)]) has these tags: [ltags(%q0)]; 
+      @switch/first %0 = /f*, {
+        @pemit %# = %rFull tag listing:%r%r
+	  #Dbref [ljust(Object, 35)] Tags
+	  [iter(lparent(%q0), 
+	    %r[rjust(##, 6)] [ljust(left(name(##)%b, 35), 35, .)]%b
+	      [left(get(##/tags), 50)]
+	  )]
+      }
+    }
+  }
+-
+&cmd-tag-list #6 = $@tag *: 
+  @force %# = @tags %0
+-
+
+
+# @tags <object> = <tag list>
+#
+&cmd-tags-set #6 = $@tags *=*:
+  @switch "%1" = "", {
+    @pemit %# = That command doesn't do anything.%b
+                To clear all the tags off an object, use '@cleartags <object>'.
+  }, {@dolist %1=think objeval(%#, settag(%0, ##))}
+
+-
+
+
+# @cleartags <object> = <tag list>
+#
+# Removes the tags in <tag list> from object, if they exist.
+# Does not clear tags off parents of objects.
+# Tags in the list may be prepended with an '!'.
+#
+&cmd-cleartags #6 = $@cleartags *=*: 
+  @switch "%1" = "", {
+    @pemit %# = 
+      That command doesn't do anything. Did you mean '@cleartags %0'?
+  }, {
+    @switch isdbref(setr( 0, locate(%#, %0, *) )) = 0, {
+      @error %# = locate %q0
+    }, {
+      &tags %q0 = setdiff(get(%q0/tags), %1); 
+      @pemit %# = 
+        [name(%q0)] (%q0 [flags(%q0)]) now has these tags: [get(%q0/tags)]
+    }
+  }
+-
+
+
+# @cleartags <object>
+#
+# Removes the tags in <tag list> from object, if they exist.
+# Does not clear tags off parents of objects.
+# Tags in the list may be prepended with an '!'.
+#
+&cmd-cleartags-object #6 = $@cleartags *: 
+  @switch "%0" = "*=*", {
+    @@ ignore and leat cmd-cleartags handle it @@
+  }, {
+    @switch isdbref(setr( 0, locate(%#, %0, *) )) = 0, {
+      @error %# = locate %q0
+    }, {
+      &tags %q0; 
+      @pemit %# = 
+        [name(%q0)] (%q0 [flags(%q0)]) now has no tags.
+    }
+  }
+-
+&cmd-cleartag-object #6 = $@cleartag *: 
+  @force %# = @cleartags %0
+-
+
+
+# u(u-goodtag, <tagname>)
+#
+# Returns 1 if the tagname is acceptable; otherwise, returns 0.
+#
+# A bad tagname is one that has special characters in it (see the secure()
+# function), or that has a '!' any place other than the first character, 
+# or one that has only a '!' in it.
+#
+&u-goodtag #6 = 
+  and(
+    strmatch(%0, secure(%0)), 
+    not(strmatch(%0, ?*!*)),
+    not(strmatch(%0, !))
+  )
+-
+
+
+
+# @configure <object>
+#
+# Runs an automated configuration script on the object, prompting the 
+# user with questions that she can give simple answers to.
+#
+&cmd-configure #6 = $@configure *: 
+  @switch setr(9, locate(%#, %0, *)) =
+  #-1, {
+    @pemit %# = I don't see what you want to configure.
+  },
+  #-2, {
+    @pemit %# = '%0' matches more than one object.
+  }, {
+    @switch [setr(8, hasattrp(%q9, config))][setr(7, isdbref(parent(%q9)))] = 
+    11, {
+      @pemit %# = Configuring [name(%q9)] (%q9):;
+#     
+#     The 'think' below sets up %q0 and %q1 to contain %# and the 
+#     semaphore to notify.  These must be passed via register because
+#     @program cannot send additional parameters.
+#     
+      think [setq(0, %#)][setq(1, %vS/semaphore-config)]; 
+      @dolist get(%q9/config) DOLIST-DONE = {
+        @wait %vS/semaphore-config = {
+          @trigger
+	    switch(##, DOLIST-DONE,
+	      pemit(%#, Done.), 
+#           else
+              %q9/configure-##
+	    )
+	}
+    }, 
+    01, {
+      @trigger me/trigger-generic-configure =
+        %#, %q9, no config found, %q8, %q7
+    }, 
+    10, 
+      @trigger me/trigger-generic-configure =
+        %#, %q9, no parent found, %q8, %q7
+    },
+    00, {
+      @trigger me/trigger-generic-configure = 
+        %#, %q9, no parent or config found, %q8, %q7
+    }, {
+      @pemit %# = Configuration Error: See Adam for help.
+    }
+  }
+-
+
+# Default Configuration
+#
+# To be used if an object either does not have a parent set, or
+# does not have a &configure attribute on it.
+#
+# %0 = %#
+# %1 = dbref of object to configure
+# %2 = descriptive reason why default config is being used
+# %3 = boolean, does %1 have a config attr?
+# %4 = boolean, does %1 have a parent?
+#
+&trigger-generic-configure #6 = 
+  @switch type(%1) =
+  room, {
+    @pemit %0 = Using default room configuration (%2);
+  },
+  player, {
+    @pemit %0 = Using default player configuration (%2);
+  },
+  exit, {
+    @pemit %0 = Using default exit configuration (%2);
+  },
+  thing, {
+    @pemit %0 = Using default thing configuration (%2);
+  }, {
+    @pemit %0 = You can't configure that!
+  }
+-
+
+
+
+# @go <location>
+#
+# If <location> is a #dbref, it teleports you into the object.
+# If <location> is a player name, it teleports you into the same room as
+# the specified player.
+# In all other cases, @go searches the names of all the rooms in the db
+# and if it finds a unique match, it teleports you there.
+#
+&cmd-go #6 = $@go *: 
+  think setq(0, pmatch(%0)); 
+
+  @switch 1 = 
+    isdbref(%0), {
+      @switch or(hastype(%0, thing), hastype(%0, room)) = 1, {
+          @tel %# = %0
+      }, {
+        @pemit %# = That isn't a room or thing.
+      }
+    },
+    isdbref(%q0), {
+          @tel %# = loc(%q0)
+    }, {
+      @switch %q0 = 
+        #-2*, {
+          @pemit %# = '%0' matches more than one player name.
+        }, 
+        #-1 *, {
+          think setq(0, search(eroom=strmatch(name(##), *%0*)) ); 
+
+          @switch words(%q0) = 
+            0, {
+              @pemit %# = No room matches '%0'.
+            }, 
+            1, {
+                @tel %# = %q0
+            }, {
+              @pemit %# = More than one room matches '%0'.
+            }
+        }, {
+          @pemit %# = Hmmm. %%q0 = %q0
+        }
+    }
+-
+    
+
+# @attrset <object>/<attribute> = <value>
+#
+# Sets the value on the object/attribute, regardless of ownership.
+#
+# Uses ulocal(ul-locateobj,%0) to avoid overwriting existing values in
+#  %q0.
+#
+&cmd-attrset #6 = $@attrset */*=*: 
+  &%1 [ulocal(ul-locateobj,%0)] = %2;
+  @pemit *waylon=Var: %1 Obj: %0 [ulocal(ul-locateobj,%0)] %2
+-
+
+# ulocal(ul-locateobj,<objectname>)
+#   
+# Returns the dbref of the <objectname> if it exists, else returns #-1.
+#
+&UL-LOCATEOBJ #6=
+  ifelse(
+    isdbref(setr(0,locate(%#, %0, *))), 
+      %q0, 
+#   else
+      #-1
+  )
+-
+
+@@ @addcommand @attrset=#6/cmd-attrset
+-
+
+
+# @error <player_dbref> = <message code>
+#
+# Emits the 'proper' message to the player, depending on the code sent.
+# See the mushcode below to determine what codes are available.
+#
+&cmd-error #6 = $@error *=*: 
+  @pemit %0 = 
+    [switch(trim(%1),
+    huh,          Huh?%b (Type "help" for help.), 
+    locate #-1,   I don't see that here., 
+    locate #-2,   I don't know which one you mean., 
+    pmatch #-1,   There's no such player by that name., 
+    pmatch #-2,   That matches more than one player name., 
+    attr #-1,     There's no such attribute., 
+    attr #-2,     That matches more than one attribute name., 
+    skill #-1,    There's no such skill., 
+    skill #-2,    That matches more than one skill name., 
+    trait #-1,    There's no such trait., 
+    trait #-2,    That matches more than one trait name., 
+                  Unknown error ([trim(%1)])
+    )]
+-
+&filter-is-ornament #6=hastag(%0, ornament)
+-
+&u-ornament-pemit #6=%band is ornamented with %xh%xc 
+      [iter(%0, name(##) %(##%),%b,%,%b)]%xh%xy
+-
+
+
+# @zap <object>
+#
+# Irrevocably destroys an object, with no further ado.
+# Ignores 'SAFE' flag, but obeys 'Immutable' and 'No_destroy' powers.
+#
+# Makes sure that the object doesn't spam the owner with messages,
+# clears and sets important flags, etc.
+# 
+&cmd-zap #6 = $@zap *: 
+  @@ This is the bullshit you have to go through in MUX to kill a fucking 
+     object for good. 
+  @@; 
+
+  think setq(0, locate(%#, %0, *)); 
+# lcon() on an exit will return #-1, so we'll have to special case that later
+  think setq(1, lcon(%q0)); 
+  think setq(2, filter(filter-is-ornament, %q1)); 
+  think setq(9, 
+    [isdbref(%q0)]
+    [t(controls(%#, %q0))]
+    [not(words(children(%q0)))]
+    [not(member(iter(lattr(%vR/*), get(%vR/##)), %q0))]
+    [not([or(hasflag(%q0, safe),hastag(%q0,dspace))])]
+    [not(haspower(%q0, immutable))]
+    [not(haspower(%q0, no_destroy))]
+    [not(words(setdiff(%q1, %q2 #-1)))]
+    [hastype(%#, Player)]
+ ); 
+
+  @select %q9 = 
+
+# NOMINAL CASE 1: item is zappable and is being destroyed by a player
+#                 ...ask the player to verify before zapping!
+  111111111, {
+    think setq(9, %#); 
+    @pemit %# = 
+        %xh%xy
+        You're about to permanently wipe out %q0 (%xh%xc[name(%q0)]%xh%xy), 
+        which is owned by %xh%xc[name(owner(%q0))]%xh%xy
+        [ifelse(words(%q2),u(u-ornament-pemit, %q2),)].%xn; 
+
+#   note that the routine requires %q0=dbref of object to zap and %q9=%#
+    @program %# = me/program-verify-zap:%xh%xmDo you really want to do this?%xn %xhyes/no%xn
+  }, 
+
+
+# NOMINAL CASE 2: item is zappable and is being destroyed by an object
+#                 ...destroy the object immediately
+  111111110, {
+#   note that the routine requires %q0=dbref of object to zap and %q9=%#
+    @trigger me/program-verify-zap = yes
+  }, 
+
+
+# can't find the object
+  0????????, { @error %# = locate %q0 }, 
+
+# don't control the object
+  ?0???????, { @pemit %# = You don't control that. Bad! Bad! Bad!}, 
+
+# object is a parent
+  ??0??????, { @pemit %# = That object has children. 
+                          You would leave lots of objects without a mommy or daddy!}, 
+
+# object is registered
+  ???0?????, { @pemit %# = That object is in the Registry. Use @rzap instead. 
+                         But first, make sure you really want to zap it!!}, 
+
+# object is safe
+  ????0????, { @pemit %# = That object is set SAFE. }, 
+
+# object is immutable
+  ?????0???, { @pemit %# = That object has the immutable power. 
+                          Some things can never be changed.}, 
+
+# object is safe
+  ??????0??, { @pemit %# = That object has the no_destroy power. It cannot be zapped.}, 
+
+# Object has contents
+  ???????0?, {@pemit %# = That object has non-ornamented objects in it. Please remove 
+                and/or @zap the contents prior to @zapping the container.}, 
+
+# ERROR
+  *,       { @pemit %# = A serious error occurred. Please report this to the staff: %%q9 = %q9. }
+-
+
+
+# %0 = yes/no answer
+# %q0 = dbref of object to zap
+# %q2 = dbref of all ornament objects inside %q0
+# %q9 = %#
+#
+&program-verify-zap #6 = 
+  @switch %0 = 
+  yes, {
+#   save the name of the object for notification later...
+
+    think setq(1, name(%q0)); 
+
+    @set %q0 = !puppet; 
+    @set %q0 = !verbose; 
+    @set %q0 = !trace; 
+    @set %q0 = !wizard; 
+    @set %q0 = !royal; 
+    @set %q0 = !quiet; 
+    @set %q0 = !going; 
+    @parent %q0; 
+    @listen %q0; 
+
+    &ac- %q0; 
+    @dolist laccounts(%q0) = {think ac_destroy(%q0, ##)}; 
+    @trigger me/trigger-destroy = %#, %q0; 
+    @dolist %q2=@zap ##
+  }, {
+    @pemit %q9 = Zap aborted.
+  }
+-
+
+&trigger-destroy #6 = 
+  @switch words(lattr(%1/AC-*)) = 0, {
+    think setq(1, name(%1)); 
+    @wipe %1; 
+    @set %1 = destroy_ok; 
+    @destroy/override %1; 
+
+    @pemit %0 = %q1 (%1) was 
+        [switch(hastype(%1, garbage), 0, {not%b})]
+        successfully destroyed.
+  }, {
+#   Hey, it works. Shut up.
+    @trigger me/trigger-destroy = %0, %1
+  }
+-
+
+&config-000 #6 = #100
+-
+
+&cmd-000 #6 = $000: 
+  @tel %# = v(config-000)
+-
+
+
+
+# @zap <object>
+#
+# Irrevocably destroys an object, with no further ado.
+# Ignores 'SAFE' flag, but obeys 'Immutable' and 'No_destroy' powers.
+#
+# Makes sure that the object doesn't spam the owner with messages,
+# clears and sets important flags, etc.
+# 
+&cmd-zap #6 = $@zap *: 
+  @@ This is the bullshit you have to go through in MUX to kill a fucking 
+     object for good. 
+  @@; 
+
+  think setq(0, locate(%#, %0, *)); 
+# lcon() on an exit will return #-1, so we'll have to special case that later
+  think setq(1, lcon(%q0)); 
+  think setq(2, filter(filter-is-ornament, %q1)); 
+  think setq(9, 
+    [isdbref(%q0)]
+    [t(controls(%#, %q0))]
+    [not(words(children(%q0)))]
+    [not(member(iter(lattr(%vR/*), get(%vR/##)), %q0))]
+    [not([or(hasflag(%q0, safe),hastag(%q0,dspace))])]
+    [not(haspower(%q0, immutable))]
+    [not(haspower(%q0, no_destroy))]
+    [not(words(setdiff(%q1, %q2 #-1)))]
+    [hastype(%#, Player)]
+ ); 
+
+  @select %q9 = 
+
+# NOMINAL CASE 1: item is zappable and is being destroyed by a player
+#                 ...ask the player to verify before zapping!
+  111111111, {
+    think setq(9, %#); 
+    @pemit %# = 
+        %xh%xy
+        You're about to permanently wipe out %q0 (%xh%xc[name(%q0)]%xh%xy), 
+        which is owned by %xh%xc[name(owner(%q0))]%xh%xy
+        [ifelse(words(%q2),u(u-ornament-pemit, %q2),)].%xn; 
+
+#   note that the routine requires %q0=dbref of object to zap and %q9=%#
+    @program %# = me/program-verify-zap:%xh%xmDo you really want to do this?%xn %xhyes/no%xn
+  }, 
+
+
+# NOMINAL CASE 2: item is zappable and is being destroyed by an object
+#                 ...destroy the object immediately
+  111111110, {
+#   note that the routine requires %q0=dbref of object to zap and %q9=%#
+    @trigger me/program-verify-zap = yes
+  }, 
+
+
+# can't find the object
+  0????????, { @error %# = locate %q0 }, 
+
+# don't control the object
+  ?0???????, { @pemit %# = You don't control that. Bad! Bad! Bad!}, 
+
+# object is a parent
+  ??0??????, { @pemit %# = That object has children. 
+                          You would leave lots of objects without a mommy or daddy!}, 
+
+# object is registered
+  ???0?????, { @pemit %# = That object is in the Registry. Use @rzap instead. 
+                         But first, make sure you really want to zap it!!}, 
+
+# object is safe
+  ????0????, { @pemit %# = That object is set SAFE. }, 
+
+# object is immutable
+  ?????0???, { @pemit %# = That object has the immutable power. 
+                          Some things can never be changed.}, 
+
+# object is safe
+  ??????0??, { @pemit %# = That object has the no_destroy power. It cannot be zapped.}, 
+
+# Object has contents
+  ???????0?, {@pemit %# = That object has non-ornamented objects in it. Please remove 
+                and/or @zap the contents prior to @zapping the container.}, 
+
+# ERROR
+  *,       { @pemit %# = A serious error occurred. Please report this to the staff: %%q9 = %q9. }
+-
+
+
+# %0 = yes/no answer
+# %q0 = dbref of object to zap
+# %q2 = dbref of all ornament objects inside %q0
+# %q9 = %#
+#
+&program-verify-zap #6 = 
+  @switch %0 = 
+  yes, {
+#   save the name of the object for notification later...
+
+    think setq(1, name(%q0)); 
+
+    @set %q0 = !puppet; 
+    @set %q0 = !verbose; 
+    @set %q0 = !trace; 
+    @set %q0 = !wizard; 
+    @set %q0 = !royal; 
+    @set %q0 = !quiet; 
+    @set %q0 = !going; 
+    @parent %q0; 
+    @listen %q0; 
+
+    &ac- %q0; 
+    @dolist laccounts(%q0) = {think ac_destroy(%q0, ##)}; 
+    @trigger me/trigger-destroy = %#, %q0; 
+    @dolist %q2=@zap ##
+  }, {
+    @pemit %q9 = Zap aborted.
+  }
+-
+
+
+ 
+
+
+
+# @zap <object>
+#
+# Irrevocably destroys an object, with no further ado.
+# Ignores 'SAFE' flag, but obeys 'Immutable' and 'No_destroy' powers.
+#
+# Makes sure that the object doesn't spam the owner with messages,
+# clears and sets important flags, etc.
+# 
+&cmd-zap-noornaments #6 = $@zap/noornaments *: 
+  @@ This is the bullshit you have to go through in MUX to kill a fucking 
+     object for good. 
+  @@; 
+
+  think setq(0, locate(%#, %0, *)); 
+# lcon() on an exit will return #-1, so we'll have to special case that later
+  think setq(1, lcon(%q0)); 
+  think setq(2, filter(filter-is-ornament, %q1)); 
+  think setq(9, 
+    [isdbref(%q0)]
+    [t(controls(%#, %q0))]
+    [not(words(children(%q0)))]
+    [not(member(iter(lattr(%vR/*), get(%vR/##)), %q0))]
+    [not(hasflag(%q0, safe))]
+    [not(haspower(%q0, immutable))]
+    [not(haspower(%q0, no_destroy))]
+    [not(words(setdiff(%q1, %q2 #-1)))]
+    [hastype(%#, Player)]
+ ); 
+
+  @select %q9 = 
+
+# NOMINAL CASE 1: item is zappable and is being destroyed by a player
+#                 ...ask the player to verify before zapping!
+  111111111, {
+    think setq(9, %#); 
+    @pemit %# = 
+        %xh%xy
+        You're about to permanently wipe out %q0 (%xh%xc[name(%q0)]%xh%xy), 
+        which is owned by %xh%xc[name(owner(%q0))]%xh%xy
+        [ifelse(words(%q2),u(u-ornament-pemit, %q2),)].%xn; 
+
+#   note that the routine requires %q0=dbref of object to zap and %q9=%#
+    @program %# = me/program-verify-zap2:%xh%xmDo you really want to do this?%xn %xhyes/no%xn
+  }, 
+
+
+# NOMINAL CASE 2: item is zappable and is being destroyed by an object
+#                 ...destroy the object immediately
+  111111110, {
+#   note that the routine requires %q0=dbref of object to zap and %q9=%#
+    @trigger me/program-verify-zap2 = yes
+  }, 
+
+
+# can't find the object
+  0????????, { @error %# = locate %q0 }, 
+
+# don't control the object
+  ?0???????, { @pemit %# = You don't control that. Bad! Bad! Bad!}, 
+
+# object is a parent
+  ??0??????, { @pemit %# = That object has children. 
+                          You would leave lots of objects without a mommy or daddy!}, 
+
+# object is registered
+  ???0?????, { @pemit %# = That object is in the Registry. Use @rzap instead. 
+                         But first, make sure you really want to zap it!!}, 
+
+# object is safe
+  ????0????, { @pemit %# = That object is set SAFE. }, 
+
+# object is immutable
+  ?????0???, { @pemit %# = That object has the immutable power. 
+                          Some things can never be changed.}, 
+
+# object is safe
+  ??????0??, { @pemit %# = That object has the no_destroy power. It cannot be zapped.}, 
+
+# Object has contents
+  ???????0?, {@pemit %# = That object has non-ornamented objects in it. Please remove 
+                and/or @zap the contents prior to @zapping the container.}, 
+
+# ERROR
+  *,       { @pemit %# = A serious error occurred. Please report this to the staff: %%q9 = %q9. }
+-
+
+
+# %0 = yes/no answer
+# %q0 = dbref of object to zap
+# %q2 = dbref of all ornament objects inside %q0
+# %q9 = %#
+#
+&program-verify-zap2 #6 = 
+  @switch %0 = 
+  yes, {
+#   save the name of the object for notification later...
+
+    think setq(1, name(%q0)); 
+
+    @set %q0 = !puppet; 
+    @set %q0 = !verbose; 
+    @set %q0 = !trace; 
+    @set %q0 = !wizard; 
+    @set %q0 = !royal; 
+    @set %q0 = !quiet; 
+    @set %q0 = !going; 
+    @parent %q0; 
+    @listen %q0; 
+
+    &ac- %q0; 
+    @dolist laccounts(%q0) = {think ac_destroy(%q0, ##)}; 
+    @trigger me/trigger-destroy = %#, %q0; 
+  }, {
+    @pemit %q9 = Zap aborted.
+  }
+-

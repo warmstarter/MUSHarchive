@@ -1,0 +1,2035 @@
+
+##################################################################
+##                                                                #
+##		THIS IS THE ROSTER SYSTEM                         #
+##                                                                #
+## New players will use this system to choose a pregenerated      #
+## character. Wizards will use this system to make characters     #
+## available to new players.                                      #
+##                                                                #
+## Syntaxes: @roster/add <character name>                         #
+##           @roster/remove <character name>                      #
+##           @roster                                              #
+##           @roster <character name>                             #
+##           @roster/info <character name>                        #
+##           @roster/background <character name>                  #
+##           @roster/family <character name>                      #
+##           @roster/choose <character name>                      #
+##           @roster/approve <email address> for <character name> #
+##           @roster/stats <character name>                       #
+##           @roster/page <page#>                                 #
+##           @roster/count                                        #
+##           @roster/ban                                          #
+##           @roster/unban                                        #
+##                                                                #
+## The Roster Object is #10                                       #
+## This code is by Stephanie Dray                                 #
+##    heavily modified by catherine to use sheet functions        #  
+###################################################################
+
+#==================================================================#
+#                 ROSTER CRON JOBS                                 #
+#                                                                  #
+# Necessary Cron Job: Goes through the database once every hour    # 
+# determining which player are tagged 'roster' and which aren't    #
+#                                                                  #
+#==================================================================#
+
+&cron_time_absent #63=|||07|30|@@ every day at 7:30 am @@
+-
+
+&cron_time_roster #63=||||10|@@ every hour on the 10 min mark @@
+-
+&cron_time_vacation #63=|||08|00|@@ every day at 8:00 am @@
+-
+&cron_job_absent #63=@tr #10/cron_job_absent
+-
+&cron_job_roster #63=@trig #10/cron_job_roster
+-
+&cron_job_vacation #63=@tr #10/cron_job_vacation
+-
+&cron_job_absent #10=
+ 
+  @wipe me/absentees;
+
+  think setq(0, get(#7/player-dbrefs));
+
+#-------------------------------------------------------------------
+# %q0 = list of player dbrefs
+# %q2 = converted to seconds, last time player logged in
+# %q3 = current seconds
+# %q4 = number of seconds since the player last logged in/got the char
+# %q5 = 10 days in seconds
+# %q7 = Time taken from roster
+# %q8 = Whichever is greater, time taken from the roster or last
+#           time logged in. (in case don't log in right away)
+#-------------------------------------------------------------------
+
+  @dolist %q0=
+     {think setq(2, convtime(get(##/last))); 
+      think setq(7, convtime(get(##/taken-from-roster))); 
+      think setq(8, max(%q2, %q7)); 
+      think setq(3, secs());
+      think setq(4, sub(%q3, %q8));
+      think setq(5, mul(60, 60, 24, 10));
+      think switch(1, and(gte(%q4, %q5),
+                          not(hasflag(##,VACATION)),
+                          not(hastag(##, dead)),
+                          not(hastag(##, offgrid)),
+                          not(hastag(##, retired)),
+                          not(hastag(##, inchargen)),
+                          not(hasflag(##, wizard)), 
+                          hastag(##, chargened)), 
+                      set(me, absentees:[setunion(get(me/absentees),##)]))};
+  
+  @wait 0=@wait 0=
+    {think setq(6, v(absentees));
+     think iter(%q6, switch(1, hastag(##, roster), 
+                               set(me,absentees:[remove(v(absentees), ##)])));
+     think setq(5, v(absentees));
+     think iter(%q6, switch(0, hasattr(##, email),
+                               set(me, absentees:[remove(v(absentees),##)])));
+     think setq(6, v(absentees));
+     think setq(6, iter(%q6, switch(1, hasflag(##, wizard),
+                                       [name(##)]%(W%), [name(##)]) ,%b, |));
+                            
+     @bb/post Absentees/Absentees=
+        The following people have been absent for 10 days or more and 
+        we might want to put them back onto the roster: %r
+        [columns(%q6, div(79, 4), |)]}
+                   
+
+-
+
+&cron_job_roster #10=
+  think setq(0, search( EPLAYER=hastag(##, roster)) ); 
+
+  think setq(9,1); 
+  think setq(1, sortby(me/sortby-name, filter(me/filter-priority, %q0))); 
+
+  think setq(9,2); 
+  think setq(2, sortby(me/sortby-name, filter(me/filter-priority, %q0))); 
+
+  think setq(9,3); 
+  think setq(3, sortby(me/sortby-name, filter(me/filter-priority, %q0))); 
+
+  think setq(9,4); 
+  think setq(4, sortby(me/sortby-name, filter(me/filter-priority, %q0))); 
+
+  think setq(9,5); 
+  think setq(5, sortby(me/sortby-name, filter(me/filter-priority, %q0))); 
+
+  &roster-list me = %q1 %q2 %q3 %q4 %q5;
+
+  @trig me/tr-roster-docheck
+-
+
+# assumes priority will be tucked away in %q9 -- cute, huh?
+# 
+&filter-priority #10 = 
+  eq(default(%0/roster-priority, 5), %q9)
+-
+&cron_job_vacation #10=@wipe me/vacationers;
+  think [setq(0,[get(#7/player-dbrefs)])];
+  @dolist %q0={@switch 
+               [hasflag(##,VACATION)]
+               [hastag(##,dead)]
+               [hastag(##,retired)]
+               [hastag(##,npc)]
+               [hastag(##,temp)]
+               [hastag(##,inchargen)]
+               [hastag(##,offgrid)]
+               [hastag(##,avatar)]=
+               10000000,{think [setq(1,[default(##/VACATION-DAYS,15)])];
+                        @switch [gte(%q1,15)]=1,{
+                        [set(me,vacationers:[setunion([v(vacationers)],##)])]
+                        [set(##,VACATION-DAYS:[add(%q1,1)])]},
+                        {[set(##,VACATION-DAYS:[add(%q1,1)])]}}};
+                         @wait 0=@wait 0=@wait 0={
+                         think setq(2,iter(get(#10/vacationers),name(##)));
+                         @bb/post Characters/Vacationers=The following 
+                         players may have been on vacation for 15 days or 
+                         more.  You can check their VACATION-REASON 
+                         attribute to find out why they are gone and their 
+                         VACATION-RETURN-DATE attribute for their expected 
+                         return date.
+                         %r%r[columns(%q2,div(79,4))];}
+-
+ 
+#================================================================#
+#                  COMMAND: @ROSTER/Stats <PLAYER>               #
+#                                                                #
+# This command enables players to see the stats of the character #
+# they're considering choosing.                                  #
+#================================================================#
+
+&cmd-roster-stats #10=$@roster/stats *:
+  think setq(0, ulocal(ul-epsearch,first(%0)));
+  think setq(7, %#);
+  think setq(9, [isdbref(%q0)]
+                [and(hastag(%q0,roster),not(u(u-guest-hidden,%q0)))]);
+
+  @select %q9=
+    0?, {@pemit %#=I don't know of any player named %0.},
+    ?0, {@pemit %#=[name(%q0)] is not on the roster.},
+    11, {
+
+           @pemit %#=%xh%xg@ROSTER/STATS on [name(%q0)];
+           @pemit %#=%xh%xb[repeat(-,75)];
+           @pemit %#=[u(#7/u-sheet-stats,%q0)];
+           @pemit %#=%xh%xb[repeat(-, 75)]}
+
+-
+&filter-out-zeroes #10=
+  [gt(skill(%q0, %0), 0)]
+-
+
+
+
+##################################################################
+##	         COMMAND: @ROSTER/ADD <PLAYER NAME>              #
+##                                                               #
+## This is the command that adds a player to the roster, sets    #
+## the player 'npc', notifies the @bb, and allows the wiz to set #
+## a priority on the character being filled.                     #
+##                                                               #
+##################################################################
+## 
+        ## Checks: 
+## 1) Make sure that %# is a wizard or staff member
+## 2) Make sure that <player> is a valid player
+
+&cmd-roster-add #10=$@roster/add *:
+ think setq(0, [num(*%0)]);
+ think setq(9, [or(hasflag(%#, wizard), hasflag(%#, staff))]
+               [t(hastype(*%0, player))]);
+ @switch/first %q9=
+   0?, {@pemit %#=Only Admin may use @roster/add.},
+   ?0, {@pemit %#=%0 isn't a player.  Characters must be 
+                  created before you can add them to 
+                  the roster.   },
+   11, {@program %#=me/prog-roster1:%xm%xh
+                 Adding a character to the roster means that 
+                 you are offering this character up for the 
+                 public and/or terminating the current player's 
+                 right to this character.  If the [name(*%0)]'s 
+                 current player wants the character back he or 
+                 she will have to re-apply for it.  Do you still 
+                 want to add [name(*%0)] to the roster?%xn}, 
+   {@pemit %#=%xmError: Admin have been alerted.%xn;
+    @qmail Waylon/Bug Report @roster=Unexpected Condition in 
+           &cmd-roster-add: %q9}
+-
+# triggered by cmd-roster-add where, 
+# %0 should be a yes or a no 
+# %# is original enactor
+# %q0 is the number of the player to be added to the roster
+# %q1 is the number of the player XP is being transferred to
+# %q2 is the number of XP poitns to transfer
+
+&prog-roster1 #10=
+  @switch %0=
+	y*, {@tag %q0=roster npc;
+             @pemit %#=%xm%xhTagging [name(%q0)] 'roster' & 'npc'.%xn;
+             @cleartag %q0=policy;
+             @cleartag %q0=apathy;
+             @set %q0=!head;
+             @cleartag %q0=inchargen;
+             @cleartag %q0=offgrid;
+#Gives the character a 1000 ERP, if it does not already have more than 1000
+             switch(gt(get(%q0/AC-ENERGY_RESERVES),2000)
+             ,1, pemit(%#, ERP Level Okay!), 
+            set(%q0,AC-ENERGY_RESERVES:2000)); 
+#Remove any possible pagelocks
+             @unlock/page %q0;
+             &ignored-page %q0=;
+#Removes the HEAD flag if the char is a faction head
+
+             @switch [hasflag(%q0, head)] = 
+                1, {@set %q0=!head; @bb/post staff/Faction Head Rostered=
+                    [name(%q0)] has be rostered and was a faction head 
+                    for the [get(%q0/clan)] clan.} ,
+                0, {@@DO NOTHING@@};
+#Notifies Beth and Angela if the char is a player helper
+             @switch [hasflag(%q0, staff)] =
+                1, {@request/add %#/Request/Player Helper [name(%q0)] Rostered!/9=
+                    [name(%q0)] has been rostered and was a player helper. Please make sure the staff flag is removed, and 
+		  their title changed, and that they no longer are noted in news files as a Player Helper.;
+                    @bb/post;
+                    @mail/quick beth amber andie/Player Helper 
+                    Rostered =
+                    [name(%q0)] was a PHer and has rostered.  
+                       Please reset their title if the PHer wizards have not already done so.},
+                0, {@@DO NOTHING@@};
+
+             @pemit %#=Clearing the policy tag from [name(%q0)].;
+             @parent parent(%q0)=[registry(npc)];
+             @pemit %#=%xm%xhParenting [name(%q0)]'s soul to the NPC 
+                       Parent.%xn;
+             @power %q0=builder;
+             &event-wall-disable %q0=;
+             @set %q0=!staff;
+             @set %q0=!restricted;
+             @set %q0=monitor;
+	     @set %q0=!suspect;
+             @set %q0=!trace;
+             @set %q0=ansi;
+             @pemit %#=Setting [name(%q0)] builder and monitor;
+	     @force %q0={clearcom;addcom pub=Public;addcom h=Help};
+	     @dolist Public Help=@cemit ##=([name(%q0)] was just 
+		      added to the roster.);
+	     @pemit %#=Clearing previous channel settings.;
+	     @force %q0=uncamp;
+             @wait 3={@tel %q0=[get(%q0/ic-home)]};
+             think setq(9, scramble(secs()));
+             @newpassword %q0=%q9;
+             @roster/vote none;
+             &type %q0; 
+             @idle %q0;
+             @away %q0;
+             @force %q0={@toggle ansi off;@toggle apathy off;@toggle autowork off;@toggle 
+                         bigmap off;@toggle combatstats off;@toggle combatstatus off;@toggle 
+                         coordinates off;@toggle echo off;@toggle newbie-message off;@toggle 
+                         nobleed off;@toggle quietlogin off;@toggle socialspam off; 
+                         @toggle stats off;@toggle status off;@toggle terse off;@toggle 
+                         wintelnet off};
+             @shortcuts/clear %q0; 
+             @cleartags %q0=!twink; 
+             &roster-voted-date %q0; 
+             @pemit %#=@newpassword'ing [name(%q0)] = %q9;
+             think setq(1, first(shuffle(remove(search(eplayer=
+                 strmatch(get(##/email),get(%q0/email))),%q0))))];
+             @account/transfer [setr(2,getaccount(%q0, unused xp))] 
+                               unused xp from %q0 to %q1;
+             @pemit %#=Transferring %q2 Experience points to [name(%q1)].;
+             &lastemail %q0=[get(%q0/email)];
+             @account/adjust %q0/used xp=[mul(-1,getaccount(%q0,used xp))];
+
+# Check to see if %q1 has a dbref in it, if so, then @account/transfer
+#   took care of XP.
+
+             @account/adjust [ifelse(isdbref(%q1), , %q0)]/unused xp=
+                -[getaccount(%q0,unused xp)];
+             @dolist totalconnects totaltime [lattr(%q0/stats-*)]=@wipe %q0/##; 
+	     @wipe %q0/type;
+             @program %#=me/prog-roster2:%xm%xh
+                      On a Scale of 1-4, where 1 is ESSENTIAL how high a 
+                      priority is it that this character be filled?%r
+                      \(Former priority: [default(%q0/roster-priority,none)]\)},
+        n*, {@pemit %#=%xm@roster/add [name(%q0)] Abandoned.%xn},
+        {@program %#=me/prog-roster1:%xm%xhAdd [name(%q0)] to the 
+                  roster? (You must answer 'yes' or 'no')%xn}
+   
+-
+# triggered by &prog-roster1, where
+# %q0 = name of the player being added to the roster
+# %0 should be a number from 1 to 4
+
+&prog-roster2 #10=
+  @switch [and(isnum(round(%0,0)), gt(%0, 0), lt(%0, 5))]=
+	1, {&roster-priority %q0=[round(%0, 0)];
+            @program %#=me/prog-roster3:%xm%xhIs this the kind of 
+                     character that may only be given to players 
+                     who have admin approval? ('Yes' or 'No') \(Formerly, 
+                     [ifelse(hastag(%q0,approve),Required, Not Required)]\)},
+        {@program %#=me/prog-roster2:
+                  %xm%xhYou must specify a whole number between 1 
+                  and 4.%xn}
+-
+# triggered by &prog-roster2, where
+# %q0 = name of the player being added to the roster
+# %0 should be yes or no
+
+&prog-roster3 #10=
+  @switch %0=
+        y*, {@tag %q0=approve;
+            @pemit %#=%xm%xh*** [name(%q0)] Added to the Roster.%xn;
+            @helpreq/add %q0/request/[name(%q0)] Added to Roster/9=
+                     [name(%q0)] has been added to the roster of players available 
+                     to the public. Please look over this character and @request any 
+                     needed updates.;
+#           +email [get(%q0/email)]=This is to inform you that your character, 
+#                  [name(%q0)] has been newpassworded and re-added to the 
+#                  roster. 
+#                  If you are interested in reapplying for this character
+#                  , please 
+#                  log in to JadeMush and speak to an admin. The address 
+#                  of JadeMush 
+#                  is firan.legendary.org 5000.;
+             @tr #10/cron_job_roster;@wipe %q0/email},
+        n*, {@pemit %#=%xm%xh*** [name(%q0)] Added to the Roster.%xn;
+             @helpreq/add %#/request/[name(%q0)] Added to Roster/9=
+                     [name(%q0)] has been 
+                     added to the roster of players available to
+                     the public. Please look over this character and @request any needed updates.;
+#             +email [get(%q0/email)]=This is to inform you that your 
+#                   character, [name(%q0)] has been newpassworded and 
+#                   re-added to the roster.  If you are interested in 
+#                   reapplying  for this character, please log in to 
+#                   JadeMush and speak to an admin.  The address of 
+#                   JadeMush is firan.legendary.org 5000.;
+              @tr #10/cron_job_roster;@wipe %q0/email},
+        {@program %#=me/prog-roster3:
+                  %xm%xhIs [name(%q0)] an 'approval' only character?
+                  (Yes or No)?%xn}
+-
+
+
+####################################################################
+##		COMMAND: @ROSTER/REMOVE <CHARACTER>                #
+##                                                                 #
+####################################################################
+## 
+## Checks: 
+## 1) Make sure that %# is a wizard or staff member
+## 2) Make sure that <player> is a valid player
+
+&cmd-roster-remove #10=$@roster/remove *:
+ think setq(0, [num(*%0)]);
+ think setq(9, [or(hasflag(%#, wizard), hasflag(%#, staff))]
+               [hastype(*%0, player)]);
+ @switch/first %q9=
+   0?, {@pemit %#=Only Admin may use @roster/remove.},
+   ?0, {@pemit %#=%0 isn't a player.},
+   11, {@cleartags %q0=roster npc;
+        @pemit %#=Removing the 'roster' and 'npc' tags from [name(%q0)];
+        @tr #10/cron_job_roster;
+        @pemit %#=Updating the Roster List.;
+        @parent parent(%q0)=[registry(generic soul)];
+        @pemit %#=Parenting [name(%q0)]'s soul back to the Generic 
+                  Soul.;
+        &roster-priority %q0;
+        @pemit %#=Removing the &roster-priority attribute from [name(%q0)].},
+   {@pemit %#=%xmError: Admin have been alerted.%xn;
+    @qmail waylon/Bug Report @roster=Unexpected Condition in 
+           &cmd-roster-remove: %q9}
+-
+
+#####################################################################
+##		COMMAND: @ROSTER/ALL                                #
+##                                                                  #
+## Shows all the characters on the roster.                          #
+#####################################################################
+
+&cmd-roster-all #10 = $@roster/all: 
+  @pemit %# = u(u-roster-header); 
+  @dolist [setq(7, %#)][filter(filter-noguest, v(roster-list))] = {@pemit %# = u(u-roster-body, ##, %#)}; 
+  @wait 0 = @pemit %# = u(u-roster-footer)
+-
+
+####################################################################
+##              COMMAND: @ROSTER/REFRESH                           #
+##                                                                 #
+## This command rebuilds the @roster after rerostering             #
+####################################################################
+
+&cmd-roster-refresh #10 = $@roster/refresh:
+     think setq(9, [or(hasflag(%#, wizard), hasflag(%#, staff))]);
+     @switch/first %q9 = 
+        0, {@pemit %# = Only Admin may refresh the roster.}, 
+        1, {@tr #10/cron_job_roster;
+            @pemit %#=%xh%xmRoster Refreshed.%xn}
+
+-
+
+
+#####################################################################
+##		COMMAND: @ROSTER                                    #
+##                                                                  #
+## This is a display command.                                       #
+#####################################################################
+
+&cmd-roster #10 = $@roster:
+  &roster-page %# = 1; 
+  @trigger me/tr-roster = %#, 1
+-
+
+&cmd-roster-next #10 = $@roster/next: 
+
+# increment the user's page number
+  &roster-page %# = setr(0, inc(default(%#/roster-page, 0))); 
+
+# but if there's nothing on that page (end of the data), return them to
+# page 1.
+  &roster-page %# = setr(0, switch(words(u(u-roster-page, %q0)), 0, 1, %q0)); 
+
+  @pemit %# = Flipping to page %q0.; 
+  @trigger me/tr-roster = %#, %q0
+-
+
+# a clone of '@roster/previous'
+&cmd-roster-previous #10 = $@roster/prev: 
+
+# decrement the user's page number
+  &roster-page %# = setr(0, dec(default(%#/roster-page, 0))); 
+
+# if they've reached page "0" then tell them they're at the beginning
+  @switch %q0 = <1, {
+    @pemit %# = You're at the beginning of the roster.; 
+    &roster-page %# = 1
+  }, {
+    @trigger me/tr-roster = %#, %q0
+  }
+-
+
+# a clone of '@roster/prev'
+&cmd-roster-previous #10 = $@roster/previous: 
+
+# decrement the user's page number
+  &roster-page %# = setr(0, dec(default(%#/roster-page, 0))); 
+
+# if they've reached page "0" then tell them they're at the beginning
+  @switch %q0 = <1, {
+    @pemit %# = You're at the beginning of the roster.; 
+    &roster-page %# = 1
+  }, {
+    @trigger me/tr-roster = %#, %q0
+  }
+-
+
+# %0 = %#
+# %1 = roster page number
+#
+&tr-roster #10 = 
+  @pemit %0 = u(u-roster-header, %1); 
+  think [setq(7,%0)];
+  @dolist u(u-roster-page, %1) = {
+    @pemit %0 = u(u-roster-body, ##, %0)
+  }; 
+  @wait 0 = @pemit %0 = u(u-roster-footer)
+-
+
+
+
+&roster-page-size #10 = 10
+-
+
+
+# %0 = page number
+# 
+&u-roster-page #10 = 
+  extract(filter(filter-noguest,v(roster-list)), 
+    inc(mul(dec(%0), v(roster-page-size))), 
+    v(roster-page-size)
+  )
+-
+
+# %0 = character to check
+#
+&filter-noguest #10 =
+  not(and(match(get(%0/tags),noguest),
+    strmatch(parent(%q7),#3843)))
+-
+
+# %0 = character to check
+#
+&u-guest-hidden #10 =
+  and(hastag(%0,noguest),
+    strmatch(parent(%q7),#3843))
+-
+
+
+# %0 = character name
+# %1 = sex
+# %2 = age
+# %3 = level (I, II, III)/social class
+# %4 = clan
+# %5 = vocation
+# %6 = approval required or not (yes, no)
+# %7 = character priority (1-5)
+# %8 = lastname
+
+&u-roster-line #10 = 
+  [u(u-lfield, %0, 10)] %b
+  [u(u-lfield, %8, 10)] %b
+  [u(u-cfield, %1, 3)] %b
+  [u(u-cfield, %2, 3)] %b
+  [u(u-lfield, %3, 11)] %b
+  [u(u-lfield, %4, 9)] %b
+  [u(u-lfield, %5, 11)] %b
+  [u(u-cfield, %6, 5)]
+-
+
+
+&u-roster-header #10 = 
+  %xh%xgJadeMush Roster of Available Pre-Generated Characters%xn%r
+  [ifelse(%0, center(%xh%xyPage %0 of 
+                     [inc(div(dec(words(filter(filter-noguest,v(roster-list)))), 
+                              v(roster-page-size)))], 78)%xn,)]%r
+  %xh
+  [u(u-roster-line, 
+    Name, 
+    Sex, 
+    Age,
+    Level/Class,
+    Clan,
+    Vocation, 
+    App?, , Family Name)]
+  %xn
+-
+
+&u-roster-footer #10 = 
+  [repeat(-, 78)]%r
+  Use %xh%xm@roster <character name>%xn to get more information on that 
+  character.%r
+  Use %xh%xm@roster/next%xn to see more available characters.%r
+  Use %xh%xm@roster/all%xn to see all the characters (spammy!).%r
+  Use %xh%xm@roster/help%xn for information on other @roster commands.
+-
+
+# %0 = dbref of character
+# %1 = %#
+# 
+&u-roster-body #10 = 
+  u(u-roster-line, 
+    name(%0), 
+    center(u(u-sex, %0), 3), 
+    default(%0/age, ?), 
+    [default(%0/level, ?)]/[u(u-class, default(%0/social-status, 2))], 
+    default(%0/clan, center(?, 10)), 
+    default(%0/vocation, center(?, 14)),
+    switch(hastag(%0, approve), 1, Yes, No ), 
+    default(%0/roster-priority, 5),
+    default(%0/lastname, none))
+-
+
+&u-class #10=
+ [switch(%0, 1, Eta, 2, commoner, 3, Lower Noble, 4, High Noble, 5, Royal)]
+-
+
+
+# %0 = text
+# %1 = field width
+#
+&u-lfield #10 = 
+  ljust(left(%0, %1), %1)
+-
+&u-rfield #10 = 
+  rjust(left(%0, %1), %1)
+-
+&u-cfield #10 = 
+  center(left(%0, %1), %1)
+-
+
+
+# %0 = character dbref
+# 
+&u-sex #10 = 
+  switch(get(%0/sex), 
+    f*, F,
+    m*, M, 
+    w*, F, 
+    p*, P, 
+    n*, N, 
+        ?
+  )
+-
+
+# no longer used
+@@ &ul-roster-list #10 = 
+  [setq(0, sortby(me/sortby-name, v(roster-list)))]
+  [sortby(me/sortby-roster-priority, %q0)]
+-
+
+&sortby-roster-priority #10 = 
+  sign(sub(default(%0/roster-priority, 5), 
+           default(%1/roster-priority, 5)
+  ))
+-
+&sortby-name #10 = 
+  comp(name(%0), name(%1))
+-
+
+
+###################################################################
+##              COMMAND: @ROSTER/NOTES <CHARACTER NAME>           #
+##              COMMAND: @ROSTER/NOTES <CHARACTER NAME>=          #
+##                          <NOTES YOU WANT TO ADD>               #
+##                                                                #
+###################################################################
+
+
+&cmd-roster-notes-display #7=$@roster/notes *: 
+
+# For use to see if it's a valid player or not
+  think setq(0, ulocal(ul-epsearch,%0));
+  think setq(7, %#);
+  think setq(9, [strmatch(%0,*=*)]
+                [and(isdbref(%q0),not(u(#10/u-guest-hidden,%q0)))][or([hastag(
+                %q0,roster)],[hasflag(%#,wizard)])]); 
+
+  @select %q9 = 
+  1??, {
+    @@ do nothing and let '@roster/notes *=*' handle it @@
+  }, 
+  0?0, {@pemit %#=Sorry, [name(%q0)] is not on the roster.},
+  01?,
+   {
+    @pemit %# = [ansi(hc, Notes for [name(%q0)]:)]%r
+                [default(%q0/notes, There are no notes.)]%r
+  },{
+    @pemit %# = I can't find player '%0.'
+#    @error %# = pmatch %q0
+  }
+-
+
+&cmd-roster-notes #7=$@roster/notes *=*:
+
+# For use to see if it's a valid player or not
+  think setq(0, pmatch(%0)); 
+
+# Get what the notes are supposed to be.
+  think setq(1, %1); 
+
+# Checks to see if this is going to be a add/change/delete
+  think setq(3, switch(t(%q1)[hasattr(%q0, notes)], 
+                11, change, 10, add, 01, delete, 00, 0))};
+
+# For error checking.
+# Is it a wiz or pher?
+# Is it a view or change?
+# Are you trying to delete a note that isn't there? 
+
+  think setq(9, [or(hasflag(%#,
+staff),match(get(%#/rank),helper))][isdbref(%q0)][t(%q3)]);
+  @select %q9=
+    0??, {@pemit %#=@roster/notes is a staff-only command. Sorry.}, 
+    10?, {@pemit %#=I can't find player '%0'.}, 
+                            name(%q0)'s notes: [get(%q0/notes)], 
+                            name(%q0) has no notes stored.)}, 
+    110, {@pemit %#=name(%q0) has no notes to delete.}, 
+    111, {@program %#=me/prog-add-notes:Do you want to %q3 
+             [ifelse(match(%q3, add), '%q1' to%b,)][name(%q0)]'s 
+             notes[ifelse(match(%q3, change),%bto '%q1',)]?}, 
+
+  {@pemit %#=Error in @roster/notes. Conditions: %q9. Please notify a wizard.}
+
+-
+# Check if you really want to add/change/delete the note.
+
+&prog-add-notes #7=@switch %0=
+  y*, {&notes %q0=%q1; 
+       @pemit %#=Note %q3[ifelse(match(%q3, add), ed, d)];
+       @bb/post helpers/Roster Notes %q3=[name(%#)] %q3 
+        new notes to [name(%q0)]'s sheet that reads as follows:%R%R %q1.}, 
+  n*, {@pemit %#=Note %q3 aborted.}, 
+  {@program %#=me/prog-add-notes:Do you want to %q3 
+      [ifelse(match(%q3, add), '%q1' to%b,)][name(%q0)]'s 
+      notes[ifelse(match(%q3, change),%bto '%q1',)] (yes/no)?}
+
+-
+
+###################################################################
+##		COMMAND: @ROSTER/CHOOSE <CHARACTER NAME>          #
+##                                                                #
+###################################################################
+# Make sure that %0 is a player
+# Make sure that %0 is listed on the roster
+
+
+&cmd-roster-choose #10=$@roster/choose *:
+  think setq(0, ulocal(ul-epsearch,first(%0)));
+  think setq(7, %#);
+  think setq(9, [t(hastype(*[first(%0)], player))]
+                [and(hastag(*[first(%0)], roster),
+not(u(u-guest-hidden,%q0)))]);
+  @switch/first %q9=
+	0?, {@pemit %#=%xg%0 does not appear to be a valid player. 
+                    Try typing the whole name again. },
+        ?0, {@pemit %#=%xg[name(%q0)] does not appear to be an 
+                    available character.  See @roster for a list 
+                    of characters that are open. },
+        11, {@program %#=me/prog-roster-email:%xg
+                      Please supply your email address so that 
+                      the password of your character can be 
+                      emailed to you.%r%xhIMPORTANT: All of your 
+                      current and past alts must be registered under the
+                      same email address! If you are a returning 
+                      player who now has a different e-mail, you have to 
+                      include this in your application or inform a 
+                      staffer up-front. Not doing this is considered 
+                      cheating, and can result in the character being taken away!%xn },
+        {@pemit %#=%xm%xhError: Admin have been notified.%xn;
+         @qmail steph/Bug Report -- @roster=Unexpected Condition 
+                produced by cmd-roster-choose: %q9. }
+                
+-
+# triggered by cmd-roster-choose where, 
+# %# = %#
+# %q0 = dbref of character
+# %0 = an email address
+
+&prog-roster-email #10=
+  think setq(1, %0);
+  @program %#=me/prog-email-confirm:%xg
+          Please re-enter your email address:%xn
+
+-
+# triggered by cmd-roster-email, where
+# %# = %#
+# %q0 = dbref of character
+# %q1 = email address
+# %0 = yes or no
+# 
+# Set the registers:
+# %q2 = dbrefs with a matching email
+# %q3 = password of the character
+# %q4 = %# (to be sent to the next programs and triggers)
+#
+#&prog-email-confirm #10=
+#  think setq(2, search(eplayer=strmatch(%q0, get(##/email))));
+#  think setq(3, scramble(secs()));
+#  think setq(4, %#);
+#  @switch %0=
+#	y*, {@switch/first [t(member(v(banned), %q1, |))]
+#                          [t(member(v(restricted), %q1, |))]
+#                          [words(%q2)]
+#                          [hastag(%q0, approve)] =
+
+# Player is from a banned email address
+               
+#              1???, {@pemit %#=Sorry, but your email address has been 
+#                            banned from our mux.  Unauthorized access 
+#                            to a computer is a crime in Maryland 
+#                            carrying a prison term.  Our admin have 
+#                            been alerted.;
+#                     @bb/post oversight/Twink Alert!=
+#                       Someone tried to choose [name(%q0)] giving 
+#                       the banned email address of: %q1.  [time()]},
+
+# Player is restricted from taking alts
+
+#              ?1??, {@pemit %#=Sorry, but your email address has been 
+#                            restricted from the @roster.  This means 
+#                            that until you've proven you have enough 
+#                            online time for an alternate character, 
+#                            you will not be able to take an alt. 
+#                            Please contact a wizard for instructions.},
+
+# A totally new player with a character that doesn't require approval
+ 
+#	       0000, {@tr me/trig-character-choose=%q0, %q1, %q2, %q3, %q4},
+
+# A totally new player with a character that requires approval
+
+#              0001, {@program %#=me/prog-chargen-apply1:%xg
+#                              [name(%q0)] is a character that  
+#                              requires admin approval.  Would you 
+#                              like to apply for this character or 
+#                              would you like to choose a new one? 
+#                              (Type either: 'apply' or 'quit')},
+
+# A player that's already got a character that doesn't require approval
+#	       0010, { @switch/first
+# If the email address matches less than three characters of different
+# levels
+#                      [lt(words(%q2), 3)] 
+#                      [switch(strmatch(iter(%q2, 
+#                               strmatch(get(##/level),get(%q0/level))),*0*), 
+#                             1, 1, 0)]=
+#		      1?, {@pemit %#=%xm%xhYou already have three 
+#                                  characters.  If you would like 
+#	                               to give one up, contact an admin.%xn},
+#                      ?1, {@pemit %#=%xm%xhYou may not have two 
+#                                  characters of the same level. 
+#                                  [name(%q0)] is a Level [get(%q0/level)] 
+#                                  and one of your other characters is 
+#                                  also a Level [get(%q0/level)].%xn},
+#                      {@tr me/trig-character-choose=%q0, %q1, %q2,
+#                                                    %q3, %q4 }},
+
+# player already has a character and wants one that requires approval
+
+#		011, {@switch/first 
+#                           [lt(words(%q2), 3)] 
+#                           [switch(strmatch(iter(%q2, 
+#                               strmatch(get(##/level),get(%q0/level))),*0*), 
+#                             1, 1, 0)]=
+#		      1?, {@pemit %#=%xm%xhYou already have three 
+#                                  characters.  If you would like 
+#                                  to give one up, contact an admin.%xn},
+#                      ?1, {@pemit %#=%xm%xhYou may not have two 
+#                                  characters of the same level. 
+#                                  [name(%q0)] is a Level [get(%q0/level)] 
+#                                  and one of your other characters is  
+#                                  also a Level [get(%q0/level)].%xn},
+#                      {@program %#=me/prog-chargen-apply1:%xg
+#                              [name(%q0)] is a character that 
+#                              requires admin approval.  Would you 
+#                              like to apply for this character or 
+#                              would you like to choose a new one? 
+#                              (Type either: 'apply' or 'quit')}},
+#	    {@pemit %#=%xmError: Admin have been alerted.%xn;
+#             @qmail steph/Bug Report in @roster Choose=Unexpected 
+#                    Condition produced by &prog-email-confirm on 
+#                    #10}},
+               
+#        n*, {@pemit %#=%xgCancelling @roster/choose because 
+#                       of incorrect email address. },
+#        {@prog %#=me/prog-email-confirm:%xgYou must answer 'yes' or 
+#                  'no'.  Is this your email address: %q0 }
+
+
+#-
+# %0 is the levels the player has already
+# %1 Level that the player is going for
+
+&Ul-LEVEL-OK #10=
+# %q0 Level of progression
+# %q1 Which levels don't have.
+# %q2 What levels have, removing dups.
+# %q3 Which level has a dup (if any)
+
+[setq(0, III II I)]
+[setq(1, setdiff(%q0, %0))]
+[setq(2, setunion(%0, %0))]
+[setq(3, edit(iter(%q0, 
+              ifelse(gt(words(graball(%0, ##)), 1), ##, )), 
+         %b, ))]
+
+# Changes %q1 here to remove any levels traded 'down' for.
+[setq(1, ifelse(%q3, 
+                setdiff(%q1, last(setinter(%q1, 
+                                     extract(%q0, match(%q0, %q3), 3)))), 
+                %q1))]
+
+# This first part checks to make sure you don't get 
+# three of one level
+[and(lt(words(graball(%0, %1)), 2), 
+
+# This part checks to see if you're 'swapping down'.
+       lte(match(%q0, %1), 
+           match(%q0, first(%q1))))]
+-
+
+# triggered by cmd-roster-email, where
+# %# = %#
+# %q0 = dbref of character
+# %q1 = email address
+# %0 = email address (2nd entry - for confirmation)
+
+&prog-email-confirm #10=
+
+#--------------------------------------------------------------- 
+# Set the registers:
+# %q2 = dbrefs with a matching email
+# %q3 = password of the character
+# %q4 = %# (to be sent to the next programs and triggers)
+# %q8 = email of character doing the applying (or 'guest' if a guest: i.e. no email)
+#----------------------------------------------------------------
+
+  think setq(2, search(eplayer=strmatch(%q1, get(##/email))));
+  think setq(3, scramble(secs()));
+  think setq(4, %#);
+  think setq(8, [ifelse(hasattr(%#,email),get(%#/email),guest)]);
+
+  @select match(%0,%q1)=0,{
+      @program %#=me/prog-roster-email:
+         %xrYour email addresses did not match each other. Please re-enter 
+            your email address to try again.%xn},
+     1,{
+
+
+
+#----------------------------------------------------------------
+# Error Check:
+# Has this email address been banned?
+# Has this email been restricted?
+# Does this email address already have three characters linked to it?
+# Does this email address already have a character of the same level?
+# Are there enough characters for the player to take an alt?
+# Does this character require approval?
+#------------------------------------------------------------------
+
+   think setq(9, [not(t(member(v(banned), %q1, |)))]
+                 [not(and(t(%q2),t(member(v(restricted), %q1, |))))]
+                 [or(not(gte(words(%q2), 3)), hasflag(%#, wizard))]
+                 [or(ulocal(ul-level-OK, iter(%q2, get(##/level)), get(%q0/level)), 
+                     hasflag(%#, wizard))]
+                 [or(
+			ulocal(ul-can-have-alt, %q1, %q2,get(%q0,level)), 
+#			hastag(%q0, approve),
+			hasflag(%#,wizard))]
+                 [u(u-enough-alts)]
+                 [not(hastag(%q0, approve))]);
+
+   @select %q9=
+
+    0??????, {@pemit %#=Sorry, but you have been banned from JadeMush. 
+                     Unauthorized access to a computer is a crime in 
+                     Maryland.  Our admin have been alerted.;
+             @bb/post oversight/Twink Alert!=
+                     Someone tried to choose [name(%q0)] from the 
+                     roster with the banned email address of: %q1.
+                     [time()]},
+    ?0?????, {@pemit %#=Sorry, but you've been restricted from taking 
+                     alternate characters.  Please contact an admin 
+                     if you believe there's been a mistake or if you 
+                     would like instructions on how to regain the 
+                     ability to take characters from the @roster.},
+
+    ??0????, {@pemit %#=I'm sorry, but you already have at least three 
+                 alts on JadeMush.  You can't have any more.},
+
+    ???0???, {@pemit %#=Sorry, but you can't have an alt of that level. 
+                 Please see 'help policy alts' for more information.},
+
+    ????0??, {@pemit %#=Sorry, but you haven't earned enough experience 
+                 points on JadeMush yet to be awarded an alt yet.  
+                 The current requirements are that you have earned 
+                 [v(min-first-alt)] xp for your first alt and 
+                 [v(min-second-alt)] xp for your second alt.}, 
+
+    ?????0?, {@pemit %#=Sorry, but there are less than
+                 [v(min-roster-chars)] 
+                 on the roster at the moment and we are in a roster 
+                 freeze, so you are not allowed to take an alt. Please 
+                 try back when there are more characters available.
+                 You can also read 'help @roster freeze' for information 
+                 on why you cannot take an alt right now. },
+
+    ??????0, {@program %#=me/prog-chargen-apply1:%xg
+                             [name(%q0)] is a character that  
+                             requires admin approval.  
+                             [ifelse(hasattr(%q0, notes), Reasons 
+                             entered for the requirement of an app 
+                             is/are: [get(%q0/notes)]%b%b,)]
+                             Would you 
+                             like to apply for this character or 
+                             would you like to choose a new one? 
+                             (Type either: 'apply' or 'quit')},
+
+    1111111, {@pemit ifelse(hasattr(%q0, notes), %#,)=
+                 Important information about the character you should know: 
+                 [get(%q0/notes)]; 
+              @tr me/trig-character-choose=%q0, %q1, %q2, %q3, %q4, %q8}},
+   {@pemit %#=ERROR: Please notify admin}
+               
+-
+# %0 = email address of the applicant
+# %1 = dbrefs of all their alts
+# %2 = level of the new character
+#
+# ulocal(ul-can-have-alt, <email address>, <list of dbrefs>)
+
+&ul-can-have-alt #10=
+
+#------------------------------------------------------------
+# %q0 = number of alts the player has
+# %q1 = total number of xp earned by the player
+# %q2 = number of players on the roster
+
+#------------------------------------------------------------
+
+  [setq(0, words(%1))]
+  [setq(1, iter(%1, add(getaccount(##, used xp), getaccount(##, unused xp))))]
+  [setq(1, fold(fold-add-nums, %q1))]
+
+#------------------------------------------------------------
+# If the player has no alts, let them have one
+# If the player has one alt, only let them have one if they have enough
+# If the player has two alts, only let them have one if they have enough
+#-------------------------------------------------------------
+
+  [switch(%q0[strmatch(%2,I)], 
+               00, 1,
+               10, [gte(%q1, v(min-first-alt))],
+               11, [gte(%q1, v(min-feature-alt))],
+               2?, [gte(%q1, v(min-second-alt))],
+               0)]
+-
+&u-enough-alts #10=
+# If we are frozen, do our roster check.
+# We do allow an exemption if the roster is above 140 but the
+# 'frozen' tag has not yet gone away.
+
+  [ifelse(hastag(#10,frozen),
+       or( 
+        gte(words(v(roster-list)), v(min-roster-chars)),
+        eq(words(%q2),0)),
+       1)]
+-
+&min-first-alt #10=15
+-
+&min-feature-alt #10=25
+-
+&min-second-alt #10=75
+-
+&min-roster-chars #10=140
+-
+&freeze-roster-chars #10=130
+-
+&fold-add-nums #10=add(%0, %1)
+-
+# Triggered by prog-email-confirm where,
+# 
+# %0 = dbref of character
+# %1 = email address entered
+# %2 = dbrefs with a matching email
+# %3 = password of the character
+# %4 = %# 
+# %5 = email of character (or 'guest' if no email exists)
+
+&trig-character-choose #10=
+
+# Check to see if the email entered is the same as that on the character
+# AND the character has an email attribute (not a guest)
+  @switch [and(not(match(%5,%1)),not(match(%5,guest)))] =
+# Player entered a different email than the one set on them
+     1,{@request/add %4/request/Possible alt policy violation!/1=
+          [name(%0)] was claimed off of the roster by [name(%4)] at [time()]. 
+          The email address entered was %1, but the email address set on [name(%4)] 
+          is %5.  %rPlease check into this to see if [name(%4)]/[name(%0)] is 
+          attempting to avoid our policy of having all alts registered under 
+          the same email address.;
+	@fo me=@cemit Wizards=%xh%xmPossible Alt Violation by [name(%4)], 
+               check @requests!%xn};
+
+  @newpassword %0=%3;
+  @fo me= +email %1=[text(text/welcome.txt, welcome)];
+  @pemit %4=%xgSending email to your email address. . .;
+  @fo me={+email %1=*** JadeMush CHARACTER INFORMATION %r%r
+                     Character Name: [name(%0)]%r
+                     Password: %3%r%r
+                           You can and should change your password 
+                           when you log in by using: 
+                           @password <old password>=<newpassword>%r 
+                           Be certain the check your @sheet/secrets 
+                           and @sheet/notes when you first log in.};
+  @power %0=!builder;
+  &event-wall-disable %0=[ifelse(match(iter(%2, 
+                                       get(##/event-wall-disable)), 
+                                 1), 
+                          1, )]; 
+  &taken-from-roster %0=[time()]; 
+  @switch [not(words(%2))]=1,{@tags %0=newbie},{@cleartags %0=newbie};
+  @set %0=restricted;
+  @set %0=!terse;
+  @set %0=!puppet;
+  @set %0=!monitor;
+  @tel %0=#3664;
+  @cleartags %0=roster npc;
+  @tag %0=welcome; 
+  @bb/post character/[name(%0)] Taken=[name(%0)] has been claimed off 
+           the roster by %1;
+  &email %0=%1;
+  @rparent [parent(%0)]=generic soul;
+  @qmail %0/Getting Started on JadeMush=
+    [text(text/news.txt, getting started on JadeMush)];
+  @tr me/cron_job_roster
+
+-
+# triggered by &prog-email-confirm, where
+# %q0 = dbref of character
+# %q1 = email address
+# %q2 = dbrefs with a matching email
+# %q3 = password of the character
+# %q4 = %# 
+# %0 = 'apply' or 'quit'
+
+&prog-chargen-apply1 #10=
+  @switch %0=
+	quit, {@pemit %#=%xgCancelling your choice of [name(%q0)].%xn },
+        apply, {@program %#=me/prog-chargen-apply2:%xg
+                         Please explain the reasons you would like to 
+                         play [name(%q0)].  Include information about 
+                         your time zone, possible plots you'd like to  
+                         pursue, and what directions you'd like this 
+                         character to go:%xn},
+        {@program %#=me/prog-chargen-apply1:%xgTo choose a 
+                  different character, type: 'quit' and start again.  
+                  To apply for [name(%q0)], type: 'apply'%xn}
+-
+# triggered by prog-chargen-apply1, where
+# %q0 = dbref of character
+# %q1 = email address
+# %q2 = dbrefs with a matching email
+# %q3 = password of the character
+# %q4 = %# 
+# %0 = application
+ 
+&prog-chargen-apply2 #10=
+
+#--------------------------------------------------------------------
+# %q7 = Application
+#--------------------------------------------------------------------
+  think setq(7, %0);
+
+# Emit the application back to the player and 
+# ask if they want to send or type another, or quit. 
+  @program %#=me/prog-chargen-apply3:%xgThis is your application:%r
+           %xn[%q7]%r%xgDo you want to send it? (type 'yes' to send, 
+	   'no' to retype your application, or 'quit' to choose a 
+           different character.)%xn;
+-
+
+
+# triggered by prog-chargen-apply2, where
+# %q0 = dbref of character
+# %q1 = email address
+# %q2 = dbrefs with a matching email
+# %q3 = password of the character
+# %q4 = %# 
+# %q7 = application
+# %0  = yes, no, quit 
+&prog-chargen-apply3 #10=
+
+#--------------------------------------------------------------------
+# %q5 = alts of the player
+# %q6 = total numbers of xp
+#---------------------------------------------------------------------
+
+ think setq(5, search(eplayer=strmatch(%q1, get(##/email))));
+ think setq(6,iter(%q5, add(getaccount(##,used xp),getaccount(##,unused xp))));
+ think setq(6, fold(fold-add-nums, %q6));
+
+ @switch %0=
+  yes, {
+     @wait 0=@apps/add %q0=%q1=%q7=[get(%#/lastsite)];
+     @pemit %#=%xm%xhYour application for [name(%q0)] has been sent!%xn;
+     @pemit %#=%xg%xhAdmin will contact you with their decision within 
+            48 hours.%xn;
+# Check to see if the email entered is the same as that on the character
+# AND the character has an email attribute (not a guest)
+     @switch [and(not(match(%q8,%q1)),not(match(%q8,guest)))] =
+# Player entered a different email than the one set on them
+     1,{@request/add %#/request/Possible alt policy violation!/1=
+          [name(%q0)] was applied for by [name(%#)] at [time()]. 
+          The email address entered was %q1, but the email address of 
+          [name(%#)] is %q8.%rPlease check into this to see if 
+          [name(%#)]/[name(%q0)] is attempting to avoid our policy of 
+          having all alts registered under the same email address.;
+          @fo me=@cemit Wizards=%xh%xmPossible Alt Violation by 
+                 [name(%#)], check @requests!%xn};
+#@bb/post characters/Application for [name(%q0)]=
+#         Application from %q1 for the character of [name(%q0)] -- 
+#           Level [default(%q0/level, ?)]%r%r
+#         [ifelse(gte(words(%q5),1),This player has the following alts:%r%xn 
+#         [iter(%q5, [name(##)] -- Level [default(##/level), ?)], %b, %r)]%r%r
+#         %xh%xgThe player has earned %q6 total experience points.,
+#         This looks like a first time player here.)]%xn%r%r
+#        Application from %q1 for the character of 
+#                    [name(%q0)] -- Level [default(%q0/level, ?)]%r%r
+#              %q7%r%r%xh%xr
+#              [ifelse(gte(words(%q5), 1), 
+#                This player has the following alts:%r%xn
+#             [iter(%q5, [name(##)] -- Level [default(##/level, ?)], %b, %r)] 
+#                      %r%r%xh%xgThe player has 
+#                            earned %q6 total experience points.,
+#                      This looks like a first time player here.)]%xn%r%r
+#           
+#              To approve this application type:%r
+#              @roster/approve %q1 for [name(%q0)]
+         },
+ no, {@program %#=me/prog-chargen-apply2:%xg
+                         Please explain the reasons you would like to 
+                         play [name(%q0)].  Include information about 
+                         your time zone, possible plots you'd like to  
+                         pursue, and what directions you'd like this 
+                         character to go:%xn},
+ quit, {@pemit %#=%xgCancelling your choice of [name(%q0)].%xn},
+ {@program %#=me/prog-chargen-apply3:%xgThis is your application:%r
+           %xn[%q7]%r%xgDo you want to send it? (type 'yes' to send, 
+	   'no' to retype your application, or 'quit' to choose a 
+           different character.)%xn;}
+-
+######################################################################
+##		  COMMAND: @roster <character>                       #
+######################################################################
+
+&cmd-roster-character #10=$@roster *:
+  think setq(0, ulocal(ul-epsearch,first(%0)));
+  think setq(7, %#);
+  think setq(9, [not(isdbref(%q0))]
+                [strmatch(%q0, #-2*)]
+                [or(not(hastag(%q0,roster)),u(u-guest-hidden,%q0))]);
+  @switch/first %q9=
+    000, {@pemit %#=%xg%xhROSTER SHEET FOR:%B%B[NAME(%q0)],%b%t
+                   [switch(get(%q0/level), I, Feature Character,
+                                          II, Companion Character,
+                                         III, Citizen Character)]%xn 
+                              \( [u(#10/u-roster-votes, %q0)] votes \)%r
+                    %xn%xgLast vote: [ifelse(hasattr(%q0,roster-voted-date),
+                              [convsecs(get(%q0/roster-voted-date))],
+                              none)]
+                    [ifelse(hastag(%q0, approve), 
+                            rjust(%xh%xgApplication Required%xn, 78),)]%r;
+          @pemit %#=[u(#7/u-sheet-physical,%q0)]%r%r
+                    %xgFor more info on [name(%q0)] type: 
+                    @roster/info [name(%q0)]%xn },
+    1??, {@pemit %#=No such character. },
+    ?1?, {@pemit %#=%0 could be more than one player. Be more 
+                   specific.},
+    ??1, {@pemit %#=%xh%xm[name(%q0)] is not on the roster of available 
+                    characters.%xn},
+    {@pemit %#=%xm%xhError:  Admin have been alerted.%xn;
+     @qmail steph/Bug in @roster Command=Unexpected Condition 
+                  Ocurred in @roster <character>: %q9 }
+-
+&cmd-roster-info #10=$@roster/info *:
+  think setq(0, ulocal(ul-epsearch,first(%0)));
+  think setq(7, %#);
+  think setq(9, [strmatch(%q0, #-1*)]
+                [strmatch(%q0, #-2*)]
+                [or(not(hastag(%q0,roster)),u(u-guest-hidden,%q0))]);
+  @switch/first %q9=
+    000, {@pemit %#=%xg%xhROSTER SHEET CONTINUED: %B%B[NAME(%q0)],%b%t
+                   [switch(get(%q0/level), I, Feature Character,
+                                          II, Companion Character,
+                                         III, Citizen Character)]%xn%r;
+          @pemit %#=[u(#7/u-sheet-pedigree, %q0)]%r
+                    [u(#7/u-sheet-personality, %q0)]%r%r%xg
+                    For more info on [name(%q0)] type: 
+                    @roster/background [name(%q0)]%xn },
+    1??, {@pemit %#=No such character. },
+    ?1?, {@pemit %#=%0 could be more than one player. Be more 
+                   specific.},
+    ??1, {@pemit %#=%xh%xm[name(%q0)] is not on the roster of available 
+                    characters.%xn},
+    {@pemit %#=%xm%xhError:  Admin have been alerted.%xn;
+     @qmail steph/Bug in @roster Command=Unexpected Condition 
+                  Ocurred in @roster/info <character>: %q9 }
+-
+
+&cmd-roster-background #10=$@roster/background *:
+  think setq(0, ulocal(ul-epsearch,first(%0)));
+  think setq(7, %#);
+  think setq(9, [strmatch(%q0, #-1*)]
+                [strmatch(%q0, #-2*)]
+                [or(not(hastag(%q0,roster)),u(u-guest-hidden,%q0))]);
+  @switch/first %q9=
+    000, {@pemit %#=%xg%xhROSTER SHEET CONTINUED: %B%B[NAME(%q0)],%b%t
+                   [switch(get(%q0/level), I, Feature Character,
+                                          II, Companion Character,
+                                         III, Citizen Character)]%xn%r;
+          @pemit %#=%xg[u(#7/u-sheet-background,%q0)]%r%r;
+          @pemit %#=%xg%xhFor information on [name(%q0)]'s family, 
+                 type: @roster/parents [name(%q0)]. },
+    1??, {@pemit %#=No such character. },
+    ?1?, {@pemit %#=%0 could be more than one player. Be more
+                   specific.},
+    ??1, {@pemit %#=%xh%xm[name(%q0)] is not on the roster of available 
+                    characters.%xn},
+    {@pemit %#=%xm%xhError:  Admin have been alerted.%xn;
+     @qmail steph/Bug in @roster Command=Unexpected Condition
+                  Ocurred in @roster/background <character>: %q9 }
+  
+-
+
+&cmd-roster-parents #10=$@roster/parents *:
+  think setq(0, ulocal(ul-epsearch,first(%0)));
+  think setq(7, %#);
+  think setq(9, [strmatch(%q0, #-1*)]
+                [strmatch(%q0, #-2*)]
+                [or(not(hastag(%q0,roster)),u(u-guest-hidden,%q0))]);
+
+  @switch/first %q9=
+
+    000, {@pemit %#=%xg%xhROSTER SHEET CONTINUED:%B%B[NAME(%q0)],%b%t
+                   [switch(get(%q0/level), I, Feature Character,
+                                          II, Companion Character,
+                                         III, Citizen Character)]%xn;
+          @pemit %#=%xh%xb[repeat(-,75)];
+          @pemit %#=[u(#7/u-roster-parents,%q0)];
+          @pemit %#=%xh%xb[repeat(-,75)];
+          @pemit %#=To learn more about [name(%q0)]'s family, type: 
+                 @roster/siblings [name(%q0)]},
+    1??, {@pemit %#=No such character. },
+    ?1?, {@pemit %#=%0 could be more than one player. Be more
+                   specific.},
+    ??1, {@pemit %#=%xh%xm[name(%q0)] is not on the roster of available 
+                    characters.%xn},
+    {@pemit %#=%xm%xhError:  Admin have been alerted.%xn;
+     @qmail steph/Bug in @roster Command=Unexpected Condition
+                  Ocurred in @roster/parents <character> on [num(me)]: %q9 }
+-
+
+&cmd-roster-siblings #10=$@roster/siblings *:
+  think setq(0, ulocal(ul-epsearch,first(%0)));
+  think setq(7, %#);
+  think setq(9, [strmatch(%q0, #-1*)]
+                [strmatch(%q0, #-2*)]
+                [or(not(hastag(%q0,roster)),u(u-guest-hidden,%q0))]);
+
+  @switch/first %q9=
+    000, {think setq(1, lattr(%q0/sibling*));
+          @pemit %#=%xg%xhROSTER SHEET CONTINUED:%B%B[NAME(%q0)],%b%t
+                   [switch(get(%q0/level), I, Feature Character,
+                                          II, Companion Character,
+                                         III, Citizen Character)]%xn;
+          @pemit %#=%xh%xb[repeat(-,75)];
+          @switch [words(%q1)]=
+            >0, {@dolist %q1=
+                   {@pemit %#=%xgRelationship with [get(%q0/##)]:%xn 
+                           [get(%q0/relationship-##)]}},
+            {@pemit %#=[name(%q0)] appears to have been an only child.};
+             @wait 0=@wait 0=
+                  {@pemit %#=%xh%xb[repeat(-, 75)];
+                   @pemit %#=See also:%xh  @roster/children [name(%q0)], 
+                                        @roster/spouse [name(%q0)], 
+                                        &  
+                                        @roster/relationships [name(%q0)] }},
+    1??, {@pemit %#=No such character. },
+    ?1?, {@pemit %#=%0 could be more than one player. Be more
+                   specific.},
+    ??1, {@pemit %#=%xh%xm[name(%q0)] is not on the roster of available 
+                    characters.%xn},
+    {@pemit %#=%xm%xhError:  Admin have been alerted.%xn;
+     @qmail steph/Bug in @roster Command=Unexpected Condition
+                  Ocurred in @roster/siblings <character> on [num(me)]: %q9 }
+-
+&cmd-roster-children #10=$@roster/children *:
+  think setq(0, ulocal(ul-epsearch,first(%0)));
+  think setq(7, %#);
+  think setq(9, [strmatch(%q0, #-1*)]
+                [strmatch(%q0, #-2*)]
+                [or(not(hastag(%q0,roster)),u(u-guest-hidden,%q0))]);
+
+  @switch/first %q9=
+    000, {think setq(1, lattr(%q0/child*));
+          @pemit %#=%xg%xhROSTER SHEET CONTINUED:%B%B[NAME(%q0)],%b%t
+                   [switch(get(%q0/level), I, Feature Character,
+                                          II, Companion Character,
+                                         III, Citizen Character)]%xn;
+          @pemit %#=%xh%xb[repeat(-,75)];
+          @pemit %#=[u(#7/u-roster-children,%q0)];
+             @wait 0=@wait 0=
+                  {@pemit %#=%xh%xb[repeat(-, 75)];
+                   @pemit %#=See also:%xh  @roster/spouse [name(%q0)], 
+                                        & 
+                                        @roster/relationships [name(%q0)] }},
+    1??, {@pemit %#=No such character. },
+    ?1?, {@pemit %#=%0 could be more than one player. Be more
+                   specific.},
+    ??1, {@pemit %#=%xh%xm[name(%q0)] is not on the roster of available 
+                    characters.%xn},
+    {@pemit %#=%xm%xhError:  Admin have been alerted.%xn;
+     @qmail steph/Bug in @roster Command=Unexpected Condition
+                  Ocurred in @roster/children <character> on [num(me)]: %q9 }
+-
+&cmd-roster-spouse #10=$@roster/spouse *:
+  think setq(0, ulocal(ul-epsearch,first(%0)));
+  think setq(7, %#);
+  think setq(9, [strmatch(%q0, #-1*)]
+                [strmatch(%q0, #-2*)]
+                [or(not(hastag(%q0,roster)),u(u-guest-hidden,%q0))]);
+
+  @switch/first %q9=
+    000, {think setq(1, lattr(%q0/spouse*));
+          @pemit %#=%xg%xhROSTER SHEET CONTINUED:%B%B[NAME(%q0)],%b%t
+                   [switch(get(%q0/level), I, Feature Character,
+                                          II, Companion Character,
+                                         III, Citizen Character)]%xn;
+          @pemit %#=%xh%xb[repeat(-,75)];
+	  @pemit %#=[u(#7/u-roster-spouse,%q0)];
+             @wait 0=@wait 0=
+                  {@pemit %#=%xh%xb[repeat(-, 75)];
+                   @pemit %#=See also:%xh 
+                                        @roster/relationships [name(%q0)] }},
+    1??, {@pemit %#=No such character. },
+    ?1?, {@pemit %#=%0 could be more than one player. Be more
+                   specific.},
+    ??1, {@pemit %#=%xh%xm[name(%q0)] is not on the roster of available 
+                    characters.%xn},
+    {@pemit %#=%xm%xhError:  Admin have been alerted.%xn;
+     @qmail steph/Bug in @roster Command=Unexpected Condition
+                  Ocurred in @roster/spouse <character> on
+[num(me)]: %q9 }
+-
+
+&cmd-roster-relationships #10=$@roster/relationships *:
+  think setq(0, ulocal(ul-epsearch,first(%0)));
+  think setq(7, %#);
+  think setq(9, [strmatch(%q0, #-1*)]
+                [strmatch(%q0, #-2*)]
+                [or(not(hastag(%q0,roster)),u(u-guest-hidden,%q0))]);
+
+  @switch/first %q9=
+    000, {think setq(1, lcstr(lattr(%q0/relationship-other*)));
+          @pemit %#=%xg%xhROSTER SHEET CONTINUED:%B%B[NAME(%q0)],%b%t
+                   [switch(get(%q0/level), I, Feature Character,
+                                          II, Companion Character,
+                                         III, Citizen Character)]%xn;
+          @pemit %#=%xh%xb[repeat(-,75)];
+          @pemit %#=[u(#10/u-roster-rel-other-list1,%q0)];
+          @pemit %#=[u(#10/u-roster-rel-other-list2,%q0)];
+          @pemit %#=[u(#10/u-roster-rel-other-list3,%q0)];
+          @pemit %#=[u(#10/u-roster-rel-other-list4,%q0)];
+             @wait 0=@wait 0=
+                  {@pemit %#=%xh%xb[repeat(-, 75)];
+                   @pemit %#=See also:%xh 
+                                        @roster/parents [name(%q0)] }},
+    1??, {@pemit %#=No such character. },
+    ?1?, {@pemit %#=%0 could be more than one player. Be more
+                   specific.},
+    ??1, {@pemit %#=%xh%xm[name(%q0)] is not on the roster of available 
+                    characters.%xn},
+    {@pemit %#=%xm%xhError:  Admin have been alerted.%xn;
+     @qmail steph/Bug in @roster Command=Unexpected Condition
+                  Ocurred in @roster/relationships <character> on
+[num(me)]: %q9 }
+
+-
+
+&cmd-roster-family-character #10=$@roster/family *:
+  think setq(0, ulocal(ul-epsearch,first(%0)));
+  think setq(7, %#);
+  think setq(9, [strmatch(%q0, #-1*)]
+                [strmatch(%q0, #-2*)]
+                [or(not(hastag(%q0,roster)),u(u-guest-hidden,%q0))]);
+
+  @switch/first %q9=
+    000, {@pemit %#=%xg%xhROSTER SHEET CONTINUED:%B%B[NAME(%q0)],%b%t
+                   [switch(get(%q0/level), I, Feature Character,
+                                          II, Companion Character,
+                                         III, Citizen Character)]%xn;
+          @pemit %#=%xh%xb[repeat(-,75)]%r;
+          @pemit %#=To find out more about [name(%q0)]'s family, you 
+                 may use the following commands:%r%r;
+          @pemit %#=[columns(@roster/parents @roster/spouse 
+                             @roster/children @roster/siblings 
+                             @roster/relationships, 25)]%r;
+          @pemit %#=%xh%xb[repeat(-,75)]%r},
+    1??, {@pemit %#=No such character. },
+    ?1?, {@pemit %#=%0 could be more than one player. Be more
+                   specific.},
+    ??1, {@pemit %#=%xh%xm[name(%q0)] is not on the roster of available 
+                    characters.%xn},
+    {@pemit %#=%xm%xhError:  Admin have been alerted.%xn;
+     @qmail steph/Bug in @roster Command=Unexpected Condition
+                  Ocurred in @roster/family <character> on [num(me)]:
+%q9 }
+-
+
+&CMD-ROSTER-HELP #10=$@roster/help:
+ @pemit %#=%xh%xg@ROSTER/HELP: A quick help index to @roster commands.%xn;
+ @pemit %#=%xh%xb[repeat(-,75)];
+ @pemit %#=
+  %xh@roster%xn -- lists available pregenerated characters on JadeMush%r
+  %xh@roster/next%xn -- flips to the next page of pregenerated characters%r
+  %xh@roster/prev%xn -- flips to the previous page of pregenerated characters%r
+  %xh@roster/info <name>%xn -- information on a particular 
+                               pregenerated character%r
+  %xh@roster/stats <name>%xn -- the attributes and skills of the character%r
+  %xh@roster/background <name>%xn -- background for a pregenerated character%r
+  %xh@roster/family <name>%xn -- lists commands to get family info on 
+                                 character%r
+  %xh@roster/parents <name>%xn -- about the character's folks%r
+  %xh@roster/spouse <name>%xn -- about the character's spouse%r
+  %xh@roster/siblings <name>%xn -- about the character's siblings%r
+  %xh@roster/children <name>%xn -- about the character's children%r
+  %xh@roster/relationships <name>%xn -- about the character's 
+                                             other relationships%r
+  %xh@roster/choose <name>%xn -- pick a character to play%r
+  %xh@roster/remove <name>%xn -- admin only, removes character from roster%r
+  %xh@roster/add <name>%xn -- admin only, adds character to roster%r
+  %xh@roster/approve <email> for <name>%xn -- admin only, approves player;
+ @pemit %#=%xh%xb[repeat(-,75)]
+-
+
+#==================================================================#
+#     COMMAND: @ROSTER/BAN <EMAIL ADDRESS>                         #
+#==================================================================#
+
+&cmd-roster-ban #10=$@roster/ban *:
+  &banned [num(me)]=[v(banned)]%0|;
+  @pemit %#=Banned: %0;
+  @bb/post staff/Player Banned!=
+   %N has banned the player from the following email address:
+     %0
+-
+
+#==================================================================#
+#     COMMAND:  @ROSTER/UNBAN <EMAIL ADDRESS>                      #
+#==================================================================#
+
+&cmd-roster-unban #10=$@roster/unban *:
+
+    @switch [t(member(v(banned), %0, |))]=
+     
+    1, {&banned [num(me)]=[remove(v(banned), %0, |)];
+        @pemit %#=@roster/unbanned: %0;
+        @bb/post staff/Player Unbanned!=
+          %N has unbanned the following address from taking alternate
+          characters from the @roster: %0},
+     
+    0, {@pemit %#=%0 isn't on the banned list.},
+ 
+
+-
+
+#==================================================================#
+#     COMMAND: @ROSTER/RESTRICT <EMAIL ADDRESS>                    #
+#==================================================================#
+
+&cmd-roster-restrict #10=$@roster/restrict *:
+
+  @switch [strmatch(%0, *@*)]
+          [not(t(member(v(restricted), %0, |)))]=
+
+    11, {&restricted [num(me)]=[v(restricted)]%0|;
+         @pemit %#=Restricted: %0;
+         @bb/post rulings/Player Restricted!=
+           %N has restricted the player from the following address from 
+           taking alternate characters: %0
+           %r%r%S will unrestrict them when they've shown that their 
+           online time is sufficient for an alternate character.;
+         @file/noprompt %0=
+           %N has restricted the player from the following address from 
+           taking alternate characters: %0
+           %r%r%S will unrestrict them when they've shown that their 
+           online time is sufficient for an alternate character.}, 
+
+   0?, {@pemit %#=You must restrict an email address.},
+
+   ?0, {@pemit %#=%0 has already been restricted.},
+
+    {@pemit %#=Unexpected error. Carrie has been notified of her bunk 
+     code.;
+     @qmail carrie/cmd-roster-restrict=It futzed. %N(%#) used the 
+       command in an attempt to add %0 to the restricted list.}
+-
+
+#==================================================================#
+#     COMMAND: @ROSTER/UNRESTRICT <EMAIL ADDRESS>                  #
+#==================================================================#
+
+&cmd-roster-unrestrict #10=$@roster/unrestrict *:
+
+  @switch [t(member(v(restricted), %0, |))]=
+
+    1, {&restricted [num(me)]=[remove(v(restricted), %0, |)];
+        @pemit %#=Unrestricted: %0;
+        @bb/post unrestrict/Player Unrestricted!=
+          %N has unrestricted the following address from taking alternate 
+          characters from the @roster: %0;
+        @file/noprompt %0=
+          %N has unrestricted the following address from taking alternate 
+          characters from the @roster: %0},
+
+    0, {@pemit %#=%0 isn't on the restricted list.},
+
+    {@pemit %#=Unexpected error. Carrie has been notified of her bunk 
+     code.;
+     @qmail carrie/cmd-roster-unrestrict=It's poopy. %N(%#) used the 
+      command in an attempt to remove %0 from the restricted list.}   
+-
+
+####################################################################
+##    COMMAND: @ROSTER/APPROVE <EMAIL ADDRESS> FOR <CHARACTER>     #
+##             @ROSTER/APPROVE <EMAIL ADDRESS> FOR <CHARACTER> =   #
+##                <COMMENTS>                                       #
+##                                                                 #
+####################################################################
+
+&cmd-roster-approve #10=$@roster/approve * for *:
+  think ifelse(strmatch(%1,*=*),
+          [setq(0, ulocal(ul-epsearch,first(%1,=)))]
+          [setq(3, rest(%1,=))],
+          [setq(0, ulocal(ul-epsearch,%1))]);
+  think setq(1, scramble(secs()));
+  think setq(2, search(eplayer=strmatch([trim(%0)],get(##/email))));
+  think setq(9, [not(hasflag(%#, wizard))]
+                [strmatch(%q0, #-1*)]
+                [strmatch(%q0, #-2*)]
+                [not(hastag(%q0, roster))]);
+  @switch/first %q9=
+    0000, {@tr me/trig-approve-character=%q0, %0, %q1, %#, %q2, %q3},
+    1???, {@pemit %#=Only Admin can use the @roster/approve command.},
+    ?1??, {@pemit %#=No such character. },
+    ??1?, {@pemit %#=%0 could be more than one player. Be more 
+                   specific.},
+    ???1, {@pemit %#=%xh%xm[name(%q0)] is not on the roster of available 
+                    characters.%xn},
+    {@pemit %#=%xm%xhError:  Admin have been alerted.%xn;
+     @qmail steph/Bug in @roster Command=Unexpected Condition 
+                  Occurred in @roster/approve <email address> for 
+                  <character>: %q9 }
+
+-
+# Triggered by prog-email-confirm where,
+# 
+# %0 = dbref of character
+# %1 = email address
+# %2 = password of the character
+# %3 = %# 
+
+&trig-approve-character #10=
+
+  @newpassword %0=%2;
+  @fo me=+email %1=[text(text/welcome.txt, welcome)];
+  @pemit %3=%xg%1 approved for the character of [name(%0)].;
+  @fo me=+email %1=*** JadeMush CHARACTER INFORMATION %r%r
+                                    Character Name: [name(%0)]%r
+                     Password: %2%r%r
+                           You can and should change your password 
+                           when you log in by using: 
+                           @password <old password>=<newpassword>%r%r 
+                           Be sure to check your @sheet/secrets and 
+                           @sheet/notes when you first log in to your 
+                           character.%r%r 
+                    THE ADDRESS OF JadeMush IS: legendary.org 5000%r%r
+                    [ifelse(t(strlen(%5)),
+                       Your application was approved with the following 
+                       comments: %5,)];
+  @cleartags %0=roster npc;
+  @tag %0=welcome; 
+  @set %0=restricted;
+  @set %0=!terse;
+  @power %0=!builder;
+  @set %0=!puppet;
+  @set %0=!monitor;
+  @switch [not(words(%4))]=1,{@tags %0=newbie},{@cleartags %0=newbie};
+  @rparent [parent(%0)]=generic soul;
+  @qmail %0/Getting Started on JadeMush=[text(text/news.txt, 
+                                              getting started on JadeMush)];
+  @tel %0=#3664;
+  @bb/post character/[name(%0)] Approved and Taken=[name(%0)] has been claimed off 
+          the roster by %1. Approval to take this app char was granted by [name(%3)].
+          [ifelse(t(strlen(%5)),%r%rAdded comments: %5,)];
+  &email %0=%1;
+  &taken-from-roster %0=[time()];
+
+  @tr me/cron_job_roster
+
+-
+
+
+&cmd-roster-count #10 = $@roster/count: 
+  think setq(0, v(roster-list));
+  think setq(9, words(%q0));
+  @pemit %# = %xhThere [switch(%q9, 1, is 1 character, are %q9 characters)] on 
+              the roster.
+              [ifelse(hastag(#10, frozen), 
+                  %r%tThe roster is currently frozen for existing players.,)];
+#-----------------------------------------------------------------------
+# %q1 = A list of all the males on the roster.
+# %q2 = A list of all the females on the roster.
+#-----------------------------------------------------------------------
+
+  think setq(1, filter(filter-male, %q0));
+  think setq(2, filter(filter-female, %q0));
+
+  @pemit %#=%xh%xc[words(%q1)] Males Total.%r%xn
+            %t[words(filter(filter-outcast, %q1))] outcasts.%r            
+            %t[words(filter(filter-commoner, %q1))] commoners.%r
+            %t[words(filter(filter-middle-class, %q1))] middle class.%r
+            %t[words(filter(filter-noble, %q1))] noblemen.%r
+	    %t[words(filter(filter-isshammie, %q1))] shamibelians.%r
+            %t%t[words(filter(filter-level-I, %q1))] level I.%r
+            %t%t[words(filter(filter-level-II, %q1))] level II.%r
+            %t%t[words(filter(filter-level-III, %q1))] level III.%r;
+  @pemit %#=%xh%xm[words(%q2)] Females Total.%r%xn
+            %t[words(filter(filter-outcast, %q2))] outcasts.%r            
+            %t[words(filter(filter-commoner, %q2))] commoners.%r
+            %t[words(filter(filter-middle-class, %q2))] middle class.%r
+            %t[words(filter(filter-noble, %q2))] noblewomen.%r
+	    %t[words(filter(filter-isshammie, %q2))] shamibelians.%r
+            %t%t[words(filter(filter-level-I, %q2))] level I.%r
+            %t%t[words(filter(filter-level-II, %q2))] level II.%r
+            %t%t[words(filter(filter-level-III, %q2))] level III.
+-
+&filter-outcast #10=strmatch(default(%0/social-status, 2), 1)
+-
+&filter-commoner #10=strmatch(default(%0/social-status, 2), 2)
+-
+&filter-middle-class #10=strmatch(default(%0/social-status, 2), 3)
+-
+&filter-noble #10=gte(default(%0/social-status, 2), 4)
+-
+&filter-level-I #10=strmatch(get(%0/level), I)
+-
+&filter-level-II #10=strmatch(get(%0/level), II)
+-
+&filter-level-III #10=strmatch(get(%0/level), III)
+
+-
+&filter-female #10=strmatch(get(%0/sex), female)
+
+-
+
+&filter-male #10=strmatch(get(%0/sex), male)
+-
+&filter-chargen #10=t(member(get(%0/tags),chargened))
+-
+&filter-hasemail #10=
+  not(
+   member(#-1 none@legendary.org staff@legendary.org JadeMush@legendary.org,
+          default(%0/email,#-1)))
+-
+&CMD-unROSTER-COUNT #10=$@unroster/count: 
+think setq(0, setdiff(get(#7/player-dbrefs), v(roster-list))); 
+think setq(0, filter(filter-chargen, %q0));
+think setq(0, filter(filter-hasemail, %q0));
+think setq(0, filter(filter-notdead, %q0)); 
+think setq(0, filter(filter-notvacation, %q0)); 
+think setq(0, filter(filter-notwiz, %q0)); 
+think setq(0, filter(filter-notdeity, %q0)); 
+think setq(9, words(%q0));
+@pemit %# = %xhThere [switch(%q9, 1, is 1 character, are %q9 characters)] off the roster 
+    who are not dead, on vacation or off the grid.;
+think setq(1, filter(filter-male, %q0));
+think setq(2, filter(filter-female, %q0));
+@pemit %#=%xh%xc[words(%q1)] Males Total.%r%xn%t[words(filter(filter-outcast, %q1))] outcasts.%r 
+   %t[words(filter(filter-commoner, %q1))] commoners.%r
+   %t[words(filter(filter-middle-class, %q1))] middle class.%r
+   %t[words(filter(filter-noble, %q1))] noblemen.%r
+   %t[words(filter(filter-isshammie, %q1))] shamibelians.%r
+   %t%t[words(filter(filter-level-I, %q1))] level I.%r
+   %t%t[words(filter(filter-level-II, %q1))] level II.%r
+   %t%t[words(filter(filter-level-III, %q1))] level III.%r;
+@pemit %#=%xh%xm[words(%q2)] Females Total.%r%xn%t[words(filter(filter-outcast, %q2))] outcasts.%r 
+   %t[words(filter(filter-commoner, %q2))] commoners.%r
+   %t[words(filter(filter-middle-class, %q2))] middle class.%r
+   %t[words(filter(filter-noble, %q2))] noblewomen.%r
+   %t[words(filter(filter-isshammie, %q2))] shamibelians.%r
+   %t%t[words(filter(filter-level-I, %q2))] level I.%r
+   %t%t[words(filter(filter-level-II, %q2))] level II.%r
+   %t%t[words(filter(filter-level-III, %q2))] level III.
+-
+&filter-notdeity #10=not(match(get(%0/tags), deity))
+-
+&filter-notshammie #10=not(match(get(%0/race), shamibelian))
+-
+&filter-isshammie #10=strmatch(get(%0/clan), shamibelian)
+-
+&filter-notwiz #10=not(hasflag(%0, wizard))
+-
+&filter-notvacation #10=not(hasflag(%0, vacation))
+-
+&filter-notdead #10=not(match(get(%0/tags), dead))
+-
+
+&cmd-roster-page #10 = $@roster/page *: 
+  think setq(0, add(0,%0)); 
+  think setq(1, u(u-roster-page, %q0)); 
+
+  think setq(9, 
+    [and(gte(%q0, 0), iswhole(%q0))]
+    [neq(0, words(%q1))]
+  ); 
+
+  @select %q9 = 
+  11, {
+    &roster-page %# = %q0; 
+    @trigger me/tr-roster = %#, %q0
+  }, 
+
+  0?, { @pemit %# = You should specify a positive integer for the page#. }, 
+  ?0, { @pemit %# = There aren't that many pages on the roster. }, 
+  *,  { @pemit %# = Logic error in #10/cmd-roster-page. Tell the staff: %q9. }
+-
+
+# I cheated with roster-voted-date.  Grump.
+
+&cmd-roster-vote #10 = $@roster/vote *:
+  @switch [t(setr(0,ulocal(ul-epsearch,first(%0))))]
+          [t(hastag(%q0, roster))]
+          [not(strmatch(%0,none))]= 
+          ??0, {&roster-vote %#; &roster-vote-comment %#;
+                @pemit %#=Vote cleared.;@tr #10/trig-count-votes},    
+          0??, {@pemit %#=%xh%xr@roster/vote: I don't know who that is.},
+          ?0?, {@pemit %#=%xh%xr@roster/vote: You must vote for someone
+                         on the roster.},
+          111, {&roster-vote %#=[pmatch(first(%0))];
+                &roster-voters #10=[setunion(v(roster-voters),%#)];
+                &roster-voted-date %q0=[secs()];
+                @prog %#=#10/program-vote-comment:
+                         Tell us why this roster spot should be filled.  
+                         Keep it concise. },
+               {@mail/quick catherine/bug=Bug in roster/vote (1).}
+-
+
+&program-vote-comment #10 =
+  &roster-vote-comment %#=%0;
+  @pemit %#=Done.;
+  @tr #10/trig-count-votes
+
+-
+
+&cmd-roster-topten #10 = $@roster/topten:
+  @pemit %#=The Roster TOPTEN:%r%xhVotes%b
+   [mid([u(u-roster-line,Name,Sex,Age,Level,Clan,Vocation,A,,Family Name)],0,73)]
+   %xn;
+  @dolist [u(u-roster-topten)] = 
+      @pemit %#=[rjust([u(u-roster-votes,##)],3)]%b%b%b
+                [mid([u(u-roster-body, ##)],0,73)]
+  
+-
+
+&u-roster-topten #10 =  
+  [extract([munge(sortby-votes, 
+                  [iter([v(roster-list)],-[u(u-roster-votes,##)])],
+                  [v(roster-list)])], 1, 10)]
+
+-
+&config-roster-vote-data #10 = #378
+-
+
+&sortby-votes #10 = [sort(%0,n)]
+
+-
+
+&u-roster-votes #10 = [default([v(config-roster-vote-data)]/v-%0,0)]
+
+-
+&trig-count-votes #10 =
+  @wait me/sem-cnt={@dolist [lattr([v(config-roster-vote-data)]/v-*)] = {&## 
+    [v(config-roster-vote-data)] =};@notify me/sem-cnt};
+  @wait me/sem-cnt={@dolist [v(roster-voters)]={&v-[u(map-get-vote,##)] 
+    [v(config-roster-vote-data)] = 
+      [inc(default([v(config-roster-vote-data)]/v-[u(map-get-vote,##)],0))]}};
+  @notify me/sem-cnt
+-
+&fold-add #10=[add(%0,%1)]
+
+-
+&map-matches-vote #10=[strmatch(%q0,%0)]
+
+-
+&map-get-vote #10=[get(%0/roster-vote)]
+-
+
+&u-roster-voting-for-me #10=[setq(0,%0)]
+  [filter(filter-matches-vote, [v(roster-voters)])]
+
+-
+
+&filter-matches-vote #10=
+  [strmatch(%q0,[u(map-get-vote,%0)])] 
+
+-
+
+&cmd-roster-voters #10=$@roster/voters *:
+  think setq(0, pmatch(first(%0)));
+  think setq(7, %#);
+  think setq(9, [strmatch(%q0, #-1*)]
+                [strmatch(%q0, #-2*)]
+                [or(not(hastag(%q0,roster)),u(u-guest-hidden,%q0))]);
+  @switch/first %q9=
+    000, {@pemit %#=%xg%xhROSTER SHEET FOR:%B%B[NAME(%q0)],%b%t
+                   [switch(get(%q0/level), I, Feature Character,
+                                          II, Companion Character,
+                                         III, Citizen Character)]%xn 
+                              \( [u(#10/u-roster-votes, %q0)] votes \)%r
+                    %xn%xgLast vote: [ifelse(hasattr(%q0/roster-voted-date),
+                              [convsecs(get(%q0/roster-voted-date))],
+                              none)]%r%rComments:%r;  
+                    @dolist [u(#10/u-roster-voting-for-me, %q0)]={ 
+                      @pemit %#=[get(##/roster-vote-comment)]}
+         },
+    1??, {@pemit %#=No such character. },
+    ?1?, {@pemit %#=%0 could be more than one player. Be more
+                   specific.},
+    ??1, {@pemit %#=%xh%xm[name(%q0)] is not on the roster of available
+                    characters.%xn},
+    {@pemit %#=%xm%xhError:  Admin have been alerted.%xn;
+     @qmail steph/Bug in @roster Command=Unexpected Condition
+                  Ocurred in @roster <character>: %q9 }
+
+-
+&tr-roster-docheck #10=
+    
+     @switch 1=
+        [gte(words(v(roster-list)),v(min-roster-chars))],
+        {
+            @switch [hastag(#10,frozen)]=1,{
+               @cleartag #10=frozen ;
+               @bb/post 45/Roster Freeze Ended=
+                  There are now [words(v(roster-list))] characters on 
+                  the roster.  As a result, the roster freeze has been 
+                  ended and alts may be taken again.
+            }
+        },
+        [lte(words(v(roster-list)),v(freeze-roster-chars))],
+        {
+            @switch [hastag(#10,frozen)]=0,{
+               @tag #10=frozen ;
+               @bb/post 45/Roster Freeze Initiated=
+                  There are now [words(v(roster-list))] characters on 
+                  the roster.  As a result, a roster freeze has been 
+                  initiated and alts may not be taken by existing players 
+                  until there are [v(min-roster-chars)] or more characters 
+                  on the roster again.%r%r
+                  See 'help @roster freeze' for more information.
+            }
+        }
+-
+
+&ul-epsearch #7=[ifelse(t(num(*%0)),num(*%0),search(player=%0))]
+
+-
+&ul-epsearch #10=[ifelse(t(num(*%0)),num(*%0),search(player=%0))]
+
+-
+&cron_time_roster-post #63=|||23|59|@@ Every day at a minute to midnight
+-
+
+&cron_job_roster-post #63=
+
+# %q0 = Old roster list
+# %q1 = Current roster list
+# %q2 = Those removed
+# %q3 = Those added
+# %q4 = [name(%q2)]
+# %q5 = [name(%q3)]
+
+  think setq(0,get(#10/old-roster-list));
+  think setq(1,get(#10/roster-list));
+  think setq(2,setdiff(%q0,%q1));
+  think setq(3,setdiff(%q1,%q0));
+#  think setq(4,[iter(%q2,name(##))]);
+#  think setq(5,[iter(%q3,name(##))]);
+  @bb/post Roster Changes/Changes for [extract(time(),1,3)]=%r
+    People added to the roster:%r
+    [ifelse(t(words(%q3)),commafy(%q3),No one has been added to the roster 
+today)].%r
+    %r
+    People removed from the roster:%r
+    [ifelse(t(words(%q2)),commafy(%q2),No one has been removed from the roster 
+ today)].%r
+    %r;
+  &old-roster-list #10=%q1;
+-
+
+&u-roster-rel-other-list1 #10=
+      [space()]
+      [trim(
+      iter(
+        lcstr(lattr(%0/relationship?)%b
+        [lattr(%0/relationship1?)]%b
+        [lattr(%0/relationship2?)]%b
+        [lattr(%0/relationship3?)]),
+        u(u-format-rel-other,%0,after(##,relationship))%r))]
+
+-
+
+&u-roster-rel-other-list2 #10=
+      [trim(
+      iter(
+        lcstr(lattr(%0/relationship4?)%b
+        [lattr(%0/relationship5?)]%b
+        [lattr(%0/relationship6?)]),
+        u(u-format-rel-other,%0,after(##,relationship))%r))]
+-
+
+&u-roster-rel-other-list3 #10=
+      [trim(
+      iter(
+        lcstr(lattr(%0/relationship7?)%b
+        [lattr(%0/relationship8?)]%b
+        [lattr(%0/relationship9?)]),
+        u(u-format-rel-other,%0,after(##,relationship))%r))]
+
+-
+
+&u-roster-rel-other-list4 #10=
+      [trim(
+      iter(
+         lcstr(lattr(%0/relationship???)),
+         u(u-format-rel-other,%0,after(##,relationship))%r))]
+
+-
+
+&u-format-rel-other #10=%xhRelationship with [get(%0/relationship%1)]:%b%xn[trim(get(%0/relationship-other%1))]
+

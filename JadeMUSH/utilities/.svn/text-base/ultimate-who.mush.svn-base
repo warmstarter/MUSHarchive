@@ -1,0 +1,581 @@
+#############################################################################
+# The Ultimate WHO Command
+#############################################################################
+
+@set me = quiet
+-
+
+@@ @create Ultimate WHO Commands
+Ultimate WHO Commands
+-
+@name Ultimate WHO Commands = Ultimate WHO Commands
+-
+@@ @wipe Ultimate WHO Commands
+-
+
+&PROGRAM-NAME Ultimate WHO Commands = Ultimate +WHO
+-
+&COPYRIGHT Ultimate WHO Commands = 
+  Copyright (C) 1998 Adam Dray <adam@legendary.org>
+-
+
+
+# store the number of the Ultimate WHO Library here
+# 
+@vL Ultimate WHO Commands = #134
+-
+
+# store the number of the Ultimate WHO (DOING) Library here
+#
+@vD Ultimate WHO Commands = #135
+-
+@parent #135 = #134
+-
+
+
+# on a TinyMUSH or TinyMUX, a Wizard player owns an object set Inherit
+# 
+@set Ultimate WHO Commands = INHERIT
+-
+@switch hasflag(owner(Ultimate WHO Commands), wizard) = 0, {
+  @switch hasflag(Ultimate WHO Commands, wizard) = 0, {
+    @pemit %# = LOAD: This object must be owned by a wizard to function 
+                properly as a global.
+  }
+}
+-
+
+# on a PennMUSH or on FiranMUX, the object is just set Wizard
+# 
+@set Ultimate WHO Commands = WIZARD
+-
+
+
+##### WHO
+#
+&CMD-WHO Ultimate WHO Commands = $who: 
+  think setq(0, u(%vL/u-who-list, %#)); 
+  think setq(1, words(%q0)); 
+  think setq(2, ifelse(hasattrp(%vL, who-body), who-body, who-default-body)); 
+
+  @pemit %# = ulocal(%vL/ul-who-piece-wrapper, top, %q1); 
+  @pemit %# = ulocal(%vL/ul-who-piece-wrapper, header, %q1); 
+  @dolist %q0 = @pemit %# = ulocal(ul-who-piece-body, %vL, ##); 
+  @wait 0 = @pemit %# = ulocal(%vL/ul-who-piece-wrapper, bottom, %q1, %q1)
+-
+
+
+
+##### WHO <pattern>
+#
+&CMD-WHO-ARG Ultimate WHO Commands = $who *: 
+  think setq(0, u(%vL/u-who-list, %#)); 
+  think setq(1, words(%q0)); 
+  think setq(9, %0);  
+  think setq(2, filter(%vL/filter-who-arg, %q0)); 
+
+  @pemit %# = ulocal(%vL/ul-who-piece-wrapper, top, %q1); 
+  @pemit %# = ulocal(%vL/ul-who-piece-wrapper, header, %q1); 
+  @dolist %q2 = @pemit %# = ulocal(ul-who-piece-body, %vL, ##); 
+  @wait 0 = @pemit %# = 
+    ulocal(%vL/ul-who-piece-wrapper, bottom, words(%q2), %q1)
+-
+
+
+# HERE
+#
+&CMD-HERE Ultimate WHO Commands = $here: 
+  think setq(5, words(u(%vL/u-who-list, %#))); 
+  think setq(0, ulocal(%vL/ul-who-list-here, %#)); 
+  think setq(1, words(%q0));
+  think setq(2, ifelse(hasattrp(%vL, who-body), who-body, who-default-body));
+
+  @pemit %# = ulocal(%vL/ul-who-piece-wrapper, top, %q1);
+  @pemit %# = ulocal(%vL/ul-who-piece-wrapper, header, %q1);
+  @dolist %q0 = @pemit %# = ulocal(ul-who-piece-body, %vL, ##);
+  @wait 0 = @pemit %# = ulocal(%vL/ul-who-piece-wrapper, bottom, %q1, %q5)
+-
+
+&UL-WHO-LIST-HERE #134 = 
+  setinter(objeval(%0, lwho()), lcon(loc(*%0)))
+-
+
+
+# DOING
+#
+&CMD-DOING Ultimate WHO Commands = $doing: 
+  think setq(0, u(%vD/u-who-list, %#)); 
+  think setq(1, words(%q0)); 
+
+  @pemit %# = ulocal(%vD/ul-who-piece-wrapper, top, %q1, %q1); 
+  @pemit %# = ulocal(%vD/ul-who-piece-wrapper, header, %q1); 
+  @dolist %q0 = @pemit %# = ulocal(ul-who-piece-body, %vD, ##); 
+  @wait 0 = @pemit %# = ulocal(%vD/ul-who-piece-wrapper, bottom, %q1, %q1)
+-
+
+
+##### DOING <pattern>
+#
+&CMD-DOING-ARG Ultimate WHO Commands = $doing *: 
+  think setq(0, u(%vD/u-who-list)); 
+  think setq(1, words(%q0)); 
+  think setq(9, %0);  
+  think setq(2, filter(%vD/filter-who-arg, %q0)); 
+
+  @pemit %# = ulocal(%vD/ul-who-piece-wrapper, top, %q1); 
+  @pemit %# = ulocal(%vD/ul-who-piece-wrapper, header, %q1); 
+  @dolist %q2 = @pemit %# = ulocal(ul-who-piece-body, %vD, ##); 
+  @wait 0 = @pemit %# = 
+    ulocal(%vD/ul-who-piece-wrapper, bottom, words(%q2), %q1)
+-
+
+
+# @doing
+#
+&CMD-@DOING Ultimate WHO Commands = $@doing: 
+  @pemit %# = Poll is set to:%b [get(%vD/poll)]; 
+  @pemit %# = Your @doing was:  [rest(get(%#/doing))];
+
+  &doing %#; 
+  @pemit %# = @doing Cleared.
+-
+
+# @doing <message>
+# 
+&CMD-@DOING-ARG Ultimate WHO Commands = $@doing *: 
+  &doing %# = @@ %0; 
+  @pemit %# = Your @doing: [rest(get(%#/doing))]
+-
+
+# @poll
+# 
+&CMD-@POLL Ultimate WHO Commands = $@poll: 
+  @pemit %# = Poll is set to:  [get(%vD/poll)]; 
+  @pemit %# = Your @doing:%b %b [rest(get(%#/doing))]
+-
+
+# @poll <message>
+# 
+&CMD-@POLL-ARG Ultimate WHO Commands = $@poll *: 
+  &poll %vD = %0; 
+  @set %vD/poll = no_command; 
+  @pemit %# = Poll is set to: [get(%vD/poll)]
+-
+
+
+
+&CMD-@WHO Ultimate WHO Commands = $@who: @force %# = who
+-
+&CMD-@WHO-ARG Ultimate WHO Commands = $@who *: @force %# = who %0
+-
+
+
+
+
+&UL-WHO-PIECE-BODY Ultimate WHO Commands = 
+  ifelse(hasattrp(%0, who-body), 
+    list(%1, switch(1, hasflag(##, connected), u(%0/who-body, ##))), 
+# else
+    list(%1, switch(1, hasflag(##, connected), u(%0/u-who-default-body, ##)))
+  )
+-
+
+
+
+#############################################################################
+# Ultimate WHO Library
+#############################################################################
+
+##### Contains the support code for the command object.
+
+@@ @create Ultimate WHO Library
+#134
+-
+@name #134 = Ultimate WHO Library
+-
+
+&PROGRAM-NAME #134 = Ultimate +WHO
+-
+&COPYRIGHT #134 = 
+  Copyright (C) 1998 Adam Dray <adam@legendary.org>
+-
+
+&U-WHO-LIST #134 = 
+  ulocal(ul-who-list, %0)
+-
+&UL-WHO-LIST #134 = 
+  [setq(0, ulocal(ul-remove-dups, objeval(%0, lwho())))]
+  [filter(filter-players, %q0)] 
+  [filter(filter-wizards, %q0)] 
+-
+
+&FILTER-PLAYERS #134 = 
+  not(hasflag(%0, wizard))
+-
+
+&FILTER-WIZARDS #134 = 
+  hasflag(%0, wizard)
+-
+
+
+&UL-REMOVE-DUPS #134 = 
+  [setq(9, iter(revwords(%0), 
+     switch(member(%q0, ##), 0, [setq(0, %q0 ##)], ##)))]
+  [revwords(squish(%q0))]
+-
+
+&U-IS-UNFINDABLE #134 = 
+  or(hasflag(loc(%0), unfindable), hasflag(%0, unfindable))
+-
+
+# Used for filtering names that start with an argument (stuff the pattern
+# for the argument into %q9).
+#
+&FILTER-WHO-ARG #134 = 
+  strmatch(name(%0), %q9*)
+-
+
+&UL-WHO-PIECE-WRAPPER #134 = 
+  ifelse(hasattrp(me, who-%0), 
+    u(who-%0, %1, %2), 
+    u(u-who-default-%0, %1, %2)
+  )
+-
+
+&U-WHO-DEFAULT-TOP #134 = 
+  [ljust(v(program-name), 35)][rjust(u(u-datetime), 35)]%r
+  [repeat(=, 70)]
+-
+
+&U-WHO-DEFAULT-HEADER #134 = 
+  iter(v(default-format), 
+    ljust(strtrunc(u(header-[strtrunc(##, 1)], %0), strlen(##)), strlen(##))
+  )
+-
+
+&U-WHO-DEFAULT-BODY #134 = 
+  iter(v(default-format), 
+    ljust(strtrunc(u(column-[strtrunc(##, 1)], %0), strlen(##)), strlen(##))
+  )
+-
+
+&U-WHO-DEFAULT-BOTTOM #134 = 
+  [repeat(-, 70)]%r
+  [ljust(v(copyright), 55)][rjust([words(%0)] connected, 15)]
+-
+
+&U-PARSE-HEADER #134 = 
+  map(me/map-header-column, %0)
+-
+
+&MAP-HEADER-COLUMN #134 = 
+  ljust(strtrunc(u(header-[strtrunc(%0, 1)], %q1), strlen(%0)), strlen(%0))
+-
+
+&UL-PARSE-BODY #134 = 
+  iter(%0, 
+    u(u-body-column, strtrunc(##, 1), strlen(##), %1)
+  )
+-
+
+&MAP-BODY-COLUMN #134 = 
+  ljust(strtrunc(u(column-[strtrunc(%0, 1)], %1), strlen(%0)), strlen(%0))
+-
+
+# 86400 = 60 x 60 x 24 = seconds in a day
+#  3600 = 60 x 60      = seconds in an hour
+# 
+&U-SHORT-DURATION #134 = 
+  rjust(
+    switch(1, 
+      gt(%0, 86400), [div(%0, 86400)]d, 
+      gt(%0, 3600),  [div(%0, 3600)]h, 
+      gt(%0, 60),    [div(%0, 60)]m, 
+                     %0s
+    ), 
+    3
+  )
+-
+
+# This is a big cheat to quickly get a time format like that used in the
+# builtin WHO list.  I take advantage of the fact that secs2time(18000)
+# returns Thu Jan  1 00:00:00 1970.  The pieces of that can be used to 
+# generate the right time formats for any connect time < 32 days.
+#
+&U-FULL-DURATION #134 = 
+  [setq(0, secs2time(add(18000, %0)))]
+  [setq(1, dec(extract(%q0, 3, 1)))]
+  [switch(gt(%q1,0), 1, %q1d)]
+  [extract(%q0, 4, 1)]
+-
+
+
+&U-BODY-COLUMN #134 = 
+  ljust(strtrunc(u(column-%0, %1), %2), %1)
+-
+
+&U-DATETIME #134 = 
+  ulocal(ul-datetime)
+-
+&UL-DATETIME #134 = 
+  [setq(0, time())]
+  [extract(extract(%q0, 4, 1), 1, 2, :)] 
+  [edit(elements(%q0, 3 2 5), %b, -)] [default(tz, EST)]
+-
+
+
+
+#############################################################################
+# Default Data for WHO
+#############################################################################
+
+# the format of a row
+&DEFAULT-FORMAT-STANDARD #134 = 
+w hh ddddd nnnnnnnnnnnn s ccc iii qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
+-
+&DEFAULT-FORMAT #134 = 
+w hh nnnnnnnnnnnn sss 3333 11111111111 2222222222222222222222 44444444 ccc iiii
+-
+
+# staff bits (wizbits)
+&HEADER-W #134 = %b
+-
+&COLUMN-W #134 = 
+  switch( [hasflag(%0, wizard)]
+          [hasflag(%0, royal)]
+          [hasflag(%0, head)]
+          [hasflag(%0, staff)]
+          [haspower(%0, builder)], 
+    1????, W, 
+    ?1???, R, 
+    ??1??, H, 
+    ???1?, S, 
+    ????1, %b, 
+           %b
+  )
+-
+
+# player dbref
+&HEADER-D #134 = %xh%xyDBREF
+-
+&COLUMN-D #134 = 
+  %0
+-
+
+# player name
+&HEADER-N #134 = %xh%xyNAME
+-
+&COLUMN-N #134 = 
+  [name(%0)]
+-
+
+# player sex
+&HEADER-S #134 = %xh%xySEX
+-
+&COLUMN-S #134 = 
+  %b
+  [switch(default(%0/sex, neuter), 
+    f*, F, 
+    m*, M, 
+    n*, N, 
+    p*, P, 
+        ?
+  )]
+-
+
+# player connect time
+&HEADER-C #134 = %xh%xyCON
+-
+&COLUMN-C #134 = 
+  switch(or(hasflag(%#, wizard), not(hasflag(%0, wizard))), 1, 
+    u(u-short-duration, conn(%0))
+  )
+-
+
+# player idle time
+&HEADER-I #134 = %xh%xyIDL
+-
+&COLUMN-I #134 = 
+  switch(or(hasflag(%#, wizard), not(hasflag(%0, wizard))), 1, 
+    u(u-short-duration, idle(%0)), 
+    u(u-idle-state, %0)
+  )
+-
+
+&U-IDLE-STATE #134 = 
+  ansi(h, 
+    switch(1, hastag(%0,onduty),duty,
+              or(gt(idle(%0), 1800), hastag(%0, afk)),  afk, 
+              or(gt(idle(%0), 900),  hastag(%0, idle)), idle))
+-
+
+
+# player location (dbref)
+&HEADER-L #134 = %xh%xyLOC#
+-
+&COLUMN-L #134 = 
+  objeval(%#, loc(%0))
+-
+
+# player location is jump_ok?
+&HEADER-J #134 = %b
+-
+&COLUMN-J #134 = 
+  ifelse(hasflag(loc(%0), jump_ok), J, %b)
+-
+
+# player is unfindable?
+&HEADER-U #134 = %b
+-
+&COLUMN-U #134 = 
+  ifelse(u(u-is-unfindable, %0), U, %b)
+-
+
+# player location (name)
+&HEADER-Q #134 = %xh%xyLOCATION
+-
+&COLUMN-Q #134 = 
+  switch(objeval(%#, loc(%0)), #-*, not available, name(loc(%0)))
+-
+
+# player is dark?
+&HEADER-H #134 = %b
+-
+&COLUMN-H #134 = 
+  [ifelse(hasflag(%0, dark), D, %b)]
+  [ifelse(strmatch(partition(%0),partition(%#)),+,%b)]
+-
+
+&HEADER-1 #134 = %xh%xyCLAN
+-
+&COLUMN-1 #134 = 
+  default(%0/clan, %b)
+-
+
+&HEADER-2 #134 = %xh%xyVOCATION
+-
+&COLUMN-2 #134 = 
+  default(%0/vocation, %b) 
+-
+
+&HEADER-3 #134 = %xh%xyAGE
+-
+&COLUMN-3 #134 = 
+  rjust(default(%0/age, %b), 3)
+-
+
+&HEADER-4 #134 = %xh%xySTATUS
+-
+&COLUMN-4 #134 = 
+  switch(get(%0/social-status), 
+    1, Eta %(outcast%), 
+    2, commoner, 
+    3, lower noble, 
+    4, high noble, 
+    5, royal, 
+       other
+  )
+-
+
+
+&WHO-TOP #134 = 
+  [ansi(Bhw, repeat(-, 78))]%r
+  [ansi(Bhy, %b[ljust(Ultimate WHO, 38)] [rjust(u(u-datetime), 37)]%b)]%r
+  [ansi(Bhw, repeat(-, 78))]%r
+-
+
+&WHO-BOTTOM #134 = 
+  [ansi(Bhw, repeat(-, 78))]%r
+  [ljust(%b[switch(eq(%0, %1), 0, %0 of%b)]%1 connected characters, 38)]%b
+  [rjust(record [default(%vC/max-logins, words(lwho()))] [u(u-when-max)], 38)]
+-
+&U-WHEN-MAX #134 = 
+  switch(hasattr(%vC, max-login-date), 1, : [get(%vC/max-login-date)], 
+    a while ago)
+-
+
+#############################################################################
+# Default Data for DOING
+#############################################################################
+
+# the format of a row
+&DEFAULT-FORMAT #135 = 
+ w h nnnnnnnnnnnn ccccccccccc iiiii ddddddddddddddddddddddddddddddddddddddddd
+-
+
+&HEADER-C #135 = %xh%xyCONN
+-
+&COLUMN-C #135 = 
+  switch(or(hasflag(%#, wizard), not(hasflag(%0, wizard))), 1, 
+    rjust(u(u-full-duration, conn(%0)), 11)
+  )
+-
+
+&HEADER-I #135 = %xh%xyIDLE
+-
+&COLUMN-I #135 = 
+  switch(or(hasflag(%#, wizard), not(hasflag(%0, wizard))), 1, 
+    u(u-short-duration, idle(%0))
+  )
+-
+
+&HEADER-D #135 = %xh%xy[default(me/poll, DOING)]
+-
+&COLUMN-D #135 = rest(get(%0/doing))
+-
+
+
+
+
+# put the library into the command object for safe-keeping
+@link #134 = Ultimate WHO Commands
+-
+@set #134 = STICKY
+-
+@switch loc(#134) = #133, {
+  @@ do nothing @@; 
+}, {
+  @teleport #134 = #133
+}
+-
+
+@switch loc(#133) = #2, {
+  @@ do nothing @@; 
+}, {
+  @pemit %# = LOAD: To make the Ultimate WHO Commands global, teleport 
+              the Commands object into your Master Room.
+}
+-
+
+#############################################################################
+# Counter Object
+#############################################################################
+
+# #136 is the Counter Object -- it keeps track of the max logins
+
+@set #136 = WIZARD
+-
+@Aconnect #136 = 
+  think setq(0, words(lwho())); 
+  think setq(1, v(max-logins)); 
+
+  &max-login-date me = switch(gte(%q0, %q1), 1, time(), v(max-login-date)); 
+  &max-logins me = max(%q0, %q1)
+-
+
+# Mark the dbref of the Counter Object on the main Who Command object and
+# the Who Library's %vC.
+#
+@vC Ultimate WHO Commands = #136
+-
+@vC #134 = #136
+-
+
+
+
+## done ##
+
+@set me = !quiet
+-
+think Done.
+-

@@ -1,0 +1,794 @@
+##################################################################
+##           		RITUALS                                 ##
+##                                                              ##
+## This set of commands is used by priests and judges primarily.           ##
+##                                                              ##
+##################################################################
+
+@set #222=Wizard
+-
+
+@power #222=Builder
+-
+
+#################################################################
+##            COMMAND: RITUAL/LIST                              #
+##                                                              #
+## This command lists the rituals that can be performed.        #
+#################################################################
+
+&ritual-list #222 = $ritual/list:
+ 
+  @pemit %# = %rLIST OF FIRAN RITUALS%R%R
+                MARRY%r
+                DIVORCE%r
+                UNBIND%r
+                EESHA%r
+                OATH%r
+                FUNERAL%r 
+                %r--
+-
+##################################################################
+## 		COMMAND: RITUAL/OATH <OATH>                      #
+##                                                               #
+## by Jennifer Warren (aka: Kava)                                #
+##################################################################
+
+&cmd-ritual-oath #222 =$ritual/oath *:
+
+  @mail/quick "lady moon" "lord sun" odin hullior/[name(%#)]'s Oath=Oath made on [time()].%r%r[secure(%0)];
+  &oathnum [parent(%#)]=[add([get(%#/oathnum)],1)];
+  &oath-[get(%#/oathnum)] [parent(%#)]=Oath made on [time()] - [secure(%0)];
+  @pemit %#=You have just made an oath witnessed by the heavens.;
+  @remit [loc(%#)]=[name(%#)] swears by the heavens, "[secure(%0)]";
+  @bb/post Player Oversight/[name(%#)]'s oath=
+     On [ictime()] in [name(loc(%#))], [name(%#)] swore the following oath:%r%r
+     [ansi(h,secure(%0))]%r%r
+     Present were: [iter(filter(filter-oath-players,lcon(loc(%#))),name(##))]
+-
+&filter-oath-players #222=
+
+  and(hastype(%0,PLAYER),
+      hasflag(%0,connected),
+      not(and(hasflag(%0,wizard),hasflag(%0,dark)))
+     )
+-
+
+##################################################################
+##            COMMAND: RITUAL/MARRY <PLAYER> AND <PLAYER>        #
+##                                                               #
+##################################################################
+
+&cmd-ritual-marry #222 = $ritual/marry * and *:
+
+## Error checking:
+## a) Is the enactor a priest
+## b) Are both players actually players?
+## c) Is the priest trying to marry himself?
+## d) Are the players different players?
+## e) Is one of the player's a man and the other a woman 
+## f) Is either of the player's already married?
+
+
+think setq(0, [hastag(%#, judge)]
+              [and(hastype(*%0, PLAYER), hastype(*%1, PLAYER))]
+              [or(strmatch(name(%#), name(*%0)),
+                    strmatch(name(%#), name(*%1)))]
+              [and(strmatch(loc(%#), loc(*%0)), strmatch(loc(%#), loc(*%1)))]
+              [not(match(get(*%0/sex), get(*%1/sex)))]
+              [strmatch(name(*%0), name(*%1))]
+              [or(hastag(*%0, married), hastag(*%1, married))]
+              [and([gt([match(u(Marriage Tea/drunkby),name(*%0))],0)],
+              [gt([match(u(Marriage Tea/drunkby),name(*%0))],0)])]);
+
+@switch/first %q0=
+
+## where %# doesn't have a priest tag
+
+	0???????, {@pemit %# =%ccOnly priests can perform a 
+                                 marriage ritual.%cn},
+
+## where both players specified are not players
+
+	?0??????, {@pemit %# =%ccYou can only marry players.%cn},
+
+## where the priest is the same as someone input
+
+	??1?????, {@pemit %# =%ccYou may only marry _other_ players.%cn},
+
+## where the people to be married are not in the same room.
+
+       ???0????, {@pemit %# = %ccYou may only marry players in the same 
+                          room as you.%cn},
+
+## where the two parties are not a man and a woman
+## NOTE: the function below, which checks to see if the parties are of 
+## opposite sexes will not work correctly if one of the players is set
+## @sex = f and the other is set @sex = female, etc.  The function looks for 
+## exact matches only.
+
+	????0???, {@pemit %#=%ccYou can only marry a man and a woman to 
+                           one another.  The Jade Empire just isn't that 
+                           progressive yet.%cn},
+
+## where the priest is trying to marry the same person to him/herself
+
+	?????1??, {@pemit %# =%ccYou may only marry two _different_ players.%cn},
+
+## where one of the two parties is already married
+
+	??????1?, {@pemit %#=%ccYou sense that your patron deity objects to the 
+                      marriage on the grounds that either the bride or the 
+                      groom belongs to another.%cn},
+	???????0, {@pemit %#=%ccThe Marriage Tea hasn't been drunk by both people!%cn},
+
+
+	11011001, {@tr me/trig-marriage = %0, %1, %#},
+                 ,
+## default
+
+	{@pemit %# = Bug!  This condition should never happen.;
+         @mail/quick waylon/Bug Report=Unexpected condition in 
+         &cmd-ritual-marry -- %q0 }
+-
+
+## triggered by ritual-marry, where
+## %0 = name of first party 
+## %1 = name of second party
+## %2 = dbref of priest
+## #219 = Eesha's garden
+
+&trig-marriage #222 =
+
+
+                 @tag *%0=married;
+        	 @tag *%1=married;
+        	 &spouse *%0=[name(*%1)];
+        	 &spouse *%1=[name(*%0)];
+        	 think setq(0, create(Marriage of [name(*%0)] and 
+                               [name(*%1)], 10));
+        	 @desc %q0 = You see a golden heart, with the names [name(*0)] and [name(*1)]
+        	             on either side.;
+                 &marriage-date %q0=[ictime()];
+                 &priest %q0=[name(%2)];
+                 &marriage-date *%0=[ictime()];
+                 &marriage-date *%1=[ictime()];
+        	 &marriage *%0=%q0;
+        	 &marriage *%1=%q0;
+        	 @tel %q0 = #219;
+        	 @pemit %2 = %ccYou have married [name(*%0)] and [name(*%1)]. 
+                             Roleplay appropriately.%cn;
+        	 @remit [loc(%2)]=[name(%2)] quietly invokes the blessing of 
+                            [poss(%2)] God on the marital union 
+                            between [name(*%0)] and [name(*%1)].
+
+-
+
+######################################################################
+##              COMMAND: RITUAL/DIVORCE <PLAYER> AND <PLAYER>        #
+#######################################################################
+## set %q3 = error combination
+## checks to see if the player is a judge
+## checks to see if each of the people to be divorced are players
+## checks to see if the judge is not trying to divorce himself
+## checks to see that all three parties are in the same location
+## checks to see that the players are two different players
+## checks to see that the players are married to each other
+
+&cmd-ritual-divorce #222=$ritual/divorce * and *:
+ think setq(0, [num(*%0)]);
+ think setq(1, [num(*%1)]);
+ think setq(3,[hastag(%#, judge)]
+              [and(hastype(*%0, PLAYER), hastype(*%1, PLAYER))]
+              [or(strmatch(name(%#), name(*%0)),
+                    strmatch(name(%#), name(*%1)))]
+              [and(strmatch(loc(%#), loc(*%0)), strmatch(loc(%#), loc(*%1)))]
+              [strmatch(name(*%0), name(*%1))]
+              [and(strmatch(get(*%0/spouse),[name(*%1)]), 
+                   strmatch(get(*%1/spouse),[name(*%0)]))] );
+
+  @switch %q3=
+	0?????, {@pemit %#=%ccOnly a Judge can divorce a couple.%cn},
+        ?0????, {@pemit %#=%ccYou may only divorce players.%cn},
+        ??1???, {@pemit %#=%ccYou can't preside over your own divorce.%cn},
+        ???0??, {@pemit %#=%ccAll parties must be in the same room.%cn},
+        ????1?, {@pemit %#=%ccYou may only divorce two 
+                            _different_ players.%cn},
+        ?????0, {@pemit %#=%ccYou sense that these two players are not 
+                           married to one another. . . and that some sort 
+                           of fraud is afoot.%cn},
+        110101, {@program %#=#222/prog-divorce:
+                             %ccHave all required signatures been done on the Writ? (Yes 
+                              or No)%cn},
+## default
+        {@pemit %#=%ccError: &cmd-ritual-divorce produced an unexpected 
+                   condition: %q3.  Alert an admin!}
+-
+## triggered by cmd-ritual-divorce, where
+## %# = priest
+## %q0 = first party to the divorce's dbref
+## %q1 = dbref of the second party to the divorce
+## %0 = yes or no (as to the wedding necklaces and consent)
+
+&prog-divorce #222=
+  @switch %0=
+	n*, {@fpose %#=takes note that the writ isn't completely signed, but might do it anyway.;
+              @program %#=#222/prog-divorce2:%cc
+                         Divorce without a complete, priest authenticated writ is
+                         a crime against the heavens.  Proceed anyhow? (yes or no)%cn},
+        y*, {@fpose %#=inspects the writ for all signatures, and is satisfied.;
+             @dolist %q0 %q1={@cleartag ##=married;
+                              @zap [get(##/marriage)];
+                              &marriage ##=;
+                              &spouse ##=};
+             &sponsor_of %q0=[remove(get(%q0/sponsor_of),%q1)];
+             &sponsor_of %q1=[remove(get(%q1/sponsor_of),%q0)];
+             &sponsored_by %q0=[remove(get(%q0/sponsored_by),%q1)];
+             &sponsored_by %q1=[remove(get(%q1/sponsored_by),%q0)];
+             &aligned_with %q0=[remove(get(%q0/aligned_with),%q1)];
+             &aligned_with %q1=[remove(get(%q1/aligned_with),%q0)];
+             &aligned_by %q0=[remove(get(%q0/aligned_by),%q1)];
+             &aligned_by %q1=[remove(get(%q1/aligned_by),%q0)];
+             @pemit %#=You've divorced [name(%q0)] and [name(%q1)].;
+             @mail/quick "Lady Moon"/Divorce=The priest [name(%#)] has divorced 
+                                       [name(%q0)] and [name(%q1)]. },
+## default
+
+       {@program %#=#222/prog-divorce:%cc
+                    You must answer 'yes' or 'no'.  Try again.%cn}
+-
+## triggered by prog-divorce, where
+## %q0 = dbref first divorcee
+## %q1 = dbref second divorcee
+## %0 = yes or no to proceed despite no necklaces
+ 
+&prog-divorce2 #222=
+
+  @switch %0=
+	n*, {@pemit %#=%ccAborting divorce proceedings.%cn},
+        y*, {@fpose %#=acknowleges that the writ isn't complete and priestly authenticated but 
+                       will proceed with the divorce anyway.;
+             @dolist %q0 %q1={@cleartag ##=married;
+                              @zap [get(##/marriage)];
+                              &marriage ##=;
+                              &spouse ##=};
+             @pemit %#=You divorced [name(%q0)] and [name(%q1)].;
+              &sponsor_of %q0=[remove(get(%q0/sponsor_of),%q1)];
+             &sponsor_of %q1=[remove(get(%q1/sponsor_of),%q0)];
+             &sponsored_by %q0=[remove(get(%q0/sponsored_by),%q1)];
+             &sponsored_by %q1=[remove(get(%q1/sponsored_by),%q0)];
+             &aligned_with %q0=[remove(get(%q0/aligned_with),%q1)];
+             &aligned_with %q1=[remove(get(%q1/aligned_with),%q0)];
+             &aligned_by %q0=[remove(get(%q0/aligned_by),%q1)];
+             &aligned_by %q1=[remove(get(%q1/aligned_by),%q0)];
+             @mail/quick "Lady Moon"/Divorce=The priest [name(%#)] has divorced 
+                                       [name(%q0)] and [name(%q1)] WITHOUT 
+                                       a fully completed, priestly authenticated
+                                       writ. You may wonder if it was consentual.;
+             @mail/quick [get(%#/patron_deity)]/Possible Priestly Offense=
+                         Your follower, [name(%#)] divorced [name(%q0)] and 
+                         [name(%q1)] without a fully completed, priestly authenticated writ.
+                         If it was non-consentual, you may be angered.},
+## default
+
+       {@program %#=#222/prog-divorce2:%cc
+                    You must answer 'yes' or 'no'.  Try again.%cn}
+
+-
+
+######################################################################
+##                 COMMAND: RITUAL/UNBIND <PLAYER>                   #
+##                                                                   #
+## This command allows a widow or widower to remarry.                #
+######################################################################
+&cmd-ritual-unbind-dummy #222=$ritual/unbind:
+  @pemit %#=%ccThe correct syntax for that command is: 
+             ritual/unbind <player>%cn
+-
+## check to see if %# is a judge
+## check to make sure that the judge is not trying to unbind himself
+## check to see if %0 is a player
+## check to see if %0 is married
+## check to see if the player has enough social points to undergo the ritual
+## check to see if the player and the judge are in the same room
+
+
+&cmd-ritual-unbind #222=$ritual/unbind *:
+  think setq(0, [num(*%0)]);
+  think setq(3, 
+           [t(hastag(%#, judge))]
+           [strmatch(%q0, %#)]
+           [t(hastype(%q0, player))]
+           [t(hastag(%q0, married))]
+           [gte(getaccount(%q0,social points),u(u-social-cost-unbinding))]
+           [strmatch(loc(%#), loc(%q0))]);
+
+  @switch %q3=
+	0??????, {@pemit %#=%ccOnly a judge can perform this ritual.%cn},
+        ?1????, {@pemit %#=%ccYou can't perform this ritual upon yourself.%cn},
+        ??0???, {@pemit %#=%ccYou can only perform this ritual upon a 
+                           player.%cn},
+        ???0??, {@pemit %#=%ccThis ritual may only be performed upon a 
+                           widow or widower.  [name(%q0)] doesn't appear to 
+                           be married.%cn},
+        ??????, {@pemit %#=%ccYou do not believe that [name(%q0)]'s spouse's 
+                           spirit is willing to release [subj(%q0)] yet.%r
+                           %cmOOC: [name(%q0)] doesn't have enough social 
+                           points to be unbound.%cn},
+        ?????0, {@pemit %#=%ccYou must be in the same room as [name(%q0)] 
+                            to perform this ritual.%cn},
+        101111, {@pemit %#=%ccBeginning Ritual . . .You should roleplay 
+                            accordingly. %cn;
+                  @tr me/trig-unbind = %#, %q0},
+## default
+	{@pemit %#=%ccError: &cmd-ritual-unbind produced an unexpected result: 
+                   %q3.  Alert an admin!}
+-
+## triggered by cmd-ritual-unbind, where
+## %0 = %#
+## %1 = dbref of player to be unbound
+
+&trig-unbind #222=
+             @pemit %0=%cmYou unbind the marriage.%cn%r;
+             @switch [t(hastag(*[before([get(%1/spouse)],\()], dead))]=0,
+             @mail/quick "Lady moon" Waylon/Unbind code abused=name(%0) unbound %1, but the spouse isn't dead.;
+             @account/adjust %1/social points=-[u(u-social-cost-unbinding)];
+             @cleartags %1=married;
+             &spouse %1=;
+             @zap [get(%1/marriage)];
+             &marriage %1=
+-
+
+########################################################################
+## 			RITUAL/EESHA                                   #
+##                                                                     #
+## The ritual of Eesha is performed by members of the opposite sex.    #
+##                                                                     #
+########################################################################
+#
+# check to see if %0 is a valid target
+# check to see that the player isn't trying to do it with themselves
+# check to see that the target is an npc or a player
+&cmd-ritual-eesha #222=$ritual/eesha with *:
+
+  think setq(0, locate(%#, %0, n));
+  think setq(1, %#);
+  think setq(3, 
+           [isdbref(%q0)]
+           [not(strmatch(%q0, %#))]
+           [or(hastype(%q0, player), hastag(%q0, npc))]
+           [not(strmatch(get(%#/sex), get(%q0/sex)))]
+           [gt(u(u-energy, %#),0)]
+           [gt(u(u-energy, %q0),0)]
+           [aware(%q0)]
+           [aware(%#)]);
+
+@switch/first %q3=
+        11111111, {@program %q0=me/prog-sex-consent:Are you consenting to 
+                            perform the ritual of Lady Moon with 
+                            [name(%#)] %(if this is rape, type no.%)?;
+               @pemit %#=So, your doing the ritual.%cn},
+	0???????, {@error %#= locate %q0},
+        ?0??????, {@pemit %#=You can only use this command to have 
+                         sex with other characters.},
+        ??0?????, {@pemit %#=You can only use this command to have sex 
+                         with other characters.},
+        ???0????, {@pemit %#=You can't use this command to have sex with 
+                         members of the same gender.},
+        ????0???, {@pemit %#=You don't have the energy for it.},
+        ?????0??, {@pemit %#=[name(%q0)] doesn't have the energy for it.},
+        ??????0?, {@pemit %#=[name(%q0)] isn't aware enough to preform this action.},
+        ???????0, {@pemit %#=You aren't aware enough to preform this action.},
+        {@pemit %#=%crERROR: There's been a bug.  Admin have been 
+                   notified.%cn;
+         @qmail steph/Bug Report: Ritual of Eesha=Unexpected condition 
+                produced by &cmd-ritual-eesha: %q3 when [name(%#)] 
+                typed: ritual/eesha with [name(%q0)] at %L}
+
+-
+&u-sex-limit-exceeded #222=
+
+   [and(not(hastag(u(u-sex-partner-male,%0,%1),viagra)),
+   [or(hastag(u(u-sex-partner-male,%0,%1),impotent),
+       [strmatch(get(u(u-sex-partner-male,%0,%1)/sex-limit),
+              [elements(ictime(),7 8)]/0)])])]
+-
+&u-sex-partner-male #222=[switch([get(%0/sex)],f*,%1,%0)]
+-
+&count-limps #222=5
+-
+&message-limp-1 #222=suffers inflation failure.
+-
+&message-limp-2 #222=is remarkably droopy.  
+-
+&message-limp-3 #222=is inexplicably floppy.
+-
+&message-limp-4 #222=has a chaffing problem.
+-
+&message-limp-5 #222=was cheated where it counts!
+-
+# u(u-has-mask, <dbref of person>)
+
+&u-has-mask #222=gt(words(filter(filter-is-mask, 
+  clothinglist(%0))),0)
+-
+&filter-is-mask #222=t(match(lparent(%0), v(mask-parent)))
+-
+&mask-parent #222=#31340
+-
+&u-get-mask #222=first(filter(filter-is-mask, clothinglist(%0)))
+-
+
+## triggered by &cmd-ritual-eesha, where
+## %q0 = player to consent
+## %q1 = original enactor
+## %0 = yes or no
+
+&prog-sex-consent #222=
+  @switch [%0][u(u-sex-limit-exceeded,%q0,%q1)]=
+      n*1, {@pemit %q0=%cmSo noted.%cn;
+           @fpose [setr(3,u(u-sex-partner-male,%q0,%q1))]=
+               [u(message-limp-[inc(rand(v(count-limps)))],%q3)];
+           @bb/post Ritual of Ladymoon/Rape Failed: 
+           [name(%q1)] with [name(%q0)]=[name(%q3)] went limp, while [name(%q1)]                        
+           [ifelse(u(u-has-mask, %q1), %b([get(u(u-get-mask, %q1)/player-name)]-%q1),)] 
+           was raping [name(%q0)][ifelse(u(u-has-mask, %q0),%b([get(u(u-get-mask, %q0)/player-name)]-%q0),)]
+            on [time()] at [name(loc(%q1))];
+                           think [setq(5,[setdiff(%q0 %q1,%q3)])]; 
+               &last-eesha-with %q0=%q1; 
+               &last-eesha-with %q1=%q0; 
+               &last-eesha-time %q0=[icsecs()]; 
+               &last-eesha-time %q1=[icsecs()]; 
+               think setq(4, [add(20,u(u-witness-chance, %q0, %q1))]); 
+
+               @witness/%q4 %q5/was seen getting raped by 
+                              [name(%q0)] on [squish(after(ictime(), on))] 
+                              at [name(loc(%q0))].;
+               @witness/%q4 %q3/was seen raping  
+                             [name(%q1)] on [squish(after(ictime(), on))] 
+                             at [name(loc(%q0))].;
+               @pemit %q1=%cmYOU MAY NOT roleplay this scene with [name(%q0)] 
+                         if you are under the age of 18 or if [name(%q0)] is 
+                         under the age of 18.  Also, if either of you 
+                         do not wish to roleplay the scene, you needn't 
+                         do so.%cn;
+               @pemit %q0=%cmYOU MAY NOT roleplay this scene with [name(%q1)] 
+                         if you are under the age of 18 or if [name(%q1)] is 
+                         under the age of 18.  Also, if either of you 
+                         do not wish to roleplay the scene, you needn't 
+                         do so.%cn;},
+      y*1, {@fpose [setr(3,u(u-sex-partner-male,%q0,%q1))]=
+               [u(message-limp-[inc(rand(v(count-limps)))],%q3)]},
+      y*0, {@bb/post 
+             39/RoE: [name(%q1)] with [name(%q0)]=[name(%q1)]
+                        [ifelse(u(u-has-mask, %q1), 
+                                %b([get(u(u-get-mask, %q1)/
+                                          player-name)]-%q1),)] 
+                        performed the ritual of eesha with [name(%q0)]
+                        [ifelse(u(u-has-mask, %q0), 
+                                %b([get(u(u-get-mask, %q0)/
+                                          player-name)]-%q0),)] 
+                        on [time()] at [name(loc(%q1))];
+
+               @switch [hastag(u(u-sex-partner-male,%q0,%q1), viagra)]/
+                 [setr(3, 
+                    get(setr(2,u(u-sex-partner-male,%q0,%q1))/sex-limit))]=
+               1*, {
+                 @cleartags %q2=viagra
+               }, 0/[elements(ictime(),7 8)]/*, {
+                 &sex-limit %q2=[first(%q3,/)]/[dec(last(%q3,/))]
+               }, {
+                 &sex-limit %q2=[elements(ictime(),7 8)]/
+              [div(sub(add(add(add(attribute(%q2,endurance),skill(%q2,seduction)),
+                               attribute(%q2,passion)),attribute(%q2,luck)),3),4)]
+               };
+# Clear the female's viagra tag.
+               @cleartags [setdiff(%q0 %q1,%q2)]=viagra; 
+               &last-eesha-with %q0=%q1; 
+               &last-eesha-with %q1=%q0; 
+               &last-eesha-time %q0=[icsecs()]; 
+               &last-eesha-time %q1=[icsecs()]; 
+	       @cleartags %q0=virgin;
+	       @cleartags %q1=virgin;
+               think setq(4, u(u-witness-chance, %q0, %q1)); 
+
+               @witness/%q4 %q1/was seen engaging in sexual relations with 
+                              [name(%q0)] on [squish(after(ictime(), on))] 
+                              at [name(loc(%q0))].;
+               @witness/%q4 %q0/was seen engaging in sexual relations with 
+                             [name(%q1)] on [squish(after(ictime(), on))] 
+                             at [name(loc(%q0))].;
+               @pemit %q1=%cmYOU MAY NOT roleplay this scene with [name(%q0)] 
+                         if you are under the age of 18 or if [name(%q0)] is 
+                         under the age of 18.  Also, if either of you 
+                         do not wish to roleplay the scene, you needn't 
+                         do so.%cn;
+               @pemit %q0=%cmYOU MAY NOT roleplay this scene with [name(%q1)] 
+                         if you are under the age of 18 or if [name(%q1)] is 
+                         under the age of 18.  Also, if either of you 
+                         do not wish to roleplay the scene, you needn't 
+                         do so.%cn;
+               @remit [loc(%q1)]=[name(%q1)] and [name(%q0)] engage in sexual 
+                         coupling.;
+               @qmail eesha/Ritual of Eesha=[name(%q1)] and [name(%q0)] 
+                            performed the ritual of eesha on 
+                            [squish(after(ictime(), on))] at the location 
+                            of: [name(loc(%q1))].;
+               @pregnancy/chance %q1/%q0;
+               @switch/first [u(u-success-sex, %q1)]=
+			<0, {@pemit %q1=%cmYou botched!%cn;
+                             @pemit %q1=You're exhausted and don't think 
+                                       you pleased [name(%q0)].;
+                             @pemit %q0=[name(%q1)]'s efforts are clumsy 
+                                        and somewhat unpleasant.;
+             think take_energy(%q1, min(10, u(u-energy, %q1)), both, e);
+                             @pemit %q1=%cmDeducting 10 energy points.%cn},
+                         0, {@pemit %q1=%cmYou failed!%cn;
+                             @pemit %q1=You're exhausted.;
+                             @pemit %q0=[name(%q1)]'s techniques are 
+                       somewhat clumsy but not entirely unpleasant.;
+             think take_energy(%q1, min(10, u(u-energy, %q1)), both, e);
+                             @pemit %q1=%cmDeducting 10 energy points.%cn},
+                        >3, {@pemit %q1=%cmYou succeeded spectacularly!%cn;
+                             @pemit %q1=You feel energized and seductive!;
+                             @pemit %q0=[name(%q1)] makes the experience 
+                                        beautiful and one of ecstasy.;
+                             @pemit %q1=%cmDeducting 0 energy points.%cn},
+                        >0, {@pemit %q1=%cmYou succeeded!%cn;
+                             @pemit %q1=You feel tired, but sated.;
+                             @pemit %q0=[name(%q1)]'s efforts are 
+                                        pleasurable.;
+                             @pemit %q1=%cmDeducting 5 energy points.%cn; 
+             think take_energy(%q1, min(5, u(u-energy, %q1)), both, e);},
+                        {@pemit %q0=%crError: There's been a bug.  Admin have 
+                                   been alerted.;
+                         @pemit %q1=%crError: There's been a bug.  Admin have 
+                                   been alerted.;
+                         @qmail steph/Bug Report: Ritual of Eesha=
+                                It doesn't appear that successes are 
+                                being returned to the nested switch in 
+                                &cmd-ritual of eesha};
+
+               @switch/first [u(u-success-sex, %q0)]=
+			<0, {@pemit %q0=%cmYou botched!%cn;
+                             @pemit %q0=You're exhausted and don't think 
+                                       you pleased [name(%q1)].;
+                             @pemit %q1=[name(%q0)]'s efforts are clumsy 
+                                        and somewhat unpleasant.;
+             think take_energy(%q0, min(10, u(u-energy, %q0)), both, e);
+                             @pemit %q0=%cmDeducting 10 energy points.%cn},
+                         0, {@pemit %q0=%cmYou failed!%cn;
+                             @pemit %q0=You're exhausted.;
+                             @pemit %q1=[name(%q0)] techniques are somewhat 
+                                        clumsy but not entirely unpleasant.;
+             think take_energy(%q0, min(10, u(u-energy, %q0)), both, e);
+                             @pemit %q0=%cmDeducting 10 energy points.%cn},
+                        >3, {@pemit %q0=%cmYou succeeded spectacularly!%cn;
+                             @pemit %q0=You feel energized and seductive!;
+                             @pemit %q1=[name(%q0)] makes the experience 
+                                        beautiful and one of ecstasy.;
+                             @pemit %q0=%cmDeducting 0 energy points.%cn},
+                        >0, {@pemit %q0=%cmYou succeeded!%cn;
+                             @pemit %q0=You feel tired, but sated.;
+                             @pemit %q1=[name(%q0)]'s efforts are 
+                                        pleasurable.;
+                             @pemit %q0=%cmDeducting 5 energy points.%cn; 
+             think take_energy(%q0, min(5, u(u-energy, %q0)), both, e);},
+                        {@pemit %q1=%crError: There's been a bug.  Admin have 
+                                   been alerted.;
+                         @pemit %q0=%crError: There's been a bug.  Admin have 
+                                   been alerted.;
+                         @qmail steph/Bug Report: Ritual of Eesha=
+                                It doesn't appear that successes are 
+                                being returned to the nested switch in 
+                                &cmd-ritual of eesha}}, 
+      {@program %q0=me/prog-sex-consent:%cmYou must answer 'yes' or 'no'.}
+
+
+-
+# Most chance you can have is 95% regardless of mods.
+# Least chance you can have is 5% regardless of mods.
+
+# %0 is one person eeshaing
+# %1 is the second person eeshaing
+# %2 is the location of the eesha.
+
+&u-witness-chance #222=
+[max(min(add(u(u-witness-location-base, %0, %1, icloc(%0)), 
+               u(u-witness-spouse-mod, %0, %1), 
+               u(u-witness-class-mod, %0, %1)), 
+         95), 
+     0)]
+-
+# No one cares all that much about outcasts eeshaing.
+# Outcasts have a social-status of 1, so the -2 is to 
+#   adjust for that.
+# The bigger the difference in their social statuses, 
+#   the more likely people will gossip about it.
+#   This mod will range from 0 to 16
+
+&u-witness-class-mod #222=
+  [add(get(%0/social-status), 
+       get(%1/social-status), 
+       -2, 
+       mul(4, abs(sub(get(%0/social-status), 
+                      get(%1/social-status)))))]
+-
+# If they're each other's spouse, lower the percentage chance
+# of eeshaing by 100%
+
+&u-witness-spouse-mod #222=
+   [ifelse(and(match(name(%0), get(%1/spouse)), 
+               match(name(%1), get(%0/spouse))), 
+           -500, 0)]
+-
+# If it's BOTH people's home, base is 0%
+# If it's out in the wilderness, base is 10% (not a lot of people)
+# If it's a PUBLIC place, base is 150 (other mods will lessen this
+#      AND, max is 95% anyway). This is also if neither of the above
+#      are true. This is to pretty much guarantee that people eeshaing
+#      in public get a witness.
+# Otherwise, base is 50%
+
+&u-witness-location-base #222=
+  [switch(1, and(match(get(%0/ic-home), %2), 
+                 match(get(%1/ic-home), %2)), 0, 
+             match(get(%2/district), Wilderness), 10, 
+             hastag(%2, public), 150, 
+             50)]
+             
+             
+-
+
+########################################################################
+##                        RITUAL/FUNERAL                               #  
+########################################################################
+&CMD-RITUAL-FUNERAL #222=$ritual/funeral *:
+
+## set %q3 = error combination
+## check to see if the player is a priest
+## check to see if the target is a player, animal or npc
+## check to see that both parties are in the same location
+## check to see that the target is, in fact, dead. 
+## 
+ think setq(0, [locate(%#,%0,ni)]);
+ think setq(3,[hastag(%#, priest)]
+              [or([hastype(*%0,player)],[hastag(%0,animal)][hastag(%0,npc)])]
+              [hastag([locate(%#,%0,n)], dead)]
+            );
+
+  @switch/first %q3=
+  0??, { @pemit %#=You are not a priest. You cannot perform a funeral.; },
+  ?0?, { @pemit %#=[name(%q0)] is not something that can be offered to
+         the god(s).; },
+  ??0, { @pemit %#=[name(%q0)] must be in the same room or is not dead 
+                  yet!; }, 
+  111, { 
+	  @remit loc(%#)=%cc[name(%#)] performs the last funeral rites for 
+			 [name(%q0)], igniting the body. Flames engulf the 
+			 remains, glowing embers floating skyward and into 
+			 the heavens.%cn;
+
+	  @teleport %q0=[num(*Unot)];
+
+	  @qmail Unot/Funeral: [name(%q0)]=[name(%#)] performed the 
+	  official funeral rites for [name(%q0)].;
+
+          @name %q0=Memory [rest([name(%q0)])];
+
+        },
+        { @qmail Brigid/Error in ritual/funeral=Switch condition: [%q3];};
+-
+
+
+
+
+########################################################################
+##                               FUNCTIONS                             #
+########################################################################
+
+# returns the number of successes the player trying to have sex gets
+# Allure + Seduction at 6
+# u(u-success-sex, <player>)
+
+&u-success-sex #222=
+[successes(add(attribute(%0, allure), skill(%0, seduction)), 6)]
+-
+
+## returns the player's total energy
+&u-energy #222=
+[add(get(%0/ac-energy),get(%0/ac-energy_reserves))]
+-
+
+
+## returns how many social points the unbinding ritual costs the player
+## u(u-social-cost-unbinding)
+&u-social-cost-unbinding #222=
+20
+-
+## returns the number of successes the priest had in the unbinding 
+## ritual
+## Religion + Mana at 7
+## u(u-success-unbinding, <priest's dbref>)
+
+&u-success-unbinding #222=
+[successes(add(skill(%0, prayer), attribute(%0, mana)), 7)]
+-
+     
+######################################################################
+##                           COMMAND: @OATH                          #
+##                                                                   #
+##  @oaths: Tells a player the oaths that they have made.            #
+######################################################################
+
+&cmd-oaths #7=$@oaths:
+     think setq(1, get(%#/soul));
+     think setq(0, lattr(%q1/oath-*));
+
+## Tell the player what oaths have been made.
+##     
+     @pemit %#=%t%t%ch%crYou have made the following oaths:%cn%r;
+     @dolist %q0=@pemit %#=[get_eval(%q1/##)]
+-
+#########################################################################
+##                     COMMAND: OATHS/LIST                              #
+##                                                                      #
+##  @oaths/list <player>: lists oaths a player has made.                #
+#########################################################################
+
+&cmd-oaths-list #6=$@oaths/list *:   
+## Get the number of the player, and check the caller is wizard and that 
+## there is actually a player by that name.
+##
+      think setq(2, num(*%0));
+      think setq(3, [hasflag(%#, wizard)][t(hastype(%q2, player))]);
+      think setq(4, get(%q2/soul));
+
+      @switch/first %q3=
+         0?, {@pemit %#=Bzzzzt. Sorry. Only wizards may use this command.},
+         ?0, {@pemit %#=%0 isn't even a player.}, 
+## Find and list oaths player has made.
+##
+      {think setq(1, lattr(%q4/oath-*));
+        @pemit %#=%t%t%cr%ch [name(%q2)] has made the following oaths:%cn%r; 
+        @dolist %q1=@pemit %#=[get_eval(%q4/##)]}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

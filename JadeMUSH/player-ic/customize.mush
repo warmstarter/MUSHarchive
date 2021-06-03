@@ -1,0 +1,587 @@
+###################################################################
+#                       SYSTEM: CUSTOMIZATION                     #
+# This system allows players to rename and set the descs and such #
+# of the objects that they create.                                #
+#                                                                 #
+# Where the settings are made on the make command object: #30     #
+#                                                                 #
+# By Stephanie Dray                                               #
+###################################################################
+
+###################################################################
+#		COMMAND: NAME <OBJECT>=<NAME>                     #
+#                                                                 #
+# Allows a player to rename customizable objects that he/she has  #
+# created.                                                        #
+###################################################################
+# %q0 = dbref of object to be renamed
+# %q1 = the new name for the object
+# %q2 = the old name of the object (minus 'unfinished')
+# %q4 = the new name with 'unfinished'
+# %q9 = error checking code
+
+&cmd-name #30=$name *=*:
+  think setq(0, trim(%0));
+  think setq(0, locate(%#, %q0, *));
+  think setq(1, trim(%1)); 
+  think setq(4, unfinished %q1); 
+
+  think setq(3, default(%q0/basename, name(%q0))); 
+  &basename %q0 = %q3; 
+
+  think setq(2, trim(edit(edit(%q3, unfinished,), Unfinished,)));
+
+# Check to see that we found the object to be renamed
+# Check to see that the object to be renamed is customizable
+# Check to see that the object to be renamed has not already been
+#       finished
+# Check to see that the player trying to rename the object is its
+#       creator
+# Check to see that the player retains the name of
+#       the original object (to prevent fraud: 'unfinished ring' being 
+#       renamed to 'necklace')
+
+  think setq(9, [isdbref(%q0)]
+                [hastag(%q0, customize)]
+                [and(not(hastag(%q0, finished)), 
+                     match(unfinished, first(name(%q0))))]
+                [strmatch(get(%q0/creator), %#)]
+                [strmatch(%q1, *%q2*)]);
+
+  @switch/first %q9=
+       0????, {@pemit %#=I don't see %0.},
+       ?0???, {@pemit %#=[name(%q0)] does not appear to be customizable.},
+       ??0??, {@pemit %#=It appears that [name(%q0)] is a finished item.},
+       ???0?, {@pemit %#=You may only customize an item that you created.},
+       ????0, {@pemit %#=You must retain all of the original name ('%q3') in 
+                         the new name of the product.},
+
+# Error checking complete, 
+# a) name the new item Unfinished <new name they provided>
+# b) tell the player what you did
+
+       11111, {@name %q0=%q1; 
+               think setq(3, strmatch(%q1, name(%q0))); 
+               @name %q0=%q4; 
+               @mask/register %q0;
+               think setq(3, and(%q3, match(first(name(%q0)), unfinished))); 
+               @name [ifelse(%q3,,pemit(%#, 
+                         You can't change the name to [rest(%q1)]. This is 
+                         known to be caused by using special characters 
+                         in the name. See 'help name' for what NOT to use.)%q0)]=
+                  Unfinished %q2; 
+               @pemit [ifelse(%q3,%#,)]=Renamed %0 to [name(%q0)].  
+                         The 'Unfinished' 
+                         will disappear when you indicate that you've 
+                         finished customizing the product by use of 
+                         the 'finish <product>' command.  
+                         See 'help finish'.},
+
+# default
+
+      {@pemit %#=Error: Admin have been alerted.;
+       @qmail steph/Bug - name=Unexpected Condition: %q9}
+-
+#####################################################################
+#             COMMAND: DESCRIBE <OBJECT>                            #
+#                                                                   #
+# This command enables players to describe objects that they have   #
+# created if they're customizable.                                  #
+#####################################################################
+# %q0 = dbref of object to be described
+# %q9 = error checking message
+
+&cmd-describe #30=$describe *:
+  think setq(0, trim(%0));
+  think setq(0, locate(%#, %q0, *));
+
+# Check to see that we found the object to be described
+# Check to see if the item is customizable
+# Check to see if the object is already finished
+# Check to see that the player trying to desc it is the same as who
+#       created it
+  
+  think setq(9, [isdbref(%q0)]
+                [hastag(%q0, customize)]
+                [and(not(hastag(%q0, finished)), 
+                     match(unfinished, first(name(%q0))))]
+                [strmatch(get(%q0/creator), %#)]);
+
+  @switch/first %q9=
+       0???, {@pemit %#=I don't see %0.},
+       ?0??, {@pemit %#=[name(%q0)] does not appear to be customizable.},
+       ??0?, {@pemit %#=It appears that [name(%q0)] is a finished item.},
+       ???0, {@pemit %#=You may only customize an item that you created.},
+       1111, {@program %#=me/prog-describe:
+                       Input the new description for [name(%q0)] 
+                       or type 'quit' to cancel:%xn}
+-
+# %q0 = the thing to be described
+# %0 = The description or quit
+
+&prog-describe #30=
+  @switch %0=
+     quit, {@pemit %#=Description Aborted.},
+
+# a) describe the item with the new description
+# b) tell the player what you did
+# c) force the player to look at the new description
+
+     {&description %q0=[objeval(%#,%0)];
+      @desc %q0=[get(#128/desc)];
+      @pemit %#=Described new object.;
+      @fo %#=look %q0 }
+
+-
+#####################################################################
+#             COMMAND: IDESCRIBE <OBJECT>=<NEW DESCRIPTION>         #
+#             ALIAS: idesc <object>=<description>                   #
+#                                                                   #
+# This command enables players to describe objects that they have   #
+# created if they're customizable.                                  #
+#####################################################################
+# %q0 = dbref of object to be described
+# %q1 = new description
+# %q9 = error checking message
+
+&cmd-Idescribe #30=$Idescribe *=*:
+  think setq(0, trim(%0));
+  think setq(0, locate(%#, %q0, *));
+  think setq(1, trim(%1));
+
+# Check to see that we found the object to be described
+# Check to see if the item is customizable
+# Check to see if the object is already finished
+# Check to see that the player trying to desc it is the same as who
+#       created it
+# Check to make sure that the player has not used []'s or ()'s in the
+#       desc (for security reasons since @desc does evaluate).
+  
+  think setq(9, [isdbref(%q0)]
+                [hastag(%q0, customize)]
+                [and(not(hastag(%q0, finished)), 
+                     match(unfinished, first(name(%q0))))]
+                [strmatch(get(%q0/creator), %#)]
+                [not(or(strmatch(%q1, *\[*), strmatch(%q1, *\]*),
+                     strmatch(%q1, *\(*), strmatch(%q1, *\)*)))]);
+
+  @switch/first %q9=
+       0????, {@pemit %#=I don't see %0.},
+       ?0???, {@pemit %#=[name(%q0)] does not appear to be customizable.},
+       ??0??, {@pemit %#=It appears that [name(%q0)] is a finished item.},
+       ???0?, {@pemit %#=You may only customize an item that you created.},
+       ????0, {@pemit %#=You may not use [\]'s or (\)'s in the 
+                         idescription of your object.},
+
+# Error checking complete, so:
+# a) describe the item with the new description
+# b) tell the player what you did
+# c) force the player to look at the new description
+
+       11111, {&idescription %q0=%q1;
+               @idesc %q0=[get(#128/idesc)];
+               @pemit %#=Described the inside of the new object.},
+
+# default
+       {@pemit %#=Error: Admin have been alerted.;
+        @qmail steph/Bug - idesc #30=Unexpected Condition: %q9 }
+-
+#####################################################################
+#                 COMMAND: FINISH <OBJECT>                          #
+#####################################################################
+# %q0 = dbref of object to be finished
+# %q9 = error checking code
+
+&cmd-finish #30=$finish *:
+  think setq(0, trim(%0));
+  think setq(0, locate(%#, %q0, *));
+
+# Check to see if we found the object to be finished
+# Is it already finished?
+# Check to see if it's customizable
+# Check to see that the person trying to finish it is the same person
+#       who created it
+ 
+  think setq(9, [isdbref(%q0)]
+                [and(not(hastag(%q0, finished)), 
+                     match(unfinished, first(name(%q0))))]
+                [hastag(%q0, customize)]
+                [strmatch(get(%q0/creator), %#)]);
+
+  @switch/first %q9=
+	0???, {@pemit %#=I don't see %0.},
+        ?0??, {@pemit %#=[name(%q0)] is already finished.},
+        ??0?, {@pemit %#=name(%q0) does not appear to be customizable},
+        ???0, {@pemit %#=You may only finish items you created.},
+
+# Error checking complete, so
+# a) tag the new item 'finished'
+# b) remove 'unfinished' from the name of the object
+# c) tell the player what you did
+
+        1111, {think setq(1, rest(name(%q0))); 
+               @name %q0=%q1; 
+               @mask/register %q0;
+               think setq(3, strmatch(%q1, name(%q0))); 
+               @tag [ifelse(%q3,%q0,pemit(%#, You can't change 
+                        the name to %q1. This is known to be caused 
+                        by starting names with '*' although other 
+                        conditions may cause this. Please select 
+                        another name by using 'name'.))]=finished; 
+               @pemit [ifelse(%q3,%#,)]=You finish the %q1.;},
+
+# default
+
+        {@pemit %#=Error: Admin have been alerted.;
+         @qmail steph/Bug - finish=Unexpected Condition: %q9 }
+-
+&fold-add #30=
+  add(%0,%1)
+-
+&filter-ornament #30=
+  hastag(%0,ornament)
+-
+##################################################################
+#	    COMMAND: ORNAMENT <OBJECT> WITH <ORNAMENT>           #
+#                                                                #
+# This command enables players to ornament the things they make  #
+# with jewels or gold or other ornamental substances.            #
+##################################################################
+
+&cmd-ornament #30=$ornament * with *:
+# %q0 = dbref of thing to be ornamented
+# %q1 = dbref of thing to ornament with
+
+  think setq(0, locate(%#, %0, *));
+  think setq(1, locate(%#, %1, *));
+
+# Check to see if we found the object to be ornamented
+# Check to see if we found the ornament
+# Check to see that the player who wants to ornament the object is the
+#       same as the person who created it
+# Check to see that the item is customizable in the first place
+# Check to see that the item hasn't already been finished
+# Check to see that the ornament is really an ornament
+
+  think setq(9, [isdbref(%q0)]
+                [isdbref(%q1)]
+                [strmatch(get(%q0/creator), %#)]
+                [hastag(%q0, customize)]
+                [and(not(hastag(%q0, finished)), 
+                     match(unfinished, first(name(%q0))))]
+                [hastag(%q1, ornamental)]
+                [gte(mul(default([parent(%q0)]/weight,0),
+                        default([parent(%q0)]/ornament-limit,1)),
+                    add(default(%q1/weight, 9999999999), 
+                        fold(fold-add, 
+                iter(filter(filter-ornament, lcon(%q0)),get(##/weight)))))]
+                );
+  
+  @switch/first %q9=
+	0??????, {@pemit %#=I don't see %0.},
+        ?0?????, {@pemit %#=I don't see %1.},
+        ??0????, {@pemit %#=You can only ornament things that you
+                 created.},
+        ???0???, {@pemit %#=[name(%q0)] is not customizable.},
+        ????0??, {@pemit %#=Sorry, but [name(%q0)] is a finished 
+                        product. You can only ornament unfinished products.},
+        ?????0?, {@pemit %#=Sorry, but [name(%q1)] does not appear to 
+                        be an ornamental substance.},
+        ??????0, {@pemit %#=You realise that there's no room for more 
+                        ornamentation.}, 
+
+# Error checking complete, so
+# a) teleport the ornament into the object it's to ornament.
+# b) lock the ornament to the object
+# c) force the player to pose that he or she has ornamented the object
+
+        1111111, {@tel %q1=%q0;
+                 @lock %q1=%q0;
+                 @fpose %#=ornaments [name(%q0)] with [name(%q1)].;
+		 @tag %q1=ornament},
+
+# default
+
+        {@pemit %#=Error: Admin have been alerted.;
+         @qmail steph/bug - ornament=Unexpected Condition: %q9}
+-
+##################################################################
+#	    COMMAND: UNORNAMENT <OBJECT> REMOVING <ORNAMENT>     #
+#                                                                #
+# This command enables players to unornament the things they make#
+# with jewels or gold or other ornamental substances.            #
+##################################################################
+
+&cmd-unornament #30=$unornament * removing *:
+# %q0 = dbref of thing to be unornamented
+# %q1 = dbref of thing to unornament with
+
+  think setq(0, locate(%#, %0, *));
+  think setq(1, locate(%q0, %1, ia));
+
+# Check to see if we found the object to be unornamented
+# Check to see if we found the ornament
+# Check to see that the player who wants to unornament the object is the
+#       same as the person who created it
+# Check to see that the item is customizable in the first place
+# Check to see that the item hasn't already been finished
+# Check to see that the ornament is really an ornament
+
+  think setq(9, [isdbref(%q0)]
+                [isdbref(%q1)]
+                [strmatch(get(%q0/creator), %#)]
+                [hastag(%q0, customize)]
+                [and(not(hastag(%q0, finished)), 
+                     match(unfinished, first(name(%q0))))]
+                [hastag(%q1, ornamental)]);
+  
+  @switch/first %q9=
+	0?????, {@pemit %#=I don't see %0.},
+        ?0????, {@pemit %#=I don't see %1.},
+        ??0???, {@pemit %#=You can only unornament things that you
+                 created.},
+        ???0??, {@pemit %#=[name(%q0)] is not customizable.},
+        ????0?, {@pemit %#=Sorry, but [name(%q0)] is a finished 
+                        product. You can only unornament unfinished products.},
+        ?????0, {@pemit %#=Sorry, but [name(%q1)] does not appear to 
+                        be an ornamental substance.},
+
+# Error checking complete, so
+# a) teleport the ornament into the object it's to ornament.
+# b) lock the ornament to the object
+# c) force the player to pose that he or she has ornamented the object
+
+        111111, {@tel %q1=%L;
+                 @unlock %q1;
+                 @fpose %#=unornaments [name(%q0)] from [name(%q1)].;
+		 @tag %q1=!ornament},
+
+# default
+
+        {@pemit %#=Error: Admin have been alerted.;
+         @qmail steph/bug - unornament=Unexpected Condition: %q9}
+-
+
+######################################################################
+#		COMMAND: DESIGN <OBJECT> AS <PATTERN>                #
+#                        DESIGN <PATTERN OBJECT>=<PATTERN NAME>      #
+#                        DESIGN/LIST                                 #
+#                        DESIGN/DESTROY <PATTERN NAME>               #
+#                                                                    #
+# Allows players to store patterns that they can reproduce, and to   #
+# name and describe new objects according to those patterns.         #
+#                                                                    #
+# Where the bin of patterns is #444                                 #
+######################################################################
+# %q0 = dbref of object to serve as the pattern
+# %q1 = pattern name
+
+&cmd-design-pattern #30=$design *=*:
+  think setq(0, trim(%0));
+  think setq(0, locate(%#, %q0, *));
+  think setq(1, trim(%1));
+ 
+#-----------------------------------------------------------------------
+# Check to make sure we found the object that's to serve as a pattern
+# Check to see that the pattern object was created by %#
+# Check to see that the pattern object is of a customizable type
+# Check to see that the pattern object is a finished object
+# Check to see that the player doesn't already have more patterns than
+#       he or she can remember.
+# Check to see that the name of the pattern isn't longer than 30 letters
+#-----------------------------------------------------------------------
+  think setq(9, [isdbref(%q0)]
+                [strmatch(get(%q0/creator), %#)]
+                [hastag(%q0, customize)]
+                [and(hastag(%q0, finished), 
+                     not(match(unfinished, first(name(%q0)))))]
+                [or([lte(get(%#/num-patterns), mul(attribute(%#,intelligence), 4))],not(hasflag(%#,wizard)))]
+                [lt(strlen(%q1), 30)] );
+
+  @switch/first %q9=
+	0?????, {@pemit %#=I don't see %0.},
+        ?0????, {@pemit %#=You can only create patterns based on 
+                       objects that you created in the first place.},
+        ??0???, {@pemit %#=You may only create patterns for 
+                       customizable items.},
+        ???0??, {@pemit %#=You can only create patterns out of 
+                        finished items.},
+        ????0?, {@pemit %#=You can't remember any more patterns.},
+        ?????0, {@pemit %#=Your pattern name cannot be longer than 30  
+                           letters/characters long.},
+
+#----------------------------------------------------------------------
+# Error checking complete, so
+# a) duplicate the pattern object
+# b) name the duplicate like the pattern
+# c) describe the duplicate like the pattern
+# d) increment the number of patterns the player knows
+# e) store the dbref of the pattern object on the player
+# f) teleport the pattern to the storage bin for patterns
+#-----------------------------------------------------------------------
+
+         111111, {think setq(8, create(pattern, 10));
+                  @name %q8=[name(%q0)];
+                  &description %q8=[get(%q0/description)];
+                  @parent %q8=[parent(%q0)];
+                  &num-patterns %#=[inc(default(%#/num-patterns, 0))];
+                  &pat_[makeattr(%q1)] %#=%q8;
+                  @tel %q8 = #444;
+                  @pemit %#=Created Pattern Named: %q1 },
+
+# default
+
+	{@pemit %#=Error: Admin have been alerted.;
+         @qmail steph/bug-design-pattern=Unexpected Condition: %q9}
+-
+######################################################################
+#		COMMAND: DESIGN <OBJECT> AS <PATTERN>                #
+######################################################################
+# %q0 = dbref of object to be designed according to pattern
+# %q1 = dbref of the pattern 
+
+&cmd-design-as #30=$design * as *:
+  think setq(0, locate(%#, %0, *));
+  think setq(1, get(%#/pat_[makeattr(%1)]));
+
+#----------------------------------------------------------------------
+# Check to see that we found the object to be designed
+# Check to see that we found the pattern
+# Check to see that the object and pattern are of the same type
+#----------------------------------------------------------------------
+
+  think setq(9, [isdbref(%q0)]
+                [isdbref(%q1)]
+                [strmatch(get(%q0/currency), get(%q1/currency))]
+                [hastag(%q0, customize)]
+                [and(not(hastag(%q0, finished)), 
+                     match(unfinished, first(name(%q0))))]
+                [strmatch(get(%q0/creator), %#)]);
+ 
+  @switch/first %q9=
+	0?????, {@pemit %#=I don't see %0.},
+        ?0????, {@pemit %#=The only patterns you know are: 
+                    [iter(lcstr(lattr(%#/pat_*)), 
+                          edit(edit(##,pat_,),_,%b), %b, \,%b)]},
+        ??0???, {@pemit %#=Your pattern is for [get(%q1/currency)] 
+                        not for [get(%q0/currency)].},
+        ???0??, {@pemit %#=You can't design items that aren't customizable.},
+        ????0?, {@pemit %#=name(%q0) is a finished item.  You can't design it.},
+        ?????0, {@pemit %#=You can only design objects you created.},
+
+#-------------------------------------------------------------------------
+# Error Checking complete, so
+# a) force the player to name it like the pattern
+# b) force the player to describe it like the pattern
+# c) tell the player what you did
+#-------------------------------------------------------------------------
+
+        111111, {@fo %#=name [name(%q0)]=[name(%q1)];
+                 @desc %q0=[get(#128/desc)];
+                 &description %q0=[get(%q1/description)];
+                 @pemit %#=Designed [name(%q0)] to pattern. You may now 
+                     finish it.},
+
+# default
+
+       {@pemit %#=Error: Admin have been alerted.;
+        @qmail steph/Bug-design-as=Unexpected Condition: %q9}
+-
+######################################################################
+#		COMMAND: DESIGN/LIST                                 #
+######################################################################
+
+&cmd-design-list #30=$design/list:
+   @switch [words(lattr(%#/pat_*))]=
+	>0, {@pemit %#=
+              The patterns you know: 
+                    [iter(lcstr(lattr(%#/pat_*)), 
+                          edit(edit(##,pat_,),_,%b), %b, \,%b)]},
+        {@pemit %#=You don't seem to know any patterns.}
+-
+######################################################################
+#		COMMAND: DESIGN/DESTROY <PATTERN NAME>               #
+######################################################################
+# %q0 = dbref of the pattern to be destroyed
+
+&cmd-design-destroy #30=$design/destroy *:
+
+  think setq(0, get(%#/pat_[makeattr(%0)]));
+
+  @switch [isdbref(%q0)]=
+	1, {&pat_[makeattr(%0)] %#;
+            @zap %q0;
+            &num-patterns %#=[dec(default(%#/num-patterns, 1))];
+            @pemit %#=Pattern for %0 destroyed. },
+       {@pemit %#=You don't know any pattern named %0.  Consult 
+                   'design/list' for a list of patterns you know.}
+-
+
+#====================================================================#
+#                COMMAND: DESIGN/VIEW <PATTERN NAME>                 #
+#====================================================================#
+
+&CMD-DESIGN-VIEW #30=$design/view *:
+  
+  think setq(0, get(%#/pat_[makeattr(%0)]));
+
+  @switch [isdbref(%q0)]=
+     0, {@pemit %#=You don't know any pattern named %0.  Consult  
+                'design/list' for a list of patterns you know.},
+     1, {@pemit %#=Pattern Known As [capstr(%0)]:%R[get_eval(%q0/desc)]}
+       
+-
+
+#####################################################################
+#             COMMAND: SCENTDESCRIBE <OBJECT>                            #
+#                                                                   #
+# This command enables players to describe objects that they have   #
+# created if they're customizable.                                  #
+#####################################################################
+# %q0 = dbref of object to be described
+# %q9 = error checking message
+
+&cmd-scentdescribe #30=$scentdescribe *:
+  think setq(0, trim(%0));
+  think setq(0, locate(%#, %q0, *));
+
+# Check to see that we found the object to be described
+# Check to see if the item is customizable
+# Check to see if the object is already finished
+# Check to see that the player trying to desc it is the same as who
+#       created it
+  
+  think setq(9, [isdbref(%q0)]
+                [hastag(%q0, customize)]
+                [and(not(hastag(%q0, finished)), 
+                     match(unfinished, first(name(%q0))))]
+                [hastag(%q0,perfume)]
+                [strmatch(get(%q0/creator), %#)]);
+
+  @switch/first %q9=
+       0????, {@pemit %#=I don't see %0.},
+       ?0???, {@pemit %#=[name(%q0)] does not appear to be customizable.},
+       ??0??, {@pemit %#=It appears that [name(%q0)] is a finished item.},
+       ???0?, {@pemit %#=You can only describe the scents of perfume.}, 
+       ????0, {@pemit %#=You may only customize an item that you created.},
+       11111, {@program %#=me/prog-scentdescribe:
+                       Input the new scent description for [name(%q0)] 
+                       or type 'quit' to cancel:%xn}
+-
+# %q0 = the thing to be described
+# %0 = The description or quit
+
+&prog-scentdescribe #30=
+  @switch %0=
+     quit, {@pemit %#=Description Aborted.},
+
+# a) describe the item with the new description
+# b) tell the player what you did
+# c) force the player to look at the new description
+
+     {&desc-long %q0=[objeval(%#,%0)];
+      @pemit %#=Scent Described on new object.}
+
+-
+
+

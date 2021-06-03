@@ -1,0 +1,129 @@
+#
+# Library of Ufuns
+#
+
+#52
+@@ @create Ufun Library
+-
+@wipe #52
+-
+
+@set #52 = visual
+-
+
+&RCS #52 = 
+  $Id: ufun-lib.mux,v 1.3 1997/03/11 02:10:07 adam Exp $
+-
+
+
+@desc #52 = 
+
+%r
+u(u-flag, <flagsymbol>) -- returns flag name that corresponds to symbol%r
+u(u-lflags, <flagsymbols>) -- returns flag names corresponding to symbols%r
+
+%r
+-
+
+
+# u(u-flag, <flagletter>)
+#
+# Given a letter %0 in &flag-list, return the matching
+# flagname in &flag-names.
+#
+# Appends a space for use in a foreach().
+#
+&u-flag #52 = 
+  [extract(v(flag-names), pos(%0, v(flag-list)), 1)]%b
+-
+
+
+# u(u-lflags, <flagletters>)
+#
+# Given a list of flag letters or symbols, returns a list of corresponding
+# flag names.
+#
+&u-lflags #52 = 
+  foreach(u-flag, %0)
+-
+
+
+# Flags
+#
+# Note that PLAYER(P), ROOM(R), and EXIT(R) are special types,
+# not actual flags.
+#
+# For TinyMUX 1.2
+#
+@@ &flag-names #52 = 
+  abode ansi auditorium compress chown_ok has_daily player_mails dark 
+  floating going haven head inherit jump_ok key link_ok monitor nospoof 
+  opaque quiet staff sticky trace unfindable visual wizard parent_ok 
+  royalty fixed uninspected no_command nobleed audible connected 
+  destroy_ok enter_ok halted immortal light myopic puppet terse robot safe 
+  transparent suspect verbose slave has_startup has_forwardlist has_listen
+-
+#
+# For TinyMUX 1.3
+#
+# Added linewrap (>) flag for FiranMUX's local linewrap code by Lanya
+#
+@@&flag-names #52 = 
+  abode ansi auditorium compress chown_ok has_daily 
+  player_mails dark floating gagged going haven head 
+  inherit jump_ok key link_ok monitor nospoof opaque 
+  quiet staff sticky trace unfindable visual vacation 
+  wizard parent_ok royalty fixed uninspected no_command 
+  nobleed audible connected destroy_ok enter_ok halted 
+  immortal light myopic puppet terse robot safe 
+  transparent suspect verbose slave has_startup 
+  has_forwardlist has_listen html linewrap 
+-
+#
+# For TinyMUX 1.2
+#
+@@ &flag-list #52 = 
+  AXb.C*BDFGH?IJKLMNOQwSTUVWYZfgn-acdehilmpqrstuvx+&@
+-
+#
+# For TinyMUX 1.3
+#
+@@&flag-list #52 = 
+  AXb.C*
+  BDFjGH?
+  IJKLMNO
+  QwSTUV|
+  WYZfgn
+  -acdeh
+  ilmpqrs
+  tuvx+
+  &@)>
+-
+# For TinyMUSH 3.1
+flag-names #52 = abode blind chown_ok dark free 
+going haven inherit jump_ok key 
+link_ok monitor nospoof opaque quiet 
+sticky trace unfindable visual wizard 
+ansi parent_ok royalty audible bounce 
+connected destroy_ok enter_ok fixed 
+uninspected halted immortal gagged 
+constant light myopic auditorium 
+zone puppet terse robot safe 
+transparent suspect verbose staff 
+slave orphan control_ok stop 
+commands presence nobleed vacation 
+head watcher html redir_ok 
+speechmod marker0 marker1 
+marker2 marker3 marker4 marker5 
+marker6 marker7 marker8 marker9
+-
+# For TinyMUSH 3.1
+&flag-list #52 =
+   ABCDFGHIJK 
+   LMNOQSTUVW 
+   XYZabcdefg
+   hijklmnopq
+   rstuvwxyz!
+   $^-|?+~>"0
+   123456789
+-

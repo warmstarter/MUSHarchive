@@ -1,0 +1,84 @@
+RCS info
+
+Here's how to do stuff with the code.
+
+To update a file, do the following:
+In this exp I want to update vmhelm.c
+
+1) upload my code to a staging area(NOT the src tree, eg ~/stage)
+2) co vmhelm.c (This brings the vmhelm.c file into the src tree) 
+3) diff vmhelm.c ~/stage (You do this to make sure someone didn't change the rev while you were working on it.) 
+if the only changes werent the ones you made then:
+3.1a) co -l vmhelm.c (this locks the file so you can make changes) 
+3.2a) Merge the changes together
+3.3a) send mail yelling to everyone. 
+else: 
+3.1b) co -l vmhelm.c (this locks the file so you can make changes) 
+3.1b) mv ~/stage/vmhelm.c . 
+
+4) ci vmhelm.c 
+5) Record the changes as prompted.  You end by typing '.' on it's own line and hitting return. 
+6) co -l libvmspace.a 
+7) make
+8) ci libvmspace.a (record the changes, or just say '.')
+9) co libvmspace.a (this will use the new rev)
+10) make normally
+
+
+This may seem like alot, but it's really not.  As for things like the change log, I wouldn't mind seeing it used to say what you cnaged, but if not, then tha's fine.  Atleast put your name, so we know who changed it ;)
+
+DO NOT TOUCH ANYTHING IN THE RCS DIRECTORIES!!!!!!!!!!!  
+
+IF you do you will jeopardize our code.  If you ever possibly need to use the actual rcs command, backup the RCS directories first...
+
+Some interesting commands:
+
+rlog - shows all the changelog entries.  Very useful for backing out of revs.  
+
+ci - checkin's files.  dont use options to this please.. I think it'd be best if we kept with the default version numbers...
+co - checkout.  important options:
+
+-l - locks rev so you can mod it.  
+-r<num> - checks out a specific rev.  eg: co -r1.2 vmacctlist.c
+
+rcs - dont use this... please.. It's useful in setting locks and rm'ing em, but using it improper can cause the whole RCS directory to become corrupt... thus well and truly screwing us.
+
+rcsdiff - useful in finding out exactly what changed between revs: 
+
+Example:
+rcsdiff -r1.2 -r1.1 vmacctlist.c
+===================================================================
+RCS file: RCS/vmacctlist.c,v
+retrieving revision 1.2
+retrieving revision 1.1
+diff -r1.2 -r1.1
+1c1
+< static char *rcsvmacctlist="$Id: README,v 1.1 2001/01/19 23:12:21 wenk Exp $"
+---
+> /* $Id: README,v 1.1 2001/01/19 23:12:21 wenk Exp $ */
+
+
+make - The new make program mike uses is GNU Make.  It's very RCS aware.  
+
+
+Words of warning... Dont do it the old way... once you run make you will trash yyer file.  
+
+Dont TOUCH anything in the RCS directories. 
+
+always co -l to change stuff
+
+always use co w/o options to just look at stuff
+
+at the end you can do \rm -f *.c *.o *.h ../*.h ../*.c ../*.o from the vmspace directory and it will cleanup stuff
+
+to get the whole src tree, do a make out
+
+to get a gzipped tar version of it(un-RCS'd) do a make dist
+
+to get a gzipped tar version of it(RCSified) do a make rcsdist 
+
+That's about it.  
+
+Valcode/Vmspace are under RCS...
+
+Mike

@@ -1,0 +1,212 @@
+##  
+##	Random Gene Programmer For Mice
+##
+## 	This program is meant to work in conjunction with the:
+## 	Create Breeding Mice Program.  The Create Breeding Mice Program
+##	sets up a basic mouse capable of reproduction.  This program is
+##	meant to set some random genes on the first generation mice before
+##	sending them out to breed and evolve.
+##	
+##	In all cases, %0 is meant to represent the mouse that is being 
+##	programmed with random genes.
+##
+
+#23
+@@ @create Rodent God
+-
+@set Rodent God=wizard
+-
+@power Rodent God=builder
+-
+
+&notify-list Rodent God=waylon mike
+-
+
+&race Rodent God = mouse
+-
+&kids Rodent God = 0
+-
+&age Rodent God = 0
+-
+&generation Rodent God = 0
+-
+&zap-mice Rodent God=@zap %#
+-
+
+&gene-types Rodent God=lifespan furcolor size aggression
+-
+#
+#     Where: generic-gene-##-(0-4) represent the kinds of traits a 
+#            mouse can have: ie. black fur, brown fur, spotted fur.
+#
+#
+
+&generic-gene-furcolor-0 Rodent God = blond
+-
+
+&generic-gene-furcolor-1 Rodent God = brown
+-
+
+&generic-gene-furcolor-2 Rodent God = black
+-
+
+&generic-gene-furcolor-3 Rodent God = white
+-
+
+&generic-gene-furcolor-4 Rodent God = spotted
+-
+#
+#	Where u-how-many-## refers to how many different kinds of
+#	genes there might be for each trait: ie. five fur colors,
+#	three sizes, etc.
+#
+
+
+&u-how-many-furcolor Rodent God=5
+-
+
+
+
+&generic-gene-lifespan-0 Rodent God=10
+-
+
+&generic-gene-lifespan-1 Rodent God=30
+-
+
+&generic-gene-lifespan-2 Rodent God=50
+-
+
+&generic-gene-lifespan-3 Rodent God=100
+-
+
+&generic-gene-lifespan-4 Rodent God=150
+-
+&u-how-many-lifespan Rodent God=5
+-
+
+&generic-gene-aggression-0 Rodent God=aggressive
+
+-
+&generic-gene-aggression-1 Rodent God=passive
+-
+&u-how-many-aggression Rodent God=2
+-
+
+&generic-gene-size-0 Rodent God=1
+-
+&generic-gene-size-1 Rodent God=2
+-
+&generic-gene-size-2 Rodent God=3
+-
+&u-how-many-size Rodent God=3
+-
+
+&recessive-genes-size Rodent God=3
+-
+&recessive-genes-aggression Rodent God=aggressive
+-
+&recessive-genes-furcolor Rodent God = white blond spotted
+-
+&recessive-genes-lifespan Rodent God=150 10
+-
+
+
+&u-is-recessive-furcolor Rodent God = t(member(v(recessive-genes-furcolor),%0))
+-
+&u-is-recessive-lifespan Rodent God = t(member(v(recessive-genes-lifespan),%0))
+-
+&u-is-recessive-aggression Rodent God=t(member(v(recessive-genes-aggression),%0))
+-
+&u-is-recessive-size Rodent God=t(member(v(recessive-genes-size),%0))
+-
+&birth-routine Rodent God=@set %#=halt;@set %#=!halt	
+-
+
+&cmd-generic-mouse Rodent God=$generic *:
+	think setq(0, locate(%#, %0, *T)); 
+	@switch %q0 =
+	#-1, {@pemit %# = I don't see '%0' here.},
+	#-2, {@pemit %# = I don't know which one you want to set up.}, 
+	{
+		@lock/use %q0 = =%q0; 
+		@pemit %# = Creating mouse baby %q0.; 
+		@name %q0 = mouse baby; 
+		@tr me/generic-parent-gene-setter = %q0;
+		@wait 10 = @tr %q0/select-genes = %q0
+	}
+-
+
+&generic-parent-gene-setter Rodent God=
+  @dolist v(gene-types)=
+   {
+	&gene-mother-## %0=
+		[v(generic-gene-##-[rand(u(u-how-many-##))])]
+    }
+   ;
+   @dolist v(gene-types)=
+    {
+	&gene-father-## %0=
+		[v(generic-gene-##-[rand(u(u-how-many-##))])]
+     }
+
+-
+&u-random-sex Rodent God = ifelse(gt(die(1,100), 50),male,female)
+-
+# Compare two mice, %0 and %1, and return 1 if they have opposite sex.
+# 
+&u-is-opposite-sex Rodent God = 
+	switch([u(u-sex, get(%0/sex))]-[u(u-sex, get(%1/sex))],
+	male-female, 1,
+	female-male, 1,
+		0
+	)
+-
+
+&u-random-parent Rodent God = 
+	ifelse(rand(2), mother, father)
+-
+
+
+
+# %0 is questionable sex value
+#
+&u-sex Rodent God = switch(%0, m*, male, f*, female, neuter)
+-
+
+
+
+
+
+
+# 	In case this easier thing is needed to pick a random 
+#       aggression gene:
+@@ &u-random-aggression Rodent God = 
+  ifelse(gt(die(1,100),50),aggressive,passive) 
+-
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

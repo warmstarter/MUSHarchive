@@ -1,0 +1,98 @@
+@create %crGeneric Container%cn%cn=10
+-
+@Adesc Generic Container=@switch [hastag(%!, closed)]0=
+                          ?1,{@pemit %#=The [name(%!)] is covered in icky garbage.},
+                          10,{@pemit %#=The [name(me)] is currently closed.}
+-
+&TAGS Generic Container=!fractional container groupable inspected repairable dumpable
+-
+&AUTHOR Generic Container=jen
+-
+&WEIGHT Generic Container=2
+-
+&REGISTRY Generic Container=Generic-Container
+-
+@lock Generic Container/REGISTRY
+-
+&GOODNAME Generic Container=container
+-
+&DAMAGE Generic Container=3
+-
+&COMMENTS Generic Container=%rA non-descript thing that needs to be described.%r
+-
+&CAPACITY Generic Container=10000
+-
+&SPEED Generic Container=10
+-
+&AEXTRACT Generic Container=@set %1=enter_ok
+-
+&TRIG-FINAL-MAKE Generic Container=@set %1=wizard;@set %1=enter_ok
+-
+&VOLUME Generic Container=1
+-
+&DAMAGE-CLASS Generic Container=bashing
+-
+&FABRIC Generic Container=wood
+-
+&MAX-DAMAGE Generic Container=15
+-
+&VERBS-THROWN-BASHING Generic Container=throws hurls heaves
+-
+@set Generic Container=STICKY
+-
+@set Generic Container=WIZARD
+-
+@set Generic Container=UNINSPECTED
+-
+@set Generic Container=SAFE
+-
+@set Generic Container=PARENT
+-
+@power Generic Container=no_destroy
+-
+@power Generic Container=immutable
+-
+@parent Generic Container=#128
+-
+
+@create Generic Container with Lock=10
+-
+&TAGS Generic Container with Lock=!locked lockable container !closed
+-
+&REGISTRY Generic Container with Lock=Generic-Container-with-Lock
+-
+@lock Generic Container with Lock/REGISTRY
+-
+&LOCKED Generic Container with Lock=[hastag(me, locked)]
+-
+&DESCRIPTION Generic Container with Lock=A container with a lock.
+-
+&MAXQUALITY Generic Container with Lock=2500
+-
+&IS-LOCKED Generic Container with Lock=[or(hastag(%!, locked), hastag(%!, barred), hastag(%!, gated), hastag(%!, latched))]
+-
+&IS-CLOSED Generic Container with Lock=[hastag(%!, closed)]
+-
+@lock Generic Container with Lock=IS-LOCKED/0
+-
+@set Generic Container with Lock=WIZARD
+-
+@set Generic Container with Lock=PARENT_OK
+-
+@set Generic Container with Lock=UNINSPECTED
+-
+
+@create Generic Container with Door=10
+-
+&TAGS Generic Container with door=!locked container !closed closable
+-
+&IS-CLOSED Generic Container with Door=[hastag(%!, closed)]
+-
+@set Generic Container with Door=WIZARD
+-
+@set Generic Container with Door=PARENT_OK
+-
+@set Generic Container with Door=UNINSPECTED
+-
+@parent Generic Container with Door=#128
+-

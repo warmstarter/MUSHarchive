@@ -1,0 +1,302 @@
+
+@Desc #363=%rThis is a shiny new shovel, used for descing and 
+more.%r[switch(u(is-builder), 1, Type '@shovel help' for a list of 
+commands.%r)]
+-
+@Startup #363=@drain me; @notify me
+-
+@lock/UseLock #363=IS-BUILDER/1
+-
+&IS-BUILDER #363=[or(haspower(%#, builder), hasflag(%#, wizard))]
+-
+&SEASON #363=summer
+-
+&TIME-OF-DAY #363=dawn
+-
+&CMD-HELP #363=$@shovel help: @pemit %# = Commands:%r%r@shovel 
+next%r%b %b cycle through all the season/time-of-day combinations,%r%b %b 
+showing you the description of each one in turn.%r@shovel <aspect>%r%b %b 
+<aspect> = day, night, spring, summer, fall, winter%r%b %b choose this aspect 
+as the current setting for the next shovel command%r@shovel formats%r%b %b 
+list the room description formats that are available for the shovel%r@shovel 
+format <formatname>%r%b %b install the specified description format on the 
+current room%r@shovel dig <segment> = <description>%r%b %b writes the 
+description for the time of day, etc.%r%b %b valid segments are 
+[v(valid-segments)]%r%b %b (note to coders: pre-evaluates the description)%r
+-
+&CMD-DAY #363=$@shovel day:&time-of-day me = day
+-
+&CMD-NIGHT #363=$@shovel night:&time-of-day me = night
+-
+&CMD-SUMMER #363=$@shovel summer: &season me = summer
+-
+&CMD-SPRING #363=$@shovel spring:&season me = spring
+-
+&CMD-FALL #363=$@shovel fall:&season me = fall
+-
+&CMD-FALL-ALIAS #363=$@shovel autumn:&season me = fall
+-
+&CMD-WINTER #363=$@shovel winter:&season me = winter
+-
+&CMD-INSPECT #363=$@shovel inspect: &room-desc me = 
+edit(edit(get(%L/desc), me/, %L/), #63, me);@pemit %# = 
+%xh[capstr(v(season))]/[capstr(v(time-of-day))]%xn%r[get_eval(me/room-desc)]
+-
+&CMD-NEXT #363=$@shovel next:@tr 
+me/[v(season)]-[v(time-of-day)];@wait 0 = {&room-desc me = 
+edit(edit(get(%L/desc), me/, %L/), #63, me);@pemit %# = 
+%xh[capstr(v(season))]/[capstr(v(time-of-day))]%xn%r[get_eval(me/room-desc)]}
+-
+&SUMMER-DAWN #363=&time-of-day me = day
+-
+&SUMMER-DAY #363=&time-of-day me = dusk
+-
+&SUMMER-DUSK #363=&time-of-day me = night
+-
+&SUMMER-NIGHT #363=&time-of-day me = dawn; &season me = fall
+-
+&FALL-DAWN #363=&time-of-day me=day
+-
+&FALL-DAY #363=&time-of-day me=dusk
+-
+&FALL-DUSK #363=&time-of-day me=night
+-
+&FALL-NIGHT #363=&time-of-day me = dawn; &season me = winter
+-
+&WINTER-DAWN #363=&time-of-day me=day
+-
+&WINTER-DAY #363=&time-of-day me = dusk
+-
+&WINTER-DUSK #363=&time-of-day me=night
+-
+&WINTER-NIGHT #363=&time-of-day me = dawn; &season me = spring
+-
+&SPRING-DAWN #363=&time-of-day me=day
+-
+&SPRING-DAY #363=&time-of-day me = dusk
+-
+&SPRING-DUSK #363=&time-of-day me=night
+-
+&SPRING-NIGHT #363=&time-of-day me = dawn; &season me = summer
+-
+&CMD-FORMAT-STUB #363=$@shovel format: @pemit %# = Syntax: @shovel 
+format <format name>
+-
+&CMD-FORMAT #363=$@shovel format *: @switch hasattrp(me, format-%0) 
+= 1, {&save-desc-%L me = get(%L/desc);@desc %L = v(format-%0);@pemit %# = New 
+description format installed in the current room.}, {@pemit %# = There is no 
+such format. Type '@shovel formats' for a list of valid formats.}
+-
+&CMD-FORMATS #363=$@shovel formats: @pemit %# = Description 
+formats:%r[iter(lattrp(#363/format-*),%r[ansi(rh, clip(##))] -- 
+[v(formatdesc-[rest(##,-)])])]
+
+-
+&FORMAT-STANDARD #363=%r[get_eval(me/desc-general)]%b[get_eval(me/desc-[get(#63/time-of-day)])
+]%b[get_eval(me/desc-[get(#63/season)])]%r%r
+-
+&FORMATDESC-STANDARD #363=3-part with general desc, time-of-day 
+desc, and season desc
+-
+&CMD-UNDO #363=$@shovel undo *: @switch %0 =format, {@switch 
+hasattr(me, save-desc-%L) = 1, {@wait me = {&temp me = get(%L/desc); @desc %L 
+= v(save-desc-%L);&save-desc-%L me = v(temp);&temp me;@pemit %# = Room 
+description format reset.; @notify me}, {@pemit %# = No undo information for 
+this room's format.}}, {@pemit %# = I don't know how to undo that. Valid 
+choices are:%bformat}
+-
+&VALID-SEGMENTS #363=general day night dawn dusk summer spring fall winter  
+day-winter night-winter day-spring night-spring day-summer night-summer 
+day-fall night-fall dawn-winter dusk-winter dawn-spring dusk-spring dawn-summer dusk-summer 
+dawn-fall dusk-fall inside outside local normal expert new worn broken
+
+-
+&CMD-DIG #363=$@shovel dig *=*: @switch member(v(valid-segments), 
+trim(%0)) = 0, {@pemit %# = Valid room description segments are: %r%b 
+[v(valid-segments)]}, {&desc-[trim(%0)] %L = %1;@switch hasattr(%#, signature) 
+= 1, &author %L = get(%#/signature),&author %L = %N;@pemit %# = Room 
+description segment '[trim(%0)]' set.}
+-
+&REGISTRY #363=Shovel
+-
+@lock #363/REGISTRY
+-
+&FORMAT-COMBINED #363=%r[get_eval(me/desc-[get(#63/time-of-day)]-[get(#63/season)])]%r%r
+-
+&FORMATDESC-COMBINED #363=This will be a description that combines 
+season and time of day.
+-
+&FORMAT-COMB-LOC #363=%r[get_eval(me/desc-general)]%b[get_eval(me/desc-[get(#63/time-of-day)]-
+[get(#63/season)])]%b[get_eval(me/desc-local)]%r%r
+-
+&FORMATDESC-COMB-LOC #363=For rooms with a parent; like 
+combined-general with a local segment
+-
+&FORMAT-HERB #363=%r[get_eval(me/desc-normal)]%r%r[switch(gte(skill(%#,herb), 
+default(me/difficulty,3)), 1, get_eval(me/desc-expert))]%r
+-
+&FORMATDESC-HERB #363=Description that reveals more information for 
+those with herbalism.
+-
+&FORMAT-INSIDE #363=%r[get_eval(me/desc-[get(#63/time-of-day)])]%r%r
+-
+&FORMATDESC-INSIDE #363=For inside rooms--just has night and day 
+segments.
+-
+&FORMAT-INSIDE-GENERAL #363=%r[get_eval(me/desc-general)]%b[get_eval(me/desc-[get(#63/time-of-day)])
+]%r%r
+-
+&FORMATDESC-INSIDE-GENERAL #363=For inside rooms--just has general, 
+night and day segments.
+-
+&FORMAT-COMBINED-GENERAL #363=%r[get_eval(me/desc-general)]%b[get_eval(me/desc-[get(#63/time-of-day)]-
+[get(#63/season)])]%r%r
+-
+&FORMATDESC-COMBINED-GENERAL #363=Like 'combined' but with a general 
+segment.
+-
+&ACREATE #363=@name me=Shovel for [name(owner(me))];@lock/uselock 
+me=[owner(me)];@pemit [owner(me)]=Done.
+-
+&FORMATDESC-LOC-COMBINED #363=Same as comb-loc, but with local 
+segment first
+-
+&FORMAT-LOC-COMBINED #363=%r[get_eval(me/desc-local)]%b[get_eval(me/desc-general)]%b[get_eval(me/d
+esc-[get(#63/time-of-day)]-[get(#63/season)])]%r%r
+-
+&FORMATDESC-STANDARD-LOC #363=Like standard, but with a local 
+segment (last).
+-
+&FORMAT-STANDARD-LOC #363=%r[get_eval(me/desc-general)]%b[get_eval(me/desc-[get(#63/time-of-day)])
+]%b[get_eval(me/desc-[get(#63/season)])]%r%r[get_eval(me/desc-local)]%r%r
+-
+&FORMAT-tools #363 =
+%r
+[switch(1, lte(v(quality), div(v(maxquality),2)), get_eval(me/desc-worn),
+           eq(v(quality), 0), get_eval(me/desc-broken),
+           get_eval(me/desc-new))]
+%r
+-
+&FORMATDESC-tools #363=
+  Has three segments: new, worn, and broken
+-
+
+@set #363=WIZARD
+-
+@set #363=SAFE
+-
+@power #363=builder
+-
+&cmd-random-help #363 = $@shovel random help:
+    @pemit %# =Shovel Random Commands:%r%rUsing a group of random descs to
+	           create a new, final one is easy. Check this out: The parent
+			   object has a number of descs stored in a
+format such as:
+			   &RANDDESC-GENERAL1, &RANDDESC-GENERAL2,
+etc... The commands grab
+			   a single one of each desc piece (general,
+day, night, etc)
+			   randomly and put it on your new object, as well as setting the
+			   object's parent. It's really slick, trust me. Anyway, there are two commands:%r%r1. @shovel random help: This bit.%r%r2. @shovel
+			   random <format> the <object> as <parent>%r%r<format> is any one
+			   of the normal formats on the shovel. Type '@shovel formats' for a
+			   list. Note, however, that some of them probably aren't done yet.
+			   Standard works. :)%r<object> can be any object, including 'here'.
+			   You probably don't want to put 'me' in here, but
+			   whatever...%r<parent> is the name of a parent in the registry,
+			   and must be one which is able to 'do' random descs... For info on
+			   creating that, type '@shovel random creating'.%r%rFor now, note
+			   that standard, standard-loc and comb-loc are the only ones finished.
+-
+&cmd-random-creating #363 = $@shovel random creating:
+    @pemit %# =The process of making up a new random-desc object is not all that
+	           hard, but involves a number of steps. Also, adept coders should
+			   have no problem adapting the original code to handle any new
+			   formats. The best source for info regarding this code is, of
+			   course, ME!%r%rOkay, first off: Create a new parent (or find one
+			   that you want to turn into a random parent :)).%r2. Make sure it
+			   is correctly set up as normal (see 'help parents').%r3. Set
+			   'israndom' as a tag, and be sure your new parent is in the
+			   registry ('help registry').%r%rContinued in '@shovel random
+			   creating2'...
+-
+&cmd-random-creating2 #363 = $@shovel random creating2:
+    @pemit %# =%r%rOkay, on with the instructions:%r%r4. Start adding &RANDDESC
+	           attributes!  A couple notes:%r%b%b%b%ba. They need to be in a
+			   format usable by the shovel, with fragments such as General, Day,
+			   Night, etc. So the attributes would go &RANDDESC-DAY1,
+			   &RANDDESC-DAY2, etc.%r%%b%b%b%bb. You don't need to include them
+			   all. If you want to just randomize the General fragment, add
+			   RANDDESC's for General, and then set a normal Day, Night (and so
+			   on) on the parent. The randomizer will use the normal descs when
+			   desired, and whatever random descs exist.%r%rAnd that's about it.
+			   You should be able to type '@shovel random <format> the <object>
+			   as <Your new parent's registered name!> and it should work. If it
+			   doesn't, ask someone like me (Jesse) to see what's going on.		
+-
+&cmd-random #363 = $@shovel random * the * as *:
+    @switch/first 
+	  [t(registry(%2))]
+	  [hastag(registry(%2), israndom)]
+	  [hasattr(me, randomformat-%0)]=
+	  0??, {@pemit %#=Sorry but %2 isn't in the registry}, 
+	  ?0?, {@pemit %#=Sorry, but %2 needs to be tagged 'israndom' to be used.},
+	  ??0, {@pemit %#=Sorry, but that's an invalid random format}, 
+	     {@rparent [switch(%1, here, %L, %1)]=%2;
+		  @tr me/randomformat-%0=[switch(%1, here, %L, %1)],%2;
+		  @pemit %#=Random description installed from parent. . . }
+-
+&randomformat-standard #363=
+  @desc %0 = get(me/format-standard);
+  &desc-general %0 =
+    get(registry(%1)/[first(shuffle(lattr(registry(%1)/randdesc-general*)))]) ;
+  &desc-day     %0 =
+    get(registry(%1)/[first(shuffle(lattr(registry(%1)/randdesc-day*)))]) ;
+  &desc-night   %0 =
+    get(registry(%1)/[first(shuffle(lattr(registry(%1)/randdesc-night*)))]) ;  
+  &desc-spring  %0 = 
+    get(registry(%1)/[first(shuffle(lattr(registry(%1)/randdesc-spring*)))]) ;
+  &desc-summer  %0 = 
+    get(registry(%1)/[first(shuffle(lattr(registry(%1)/randdesc-summer*)))]) ; 
+  &desc-fall    %0 = 
+    get(registry(%1)/[first(shuffle(lattr(registry(%1)/randdesc-fall*)))]) ;
+  &desc-winter  %0 = 
+    get(registry(%1)/[first(shuffle(lattr(registry(%1)/randdesc-winter*)))])
+-
+&randomformat-standard-loc #363=@desc %0 =
+  get(me/format-standard-loc);
+  &desc-general %0 =
+    get(registry(%1)/[first(shuffle(lattr(registry(%1)/randdesc-general*)))]) ;
+  &desc-day     %0 =
+    get(registry(%1)/[first(shuffle(lattr(registry(%1)/randdesc-day*)))]) ; 
+  &desc-night   %0 =     
+    get(registry(%1)/[first(shuffle(lattr(registry(%1)/randdesc-night*)))]) ;   
+  &desc-spring  %0 =    
+    get(registry(%1)/[first(shuffle(lattr(registry(%1)/randdesc-spring*)))]) ; 
+  &desc-summer  %0 =    
+    get(registry(%1)/[first(shuffle(lattr(registry(%1)/randdesc-summer*)))]) ;  
+  &desc-fall    %0 =    
+    get(registry(%1)/[first(shuffle(lattr(registry(%1)/randdesc-fall*)))]) ; 
+  &desc-winter  %0 =    
+    get(registry(%1)/[first(shuffle(lattr(registry(%1)/randdesc-winter*)))]) 
+-
+&randomformat-comb-loc #363=
+  @desc %0 = get(me/format-comb-loc);
+  &desc-general %0 =
+    get(registry(%1)/[first(shuffle(lattr(registry(%1)/randdesc-general*)))]) ;
+  &desc-day-summer %0 =
+    get(registry(%1)/[first(shuffle(lattr(registry(%1)/randdesc-day-summer*)))]) ;
+  &desc-day-spring %0 = 
+    get(registry(%1)/[first(shuffle(lattr(registry(%1)/randdesc-day-spring*)))]) ;
+  &desc-day-fall %0 = 
+    get(registry(%1)/[first(shuffle(lattr(registry(%1)/randdesc-day-fall*)))]) ;
+  &desc-day-winter %0 = 
+    get(registry(%1)/[first(shuffle(lattr(registry(%1)/randdesc-day-winter*)))]) ;
+  &desc-night-summer %0 = 
+    get(registry(%1)/[first(shuffle(lattr(registry(%1)/randdesc-night-summer*)))]) ;
+  &desc-night-spring %0 = 
+    get(registry(%1)/[first(shuffle(lattr(registry(%1)/randdesc-night-spring*)))]) ;
+  &desc-night-fall %0 = 
+    get(registry(%1)/[first(shuffle(lattr(registry(%1)/randdesc-night-fall*)))]) ;
+  &desc-night-winter %0 = 
+    get(registry(%1)/[first(shuffle(lattr(registry(%1)/randdesc-night-winter*)))]) ;

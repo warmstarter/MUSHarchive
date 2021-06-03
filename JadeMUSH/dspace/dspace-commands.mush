@@ -1,0 +1,272 @@
+############################################################################
+#
+#  @dspace commands:    Written by Adam
+#			Reconstructed for CVS by Steven
+#
+#  This file contains commands for manipulating dspace room and exits,
+#  written as @ds/*
+#
+############################################################################
+
+#
+#  First, set up some of the flags and other settings for #9
+#
+
+@ufail #9=That command works only in dynamic space rooms.
+-
+@amove #9=@tel me=#2
+-
+@lock/useLock #9=IS-WIZARD-OR-ROYAL/1|IS-IN-DSPACE/1
+-
+@set #9=wizard
+-
+@set #9=safe
+-
+@set #9=immortal
+-
+&TAGS #9=master_object
+-
+&DYNAMIC-ARRAY-OBJECT #9=#103
+-
+
+#
+# @ds commands
+#
+
+&CMD-SUCC-HERE #9=$@ds?succ here=*:
+  @succ %L = %1;
+  &succ-[get(%L/xcoor)].[get(%L/ycoor)].[get(%L/zcoor)] 
+        [get(%L/dynamic-array-object)] = %1;
+  @pemit %# = Succ set.
+-
+
+&CMD-NAME-HERE #9=$@ds?name here=*:
+  @name %L = %1;
+  &name-[get(%L/xcoor)].[get(%L/ycoor)].[get(%L/zcoor)] 
+        [get(%L/dynamic-array-object)] = %1;
+  @pemit %# = Name set.
+-
+
+&CMD-COORDS #9=$@ds?coords:
+  @pemit %# = [setq(0, get(%L/xcoor))][setq(1, get(%L/ycoor))]
+         [setq(2, get(%L/zcoor))]X,Y,Z = %q0, %q1, %q2%t([abs(%q1)]
+         [ifelse(gte(%q1, 0), N, S)], [abs(%q0)][ifelse(gte(%q0, 0), E, W)])%r
+-
+
+&CMD-FIX-HERE #9=$@ds?fix here:
+  @aleave %L = #;
+  @pemit %# = Room fixed.
+-
+
+&CMD-PARENT-HERE #9=$@ds?parent here=*:
+  @switch member(lparent(%L), #101) = 
+    0, {@pemit %# = To do that would be pure folly.}, 
+       {@parent %L = %1;
+        &parent-[get(%L/xcoor)].[get(%L/ycoor)].[get(%L/zcoor)] 
+                [get(%L/dynamic-array-object)] = %1;
+        @pemit %# = Parent set.}
+-
+
+&CMD-HIDE-EXIT #9=$@ds?hide exit=*:
+  @switch setr( 0, locate(%L, %1, c) ) = 
+    #-1, {@pemit %# = I don't see that exit here.},
+    #-2, {@pemit %# = I don't know which exit you mean!}, 
+         {&dark_exits %L = setunion(get(%L/dark_exits), lcstr(name(%q0)),|);
+          &dark_exits-[get(%L/xcoor)].[get(%L/ycoor)].[get(%L/zcoor)] 
+                      [get(%L/dynamic-array-object)] = get(%L/dark_exits);
+         @pemit %# = Exit hidden.}
+-
+
+&CMD-SHOW-EXIT #9=$@ds?show exit=*:
+  @switch setr( 0, locate(%L, %1, c) ) = 
+    #-1, {@pemit %# = I don't see that exit here.},
+    #-2, {@pemit %# = I don't know which exit you mean!},
+         {&dark_exits %L = setdiff(get(%L/dark_exits), lcstr(name(%q0)), |);
+          &dark_exits-[get(%L/xcoor)].[get(%L/ycoor)].[get(%L/zcoor)] 
+              [get(%L/dynamic-array-object)] = get(%L/dark_exits);
+          @pemit %# = Exit revealed.}
+-
+
+&CMD-HIDDEN-EXITS #9=$@ds?* hidden exits:
+  @switch member(show view list, %0) = 
+    >0, {@pemit %# = Hidden exits: [edit(get(%L/dark_exits),|,%b%b)]},
+        {@huh %#}
+-
+
+&CMD-BLOCK-EXIT #9=$@ds?block exit=*:
+  @switch setr( 0, locate(%L, %1, c) ) = 
+    #-1, {@pemit %# = I don't see that exit here.},
+    #-2, {@pemit %# = I don't know which exit you mean!},
+         {&blocked_exits %L = setunion(get(%L/blocked_exits), 
+                              lcstr(name(%q0)),|);
+          &blocked_exits-[get(%L/xcoor)].[get(%L/ycoor)].[get(%L/zcoor)] 
+                  [get(%L/dynamic-array-object)] = get(%L/blocked_exits);
+          @pemit %# = Exit blocked.}
+-
+
+&CMD-OPEN-EXIT #9=$@ds?open exit=*:
+  @switch setr( 0, locate(%L, %1, c) ) = 
+    #-1, {@pemit %# = I don't see that exit here.},
+    #-2, {@pemit %# = I don't know which exit you mean!},
+         {&blocked_exits %L = setdiff(get(%L/blocked_exits),
+                              lcstr(name(%q0)),|);
+          &blocked_exits-[get(%L/xcoor)].[get(%L/ycoor)].[get(%L/zcoor)]
+                      [get(%L/dynamic-array-object)] = get(%L/blocked_exits);
+          @pemit %# = Exit opened.}
+-
+
+&CMD-BLOCKED-EXITS #9=$@ds?* blocked exits:
+  @switch member(show view list, %0) = 
+    >0, {@pemit %# = Blocked exits: [edit(get(%L/blocked_exits),|,%b%b)]},
+        {@huh %#}
+-
+
+&CMD-TELTO2 #9=$@ds?telto * * *:
+  @wait [get(#101/dynamic-array-object)] = {
+    @trigger get(#101/exit_parent)/[setq( 7, add(%1, 0) )]
+              [setq( 8, add(%2, 0) )][setq( 9, add(%3, 0) )]
+              [switch(0, u(#101/inbounds, %q7, %q8, %q9), dummy,
+              comp(get([get(#101/dynamic-array-object)]/num-%q7.%q8.%q9),), 
+              alloc_room, tel_to_room)] = %#, %L, %n, %q7, %q8, %q9}
+-
+&cmd-telto #9=$@ds?telto * * *=*:
+  @wait [get(#101/dynamic-array-object)] = {
+    @trigger get(#101/exit_parent)/[setq( 7, add(%1, 0) )]
+              [setq( 8, add(%2, 0) )][setq( 9, add(%3, 0) )]
+              [switch(0, u(#101/inbounds, %q7, %q8, %q9), dummy,
+              comp(get([get(#101/dynamic-array-object)]/num-%q7.%q8.%q9),), 
+              alloc_room, tel_to_room)] = %4, %L, %n, %q7, %q8, %q9}
+-
+
+&CMD-DS-BLOCK-DIAGONALS #9=$@ds?block diagonals:
+@force %# = {@ds/block exit=northwest;
+             @ds/block exit=northeast;
+             @ds/block exit=southeast;
+             @ds/block exit=southwest}
+-
+
+&CMD-DS-HIDE-DIAGONALS #9=$@ds?hide diagonals:
+@force %# = {@ds/hide exit=northwest;
+             @ds/hide exit=northeast;
+             @ds/hide exit=southeast;
+             @ds/hide exit=southwest}
+-
+
+&CMD-DS-HIDE-AND-BLOCK-DIAGONALS #9=$@ds?hide and block diagonals:
+@force %# = {@ds/hide exit=northwest;
+             @ds/hide exit=northeast;
+             @ds/hide exit=southwest;
+             @ds/hide exit=southeast;
+             @ds/block exit=northwest;
+             @ds/block exit=northeast;
+             @ds/block exit=southwest;
+             @ds/block exit=southeast}
+-
+
+&CMD-DS-BLOCK-AND-HIDE-DIAGONALS #9=$@ds?block and hide diagonals:
+  @force %# = {@ds/hide exit=northwest;
+               @ds/hide exit=northeast;
+               @ds/hide exit=southwest;
+               @ds/hide exit=southeast;
+               @ds/block exit=northwest;
+               @ds/block exit=northeast;
+               @ds/block exit=southwest;
+               @ds/block exit=southeast}
+-
+
+&CMD-DS-HIDE-AND-BLOCK #9=$@ds?hide and block exit=*:
+ @force %# = {@ds/hide exit=%1;
+              @ds/block exit=%1}
+-
+
+&CMD-DS-BLOCK-AND-HIDE #9=$@ds?block and hide exit=*:
+  @force %# = {@ds/hide exit=%1;
+               @ds/block exit=%1}
+-
+
+&CMD-DESC-HERE #9=$@ds?desc here=*:
+  @desc %L = %1;
+  &desc-[get(%L/xcoor)].[get(%L/ycoor)].[get(%L/zcoor)] 
+        [get(%L/dynamic-array-object)] = %1;
+  @pemit %# = Desc set.
+-
+
+&CMD-UNHIDE-EXIT #9=$@ds?unhide exit=*:
+  @force %# = @ds/show exit=%1
+-
+
+&CMD-UNBLOCK-EXIT #9=$@ds?unblock exit=*:
+  @force %# = @ds/open exit=%1
+-
+
+&CMD-MAP-HERE #9=$@ds?map here=*:
+  &map-[get(%L/xcoor)].[get(%L/ycoor)].[get(%L/zcoor)] 
+       [get(%L/dynamic-array-object)] = %1;
+  @pemit %# = Map symbol set.
+-
+
+&CMD-SETMAP #9=$@setmap *:
+  &map-[get(%L/xcoor)].[get(%L/ycoor)].[get(%L/zcoor)] 
+       [get(%L/dynamic-array-object)] = %0;
+  @pemit %# = Map symbol set.
+-
+&CMD-REPAIR-HERE #9=$@ds?repair here:
+
+  @switch [isdspace(%L)]=
+   0, { @pemit %#=You are not in a dspace room! },
+   1, {
+
+# Fix the endless-looping desc problem.
+
+     @unlock %L ;
+
+# Fix any unlocked exits.
+
+     @lock #104=[%#]&![%#] ;
+     @lock #105=[%#]&![%#] ;
+     @lock #106=[%#]&![%#] ;
+     @lock #107=[%#]&![%#] ;
+     @lock #108=[%#]&![%#] ;
+     @lock #109=[%#]&![%#] ;
+     @lock #110=[%#]&![%#] ;
+     @lock #111=[%#]&![%#] ;
+     @lock #112=[%#]&![%#] ;
+     @lock #113=[%#]&![%#] ;
+
+# Inform the person of various useful bits for the room.
+
+     @pemit %#=Locks ensured correct for dspace and this room. ;
+
+     @pemit %#=The current dspace room is 
+       [ansi(h,ifelse(strmatch(get(%L/aleave),#),Fixed,Not Fixed))].%r%tTo 
+       change this, use '@ds/fix here' or '@ds/unfix here'. ;
+
+     @pemit %#=The current dspace room has the following exits blocked: 
+       [get(%L/blocked_exits)].%r%tTo unblock one of these exits, 
+       use '@ds/unblock exit=<exitname>'. ;
+
+     @pemit %#=The current dspace room has the following exits hidden:
+       [get(%L/dark_exits)].%r%tTo reveal one of these exits, do 
+       '@ds/unhide exit=<exitname>'.
+   }
+
+-
+&CMD-MAP-KEY #9=$map key:
+  @force %# = help map key
+-
+
+
+#
+#  The following functions are not all being used in the current dspace
+#  commands, but they are all being retained, at present
+#
+
+&IS-IN-DSPACE #9=[hastag(%L,dspace)]
+-
+
+&IS-BUILDER #9=[haspower(%#, builder)]
+-
+
+&IS-WIZARD-OR-ROYAL #9=[orflags(%#, WZ)]
+-
+

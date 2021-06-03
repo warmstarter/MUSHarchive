@@ -1,0 +1,64 @@
+#!/bin/bash
+MYDIR=`pwd`
+if [ ! -d game ] 
+then 
+	echo "No game directory.  Something didn't happen right with the cvs.  Try again Sam."
+	exit -1
+fi
+
+if [ ! -f src/netmux ] 
+then 
+	echo "Please compile the game server before running this script.  Try again Willy."
+	exit -1
+fi
+
+if [ ! -f src/dbconvert ] 
+then 
+	echo "sorry pops, you either forgot, or failed to compile the utilities, this script will not run w/o dbconvert/mkindx/slave.  Try again, Bob."
+	exit -1
+fi
+
+if [ -f game/script.done ] 
+then
+	echo "You've already run this script.  Doing it again will break things."
+	exit -1
+fi
+
+
+
+if [ -f game/script.lck ] 
+then
+	echo "You're running the script.   Dont mess with it or kill it, wait for it to finish.  Dont be stupid and remove the lock file unless you know what yer doing, or REALLY want to sit thru a redownload via cvs... I know I wouldn't."
+	exit -1
+fi
+
+touch game/script.lck 
+
+echo "About to run thru and create links and import the TEST db.  Im going to ask you once, and if you say anything other than \"no\" I will do so.  This is your only warning.  So, shall I do it all for you chief?"
+
+read ans
+
+if [[ "$ans" = "no" ]]
+then
+echo "Ok, wont do a thing."
+rm -f game/script.lck
+exit 0
+fi
+
+echo -n "Starting to make links..."
+cd game/bin
+ln -s $MYDIR/src/netmux netmux
+ln -s $MYDIR/src/mkindx mkindx
+ln -s $MYDIR/src/dbconvert dbconvert
+echo "done."
+
+echo -n "Importing default db file..."
+cd $MYDIR/game/data
+./db_load netmux.gdbm $MYDIR/data/netmux.flat netmux.db.new
+echo "done."
+cd $MYDIR
+rm -f game/script.lck
+touch game/script.done
+
+echo "All finished.  all you need to do is log into the game(Login God PW: b5iscool) and run the space creation script and econ creation script(If wanted)." 
+

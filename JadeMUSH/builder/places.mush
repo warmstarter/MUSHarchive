@@ -1,0 +1,459 @@
+# Places Code Port
+# 
+# Decompiled from Jon's code by Pete on Jan 15, 2000. 
+# Places Code Object: #367
+#
+
+&TAGS #367= master_object
+-
+&EVAL_OBJ #367=#368
+-
+
+# Default setup for a place. 
+# This will get stuffed into the config for a new place. 
+&SETUP_FN #367=Table %0|%1|[add(rand(%1),1)]||I'm sorry, there's no room to add a place there.|I'm sorry, there's on place to move there.|You sit down at|sits down at|You stand and leave|stands and leaves|At your table
+-
+
+# Update 
+# 
+&DO_UPDATE #367=$update */*=*: 
+   @switch/first 
+	[controls(%#,%l)]:
+	[and(isnum(%0),lte(%0,get(%l/PLACESMAX)))]:
+	[member(NAME MAXPLACES CURPLACES FIXED FULL EMPTY JOIN OJOIN DEPART ODEPART PREFIX,ucstr(%1))]=
+      0:*:*, { @pemit %#=Permission denied.},
+      *:0:*, { @pemit %#=I'm sorry, but '%0' isn't a valid place number.},
+      *:*:0, { @pemit %#=I'm sorry, but '%1' isn't a valid configuration option.}, 
+	     { @unlock %l/PLACE%0; &PLACE%0 %l=u(UPDATEINFO,%l,%0,%1,%2); 
+	       @pemit %#=The %1 for [u(GETINFO,%l,%0,NAME)] is now set to:%r
+	                 [space(5)][u(GETINFO,%l,%0,%1)]
+             }
+-
+
+# Command to move a vacant seat from one palce to another. 
+# %0 - source place
+# %1 - Destination place
+&DO_MV #367=$mv from * to *: 
+   @switch/first 0=
+      and(gt(%0,0),lte(%0,get(%l/PLACESMAX))), 
+         {@pemit %#='%0' is not a valid place number.},
+      and(gt(%1,0),lte(%1,get(%l/PLACESMAX))), 
+         {@pemit %#='%1' is not a vaild place number.},
+      not(words(u(GETINFO,%l,%0,FIXED))), {@pemit %#=u(GETINFO,%l,%0,FIXED)},
+      not(words(u(GETINFO,%l,%1,FIXED))), {@pemit %#=u(GETINFO,%l,%1,FIXED)},
+      sub(u(GETINFO,%l,%0,CURPLACES),words(extract(get(%l/PLACENUMS),%0,1,|))),
+         {@pemit %#=u(GETINFO,%l,%0,EMPTY)},
+      neq(u(GETINFO,%l,%1,CURPLACES),u(GETINFO,%l,%1,MAXPLACES)), 
+         {@pemit %#=u(GETINFO,%l,%1,FULL)}, 
+
+         { @unlock %l/PLACE%0; 
+           @unlock %l/PLACE%1; 
+           &PLACE%0 %l=u(UPDATEINFO,%l,%0,CURPLACES,
+			 sub(u(GETINFO,%l,%0,CURPLACES),1)); 
+           &PLACE%1 %l=u(UPDATEINFO,%l,%1,CURPLACES,
+			 add(u(GETINFO,%l,%1,CURPLACES),1)); 
+           @pemit %#=You move a place from [u(GETINFO,%l,%0,NAME)] to 
+			[u(GETINFO,%l,%1,NAME)].
+         }
+-
+
+# Listener that triggers cleanup code when someone leaves the room. 
+&PLACESCLEANUP1 #367=^* has left.:placescleanup(%#)
+-
+
+# Listener that triggers cleanup code when someone disconnects. 
+&PLACESCLEANUP2 #367=^* has disconnected.:placescleanup(%#)
+-
+
+# Places cleanup code. 	
+# Sets the PLACENUMS attribute with the appropriate dbrefs of the remaining
+# players at the place. 
+&PLACESCLEANUPCMD #367=$placescleanup(*):
+   @switch setr(0, U(WHICHPLACE, %#, %0)) =
+      > 0, {&PLACENUMS %#=
+	     [replace(get(%#/PLACENUMS), 
+              	r(0), 
+              	remove(extract(get(%#/PLACENUMS),r(0),1,|), %0), 
+	      	|)
+	      ]
+            }
+-
+
+# Command to join a place. 
+#
+&DO_JOIN #367=$join *: 
+   @switch/first [not(u(WHICHPLACE,%l,%#))] [lcstr(%0)]=
+      0 *, {@pemit %#=Don't you think you should 'depart' first?},
+      1 at #*, {@trig me/PLACEFUNCTION=%l,%#,[delete(rest(%0),0,1)]},
+      1 #*, {@trig me/PLACEFUNCTION=%l,%#,[delete(%0,0,1)]},
+      1 with *, 
+        { @pemit [setq(1,locate(%#,rest(%0),niPT))][setq(0,u(WHICHPLACE,%l,r(1)))]%#=
+            switch(r(0),0,There isn't anyone named '[capstr(rest(%0))]' at a special place.,
+                    You go over to join [name(r(1))].); 
+          @trig me/[switch(r(0),0,-,PLACEFUNCTION)]=%l,%#,[r(0)]
+        }, 
+
+# Default
+        {@trig me/PLACEFUNCTION=
+            %l,
+            %#,
+	    [match(iter(rest(lnum(add(get(%l/PLACESMAX),1))),
+            [u(GETINFO,%l,##,NAME)]|),*%0*,|)]	
+	}
+-
+
+# Triggered function that handles adding a dbref to the PLACENUMS string. 
+#
+&PLACEFUNCTION #367=
+   @switch/first 0= 
+      [lte(%2, get(%0/PLACESMAX))], @pemit %1=Invalid Place Number '%2'.,
+
+      [setq(1, extract(get(%0/PLACENUMS), %2, 1, |))]
+	[gt(u(GETINFO, %0, %2, CURPLACES),words(r(1)))], 	
+	{@pemit %1=There aren't any free spaces there.},
+
+	{@verb v(eval_obj)=[setq(0,u(getinfo,%0,%2,NAME))]%1,eval_msg,,oeval_msg,,,
+	  {[edit([U(GETINFO, %0, %2, JOIN)] [r(0)].,%,,%%%,)],[edit([U(GETINFO, %0, %2, OJOIN)] 
+	  [r(0)].,%,,%%%,)]};
+
+	  @dolist [r(1)]={@pemit ##=[name(%1)] joins you.};
+
+	  &PLACENUMS %0=[replace(get(%0/PLACENUMS), %2, [r(1)]%1%b, |)]
+        }
+-
+
+# Command to depart a place
+#	
+&DO_DEPART #367=$depart:
+   @switch 
+	[setq(1, U(WHICHPLACE, %l, %#))]
+	[setq(0,U(GETINFO,%l,r(1),NAME))]
+	[r(1)]=
+
+	0, {@pemit %#=You aren't placed anywhere.}, 
+	   {
+	     &PLACENUMS %l=[replace(get(%l/PLACENUMS), 
+			    r(1), 
+			    [remove(extract(get(%l/PLACENUMS), r(1), 1, |), %#)], |)];
+ 
+	     @verb v(eval_obj)=%#,eval_msg,,oeval_msg,,,
+		{[edit([U(GETINFO, %l, r(1), DEPART)] [r(0)].,%,,%%%,)],
+		 [edit([U(GETINFO, %l, r(1), ODEPART)] [r(0)].,%,,%%%,)]};
+
+	     @dolist [extract(get(%l/PLACENUMS), r(1), 1, |)]={@pemit ##=%N has departed.}
+
+           }
+-
+
+# Command to trigger the display of places. 
+#
+&DO_PLACES #367=$places: 
+   @pemit %#=switch(get(%l/PLACESMAX),,There are no special places here.,0,There are no special places here.,map(PLACES_FN,rest(lnum(add(get(%l/PLACESMAX),1)))))
+-
+
+# Command to trigger the display details on a specific place
+#
+&DO_PLACE #367=$place *: 
+   @pemit %#=switch(get(%l/PLACESMAX),,There are no special places here.,0,There are no special places here.,map(PLACES_FN,edit(%0,#,)))
+-
+
+# ufunc to format place information
+#
+&PLACES_FN #367=%r
+	[setq(0,u(GETINFO,%l,%0,CURPLACES))]
+	[setq(1,extract(get(%l/PLACENUMS),%0,1,|))]
+	[capstr(u(GETINFO,%l,%0,NAME))] (#%0) has 
+	[setq(2,sub(r(0),words(r(1))))]
+	[switch(r(2),0,no empty places,1,1 empty place,[r(2)] empty places)].
+	[switch(words(r(1)),0,,1,%r
+	%tPresent is: %b[name(r(1))].,%r
+	%tPresent are: %b[u(PLACE_LOOK,r(1))])]
+-
+
+# ufunc to support plook, below
+#
+&PLACE_LOOK #367=
+	[setq(9,words(%0))]
+	[switch(r(9),0,,1,name(%0),2, [name(first(%0))] and 
+	[name(rest(%0))],
+	[iter(extract(%0,1,sub(r(9),1)),{name(##),})] and 
+	[name(extract(%0,r(9),1))])]
+-
+
+# Command to display an alternate for of place information, in 
+# a more xNTx format. :) For the analytical types, in columnar format. 
+# 
+&DO_PLOOK #367=$plook: 
+	@pemit %#=
+	[setq(0,edit(get(%l/PLACENUMS),|,))]
+	[fold(PLOOK_FOLD_FN,rest(lnum(add(get(%l/PLACESMAX),1))),-----)]%r
+	No place [space(3)] [setq(3,setdiff(setinter(lcon(%l),lwho()),r(0)))]
+	[rjust([words(r(3))] at no places,15)] 
+	[space(3)] 
+	[setq(4,sort(iter(r(3),name(##))))]
+	[ljust(mid(extract(r(4),1,1),0,14),14)] 
+	[ljust(mid(extract(r(4),2,1),0,14),14)] 
+	[ljust(mid(extract(r(4),3,1),0,14),14)]
+	[switch(gt(words(r(4)),3),1,u(NAME_3COL_FN,extract(r(4),4,3999)))]%r
+	-----
+-
+
+#
+&PLOOK_FOLD_FN #367=
+	%0%r
+	[setq(1,extract(get(%l/PLACENUMS),%1,1,|))]Place #[ljust(%1,5)] 
+	[rjust([sub(u(GETINFO,%l,%1,CURPLACES),words(r(1)))] empty places,15)] 
+	[space(3)] 
+	[setq(2,sort(iter(r(1),name(##))))]
+	[ljust(mid(extract(r(2),1,1),0,14),14)] 
+	[ljust(mid(extract(r(2),2,1),0,14),14)] 
+	[ljust(mid(extract(r(2),3,1),0,14),14)]
+	[switch(gt(words(r(2)),3),1,u(NAME_3COL_FN,extract(r(2),4,3999)))]
+-
+
+#
+&NAME_3COL_FN #367=
+	[fold(NAME_3AUX_FN,rest(%0),%r
+	[space(33)]
+	[ljust(mid(first(%0),0,14),15)])]
+-
+
+#
+&NAME_3AUX_FN #367=
+	%0
+	[switch(mod(words(%0),4),0,%r
+	[space(33)]
+	[ljust(mid(%1,0,14),15)],
+	[ljust(mid(%1,0,14),15)])]
+-
+
+# Command to Table Talk. @pemits only to those in the placelist
+#
+&DO_TT #367=$tt *: 
+   @dolist 
+	[setq(0,u(WHICHPLACE,%l,%#))]
+	[switch(r(0),0,%#[setq(1,Please join a place first.)],
+	[extract(get(%l/PLACENUMS),r(0),1,|)] [setinter(get(#3993/obslist),lcon(%l))]
+	[setq(1,\{[u(GETINFO,%l,r(0),PREFIX)], 
+	[switch(%0,:*,%N [delete(%0,0,1)],;*,%N[delete(%0,0,1)],"*,%N says "[delete(%0,0,1)]",|*,delete(%0,0,1),%N says "%0")]\})])]=
+
+	{@pemit ##=r(1)}
+-
+
+# Returns the placenumber where %1 is sitting. 
+# %0 Room reference
+# %1 dbref of occupant you are looking for
+&WHICHPLACE #367=[match(get(%0/PLACENUMS), *%1%b*, |)]
+-
+
+# Returns the specified piece of information for a place
+# %0 Room dbref
+# %1 Place number (integer)
+# %2 Requested info [ NAME, MAXPLACES, CURPLACES, etc See list below ] 
+#
+&GETINFO #367=
+	[extract(get(%0/PLACE%1),match(NAME MAXPLACES CURPLACES FIXED FULL EMPTY JOIN OJOIN DEPART ODEPART PREFIX,%2),1,|)]
+-
+
+# Sets the specified place data in the room
+# %0 Room dbref
+# %1 Place number
+# %2 Data member [NAME, MAXPLACES, CURPLACES, etc. See list below.]
+# %3 New value of data member. 
+&UPDATEINFO #367=[replace(get(%0/PLACE%1),match(NAME MAXPLACES CURPLACES FIXED FULL EMPTY JOIN OJOIN DEPART ODEPART PREFIX,%2),%3,|)]
+-
+
+#
+# %0 Room dbref
+# %1 
+&ATPLACE #367=[extract(get(%0/PLACENUMS), %1, 1, |)]
+-
+
+# Text of the 'places/help' message
+#
+&HELP_PLACES #367=%rPlaces are virtual places to sit, stand or occupy. You remain in the same%rroom, but join a group of people within that room who may or may not be%rhaving a quiet conversation only with others placed with them.%r%r%b%bCommands:%r%b%b---------%r%b%b[ljust(Mv from <#> to <#>,28)]Moves a vacancy from one place to another.%r%b%b[ljust(Join <place name>,28)]Puts you at <place name>%r%b%b[ljust(Join at #<num>,28)]Puts you at place #<num>.%r%b%b[ljust(Join with <name>,28)]Puts you at the place with <name>.%r%b%b[ljust(Depart,28)]Removes you from your place.%r%b%b[ljust(Places,28)]Lists who's present at all places.%r%b%b[ljust(Place <num>,28)]Lists who's present at place <num>.%r%b%b[ljust(Plook,28)]Lists in column format everyone around the room.%r%b%b[ljust(tt <message>,28)](Tete a tete) Relays a message%r[space(30)]to all those at your place. This command takes%r[space(30)]the usual say/pose tokens, and TT |<message>%r[space(30)]will emit.%r%b%b[ljust(Update <#>/<Option>=<text>,28)]See '+help places options'%r%rFor installation help, type '+help places config'. This code is provided courtesy of Deirdre, Meg, and Osric of AmberMUSH.
+-
+
+# Text of the 'places/help config' message
+#
+&HELP_PLACES_CONFIG #367=%rPLACES configuration:%r%b%bConfigure <num> places%r%b%bUnconfigure places%r%r%b%bNotes: A null fixed message means vacancies can be moved freely to and from the place. % This does not make sense for things like couches and rugs. % Set it to something like "That makes no sense." if you are using such a place.%r%b%b(O)Join and (O)depart messages take like this: %%%%N. All Join and Depart messages are appended with the place name.%r%rFunctions:%r%b%bWHICHPLACE(<loc num>,<dbnum>) gives the number of a place where <dbnum> is.%r%b%bATPLACE(<loc num>,<place num>) gives you a list of things at a place.%r%b%bPLACEINFO(<loc num>,<place num>,<option>) gives the value of <option> at place.%r%r
+-
+
+# Text of the 'places/help options' command
+#
+&HELP_PLACES_OPTIONS #367=%b%bUpdate <Place #>/<Option>=<Configuration Text>%r%r%b%bOption Description%t<Option>%tDefault Configuration Text%r%b%b------------------%t--------%t--------------------------%r%b%bPlace Name%t%tNAME%t%tTable x%r%b%bMaximum # of places%tMAXPLACES%tRandom%r%b%bCurrent # of places%tCURPLACES%tRandom (1 >= # >= MAXPLACES)%r%b%bFixed fail message%tFIXED%t%t<NULL>%r%b%bFull fail message%tFULL%t%tThat table has no more room.%r%b%bJoin message%t%tJOIN%t%tYou sit down at <place>.%r%b%bOjoin message%t%tOJOIN%t%tsits down at <place>.%r%b%bDepart message%tDEPART%t%tYou stand and leave <place>.%r%b%bOdepart message%tODEPART%t%tstands and leaves <place>.%r%b%bSay prefix%t%tPREFIX%t%tAt your table%r
+-
+
+&FUNC_ATPLACE #367=[switch(or(controls(%#,%0),match(rloc(%l,100),rloc(%0,100))),1,extract(get(%0/PLACENUMS), %1, 1, |),PERMISSION DENIED)]
+-
+
+&FUNC_PLACEINFO #367=[switch(or(controls(%#,%0),match(rloc(%l,100),rloc(%0,100))),1,extract(get(%0/PLACE%1),match(NAME MAXPLACES CURPLACES FIXED FULL EMPTY JOIN OJOIN DEPART ODEPART PREFIX,%2),1,|),PERMISSION DENIED)]
+-
+
+&FUNC_WHICHPLACE #367=[switch(or(controls(%#,%0),match(rloc(%l,100),rloc(%0,100))),1,match(get(%0/PLACENUMS), *%1%b*, |),PERMISSION DENIED)]
+-
+
+# Command to set up the initial places for a room
+# %0 - Number of places to configure
+#
+&DO_CONFIGURE #367=$configure * places: 
+   @switch/first 
+	[controls(%#,%l)]:
+	[isnum(%0)]:%0=
+
+      0:*:*, {@pemit %#=You do not control [name(%l)].},
+      *:0:*, {@pemit %#=The number of places needs to be a number!},
+      *:*:0, {
+         @dolist rest(lnum(add(get(%l/PLACESMAX),1)))=
+	   { @unlock %l/PLACE##; &PLACE## %l }; 
+         @unlock %l/PLACESCLEANUP1; 
+         @unlock %l/PLACESCLEANUP2; 
+         @unlock %l/PLACESMAX; 
+         &PLACESCLEANUP1 %l; 
+         &PLACESCLEANUP2 %l; 
+         &PLACESMAX %l; 
+         @set %l=!MONITOR; 
+         @pemit %#=Places removed from [name(%l)].
+       }, 
+
+# Default
+       {
+	&PLACESMAX %l=%0; 
+	@dolist rest(lnum(add(%0,1)))=
+	 { @unlock %l/PLACE##; &PLACE## %l=u(SETUP_FN,##,add(rand(9),1)) }; 
+        @unlock %l/PLACESCLEANUP1; 
+	@unlock %l/PLACESCLEANUP2; 
+	@unlock %l/PLACESMAX; 
+	@set %l=MONITOR; 
+	&PLACESCLEANUP1 %l=v(PLACESCLEANUP1); 
+	&PLACESCLEANUP2 %l=v(PLACESCLEANUP2); 
+	&PLACENUMS %l=[repeat(|,%0)]; 
+	@pemit %#=Configuration for %0 places complete.
+       }
+-
+
+# Help command for the places code
+#
+&CMD-PLACES-HELP #367=$places/help:
+   @pemit %#=
+      [get_eval(me/HELP_PLACES)]%r%r
+      For more, try 'places/help config' and 'places/help options'.
+-
+
+# Help command for configuring places.
+#
+&CMD-PLACES-HELP-CONFIG #367=$places/help config:
+   @pemit %#=[get_eval(me/HELP_PLACES_CONFIG)]
+-
+
+# Help command for options on configuring places
+#
+&CMD-PLACES-HELP-OPTIONS #367=$places/help options:
+   @pemit %#=[get_eval(me/HELP_PLACES_OPTIONS)]
+-
+
+# Command to add a new place to a room
+# Added Oct 19, 2000 by sparks (CopperBuilder)
+# This is to allow the new couch object, and other future code,
+# to add places to rooms.  It was added at Adam's request.
+
+&cmd-place-add #367=$@addplace *=*/*/*:
+
+    @switch [or(hasflag(%#,WIZARD),not(comp(type(%#),THING)))]
+            [isdbref(num(%0))]=
+      0?,{ @pemit %#=You cannot use this command! },
+      ?0,{ @pemit %#='%0' doesn't seem to be a valid place! },
+        { think setq(1,add(default(%0/placesmax,0),1)) ; 
+          think setq(0,num(%0)) ;
+          &placesmax %q0=%q1 ; 
+          &place[%q1] %q0=%1|%2|%2||I'm sorry, there's no room to add a 
+            place there.|I'm sorry, there's no place to move there.|You 
+            sit down at|sits down at|You stand and leave|stands and 
+            leaves|%3 ; 
+          @switch [hasattr(%q0,placenums)]=
+            0,&placenums %q0=| ;
+          &placescleanup1 %q0=^* has left.:placescleanup(%%#) ;
+          &placescleanup2 %q0=^* has left.:placescleanup(%%#) ;
+          @set %q0=MONITOR ;
+          &placenums %q0=[get(%q0/placenums)]| ;
+          @pemit %#='%1' added with %2 places. }
+-
+
+# Command to remove a place from the places list.
+# Added October 26, 2000 by CopperBuilder
+# This was at Steph's request since we now have an @addplace... :)
+
+&places_del #367=
+
+   $@delplace *=*:
+
+    @switch [or(hasflag(%#,WIZARD),not(comp(type(%#),THING)))]
+            [isdbref(num(%0))]=
+      0?,{ @pemit %#=You cannot use this command! },
+      ?0,{ @pemit %#='%0' doesn't seem to be a valid place! },
+         {
+            think setq(0,get(%0/placesmax)) ;
+            @switch [isnum(%1)][lte(%1,%q0)]=
+               0?,@pemit %#=You must provide a place number!,
+               ?0,@pemit %#=There don't seem to be that many places 
+                            installed!,
+               {
+                  @switch [lt(%1,%q0)]=
+                    1,{ @mvattr %0=PLACE[%q0],PLACE[%1] },
+                      { &PLACE[%1] %0 } ; 
+
+                  &placesmax %0=[sub(%q0,1)] ;
+                  &placenums %0=[repeat(|,%q0)] ; 
+                  @pemit %#=The place has been removed. 
+                            Everyone at places in '[name(%0)]' has been 
+                            bumped and must rejoin.
+               }
+         }
+
+-
+# Command to emit to a place in a room; created by Jeanne (formerly
+# CopperBuilder) for use in other code, March 3, 2001
+
+&cmd-@plemit #367=
+
+        $@plemit * *=*:
+
+           @switch [hasflag(%#,wizard)]
+                   [isdbref(%0)]
+                   [hasattr(%0,placesmax)]
+                   [gte(%1,1)]
+                   [lte(%1,default(%0/placesmax,0))]=
+
+           0????, {
+                     @pemit %#=You don't have permission to use this 
+                               command!
+                  },
+           ?0???, {
+                     @pemit %#='%0' is not a valid dbref.
+                  },
+           ??0??, {
+                     @pemit %#=%0 doesn't seem to have any places.
+                  },
+           ???0?, {
+                     @pemit %#='%1' is not a number between 1 and 
+                               [get(%0/placesmax)].
+                  },
+           ????0, {
+                     @pemit %#='%1' is not a number between 1 and 
+                               [get(%0/placesmax)].
+                  },
+           11111, {
+                     @pemit/list [extract(get(%0/PLACENUMS),%1,1,|)]=%2
+                  }
+
+-
+# Set the proper flags on the object
+@set #367=WIZARD
+-
+
+@set #367=UNINSPECTED
+-
+
+@set #367=SAFE
+-
+

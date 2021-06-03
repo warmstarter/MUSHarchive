@@ -1,0 +1,206 @@
+#######################################################
+# This is the @finger code for FiranMUX               #
+# The @finger code object is #381                    #
+#######################################################
+  
+
+@Amove #381 = @tel me=#2
+-
+
+@set #381/Amove = no_command
+-
+
+&TAGS #381 = master_object
+-
+
+&FINGER #381 = $@finger *:
+ @pemit %#=
+   [switch(%0,me,setq(0,%#),setq(0,pmatch(%0)))]
+   [switch(%q0,#-1*, There is no such player.,
+      %xr.[repeat(-,76)].%xn%r
+      [ljust(%xr| .-%xn %xy%xh@Finger on [name(%q0)]%xn %xr-.%xn,77)]%xr|%xn%r
+      %xr| |%xn[space(add(strlen(name(%q0)), 16))]%xr`%xn%xr
+         [repeat(-,[sub(57, strlen(name(%q0)))])]'%xn%r
+      %xr| |%xn%r
+      %xr| |%xn %b%b
+         [ljust(%xgName:%xn [name(%q0)] [get(%q0/lastname)]%b<[get(%q0/ALIAS)]>,40)]
+         [space(1)]
+         [ljust(%xgSex:%xn 
+            [switch(get(%q0/sex), m*, Male, f*, Female, n*, 
+            Neuter, p*, Plural, Unknown)],25)]%r
+      %xr| |%xn %b%b
+         [ljust(%xgClan:%xn [default(%q0/Clan, Unknown)], 40)][space(1)]
+         [ljust(%xgTitle:%xn [default(%q0/Title, Unknown)], 25)]%r
+      %xr| |%xn %b%b
+         [ljust(%xgRank:%xn [get(%q0/RANK)],40)]%xg[space(1)]
+         [ljust([switch(
+            [hasflag(%q0,wizard)]
+            [hasflag(%#,wizard)]
+            [hasflag(%q0,dark)],
+# Player @fingers a non-dark wiz
+            100,Connection:%xn 
+               [switch(
+                  [and(hasflag(%q0,connected),not(hasflag(%q0,dark)))]
+                  [hastag(%q0,afk)],
+                  11,Afk,
+                  10,Not Afk,
+                  0?,Offline)],
+# Player @fingers a dark wiz
+            101,Connection:%xn Offline,
+# Any other case (Player fingering player, wiz fingering anyone)
+            Idle:%xn 
+                [switch(
+
+                   hasflag(%q0,connected),
+                   1,[div(setr(1,idle(%q0)),86400)]d%b
+                      [div(mod(%q1,86400),3600)]h%b
+                      [div(mod(%q1,3600),60)]m%b
+                      [mod(%q1,60)]s
+                   , Offline)]
+            )],25)]
+         [switch(rank(%#, Honorary), 1,%r%xr| |%xn %b
+            [ljust(%xgEmail:%xn [get(%q0/EMAIL)],25)])]%r%xr| |%xn 
+         [ljust(%xgStatus:%xn 
+            [switch(
+              [hasflag(%#, WIZARD)]
+              [hasflag(%q0,connected)]
+              [hastag(%q0,roster)]
+              [hasflag(%q0,DARK)]
+              [hastag(%q0,retired)],
+                1101?,Connected (DARK),
+                ?01??,On the Roster,
+                ?10?0,Connected,
+# Commented out so dark players don't show up as offline
+#                01010,Offline - Last
+#                     %bDisconnected:
+#                     %b[get(%q0/LASTDISCONNECT)],
+                ?00?0,Offline - Last
+                     %bDisconnected:
+                     %b[get(%q0/LASTDISCONNECT)],
+                ?110?,On the Roster and Connected?,      
+                0111?,On the Roster,
+                1111?,On the Roster\,Connected\,and Dark,
+                ?1?01,Retired and Connected?,
+                ?0??1,Retired)],25)]%r
+            [border([ljust(%b%xgQuote:%xn 
+               [ifelse(hasattr(%q0,quote),
+               [eval(escsafe(get(%q0/QUOTE)))],)],25)],
+               70,%xr|%b|%b%xn,%b)]
+         [switch(t(elements(mail(%q0), 2)), 
+            1, [ljust(%r%xr| |%xn 
+            %xg[name(%q0)] has unread mail.,25)])]
+         [switch(hasflag(%q0, VACATION), 
+            1, [ljust(%r%xr| |%xn %xgOn Vacation:%xn 
+               [get(%q0/AWAY)],25)], %b)]%r%xr|%b`[repeat(-,74)]%xn%xr.
+               %xn%r%xr|%xn[space(4)]%xy%xh
+         See 'help @finger' for information on @finger.[space(26)]%xn%xr|%xn%r%xr`
+         [repeat(-,76)]%xn%xr'%xn)]
+-
+#
+# This version of @finger allows the player to skip over spammy quotes.
+#
+
+&FINGER/SHORT #381 = $@finger/short *:
+   @pemit %#=
+   [switch(%0,me,setq(0,%#),setq(0,pmatch(%0)))]
+   [switch(%q0,#-1*, There is no such player.,
+      %xr.[repeat(-,76)].%xn%r
+         [ljust(%xr| .-%xn %xy%xh@Finger on [name(%q0)]%xn %xr-.%xn,77)]%xr|%xn%r
+      %xr| |%xn[space(add(strlen(name(%q0)), 16))]%xr`%xn%xr
+         [repeat(-,[sub(57, strlen(name(%q0)))])]'%xn%r
+      %xr| |%xn%r
+      %xr| |%xn %b%b
+         [ljust(%xgName:%xn [name(%q0)] 
+           [get(%q0/lastname)]%b<[get(%q0/ALIAS)]>,40)][space(1)]
+         [ljust(%xgSex:%xn
+            [switch(get(%q0/sex), m*, Male, f*, Female, n*, 
+            Neuter, p*, Plural, Unknown)],25)]%r
+      %xr| |%xn %b%b
+         [ljust(%xgClan:%xn [default(%q0/Clan, Unknown)], 40)][space(1)]
+         [ljust(%xgTitle:%xn [default(%q0/Title, Unknown)], 25)]%r
+      %xr| |%xn %b%b
+         [ljust(%xgRank:%xn [get(%q0/RANK)],40)]%xg[space(1)]
+         [ljust([switch(
+            [hasflag(%q0,wizard)]
+            [hasflag(%#,wizard)]
+            [hasflag(%q0,dark)],
+# Player @fingers a non-dark wiz
+            100,Connection:%xn 
+               [switch(
+                  [and(hasflag(%q0,connected),not(hasflag(%q0,dark)))]
+                  [hastag(%q0,afk)],
+                  11,Afk,
+                  10,Not Afk,
+                  0?,Offline)],
+# Player @fingers a dark player or wiz
+            ?01,Connection:%xn Offline,
+# Any other case (Player finger non-dark player, wiz fingering anyone)
+            Idle:%xn
+                [switch(
+                   hasflag(%q0,connected),
+                   1,[div(setr(1,idle(%q0)),86400)]d%b
+ [div(mod(%q1,86400),3600)]h%b
+                      [div(mod(%q1,3600),60)]m%b
+                      [mod(%q1,60)]s
+                   , Offline)]
+            )],25)]
+         [switch(rank(%#, Honorary), 1,%r%xr| |%xn %b
+            [ljust(%xgEmail:%xn [get(%q0/EMAIL)],25)])]%r
+      %xr| |%xn 
+         [ljust(%xgStatus:%xn 
+            [switch([hasflag(%#, WIZARD)]
+                 [hasflag(%q0,connected)]
+              [hastag(%q0,roster)]
+              [hasflag(%q0,DARK)]
+               [hastag(%q0,retired)],
+                1101?,Connected (DARK),
+                ?01??,On the Roster,
+                ?1000,Connected,
+                01010,Offline - Last
+                     %bDisconnected:
+                     %b[get(%q0/LASTDISCONNECT)],
+                ?00?0,Offline - Last
+                     %bDisconnected:
+                     %b[get(%q0/LASTDISCONNECT)],
+                ?110?,On the Roster and Connected?,
+                0111?,On the Roster,
+                1111?,On the Roster\,Connected\,and Dark,
+                ?1?01,Retired and Connected?,      
+                ?0??1,Retired)],25)]%r
+      %xr| |%xn %b%b
+            [switch(t(elements(mail(%q0), 2)),
+            1, [ljust(%r%xr| |%xn
+            %xg[name(%q0)] has unread mail.,25)])]
+         [switch(hasflag(%q0, VACATION),  
+            1, [ljust(%r%xr| |%xn %xgOn Vacation:%xn 
+               [get(%q0/AWAY)],25)], %b)]%r%xr|%b`[repeat(-,74)]%xn%xr.
+               %xn%r%xr|%xn[space(4)]%xy%xh
+         See 'help @finger' for information on @finger.[space(26)]%xn%xr|%xn%r%xr`
+[repeat(-,76)]%xn%xr'%xn)]
+-
+&JFINGER #381 = $@finger:@pemit %#=It's '@finger <player name>'. For help read 'help @finger'.
+-
+
+&CMD-QUOTE #7 =
+
+    $@quote *:
+
+
+       &quote %# = safestr(%0) ;
+       @pemit %# = You have just set your quote to: 
+                 [eval(escsafe(get(%#/quote)))]
+
+-
+@set #381 = WIZARD
+-
+
+@set #381  = ROYALTY
+-
+
+@set #381 = UNINSPECTED
+-
+
+@set #381 = IMMORTAL
+-
+
+@set #381 = SAFE

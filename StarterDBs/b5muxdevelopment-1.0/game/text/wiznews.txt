@@ -1,0 +1,135 @@
+&help
++===========================================================================+
+|             B A B Y L O N   5   M U X   W i z a r d   N e w s             |
++---------------------------------------------------------------------------+
+|                HELP LAST UPDATED: Sunday, January 17, 1999                |
+|     Available news topics are organized by date. Type 'news <topic>'      |
+|                                                                           |
+| DATE            TOPIC                 DESCRIPTION                         |
+| 01-17-99        email                 Wizard email addresses              |
+| 01-17-99        xtypes                Info on how to set up XTYPEs        |
++===========================================================================+
+        If you wish to add something to the news read NEWS SUBMISSIONS
+  
+&email
+Wizard email addresses are listed below:
+ 
+WIZARD                 EMAIL ADDRESS
+JohnD                  jdutka@pcnet.com
+Mike                   wenk@en.com
+Valdar                 swaller@nwu.edu
+    
+&xtypes
++===========================================================================+
+|               B A B Y L O N   5   M U X   X T Y P E   N e w s             |
++---------------------------------------------------------------------------+
+|      Available topics are organized by date.  Type 'wizhelp <topic>'      |
+|                                                                           |
+| DATE            TOPIC            DESCRIPTION                              |
+| ----            -----            -----------                              |
+| 01-17-99        vmspace          Space Master Room                        |
+| 01-17-99        vmroom           Ship Bridges                             |
+| 01-17-99        traderoom        Buy/Sell Trade Rooms                     |
+| 01-17-99        storeroom        Sell-Only Trade Rooms (Stores)           |
+| 01-17-99        cargoroom        Cargo Storage Rooms                      |
+| 01-17-99        relay            Communucations Relay Room                |
+| 01-17-99        weapon           Personal Combat Weapons                  |
+| 01-17-99        item             Personal Items (Links, Medkits, etc.)    |
++===========================================================================+
+       If you wish to add something to the news read News Submissions
+    
+&vmspace
+          
+This is the room that basically controls helming and placement of ships and
+planets.  Only wizzes should be allowed in here.
+         
+&vmroom
+        
+The VMROOM xtype is used for ship bridges.  You need to set &XTYPE on the
+bridge to VMROOM and then set the room CONSOLE.  You then need to set the
+room's zone with @CHZONE, @DESC the zone to create the ship's external
+description, set &HASNAME to 1 and &SHIPNAME to the ship's name, such as
+"EAS Nemesis, Human Omega Class Destroyer."  You then need to use the HELM
+command in the VMSPACE room (#4) to helm the ship, use VMSETMB to set the
+ship's bridge (minus the # symbol) and place the ship with the PLACE command.
+The next step is creating the ship airlock exit and entrance.  The airlock
+exit, which leads out of the ship, is a normal exit with no destination,
+set to the ship's zone object with @CHZONE and @SET the exit SHIPEXIT.  If
+desired, you can set a hardcode lock on the ship's airlock exit and entrance.
+To create the ship's airlock entrance, @tel to room #36, the home of all
+airlock entrances for ships in space, @OPEN an exit leading to the location
+of the airlock exit you just created, set it to the ship's zone object with
+@CHZONE and then @SET the exit SHIPIN and add a hardcode lock if so desired.
+Remember to set all @DESC, @ODROP, @SUCC, @OSUCC, @FAIL and @OFAIL on the
+exit and entrance and a @DESC on the ship's bridge (along with all other
+exits and rooms on the ship).  The HELM command gives you a ship ID number
+used by the hardcode for that ship, which you need to set on the ship zone's
+@SHIPNUM register.  You then type SAVE in the VMROOM, followed by VMINIT and
+VMROOM to save the ship and reinit space and all rooms with the ship
+existing.  Finally, dock the ship at the desired bay or landing pad.
+    
+&traderoom
+          
+The TRADEROOM xtype is used for trade rooms, which function as commodity sale
+or brokerage houses, where players can buy and sell commodities for profit.
+You need to set &XTYPE on the bridge to TRADEROOM and then set the room
+CONSOLE.  You then need to set &VMONEY to 0 0 0 0 0 0 0 0 0 0 to give it 0 of
+the first ten currencies or whatever value you'd like (there are currently
+less than ten but all ten are added for padding), &CARGO to the current
+available cargo space, &MCARGO to the maximum cargo space the room holds,
+&TAX to the tax rate (0.0 to whatever number, currently .02) and &PMOD## to
+the price modifier for commodity number ##.  For example, setting &PMOD128 to
+1.5 would make commodity number 128's price 1.5 times standard in that trade
+room.  You then need to @tel to VALWORLD (#235) and use the ADD command to
+add the room's dbref (minus the # symbol) to the ValDB as an econ room.  Note
+that you can buy and sell commodities in a TRADEROOM.  Remember to type SAVE
+in VALWORLD to save the ValDB.
+
+&storeroom
+              
+The STOREROOM xtype is used for stores, which are like trade rooms but only
+sell commodities.  You need to set &XTYPE on the bridge to STOREROOM and then
+set the room CONSOLE.  You then need to set &VMONEY to 0 0 0 0 0 0 0 0 0 0 to
+give it 0 of the first ten currencies or whatever value you'd like (there are
+currently less than ten but all ten are added for padding), &CARGO to the
+current available cargo space, &MCARGO to the maximum cargo space the room
+holds, &TAX to the tax rate (0.0 to whatever number, currently .02) and
+&PMOD## to the price modifier for commodity number ##.  For example, setting
+&PMOD128 to 1.5 would make commodity number 128's price 1.5 times standard in
+that store.  You then need to @tel to VALWORLD (#235) and use the ADD command
+to add the room's dbref (minus the # symbol) to the ValDB as an econ room.
+Note that you can only buy commodities in a STOREROOM.  Remember to type SAVE
+in VALWORLD to save the ValDB.
+    
+&cargoroom
+          
+The CARGOROOM xtype is used for warehouses and cargo bays, which function as
+places for empires and players to store their commodities.  You need to set
+&XTYPE on the bridge to CARGOROOM and then set the room CONSOLE.  You then
+need to set &VMONEY to 0 0 0 0 0 0 0 0 0 0 to give it 0 of the first ten
+currencies (there are currently less than ten), &CARGO to the current
+available cargo space, &MCARGO to the maximum cargo space the room holds.
+You then need to @tel to VALWORLD (#235) and use the ADD command to add the
+room's dbref (minus the # symbol) to the ValDB as an econ room.  Remember to
+type SAVE in VALWORLD to save the ValDB.
+            
+&relay
+    
+To create a communications relay room, set &XTYPE to RELAY and @SET the room
+CONSOLE.  Set @VB on the room to the maximum number of channel ranges
+relayed, with @ATTRIBS set to a long string of thirty-two -1.  We have
+thirty-two channel ranges, with 1 to 1.9999, 2 to 2.9999 and so on.  The
+thirty-two -1 represent a closed channel range, 0 would mean the range is
+open or a string for encryption.  You may want to pad a few extra -1 at the
+end just in case, perhaps 35 or so and let the players choose what to relay.
+The relay will then be recognized on the next VMINIT typed in the VMSPACE
+room (#4).
+    
+&weapon
+    
+Text will be added here soon.
+    
+&item
+    
+Text will be added here soon.
+   

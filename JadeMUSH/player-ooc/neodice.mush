@@ -1,0 +1,50 @@
+&function-successes-debug #50=[setq(0,[dieroll(%0)])]
+                        [setq(1,0)][setq(2,0)][setq(3,0)]
+                        [iter(%q0,
+                          [switch(lte(##,5)
+                          ,1,
+                            [setq(1,[add(1,%q1)])]
+                          ,
+                            [setq(2,[add(1,%q2)])]
+                          )]
+                          [switch(eq(##,1)
+                          ,1,
+                            [setq(3,[add(1,%q3)])]
+                          )]
+                        )]
+                        result: [switch([gt(%q3,words(%q0))]
+                        ,1,
+                          Botch
+                        ,
+                          %q2
+                        )] dice: %q0%rfails: %q1%rsuccs: %q2%r1's: %q3%r
+                        Vs. RS: [sub(%q2,%1)]
+-                        
+&function-successes #50=[setq(0,[dieroll(%0)])]
+                        [setq(1,0)][setq(2,0)][setq(3,0)]
+                        [iter(%q0,
+                          [switch(lte(##,5)
+                          ,1,
+                            [setq(1,[add(1,%q1)])]
+                          ,
+                            [setq(2,[add(1,%q2)])]
+                          )]
+                          [switch(eq(##,1)
+                          ,1,
+                            [setq(3,[add(1,%q3)])]
+                          )]
+                        )]
+                        [switch([gt(%q3,words(%q0))]
+                        ,1,
+                          Botch
+                        ,
+                          [sub(%q2,%1)]
+                        )]
+-                        
+                          
+&function-dieroll #50=[switch(gt(%0,0)
+                      ,1,
+                        [setq(0,[iter(lnum(%0),die(1,10))]%b)]
+                        [setq(1,[dieroll([words(matchall(%q0,10))])])]%q0%b%q1
+                      )]
+-                           

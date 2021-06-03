@@ -1,0 +1,1076 @@
+# FiranMUX Clothing System
+# by Dan
+# outfit command by Adam
+#
+# A system to allow clothing to be worn, removed, hidden etc.
+
+#----------------
+# Player Commands
+#----------------
+
+# A command for a player to wear an article of clothing
+&CMD-WEAR #234=$wear *:
+# %0 is the clothing
+# %q0 is the dbref of the clothing
+# %q1 is the wearloc that will be used, 0 if none - Set in u-can-wear
+# %q4 is a 0 if the wearloc is a special one, 1 if it's normal - set in u-can-wear
+# %q5 is the article of clothing in the way, or empty if it's wearable - set in u-can-wear
+# %q6 is the invalid wearloc, 0 if all are correct - set in u-can-wear
+
+# Get the dbref of %0
+     think [setq(0,locate(%#,%0,iT))];
+# Get the possible wearloc
+     think setq(1,u(u-can-wear,%q0,%#));
+# Error checking
+     think setq(9,
+          [isdbref(%q0)]
+          [hastag(%q0,clothing)]
+          [not(hastag(%q0,perfume))]
+          [not(hastag(%q0,worn))]
+          [not(or(hastag(%q0,grouped),hastag(%q0,group)))]
+          [t(%q1)]
+          [not(t(%q6))]
+          [not(%q4)]
+          [not(hastag(%q0,broken))]
+          [not(strmatch(get(%#/combat-wielded),%q0))]);          
+# a) is %q0 a dbref?
+# b) is it clothing?
+# c) is it not perfume?
+# d) is it not being worn?
+# e) is it not a group?
+# f) can it be worn?
+# g) are the wearlocs valid?
+# h) is %q1 not a special location?
+# i) is %q0 broken?
+# j) is %q0 not wielded?
+     @switch %q9=
+          100?0?????,{@pemit %#=You aren't planning to bathe in perfume -- 
+                     I hope.  Please separate a perfume from its group 
+                     before wearing it.},
+          100?1?????,{@wearp %#=%q0},
+          0?????????,{@pemit %#=I don't see %0 here.},
+          ?0????????,{@pemit %#=[name(%q0)] isn't clothing.},
+          ???0??????,{@pemit %#=[name(%q0)] is already being worn.},
+          ????0?????,{@pemit %#=[name(%q0)] is a group and so can't be worn.},
+          ?????0?0??,{@pemit %#=You can't find a place to wear your [name(%q0)] 
+                     because you are already wearing '[name(%q5)]' \(%q5\).},
+          ??????0???,{@pemit %#=[name(%q0)] can not be worn because '%q6' is not
+                     a valid wearloc.  Please inform an admin.},
+          ?????0?1??,{@pemit %#=You can't wear your [name(%q0)] because 
+# If the wiz programmed a error message, give it instead of the default
+                     [default([get(me/alias-storage)]/sp-alias-%q5-error,
+                       you don't meet the special requirements.)]},
+          ????????0?,{@pemit %#=Your [name(%q0)] is broken! There's no way 
+                       to wear it until it gets repaired.},
+          ?????????0,{@pemit %#=You're ready to fight with your [name(%q0)], 
+                       it's kind of hard to wear it until you put it away.
+                       Try unwielding it.},
+          1111111011,{@remit %L=%N puts on %p [name(%q0)].;
+                    @tr %q0/awear=%#,%q0;
+                    think settag(%q0,worn);
+                    &worn-on %q0=%q1; 
+                    @resynch %#},
+          1111111111,{@remit %L=%N puts on %p [name(%q0)].;
+                    @tr %q0/awear=%#,%q0;
+                    think settag(%q0,worn);
+                    think settag(%q0,worn_special);
+                    &worn-on %q0=%q1;
+                    @switch hasattrp(%q0,awear-special)=
+                     1,{@trigger %q0/awear-special=%#,%q0};
+                    @switch hasattr(#874,sp-alias-%q1-action)=
+                     1,{think [u(#874/sp-alias-%q1-action)]};
+                    @resynch %#},
+          {@pemit %#=Error (%q9) in the clothing code. If it repeats, notify admin.}
+
+-
+&CMD-REMOVE #234=$remove *:
+# A command to remove an article of clothing a person is wearing.
+   @switch strmatch(%0,*'s *)=1,{@@ DO nothing, other syntax will take it},{
+# %0 is the clothing
+# %q0 is the dbref of the clothing
+     think setq(0,locate(%#,%0,iT));
+# Check to see if %0 is clothing that can be removed
+     think setq(9,
+          [isdbref(%q0)]
+          [hastag(%q0,clothing)]
+          [hastag(%q0,worn)]
+          [ifelse(hastag(%q0,remove-special),
+              ulocal(ul-can-remove-special,%q0,%#),1)]
+          [not(hastag(%q0,unremovable))]);
+     @switch %q9=
+# Return errors if needed
+          0????,{@pemit %#=I don't see %0 in your inventory.},
+          ?0???,{@pemit %#=[name(%q0)] isn't clothing.},
+          ??0??,{@pemit %#=[name(%q0)] isn't being worn right now.},
+          ??10?,{@pemit %#=You can't remove [name(%q0)] because 
+                  [default(%q0/mess-special-remove-error,
+                       some special condition hasn't been met.)]},
+          ????0,{@pemit %#=You can not remove a [goodname(%q0)].},
+# If everything checks out, remove the clothing and trigger aremove
+          11111,{think settag(%q0,!worn);
+                 @cleartag %q0=worn-special;
+                 @remit [loc(%#)]=%N removes %p [name(%q0)].;
+                 @tr %q0/aremove=%#,%q0;
+                 &worn-on %q0; 
+                 @resynch %#},
+# Error: notify admin.
+          {@pemit %#=Error (%q9): notify admin if the problem repeats.}}
+-
+#&CMD-DRESS #234=$dress:
+## A command to have a player wear all possible items of clothing they are
+## wearing.
+## %q0 is the list of clothing the player should attempt to wear
+#     think [setq(0,filter(filter-can-wear,lcon(%#)))];
+## Give off a message
+#     @remit %#=%N dresses %oself.;
+## For everything in %q0...
+#     @dolist %q0=
+## Check to see if ## is wearable, and if so, wear it.
+#          {{@switch [setr(1,u(u-can-wear,##,%#))]=
+## If not, tell the player.
+#               0,{@pemit %#=You can not wear your [name(##)] right
+#now},
+#               {think settag(##,worn);
+#                    &worn-on ##=%q1; 
+#                    @resynch %#; 
+#                    @switch hasattr(%q0,awear)=
+#                           1,@trig %q0/awear=%#;
+#                    @pemit %#=You put on your [name(##)].}}}
+#-
+&CMD-UNDRESS #234=$undress:
+# A command to have a player remove all his or her clothes.
+# Tell everyone what's going on
+     @remit %L=%N undresses.;
+     @dolist clothinglist(%#)=
+          @switch hastag(##,unremovable)=
+          0,{think setq(0,##);
+               think settag(##,!worn);
+               @wipe ##/worn-on;
+               @tr ##/aremove=%#,##; 
+               @resynch %#; 
+               @pemit %#=[name(##)] removed.}
+-
+
+&CMD-DRESS-PLAYER #234=$dress * in *:
+# A command to let one player dress another.
+# %0 is the player
+# %1 is the name of the clothing
+# %q0 is the dbref of the player (to make sure the player is nearby)
+# %q1 is the dbref of the clothing
+# %q2 is where the clothing will be worn
+# %q4 is a 1 if the wearloc is special
+# %q5 is the article of clothing in the way or empty if it's clear
+# %q6 is the inalid wearloc, or 0
+# %q8 is a check to see if the player being dressed should be asked.
+     think setq(0, locate(%#,%0,niP));
+     think setq(1, locate(%#,%1,iT));
+     think setq(2, u(u-can-wear,%q1,%q0));
+     
+     think setq(8, or(
+# First, is the object a baby, a toddler or a child?
+        t(match(#3197 #47177 #38832,parent(%q0))),
+# Second, is the player unconscious or dead?
+        hastag(%q0,shock),
+        hastag(%q0,dead)));
+
+     think setq(9,
+          [isdbref(%q0)]
+          [isdbref(%q1)]
+          [hastag(%q1,clothing)]
+          %q8
+          [not(hastag(%q0,perfume))]
+          [not(hastag(%q1,worn))]
+          [not(or(hastag(%q0,grouped),hastag(%q0,group)))]
+          [t(%q2)]
+          [not(t(%q6))]
+          [not(hastag(%q1,broken))]);
+
+# Error checking:
+# a) Is %q0 a dbref?
+# b) Is %q1 a dbref?
+# c) Is the object clothing?
+# d) Is the object not perfume?
+# e) Is the object not already worn?
+# f) Is the object not a group?
+# g) Is the target dressable?
+# h) Is there a place to wear it?
+# i) Are all the wearlocs valid?
+# j) Is the item not broken?
+
+     @switch %q9=
+          0?????????,{@pemit %#=You don't see [capstr(%0)] here},
+          ?0????????,{@pemit %#=[capstr(%0)] doesn't seem to have a %1.},
+          ??0???????,{@pemit %#=[capstr(%0)]'s %1 isn't clothing.},
+          ???0??????,{@pemit %#=[capstr(%0)] is not a valid target. If 
+                     it's a child, please contact a wizard to correct 
+                     your child's parent. If it's a player, they have to 
+                     be unconscious or dead to dress them.},
+          ????1?0???,{@pemit %#=You aren't planning to bathe %1 in
+                      perfume -- I hope.  Please separate a perfume from its group 
+                      before dressing someone in it.},
+          ?????0????,{@pemit %#=You are already wearing %1!},
+          ??????0???,{@pemit %#=[name(%q1)] is a group and so can't be worn.},
+          ???????0??,{@pemit %#=[capstr(%0)] is already wearing %q5 in
+                      the space where that would go.},
+          ????????0?,{@pemit %#=You can't dress [capstr(%0)] in %1
+                      because '%q6' is not a valid wearloc.  Please inform an admin.},
+          ?????????0,{@Pemit %#=[name(%q1)] is broken! [subj(%q0)] can't 
+                      wear that!},
+# Player is not aware, or object is a dressable non-player
+          1111111111,{@tel %q1=%q0; 
+                      @remit [loc(%#)]=%N dresses [name(%q0)] in [poss(%q0)] 
+                      [name(%q1)];
+                      @tr %q1/awear=%q0; 
+                      &worn-on %q1=%q2;
+                      @tag %q1=worn; 
+                      @resynch %q0},
+          {@pemit %#=Error in the clothing code.}
+-
+&CMD-REMOVE-PLAYER #234=$remove *'s *:
+# A command to let one player undress another.
+# %0 is the player
+# %1 is the name of the clothing
+# %q0 is the dbref of the player (to make sure the player is nearby)
+# %q1 is the dbref of the clothing
+# %q8 is a check to see if the player being undressed should be asked.
+# As with dress, this is now modified to work only with babies, toddlers
+# and children.
+
+     think setq(0, locate(%#,%0,niP));
+     think setq(1, locate(%q0,%1,iT));
+
+     think setq(8,or(
+# First, is the object a baby, a toddler or a child?
+        t(match(#3197 #47177 #38832,parent(%q0))),
+# Second, is the player unconscious or dead?
+        hastag(%q0,shock),
+        hastag(%q0,dead)));
+     think setq(9,
+          [isdbref(%q0)]
+          [isdbref(%q1)]
+          [hastag(%q1,clothing)]
+          [hastag(%q1,worn)]
+          %q8
+          [not(hastag(%q1,unremovable))]);
+     @switch %q9=
+          0?????,{@pemit %#=You don't see [capstr(%0)] here},
+          ?0????,{@pemit %#=[capstr(%0)] doesn't seem to have a %1.},
+          ??0???,{@pemit %#=[capstr(%0)]'s %1 isn't clothing.},
+          ???0??,{@pemit %#=[capstr(%0)] isn't wearing %1.},
+          ?????0,{@pemit %#=[capstr(%0)]'s %1 won't come off.},
+          ????0?,{@pemit %#=[capstr(%0)] isn't a baby, toddler, child, in 
+                   shock, or dead. You can't remove [poss(%q0)] clothing.},
+          111111,{@remit [loc(%#)]=%N removes [name(%q0)]'s [name(%q1)].;
+               think settag(%q1,!worn);
+               &worn-on %q0;
+               @tel %q1=%#;
+               @resynch %q0},
+          {@pemit %#=Error in the clothing code.}
+-
+
+&CMD-CLOTHING #234=$clothing:
+# A command to get information about the clothing the player is wearing.
+     @resynch %#; 
+     @switch words(clothinglist(%#))=
+# If the player isn't wearing anything
+          0,@pemit %#=You're not wearing anything.,
+# Other wise
+          {@pemit %#=
+# Go through the list of clothing on the player, and return it's name and
+# the wearlocs it covers
+          %b[iter(clothinglist(%#),
+               [name(##)] -- 
+%b[edit(edit(edit(map(map-emit-loc,default(##/worn-on,---)),%b,u(comma)),_,%b),
+     ---,Error: please wait and try again)].%r)]}
+-
+
+&COMMA #234 = ,%b
+-
+
+&cmd-wearable #7=$@wearable *: 
+# A command to get information about where the clothing can 
+#   be worn, to check for conflicts -- what can be worn where.
+#
+# %0 is the clothing that's being checked.
+#
+# %q0 is the dbref of the clothing.
+
+think setq(0, locate(%#, %0, ni)); 
+@switch isdbref(%q0) = 
+  1, {@pemit %# = [name(%q0)] can be worn on: 
+    %r[edit(edit(edit(
+      map(#234/map-emit-loc, 
+        map(#234/map-emit-loc, get(%q0/wearlocs), |), 
+      +), |, %r%t%chor%cn%r), +, %b%chand%cn%b), _, %b)]}, 
+  {@error %# = locate %q0}
+-
+
+&CMD-CLOTHING-PLAYER #234=$clothing *:
+# A command to get information about the clothing another player is wearing.
+# %0 is the player to get the information about
+# If %# is not a wizard, check to see if %0 is closeby.
+     think switch(hasflag(%#,wizard),
+          0, setq(0,locate(%#,%0,nP)),
+          1, setq(0,num(*%0)));
+     @switch [isdbref(%q0)][t(words(clothinglist(%q0)))]=
+# If the player can see %0 (by being a wizard or nearby) give the
+# information
+          11,{@resynch %q0; 
+              @pemit %# = %b[iter(clothinglist(%q0),
+               [name(##)] -- 
+%b[edit(edit(edit(map(map-emit-loc,default(##/worn-on,---)),%b,u(comma)),_,%b),
+     ---,Error: please wait and try again)].%r)]},
+# Otherwise tell the player that they can't find %0
+          0?,{@pemit %#=You don't see %0 here.},
+          10,{@pemit %#=%0 isn't wearing anything.}
+
+-
+&CMD-DRESS-QUICK #234=$dress/quick *:
+# A command to dress in a bunch of stuff quickly.
+# This is a relativly simple command, which will take a list of parent
+# objects, by dbref, and have the player try to wear them in that order.
+
+# %0 is the type of thing to wear
+# %q0 is the stored listing of parents
+# %q1 is the filtered inventory of the player
+# %q2 is the sorted list
+
+# The setq is put before the @switch, even though it might mean it tries to
+# process something it can't, because of the problems with putting the setq in
+# @switch. For that reason, I put a default() in here
+
+  think setq(0,default([get(me/alias-storage)]/quick-alias-%0,#-1));
+  think setq(1,u(u-sort-children,%q0,lcon(%#)));
+
+  @switch [hasattr([get(me/alias-storage)],quick-alias-%0)]
+          [not(strmatch(%0,* from *))]=
+    01,{@pemit %#=I don't know anything about getting dressed in %0. Type 
+       'dress/quick' to get a list of what I do know about.},
+    10,{@@ Do nothing. Other syntax will handle it.},
+
+# @forcing the player to wear the clothes is prefered here to @wear because
+# we want the player to get the error messages instead of the code object.
+    11,{@pemit %#=Getting dressed in %0.;
+        @dolist %q1={@wait [mul(#@,2)]=@fo %#=wear ##};
+        @wait [add(mul(words(%q1),2),2)]=@pemit %#=You are now dressed in your %0!}
+-
+&cmd-dress-quick-stub #234=$dress/quick:
+# A stub command to list the kinds of dress/quick that are set up already
+
+  @pemit %#=The dress/quick command is set up to work with the following 
+            sets of clothing: 
+            [iter(lattr([get(me/alias-storage)]/quick-alias-*),
+              lcstr(last(##,-)))].
+
+-
+&CMD-DRESS-QUICK-HERE #234=$dress/quick * from here:
+# A command to dress in a bunch of stuff quickly from a location
+# This is a relativly simple command, which will take a list of parent
+# objects, by dbref, and have the player try to wear them in that order.
+
+# %0 is the type of thing to wear
+# %q0 is the stored listing of parents
+# %q1 is the contents of the room
+# %q2 is the sorted list
+
+# The setq is put before the @switch, even though it might mean it tries to
+# process something it can't, because of the problems with putting the setq in
+# @switch. For that reason, I put a default() in here
+
+#@set me=trace;@set me=verbose;@set me=puppet;
+
+  think setq(0,default([get(me/alias-storage)]/quick-alias-%0,#-1));
+  think setq(1,lcon(%L));
+  think setq(2,u(u-sort-children,%q0,%q1));
+
+  @switch [hasattr([get(me/alias-storage)],quick-alias-%0)]
+          [t(words(%q2))]=
+    0?,{@pemit %#=I don't know anything about getting dressed in %0. Type 
+       'dress/quick' to get a list of what I do know about.},
+    ?0,{@pemit %#=There's no %0 here!},
+
+# @forcing the player to wear the clothes is prefered here to @wear because
+# we want the player to get the error messages instead of the code object.
+    11,{@pemit %#=Getting dressed in %0.;
+        @dolist %q2={@wait [mul(#@,2)]=@fo %#=take ##; 
+                     @wait [inc(mul(#@,2))]=@fo %#=wear ##};
+        @wait [mul(add(words(%q2),2),2)]=@pemit %#=You are now dressed in your %0!}
+-
+
+&CMD-DRESS-QUICK-FROM #234=$dress/quick * from *:
+# A command to dress in a bunch of stuff quickly from an item
+# This is a relativly simple command, which will take a list of parent
+# objects, by dbref, and have the player try to wear them in that order.
+
+# %0 is the type of thing to wear
+# %q0 is the stored listing of parents
+# %q1 is the contents of the item
+# %q2 is the sorted list
+# %q3 is the dbref ot the item
+
+# The setq is put before the @switch, even though it might mean it tries to
+# process something it can't, because of the problems with putting the setq in
+# @switch. For that reason, I put a default() in here
+
+  think setq(0,default([get(me/alias-storage)]/quick-alias-%0,#-1));
+  think setq(3,locate(%#,%1,niTV));
+  think setq(1,lcon(%q3));
+  think setq(2,u(u-sort-children,%q0,%q1));
+
+  @switch [hasattr([get(me/alias-storage)],quick-alias-%0)]
+          [t(words(%q1))]
+          [not(strmatch(%1,here))]=
+    0??,{@pemit %#=I don't know anything about getting dressed in %0. Type 
+       'dress/quick' to get a list of what I do know about.},
+    ?0?,{@pemit %#=There's nothing in that [name(%q3)]!},
+    ??0,{@@ Do nothing. Another syntax will handle it},
+
+# @forcing the player to wear the clothes is prefered here to @wear because
+# we want the player to get the error messages instead of the code object.
+    111,{@pemit %#=Getting dressed in %0.;
+        @dolist %q2={@wait [mul(#@,2)]=@fo %#=take ## from %q3;
+                     @wait [inc(mul(#@,2))]=@fo %#=wear ##};
+        @wait [mul(add(words(%q2),2),2)]=@pemit %#=You are now dressed in your %0!}
+-
+
+
+
+#----------------
+# Wizard commands
+#----------------
+
+# A command for a wizard to make a player wear an article of clothing
+&CMD-@WEAR #234=$@wear *=*:
+# %0 is the player (*name, name, or dbref)
+# %1 is the clothing
+# %q0 is the dbref of the player
+# %q1 is the dbref of the clothing
+# %q2 is the wearloc that will be used
+
+# Get the dbref of %0
+     think [setq(0,locate(%#,%0,ahimnpP))]
+          [switch(isdbref(%q0),0,setq(0,locate(%#,*%0,*P)))];
+# Get the dbref of %1
+     think [setq(1,locate(%q0,%1,iT))];
+# Get the possible wearloc
+     think setq(2,u(u-can-wear,%q1,%q0));
+# Error checking
+     think setq(9,
+          [hasflag(%#,wizard)]
+          [isdbref(%q0)]
+          [isdbref(%q1)]
+          [hastag(%q1,clothing)]
+          [not(hastag(%q1,worn))]
+          [t(%q2)]
+          [eval(u(me/u-udefault,[get(me/alias-storage)]/sp-alias-%q2,1,%q0))]);
+          
+# a) is %# a wizard?
+# b) is %q0 a dbref?
+# c) is %q1 a dbref?
+# d) is it clothing?
+# e) is it not being worn?
+# f) can it be worn?
+      @switch %q9=
+          0??????,{@pemit %#=Only wizards can use this command.},
+          ?0?????,{@pemit %#=I don't know who %0 is.},
+          ??0????,{@pemit %#=I don't see %1 in %0's inventory.},
+          ???0???,{@pemit %#=[name(%q1)] isn't clothing.},
+          ????0??,{@pemit %#=[name(%q1)] is already being worn.},
+          111110?,{@pemit %#=You can't find a place to make %0 wear 
+               [poss(%q0)] %1
+               [switch(u(u-valid-locs,%q2),
+                    0, %bbecause %q6 is not a valid wearloc)].},
+          1111110,{@pemit %#=You can't make %0 wear %1 because the special
+                        conditions of "[get(
+                        [get(me/alias-storage)]/sp-alias-%q2-error)]" aren't met.},
+          1111111,{@remit [loc(%q0)]=[name(%q0)] puts on [poss(%q0)] [name(%q1)];
+               think settag(%q1,worn);
+               &worn-on %q1=%q2; 
+               @resynch %q0; 
+               @pemit %q0=You have just put on your [name(%q1)];
+               @pemit %#=You make [name(%q0)] wear [poss(%q0)] [name(%q1)]},
+          {@pemit %#=Error in the clothing code. If it repeats, notify 
+ Dan.}
+
+
+-
+&CMD-@REMOVE #234=$@remove *=*:
+# A command for a wizard to remove an article of clothing a person is wearing.
+# %0 is the player (*name, name, or dbref)
+# %1 is the clothing
+# %q0 is the dbref of the player
+# %q1 is the dbref of the clothing
+
+# Get the dbref of %0
+     think [setq(0,locate(%#,%0,ahimnpP))]
+          [switch(isdbref(%q0),0,setq(0,locate(%#,*%0,*P)))];
+# Get the dbref of %1
+     think [setq(1,locate(%q0,%1,iT))];
+# Check to see if %1 is clothing that can be removed
+     @switch 
+          [hasflag(%#,wizard)]
+          [isdbref(%q0)]
+          [isdbref(%q1)]
+          [hastag(%q1,clothing)]
+          [hastag(%q1,worn)]=
+# Return errors if needed
+          0????,{@pemit %#=Only wizards can use this command.},
+          ?0???,{@pemit %#=I don't know who %0 is.},
+          ??0??,{@pemit %#=I don't see %1 in [name(%q0)]'s inventory},
+          ???0?,{@pemit %#=[name(%q0)] isn't clothing.},
+          ????0,{@pemit %#=[name(%q0)] isn't being worn right now.},
+# If everything checks out, remove the clothing.
+          11111,{think settag(%q1,!worn);
+               @remit [loc(%q0)]=[name(%q0)] removes [poss(%q0)] [name(%q1)].;
+               &worn-on %q1; 
+               @resynch %q0; 
+               @pemit %#=You make [name(%q0)] remove [poss(%q0)] [name(%q1)].},
+# Error: notify admin.
+          {@pemit %#=Error: notify Dan if the problem repeats.}
+
+-
+
+
+#---------------------
+# Functions and u-funs
+#---------------------
+
+
+&UL-CLOTHING-ALIAS #234=
+# A local function to expand any aliases in a wearloc until it is reduced to
+# the basic wearlocs (i.e. no more aliases)
+# %0 is the wearloc to break down
+# %1 is the componantes of that wearloc
+
+# Check to see if there's any +'s (there should be if it's been broken down)
+# If so, run this function for each one via iter
+     [switch(match(first(%0,+),%0),
+          0,[iter(%0,ulocal(me/ul-clothing-alias,##,
+               [get(v(aliias-storage)/alias-##)]),+)])]
+# If not:
+# Check to see if %0 is the same as %1,
+# meaning there are no further aliases to break down
+     [switch(strmatch(%0,%1),
+# put all aliases of %0 into %q0
+          0, [setq(0,get(v(alias-storage)/alias-%0))]
+# For each alias in %q0, check to see if *it* can be broken down.
+               [iter(%q0,ulocal(me/ul-clothing-alias,##,
+                    [get(v(alias-storage)/alias-##)])
+               )],
+# If it can't be broken down alias-## will return ##, ending the loop.
+          1, %0)]
+
+-
+&FUNCTION-WEARLOCS #50=
+# A function to list every acceptable wearloc, based on what's set oin the
+# generic player
+     [iter(lattr(u(#234/alias-storage)/alias-*),elements(##,2,-))]
+-
+&FUNCTION-CLOTHINGLIST #50=
+# A function to list the dbrefs of all the clothing worn by %0 (a player)
+     [iter(lcon(%0),
+# If ## has a worn tag, return its dbref
+          switch(hastag(##,worn),1,##)
+     )]
+-
+&FUNCTION-CLOTHINGLOCS #50=
+# A function to list the locations a player (%0) has clothing on.
+# And it's componants
+     [iter([clothinglist(%0)], 
+#          [iter(get(##/WORN-ON),
+#               ulocal(#234/ul-clothing-alias,\\#\\#)
+#          )]
+          [get(##/WORN-ON)] 
+     )]
+
+-
+# A Function to go into the generic player's desc. It will list all
+# non-dark, non-worn items in the player's inventory.
+
+&FUNCTION-CONTENTSDESC #50=
+# Filter teh list of a player's (%0) inventory and
+# If they are not dark and not worn (passed by the filter) show them with a
+# %r afterwards
+     [iter(filter(#234/filter-visible-objects,lcon(
+          [switch(hastag(%0,body),1,parent(%0),%0)]
+     )),[name(##)]%r)]
+-
+&UL-EXPAND-WEARLOCS #234=
+# To take the list of wearlocs and expand it
+# %0 is the clothing dbref
+# Get the list of locations for %0. This will be in the format:
+#    <loc1>|<loc2>+<extraloc>|<loc3>...
+
+     [setq(0,eval(get(%0/wearlocs)))]
+# Replace all the +'s with spaces.
+     [setq(0,edit(%q0,+,%b))]
+# For each thing, divided by a |, run ul-clothing-alias for every word in it.
+# Put the compleatly expanded list, still divided by |'s into %q1
+     [setq(1,
+          [iter(%q0,
+               [iter(##,ulocal(ul-clothing-alias,\\#\\#))],|,|)])]
+     %q1
+-
+
+&U-CAN-WEAR #234=
+# A ufun to return a 0 if the player can't wear the clothing at all,
+# the first usable wearloc if the player can.
+# %0 is the clothing dbref
+# %1 is the player's dbref
+# %q4 will be 1 if the used wearloc is a special one, 0 if not
+# %q5 will be the name of the article of clothing in the way, if there is one.
+# %q6 will be the name of the invalid wearloc or 0 if they're all right.
+
+# Start by getting the list of all possible wearlocs (| separated). 
+# Put it into %q6, to be overwritten later.
+
+   [setq(6,ulocal(ul-expand-wearlocs,%0))]
+
+# Next, filter out all those which over lap with clothing the player is
+# already wearing.  If nothing's left, return the first piece of clothing in
+# the way.
+
+   [setq(4,%1)]
+   [setq(5,filter(filter-not-covered,%q6,|))]
+   [ifelse([t(words(%q5,|))], ,setq(5,u(u-what-covers,%1,last(%q6,|))))]
+
+# Next, filter out all un-met special cases.
+
+   [setq(4,filter(filter-unmet-special,%q5,|))]
+   [ifelse([t(words(%q4,|))], ,[setq(4,0)])]
+
+# Finally, pick the wearloc to use, return it, and reset %q4, %q5, and %q6
+# as needed.
+
+   [ifelse(isdbref(%q5),0,
+      [ifelse(t(%q4),first(%q4,|),0[setq(5,first(%q5,|))])])]
+#   [setq(4,hasattr([get(me/alias-storage)],sp-alias-%q4))]
+   [setq(6,[iter(%q6,filter(filter-invalid-wearlocs,##),|)])]
+   [ifelse(t(words(%q6)),,setq(6,0))]
+
+-
+&ALias-storage #234=#233
+# An attribute to refer the code to where ever aliases are stored, probably
+# #233, the generic player
+-
+
+&U-valid-locs #234=
+# A ufun to make sure that all wearlocs on %0 are valid and store invalid
+# ones in %q6
+# %0 is a dbref of clothing
+# %q6 is broken wearlocs
+# if a 0 is returned, there are broken wearlocs, a 1 everything's fine
+
+     [setq(6,setdiff(
+          ucstr(edit(edit(eval(get(%0/wearlocs)),+,%b),|,%b)),
+          wearlocs()
+     ))]
+     [switch(t(words(%q6)),
+          0,1,
+          1,0
+     )]
+-
+&u-what-covers #234=
+# A ufun to return the a specific item of clothing blocking the new clothing 
+# from being worn
+
+# %0 is the player's dbref
+# %1 is the first set of wearlocs on the clothing.
+
+  [first(
+    [iter(clothinglist(%0),
+      [ifelse(
+        t(words(setinter(get(##/worn-on),%1))),
+        ##,
+      )]
+    )]
+  )]
+-
+&u-udefault #234=
+# A ufun to replace the non-evaluating udefault()
+# %0 is the attr to use
+# %1 is the default
+# %2 is what is to be the %0 of the called function
+
+# Use an ifelse() and a t() to determine wheather the attribute exists
+  [ifelse(t(hasattr([get(me/alias-storage)],%0)),
+# If the attr exists, call it and pass in %2
+     u([get(me/alias-storage)]/%0,%2),
+# Else, return the default (%1)
+     %1)]
+-
+&u-sort-children #234=
+# a ufun to sort a list according to another one
+# %0 is the list of parents in the right order
+# %1 is the list of what to check and sort
+
+#  [iter(%0,
+#    [setq(9,##)]
+#    [filter(filter-good-children,lcon(%#))]
+#  )]
+
+# Go through the list of items in the player, and, for each one...
+  [setq(9,iter(%1,
+
+# ... find the position of the dbref in %0 which matches it.
+#      Use a ufun because you have to use a lparent()
+    [setr(7,u(u-parent-position,%0,[lparent(##)]))]
+    [ifelse(t(words(%q7)),[setq(8,%q8 ##)],)]))]
+
+  [munge(munge-clothing-sort,%q9,%q8)]
+
+-
+&u-parent-position #234=
+# A ufun to return the position in %0 of the dbref matching one of the
+# dbrefs in the %1 list
+
+  [first(filter(filter-remove-zeros,
+        [iter(%1, 
+          [member(%0,##)])],
+        ))]
+
+-
+&ul-can-remove-special #234=
+# A ufun to check whatever special conditions are in plcae to have an object
+# removed.
+# %0 is the dbref of the clothing
+# %1 is the dbref of the player removing it.
+
+  [switch(hasattrp(%0,special-remove),
+# If it has the attribute, pass %0 and %1 on to it.
+# If a 1 is returned, the object can be removed.
+     1, u(%0/special-remove,%0,%1),z
+# If not, check all objects with the worn-special tag.
+     0, [t(edit([iter(clothinglist(%1),
+           [ifelse(hastag(##,worn-special),
+              u(##/special-remove-other,%0,%1),
+              0)])],
+           %b,))]
+     )]
+-
+#--------------------------
+# Filters, maps, and munges
+#--------------------------
+ 
+&filter-not-covered #234=
+# A filter to check to see if there are any spaces on the player for the
+# clothing, based on the comparison of all wearlocs on the clothing and 
+# clothinglocs().
+
+# %0 is a list of all wearlocs that the item would cover
+
+  [iter(%0,
+    [switch(
+      [words(
+         setinter(##,clothinglocs(%q4)))],
+       0,1,
+       0)]
+     ,|,|)]
+-
+
+&filter-unmet-special #234=
+# A filter to take a list of wearlocs and remove any for which 
+# the special conditions aren't met.
+# When called from u-can-wear, a list of several wearlocs is being passed in.
+# Special conditions are stored on #874 in sp-alias-<wearloc>
+
+# %0 is the wearloc to test
+# %q4 was the player's dbref
+# %q9 which should be overwritten later in the code if it's needed, is a
+# place holder
+
+   [setq(9,1)]
+   [setq(4,
+     parse([iter(%0,u(u-udefault,sp-alias-##,1,%q4), ,~)],
+           [setq(9,and(%q9,##))],~))]
+   %q9
+-
+
+&filter-invalid-wearlocs #234=
+# A filter which takes a list of wearlocs (one at a time) and returns a 1 
+# for any which are invalid
+
+  [not(hasattr([get(me/alias-storage)],alias-%0))]
+
+-
+# The filter called by function-contentsdesc
+&filter-visible-objects #234=
+      [and(not(hasflag(%0,dark)),not(hastag(%0,worn)))]
+-
+
+&FILTER-CAN-WEAR #234=
+     [and(
+          hastag(%0,clothing),
+          not(hastag(%0,worn))
+     )]
+
+-
+&filter-good-children #234=
+# A filter to return the contents of a player which are to be used in 
+# dress/quick
+# %0 is the item being checked
+# %q9 is the list of the parent to check.
+
+     [t(edit(iter(lparent(%0),
+       match(%q9,##)),%b,))]
+-
+# A filter to remove '0's from a string if they're not part of a larger
+# number such as 10 or 20 (negatives are removed too)
+&filter-remove-zeros #234=[gt(%0,0)]
+-
+# This takes the wear location as an argument.
+#   It changes l_ and r_ into left and right.
+&map-emit-loc #234=[switch(mid(%0,0,2), 
+  l_, left_[mid(%0,2,strlen(%0))],
+  r_, right_[mid(%0,2,strlen(%0))],
+  %0)]
+-
+&munge-clothing-sort #234=[sort(%0)]
+-
+# The conformat for the generic player
+@conformat #233=
+[setq(0,[contentsdesc(%!)])][ifelse(t(%q0),Carrying:%r%b%q0,)]
+
+-
+
+#--------------------------
+# Command stubs and aliases
+#--------------------------
+
+
+&cmd-worn #234=$worn:@fo %#=clothing
+-
+&cmd-unwear #234=$unwear *:@fo %#=remove %0; @wipe %0/worn-on
+-
+
+
+#--------------------------------------------
+# OUTFIT commands
+#--------------------------------------------
+
+&cmd-outfits #234 = $outfits: 
+  think setq(0, lattr(%#/outfit-*)); 
+  @pemit %# = You have created the following outfits:;
+  @pemit %# = 
+    switch(words(%q0), 0, 
+      %b none,
+#   else
+      list(%q0, 
+        %b [ljust(lcstr(after(##:,-)), 25)] [after(get(%#/##),:)]
+      )
+    ); 
+  @pemit %# = --
+-
+
+&cmd-outfit/create-nodesc #234 = $outfit/create *: 
+  @switch %0 = *=*, {
+    @@ do nothing @@
+  }, {
+    @fo %# = outfit/create %0=no description
+  }
+-
+
+&cmd-outfit/create #234 = $outfit/create *=*: 
+  think setq(0, makeattr(%0)); 
+
+  @select 1 = 
+
+  hasattr(%#, outfit-%q0), {
+    @pemit %# = You already have an outfit by that name.
+  }, 
+
+  gt(strlen(%q0), 25), 
+    @pemit %# = The name of an outfit can be no more than 25 characters long.
+  }, {
+    &outfit-%q0 %# = :[trim(%1)]; 
+    @pemit %# = Created new outfit named '%0'. %r
+                Build it with 'outfit/add <outfit> = <item>' in the order the 
+                items should be worn.
+  }
+-
+
+&cmd-outfit/destroy #234 = $outfit/destroy *: 
+  think setq(0, makeattr(%0)); 
+
+  @select 0 = 
+
+  hasattr(%#, outfit-%q0), {
+    @pemit %# = You do not have any outfit by that name. 
+                Type 'outfits' for a list.
+  }, {
+    &outfit-%q0 %#; 
+    @pemit %# = Outfit '%0' has been destroyed (but not the items in it).
+  }
+-
+
+&cmd-outfit/add #234 = $outfit/add *=*: 
+  think setq(0, makeattr(%0)); 
+  think setq(1, locate(%#, %1, *)); 
+  
+  @select 0 = 
+
+  hasattr(%#, outfit-%q0), {
+    @pemit %# = You do not have any outfit by that name. 
+                Type 'outfits' for a list.
+  }, 
+
+  isdbref(%q1), {
+    @error %# = locate %q1;
+  }, 
+
+  {
+    &outfit-%q0 %# = %q1 [get(%#/outfit-%q0)]; 
+    @switch strmatch(loc(%q1),%#)=
+      0, {@fo %# = take %q1};
+    @fo %# = wear %q1; 
+    @pemit %# = Added '[name(%q1)]' to outfit.
+  }
+-
+
+&cmd-outfit/list #234 = $outfit/list *: 
+  think setq(0, makeattr(%0)); 
+  think setq(1, before(get(%#/outfit-%q0),:)); 
+  
+  @select 0 = 
+
+  hasattr(%#, outfit-%q0), {
+    @pemit %# = You do not have any outfit by that name. 
+                Type 'outfits' for a list.
+  }, 
+
+  words(%q1), {
+    @pemit %# = That outfit contains no items.  
+                You need to add items to it first.
+  }, 
+
+  {
+    @pemit %# = Outfit '%0': [after(get(%#/outfit-%q0),:)];
+    @pemit %# = list(revwords(%q1), 
+      %b [ljust(#@, 3)] [name(##)]
+    ); 
+    @pemit %# = --
+  }
+-
+
+
+&cmd-outfit/wear #234 = $outfit/wear *: 
+  think setq(0, makeattr(%0)); 
+  think setq(1, before(get(%#/outfit-%q0),:)); 
+
+  @select 0 = 
+
+  hasattr(%#, outfit-%q0), {
+    @pemit %# = You do not have any outfit by that name. 
+                Type 'outfits' for a list.
+  }, 
+
+  words(%q1), {
+    @pemit %# = That outfit contains no items.  
+                You need to add items to it first.
+  }, 
+
+  {
+    @pemit %# = Wearing outfit '%0'. Please wait till 'Done.'; 
+    @tr me/tr-outfit-wear = revwords(%q1), %#, 1, 1
+  }
+-
+
+# %0 = list of items to wear
+# %1 = %#
+# %2 = item number
+# %3 = try for this item
+# 
+&tr-outfit-wear #234 = 
+  think setq(0, first(%0)); 
+  @pemit %1 = switch(hastag(%1, debugoutfit),1,## %0\, %1\, %2\, %3\, %q0 ##); 
+
+  @select 1 = 
+
+  eq(words(%0), 0), {
+    @pemit %1 = Done.
+  }, 
+
+  gt(%3, v(outfit-max-tries)), {
+    @pemit %1 = Giving up on [name(%q0)] after [v(outfit-max-tries)] tries.; 
+    @tr me/tr-outfit-wear = rest(%0), %1, inc(%2), 1
+  }, 
+
+  not(hastag(%q0, clothing)), {
+    @pemit %1 = Item %2 ([name(%2)]) is not a wearable item, 
+                so it will be skipped.; 
+    @wipe %1/outfit_*; 
+  }, 
+
+  hastag(%q0, worn), {
+    @pemit %1 = [name(%q0)] is already worn. This could cause 
+                a problem if the order the outfit is donned is important.; 
+    @wipe %1/outfit_*; 
+    @tr me/tr-outfit-wear = rest(%0), %1, inc(%2), 1
+  }, 
+
+# the item is already in the inventory
+  and(eq(%3, 1), strmatch(loc(%q0), %1)), {
+#   @pemit %1 = Found [name(%q0)] in inventory.; 
+    @fo %1 = wear %q0; 
+    @wipe %1/outfit_*; 
+    @tr me/tr-outfit-wear = rest(%0), %1, inc(%2), 1
+  }, 
+
+# the item has been moved to the inventory
+  and(gt(%3, 1), strmatch(loc(%q0), %1)), {
+#   @pemit %1 = Moved [name(%q0)] into inventory.; 
+    @fo %1 = wear %q0; 
+    @wipe %1/outfit_*; 
+    @tr me/tr-outfit-wear = rest(%0), %1, inc(%2), 1
+  }, 
+
+# if the item was already found, then just recycle after a delay -- 
+# essentially, we're waiting for the queue to catch up with the command
+  strmatch(%q0, get(%#/outfit_item)), {
+    @pemit %1 = Waiting for [name(%q0)].; 
+    @wait [v(outfit-delay)] = @tr me/tr-outfit-wear = %0, %1, %2, inc(%3)
+  }, 
+
+# item is in the room -- get it, then cycle till it's in inventory
+  strmatch(loc(%q0), loc(%1)), {
+    @pemit %1 = Found [name(%q0)] in the room.; 
+    &outfit_item %# = %q0; 
+    &outfit_action %# = get %q0; 
+    @fo %1 = get %q0; 
+    @tr me/tr-outfit-wear = %0, %1, %2, %3
+  }, 
+
+# item is in a container in inventory -- get it, then cycle till it's
+# in inventory
+  and(strmatch(loc(loc(%q0)), %1), hastag(loc(%q0), container)), {
+    @pemit %1 = Found [name(%q0)] in [name(loc(%q0))]. 
+                Attempting to get it.; 
+    &outfit_item %# = %q0; 
+    &outfit_action %# = get %q0 from [loc(%q0)]; 
+    @fo %1 = get %q0 from [loc(%q0)]; 
+    @tr me/tr-outfit-wear = %0, %1, %2, %3
+  }, 
+
+# item is in a container in location -- get it, then cycle till it's
+# in inventory
+  and(strmatch(loc(loc(%q0)), loc(%1)), hastag(loc(%q0), container)), {
+    @pemit %1 = Found [name(%q0)] in [name(loc(%q0))]. 
+                Attempting to get it.; 
+    &outfit_item %# = %q0; 
+    &outfit_action %# = get %q0 from [loc(%q0)]; 
+    @fo %1 = get %q0 from [loc(%q0)]; 
+    @tr me/tr-outfit-wear = %0, %1, %2, %3
+  }, 
+
+  {
+    @pemit %1 = Cannot find item %2 ([name(%q0)]) in inventory, room, 
+                or containers in room.; 
+    @wipe %1/outfit_*; 
+    @tr me/tr-outfit-wear = rest(%0), %1, inc(%2), 1
+  }
+-
+
+&outfit-max-tries #234 = 3
+-
+&outfit-delay #234 = 1
+-

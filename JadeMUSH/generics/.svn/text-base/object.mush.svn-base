@@ -1,0 +1,273 @@
+#############################################################################
+# Generic Object
+#############################################################################
+#
+# Important Note:
+#    * For this code to work, two things need to be in place.
+#      1. Locks must be made inheritable in the server code.
+#            This is a simple change in could_doit().
+#      2. There needs to be a @setattr command that can set an
+#         attribute on any object regardless of control issues.
+#
+# Features:
+#    * Checks to make sure you have a free hand before you pick it up.
+#    * Supports special creatures (which don't have the standard
+#      rhold/lhold locations).
+#    * Records the location of the object in the appropriate attribs on
+#      both the player and the object.
+#    * Checks to see that the item is in a player's rhold or lhold
+#      location before allowing him to drop it.
+#    * Supports special objects which can't be dropped.
+#    * Supports very basic encumbrance system.
+#
+# Limitations:
+#    * Doesn't handle objects that require two hands to carry.
+#    * Doesn't allow a 'strength feat' check to carry items that are 
+#      too heavy.
+#    * Bulk is not programmed yet.
+#    * If a player is carrying small objects such as keys in both hands, 
+#      it is not possible for her to pick up another object (unrealistic).
+#
+# Configuration:
+#    * To set up players/NPCs/monsters with nonstandard rhand/lhand
+#      pairs or body locations (e.g., octopus, one-handed man), 
+#      write an appropriate u-freehand on the player/NPC/monster.
+#    * Messages that can be configured include:
+#      MSG-no-free hand -- when a player doesn't have a hand free to 
+#          carry an object.
+#      MSG-can't-carry -- when a player can't pick up an object for
+#          other reasons (encumbrance, etc.)
+#      MSG-not-carrying -- when a player tries to drop an object that 
+#          isn't in her inventory
+#      MSG-can't-drop -- when a player can't drop an object for other
+#          reasons (glued to hand, etc.)
+# 
+# Interfacing:
+#    * body location system (body-lhold, body-rhold, etc.) --
+#      #dbref of item held is stored in body-rhold or body-lhold
+#      attribute.
+#    * encumbrance system -- items should have a basic &weight value
+#      (weight in pounds), and players/NPCs/monsters should have a 
+#      &maximum-encumbrance value and their &encumbrance attribute
+#      should equal zero when they're not carrying anything.  Objects
+#      also should have a &bulk set.
+#    
+#############################################################################
+
+
+
+&RCS #128 = 
+  $Id: object.mux,v 1.9 1998/06/23 04:22:06 steph Exp $
+-
+&function-max_encumbrance #50=[mul(add(u(parent(%0)/at-stamina),u(parent(%0)/at-strength)),15)]
+-
+
+# Make sure the above function is added to the global function list
+#
+# Default properties (weight in pounds, bulk)
+#
+
+&weight #128 = 9999999999
+-
+&bulk #128 = 9999999999
+-
+&volume #128 = 9999999999
+-
+&capacity #128 = 0
+-
+
+
+@desc #128=
+  [switch(1, eq(default(me/ac-[makeattr(get(me/currency))], 1), 1), 
+             get_eval(me/description),
+             get(me/ac-[makeattr(get(me/currency))])%b[get(me/currency)] each 
+             of which looks like: [get_eval(me/description)])]
+-
+
+@idesc #128=
+%r[switch(1, eq(default(me/ac-[makeattr(get(me/currency))], 1), 1), 
+             get_eval(me/idescription),
+             get(me/ac-[makeattr(get(me/currency))])%b[get(me/currency)] the 
+             inside of each looks like: [get_eval(me/idescription)])]%r
+-
+
+&idescription #128=%rThe non-descript insides of something.%r
+-
+
+&description #128=%rA non-descript thing that needs to be described.%r
+-
+
+
+#
+# Basic Lock
+#
+@lock #128 = 
+  has-freehand/1 & can-carry/1
+-
+@succ #128 = 
+  You pick up the [goodname(%!)].[switch(get(%!/taking),%#,[set(%!,taking:)],[cemit(Wizards,%xh%rTwink Alert: %xh%xw[name(%#)] %# %xh%xwhas bypassed the take code%, taking %xh%xw[name(%!)] %! %xh%xwusing the __get command.%xn)])]
+-
+# Lets doublecheck security. If none of the softcode moved the object, but the object moved, squeal.
+@move #128=[switch([not(strlen(
+                   [get(%!/giving)]
+                   [get(%!/taking)]
+                   [get(%!/dropping)]
+                   [get(%!/putting)]
+                   [get(%!/loading)]
+                   [get(%!/unloading)]
+                   [get(%!/dumping)]
+                   ))]
+            ,1
+# No softcode has moved this object. Lets tell the wizzen.
+               ,[cemit(Wizards,%xh%xwWarning: [name(%!)] %! %xh%xwmoved without softcode%, and is now at [name(loc(%!))] [loc(%!)]%xn)]
+            ,
+# Softcode has moved this object, so lets clear all the possible verbs.
+                [set(%!,giving:)]
+                [set(%!,putting:)]
+                [set(%!,loading:)]
+                [set(%!,unloading:)]
+                [set(%!,dumping:)]
+             )]
+-
+@osucc #128=picks up the [goodname(%!)].
+-
+@ofail #128=tries to pick up [goodname(%0)] but cannot.
+-
+@fail #128 = 
+  [switch(u(has-freehand), 0,
+    default(%!/msg-no-free-hand, You don't have a hand free to carry that.),
+    default(%!/msg-can't-carry, You can't carry that.)
+  )][remit(here,[name([get(%!/taking)])] tries to pick up [goodname(%!)] but cannot.)][set(%!,taking:)]
+-
+
+#
+# Returns 1 if player (%#) has a hand free to carry the item; otherwise,
+# returns 0.
+#
+&has-freehand #128 = 
+  [switch(udefault(%#/u-freehand, u(u-freehand, %#), %#), #-1, 0, 1)]
+-
+
+
+#
+# Returns 1 if the player (%#) is able to carry the item (because of
+# encumbrance restrictions); otherwise, returns 0.
+#
+&can-carry #128 = 
+   [switch(0, add(0, max_encumbrance(%#)), 1, 
+	      gt(add(default(%#/encumbrance, 0), default(%!/weight, 0)), 
+		 max_encumbrance(%#)),    1,
+					      0
+   )]
+-
+
+
+#
+# When object is picked up via 'get'.
+#
+# Assumes that the character getting the object passed the basic lock,
+# which should handle the checks which determine if the character has a 
+# free hand, and so on.
+#
+# Also assumes that all characters are right-handed (that is, they prefer
+# to pick up things in their right hand first).
+#
+@asucc #128 = 
+  think [setq( 0, udefault(%#/u-freehand, u(u-freehand, %#), %#) )]
+# Set the rhold/lhold attribute to the dbref of the object...
+  [set(%#,body-%q0:%!)]
+# Set the location attribute of the object...
+  [set(%!,location:[%#/body-%q0])]
+# Adjust the encumbrance of the player...
+  [set(%#,encumbrance:[add(default(%#/encumbrance, 0), default(%!/weight, 0))])]
+-
+
+
+#
+# u(u-freehand, <player>)
+#
+# Default u-freehand ufun (can be overridden by a ufun of the same name 
+# on a player or other object capable of picking up objects, if the
+# player doesn't have the traditional right hand/left hand setup (e.g., 
+# an octopus).
+#
+# If the player has a hand free to take an object, the ufun returns the 
+# name of the body location on the player where the object will be stored.
+# If the player has no hand free, it returns #-1.
+#
+# %0 = player dbref
+#
+&u-freehand #128 = 
+  switch(#-1,
+    lequip(%0, rhold),
+	rhold,
+    lequip(%0, lhold),
+	lhold,
+#   else
+      #-1
+  )
+-
+    
+
+#
+# Drop Lock
+#
+@lock/drop #128 = 
+  is-carrying/1 & can-drop/1
+-
+@drop #128 = 
+  You drop the [goodname(%!)].[switch(get(%!/dropping),%#,[set(%!,dropping:)],[cemit(Wizards,%xh%rTwink Alert: [name(%#)] %# %xh%xwhas bypassed the drop code%, dropping [name(%!)] %! %xh%xwusing the __drop command.%xn)])]
+-
+@odrop #128 =
+  drops the [goodname(%!)].
+-
+@dfail #128 = 
+  [switch(u(is-carrying), 0, 
+    default(%!/msg-not-carrying, You're not carrying that.),
+    default(%!/msg-can't-drop, You can't drop that.)
+  )]
+-
+
+
+#
+# Returns 1 if the player (%#) is carrying the item (%!) in such a way
+# that it can be dropped (i.e., the item is in the character's right/left
+# hand, or the equivalent); otherwise, returns 0.
+#
+&is-carrying #128 = 
+  [switch(get_eval(%!/location),
+    %#/body-rhold, 1,
+    %#/body-lhold, 1,
+                   0
+  )]
+-
+
+#
+# Returns 1 if the player (%#) is allowed to drop the object (%!); 
+# otherwise, returns 0.  
+#
+# The player may be prohibited from dropping an object if it is, for
+# example, glued to his hand.
+#
+&can-drop #128 = 
+  [1]
+-
+
+
+
+#
+# When object is dropped via 'drop'.
+#
+# Assumes that the character getting the object passed the droplock,
+# which should handle the checks which determine that the character
+# may get rid of the object (including checking that the character 
+# was holding the object, not wearing it).
+#
+@adrop #128 = 
+# Clear the body location where the item was held...
+  think [set([first([get(%!/location)],/)],[last([get(%!/location)],/)]:)]
+# Clear the object's location...
+  [set(%!,location:)]
+# Update the player's encumbrance...
+  [set(%#,encumbrance:[sub(default(%#/encumbrance, 0), default(%!/weight, 0))])]
+-

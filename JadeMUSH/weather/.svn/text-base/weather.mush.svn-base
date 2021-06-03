@@ -1,0 +1,320 @@
+# The Firan Weather System 
+# 
+# This system determines and emits
+# weather messages to the mush.  It also stores said information for
+# retrieval.
+#
+# By Stephanie Dray
+# Started: 11/28/99
+#
+# Where the weather code object is #36
+# Where the weather message object is #77
+#
+# @weather -- shows the current weather
+# @weather/previous -- shows previous weather pattern
+# @weather/next -- shows the next weather pattern
+# @weather/list -- shows the list of weather pattern names
+# @weather/list <name of weather pattern> -- shows text of weather pattern
+# @weather/set <name of weather pattern> -- sets weather pattern
+
+
+#-----------------------------------------------------------------
+# COMMAND: @weather/set <name of weather condition>
+#-----------------------------------------------------------------
+&cmd-@weather/set #36=$@weather/set *:
+   @switch t(match(u(#36/u-weather-list), %0))=
+      0, {@pemit %#=There's no such weather condition.},
+      1, {&weather-previous #63=[get(#63/weather-current)];
+          &weather-current #63=%0;
+          &weather-next #63=[ulocal(ul-weather-choose, %0)];
+          @pemit %#=Current Weather Condition set to: %0}
+-
+
+#-----------------------------------------------------------------
+# COMMAND: @weather
+#-----------------------------------------------------------------
+&cmd-@weather #36=$@weather:
+  @pemit %#=[setq(0, get(#63/weather-current))]
+            %q0: [get(#77/%q0)]
+-
+#-----------------------------------------------------------------
+# COMMAND: @weather/previous
+#-----------------------------------------------------------------
+&cmd-@weather/previous #36=$@weather/previous:
+  @pemit %#=[setq(0, get(#63/weather-previous))]
+            %q0: [get(#77/%q0)]
+-
+#-----------------------------------------------------------------
+# COMMAND: @weather/next
+#-----------------------------------------------------------------
+&cmd-@weather/next #36=$@weather/next:
+   @pemit %#=[setq(0, get(#63/weather-next))]
+             %q0: [get(#77/%q0)]
+-
+
+#-----------------------------------------------------------------
+# COMMAND: @weather/list <weather condition name>
+#-----------------------------------------------------------------
+
+&cmd-@weather/list2 #36=$@weather/list *:
+   @switch t(match(u(#36/u-weather-list), %0))=
+     0, {@pemit %#=That doesn't appear to be the name of a valid 
+                   weather condition},
+     1, {@pemit %#=[get(#77/%0)]}
+-
+
+#-----------------------------------------------------------------
+# COMMAND: @weather/list
+#          (shows the list of weather pattern names)
+#-----------------------------------------------------------------
+
+&cmd-@weather/list #36=$@weather/list:
+  @pemit %#=[columns(u(#36/u-weather-list), 25)]
+  
+-
+&u-weather-list #36=[lattr(#77)]
+-
+
+#------------------------------------------------------------------
+# Weather Cronic Jobs
+#------------------------------------------------------------------
+
+#--------------------------------------------------------------------------
+# UL-CONFIRM-WEATHER
+#
+# ULOCAL(#63/UL-CONFIRM-WEATHER, <weather pattern>
+#   Replaces season and time of day with the current season and time of day
+#--------------------------------------------------------------------------
+# %q0 = pull out the season
+# %q1 = pull out the time of day
+# %q2 = pull out the weather condition
+&ul-confirm-weather #63=
+ [setq(0, first(%0, -))]
+ [setq(1, extract(%0, 2, 1, -))]
+ [setq(2, last(%0, -))]
+ [get(#63/season)]-[get(#63/time-of-day)]-%q2
+-
+
+&cronic_time_dawn #63=|||04|50|@@ every morning at dawn @@
+-
+# %q0= Get the next weather pattern name
+# %q0 = set it to the current time and season
+# %q1 = pull out the time of day and replace it with dawn
+
+&cronic_job_dawn #63=
+  think setq(0, get(#63/weather-next));
+  think setq(0, ulocal(#63/ul-confirm-weather, %q0));
+  think setq(1, trim(extract(%q0, 2, 1, -)));
+  think setq(1, edit(%q0, %q1, dawn));
+  @weather/set %q1;
+  @wall/no_prefix/emit %ch%[Weather Report%] [get(#77/%q1)]%cn
+-
+&cronic_time_dusk #63=|||21|50|@@ every ic day at dusk@@
+-
+# %q0= Get the next weather pattern name
+# %q0 = set it to the current time and season
+# %q1 = pull out the time of day and replace it with dawn
+
+&cronic_job_dusk #63=
+  think setq(0, get(#63/weather-next));
+  think setq(0, ulocal(#63/ul-confirm-weather, %q0));
+  think setq(1, trim(extract(%q0, 2, 1, -)));
+  think setq(1, edit(%q0, %q1, dusk));
+  @weather/set %q1;
+  @wall/no_prefix/emit %ch%[Weather Report%] [get(#77/%q1)]%cn
+-
+&cronic_time_day-weather #63=|||05|50|@@ every ic morning at 5:50 am@@
+-
+&cronic_job_day-weather #63=
+  think setq(0, get(#63/weather-next));
+  think setq(1, ulocal(#63/ul-confirm-weather, %q0));
+  @weather/set %q1;
+  @wall/no_prefix/emit %ch%[Weather Report%] [get(#77/%q1)]%cn
+-
+&cronic_time_night-weather #63=|||22|50|@@ every ic night at 10 pm @@
+-
+&cronic_job_night-weather #63=
+  think setq(0, get(#63/weather-next));
+  think setq(1, ulocal(#63/ul-confirm-weather, %q0));
+  @weather/set %q1;
+  @wall/no_prefix/emit %ch%[Weather Report%] [get(#77/%q1)]%cn
+-
+&cronic_time_weather-report #63=|||02 06 09 12 15 18 21|13|@@ every third hour on the 13 minute mark @@
+-
+&cronic_job_weather-report #63=
+  think setq(0, lwho());
+  think setq(0, filter(#63/filter-weather-off, %q0));
+  @dolist %q0={@pemit ##=%ch%[Weather Report%] 
+                            [get(#77/[get(#63/weather-current)])]}
+
+-
+&filter-weather-off #63=
+ [not(hastag(%0, !weather))]
+-
+
+#------------------------------------------------------------------
+# UL-WEATHER-CHOOSE
+#
+# ulocal(ul-weather-choose, <current weather>)
+#    spits back out the choice for the next weather pattern
+#------------------------------------------------------------------
+# %q0 = pull out the season
+# %q1 = pull out the time of day
+# %q2 = pull out the weather condition
+
+&ul-weather-choose #36=
+  [setq(0, trim(first(%0, -)))]
+  [setq(1, extract(%0, 2, 1, -))]
+  [setq(2, trim(last(%0, -)))]
+  %q0-%q1-[u(#36/u-%q0/%q2)]
+-
+&u-spring/rain #36=
+ [choose(rain stormy clear overcast fair fog sleet blizzard lightsnow,
+         10    10    25    20       30   10  5     2        2)]
+-
+&u-spring/stormy #36=
+ [choose(rain stormy clear overcast fair fog sleet blizzard lightsnow,
+         15    5     20    10       25   10  5     2        2)]
+-
+&u-spring/clear #36=
+ [choose(rain stormy clear overcast fair fog sleet blizzard lightsnow,
+         5    5      30    15       30   10  5     2        2)]
+-
+&u-spring/overcast #36=
+ [choose(rain stormy clear overcast fair fog sleet blizzard lightsnow,
+         5    5      25    15       25   5   5     2        2)]
+-
+&u-spring/fair #36=
+ [choose(rain stormy clear overcast fair fog sleet blizzard lightsnow,
+         5    5      25    10       40   10  5     2        2)]
+-
+&u-spring/fog #36=
+ [choose(rain stormy clear overcast fair fog sleet blizzard lightsnow,
+         5    5      25    10       30   10  5     2        2)]
+-
+&u-spring/sleet #36=
+ [choose(rain stormy clear overcast fair fog sleet blizzard lightsnow,
+         10   10     30    20       20   10  5     5        2)]
+-
+&u-spring/blizzard #36=
+ [choose(rain stormy clear overcast fair fog sleet blizzard lightsnow,
+         5    10     20     30      20   15  5     5        5)]
+-
+&u-spring/lightsnow #36=
+ [choose(rain stormy clear overcast fair fog sleet blizzard lightsnow,
+         15    5     25     30      20    5   10     5        10)]
+-
+&u-summer/rain #36=
+ [choose(rain stormy clear overcast fair fog sleet blizzard lightsnow,
+         15    5     30    15       25   10   0     0        0)]
+-
+&u-summer/stormy #36=
+ [choose(rain stormy clear overcast fair fog sleet blizzard lightsnow,
+         10    10    20    10       30   10   0     0        0)]
+-
+&u-summer/clear #36=
+ [choose(rain stormy clear overcast fair fog sleet blizzard lightsnow,
+         5     5     50     10       30   5   0     0        0)]
+-
+&u-summer/overcast #36=
+ [choose(rain stormy clear overcast fair fog sleet blizzard lightsnow,
+         5    5      25    10       20   10   0     0        0)]
+-
+&u-summer/fair #36=
+ [choose(rain stormy clear overcast fair fog sleet blizzard lightsnow,
+         10    10    30    15       50   10   0     0        0)]
+-
+&u-summer/fog #36=
+ [choose(rain stormy clear overcast fair fog sleet blizzard lightsnow,
+         10    10    20    10       20   5   0     0        0)]
+-
+
+&u-summer/sleet #36=
+ [choose(rain stormy clear overcast fair fog sleet blizzard lightsnow,
+         15    5     30     10       30  10   5     0        0)]
+-
+&u-summer/blizzard #36=
+ [choose(rain stormy clear overcast fair fog sleet blizzard lightsnow,
+         10    10    20    20       20   30   2     2        0)]
+-
+&u-summer/lightsnow #36=
+ [choose(rain stormy clear overcast fair fog sleet blizzard lightsnow,
+         15   10     20    20       20   30   5     5        5)]
+-
+
+
+&u-fall/rain #36=
+ [choose(rain stormy clear overcast fair fog sleet blizzard lightsnow,
+         10    10    30    10       30   10   0     0        0)]
+-
+&u-fall/stormy #36=
+ [choose(rain stormy clear overcast fair fog sleet blizzard lightsnow,
+         15    10    30    10       20   10   0     0        0)]
+-
+&u-fall/clear #36=
+ [choose(rain stormy clear overcast fair fog sleet blizzard lightsnow,
+         10   10     40    10       30   10   0     0        0)]
+-
+&u-fall/overcast #36=
+ [choose(rain stormy clear overcast fair fog sleet blizzard lightsnow,
+         10    5     30    15       20   15   0     0        0)]
+-
+&u-fall/fair #36=
+ [choose(rain stormy clear overcast fair fog sleet blizzard lightsnow,
+         5    5      30    10       40   10   0     0        0)]
+-
+&u-fall/fog #36=
+ [choose(rain stormy clear overcast fair fog sleet blizzard lightsnow,
+         10    10    35    10       25   10   0     0        0)]
+-
+&u-fall/sleet #36=
+ [choose(rain stormy clear overcast fair fog sleet blizzard lightsnow,
+         10    10    30    10       30   10   10     2        2)]
+-
+&u-fall/blizzard #36=
+ [choose(rain stormy clear overcast fair fog sleet blizzard lightsnow,
+         10    10    20    30       20   10   10     10        2)]
+-
+&u-fall/lightsnow #36=
+ [choose(rain stormy clear overcast fair fog sleet blizzard lightsnow,
+         15   10     20    15       30   15   5     0        10)]
+-
+
+&u-winter/rain #36=
+ [choose(rain stormy clear overcast fair fog sleet blizzard lightsnow,
+         15    10    30    10       20   10   10     10        10)]
+-
+&u-winter/stormy #36=
+ [choose(rain stormy clear overcast fair fog sleet blizzard lightsnow,
+         5    5      20    10       30   10   10     10        15)]
+-
+&u-winter/clear #36=
+ [choose(rain stormy clear overcast fair fog sleet blizzard lightsnow,
+         5    5      30    20       30   5    10     5        10)]
+-
+&u-winter/overcast #36=
+ [choose(rain stormy clear overcast fair fog sleet blizzard lightsnow,
+         15    5     30    10       30   10   10     15        15)]
+-
+&u-winter/fair #36=
+ [choose(rain stormy clear overcast fair fog sleet blizzard lightsnow,
+         5    5      30    10       30   5    10     10        15)]
+-
+&u-winter/fog #36=
+ [choose(rain stormy clear overcast fair fog sleet blizzard lightsnow,
+         10    5      30    10       30   15   10     10        15)]
+-
+&u-winter/sleet #36=
+ [choose(rain stormy clear overcast fair fog sleet blizzard lightsnow,
+         15    5      20    10       30   5    15     10        10)]
+-
+&u-winter/blizzard #36=
+ [choose(rain stormy clear overcast fair fog sleet blizzard lightsnow,
+         5    5      20    15       20   10    10     10        25)]
+-
+&u-winter/lightsnow #36=
+ [choose(rain stormy clear overcast fair fog sleet blizzard lightsnow,
+         5    5      30    10       30   5    5     10        15)]
+
+
+

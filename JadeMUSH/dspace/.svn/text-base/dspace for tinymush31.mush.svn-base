@@ -1,0 +1,155 @@
+&XCOOR here=0
+&YCOOR here=0
+&ZCOOR here=0
+@set here=FLOATING
+@create Dynamic Room Parent
+@create Dynamic Exit Parent
+@create Dynamic Array Object
+@parent here=Dynamic Room Parent
+@set Dynamic Room Parent=SAFE
+@set Dynamic Room Parent=HALTED
+@set Dynamic Exit Parent=SAFE
+@set Dynamic Array Object=SAFE
+@fo me=&NAME-0.0.0 Dynamic Array Object=[name(here)]
+@fo me=&NUM-0.0.0 Dynamic Array Object=[num(here)]
+@fo me=&ARRAY Dynamic Room Parent=[num(Dynamic Array Object)]
+@fo me=&ARRAY Dynamic Exit Parent=[num(Dynamic Array Object)]
+@fo me=@va Dynamic Room Parent=[num(Dynamic Array Object)]
+@fo me=@va Dynamic Exit Parent=[num(Dynamic Array Object)]
+@fo me=&ROOM_PARENT Dynamic Exit Parent=[num(Dynamic Room Parent)]
+@fo me=&EXIT_PARENT Dynamic Room Parent=[num(Dynamic Exit Parent)]
+drop Dynamic Room Parent
+enter Dynamic Room Parent
+
+@open North <N>;north;n
+@set North=DARK
+@parent North=Dynamic Exit Parent
+@lock North=me&!me
+@link North=here
+&YNEW North=add(get(%0/YCOOR),1)
+@Succ North=You head north.
+@Osucc North=heads north.
+@Odrop North=comes in from the south.
+&FAKE_FAIL North=You find you cannot travel further north.
+&NO_DESC North=You cannot discern anything further to the north.
+&FAIL_DESC North=Travel to the north appears blocked.
+
+@open East <E>;east;e
+@set East=DARK
+@parent East=Dynamic Exit Parent
+@lock East=me&!me
+@link East=here
+&XNEW East=add(get(%0/XCOOR),1)
+@Succ East=You head east.
+@Osucc East=heads east.
+@Odrop East=comes in from the west.
+&FAKE_FAIL East=You find you cannot travel further east.
+&NO_DESC East=You cannot discern anything further to the east.
+&FAIL_DESC East=Travel to the east appears blocked.
+
+@open South <S>;south;s
+@set South=DARK
+@parent South=Dynamic Exit Parent
+@lock South=me&!me
+@link South=here
+&YNEW South=sub(get(%0/YCOOR),1)
+@Succ South=You head south.
+@Osucc South=heads south.
+@Odrop South=comes in from the north.
+&FAKE_FAIL South=You find you cannot travel further south.
+&NO_DESC South=You cannot discern anything further to the south.
+&FAIL_DESC South=Travel to the south appears blocked.
+
+@open West <W>;west;w
+@set West=DARK
+@parent West=#102
+@lock West=me&!me
+@link West=here
+&XNEW West=sub(get(%0/XCOOR),1)
+@Succ West=You head west.
+@Osucc West=heads west.
+@Odrop West=comes in from the east.
+&FAKE_FAIL West=You find you cannot travel further west.
+&NO_DESC West=You cannot discern anything further to the west.
+&FAIL_DESC West=Travel to the west appears blocked.
+leave
+
+&ISBUILDER Dynamic Room Parent=switch hasflag(%#, BUILDER)=1
+&ISWIZARD Dynamic Room Parent=switch hasflag(%#, WIZARD)=1
+@lock/UseLock Dynamic Room Parent=!ISBUILDER/0 | !ISWIZARD/0
+&X-LIMITS Dynamic Array Object=1
+&Y-LIMITS Dynamic Array Object=1
+&Z-LIMITS Dynamic Array Object=1
+&MAXX Dynamic Array Object=10
+&MINX Dynamic Array Object=-10
+&MAXY Dynamic Array Object=10
+&MINY Dynamic Array Object=-10
+&MAXZ Dynamic Array Object=0
+&MINZ Dynamic Array Object=0
+&QUEUE-MIN Dynamic Array Object=1
+&QUEUE-MAX Dynamic Array Object=4
+@Desc Dynamic Room Parent=The plane is featureless.
+@Adesc Dynamic Room Parent=@pemit %#=[switch(hasflag(%#,TERSE),1,[@pemit %#=Your TERSE flag is set. You will not exit names in this area.],[setq(1,setunion(v(DARK_EXITS),u(DE_HIDE_BORDER),|))][setq(0,filter(DE_FILTER,lexits(%!)))][switch(words(%q0),0,,Obvious exits:%r[iter(%q0,name(##)%b)])][switch(u(ISBUILDER),1,%rType "DS Help" for DS Builder commands.)])]
+&DE_FILTER Dynamic Room Parent=switch(member(lcstr(%q1),lcstr(name(%0)),|),0,1,0)
+&DE_HIDE_BORDER Dynamic Room Parent=edit(trim(squish([switch(11,[get(%va/X-LIMITS)][eq(v(XCOOR),get(%va/MAXX))],East <E>)]%b[switch(11,[get(%va/X-LIMITS)][eq(v(XCOOR),get(%va/MINX))],West <W>)]%b [switch(11,[get(%va/Y-LIMITS)][eq(v(YCOOR),get(%va/MAXY))],North <N>)]%b[switch(11,[get(%va/Y-LIMITS)][eq(v(YCOOR),get(%va/MINY))],South <S>)]%b[switch(11,[get(%va/Z-LIMITS)][eq(v(ZCOOR),get(%va/MAXZ))],Up <U>)]%b[switch(11,[get(%va/Z-LIMITS)][eq(v(ZCOOR),get(%va/MINZ))],Down <D>)])),%b,|)
+&desc_HERE Dynamic Room PARENT=$desc here=*:&desc_normal here=%0;&desc-[v(XCOOR)].[v(YCOOR)].[v(ZCOOR)] %va=%0;@pemit %#=Desc set.
+&SUCC_HERE Dynamic Room PARENT=$succ here=*:@succ me=%0;&succ-[v(XCOOR)].[v(YCOOR)].[v(ZCOOR)] %va=%0;@pemit %#=Succ set.
+&EXPOSE_HERE Dynamic Room PARENT=$exposure here=*:&exposure me=%0;&exposure-[v(XCOOR)].[v(YCOOR)].[v(ZCOOR)] %va=%0;@pemit %#=Exposure set.
+&NAME_HERE Dynamic Room parent=$name here=*:@name me=%0;&name-[v(XCOOR)].[v(YCOOR)].[v(ZCOOR)] %va=%0;@pemit %#=Name set.
+&VIEW_HERE Dynamic Room PARENT=$art here=*:&view_area here=*;&view-[v(XCOOR)].[v(YCOOR)].[v(ZCOOR)] %va=%0;@pemit %#=+View for the area set.
+&COORDS_HERE Dynamic Room Parent=$coords:@pemit %#=X coordinate = [v(XCOOR)], Y coordinate = [v(YCOOR)], Z coordinate = [v(ZCOOR)]
+&FIX_HERE Dynamic Room Parent=$fix here:@aleave me=@@;@pemit %#=Room fixed.
+&clear_fix room parent=$clear fix:@aleave here=;@pemit %#=The room is no longer fixed.
+&PARENT_HERE Dynamic Room Parent=$parent here=*:@parent me=%0;&parent-[v(XCOOR)].[v(YCOOR)].[v(ZCOOR)] %va=%0;@pemit %#=Parent set.
+&CMD_HIDE_EXIT ROOM PARENT=$hide exit=*:@switch locate(%L,%0,c)=#-1,{@pemit %#=I don't see that exit here.},#-2,{@pemit %#=I don't know which exit you mean!},{&DARK_EXITS %!=setunion(v(DARK_EXITS),lcstr(name(locate(%L,%0,c))),|);&DARK_EXITS-[v(XCOOR)].[v(YCOOR)].[v(ZCOOR)] %va=v(DARK_EXITS);@pemit %#=Exit hidden.}
+&CMD_SHOW_EXIT ROOM PARENT=$show exit=*:@switch locate(%L,%0,c)=#-1,{@pemit %#=I don't see that exit here.},#-2,{@pemit %#=I don't know which exit you mean!},{&DARK_EXITS %!=setdiff(v(DARK_EXITS),lcstr(name(locate(%L,%0,c))),|);&DARK_EXITS-[v(XCOOR)].[v(YCOOR)].[v(ZCOOR)] %va=v(DARK_EXITS);@pemit %#=Exit revealed.}
+&CMD_HIDDEN_EXITS Dynamic Room Parent=$list hidden exits:@pemit %#=Hidden exits: [edit(v(DARK_EXITS),|,%b%b)]
+&CMD_BLOCK_EXIT ROOM PARENT=$block exit=*:@switch locate(%L,%0,c)=#-1,{@pemit %#=I don't see that exit here.},#-2,{@pemit %#=I don't know which exit you mean!},{&BLOCKED_EXITS %!=setunion(v(BLOCKED_EXITS),lcstr(name(locate(%L,%0,c))),|);&BLOCKED_EXITS-[v(XCOOR)].[v(YCOOR)].[v(ZCOOR)] %va=v(BLOCKED_EXITS);@pemit %#=Exit blocked.}
+&CMD_OPEN_EXIT Dynamic Room Parent=$open exit=*:@switch locate(%L,%0,c)=#-1,{@pemit %#=I don't see that exit here.},#-2,{@pemit %#=I don't know which exit you mean!},{&BLOCKED_EXITS %!=setdiff(v(BLOCKED_EXITS),lcstr(name(locate(%L,%0,c))),|);&BLOCKED_EXITS-[v(XCOOR)].[v(YCOOR)].[v(ZCOOR)] %va=v(BLOCKED_EXITS);@pemit %#=Exit opened.}
+&CMD_BLOCKED_EXITS Dynamic Room Parent=$list BLOCKED exits:@pemit %#=Blocked exits: [edit(v(BLOCKED_EXITS),|,%b%b)]
+@parent Dynamic Room Parent=Dynamic Exit Parent
+&CMD_TELTO Dynamic Room Parent=$telto * * *:@wait %va={@trigger v(EXIT_PARENT)/[setq(7,add(%0,0))][setq(8,add(%1,0))][setq(9,add(%2,0))][switch(0,u(INBOUNDS,%q7,%q8,%q9),DUMMY,comp(get(%va/NUM-%q7.%q8.%q9),),ALLOC_ROOM,TEL_TO_ROOM)]=%#,%L,%N,%q7,%q8,%q9}
+&CMD_DS_HELP Dynamic Room Parent=$DS Help:@pemit %#={%rYou can use the following commands:%r%b'name here=<new name>'%b %b'coords' - find out your current coordinates%r%b'fix here' - stop this room from being recycled%r%b'succ here=<new succ>'%b %b'parent here=<new parent>' - be careful!!%r%b'hide exit=<exitname>'%b %b'show exit=<exitname>' %b 'list hidden exits'%r%b'block exit=<exitname>'%b 'open exit=<exitname>' %b 'list blocked exits'%r%b'telto <x> <y> <z>' - teleport to those coordinates, if they're valid%r'clear fix' this will unfix a room that has been fixed.%r%rThe description is broken up into 12 seperate categories:%r%b'spring here'%b'summer here'%b'autumn here'%b'winter here' - all represent the appropriate seasonal desc.%r%b'morning here'%b'afternoon here'%b'evening here'%b'night here' - all represent the appropriate time of day.%r%b'basic here' is the main description...the part that does not change with season or time of day.%r%b'exposure here' is the exposure - important to some MU*'s...or just as an extra 'attribute' holder.%r%b'art here' to add +viewable art%r%rb'sec here' to add security descriptions.%r%r}
+@Aleave Dynamic Room Parent=@switch and(eq(words(lcon(me)),0),eq(words(lexits(me)),words(lexits(parent(me)))))=1,{&num-[v(XCOOR)].[v(YCOOR)].[v(ZCOOR)] %va=setdiff(get(%va/num-[v(XCOOR)].[v(YCOOR)].[v(ZCOOR)]),num(me));&recycle_list %va=setunion(get(%va/RECYCLE_LIST),num(me));@name me=DS Recycled Room;@parent me;@dolist lattr(me)={&## me};@trigger %va/RECYCLE}
+@Startup Dynamic Room Parent=@trigger me/Aleave
+&RECYCLE Dynamic Array Object=@switch words(v(RECYCLE_LIST))=<[v(QUEUE-MIN)],{@dig DS Recycled Room;@trigger me/RECYCLE},>[v(QUEUE-MAX)],{@destroy first(v(RECYCLE_LIST));&recycle_list me=rest(v(RECYCLE_LIST));@trigger me/RECYCLE}
+@Listen Dynamic Array Object=* created with room number *.
+@Amhear Dynamic Array Object=&RECYCLE_LIST me=cat(v(RECYCLE_LIST),#%1);@set #%1=FLOATING
+@trigger Dynamic Array Object/RECYCLE
+@Fail Dynamic Exit Parent=\
+&PASS_LOCK Dynamic Exit Parent=[and(not(member(lcstr(get(%L/BLOCKED_EXITS)),lcstr(name(%!)),|)),not(u(ISNULL,%q7,%q8,%q9)),u(DIM_LOCK))]
+&DIM_LOCK Dynamic Exit Parent=1
+&ISNULL Dynamic Exit Parent=0
+@Desc Dynamic Exit Parent=[setq(7,u(DXNEW,u(XNEW,%L)))][setq(8,u(DYNEW,u(YNEW,%L)))][setq(9,u(DZNEW,u(ZNEW,%L)))][switch(1,not(u(INRANGE,%q7,%q8,%q9)),v(NO_DESC),not(u(PASS_LOCK)),v(FAIL_DESC),[setq(0,s(u(GETDESC,%q7,%q8,%q9)))][switch(%q0,,get_eval(u(GETPARENT,%q7,%q8,%q9)/Desc),%q0)][setq(0,s(u(GETSUCC,%q7,%q8,%q9)))][switch(%q0,,setq(0,get_eval(u(GETPARENT,%q7,%q8,%q9)/Succ)))][switch(%q0,,,%r%q0)])]
+&INRANGE Dynamic Exit Parent=and(or(neq(get(%va/X-LIMITS),1),u(IS_IN_X,%0)),or(neq(get(%va/Y-LIMITS),1),u(IS_IN_Y,%1)),or(neq(get(%va/Z-LIMITS),1),u(IS_IN_Z,%2)))
+&INBOUNDS Dynamic Exit Parent=and(or(not(get(%va/X-LIMITS)),u(IS_IN_X,%0)),or(not(get(%va/Y-LIMITS)),u(IS_IN_Y,%1)),or(not(get(%va/Z-LIMITS)),u(IS_IN_Z,%2)))
+&IS_IN_X Dynamic Exit Parent=and(lte(%0,get(%va/MAXX)),gte(%0,get(%va/MINX)))
+&IS_IN_Y Dynamic Exit Parent=and(lte(%0,get(%va/MAXY)),gte(%0,get(%va/MINY)))
+&IS_IN_Z Dynamic Exit Parent=and(lte(%0,get(%va/MAXZ)),gte(%0,get(%va/MINZ)))
+&XNEW Dynamic Exit Parent=get(%0/XCOOR)
+&YNEW Dynamic Exit Parent=get(%0/YCOOR)
+&ZNEW Dynamic Exit Parent=get(%0/ZCOOR)
+&DXNEW Dynamic Exit Parent=switch(get(%va/X-LIMITS),2,switch(1,gt(%0,get(%va/MAXX)),get(%va/MINX),lt(%0,get(%va/MINX)),get(%va/MAXX),%0),%0)
+&DYNEW Dynamic Exit Parent=switch(get(%va/Y-LIMITS),2,switch(1,gt(%0,get(%va/MAXY)),get(%va/MINY),lt(%0,get(%va/MINY)),get(%va/MAXY),%0),%0)
+&DZNEW Dynamic Exit Parent=switch(get(%va/Z-LIMITS),2,switch(1,gt(%0,get(%va/MAXZ)),get(%va/MINZ),lt(%0,get(%va/MINZ)),get(%va/MAXZ),%0),%0)
+@Afail Dynamic Exit Parent=@wait %va={@trigger me/[setq(7,u(DXNEW,u(XNEW,%L)))][setq(8,u(DYNEW,u(YNEW,%L)))][setq(9,u(DZNEW,u(ZNEW,%L)))][switch(0,u(INRANGE,%q7,%q8,%q9),DUMMY,u(PASS_LOCK),DUMMY,comp(get(%va/NUM-%q7.%q8.%q9),),ALLOC_ROOM,TEL_TO_ROOM)]=%#,%L,%N,%q7,%q8,%q9}
+&DUMMY Dynamic Exit Parent=@pemit %0=u(FAKE_FAIL,%0,%3,%4,%5);@notify %va
+&FAKE_FAIL Dynamic Exit Parent=Sorry, you can't go to (%1,%2,%3).
+&ALLOC_ROOM Dynamic Exit Parent=@VN me=first(cat(get(%va/num-%3.%4.%5),get(%va/recycle_list)));&RECYCLE_LIST %va=setdiff(get(%va/RECYCLE_LIST),%vn);@trigger %va/RECYCLE;&num-%3.%4.%5 %va=%vn; &XCOOR %vn=%3; &YCOOR %vn=%4; &ZCOOR %vn=%5; @set %vn=FLOATING; @name %vn=u(GETNAME,%3,%4,%5); &desc_normal %vn=u(GETdesc,%3,%4,%5); @succ %vn=u(GETSUCC,%3,%4,%5); &exposure %vn=u(GETEXPOSE,%3,%4,%5);@parent %vn=u(GETPARENT,%3,%4,%5);&view_area %vn=u(GETVIEW,%3,%4,%5);&DARK_EXITS %vn=u(GETDARKEXITS,%3,%4,%5);&BLOCKED_EXITS %vn=u(GETBLOCKEDEXITS,%3,%4,%5);@pemit %0=switch(hasflag(%0,TERSE),1,,u(Succ,%0));@tel %0=%vn;@pemit/contents %1=%2 [u(Osucc,%0)];@notify %va
+&TEL_TO_ROOM Dynamic Exit Parent=@VN me=get(%va/num-%3.%4.%5);@pemit/contents %vn=%2 [u(Odrop,%0)];@pemit %0=switch(hasflag(%0,TERSE),1,,u(Succ,%0));@tel %0=%vn;@pemit/contents %1=%2 [u(Osucc,%0)];@notify %va;@notify Dynamic Array Object
+@Startup Dynamic Array Object=@drain me;@notify me;@wait 1200={@dolist lattr(%!/NUM-*)={@trigger v(##)/Aleave}}
+&GETNAME Dynamic Exit Parent=[setq(1,get(%va/NAME-%0.%1.%2))][switch(%q1,,{Dynamic Room %0 %1 %2},%q1)]
+&GETdesc Dynamic Exit Parent=[setq(1,get(%va/desc-%0.%1.%2))][switch(%q1,,{},%q1)]
+&GETSUCC Dynamic Exit Parent=[setq(1,get(%va/SUCC-%0.%1.%2))][switch(%q1,,{},%q1)]
+&GETEXPOSE Dynamic Exit Parent=[setq(1,get(%va/EXPOSURE-%0.%1.%2))][switch(%q1,,{},%q1)]
+&GETPARENT Dynamic Exit Parent=[setq(1,get(%va/PARENT-%0.%1.%2))][switch(%q1,,v(ROOM_PARENT),%q1)]
+&GETview Dynamic Exit Parent=[setq(1,get(%va/view-%0.%1.%2))][switch(%q1,,{},%q1)]
+&GETDARKEXITS Dynamic Exit Parent=[setq(1,get(%va/DARK_EXITS-%0.%1.%2))][switch(%q1,,{},%q1)]
+&GETBLOCKEDEXITS Dynamic Exit Parent=[setq(1,get(%va/BLOCKED_EXITS-%0.%1.%2))][switch(%q1,,{},%q1)]
+@desc dynamic room parent=[space(5)][u(desc_normal)]
+@succ dynamic room parent=
+@tel Dynamic Room Parent=me
+@tel Dynamic Exit Parent=me
+@tel Dynamic Array Object=me
+@aleave here=@@
+@pemit me=Script Complete at [time()]

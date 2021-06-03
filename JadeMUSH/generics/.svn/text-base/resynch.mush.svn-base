@@ -1,0 +1,572 @@
+#################################################################
+#            COMMAND: @RESYNCH[/QUIET] <object/player>          #
+#                                                               #
+# This command resets player 'encumbrances' when they get       #
+# messed up due to broken objects that don't have weights set.  #
+#                                                               #
+# When used on objects, the capacity and weight attributes      #
+# are reset to fix anything that might be broken because of     #
+# faulty objects with inaccurate weights.                       #
+#                                                               #
+# This command will give feedback and identify broken objects   #
+# that the player or object is holding.                         #
+#################################################################
+
+&cmd-resynch #70=$@resynch*:
+
+#----------------------------------
+# %q0 = object to be resynched
+#----------------------------------
+
+  think setq(0, switch(strmatch(%0, /quiet*), 1, 
+                       locate(%#, after(%0, %b), *P),
+                       locate(%#, %0, *P)));
+  think ifelse(and(t(%q0),
+               words(lattr(%q0/poison-doses)),
+               strmatch(0,[get(%q0/poison-doses)])),set(%q0,poison-doses:),);
+
+#-------------------------------------------------
+# First resynch all the objects that the thing is 
+# holding
+#
+# COMMENTED OUT BECAUSE IT WAS UNECESSARILY SPAMMING THE QUEUE
+#-------------------------------------------------
+
+### setdiff( ... , #-1) was necessary to prevent looping errors...  /ad/ ###
+
+#  @switch t(words(lcon(%q0)))=
+#       1, {@dolist [setdiff(filter(filter-dark, lcon(%q0)), #-1)]=
+#             @resynch ##};
+
+#================================================================#
+# Step One:                                                      #
+# Regardless of what kind of object it is, if it's a group, tag  #
+# it grouped, and if it's not a group, tag it not grouped.       #
+#================================================================#
+  
+  think ifelse(u(u-is-group, %q0), settag(%q0, grouped), 
+                                   [settag(%q0, !group)]
+                                   [settag(%q0, !grouped)]);
+ 
+#=================================================================#
+# Step Two:                                                       #
+# make sure that it's name is correct.  For example,              #
+# if you have a grouped apple object with an account of 9 apples  #
+# on it, it should be named '9 apples' not '10 apples'            #
+#                                                                 #
+# If: either, the object is generic, not a parent item, and not   #
+#     an unfinished object, or, the object isn't a parent item    #
+#     and the first word in its name is a number.                 #
+#=================================================================#
+
+  @switch/now/first [or(hastype(%q0, player), 
+                  hasflag(%q0, parent),
+                  strmatch(first(name(%q0)), Unfinished))]
+          [generic(%q0)]=
+
+    1?, {@@ Don't rename a Players, Unfinished items or Parent objects @@},
+    
+    ?0, {@@ Object is a customized object and needs to be renamed @@;
+          @@ %q1 = currency type of the item @@;
+          @@ %q2 = the number of currency the item holds @@;
+          @@ %q3 = original name of the item @@;
+          @@ Need a little extra processing it is a tamed sheep animals 
+@@;
+          think setq(1, get(%q0/currency));
+          think setq(2, getaccount(%q0, %q1));
+          think setq(3, name(%q0));
+          think setq(3, ifelse(isnum(first(%q3)), trim(rest(%q3)), %q3));
+          @name %q0=[ifelse(or(strmatch(%q3,
+                sheep),strmatch(%q3,sheep animals)),
+                ifelse(eq(%q2,1),sheep, %q2 sheep),
+                ifelse(eq(%q2, 1), %q3,
+          %q2 %q1))]},
+
+   ?1, {@@ Object is Generic and needs to be renamed @@;
+        @@ %q1 = the currency type of the item @@;
+        @@ %q2 = the number of currency the item holds @@;
+        @@ %q3 = the goodname of the item @@;
+
+       think setq(1, get(%q0/currency));
+       think setq(2, getaccount(%q0, %q1));
+       think setq(3, goodname(%q0));
+       think setq(3, ifelse(isnum(first(%q3)), trim(rest(%q3)), %q3));
+       think setq(3, edit(%q3, Generic,));
+       think setq(3, edit(%q3, generic,));
+       think setq(3, edit(%q3, parent,));
+       think setq(3, trim(edit(%q3, Parent,)));
+
+#---------------------------------------------------------------------        
+#        If there's only one of the currency, give it the good name, 
+#        if more than one, give it the number and then the currency 
+#        name
+#---------------------------------------------------------------------
+
+       @name %q0=[switch(%q2, 1, %q3, switch(strmatch(%q1,sheep animals),1,
+       %q2 %q3,%q2 %q1))]};
+
+
+#================================================================#
+# Step Three:                                                    #
+# Clean up the &wear attributes on a player.                     #
+#                                                                #
+# %q4 = all the wear attributes on the player                    #
+# %q5 = the contents of the player                               #
+# %q6 = for each, the dbref of the clothing item                 #
+#                                                                #
+# COMMENTED OUT BECAUSE IT MAY NOT BE NECESSARY.                 #
+#================================================================#
+
+#  think setq(4, lattr(%q0/wear-*));
+#  think setq(5, lcon(%q0));
+#  think iter(%q4, [setq(6, trim(first(get(%q0/##), |)))]
+#                  [switch(and(t(member(%q5, %q6)), hastag(%q6, worn)),
+#                          0, [set(%q0, ##:)]
+#                             [set(%q6, !dark)])]);
+
+#================================================================#
+# Step Four:                                                     #
+#                                                                #
+# Error Checking                                                 #
+# %q9 = error code that checks to see:                           #
+#       a) Did we find the player or object specified?           #
+#       b) Is the thing to be resynched a player?                #
+#       c) or, is the thing to be resynched an object?           #
+#================================================================#
+
+  think setq(9, [isdbref(%q0)]
+                [or(hastype(%q0, player), hastag(%q0, npc))]
+                [hastag(%q0, container)]);
+
+  think switch(%q9,
+
+        0??, [pemit(%#, I don't see what you want to resynch.)],
+
+#-----------------------------------------------------------
+#       If the object to be resynched is a player or an npc
+#-----------------------------------------------------------
+
+        ?1?, [switch(strmatch(first(%0), /quiet), 0, 
+                    pemit(%#, Resynching [name(%q0)]. . .))]
+             [ulocal(ul-resynch-player, %#, %q0, first(%0))],
+
+#-----------------------------------------------------------
+#       If the object to be resynched is a container,
+#-----------------------------------------------------------
+
+        ??1, [switch(strmatch(first(%0), /quiet), 0, 
+                           pemit(%#, Resynching [name(%q0)]. . . ))]
+             [ulocal(#70/ul-resynch-container, #50, %q0, first(%0))],
+
+#-----------------------------------------------------------
+#       default case of thing
+#-----------------------------------------------------------
+
+        [switch(strmatch(first(%0), /quiet), 0, 
+                      pemit(%#, Resynching [name(%q0)]. . . ))]
+        [ulocal(ul-resynch-thing, %#, %q0, first(%0))])
+
+-
+
+#====================================================================#
+#            FUNCTION: RESYNCH(<OBJECT>)                             #
+#                                                                    #
+# This is the functional equivalent of the @resynch command.         #
+#====================================================================#
+
+&function-resynch #50=
+
+#----------------------------------
+# %q0 = object to be resynched
+#----------------------------------
+
+  [setq(0, locate(%#, %0, *))]
+
+#-----------------------------------------------------------------
+# The code used to here resynch all the objects 
+# in the original object's inventory as well.
+#
+# COMMENTED OUT BECAUSE IT WAS UNECESSARILY SPAMMING THE QUEUE
+#-----------------------------------------------------------------
+# setdiff( ... , #-1) was necessary to prevent looping errors/ad/ 
+#  
+#  [switch(t(words(lcon(%q0))), 
+#          1, iter(setdiff(filter(#70/filter-dark, lcon(%q0)), #-1), 
+#                  resynch(##)))]
+#-----------------------------------------------------------------
+
+#================================================================#
+# Step One:                                                      #
+# Regardless of what kind of object it is, if it's a group, tag  #
+# it grouped, and if it's not a group, tag it not grouped.       #
+#================================================================#
+  
+  [ifelse(u(#70/u-is-group, %q0), settag(%q0, grouped), 
+                             [settag(%q0, !group)]
+                             [settag(%q0, !grouped)])]
+ 
+#=================================================================#
+# Step Two:                                                       #
+# make sure that it's name is correct.  For example,              #
+# if you have a grouped apple object with an account of 9 apples  #
+# on it, it should be named '9 apples' not '10 apples'            #
+#                                                                 #
+# If: either, the object is generic, not a parent item, and not   #
+#     an unfinished object, or, the object isn't a parent item    #
+#     and the first word in its name is a number.                 #
+#=================================================================#
+
+  [switch([or(hastype(%q0, player),
+             hasflag(%q0, parent),
+             strmatch(first(name(%q0)), Unfinished))]
+          [generic(%q0)], 
+
+      1?, pemit(#50, Do not rename players or 
+                     unfinished items or parent items.),
+
+
+#----------------------------------------------------------------
+# Where the item needs to be renamed and is generic
+#
+#       %q1 = the currency type of the item
+#       %q2 = the number of currency the item holds
+#       %q3 = the goodname of the item if it turns out 
+#             to be singular
+#----------------------------------------------------------------
+
+      ?1, [setq(1, get(%q0/currency))]
+             [setq(2, getaccount(%q0, %q1))]
+             [setq(3, goodname(%q0))]
+             [setq(3, ifelse(isnum(first(%q3)), trim(rest(%q3)), %q3))]
+             [setq(3, edit(%q3, Generic,))]
+             [setq(3, edit(%q3, generic,))]
+             [setq(3, edit(%q3, parent,))]
+             [setq(3, trim(edit(%q3, Parent,)))]
+
+#---------------------------------------------------------------------        
+#        If there's only one of the currency, give it the good name, 
+#        if more than one, give it the number and then the currency 
+#        name unless it's customized, in which case, keep it's custom 
+#        name. (BTW, Switch is used here because ifelse treats 
+#        everything greater than a 1 as if it were true).
+#---------------------------------------------------------------------
+
+             [setname(%q0, switch(%q2, 1, %q3, switch(
+             strmatch(%q1,sheep animals),1,%q2 %q3,%q2 %q1)))],
+
+#---------------------------------------------------------------------
+# Where the item is not generic
+#---------------------------------------------------------------------
+
+       ?0, [setq(1, get(%q0/currency))]
+           [setq(2, getaccount(%q0, %q1))]
+           [setq(3, name(%q0))]
+           [setq(3, ifelse(isnum(first(%q3)), trim(rest(%q3)), %q3))]
+           [setname(%q0, switch(%q2, 1, %q3, %q2 %q3))])]
+
+
+#================================================================#
+# Step Three:                                                    #
+# Clean up the &wear attributes on a player.                     #
+#                                                                #
+# %q4 = all the wear attributes on the player                    #
+# %q5 = the contents of the player                               #
+# %q6 = for each, the dbref of the clothing item                 #
+#                                                                #
+# COMMENTED OUT BECAUSE IT MAY NOT BE NECESSARY.                 #
+#================================================================#
+#  [setq(4, lattr(%q0/wear-*))]
+#  [setq(5, lcon(%q0))]
+#  [iter(%q4, [setq(6, trim(first(get(%q0/##), |)))]
+#                  [switch(and(t(member(%q5, %q6)), hastag(%q6, worn)),
+#                          0, [set(%q0, ##:)]
+#                             [set(%q6, !dark)])])]
+
+#================================================================#
+# Step Four:                                                     #
+#                                                                #
+# Error Checking                                                 #
+# %q9 = error code that checks to see:                           #
+#       a) Did we find the player or object specified?           #
+#       b) Is the thing to be resynched a player?                #
+#       c) or, is the thing to be resynched an object?           #
+#================================================================#
+
+  [setq(9, [isdbref(%q0)]
+                [or(hastype(%q0, player), hastag(%q0, npc))]
+                [hastag(%q0, container)])]
+
+  [switch(%q9,
+
+        0??, [pemit(%#, #-1 DID NOT LOCATE ITEM TO RESYNCH )],
+
+#-----------------------------------------------------------
+#       If the object to be resynched is a player or an npc
+#-----------------------------------------------------------
+
+        ?1?, [ulocal(#70/ul-resynch-player, #50, %q0, first(%0), quiet)],
+
+#-----------------------------------------------------------
+#       If the object to be resynched is a container,
+#-----------------------------------------------------------
+
+        ??1, [ulocal(#70/ul-resynch-container, #50, %q0, first(%0), quiet)],
+
+#-----------------------------------------------------------
+#       default case of thing
+#-----------------------------------------------------------
+
+        [ulocal(#70/ul-resynch-thing, #50, %q0, first(%0), quiet)])]
+-
+
+
+
+
+#================= UL-RESYNCH-THING 
+#
+# triggered by cmd-resynch, where
+#
+# %0 = %#
+# %1 = object to be resynched
+# %2 = /quiet or jibberish
+# %3 = nothing or 'quiet'
+#====================================
+
+&ul-resynch-thing #70=
+
+#------------------------------------------------------------------#
+# Step One: Set the Registers 
+#
+# %q2 = currency type
+# %q0 = parent item
+# %q1 = account of currency on object
+# %q3 = a list of accounts _except for_ the currency on the parent
+#------------------------------------------------------------------#
+
+  [setq(2, get(%1/currency))]
+  [setq(0, paccount(%q2))]
+  [setq(1, getaccount(%1, %q2))]
+  [setq(3, remove(lcstr(laccounts(%q0)), makeattr(%q2)))]
+
+#--------------------------------------------------------------------#
+# Step Two:  Resynch Weight and Volume
+# Adjust the weights and volumes based on the number of units present
+#--------------------------------------------------------------------#
+
+  [set(%1, weight:[mul(get(%q0/weight), %q1)])]
+  [set(%1, volume:[mul(get(%q0/volume), %q1)])]
+
+#--------------------------------------------------------------------#
+# Step Three: Resynching Non Currency Accounts                       
+# 
+# delete the accounts (except the currency) on the object and reset
+# them according to the proper quantities.
+#
+# COMMENTED OUT BECAUSE THERE DOESN'T APPEAR TO BE ANY GOOD REASON 
+# FOR IT, AND ALSO BECAUSE IT CAUSES TREES TO HAVE ENDLESS SUPPLIES OF 
+# FRUIT AND SO ON.
+#--------------------------------------------------------------------#
+
+#   [iter(%q3, [ac_destroy(%1, ##)]
+#              [ac_create(%1, ##, mul(getaccount(%q0, ##), %q1))])]
+
+#----------------------------------------------------------------#
+# Step 4: Finish Up                                              #
+#----------------------------------------------------------------#
+  
+   [switch(or(strmatch(%2, /quiet), strmatch(%3, quiet)), 
+           0, pemit(%0, [goodname(%1)] Resynched.))]
+
+
+-
+
+#=======================  UL-RESYNCH-PLAYER 
+# triggered by cmd-resynch, where
+#
+# %0 = %#
+# %1 = player dbref
+# %2 = /quiet or jibberish
+# %3 = quiet or nothing
+
+&ul-resynch-player #70=
+
+#-------------------------------------------------------------#
+# Step One: Destroy any extraneous accounts on the player 
+#   a) build a list of empty accounts
+#   b) filter out the necessary ones
+#   c) destroy the unecessary ones
+#-------------------------------------------------------------#
+  [setq(8, %1)]
+  [setq(9, laccounts(%q8))]
+  [setq(9, filter(filter-empty-accounts, %q9))]
+  [setq(9, remove(%q9, MON))]
+  [setq(9, remove(%q9, SOCIAL_POINTS))]
+  [setq(9, remove(%q9, STAMINA_POINTS))]
+  [setq(9, remove(%q9, USED_XP))]
+  [setq(9, remove(%q9, UNUSED_XP))]
+  
+  [iter(%q9, [ac_destroy(%1, ##)])]  
+
+#-------------------------------------------------------------#
+# Step Two: Set the registers
+# %q0 = dbrefs that don't have weights
+# %q1 = dbrefs that don't have parents
+# %q2 = dbrefs that don't have volumes
+#-------------------------------------------------------------#
+
+  [setq(0, filter(filter-no-weight, lcon(%1)))]
+  [setq(1, filter(filter-no-parent, lcon(%1)))]
+  [setq(2, filter(filter-no-parent, lcon(%1)))]
+
+#-------------------------------------------------------------#
+# Step Three: Error Check 
+#-------------------------------------------------------------#
+
+  [switch([gt(words(%q0), 0)][gt(words(%q1), 0)][gt(words(%q2), 0)],
+
+
+#  If the player is holding objects that don't have &weight set
+
+   1??, iter(%q0, pemit(%0, [name(##)] (##) is a broken object and has 
+                  no &weight attribute set. Cannot resynch [name(%1)].)),
+
+#  If the player is holding objects that don't have parents set
+
+   ?1?, iter(%q1, pemit(%0, [name(##)] (##) is a broken object and has 
+                   no parent set. Cannot resynch [name(%1)].)),
+
+#  If the player is holding objects that don't have volumes set
+
+   ??1, iter(%q1, pemit(%0, [name(##)] (##) is a broken object and has 
+                   no &volume set. Cannot resynch [name(%1)].)),
+
+# If none of the stuff the player is holding is broken, reset the
+# encumbrance of the player to the combined weight of everything
+# he/she is holding
+
+   000, [setq(3, clothinglist(%1))]
+        [set(%1, encumbrance:0)]
+        [iter(setdiff(lcon(%1), %q3), 
+              set(%1, encumbrance:[add(get(%1/encumbrance),
+                                       get(##/weight))]))]
+        [iter(%q3, set(%1, encumbrance:[add(get(%1/encumbrance),
+                                            fdiv(get(##/weight),2))]))]
+        [switch(or(strmatch(%2, /quiet), strmatch(%3, quiet)), 
+                0, pemit(%0, [goodname(%1)] Resynched.))])]
+-
+
+# Returns only accounts on the player that are empty where 
+# %q8 is the player
+
+&filter-empty-accounts #70=
+ [eq(getaccount(%q8, %0), 0)]
+
+-
+
+# Returns only dbrefs that don't have a &weight attribute set
+
+&filter-no-weight #70=
+ [not(hasattrp(%0, weight))]
+
+-
+#============================= UL-RESYNCH-CONTAINER 
+# triggered by cmd-resynch, where
+# %0 = %#
+# %1 = object dbref
+# %2 = jibberish or /quiet
+# %3 = quiet or nothing
+
+&ul-resynch-container #70=
+
+#--------------------------------------------------------------------#
+# Set the registers:
+# %q0 = the dbrefs that the object contains that don't have &weights
+# %q1 = the dbrefs that the object contains that don't have &volumes
+# %q2 = the dbrefs that the object contains that don't have parents
+#--------------------------------------------------------------------#
+
+  [setq(0, filter(filter-no-weight, lcon(%1)))]
+  [setq(1, filter(filter-no-volume, lcon(%1)))]
+  [setq(2, filter(filter-no-parent, lcon(%1)))]
+
+  [switch([not(gt(words(%q0), 0))]
+          [not(gt(words(%q1), 0))]
+          [not(gt(words(%q2), 0))]
+          [hasattrp(%1, capacity)], 
+
+# If the container has objects that lacking &weight attributes
+
+        0???, iter(%q0, pemit(%0, [name(##)] (##) does not have a &weight 
+                        attribute.  Cannot resynch [name(%1)] (%1).)),
+
+# If the container has objects that lack &volume attributes
+
+        ?0??, iter(%q1, pemit(%0, [name(##)] (##) does not have a &volume 
+                         attribute. Cannot resynch [name(%1)] (%1).)),
+
+# If the container has objects that are not parented
+
+        ??0?, iter(%q2, pemit(%0, [name(##)] (##) does not have a parent. 
+                         Cannot resynch [name(%1)] (%1).)),
+
+# If the container itself does not have a &capacity
+
+        ???0, pemit(%0, [name(%1)] (%1) doesn't have a &capacity 
+                      attribute set.  Cannot resynch [name(%1)] (%1).),
+
+# Otherwise, reset the settings of the container to its default
+# parent, Then reset everything by combining the weights of the
+# objects inside the container, subtracting the total volume of the
+# contents of the container from the capacity
+
+        [set(%1, capacity:)]
+        [set(%1, weight:)]
+        [set(%1, capacity:[get(%1/capacity)])]
+        [set(%1, weight:[mul(getaccount(%1,get(%1/currency)),
+                             get(%1/weight))])]
+        [iter(lcon(%1), 
+              [set(%1, weight:[add(get(%1/weight), get(##/weight))])]
+              [set(%1,capacity:[sub(get(%1/capacity),get(##/volume))])])]
+
+        [switch([gte(get(%1/weight), 0)][gte(get(%1/capacity), 0)], 
+                 0?, pemit(%0, [name(%1)] (%1) has a 
+                             negative weight! Cannot resynch!),
+                 ?0, pemit(%0, [name(%1)] (%1) has a 
+                             negative capacity 
+                             and is too full!  Cannot resynch!),
+                 pemit(%0, [name(%1)] (%1) has been resynched!))])]
+-
+
+# Returns only dbrefs of objects that have no parents
+
+&filter-no-parent #70=
+ [strmatch(parent(%0), #-1)]
+
+-
+# Returns only dbrefs of objects that are lacking &volume attributes
+
+&filter-no-volume #70=
+ [not(hasattrp(%0, volume))]
+
+-
+
+# u(u-is-group, <object>)
+#
+# If the object (a dbref) is a group, return 1.  
+# Otherwise, return a 0.
+#
+# Looks at the number of currency units on the object 
+# (using the &currency) to detect which account to inspect.
+#  If the units = 1, it's not a group.
+
+&u-is-group #70 =
+  gt(getaccount(%0, default(%0/currency, NOT_A_CURRENCY)), 1)
+-
+&filter-dark #70=
+ [not(hasflag(%0, dark))]
+
+
+
+
+
+

@@ -1,0 +1,1044 @@
+
+#############################################################
+##		COMMAND: MAKE <THING>                         #
+###############################################################
+#
+# %q0 = find the parent dbref of the object to be made
+#       (this resets several times to check various places to see if it 
+#        can be found on the master bank, the registry, or on the make 
+#        object itself)
+#
+# %q1 = required skill, if any
+# %q2 = required labor, default of 1 energy unit
+# %q3 = required tools, if any
+# %q4 = <machine name>, player, or here
+
+
+&cmd-make #30=$make *:
+  think setq(0, paccount(%0));
+  think setq(0, switch(1, isdbref(%q0), %q0, paccount(%0s)));
+  think setq(0, switch(1, isdbref(%q0), %q0, paccount(%0es)));
+  think setq(0, switch(1, isdbref(%q0), %q0, registry(%0)));
+  think setq(0, switch(1, isdbref(%q0), %q0, 
+                       paccount(after(grab(v(exceptions), %0=*, |), =))));
+ think setq(0, switch(1, isdbref(%q0), %q0, @@ looks on its own list @@));
+
+
+# This requires that the product builders set up the required skill 
+# correctly.  If they make a mistake in the skill name, the code will break.
+
+  think setq(1, default(%q0/required-skill, none));
+  
+  think setq(2, default(%q0/labor-make, 1));
+
+  think setq(3, default(%q0/tools, none));
+  think setq(3, switch(%q3, none, none, locate(%#, %q3, in)));
+  think setq(3, switch(1, isdbref(%q3), %q3, 
+                          strmatch(%q3, none), none,
+                          first(lhasaccount(%#, %q3, in))));
+  
+  think setq(4, switch(default(%q0/machine, player), 
+                               here, here, 
+                               player, player,
+                               locate(%#, get(%q0/machine), in)));
+ 
+  
+# Checks:
+# Did I find the parent account of the object the player's trying to make
+# Is the thing makeable
+# Does the player have the required skill, if any
+# Does the player have enough energy
+# Does the player have the required tool, if any
+# Are the player's tools broken?
+# Does the player have the required machine, if any
+  think setq(9, [isdbref(%q0)]
+                [hastag(%q0, make)]
+                [switch(%q1, none, 1, gte(skill(%#, %q1),
+                [default(%q0/required-skill-level,1)]))]
+                [gte(getaccount(%#, stamina points), %q2)]
+                [switch(%q3, none, 1, isdbref(%q3))]
+                [switch(%q3, none, 1, not(hastag(%q3, broken)))]
+                [switch(%q4, here, 1, player, 1, isdbref(%q4))]);
+  
+@switch/first %q9=
+     1111111, {@pemit %#=You start looking for the stuff you need to 
+                           make: %0.;
+               think setq(5, get(%q0/accounts-required));
+               think setq(6, create(Storage Object, 10));
+               @tr me/trig-find-accounts=%q0, %q4, %q5, %#, %q6, %q3 }, 
+     0??????, {@pemit %#=%xmI'm sorry but I don't know what 
+                         [art(%0)] %0 is.%xn},
+     ?0?????, {@pemit %#=%xmI'm sorry, but mortals cannot make: %0%xn},
+     ??0????, {@pemit %#=You need the %q1 skill at level 
+               [default(%q0/required-skill-level,1)] to make: %0},
+     ???0???, {@pemit %#=You don't have enough stamina points to make: %0},
+     ????0??, {@pemit %#=You need [get(%q0/tools)] to make: %0},
+     ?????0?, {@pemit %#=Your [name(%q3)] is/are broken.},
+     ??????0, {@pemit %#=You need [get(%q0/machine)] to make: %0},
+    
+# default
+
+     {@pemit %#=%xm%xhError: Admin have been alerted.%xn;
+      @qmail steph/Bug Report 'Make'=Unexpected Condition in 
+             &cmd-make on #30: %q9}
+-
+
+# Triggered by cmd-make, where
+# 
+# %0 = the parent dbref of the object to be made
+# %1 = <machine dbref>, player, or here
+# %2 = list of required accounts: currency=#|currency=#
+# %3 = %#
+# %4 = dbref of storage object
+# %5 = dbref of tool
+#
+# %q0 = currency to look for
+# %q1 = rest of list of things to look for
+# %q3 = list of qualifying dbrefs
+# %q2 = amount to look for
+
+&trig-find-accounts #30=
+  @switch [words(%2,|)]=
+     0, {@@ no accounts left to search for -- move on to containers @@;
+         @switch [words(get(%0/containers))]=
+            0, {@trigger me/trig-find-ingredients=
+                  %0, %1, [get(%0/ingredients)], %3, %4, %5 },
+               {@trigger me/trig-find-containers= 
+                 %0, %1, [get(%0/containers)], %3, %4, %5 }},
+    {@@ find first account in list @@;
+        think setq(0, first(first(%2,|),=));
+        think setq(1, rest(%2,|));
+        think setq(2, after(first(%2,|),=));
+        think setq(3, ulocal(ul-qualif-mult-acc, %1, %q0, %q2, %3));
+        think setq(4, u(u-is-breeding,%q0,%q2)); 
+        think setq(5, first(shuffle(%q3))); 
+        
+     @@ Make sure that ulocal(ul-qualifying-dbrefs) returned dbrefs and not an 
+          error message @@;
+        
+	think setq(3, switch(strmatch(iter(%q3, isdbref(##)), *0*), 1, ,%q3));
+        @switch words(%q3)=
+	  0, {@@ problem! required account not present! @@;
+              @pemit %3=You need %q2 %q0.[ifelse(%q4,%bYou need one of each gender.,)];
+              @pemit %3=%xmOOC Hint: 
+                   [switch(%1, here, The %q0 need(s) to be in the 
+                                     room with you.,
+                               player, You need to be holding the %q0.,
+                               The %q0 need(s) to be placed in 
+                               [name(%1)].)]; 
+              @zap %4},
+          1, {@pemit %3=Located %q0.;
+              &[makeattr(%q0)] %4=%q3;
+              @tr me/trig-find-accounts= %0, %1, %q1, %3, %4, %5},
+          {@@ Could be more than one option or if breeding/multiple object to meet # requirement @@; 
+           think setq(9, switch(1, %q4, %q3, 
+                                gte(getaccount(%q5, %q0), %q2), %q5, 
+                                %q3)); 
+           @pemit %3=[ifelse(eq(words(%q9), 1), 
+                             Found more than one object with an account of 
+                                 %q0 on it.  Choosing at random: [name(%q9)] %q9., 
+                             Required accounts found: [iter(%q9, name(##) ##,%b,%,%b)].)];
+           &[makeattr(%q0)] %4=%q9;
+           @tr me/trig-find-accounts= %0, %1, %q1, %3, %4, %5 }}
+
+
+-
+# triggered by trig-find-accounts, where
+# %0 = the parent dbref of the object to be made
+# %1 = <machine dbref>, player, or here
+# %2 = list of required containers: currency=#|currency=# (where | means -or-)
+# %3 = %#
+# %4 = dbref of storage object
+# %5 = dbref of the tool
+# 
+# %q0 = list of currencys for possible containers separated by |'s
+# %q1 = first currency
+# %q2 = rest of currency=# pairs
+# %q4 = qualifying dbrefs
+# %q3 = amount of currency to look for 
+
+&trig-find-containers #30=
+  think setq(0, iter(%2, first(##,=),|,|));
+  @switch [words(%2)]=
+     0, {@@ no containers left to search for @@;
+         @switch [get(%4/has-container)]=
+            yes, {@@ a container was found @@;
+                  @trigger me/trig-find-ingredients= 
+                  %0, %1, [get(%0/ingredients)], %3, %4, %5},
+            {@@ none of the possible containers was found @@;
+             @pemit %3=You need one or more of the following unlocked 
+                       containers: 
+                   [iter(get(%0/containers),first(##,=),|)];
+             @pemit %3=%xmOOC Hint: 
+                   [switch(%1, here, The containers need to be in the 
+                                     room with you.,
+                               player, You need to be holding the containers.,
+                               The containers need to be placed in 
+                               [name(%1)].)]; 
+             @zap %4}},
+    {@@ find first account in list @@;
+        think setq(1, first(first(%2,|),=));
+        think setq(2, rest(%2,|));
+        think setq(3, after(first(%2,|),=));
+        think setq(4, ulocal(ul-qualifying-dbrefs, %1, %q1, %q3, %3));
+        
+     @@ Make sure that ulocal(ul-qualifying-dbrefs) returned dbrefs and not an 
+          error message @@;
+
+        think setq(4, switch(strmatch(iter(%q4, isdbref(##)), *0*), 1, ,%q4));
+
+     @@ Make sure that the containers are unlocked @@;
+
+	think setq(4, filter(filter-unlocked, %q4));
+
+        @switch words(%q4)=
+	  0, {@@ this type of open container not found @@;
+              @tr me/trig-find-containers=%0, %1, %q2, %3, %4, %5},
+          1, {&container %4=%q1=%q4;
+              &has-container %4=yes;
+              @tr me/trig-find-containers= %0, %1, %q2, %3, %4, %5;
+              @pemit %3=Located %q1.},
+          {@@ more than one possible account, current solution is to pick 1 
+              which turns out to be the last valid one @@;
+           @pemit %3=Found more than one object that has valid container 
+                     accounts on it.  Picking one at random.;
+           &container %4=%q1=[first(sortby(sortby-capacity,%q4))];
+           &has-container %4=yes;
+           @pemit %3=Located %q1.;
+           @tr me/trig-find-containers= %0, %1, %q2, %3, %4, %5 }}
+-
+&sortby-capacity #30=
+  [sign(sub(get(%1/capacity),get(%0/capacity)))]
+-
+&filter-unlocked #30=
+ [not(hastag(%0, locked))]
+-
+
+#
+# %0 = the parent dbref of the object to be made
+# %1 = <machine dbref>, player, or here
+# %2 = list of required ingredients: currency=#|currency=#
+# %3 = %#
+# %4 = dbref of storage object
+# %5 = dbref of tool
+# 
+# %q0 = currency
+# %q1 = rest of the list of ingredients
+# %q3 = dbrefs that have the account
+# %q2 = amount to look for 
+
+&trig-find-ingredients #30=
+
+  @switch [words(%2,|)]=
+     0, {@@ no ingredients left to search for -- go on@@;
+         @trigger me/trig-make-roll= 
+                 %0, %3, %4, %5},
+    {@@ find first ingredient in list @@;
+        think setq(0, first(first(%2,|),=));
+        think setq(1, rest(%2,|));
+        think setq(2, after(first(%2, |),=));
+        think setq(3, ulocal(ul-qualifying-dbrefs, %1, %q0, %q2, %3));
+     @@ Make sure that ulocal(ul-qualifying-dbrefs) returned dbrefs and not an 
+          error message @@;
+        think setq(3, switch(strmatch(iter(%q3, isdbref(##)), *0*), 1, ,%q3));
+        @switch words(%q3)=
+	  0, {@@ problem! ingredient %q0 not present! @@;
+              @pemit %3=You need %q2 %q0.;
+              @pemit %3=%xmOOC Hint: 
+                     [switch(%1, here, The %q0 need(s) to be in the 
+                                       room with you.,
+                               player, You need to be holding the %q0.,
+                               The %q0 need(s) to be placed in 
+                               [name(%1)].)]; 
+              @zap %4},
+          1, {@pemit %3=Located %q0.;
+              &[makeattr(%q0)] %4=%q3;
+              @tr me/trig-find-ingredients= %0, %1, %q1, %3, %4, %5},
+          {@@ more than one possible object with ingredient, 
+              current solution is to pick 1 @@;
+           think setq(9, [first(%q3)]);
+           @pemit %3=Found more than one object with %q0 on it.  
+                     Choosing the nearest item: [name(%q9)] %q9.;
+           &[makeattr(%q0)] %4=%q9;
+           @tr me/trig-find-ingredients= %0, %1, %q1, %3, %4, %5}}
+-
+# triggered by trig-find-ingredients, where
+# %0 = dbref of parent object
+# %1 = %#
+# %2 = storage object
+# %3 = dbref of tool
+#
+# %q0 = <attribute>+<skill>@<difficulty>
+# %q1 = attribute
+# %q2 = skill
+# %q3 = difficulty 
+# %q4 = successes
+
+&trig-make-roll #30=
+  @pemit %1=You start making your product.;
+  think setq(0, [get(%0/roll)]);
+  think setq(1, first(%q0, +));
+  think setq(2, rest(%q0, +));
+  think setq(2, first(%q2, @));
+  think setq(3, last(%q0,@));
+  think setq(4, successes(add(attribute(%1, %q1), skill(%1, %q2)), %q3));
+  think setq(5, get(%0/bonus-make));
+
+  @switch/first %q4=
+	 <0, {@pemit %1=%xm%xhYou botched!%xn;
+              @tr me/trig-make-botch=%0, %1, %2, %3},
+          0, {@pemit %1=%xm%xhYou failed!%xn;
+              @tr me/trig-make-fail=%0, %1, %2, %3 },
+        >%q5, {@pemit %1=%xm%xhYou succeeded spectacularly!%xn;
+              @tr me/trig-make-bonus=%0, %1, %2, %3 },
+         >0, {@pemit %1=%xm%xhYou succeeded!%xn;
+              @tr me/trig-make-success=%0, %1, %2, %3 },
+             {@pemit %1=%xm%xhError: Admin have been alerted.%xn;
+              @qmail waylon/Bug Report 'make'=Successes is 
+                     returning the following: %q4, %%q5 = %q5 }
+-
+# triggered by trig-make-roll, where
+# %0 = dbref of parent object
+# %1 = %#
+# %2 = storage object
+# %3 = dbref of tool
+#
+# %q0 = list of dbrefs to take things from
+# %q1 = randomly chosen <ingredient>=<amount>
+# %q2 = <ingredient/currency>
+# %q3 = <amount>
+# %q4 = dbref to take from
+
+&trig-make-botch #30=
+  think setq(0, iter(lattr(%2), get(%2/##)));
+  think setq(0, filter(filter-isdbref, %q0));
+  think setq(1, first(shuffle(get(%0/ingredients), |), |));
+  think setq(2, first(%q1, =));
+  think setq(3, after(%q1, =));
+  think setq(4, get(%2/[makeattr(%q2)]));
+
+# waste the random ingredient by deducting it from the object
+  think ac_adjust(%q4, %q2, -%q3);
+  @pemit %1 =You just wasted %q3 %q2.  You'll have to start again.;
+  @resynch %q4;
+
+# See if the deductions completely emptied the object of its main 
+# ingredient and if so, destroy it 
+
+   @switch [lte(getaccount(%q4, get(%q4/currency)), 0)]=
+	1, {@zap %q4},
+        {@@ do not destroy since object still has remaining currency @@};
+
+# Check to see if player has enough stamina points
+
+  think ac_adjust(%1, stamina points, -[default(%0/labor-make, 1)]);
+
+# Tell the player that we're deducting energy
+  @pemit %1=%xmDeducting [default(%0/labor-make, 1)] stamina points.%xn;
+
+# Final activities
+  @tr %0/trig-botch-make = %1,#-1;
+
+# use of 5 of the 'tools' lives, so to speak
+
+  @dolist lnum(5)=@tr %3/ause;
+  @teleport %q2=[loc(%1)];
+  @tr %0/trig-final-make = %1;
+  @zap %2;
+  @dolist %q8=@resynch ##;
+
+-
+# triggered by trig-make-roll, where
+# %0 = dbref of parent object
+# %1 = %#
+# %2 = storage object
+# %3 = dbref of the tool
+#
+# %q0 = <object name to be produced>
+# %q1 = <dbref of the object to be produced>
+# %q2 = product dbref
+# %q3 = list of accounts created: <currency>=<#>|<currency>=<#>
+# %q4 = list of ingredients: <currency>=<#>|<currency>=<#>
+# %q5 = list of all the objects to take accounts from
+# %q6 = currency
+# %q7 = dbref of container
+# %q8 = debref's of containers holding objects.
+
+&trig-make-fail #30=
+  think setq(0, first(get(%0/objects-produced), =));
+  think setq(1, last(get(%0/objects-produced), =));
+  think setq(2, create(%q0, 10));
+  think setq(3, get(%0/accounts-produced));
+  think setq(4, get(%0/ingredients));
+  think setq(5, iter(lattr(%2), get(%2/##)));
+  think setq(5, filter(filter-isdbref, %q5));
+  think setq(6, get(%q2/currency));
+  think setq(7, after(get(%2/container), =));
+  think iter(%q5, setq(8, setunion(%q8,loc(%q5))));
+
+# Link new ojbects to the lost and found so it doesn't end 
+#     up in the master room.
+    @link %q2=#312; 
+
+# Parent the new object to its correct parent
+    @parent %q2=%q1;
+
+# Establish the quality of the item
+    &quality %q2=[div(get(%0/quality), 2)];
+    &maxquality %q2=[div(get(%0/quality), 2)];
+
+# Identifiers
+    &creator %q2=%1;
+    &created-location %q2=[loc(%1)];
+    &extracted_at %q2=[secs()]; 
+
+# Put all the appropriate accounts on the new object
+@@  @dolist/delimit | %q3 = 
+     think ac_create(%q2, first(##,=), last(##, =));
+  think iter(%q3, ac_create(%q2, first(##,=), last(##, =)), |); 
+
+# Adjust weights, volumes, and such depending on how many units it is
+
+  @switch [gt(getaccount(%q2, %q6), 1)]=
+     0, {@@ do nothing, inherits these qualities from the parent @@},
+     1, {@resynch %q1;
+         @tag %q2=group }; 
+
+# take energy from the player
+  think take_energy(%1, default(%0/labor-make, 1), both, e); 
+
+# Tell the player that we're deducting energy
+  @pemit %1=%xmDeducting [default(%0/labor-make, 1)] energy.%xn;
+
+# Deduct all the currency/ingredients from their objects
+  @dolist/delimit | %q4 = 
+     think ac_adjust(get(%2/[makeattr(first(##, =))]), 
+                     first(##, =), -[last(##, =)]);
+
+# See if the deductions completely emptied the objects of their main 
+# ingredient and if so, destroy them.
+
+  @dolist %q5=@resynch ##;
+  @dolist %q5 = 
+     @switch [lte(getaccount(##, get(##/currency)), 0)]=
+	1, {@zap ##},
+        {@@ do not destroy since object still has remaining currency @@};
+
+# Final activities
+
+  @switch [hastag(%0, customize)]=
+      1, {@name %q2=Unfinished [name(%q2)]},
+      0, {@@ do nothing @@};
+  @tr %0/trig-fail-make = %1, %q2;
+
+# Use up two of the 'tools' lives, so to speak
+  @tr %3/ause;
+  @tr %3/ause;
+  @teleport %q2=[loc(%1)];
+  @tr %0/trig-final-make = %1, %q2;
+
+# Check to see if it can fit in the container.
+
+  @switch/first [gt(words(%q7), 0)]
+                [ulocal(#70/ul-can-fit, %q7, %q2)]=
+	10, {@fpose %1=doesn't realize until too late that [poss(%1)] 
+                    [name(%q2)] can't fit in the [name(%q7)] 
+                    and [name(%q2)] is ruined.;
+             @zap %q2},
+        11, {@teleport %q2=%q7;
+             @resynch %q7; @resynch %q2 },
+        00, {@@ do nothing since no container is necessary @@};
+  @zap %2;  
+  @dolist %q8=@resynch ##;
+
+-
+# triggered by trig-make-roll, where
+# %0 = dbref of parent object
+# %1 = %#
+# %2 = storage object
+# %3 = dbref of the tool
+#
+# %q0 = <object name to be produced>
+# %q1 = <dbref of the object to be produced>
+# %q2 = product dbref or container dbref
+# %q3 = list of accounts created: <currency>=<#>|<currency>=<#>
+# %q4 = list of ingredients: <currency>=<#>|<currency>=<#>
+# %q5 = list of all the objects to take accounts from
+# %q6 = currency
+# %q7 = container dbref
+# %q8 = containers holding the ingredients.
+&trig-make-success #30=
+
+  think setq(0, first(get(%0/objects-produced), =));
+  think setq(1, last(get(%0/objects-produced), =));
+  think setq(2, create(%q0, 10));
+  think setq(3, get(%0/accounts-produced));
+  think setq(4, get(%0/ingredients));
+  think setq(5, iter(lattr(%2), get(%2/##)));
+  think setq(5, filter(filter-isdbref, %q5));
+  think setq(6, get(%q2/currency));
+  think setq(7, after(get(%2/container), =));
+  think iter(%q5, setq(8, setunion(%q8,loc(%q5))));
+
+# Link new ojbects to the lost and found so it doesn't end
+#     up in the master room.
+    @link %q2=#312;
+
+# Put all the appropriate accounts on the new object
+
+@@  @dolist/delimit | %q3 = 
+     think ac_create(%q2, first(##,=), last(##, =));
+  think iter(%q3, ac_create(%q2, first(##,=), last(##, =)), |); 
+
+# take energy from the player prefering energy reserves
+
+  think take_energy(%1, default(%0/labor-make, 1), both, r);
+
+# Tell the player that we're deducting energy
+
+  @pemit %1=%xmDeducting [default(%0/labor-make, 1)] energy.%xn;
+
+# Deduct all the currency/ingredients from their objects
+
+  @dolist/delimit | %q4 = 
+     think ac_adjust(get(%2/[makeattr(first(##, =))]), 
+                     first(##, =), -[last(##, =)]);
+
+# See if the deductions completely emptied the objects of their main 
+# ingredient and if so, destroy them.
+
+  @dolist %q5=@resynch ##;
+  @dolist %q5 = 
+     @switch [lte(getaccount(##, get(##/currency)), 0)]=
+	1, {@zap ##},
+        {@@ do not destroy since object still has remaining currency @@};
+
+#         Parent the new object to its correct parent
+
+          @parent %q2=%q1;
+
+#         Establish the quality of the item
+
+          &quality %q2=[get(%0/quality)];
+          &maxquality %q2=[get(%0/quality)];
+
+#         Identifiers
+
+          &creator %q2=%1;
+          &created-location %q2=[loc(%1)];
+          &extracted_at %q2=[secs()]; 
+
+# Adjust weights, volumes, and such depending on how many units it is
+
+  @switch [gt(getaccount(%q2, %q6), 1)]=
+     0, {@@ do nothing, inherits these qualities from the parent @@},
+     1, {@resynch %q2};
+	
+# Final activities
+
+  @switch [hastag(%0, customize)]=
+      1, {@name %q2=Unfinished [name(%q2)]},
+      0, {@@ do nothing @@};
+  @tr %3/ause;
+  @tr %0/trig-success-make = %1, %q2;
+  @teleport %q2=[loc(%1)];
+  @tr %0/trig-final-make = %1, %q2;
+  
+# Check to see if it can fit in the container.
+
+  @switch/first [gt(words(%q7), 0)]
+                [ulocal(#70/ul-can-fit, %q7, %q2)]=
+	10, {@fpose %1=doesn't realize until too late that [poss(%1)] 
+                    [name(%q2)] can't fit in the [name(%q7)] 
+                    and [name(%q2)] is ruined.;
+             @zap %q2},
+        11, {@teleport %q2=%q7;
+             @resynch %q7; @resynch %q2 },
+        00, {@@ do nothing since no container is necessary @@};
+  @zap %2;
+  @dolist %q8=@resynch ##;
+-
+
+# triggered by trig-make-roll, where
+# %0 = dbref of parent object
+# %1 = %#
+# %2 = storage object
+# %3 = dbref of the tool
+# 
+# %q0 = <object name to be produced>
+# %q1 = <dbref of the object to be produced>
+# %q2 = product dbref or container dbref
+# %q3 = list of accounts created: <currency>=<#>|<currency>=<#>
+# %q4 = list of ingredients: <currency>=<#>|<currency>=<#>
+# %q5 = list of all the objects to take accounts from
+# %q6 = currency
+# %q7 = container dbref
+# %q8 = containers of the ingredients, for resynching.
+
+&trig-make-bonus #30=
+  think setq(0, first(get(%0/objects-produced), =));
+  think setq(1, last(get(%0/objects-produced), =));
+  think setq(2, create(%q0, 10));
+  think setq(3, get(%0/accounts-produced));
+  think setq(4, get(%0/ingredients));
+  think setq(5, iter(lattr(%2), get(%2/##)));
+  think setq(5, filter(filter-isdbref, %q5));
+  think setq(6, get(%q2/currency));
+  think setq(7, after(get(%2/container), =));
+  think iter(%q5, setq(8, setunion(%q8,loc(%q5))));
+
+
+# Link new ojbects to the lost and found so it doesn't end
+#     up in the master room.
+    @link %q2=#312;
+
+# Put all the appropriate accounts on the new object
+
+@@  @dolist/delimit | %q3 = 
+     think ac_create(%q2, first(##,=), last(##, =));
+  think iter(%q3, ac_create(%q2, first(##,=), last(##, =)), |);
+
+# take energy from the player preferring reserves
+
+  think take_energy(%1, default(%0/labor-make, 1), both, r);
+
+# Tell the player that we're deducting energy
+
+  @pemit %1=%xmDeducting [default(%0/labor-make, 1)] energy.%xn;
+
+# Deduct all the currency/ingredients from their objects
+
+  @dolist/delimit | %q4 = 
+     think ac_adjust(get(%2/[makeattr(first(##, =))]), 
+                     first(##, =), -[last(##, =)]);
+
+# See if the deductions completely emptied the objects of their main 
+# ingredient and if so, destroy them.
+
+  @dolist %q5=@resynch ##;
+
+  @dolist %q5 = 
+     @switch [lte(getaccount(##, get(##/currency)), 0)]=
+	1, {@zap ##},
+        {@@ do not destroy since object still has remaining currency @@};
+
+
+#         Parent the new object to its correct parent
+
+          @parent %q2=%q1;
+
+#         Establish the quality of the item
+
+          &quality %q2=[get(%0/maxquality)];
+
+#         Identifiers
+
+          &creator %q2=%1;
+          &created-location %q2=[loc(%1)];
+          &extracted_at %q2=[secs()];
+
+# Adjust weights, volumes, and such depending on how many units it is
+
+  @switch [gt(getaccount(%q2, %q6), 1)]=
+     0, {@@ do nothing, inherits these qualities from the parent @@},
+     1, {@resynch %q2};
+
+# Final activities
+
+  @switch [hastag(%0, customize)]=
+      1, {@name %q2=Unfinished [name(%q2)]},
+      0, {@@ do nothing @@}; 
+  @tr %0/trig-bonus-make = %1, %q2;
+  @teleport %q2=[loc(%1)];
+  @tr %0/trig-final-make = %1, %q2;
+
+# Check to see if it can fit in the container.
+  @switch/first [gt(words(%q7), 0)]
+                [ulocal(#70/ul-can-fit, %q7, %q2)]=
+	10, {@fpose %1=doesn't realize until too late that [poss(%1)] 
+                    [name(%q2)] can't fit in the [name(%q7)] 
+                    and [name(%q2)] is ruined.;
+             @zap %q2},
+        11, {@teleport %q2=%q7;
+             @resynch %q7; @resynch %q2 },
+        00, {@@ do nothing since no container is necessary @@};
+  @zap %2;
+  @dolist %q8=@resynch ##;
+-
+#################################################################
+## 		COMMAND: Products Cron Job                      #
+#################################################################
+
+&cron_time_productlist #63=|||4|45|@@ every night at 4:45 am @@
+-
+&cron_job_productlist #63=@tr #30/cron_job_productlist
+-
+&cron_job_productlist #30=
+  think setq(0, search(ething=and(hastag(##, make), hasflag(##, parent))));
+  &product-dbrefs #30=%q0
+-
+
+####################################################################
+##    COMMAND: @PRODUCTS                                           #
+##             @PRODUCTS/<SKILL>                                   #
+##             @PRODUCTS <PRODUCT NAME>                            #
+##             @PRODUCTS/SEARCH <STRING>                           #
+####################################################################
+#
+# %q0 = list of generic objects than can be made without a special skill
+# %q1 = list of product names
+
+&cmd-products #30=$@products:
+
+#-----------------------------------------------------------------
+# Had to replace this line of code because, of course, filter() 
+# is such a wimpy function that it blew with too many products 
+# to filter through.  I replaced it with an iter that put a 
+# blank space in for every thing that should be filtered out, and 
+# then squished it to get rid of the blank spaces.
+# 
+#  think setq(0, filter(filter-no-skill, v(product-dbrefs)));
+#------------------------------------------------------------------
+
+  think setq(0, iter(v(product-dbrefs), 
+                     switch(default(##/required-skill, none), 
+                            none, ##, %b)));
+  think setq(0, squish(%q0));
+
+  think setq(0, iter(%q0, name(##), ,|));
+  think setq(1, squish(iter(%q0, edit(edit(edit(edit(##, Generic,), 
+                                                         generic,), 
+                                                         Parent,), 
+                                                        parent,), |, |)));
+  think setq(1, sortby(me/sort-alphabetize, %q1, |));
+  @pemit %#=%xh%xgJadeMUSH LIST OF PRODUCTS THAT ANYONE CAN MAKE%R;
+  @pemit %#=[columns(%q1, 24, |)]%r;
+  @pemit %#=%xh%xgUse @products <product name> to find out more info...%xn;
+  @pemit %#=%xh%xgUse @products/<skill> for products you can make with 
+                                        a specific skill.%xn;
+  @pemit %#=%xh%xgUse @products/search <term> for products containing 
+            that term.%xn;
+  @pemit %#=%xh%xgUse @products/all for all products that 
+            can be made on JadeMUSH.
+-
+
+&filter-no-skill #30=
+  [lt(words(lattrp(%0/required-skill)), 1)]
+-
+
+#
+# %q0 = list of generic objects than can be made
+# %q1 = list of product names
+
+&cmd-products-all #30=$@products/all:
+
+  think setq(0, iter(v(product-dbrefs), name(##), ,|));
+  think setq(1, squish(iter(%q0, edit(edit(edit(edit(##, Generic,), 
+                                                         generic,), 
+                                                         Parent,), 
+                                                        parent,), |, |)));
+  think setq(1, sortby(me/sort-alphabetize, %q1, |));
+  @pemit %#=%xh%xgJadeMUSH PRODUCT LIST%R;
+  @pemit %#=[columns(%q1, 24, |)]%r;
+  @pemit %#=%xh%xgUse @products <product name> to find out more info...%xn;
+  @pemit %#=%xh%xgUse @products/<skill> for products you can make with 
+                                        a specific skill.%xn;
+  @pemit %#=%xh%xgUse @products/search <term> for products containing 
+            that term.%xn;
+  @pemit %#=%xh%xgUse @products for products that don't require a skill.
+
+-
+
+&cmd-products-skill #30=$@products/*:
+  think setq(0, skillname(%0));
+  think setq(0, lcstr(clip(%q0)));
+  think setq(9, [strmatch(%0, search *)]
+                [strmatch(%0, all)]
+                [switch(strmatch(skillname(%0), #-1), 1, 0, 1)]);
+  @switch/first %q9=
+      1??, {@@ do nothing, @products/search will handle it @@},
+      ?1?, {@@ do nothing, @products/all will handle it @@},
+      000, {@pemit %#=%0 isn't a skill.  Please see 'help skill list' for 
+                    a list of valid skills.},
+      001, {think setq(1, filter(filter-skill, v(product-dbrefs)));
+            think setq(1, iter(%q1, default(##/currency, name(##)), ,|));
+            think setq(1, squish(iter(%q1, edit(edit(
+                                         edit(edit(##, Generic,), 
+                                                       generic,), 
+                                                       Parent,), 
+                                                       parent,), |, |)));
+          think setq(1, sortby(me/sort-alphabetize, %q1, |));
+          @pemit %#=%xh%xgJadeMUSH PRODUCT LIST FOR SKILL: %q0%xn%r;
+          @pemit %#=[columns(%q1, 24, |)]%r;
+          @pemit %#=%xh%xg
+                 Use @products <product name> to find out more info ...%xn%xr}
+
+-
+# %q0 = find the parent dbref of the object to be made
+#       (this resets several times to check various places to see if it 
+#        can be found on the master bank, the registry, or on the make 
+#        object itself)
+
+&cmd-products-specific #30=$@products *:
+  think setq(0, paccount(%0));
+  think setq(0, switch(1, isdbref(%q0), %q0, paccount(%0s)));
+  think setq(0, switch(1, isdbref(%q0), %q0, paccount(%0es)));
+  think setq(0, switch(1, isdbref(%q0), %q0, registry(%0)));
+  think setq(0, switch(1, isdbref(%q0), %q0, 
+                          paccount(after(grab(v(exceptions), %0=*, |), =))));
+  think setq(0, switch(1, isdbref(%q0), %q0, nothing ));
+ 
+  think setq(1, [isdbref(%q0)]);
+  @switch/first %q1=
+	0, {@pemit %#=I don't know what %0 is/are. Please use @products 
+                   for a list of valid products.},
+        1, {@pemit %#=%xh%xgPRODUCT: [capstr(%0)]%xn
+                      [ifelse(and(hastag(%q0, food), 
+                                  not(hastag(%q0, nonperishable))),
+                              %t%t<<Perishable>>, )]
+                      [ifelse(hastag(%q0, storage), %t%t<<food-safe>>, )]%r%r
+                      %xgCustomizable:%xn 
+                         [switch(hastag(%q0, customize), 
+                                 1, yes (see 'help customizing'), no)]%r
+                      %xgEnergy Cost:%xn [default(%q0/labor-make, 1)]%r
+                      %xgRequired Skill:%xn [get(%q0/required-skill)]%r
+                      %xgRelated Attribute:%xn [first(get(%q0/roll), +)]%r
+                      %xgDifficulty:%xn [after(get(%q0/roll), @)]%r
+                      %xgIngredients:%xn [get(%q0/ingredients)]%r
+                      %xgProduces:%xn [get(%q0/accounts-produced)]%r
+                      %xgEach [capstr(%0)] weighs:%xn [get(%q0/weight)]%r
+                      %xgEach has a volume of:%xn [get(%q0/volume)]%r
+                      %xgEach has a capacity of:%xn 
+[ifelse([hastag(%q0,container)],[get(%q0/capacity)],N/A)]%r
+                      %xgWhere to Assemble Ingredients:%xn 
+                         [switch(get(%q0/machine), 
+                                 player, hold them,
+                                 here, in the same room,
+                                 inside [get(%q0/machine)])]%r
+                      %xgAny other required things:%xn%b
+                                             [get(%q0/tools)]%b
+                                             [get(%q0/containers)]%b 
+                                             [get(%q0/accounts-required)]%r
+                      %xgComments:%xn [get(%q0/comments)]%r }
+
+-
+
+# %q0 = list of products
+
+&cmd-products-search #30=$@products/search *:
+  think setq(0, v(product-dbrefs));
+  @pemit %#=Searching all products for: %0;
+    @dolist %q0=
+       @switch [gt(words(grepi(##, *, %0)), 0)]=
+	  1, {@pemit %#=[name(##)] (##) has '%0' in it somewhere.},
+          0, {@@ do nothing @@};
+  @wait 0=@wait 0=@pemit %#=Done Searching.
+
+
+-
+&exceptions #30=bronze knife=bronze knives|iron knife=iron knives
+-
+
+
+##################################################################
+#		FUNCTIONS FOR THE MAKE COMMAND                   #
+##################################################################
+
+# This nasty little function checks for ingredients where they're so 
+# indicated BUT: 
+# A) if it's an animal ingredient, and it needs more than one, it 
+# requires one male and one female account. 
+# B) If it's not an animal ingredient or just has 1 required account, 
+# if any object(s) have enough accounts on their own, 
+#    it returns the list of all the objects whose accounts 
+#         meet the requirements
+# C) Otherwise, if the total accounts for all the currencies is enough, 
+# it returns a list of accounts if more than one is needed to get the 
+# required number.
+# D) If it meets none of the above, nothing is returned.
+
+&UL-QUALIF-Mult-Acc #30=
+
+# Set the registers for the filters:
+# %q0 = <machine>, %q1 = <currency>, %q2 = <amount needed>, %q3 = <enactor>
+
+[setq(0, %0)]
+[setq(1, %1)]
+[setq(2, %2)]
+[setq(3, %3)]
+
+# %q4 = <dbrefs of objects with that currency>
+
+[setq(4, switch(%q0, 
+            here, lhasaccount(%q3, %q1,*)
+               [squish(edit(iter(lcon(loc(%q3)),
+                 switch(hastag(##,container),
+                 lhasaccount(##,%q1,i))),#-1,))],
+            player, lhasaccount(%q3, %q1, im)
+               [squish(edit(iter(lcon(loc(%q3)),
+                 switch(hastag(##,container),
+                 lhasaccount(##,%q1,i))),#-1,))],
+            lhasaccount(%q0, %q1, imn)
+             [squish(edit(iter(lcon(loc(%q0)),
+                 switch(hastag(##,container),
+                 lhasaccount(##,%q1,i))),#-1,))]))]
+[setq(4, filter(filter-not-player, %q4))]
+[setq(4, filter(filter-not-room, %q4))]
+[setq(4, filter(filter-!ingredient, %q4))]
+
+# %q5 = <Those of %q4 who have enough accounts to meet the requirement>
+# %q6 = <The sex of every dbref in %q4 (in that order)>
+# %q7 = <the first female and male dbref from %q4>
+# %q8 = <dbref>:<# currency> for each dbref, starting with those in %q7
+# %q9 = Puts a total of accounts from %q8, stops when reaches enough 
+#       to match %q2.
+# %q3 = Redefined for reuse: switch() condition. (For A-C conditions above)
+
+[setq(5, filter(filter-enough-ingredient, %q4))]
+[setq(6, iter(%q4, get(##/sex)))]
+[setq(7, extract(%q4, match(%q6, f*), 1) [extract(%q4, match(%q6, m*), 1)])]
+[setq(8, iter(%q7 [setdiff(%q4, %q7)], ##:[getaccount(##, %q1)]))]
+[setq(9, fold(fold-check-mult-acc,%q8,0))]
+[setq(3, u(u-is-breeding,%q1,%q2)[t(words(%q5))][gte(first(%q9), %q2)])]
+[switch(%q3, 
+        1??, u(u-breeding-check,%q9,%q2,%q6), 
+        01?, %q5, 
+        001, iter(rest(%q9),first(##,:)), )]
+-
+# %0 = <# currency> <list of dbref:#curr> (at first just 0)
+# %1 = current <dbref>:<#curr for the dbref>
+# %q2 = # of accounts needed 
+
+&fold-check-mult-acc #30=
+  [ifelse(gte(first(%0), %q2), %0, 
+          add(first(%0),last(%1,:)) [rest(%0)] %1)]
+-
+# %0 = fold-check-mult-acc'd info. <# currency> <list of dbref:#curr>
+# %1 = # accounts needed
+# %2 = list of genders for all dbrefs
+
+&u-breeding-check #30=
+  [ifelse(and(gte(first(%0), %1), match(%2,f*), match(%2,m*)), 
+          iter(rest(%0),first(##,:)), )]
+-
+# Is one of the parents the generic animal parent?
+# Is the # of accounts needed more than 1?
+# If so, the make code will require at least one to be female, and one male
+#
+# %0 = currency looking for
+# %1 = # of currency looking for
+
+&u-is-breeding #30=and(words(setinter(lparent(paccount(%0)),#2089)),gt(%1,1))
+-
+
+&sort-alphabetize #30=[comp(%0, %1)]
+
+-
+
+&filter-skill #30 = 
+  [strmatch(get(%0/required-skill), %q0)]
+
+-
+&filter-empty #30=
+  [gt(words(%0), 1)]
+-
+
+&filter-generics #30=
+  [or(strmatch(name(%0), *generic*), 
+      strmatch(name(%0), *Generic*), 
+      strmatch(name(%0), *Parent*), 
+      strmatch(name(%0), *parent*))]
+-
+
+&filter-has #30=
+  [not(strmatch(%0, has))]
+-
+
+&filter-isdbref #30=
+  [isdbref(%0)]
+
+-
+
+# u(u-needed, <list of required things currency=amount|>,
+#             <currency>)
+#
+# Returns a 1 if there's enough and a 0 if not
+
+&u-needed #30=
+ [after(grab(%0, %1=*, |),=)]
+
+-
+# ulocal(ul-qualifying-dbrefs, <machine>, <currency>, <amount>, <enactor>)
+# 
+# Returns a list of dbrefs that that could be qualifying
+
+&ul-qualifying-dbrefs #30=
+
+# Set the registers for the filters: 
+# %q0 = <machine>, %q1 = <currency>, %q2 = <amount needed>, %q3 = <enactor>
+
+  [setq(0, %0)][setq(1, %1)][setq(2, %2)][setq(3, %3)]
+
+# %q4 = list of qualifying dbrefs 
+
+  [setq(4, squish(edit(switch(%q0, 
+            here, lhasaccount(%q3, %q1,*)
+               [iter(lcon(loc(%q3)),
+                 switch(
+                 and(not(hastag(##,closed)),
+                 hastag(##,container)),1,
+                 lhasaccount(##,%q1,i)))],
+            player, lhasaccount(%q3, %q1, im)
+               [iter(lcon(loc(%q3)),
+                 switch(
+                 and(not(hastag(##,closed)),
+                 hastag(##,container)),1,
+                 lhasaccount(##,%q1,i)))],
+            lhasaccount(%q0, %q1, im)
+            ),#-1,)))]
+ [setq(4, filter(filter-not-player, %q4))]
+ [setq(4, filter(filter-not-room, %q4))]
+ [setq(4, filter(filter-enough-ingredient, %q4))]
+ [filter(filter-!ingredient, %q4)]
+
+-
+&filter-not-room #30=
+ [not(hastype(%0, room))]
+
+-
+# filters out any object that is tagged !ingredient
+&filter-!ingredient #30=
+ [not(hastag(%0, !ingredient))]
+
+-
+# filters out objects that don't have enough of the ingredient where 
+# %q1 is the ingredient and %q2 is the amount needed
+
+&filter-enough-ingredient #30=
+  [gte(getaccount(%0, %q1), %q2)]
+-
+# filters out any qualifying dbrefs that happen to be players so that 
+# someone using the make command cannot steal their supplies off of another 
+# player
+	
+&filter-not-player #30=
+ [not(or(hastype(%0, player), hastag(%0, npc)))]
+
+-
+
+
+# ulocal(ul-valid-containers, <machine>, <list of currency=#>, <enactor>)
+# 
+# Returns a list of valid dbrefs that could be qualifying
+# %q0 = currency
+# %q1 = rest of the list
+# %q2 = one or more valid dbrefs
+
+&ul-valid-containers #30=
+  [setq(0, first(first(%1, |), =))]
+  [setq(1, rest(%1, |))]
+  [setq(2, switch(%0, here, lhasaccount(%2, %q0, *),
+                      player, lhasaccount(%2, %q0, im),
+                      lhasaccount(%0, %q0, im)))]
+  [setq(3, switch(strmatch(iter(%q2, isdbref(##)), *0*), 1, none, %q2))]
+  [switch(1, and(gt(words(%q1),0), strmatch(%q2, none) 

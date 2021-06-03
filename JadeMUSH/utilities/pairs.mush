@@ -1,0 +1,22 @@
+@@ @create #6
+-
+@@set #6 = VISUAL
+-
+@@set #6 = !NO_COMMAND
+-
+&U_SREPORT #6=[ljust(%0,%1)]^
+-
+&U_CREPORT #6=%r %bUnbalanced [mid(-%q0,%0,1)] at %0.
+-
+&U_BAD #6=[switch(pos(%0,%q2),#-1,setq(3,strlen(%1) %q3),setq(3,iter(first(%q2,%0),rest(\##,:)) %q3)[setq(2,rest(rest(%q2,%0)))])]
+-
+&U_PCHUNK #6=[switch(%1,\\\(*,setq(2,\):[strlen(%0)] %q2),\\\[*,setq(2,\]:[strlen(%0)] %q2),\\\{*,setq(2,\}:[strlen(%0)] %q2),\\\^*,setq(2,\$:0),mid(%q2,0,1)*,setq(2,rest(%q2)),u(U_BAD,mid(%1,0,1),%0))]%0%1
+-
+&U_PCHECK #6=[setq(0,get(%0))] [ljust(rest(%0,/):,19)][setq(1,edit(edit(edit(edit(edit(edit(edit(edit(edit(edit(edit(edit(edit(edit(edit(%q0,%%,\\),\\\\,--),|,-),\\\(,--),\\\),--),\\\[,--),\\\],--),\\\{,--),\\\},--),\(,|\(),\),|\)),\[,|\[),\],|\]),\{,|\{),\},|\}))]\{ \}: [ljust(sub(words(%q1,\{),1)/[sub(words(%q1,\}),1)],10)]\[ \]: [ljust(sub(words(%q1,\[),1)/[sub(words(%q1,\]),1)],10)]\( \): [ljust(sub(words(%q1,\(),1)/[sub(words(%q1,\)),1)],10)][setq(2,)][setq(3,)][setq(1,fold(U_PCHUNK,^%q1|$,,|))]
+-
+&U_ATTRMATCH #6=[visible(%#,%q0/%0)]
+-
+&CMD-PSHOW #6=$@pshow */*:think setq(0,[locate(%#,%0,*)]);think setq(1,[switch(%q0,#-*,,filter(u_attrmatch,lattr(%q0/%1)))]);@pemit %#=[switch(%q0%q1,#-1*,No such object.,#-2*,I don't know which one you mean.,%q0,No matching visible attributes.,Pairs Show for [name(%q0)]\(%q0[flags(%q0)]\))];@dolist [iter(%q1,%q0/##)]=@pemit %#=[u(u_pcheck,##)][switch(%q3,,,%r%b %q0%r [fold(U_SREPORT,sort(%q3),)])];
+-
+&CMD-PCHECK #6=$@pcheck */*:think setq(0,[locate(%#,%0,*)]);think setq(1,[switch(%q0,#-*,,filter(u_attrmatch,lattr(%q0/%1)))]);@pemit %#=[switch(%q0%q1,#-1*,No such object.,#-2*,I don't know which one you mean.,%q0,No matching visible attributes.,Pairs Check for [name(%q0)]\(%q0[flags(%q0)]\))];@dolist [iter(%q1,%q0/##)]=@pemit %#=[u(u_pcheck,##)][switch(%q3,,,map(U_CREPORT,sort(%q3)))];
+-

@@ -1,0 +1,371 @@
+#===========================================================================
+# WATCH -- a system whereby players can watch each other log in and out
+#===========================================================================
+#43 is the Watch Command
+
+
+#----------------------------------------
+# WATCH
+#----------------------------------------
+# List the players you are watching and hiding from.
+# 
+&cmd-watch #43 = $watch: 
+  @pemit %# = 
+    %xh%xc[repeat(-,75)]%xn%r
+    %xcWATCH for %n%xn%r
+    %xh%xc[repeat(-,75)]%xn%r
+
+    Watching is turned %xh[ifelse(hastag(%#, watching), %xgon, %xroff)]%xn.%r
+
+    You are currently %xh[ifelse(hastag(%#, unwatchable), 
+      %xrinvisible, %xgvisible)]%xn to other players watching.%r
+
+    %xcWatching: %b%b %xn
+      [u(u-commafy, sortby(sortby-name, get(%#/watching)))]%r
+
+    %xcHiding from: %xn
+      [ifelse(hastag(%#, unwatchable), Everyone. %r%tOn your hide list:%b,)]
+             [u(u-commafy, sortby(sortby-name, get(%#/watch-hiding-from)))]%r
+
+    %xcPermitting:%b %xn
+      [u(u-commafy, sortby(sortby-name, get(%#/watch-permitted)))]%r
+
+    %xh%xc[repeat(-,75)]%xn%r
+-
+
+&sortby-name #43 = 
+  [comp(name(%0), name(%1))]
+-
+
+
+#----------------------------------------
+# WATCH <player>
+#----------------------------------------
+# Add a player to your watchlist.
+#
+&cmd-watch-player #43 = $watch *: 
+  think setq(0, locate(%#, *%0, p)); 
+  think setq(9, 
+    [isdbref(%q0)]
+    [not(strmatch(%#, %q0))]
+    [not(member(get(%#/watching), %q0))]
+    [or(not(member(get(%#/watch-hiding-from), %q0)), 
+        hasflag(%#, wizard))]
+  ); 
+
+  @select %q9 = 
+
+  1111, {
+    &watching %# = setunion(get(%#/watching), %q0); 
+    @pemit %# = You are now watching [name(%q0)].
+  }, 
+
+  0???, {@pemit %# = There is no such player by that name.}, 
+  ?0??, {@pemit %# = You can't watch yourself.}, 
+  ??0?, {@pemit %# = You are already watching [name(%q0)].}, 
+  ???0, {@pemit %# = You cannot watch someone you are hiding from.}, 
+        {@watch/error %#, #43/cmd-watch-player, watch %0, '%q9'}
+-
+
+#----------------------------------------
+# UNWATCH player
+#----------------------------------------
+# Remove a player from your watch list.
+# 
+&cmd-unwatch-player #43 = $unwatch *: 
+  think setq(0, locate(%#, *%0, p)); 
+  think setq(9, 
+    [isdbref(%q0)]
+    [t(member(get(%#/watching), %q0))]
+  ); 
+
+  @select %q9 = 
+
+  11, {
+    &watching %# = setdiff(get(%#/watching), %q0); 
+    @pemit %# = You are no longer watching [name(%q0)].
+  }, 
+
+  0?, {@pemit %# = There is no such player by that name.}, 
+  ?0, {@pemit %# = You were not watching [name(%q0)].}, 
+      {@watch/error %#, #43/cmd-unwatch-player, unwatch %0, '%q9'}
+-
+
+#----------------------------------------
+# WATCH/WHO
+#----------------------------------------
+# List all the people on your watch list who are currently logged in.
+#
+&cmd-watch/who #43 = $watch/who: 
+  think setq(0, %#); 
+  think setq(1, setinter(get(%#/watching), objeval(%#, lwho()))); 
+  think setq(2, u(u-watching, %q0));
+
+  @pemit %# = WATCH: [u(u-commafy, sortby(sortby-name, %q1))] 
+              [switch(words(%q1), 0, is, 1, is, are)] logged in.%r
+              WATCH: [u(u-commafy, sortby(sortby-name, %q2))] 
+              [switch(words(%q2), 0, is, 1, is, are)] watching you.
+-
+
+#----------------------------------------
+# WATCH/ON
+#----------------------------------------
+# Turn connection reporting on.
+#
+&cmd-watch/on #43 = $watch/on: 
+  @pemit %# = You are now watching connections.; 
+  @tag %# = watching; 
+  &watching me = setunion(v(watching), %#)
+-
+
+#----------------------------------------
+# WATCH/OFF
+#----------------------------------------
+# Turn connection reporting off.
+#
+&cmd-watch/off #43 = $watch/off: 
+  @pemit %# = You stop watching connections.; 
+  @cleartags %# = watching; 
+  &watching me = setdiff(v(watching), %#)
+-
+
+
+#----------------------------------------
+# WATCH/HIDE
+#----------------------------------------
+# Hide your connects and disconnects from everyone.
+#
+&cmd-watch/hide #43 = $watch/hide: 
+  @tag %# = unwatchable; 
+  @pemit %# = You are now hidden from everyone's watching.
+-
+
+
+#----------------------------------------
+# WATCH/UNHIDE
+#----------------------------------------
+# Unhide your connects and disconnects from everyone.
+#
+&cmd-watch/unhide #43 = $watch/unhide: 
+  @cleartags %# = unwatchable; 
+  @pemit %# = You are no longer hidden from everyone's watching 
+              (but still invisible to those on your hide list).
+-
+
+
+#----------------------------------------
+# WATCH/HIDE player
+#----------------------------------------
+# Hide your connects and disconnects from a player.
+# 
+&cmd-watch/hide-player #43 = $watch/hide *: 
+  think setq(0, locate(%#, *%0, p)); 
+  think setq(9, 
+    [isdbref(%q0)]
+    [or(not(member(get(%#/watching), %q0)), 
+        hasflag(%#, wizard))]
+    [not(member(get(%#/watch-hiding-from), %q0))]
+  ); 
+
+  @select %q9 = 
+
+  111, {
+    &watch-hiding-from %# = setunion(get(%#/watch-hiding-from), %q0); 
+    @pemit %# = You are now hiding from [name(%q0)].
+  }, 
+
+  0??, {@pemit %# = There is no player by that name.}, 
+  ?0?, {@pemit %# = You cannot hide from someone you are watching.}, 
+  ??0, {@pemit %# = You are already hiding from [name(%q0)].}, 
+       {@watch/error %#, #43/cmd-watch/hide-player, watch/hide %0, '%q9'}
+-
+  
+
+#----------------------------------------
+# WATCH/UNHIDE player
+#----------------------------------------
+# Unhide your connects and disconnects from a player.
+# 
+&cmd-watch/unhide-player #43 = $watch/unhide *: 
+  think setq(0, locate(%#, *%0, p)); 
+  think setq(9, 
+    [isdbref(%q0)]
+    [t(member(get(%#/watch-hiding-from), %q0))]
+  ); 
+
+  @select %q9 = 
+
+  11, {
+    &watch-hiding-from %# = setdiff(get(%#/watch-hiding-from), %q0); 
+    @pemit %# = You stop hiding from [name(%q0)].
+  }, 
+
+  0?, {@pemit %# = There is no player by that name.}, 
+  ?0, {@pemit %# = You were not hiding from [name(%q0)].}, 
+      {@watch/error %#, #43/cmd-watch/unhide-player, watch/unhide %0, '%q9'}
+-
+
+
+#----------------------------------------
+# WATCH/PERMIT player
+#----------------------------------------
+# Permit a player to watch you despite other settings.
+# Removes the player from the hiding list and adds them to the permit list.
+#
+&cmd-watch/permit-player #43 = $watch/permit *: 
+  think setq(0, locate(%#, *%0, p)); 
+  think setq(9, 
+    [isdbref(%q0)]
+    [not(member(get(%#/watch-permitted), %q0))]
+  ); 
+
+  @select %q9 = 
+
+  11, {
+    @pemit %# = switch(t(member(get(%#/watch-permitted), %q0)), 1, 
+      You stop hiding from [name(%q0)].); 
+    &watch-hiding-from %# = setdiff(get(%#/watch-hiding-from), %q0); 
+
+    &watch-permitted %# = setunion(get(%#/watch-permitted), %q0); 
+    @pemit %# = You now permit [name(%q0)] to watch you despite other settings.
+  }, 
+
+  0?, {@pemit %# = There is no such player by that name.}, 
+  ?0, {@pemit %# = You have already permitted [name(%q0)] to watch you.}, 
+      {@watch/error %#, #43/cmd-watch/permit-player, watch/permit %0, '%q9'}
+-
+
+
+#----------------------------------------
+# WATCH/UNPERMIT player
+#----------------------------------------
+# Unpermit a player to watch you despite other settings.
+# Removes the player from the permit list.
+#
+&cmd-watch/unpermit-player #43 = $watch/unpermit *: 
+  think setq(0, locate(%#, *%0, p)); 
+  think setq(9, 
+    [isdbref(%q0)]
+    [t(member(get(%#/watch-permitted), %q0))]
+  ); 
+
+  @select %q9 = 
+
+  11, {
+    &watch-permitted %# = setdiff(get(%#/watch-permitted), %q0); 
+    @pemit %# = You stop permitting [name(%q0)] to watch you despite 
+                other settings.
+  }, 
+
+  0?, {@pemit %# = There is no such player by that name.}, 
+  ?0, {@pemit %# = You did not permit [name(%q0)] to watch you.}, 
+    {@watch/error %#, #43/cmd-watch/unpermit-player, watch/unpermit %0, '%q9'}
+-
+
+
+#----------------------------------------
+# @WATCH/ERROR enactor, obj/attr, command, debug info
+#----------------------------------------
+# Report an error in the watch commands.
+# 
+# %0 = enactor
+# %1 = obj/attr of command routine
+# %2 = command entered
+# %3 = debug info
+# 
+&cmd-@watch/error #43 = $@watch/error *, *, *, *: 
+  @switch hasflag(%#, wizard) = 1, {
+    @pemit %0 = Error in %1. The author has been notified.; 
+    @mail/quick *Adam/Error in %1 = 
+      [name(%0)] entered '%2' and the code could not process it.%r
+      Debug data: %3%r
+  }, {
+    @pemit %# = You're not a wizard, so you cannot use this command.
+  }
+-
+
+
+#===========================================================================
+# Aconnect and Adisconnect magic
+#===========================================================================
+
+@Startup #43 = 
+  &watching me = setunion(filter(filter-is-watching, lwho()), @@)
+-
+&filter-is-watching #43 = 
+  hastag(##, watching)
+-
+
+
+@Aconnect #43 = 
+# tell everyone who needs to know that %# has logged in
+  @pemit/list [u(u-watching, %#)] = WATCH: %n has connected.; 
+
+# add %# to the watching list if he has it turned on
+  &watching me = setunion(v(watching), switch(hastag(%#, watching), 1, %#))
+-
+
+
+@Adisconnect #43 = 
+# remove %# from the watching list
+  &watching me = setdiff(v(watching), %#); 
+
+# tell everyone who needs to know that %# has logged out
+  @pemit/list [u(u-watching, %#)] = WATCH: %n has disconnected.
+-
+&filter-wiz-prot #43=
+
+# %q0 is %# (who's running watch/who)
+# %0 is the list of who's watching %q0
+
+# You don't get filtered out if:
+# a) %q0(watcher) is NOT a wizard
+# b) %0(watchee) is a wizard OR
+# c) %q0(watcher) is not dark OR
+
+# Therefore, if the watcher is not a wizard, 
+# and the watchee is a dark wizard, they 
+# don't get watched.
+
+  or(not(hasflag(%q0, wizard)), 
+     hasflag(%0, wizard), 
+     not(hasflag(%q0, dark)))
+-
+&u-watching #43 = 
+  ulocal(ul-watching, %0)
+-
+&ul-watching #43 = 
+  [setq(0, %0)]
+  [setq(1, filter(filter-can-watch, v(watching)))]
+  [filter(filter-wiz-prot, %q1)]
+-
+&filter-can-watch #43 = 
+
+# %q0 is %# - person running watch/who or who's trying to 
+#     be notified of someone connecting.
+# %0 is who you're checking if they're watching %q0 or not.
+
+# the player is watching %# AND 
+#   (either %# has permitted the player OR 
+#     (%# is not hiding from the player AND %# is not unwatchable)
+#   )
+
+  and(member(get(%0/watching), %q0), 
+      or(member(get(%q0/watch-permitted), %0), 
+         hasflag(%0, wizard), 
+         and(not(member(get(%q0/watch-hiding-from), %0)), 
+             not(hastag(%q0, unwatchable))
+         )
+      )
+  )
+-
+
+&u-commafy #43 = 
+  switch(words(%0), 
+    0, no one, 
+    1, name(%0), 
+    2, [name(first(%0))] and [name(rest(%0))], 
+       map(me/map-comma, extract(%0, 1, dec(words(%0)))) and [name(last(%0))]
+  )
+-
+&map-comma #43 = [name(%0)],

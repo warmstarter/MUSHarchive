@@ -1,0 +1,665 @@
+########################################################################
+# ECONOMY.MUX  --  economic system (functional style)
+########################################################################
+
+@@ Features @@
+
+Data structures:
+  * A Bank is an object that has one or more accounts stored on it.
+  * An Account is a specially-named attribute on a Bank that stores
+    an amount of some currency.
+  * Currency is a unit of measurement of something, like silver coins, 
+    raw iron ore, wheat grain, water, food, or loyalty.
+
+Operations:
+  * A Transfer is the movement of some number of units of currency of 
+    some type from an account on one object to an account of the same
+    currency type on another object.  For instance, you can transfer
+    5 units of wheat currency from the Wheat account on a bushel object 
+    (bank) to the Wheat account on the grain silo object (bank).
+  * A Conversion is changing units of one or more types of currency into
+    units of one or more different kinds of currency.  For example, typing 
+    the command 'cook soup' might convert 4 Water (units) + 1 Chicken + 
+    2 Spices + 1 Cooking-Labor into 5 Soup units.
+  * Accounts can be Created, Adjusted, and Destroyed.  Newly Created 
+    accounts have to be initialized to some numeric value, even if it is 
+    0.  Adjusting an account lets you add or subtract units from it in a 
+    safe way.  Destroyed accounts lose all the data in them and go away 
+    forever.
+
+
+Master Bank:
+
+A Master Bank object tracks the MUXwide totals of all accounts, and
+adjusts this master listing whenever an account is created, adjusted,
+or destroyed, and whenever units are converted.  This allows for admin
+tracking of the economic system as a whole.
+
+Note that accounts on the Master Bank aren't adjusted automatically
+when an object is destroyed.  This might be fixed later.
+
+
+"File Locking":
+
+Critical transactions are semaphored for security, using the Master-Bank
+attribute on the Global Semaphores Object.
+
+
+# # # N O T E # # #
+
+Due to limitations on the locking mechanism, some code needs to be
+duplicated.  Specifically (at the moment) pieces of @account/create
+are duplicated within /transfer, and pieces of @account/adjust are
+duplicated in /transfer and /destroy.
+
+-
+
+&RCS-Economy #50 = 
+  $Header: /usr/local/cvsroot/softcode/builder/accounts-functional.mux,v 1.9 2001/01/17 20:34:51 theo Exp $
+-
+
+
+#6 = Builder Commands
+#50 = Function Library
+#51 = Global Semaphores Object
+#56 = Master Bank
+
+
+# v(master-bank) returns the number of the Master Bank
+#
+&master-bank #50 = #56
+-
+
+# v(semaphore-bank) returns the object/attribute to lock on
+#
+&semaphore-bank #6 = #51/Master-Bank
+-
+
+
+# ac_create(<object>, <account name>, <amount>)
+#
+# Make a new account called <account name> on <object>, and initialize it 
+# with <amount> units of the currency type which matches <account name>.
+
+# Reports an error if the account already exists on the object, or if there
+# is no such account pre-registered on the Master Bank.  If <object> is
+# "master", it will attempt to create the account on the Master Bank.
+# 
+# %0 = <object>
+# %1 = <account name>
+# %2 = <amount>
+# 
+&function-ac_create #50 = 
+  [setq(0, switch(%0, master, get(#6/master-bank), locate(%#, %0, *)))]
+  [setq(1, u(#6/u-account-attribute, %q0, %1))]
+  [setq(2, add(0, %2))]
+
+  [setq(9, 
+    [isdbref(%q0)]
+    [not(hasattr(%q0, %q1))]
+    [or(iscurrency(%1), strmatch(%q0, get(#6/master-bank)))]
+    [isnum(%2)]
+    [lt(strlen(%q1), 29)]
+  )]
+
+# %q0 = dbref of object to create account on
+# %q1 = name of attribute to hold account information
+# %q2 = amount to set
+
+  [switch(%q9, 
+    11111, 
+#     update master bank if necessary (if %0 != 'master')
+      [switch(lcstr(%0), master,, 
+        set(get(#6/master-bank), %q1:[add(get(get(#6/master-bank)/%q1), %0)])
+      )]
+
+#     create account
+      [objeval(%!, set(%q0, %q1:%q2))]
+      [pemit(%!, 
+        ifelse(hasattr(%q0, %q1), 
+          Account created., Account could not be created.)
+      )]
+#     This gives an 'I don't see that here' error message if
+#       %q0 doesn't have a parent. So an ifelse was put in
+#       2/14/00 to mitiage that.
+      [pemit(%!, 
+        switch(ifelse(gt(words(lparent(%q0)),1),
+            hasattrp(parent(%q0), %q1),
+            0) , 
+          1, Parent already had account (child overrides).)
+      )], 
+
+    0????, 
+      pemit(%!, 
+        switch(%q0, 
+        #-1, I don't see that here., 
+        #-2, I don't know which %0 you mean., 
+             Uh oh. Something bad happened. Code: %q9
+        )
+      ), 
+
+    ?0???, 
+      pemit(%!, [name(%q0)] already has [art(trim(%1))] [trim(%1)] account.), 
+
+    ??0??, 
+      pemit(%!, '[trim(%1)]' isn't a valid type of currency.), 
+
+    ???0?, 
+      pemit(%!, You must specify a numerical value for the number of units.), 
+
+    ????0, 
+      pemit(%!, That account name is too long.), 
+
+#   Else
+      pemit(%!, Unknown error. Tell a wizard that @account/create is broken.)
+  )]
+-
+
+
+# %0 = .         if use the default %q0
+#      none      if don't associate with parent object
+#      a dbref   if use the specified dbref
+#      anything else is an error
+# %q0 = dbref of default object
+# 
+@@ &program-associate-parent #6 = 
+  think setq(9, %!); 
+  think setq(6, 
+    switch(%0, 
+    .,    %q0, 
+    none, none[setq(9, #-1)], 
+    q*,   quit[setq(9, #-1)], 
+#   else
+      ifelse(isdbref(%0), %0, #-1)
+    )
+  ); 
+
+  @switch %q6 = #-1, {
+    @pemit %q9 = That's not a valid dbref. Try again.; 
+    @program %q9 = me/program-associate-parent
+  }, {
+    @force %q9 = {@account/parent %q6/%q3}; 
+    @notify v(semaphore-bank)
+  }
+-
+
+
+# ac_destroy(<object>, <account name>)
+# 
+# Irrevocably delete an account from an object.  If the account name is
+# 'master', this will delete the account from the Master Bank; this does
+# NOT delete similarly named accounts from other banks, though.
+# 
+# %0 = <object>
+# %1 = <account name>
+# 
+&function-ac_destroy #50 = 
+  [setq(0, switch(%0, master, get(#6/master-bank), locate(%!, %0, *)))]
+  [setq(1, u(#6/u-account-attribute, %q0, %1))]
+  [setq(9, 
+    [isdbref(%q0)]
+    [hasaccount(%q0, %q1)]
+  )]
+
+  [switch(%q9, 
+    11, 
+      [set(get(#6/master-bank), %q1:[sub(get(get(#6/master-bank)/%q1), get(%q0/%q1))])]
+      [set(%q0, %q1:)]
+      [pemit(%!, 
+        Account [ifelse(hasattr(%q0, %q1), 
+                   not actually destroyed, destroyed)].
+      )], 
+
+    0?, 
+      pemit(%!, 
+        switch(%q0, 
+        #-1, I don't see that here., 
+        #-2, I don't know which %0 you mean., 
+             Uh oh. Something bad happened. Code: %q9
+        )
+      ), 
+
+    ?0, 
+      pemit(%!, [name(%q0)] doesn't have [art(trim(%1))] [trim(%1)] account.), 
+
+# error
+      pemit(%!, Unknown error. Tell a wizard that @account/destroy is broken.)
+  )]
+-
+
+
+# Expects:
+#   %q0 = dbref of bank whose account we will destroy
+#   %q1 = name of account attribute to destroy
+#   %0  = y* (yes, to destroy account) or anything else (not to destroy it)
+#
+@@ &prog-destroy-account #6 = 
+  think setq(2, 
+    [hasaccount(%q0, %q1)]
+    [strmatch(lcstr(%0), y*)]
+    [strmatch(%q0, v(master-bank))]
+  );
+
+  @switch/first %q2 = 
+  110, {
+#   if it's not the master bank, then the master bank needs adjusted first
+    &%q1 [v(master-bank)] = sub(get(v(master-bank)/%q1), get(%q0/%q1)); 
+
+    @wipe %q0/%q1; 
+    @pemit %! = Account 
+      [ifelse(hasaccount(%q0, %q1), 
+        not actually destroyed, destroyed.)]; 
+    @notify v(semaphore-bank)
+  }, 
+
+  111, {
+    @wipe %q0/%q1; 
+    @pemit %! = Account 
+      [ifelse(hasaccount(%q0, %q1), 
+        not actually destroyed, destroyed.)]; 
+    @notify v(semaphore-bank)
+  }, 
+
+  0??, {
+    @pemit %! = 
+      Something went wrong! [name(%q0)] doesn't have 
+      [art(clip(%q1))] [clip(%q1)] account to destroy.; 
+    @notify v(semaphore-bank)
+  }, 
+
+  ?0?, {
+    @pemit %! = Account not destroyed.; 
+    @notify v(semaphore-bank)
+  }, 
+
+# error
+  {
+    @pemit %! = Tell a wizard that @account/destroy is broken.; 
+    @mail/quick Adam/BUG: #6/prog-destroy-account = 
+      Error condition: '%q2'; 
+    @notify v(semaphore-bank)
+  }
+-
+
+
+# ac_list(<object>, <pattern>)
+#
+# Without the optional <pattern>, the command lists all the accounts
+# that are on the object.  If a /<pattern> is specified, it lists all
+# the accounts on the object which match the pattern.  The pattern is a 
+# typical MUX pattern which may include * and ? characters.
+# 
+# %0 = <object>
+# %1 = <pattern>
+# 
+&function-ac_list #50 = 
+  [setq(9, switch(%0, */*, first(%0,/), %0))]
+  [setq(0, switch(%q9, master, get(#6/master-bank), locate(%!, %q9, *)))]
+  [setq(1, switch(%0, */*, rest(%0,/), *))]
+
+  [switch(isdbref(%q0), 0, 
+    pemit(%!, 
+      switch(%q0, 
+      #-1, I don't see that here., 
+      #-2, I don't know which %0 you mean., 
+           Uh oh. Something bad happened. Code: %q9
+      )
+    ), 
+
+# else
+    [pemit(%!, %xh[center(Accounts on [name(%q0)], 45)]%r)]
+    [pemit(%!, %xh%xr
+        [ljust(Account Name, 35)]%b
+        [rjust(Balance, 10)]
+    )]
+    [list(lattrp(%q0/AC-%q1), 
+      [ljust([clip(##)] [switch(hasattr(%q0, ##), 1, \(inh.\))], 35)] 
+      [rjust(comma(get(%q0/##)), 10)]
+    )]
+    [pemit(%!, --)]
+  )]
+-
+
+
+# ac_adjust(<object>, <account name>, <amount>)
+#
+# Adds the specified amount to an object's account.  To subtract from
+# the account, make <amount> a negative number.
+#
+&function-ac_adjust #50 = 
+  [setq(0, switch(%0, master, get(#6/master-bank), locate(%!, %0, *)))]
+  [setq(1, u(#6/u-account-attribute, %q0, %1))]
+  [setq(9, 
+    [isdbref(%q0)]
+    [hasaccount(%q0, %q1)]
+    [isnum(%2)]
+    [strmatch(lcstr(%0), master)]
+  )]
+
+  [switch(%q9, 
+    1111, 
+      [set(%q0, %q1:[add(get(%q0/%q1), %2)])]
+      [pemit(%!, Account adjusted.)], 
+
+    1110, 
+      [set(%q0, %q1:[add(getaccount(%q0, edit(%q1,AC-,)), %2)])]
+      [pemit(%!, Account adjusted.)]
+      [set(get(#6/master-bank), %q1:[add(get(get(#6/master-bank)/%q1), %2)])]
+      [pemit(%!, Updating master bank.)], 
+
+    0???, 
+      pemit(%!, 
+        switch(%q0, 
+        #-1, I don't see %0 here., 
+        #-2, I don't know which %0 you mean., 
+             Uh oh. Something bad happened. Code: %q9 Code: %q9
+        )
+      ), 
+
+    ?0??, 
+      pemit(%!, There is no '%1' account on that object.), 
+
+    ??0?, 
+      pemit(%!, You need to adjust the account by some number of currency units.), 
+
+#   error
+      pemit(%!, Tell a wizard that @account/adjust is broken.)
+  )]
+-
+
+
+# ac_transfer(<amount>, <account name>, <object1>, <object2>)
+#
+# Moves an amount of currency from an account on one object to the 
+# corresponding account on the other object.  Creates the account on
+# object2 if necessary.
+#
+# It is ILLEGAL to transfer from an object to the master bank, or from
+# the master bank to an object. Tranfers between an object and itself
+# nonsensicle, and is therefore also illegal. 
+#
+# Transferring between different non master-bank objects is permissible.
+# Amended PLR 1/11/97
+# 
+# %0 = <amount>
+# %1 = <account name>
+# %2 = <object1>
+# %3 = <object2>
+# 
+# %q0 = Dbref of master bank
+# %q1 = Source object to transfer currency from
+# %q2 = Account to be transferred
+# %q3 = Destination object to transfer currency to
+
+&function-ac_transfer #50 =
+  [setq(0, get(#6/master-bank))]
+  [setq(1, switch(%2, master, %q0, locate(%!, %2, *T)))]
+  [setq(2, u(#6/u-account-attribute, %q1, %1))]
+  [setq(3, switch(%3, master, %q0, locate(%!, %3, *T)))]
+
+  [setq(9, 
+    [not(or(match(%q1, %q0), match(%q3, %q0)))]
+    [not(strmatch(%q1, %q3))]
+    [isdbref(%q1)]
+    [isdbref(%q3)]
+    [hasaccount(%q1, %q2)]
+    [isnum(%0)]
+  )]
+
+  [switch(%q9, 
+
+    111111, 
+#     Create account on destination object only if necessary.
+#     Make sure not to lose amount on parent if transferring.
+        [pemit(%!, switch(hasattr(%q3, %q2), 0, Account created.))]
+        [switch(hasattr(%q3, %q2), 0, set(%q3, %q2:[getaccountd(%q3, %q2)]))]
+
+      [set(%q1, %q2:[sub(get(%q1/%q2), %0)])]
+      [set(%q3, %q2:[add(get(%q3/%q2), %0)])]
+      [pemit(%!, Account transferred.)], 
+
+# If either the source or destination object are the master bank, 
+# but both aren't the master bank, it's an illegal transfer...
+    0?????, 
+      pemit(%!, You can't transfer between the master bank and other objects.), 
+
+# The source object is the same as the destination object...
+    ?0????, 
+      pemit(%!, You need to specify two different objects for the transfer.), 
+
+# If the source object doesn't exist from the user's perspective...
+    ??0???, 
+      pemit(%!, 
+        switch(%q1, 
+        #-1, I don't see that here., 
+        #-2, I don't know which %0 you mean., 
+             Uh oh. Something bad happened. Code: %q9
+        )
+      ), 
+
+# If the destination object doesn't exist from the user's perspective...
+    ???0??, 
+      pemit(%!, 
+        switch(%q3, 
+        #-1, I don't see that here., 
+        #-2, I don't know which %0 you mean., 
+             Uh oh. Something bad happened. Code: %q9
+        )
+      ), 
+
+# If the account specified doesn't exist on %q1...
+    ????0?, 
+      pemit(%!, There is no '%2' account on [name(%q1)] (%q1).), 
+
+# If the user doesn't specify a number for the amount to transfer...
+    ?????0, 
+      pemit(%!, You need to transfer some number of currency units.), 
+
+#   error
+      pemit(%!, Unknown error. Tell a wizard that @account/transfer isn't working.)
+  )]
+-
+
+
+# ac_parent(<object>, <?>)
+# by Stephanie
+#
+&function-ac_parent #50 = 
+  [setq(0, locate(%!, %0, *))]
+  [setq(1, u(#6/u-parent-attribute, %q0, %1))]
+  [setq(9, 
+    [isdbref(%q0)]
+    [iscurrency(%1)]
+  )]
+
+  [switch(%q9, 
+  11, 
+    [set(get(#6/master-bank), %q1:%q0)]
+    [set(%q0, currency:[clip(%q1)])]
+    [pemit(%!, Added %q0 [name(%q0)] as the parent object for %1 currency.)], 
+
+  0?, 
+    pemit(%!, 
+      switch(%q0, 
+      #-1, I don't see that here., 
+      #-2, I don't know which %0 you mean., 
+           Uh oh. Something bad happened. Code: %q9
+      )
+    ), 
+
+  ?0, 
+    pemit(%!, %1 doesn't appear to be a valid currency.), 
+
+#error
+    pemit(%!, Uh oh. Something bad happened. Code: %q9%r
+              Tell a staff member that ac_parent() is broken.)
+  )]
+-
+
+
+
+########################################################################
+# UFuns for economy system
+########################################################################
+
+# u(u-account-attribute, <object>, <currency>)
+#
+# Returns the proper attribute name for the currency type on the given 
+# object.  On the Master Bank, account attributes are not prefixed with
+# 'AC-', as they are on all other objects.
+#
+&u-account-attribute #6 = 
+  AC-[makeattr(clip(%1))]
+-
+
+
+# u(u-parent-attribute, <object>, <currency>)
+#
+# Returns the proper attribute name for the currency type on the
+# given object.
+#
+&u-parent-attribute #6 = 
+ PNT-[makeattr(clip(%1))]
+-
+
+&u-dspace-attribute #6 = 
+-
+
+########################################################################
+# Functions for economy system
+########################################################################
+###
+### Don't forget to add these functions to the &functions-*-list on #50!
+###
+
+# Actually, economy.mux contains the functions now. Don't use these versions!
+
+
+# hasaccount(<bank>, <account name>))
+#
+# Returns 1 if the bank object has an account matching the listed 
+# account name; otherwise, it returns 0.
+#
+# @function/privileged hasaccount = #50/function-hasaccount
+#
+&function-hasaccount #50 = 
+  and(
+    isdbref(%0), 
+    hasattrp(%0, [switch(%1, AC-*,, AC-)][makeattr(%1)])
+  )
+-
+
+
+# iscurrency(<account name>))
+#
+# Returns 1 if the account is a valid currency (on the Master Bank); 
+# otherwise returns 0.
+#
+# @function/privileged iscurrency = #50/function-iscurrency
+#
+&function-iscurrency #50 = 
+  hasattr(get(#6/master-bank), AC-[makeattr(%0)])
+-
+
+
+# getaccount(<bank>, <account name>)
+# 
+# Returns the number of currency units of type <account name> stored
+# in <bank>'s <account name> account.
+# 
+# If the object doesn't have that account on it at all, the function
+# returns #-1.
+# 
+# @function/privileged getaccount = #50/function-getaccount
+# 
+&function-getaccount #50 = 
+  ulocal(#50/ul-mulaccount, locate(%!, %0, *), 
+    u(#6/u-account-attribute, doesn't matter, %1), 
+    #-1)
+-
+
+# This checks if the parent or the object has the account set on 
+# it.  If it's received from the parent, and the 'currency' isn't
+# what's being 'gotten', it multiplies the account by the number
+# of the currency.
+#
+# %0 is the db# of the object
+# %1 is the account being 'gotten' (In ac-<account> format)
+# %2 is the default if the account doesn't exist
+
+&ul-mulaccount #50 = 
+  ifelse(isnum(setr(0,default(%0/%1, %2))), 
+      mul(%q0, 
+#             If the object has the attribute, not inherited
+    ifelse(or(hasattr(%0, %1), 
+#             If the account names are the same, it's the currency.
+#             Have to not() it because comp() returns 0 if the same
+        not(comp(ucstr(%1), 
+          ucstr(setr(1,u(#6/u-account-attribute, doesn't matter, 
+            get(%0/currency))))))), 
+      1, 
+      default(%0/%q1, 1))), %2)
+-
+
+# getaccountd(<bank>, <account name>)
+#
+# Returns the number of currency units of type <account name> stored
+# in <bank>'s <account name> account.
+#
+# If the object doesn't have that account on it at all, the function
+# returns 0.
+#
+# @function/privileged getaccountd = #50/function-getaccount
+#
+
+&function-getaccountd #50=
+  ulocal(#50/ul-mulaccount, locate(%!, %0, *),
+    u(#6/u-account-attribute, doesn't matter, %1),
+    0)
+-
+
+
+# getaccountnm(<bank>, <account name>, <default>)
+#
+# Returns the number of currency units of type <account name> stored
+# in <bank>'s <account name> account.
+#
+# If the object doesn't have that account on it at all, the function
+# returns the passed requested default.
+#
+# This is done so two functions didn't have to be written.  This
+# function should _only_ be used where getaccount() breaks across
+# an iter() for the function invocation limit.  It should NOT be
+# used at all (find a different way other than iter()) if it has 
+# the _potential_ to be used where it may get a non-currency 
+# account from the parent (seeds from raspberries, where the 
+# account (ac-raspberry_seeds) isn't explicity set on the child.
+#
+# @function/privileged getaccount = #50/function-getaccountnm
+#
+
+&function-getaccountnm #50 =
+  default(locate(%!, %0, *)/
+    [u(#6/u-account-attribute, doesn't matter, %1)], %2)
+
+-
+
+
+# laccounts(<bank>)
+# 
+# Returns a list of the accounts on <bank>.
+# 
+# The names of the accounts have spaces replaced with _'s.
+# If the bank has no accounts, a null list is returned.
+# 
+# @function/privileged laccounts = #50/function-laccounts
+# 
+&function-laccounts #50 = 
+  switch(lattrp([locate(%!, %0, *)]/AC-*), 
+    #-1 NO MATCH, [], 
+# else
+    iter(lattrp([locate(%!, %0, *)]/AC-*), 
+      after(##, -)
+    )
+  )
+-

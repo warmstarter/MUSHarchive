@@ -1,0 +1,497 @@
+#############################################################################
+# Registry commands
+#############################################################################
+
+#137
+@@ @create Register
+-
+#
+# Keep it safe in the Bin
+# 
+@@ @teleport Register = #3
+
+
+
+#138
+@@ @create Registry Commands
+-
+@@ @wipe #138/*
+-
+
+
+# #dbref of the Register is in %vR
+#
+@vR #138 = #137
+-
+
+@set #138 = !UNINSPECTED
+-
+@set #138 = SAFE
+-
+@set #138 = WIZARD
+-
+
+
+&IS-BUILDER #138 = [isbuilder(%#)]
+-
+@lock/use #138 = is-builder/1
+-
+
+
+
+# @regdig <room name>
+# 
+# Digs a room named <room name> and prompts the user for a name to use
+# for purposes of registration.  If no other object is registered with that
+# name, the #dbref of the new room is saved in an associative array.
+# 
+&cmd-regdig-room #138 = $@regdig *: 
+  think setq(0, dig(%0)); 
+  @switch hastype(%q0, room) = 1, {
+    @pemit %# = [name(%q0)] created with room number [after(%q0, #)].; 
+
+    think setq(1, squish(secure(name(%q0)))); 
+    @program %# = me/prog-register:
+      What name should this room be registered as? %r
+      \[Enter '.' for default: %q1\]
+  }, {
+    @pemit %# = An error occurred while digging the room.
+  }
+-
+
+# @rdig <new room name> = <room parent>
+#
+# Digs the new room, and sets the parent to the #dbref of the room/thing 
+# which is registered in the Registry.
+#
+&cmd-rdig-parent #138 = $@rdig *=*: 
+  think setq(0, u(u-lookup, %1) ); 
+  @switch [isdbref(%q0)][or(hastype(%q0, thing), hastype(%q0, room))] = 
+  0?, {
+    @pemit %# = No such object '%1' exists in the Registry.
+                Type @registry for a list of valid choices.
+  }, 
+  10, {
+    @pemit %# = You can only use registered objects of type Room or Thing 
+      for parent objects.
+  }, {
+    think setq(1, room(%0)); 
+    @switch and(isdbref(%q1), hastype(%q1, room)) = 0, {
+      @pemit %# = Error creating room '%0'. Stopping.
+    }, {
+      @pemit %# = [name(%q1)] created with room number [after(%q1, #)].; 
+      @parent %q1 = %q0; 
+      @pemit %# = Parent set to [name(%q0)] (%q0).
+    }
+  }
+-
+
+
+# @rdig
+#
+# An interactive command that prompts a used for a registered parent name
+# and a name of the room to be dug.  It then digs the room, and sets the 
+# parent to the #dbref of the room/thing which is registered with the 
+# registered parent name.
+#
+&cmd-rdig #138 = $@rdig: 
+  @pemit %# = [switch(default(%#/level, novice), novice, {
+    This is an interactive digging system which will ask you two 
+    questions. Type in your answers and press enter after each. 
+    It will then create the room correctly.
+  })]; 
+
+  @trigger me/tr-rdig-get-rparent = %#
+-
+
+
+# Called from @rdig
+# %0 = %#
+#
+&tr-rdig-get-rparent #138 = 
+  think setq(0, room); 
+  @program %0 = me/prog-get-rparent:
+    Enter the registry name of the room you want to use as a parent.
+-
+
+
+# Called from @rdig
+#
+# %0 contains the registry name entered at the prompt
+#
+&prog-get-rparent #138 = 
+  @switch %0 = 
+  quit, {
+    @pemit %# = Terminated.
+  }, 
+  help, {
+    @pemit %# = 
+      Enter a registry name for the room you want to dig, or enter 'list' 
+      to see a list of valid entries, or 'quit' to exit this program.; 
+    @trigger me/tr-rdig-get-rparent = %#
+  }, 
+  list, {
+    @pemit %# = u(u-list-rdig-parents); 
+    @trigger me/tr-rdig-get-rparent = %#
+  }, {
+    think setq(0, u(u-lookup, %0) ); 
+    @switch and(isdbref(%q0), 
+                or(hastype(%q0, thing), 
+                   hastype(%q0, room)
+                )
+            ) = 
+    1, {
+      @pemit %# = [name(%q0)] (%q0) selected as the room parent.; 
+      @trigger me/tr-rdig-get-roomname = %#
+    }, {
+    @program %# = me/prog-get-rparent:
+        That is not a valid registered parent object. Type 'list' to see 
+        your valid choices.
+    }
+  }
+-
+
+# Called from prog-rdig-get-rparent
+# %0 = %# 
+# %q0 = parent of room
+#
+&tr-rdig-get-roomname #138 = 
+  @program %0 = me/prog-get-roomname:
+    Enter the name of the room you want to dig.
+-
+
+# Called from prog-rdig-get-rparent
+# %q0 = parent of room
+#
+&prog-get-roomname #138 = 
+  think setq(1, dig(%0)); 
+  @switch hastype(%q1, room) = 1, {
+    @pemit %# = [name(%q1)] created with room number [after(%q1, #)].; 
+    @parent %q1 = %q0; 
+    @pemit %# = Parent set to [name(%q0)] (%q0).
+  }, {
+    @pemit %# = An error occurred while digging the room.
+  }
+-
+
+
+# @regcreate <thing name>
+# 
+# Creates and object named <thing name> and prompts the user for a name 
+# to use for purposes of registration.  If no other object is registered 
+# with that name, the #dbref of the new object is saved in an 
+# associative array.
+# 
+&cmd-regcreate-thing #138 = $@regcreate *: 
+  think setq(0, create(%0, 10)); 
+  @switch hastype(%q0, thing) = 1, {
+    @pemit %# = [name(%q0)] created as object %q0.; 
+
+    think setq(1, squish(secure(name(%q0)))); 
+    @program %# = me/prog-register:
+      What name should this object be registered as? %r
+      \[Enter '.' for default: %q1\]
+  }, {
+    @pemit %# = An error occurred while creating the object.
+  }
+-
+
+
+# @rparent <object> = <registry parent name>
+#
+# Sets the parent of object to the #dbref of the object which is registered
+# as <registry parent name> in the Registry.
+#
+&cmd-rparent #138 = $@rparent *=*: 
+  think setq(1, trim(%1));
+
+  @switch isdbref(setr( 0, locate(%#, %0, *) )) = 0, {
+    @error %# = locate %q0
+  }, {
+    @switch "%q1" = "", {
+      @parent %q0; 
+      @pemit %# = Parent cleared.
+    },{
+      @switch setr( 2, u(u-lookup, %q1) ) = #-1, {
+        @pemit %# = 
+          The name '%q1' doesn't match anything in the Registry.%r
+          The @registry command will list valid choices.
+      }, {
+        @parent %q0 = %q2; 
+        @pemit %# = [name(%q0)] (%q0)'s parent set to [name(%q2)] (%q2).
+      }
+    }
+  }
+-
+
+
+# @register <object>
+#
+# Prompts the user for a registry name for <object>, verifies it, 
+# then stores the valid registry name in the Registry.
+#
+&cmd-register #138 = $@register *: 
+  @switch isdbref(setr( 0, locate(%#, %0, *) )) = 0, {
+    @error %# = locate %q0
+  }, {
+    think setq(1, squish(secure(name(%q0)))); 
+    @program %# = me/prog-register:
+      What name should this [type(%q0)] be registered as? %r
+      \[Enter '.' for default: %q1\]
+  }
+-
+
+
+# @registry
+#
+# List all entries in the Registry
+
+
+&cmd-registry #138 = $@registry: 
+  @pemit %# = [mudname()] Registry%r; 
+  @pemit %# = 
+    %xh%xrTYPE %b%b%b%b #DBREF %bREGISTRY NAME %b%b%b%b%b%b%b%b%b%b%b TRUE NAME%xn;
+  @dolist sort(lattr(%vR/*)) = {
+    think setq( 0, get(%vR/##) ); 
+    @pemit %# = 
+      [ljust(switch(type(%q0), #-1*, Garbage, type(%q0) ), 7)]%b
+      [rjust(%q0, 8)]%b%b
+      [ljust(lcstr(u(u-rname-to-name, ##)), 25)]%b
+      [ljust(name(%q0), 20)]%b
+  }
+-
+
+# @registry <tag>
+# added by Stephanie Dray
+# lists entries in the registry by tag
+
+&cmd-registry-by-tag #138 = $@registry *:
+  @switch %0 = tags, {
+    @@ The tag list is set by the @daily @@; 
+    @pemit %# = All tags on registered objects:; 
+    @pemit %# = border(sort(u(u-all-tags)), 55, space(10), ); 
+    @pemit %# = --
+  }, {
+    @pemit %# = [mudname()] Registry -- Sorted by %0 Tag:%r; 
+    @pemit %# = 
+      %xh%xrTYPE %b%b%b%b #DBREF %bREGISTRY NAME %b%b%b%b%b%b%b%b%b%b%b TRUE NAME%xn;
+
+    think setq(8, sort(lattr(%vR)));
+#    think setq(9, %0);
+#    think setq(1, filter(me/filter-hastag-q9, %q8));
+
+    @dolist %q8 = {
+      think setq(0, get(%vR/##));
+      @pemit %# = 
+        switch(hastag(%q0, %0), 1, 
+          [ljust(switch(type(%q0), #-1*, Garbage, type(%q0) ), 7)]%b
+          [rjust(%q0, 8)]%b%b
+          [ljust(left(lcstr(u(u-rname-to-name, ## )), 25), 25)]%b
+          [ljust(left(name(%q0), 20), 20)]%b
+        )
+    }
+  }
+-
+
+&filter-hastag-q9 #138 = 
+  [hastag(xget(%vR,%0), %q9)]
+-
+
+
+#
+&cmd-unregister #138 = $@unregister *: 
+  @switch isdbref(%0) = 0, {
+    @pemit %# = 
+      You must specify the #dbref of the object whose references you want 
+      to remove from the Registry.
+  }, {
+    @pemit %# = Cleaning all references to object %0 from the Registry...; 
+    @dolist lattr(%vR/*) = {
+      @switch get(%vR/##) = %0, {
+        @pemit %# = Unregistering [u(u-rname-to-name, ##)].; 
+        &## %vR
+      }
+    }; 
+    @dolist 0 = { @pemit %# = Done. }
+  }
+-
+
+
+# @rzap <object or dbref>
+#
+# Zaps an object, removing all references to it from the Registry.
+#
+&cmd-rzap #138 = $@rzap *: 
+
+# if the player specified a dbref...
+
+  @switch isdbref(%0) = 1, {
+    @force %# = {@unregister %0; @wait 0=@zap %0}
+  }, {
+
+# otherwise assume they specified a registry name
+
+    @switch setr(0, u(u-lookup, %0)) = #-1, {
+      @pemit %# = There is no such object with that name in the Registry.
+    }, {
+      @force %# = {@unregister %q0; @wait 0=@zap %q0}
+    }
+  }
+-
+
+
+@daily #138 = 
+  @@ Set tag list @@; 
+  @dolist lattr(%vR) = {
+    &all-tags me = setunion(v(all-tags), ltags(get(%vR/##)))
+  }; 
+  @pemit %# = Done.
+-
+
+
+#############################################################################
+# Common Subroutines and Ufuns
+#############################################################################
+
+
+# Called from @regcreate *, @regdig *, @register, etc
+# %0 = name to register the object as, entered at the prompt.
+# %q0 = #dbref of object to be registered
+# %q1 = default registry name for object
+#
+&prog-register #138 = 
+  think setq( 2, u(u-rname, ifelse(strmatch(%0, .), %q1, %0)) ); 
+  @switch isdbref(%q0)[hasattr(%vR, %q2)] = 
+  10, {
+    &%q2 %vR = %q0; 
+    @unlock %q0/registry; 
+    &registry %q0 = %q2; 
+    @lock %q0/registry = #1; 
+    @pemit %# = Registered.
+  }, 
+  11, {
+    @pemit %# = 
+      [name(get(%vR/%q2))] ([get(%vR/%q2)]) is already registered as %q2.%r
+      Not registered.
+  }, 
+  0?, {
+    @pemit %# = Error in [num(me)]/prog-register: r(0) is empty.
+  }, {
+    @pemit %# = Error in [num(me)]/prog-register: bad condition
+  }
+-
+
+
+
+# u(u-rname, <registry name of object>)
+#
+# Returns an attribute name that corresponds to <registry name>
+# even if the attribute doesn't exist on the Register object.
+#
+&u-rname #138 = 
+  edit(%0, space(), -)
+-
+
+# u(u-lookup, <registry name of object>)
+# 
+# Returns the #dbref of the object specified by <registry name>, 
+# or #-1 if no such name is in the Registry.
+# Performs own translation of <registry name> using u-rname.
+#
+&u-lookup #138 = 
+  default(%vR/[u(u-rname, %0)], #-1)
+-
+
+
+# u(u-rname-to-name, <attr-name>)
+#
+# Returns the Englishy name that corresponds to the attribute name
+# used as the associative array key on the Registry.
+#
+&u-rname-to-name #138 = 
+  edit(%0, -, %b)
+-
+
+
+&u-list-rdig-parents #138 = 
+  %r
+  Valid Rooms(R) and Objects(O) to be used as Parent Objects for Rooms:
+  [iter(lattr(%vR/*), 
+    %r
+    [switch(type(get(%vR/##)),
+      ROOM, 
+        u(u-rname-to-name, ##) (R), 
+      THING, 
+        u(u-rname-to-name, ##) (O)
+    )]
+  )]
+  %r
+-
+
+
+# The nifty code below, which is commented out, blows out of the 
+# function-invocation limit, which I've already stretched beyond
+# its default size.
+# 
+&u-all-tags #138 = 
+  v(all-tags)
+
+#  fold(me/fold-add-tags, lattr(%vR))
+#-
+#&fold-add-tags #138 = 
+#  setunion(%0, iter(get(%vR/%1), ltags(##)))
+-
+
+#############################################################################
+# Functions (on #50)
+#############################################################################
+
+
+@vR #50 = #137
+-
+
+# registry(some registry name)
+#
+# Returns the dbref of the object in the Registry, if a reasonable match is 
+# found there.
+#
+# @function/preserve registry = #50/function-registry
+#
+&function-registry #50 = 
+  [setq(0, edit(%0, %b, -))]
+  [setq(1, filter(me/filter-registry, lattr(%vR)))]
+  [switch(words(%q1), 0, #-1 NO MATCHES FOUND, u(u-registry-dbrefs, %q1))]
+-
+
+&filter-registry #50 = 
+  or(strmatch(%q0, *%0*), strmatch(%0, *%q0*))
+-
+
+&u-registry-dbrefs #50 = 
+  iter(%0, default(%vR/##, #-1))
+-
+
+
+# registryname(some registry name)
+#
+# Returns a list of full Registry names which match the partial registry
+# name given, if a reasonable match is found there.  The returned list
+# will be |-delimited, since the Registry names often contain spaces.
+#
+# @function/preserve registryname = #50/function-registryname
+#
+&function-registryname #50 = 
+  [setq(0, edit(%0, %b, -))]
+  [setq(1, filter(me/filter-registry, lattr(%vR)))]
+  [switch(words(%q1), 0, #-1 NO MATCHES FOUND, u(u-registry-name-list, %q1))]
+-
+
+&u-registry-name-list #50 = 
+  trim(
+    edit(
+      iter(%0, [edit(##, -, %b)]|), 
+      |%b, |
+    ), 
+    b, |)
+-
+

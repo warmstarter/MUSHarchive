@@ -1,0 +1,81 @@
+#############################################################################
+# Player commands
+#############################################################################
+
+
+# Softcode replacement for 'give'
+# @addcommand give = #7/cmd-give
+# 
+&CMD-GIVE #7 = $give * to *: 
+  think 
+    [setq( 0, locate(%#, %0, inTV) )]
+    [setq( 1, locate(%#, %1, *P) )]
+    [setq( 2, 
+      [elock(%q0/receive, %#)]
+      [elock(%q1/enter, %q0)]
+      [elock(%q0/drop, loc(%q0))]
+    )]; 
+  @switch and(isdbref(%q0), isdbref(%q1), eq(%q2, 111)) = 0, {
+    @pemit %# = Problem.
+  }, {
+    @pemit %# = You give [name(%q0)] to [name(%q1)].;
+    @pemit %q1 = %n gives you [name(%q0)].; 
+    @pemit/list [setdiff(lcon(%L), %q1)] =
+      %n gives [name(%q0)] to [name(%q1)].;
+    @tel %q0 = %q1;
+  }
+-
+
+
+# @bug <bug report>
+#
+# Sends a bug report to the coders.
+# Adds lots of information to the mail automatically.
+#
+&cmd-bug #7 = $@bug *: 
+  &bugreport me = inc(v(bugreport)); 
+  @force %#={
+    @mail *Coders = Bug Report [v(bugreport)]; 
+
+    -From: %%b %%b %n (%# [flags(%#)])%%r
+     Date: %%b %%b [time()]%%r
+     Location: [name(%L)] (%L [flags(%L)])%%r
+     %%r
+     Contents of Player: %%b [lcon(%#)]%%r
+     Contents of Location: [lcon(%L)]%%r
+     Bug Report:%%r
+     %%t{%0}%%r; 
+    @mail/send
+  }
+-
+
+&bugreport #7 = 0
+-
+
+# @typo <typo report>
+#
+# Sends a typo report to the owner of the room the reporter is in.
+# Adds lots of information to the mail automatically.
+#
+&cmd-typo #7 = $@typo *: 
+  &typoreport me = inc(v(typoreport)); 
+  @force %#={
+    @mail [owner(%L)] = Typo Report [v(typoreport)]; 
+
+    -From: %%b %%b %n (%# [flags(%#)])%%r
+     Date: %%b %%b [time()]%%r
+     Location: [name(%L)] (%L [flags(%L)])%%r
+     %%r
+     Contents of Player: %%b [lcon(%#)]%%r
+     Contents of Location: [lcon(%L)]%%r
+     Typo Report:%%r
+     %%t{%0}%%r; 
+    @mail/send
+  }
+-
+
+&typoreport #7 = 0
+-
+
+
+

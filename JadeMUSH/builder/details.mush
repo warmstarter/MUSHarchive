@@ -1,0 +1,417 @@
+#############################################################################
+# DETAILS.MUX -- setup code for 'view' (details on objects and rooms)
+############################################################################# 
+#
+# Modified #6 to #1029 for testing - jdh 2/13/97
+# Modified #8 to #1027 for testing - jdh 2/13/97
+#
+# Returned #1029 to #6 for upload - jdh 2/19/97
+# Returned #1027 to #8 for upload - jdh 2/19/97
+# 
+# Added @view command jdh 2/21/97
+# 
+# John, these things aren't really necessary -- when you do the RCS ci, 
+# put them there. You can use the rlog command on a file to see the log
+# summary...
+#
+# Any object may have additional details on it.  You can 'view <object>' 
+# to see a list of(obvious) details.  You can 'view <object>'s <detail>'
+# to see a specific detail on an object.  If <detail> does not appear on
+# more than one object in your vicinity, and there is no nearby object named 
+# <detail>, then you can simply 'view <detail>'.
+# 
+# Details can be placed on an object with the detail command.  Details
+# have properties (hidden/visible, noisy/quiet) that can be set with a /switch.
+# Detail messages are stored in &detail-<name>, &odetail-<name>, and 
+# &adetail-<name> attributes on the object.  The odetail is shown to everyone
+# else in the room when you view the detail and the adetail is triggered.
+# Noisy details have default odetail messages of '<player> checks out the
+# <detail>.'  Hidden details don't show up automatically when you view an
+# object.  There are @odetail and @adetail commands for this.
+# 
+# You can put a &udetail-<name> attribute on it which is evaluated every time
+# a person views the object.  If u(udetail-<name>) evaluates true (1), then
+# the detail will be shown in the view list; otherwise, it won't.  There's a
+# @udetail command for this.
+#
+#############################################################################
+
+
+&RCS-details #6 = 
+  $Header: /usr/local/cvsroot/softcode/builder/details.mux,v 1.8 1997/04/26 22:44:23 adam Exp $
+-
+
+
+# @detail <object>/<detailname> = <description>
+#
+# Add a detail message to an object.
+#
+&cmd-detail-set #6 = $@detail */*=*: 
+  think setq(0, locate(%#, %0, *T)); 
+  @switch isdbref(%q0) = 0, {
+    @error %# = locate %q0
+  }, {
+    @switch controls(%#, %q0) = 0, {
+      @pemit %# = You don't control that object.
+    }, {
+      think setq(1, makeattr(%1)); 
+      &DETAIL-%q1 %q0 = %2; 
+      @pemit %# = Detail set.
+    }
+  }
+-
+
+
+# @detail <object>/<detailname>
+#
+# Clears all detail messages/attributes from an object.
+# Effectively removes the detail.
+#
+&cmd-detail-clear #6 = $@detail */*: 
+  @switch strmatch(%1, *=*) = 0, {
+    think setq(0, locate(%#, %0, *T)); 
+    @switch isdbref(%q0) = 0, {
+      @error %# = locate %q0
+    }, {
+      @switch controls(%#, %q0) = 0, {
+        @pemit %# = You don't control that object.
+      }, {
+        think setq(1, makeattr(%1)); 
+        &DETAIL-%q1 %q0; 
+        &ODETAIL-%q1 %q0; 
+        &ADETAIL-%q1 %q0; 
+        &UDETAIL-%q1 %q0; 
+        &DETAILNOISY-%q1 %q0; 
+        &DETAILVISIBLE-%q1 %q0; 
+        @pemit %# = Detail removed.
+      }
+    }
+  }
+-
+
+# @odetail <object>/<detailname> = <description>
+#
+# Add an odetail message to an object.
+#
+&cmd-odetail-set #6 = $@odetail */*=*: 
+  think setq(0, locate(%#, %0, *T)); 
+  @switch isdbref(%q0) = 0, {
+    @error %# = locate %q0
+  }, {
+    @switch controls(%#, %q0) = 0, {
+      @pemit %# = You don't control that object.
+    }, {
+      think setq(1, makeattr(%1)); 
+      @switch hasattrp(%q0, DETAIL-%q1) = 1, {
+        &ODETAIL-%q1 %q0 = %2; 
+        @pemit %# = Odetail set.
+      }, {
+        @pemit %# = There is no detail named '%1' on that object.
+      }
+    }
+  }
+-
+
+
+# @odetail <object>/<detailname>
+#
+# Clear an odetail message.
+#
+&cmd-odetail-clear #6 = $@odetail */*: 
+  @switch strmatch(%1, *=*) = 0, {
+    think setq(0, locate(%#, %0, *T)); 
+    @switch isdbref(%q0) = 0, {
+      @error %# = locate %q0
+    }, {
+      @switch controls(%#, %q0) = 0, {
+        @pemit %# = You don't control that object.
+      }, {
+        think setq(1, makeattr(%1)); 
+        @switch hasattrp(%q0, DETAIL-%q1) = 1, {
+          &ODETAIL-%q1 %q0; 
+          @pemit %# = Odetail cleared.
+        }, {
+          @pemit %# = There is no detail named '%1' on that object.
+        }
+      }
+    }
+  }
+-
+
+# @adetail <object>/<detailname> = <command list>
+#
+# Add an adetail command list to an object.  This is triggered whenever
+# someone views that detail.
+#
+&cmd-adetail-set #6 = $@adetail */*=*: 
+  think setq(0, locate(%#, %0, *T)); 
+  @switch isdbref(%q0) = 0, {
+    @error %# = locate %q0
+  }, {
+    @switch controls(%#, %q0) = 0, {
+      @pemit %# = You don't control that object.
+    }, {
+      think setq(1, makeattr(%1)); 
+      @switch hasattrp(%q0, DETAIL-%q1) = 1, {
+        &ADETAIL-%q1 %q0 = %2; 
+        @pemit %# = Adetail set.
+      }, {
+        @pemit %# = There is no detail named '%1' on that object.
+      }
+    }
+  }
+-
+
+
+# @adetail <object>/<detailname>
+#
+# Clear an adetail command list.
+#
+&cmd-adetail-clear #6 = $@adetail */*: 
+  @switch strmatch(%1, *=*) = 0, {
+    think setq(0, locate(%#, %0, *T)); 
+    @switch isdbref(%q0) = 0, {
+      @error %# = locate %q0
+    }, {
+      @switch controls(%#, %q0) = 0, {
+        @pemit %# = You don't control that object.
+      }, {
+        think setq(1, makeattr(%1)); 
+        @switch hasattrp(%q0, DETAIL-%q1) = 1, {
+          &ADETAIL-%q1 %q0; 
+          @pemit %# = Adetail cleared.
+        }, {
+          @pemit %# = There is no detail named '%1' on that object.
+        }
+      }
+    }
+  }
+-
+
+
+# @udetail <object>/<detailname> = <ufun>
+#
+# Add an udetail ufun to be evaluated to see if the detail is shown
+# in the obvious details list.
+#
+&cmd-udetail-set #6 = $@udetail */*=*: 
+  think setq(0, locate(%#, %0, *T)); 
+  @switch isdbref(%q0) = 0, {
+    @error %# = locate %q0
+  }, {
+    @switch controls(%#, %q0) = 0, {
+      @pemit %# = You don't control that object.
+    }, {
+      think setq(1, makeattr(%1)); 
+      @switch hasattrp(%q0, DETAIL-%q1) = 1, {
+        &UDETAIL-%q1 %q0 = %2; 
+        @pemit %# = Udetail set.
+      }, {
+        @pemit %# = There is no detail named '%1' on that object.
+      }
+    }
+  }
+-
+
+
+# @udetail <object>/<detailname>
+#
+# Clear an udetail unfun.
+#
+&cmd-udetail-clear #6 = $@udetail */*: 
+  @switch strmatch(%1, *=*) = 0, {
+    think setq(0, locate(%#, %0, *T)); 
+    @switch isdbref(%q0) = 0, {
+      @error %# = locate %q0
+    }, {
+      @switch controls(%#, %q0) = 0, {
+        @pemit %# = You don't control that object.
+      }, {
+        think setq(1, makeattr(%1)); 
+        @switch hasattrp(%q0, DETAIL-%q1) = 1, {
+          &UDETAIL-%q1 %q0; 
+          @pemit %# = Udetail cleared.
+        }, {
+          @pemit %# = There is no detail named '%1' on that object.
+        }
+      }
+    }
+  }
+-
+
+
+&cmd-setdetail #6 = $@setdetail */*=*: 
+  think setq(0, locate(%#, %0, *T)); 
+  @switch isdbref(%q0) = 0, {
+    @error %# = locate %q0
+  }, {
+    @switch controls(%#, %q0) = 0, {
+      @pemit %# = You don't control that object.
+    }, {
+      think setq(1, makeattr(%1)); 
+      @switch hasattrp(%q0, DETAIL-%q1) = 1, {
+        @dolist %2 = {
+          @switch ## = 
+          hidden, {
+            &detailvisible-%q1 %q0 = 0; 
+            @pemit %# = Detail %1 set hidden.
+          }, 
+          visible, {
+            &detailvisible-%q1 %q0 = 1;
+            @pemit %# = Detail %1 set visible.
+          }, 
+          noisy, {
+            &detailnoisy-%q1 %q0 = 1;
+            @pemit %# = Detail %1 set noisy.
+          }, 
+          quiet, {
+            &detailnoisy-%q1 %q0 = 0; 
+            @pemit %# = Detail %1 set quiet.
+          }, {
+            @pemit %# = I don't understand the detail flag '##'.
+          }
+        }, {
+          @pemit %# = There is no detail named '%1' on that object.
+        }
+      }
+    }
+  }
+-
+
+# @view
+#
+# Equivalent to '@view here'.
+#
+&cmd-atview-here #8 = $@view: 
+  @force %# = @view here
+-
+
+# @view <object>
+#
+# Shows a builder all the details on the object, regardless of their
+# ufun or a hidden flag.
+#
+&cmd-view-all #6 = $@view *: 
+  think setq(0, locate(%#, %0, *T)); 
+  @switch isdbref(%q0) = 0, {
+    @error %# = locate %q0
+  }, {
+    @switch controls(%#, %q0) = 0, {
+      @pemit %# = You don't control that object.
+    }, {
+      @pemit %# = Details on [name(%q0)]:; 
+      @pemit %# = iter(lattrp(%q0/detail-*), 
+        %r%b [clip(##)]
+      )
+    }
+  }
+-
+
+
+# view
+#
+# Equivalent to 'view here'.
+#
+&cmd-view-here #8 = $view: 
+  @force %# = view here
+-
+
+# view <object or detail>
+#
+# Show the player any details he notices on the object.  Hidden details
+# are never listed.  Details with a udetail are listed if the u(udetail)
+# returns 1.  If there is no nearby matching object, it checks everything
+# nearby for a matching detail...
+#
+&cmd-view-thing #8 = $view *: 
+# ignore all view <object>'s <detail> matches
+  @switch strmatch(%0, *'s *) = 0, {
+    think setq(0, locate(%#, %0, *T)); 
+    @switch %q0 = 
+    #-2, {
+      @error %# = locate #-2
+    }, 
+    #-1, {
+      think setq(9, makeattr(%0)); 
+      think setq(1, 
+        iter(%L [lcon(%L)] [lcon(%#)] %#, 
+          switch(hasattrp(##, DETAIL-%q9), 1, ##)
+        )
+      ); 
+      think setq(2, first(shuffle(shuffle(%q1)))); 
+      @switch words(%q1) = 0, {
+        @error %# = locate #-1
+      }, {
+# the code that handles the actual detail view...
+        @pemit %# = setq(8,get(%q2/DETAIL-%q9))[objeval(%#, s(%q8))]; 
+        @switch udefault(%q2/DETAILNOISY-%q9, 0) = 1, {
+          @oemit %# = 
+            %n [setq(8,default(%q2/ODETAIL-%q9, examines the %0.))] 
+            [objeval(%#,s(%q8))];
+        }, {
+          @oemit %# = switch(hasattrp(%q2, ODETAIL-%q9), 1, 
+            %n [setq(8,get(%q2/ODETAIL-%q9))][objeval(%#, s(%q8))]
+          )
+        }; 
+        @trigger %q2/ADETAIL-%q9 = %#
+      }
+    }, {
+      think setq(1, 
+        iter(lattrp(%q0/detail-*),   [setq(9, rest(##, -))]
+          [switch(
+             and(
+               default(%q0/DETAILVISIBLE-%q9, 1), 
+               udefault(%q0/U##, 1)
+             ), 1,
+              :[clip(%q9)]
+          )]
+        )
+      ); 
+    
+      @switch words(%q1) = 0, {
+        @pemit %# = switch(%q0, %L, 
+          There are no obvious details here., 
+#       else
+          That has no obvious details.
+        )
+      }, {
+        @pemit %# = 
+          Obvious details on [name(%q0)]: 
+          [iter(%q1, %r%b ##, :)]
+      }
+    }
+  }
+-
+
+# view <object>'s <detail>
+#
+# Show the player a specific detail on an object
+#
+&cmd-view-obj-thing #8 = $view *'s *: 
+  think setq(0, locate(%#, %0, *T)); 
+  @switch isdbref(%q0) = 0, {
+    @error %# = locate %q0
+  }, {
+# the code that handles the actual detail view...
+    think setq(9, makeattr(%1)); 
+
+    @switch hasattrp(%q0,DETAIL-%q9)= 0, {
+      @pemit %# = There is no detail named '%1' on '%0'.
+    }, {
+      @pemit %# = get_eval(%q0/DETAIL-%q9); 
+      @switch udefault(%q0/DETAILNOISY-%q9, 0) = 1, {
+        @oemit %# = %n [edefault(%q0/ODETAIL-%q9, examines the %1.)]; 
+      }, {
+        @oemit %# = switch(hasattrp(%q0, ODETAIL-%q9), 1, 
+         %n [get_eval(%q0/ODETAIL-%q9)]
+        )
+      }; 
+      @trigger %q0/ADETAIL-%q9 = %#
+    }
+  }
+-
+
+&help-detail #6 = 
+Detail names can be only one word long.
+-
+

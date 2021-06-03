@@ -1,0 +1,99 @@
+# @knock Machine, originally by Michael
+# @decompiled and formatted by Jonathan Evans (Jon)
+# Modified 8/2/98 by Jon because of a bug in @unsummon
+
+&CMD-KNOCK #7=$@knock *: 
+
+	@switch/first or(orflags(%#, WZw), haspower(%#, builder)) = 
+	0, {
+		@pemit %#=I'm sorry, you are not allowed to use this 
+			command.
+	}, {
+		@switch/first and(isdbref(pmatch(%0)), 
+			hasflag(*%0,CONNECTED)) = 
+		0, {
+			@pemit %# = I don't know who you mean.
+		}, {
+			@pemit %# = %cc%chYou are knocking to [name(*%0)], 
+				please wait for a response.%cn;
+			@pemit *%0 = %cm%ch%n is knocking, and wishes to 
+				join your destination.%RType @knock/accept 
+				to accept, and @knock/reject to reject.%cn; 
+			&knocked *%0=%#
+		}
+	}
+
+-
+
+&CMD-KNOCK/ACCEPT #7=$@knock/accept:
+
+	@pemit %#=%cc%chYou have accepted the @knock, prepare to be 
+		joined.%cn; 
+	@pemit get(%#/knocked)=%cm%ch%n has accepted, prepare 
+		to join their location.%cn; 
+	@wait 5= {
+		@tel get(%#/knocked) = loc(%#);&knocked %#=
+	}
+
+-
+
+&CMD-KNOCK/REJECT #7=$@knock/reject:
+
+	@pemit %#=%cc%chYou have rejected the knock.%cn;
+	@pemit get(%#/knocked) = %cm%chI'm sorry, %n is busy at 
+		the moment.%cn;
+	&knocked %#=
+
+-
+
+&CMD-SUMMON #7=$@summon *:
+
+   @switch/first [orflags(%#,WZ)]
+                 [not(hastag(loc(pmatch(%0)), dreamworld))]=
+	0?, {@pemit %#=I'm sorry, you can't use that command.},
+        ?0, {@pemit %#=[name(pmatch(%0))] is in the dreamworld!  No way!},
+            {@switch/first and(isdbref(pmatch(%0)), 
+			hasflag(*%0,CONNECTED)) = 
+		0, {
+			@pemit %# = I don't know who you mean.
+		}, {
+			&last-loc *%0 = loc(*%0); 
+			@pemit %#=%cr%chYou have summoned [name(*%0)].%cn; 
+			@pemit *%0 = %cr%chYou are being summoned.%cn; 
+			@remit loc(*%0)=%cr%ch <OOC> [name(*%0)] has been 
+				summoned before the gods.%cn;
+			@wait 5=@tel *%0=loc(%#)
+		}
+	}
+
+-
+
+&CMD-UNSUMMON #7=$@unsummon *:
+
+	think setq(0, default(*%0/last-loc,#-1));
+	@switch/first orflags(%#,WZ)=
+	0, {
+		@pemit %#=I'm sorry, you can't use that command.
+	}, {
+		@switch/first and(isdbref(pmatch(%0)), 			hasflag(*%0,CONNECTED))=
+		0, {
+			@pemit %#=I don't know who you mean.
+		}, {
+			@switch/first %q0=
+			#-1, {
+				@pemit %#=That player has not been summoned.
+			}, {
+				@pemit %#=%cr%chYou have dismissed 
+					[name(*%0)].%cn;
+				@pemit *%0=%cr%chYou have been dismissed, 
+					prepare to return to your last 
+					location.%cn;
+				@wait 5= {
+					@tel *%0= %q0; 
+					&last-loc *%0=
+				}
+			}
+		}
+	}
+
+-

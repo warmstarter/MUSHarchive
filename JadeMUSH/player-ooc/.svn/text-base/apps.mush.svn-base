@@ -1,0 +1,419 @@
+#@create @apps database #235
+#-
+#@create @apps command object #236
+#-
+
+#@apps			     - List uncomplete apps
+&cmd-apps #236 = $@apps:
+  @apps/timecheck;
+  @switch [t(words(u(u-apps-active)))] =
+  1, {@wait 0=@pemit %#=[u(u-apps-header)];
+      @wait 0=@wait 0=think [u(u-apps-body, u(u-apps-active))];
+      @wait 0=@wait 0=@wait 0=@pemit %#=[u(u-apps-footer)]},
+  {@pemit %#=%xh@apps: no applications pending.}
+-
+&u-apps-header #236 =
+  CR[rjust(A#, 5)][center(Status,9)][ljust(Character,16)][ljust(Email,25)]
+   [center(Hours,5)][center(Claimed by,15)]%r[repeat(-,75)]
+-
+&u-apps-header2 #236 =
+  C%b[rjust(A#, 5)][center(Status,9)][ljust(Character,16)][ljust(Email,25)]
+   %b%b%b%b%b[center(Completed by,15)]%r[repeat(-,75)]
+-
+&u-apps-body #236 =
+  [list(sort(%0), [u(u-apps-terse, ##)])]
+-
+&u-apps-body2 #236 =
+  [list(sort(%0), [u(u-apps-terse2, ##)])] 
+-
+&sortby-time #236 
+-
+&u-apps-footer #236 =
+  [repeat(-,75)]
+-
+&u-apps-active #236 =
+  [setunion(setunion(iter(lattr(#235/A.*.ES),first(rest(##,.),.)),
+            iter(lattr(#235/A.*.AC),first(rest(##,.),.))),
+            iter(lattr(#235/A.*.LT),first(rest(##,.),.)))]
+-
+&u-apps-forchar #236 =
+  [iter(setdiff(grepi(#235,a.*.*,%0~),grepi(#235,a.*.*,~%0~)),first(rest(##,.),.))]
+-
+&u-apps-terse #236 =
+  [ifelse(t(u(u-apps-claimer, %0)),*,%b)]
+  [ifelse(t(hastag(u(u-apps-character, %0),roster)),*,!)]
+  [rjust(mid(%0, 0, 5), 5)]
+  [center(mid(u(u-apps-status, %0), 0, 8), 9)]
+  [ljust(mid(name(u(u-apps-character, %0)), 0, 15), 15)]%b
+  [ljust(mid(u(u-apps-email, %0), 0, 25), 25)]
+  [center(mid(ifelse(gt(setr(0,u(u-apps-hours, %0)),168),WOW,%q0), 0, 5), 5)]
+  [center(mid(ifelse(t(setr(0,u(u-apps-claimer, %0))),
+	             name(%q0),[repeat(-,11)]), 0, 15), 15)]
+-
+&u-apps-terse2 #236 =
+  [ifelse(t(u(u-apps-claimer, %0)),*,%b)]
+  %b
+  [rjust(mid(%0, 0, 5), 5)]
+  [center(mid(u(u-apps-status, %0), 0, 8), 9)]
+  [ljust(mid(name(u(u-apps-character, %0)), 0, 15), 15)]%b
+  [ljust(mid(u(u-apps-email, %0), 0, 25), 25)]
+  %b%b%b%b%b 
+  [center(mid(ifelse(t(setr(0,u(u-apps-claimer, %0))),
+	             name(%q0),[repeat(-,11)]), 0, 15), 15)]
+-
+&u-apps-status #236 =
+  [switch(last(lattr(#235/A.%0.*),.),
+	  AC, ACTIVE,
+          ES, CONSULT,
+          DN, DENIED,
+          AP, APPRVD,
+          LT, LATE,
+          RM, REMOVED,
+          UNKNOWN)]
+-
+&u-apps-character #236 =
+  [elements(get(#235/[first(lattr(#235/A.%0.*))]),1,~)]
+-
+&u-apps-email #236 =
+  [elements(get(#235/[first(lattr(#235/A.%0.*))]),2,~)]
+-
+&u-apps-hours #236 =
+  [div(sub(secs(),
+       [elements(get(#235/[first(lattr(#235/A.%0.*))]),3,~)]),3600)]
+-
+&u-apps-timestart #236 =
+  [elements(get(#235/[first(lattr(#235/A.%0.*))]),3,~)]
+-
+&u-apps-claimer #236 =
+  [elements(get(#235/[first(lattr(#235/A.%0.*))]),4,~)]
+-
+&u-alts-email #236 =
+  search(eplayer=strmatch(%0, get(##/email)))
+-
+&u-apps-timeend #236 =
+  [elements(get(#235/[first(lattr(#235/A.%0.*))]), 5, ~)]
+-
+&u-apps-hasfile #236 =
+  [trim(parse(lattr(#68/email*),
+     ifelse(member(get(#68/##),%0),edit(##,EMAIL,),)))]
+-
+&ul-apps-loginsite #236 =
+  [setq(9,get(#235/[first(lattr(#235/A.%0.*))]))]
+  [ifelse(gte(words(%q9,~),6),
+     [elements(%q9,6,~)],
+     none recorded)]
+-
+#@apps <#>		     - List specific info on that app
+&cmd-apps-detail #236 = $@apps *:
+  @switch [t(lattr(#235/A.%0.*))][t(pmatch(%0))]=
+  1?, {@pemit %#=%xhApplication %0:%xn%r
+                %xhCharacter name:%xn [name(u(u-apps-character, %0))]%r
+                %xhStatus:%xn [u(u-apps-status, %0)]%r
+                %xhLevel:%xn [default([u(u-apps-character, %0)]/level, ?)]%r
+                %xhSocial Class:%xn 
+                [switch(get([u(u-apps-character, %0)]/social-status),
+                  1, outcast, 2, commoner, 3, middle class, 
+                  4, noble, 5, clan leader/royal, unknown)]%r%r
+
+                %xhEmail:%xn [setr(6,u(u-apps-email, %0))] 
+                  [ifelse(t(setr(9,u(u-apps-hasfile,%q6))),
+                      %xr%xh%(@file %q9%)%xn,)]%r
+                %xhSite:%xn [ulocal(ul-apps-loginsite, %0)]%r
+                %xhAlts:%xn [setq(7,u(u-alts-email, %q6))]
+                   [ifelse(words(%q7),
+                     %r[iter(%q7,
+                         %b%b[name(##)] -- 
+                             Level [default(##/level, ?)], %b, %r)],
+                     None)]%r%r
+                [ifelse(words(%q7), %xh%xgThis player has earned a total of 
+                   [fold(fold-add-nums,iter(%q7, add(getaccount(##,used xp),
+                                  getaccount(##,unused xp))))] XP.,
+                   %xh%xgThis seems to be a new player.)]%r%r%xn
+                [ifelse(u(u-issue-warning, %q6, u(u-apps-character, %0)),
+                   %xh%xrWARNING: EMAIL IS NON-VERIFIABLE -- SUBJECT TO CONSULTATION%xn%r%r,)]
+              
+                %xhClaimed by:%xn [ifelse(t(u(u-apps-claimer, %0)),
+	                            [name(u(u-apps-claimer, %0))],
+                                    Unclaimed)]%r
+                %xhDate of Application:%xn 
+                    [convsecs(u(u-apps-timestart, %0))]%r
+                %xhDate of Disposition:%xn 
+	        [ifelse(t(u(u-apps-timeend, %0)),
+                   [convsecs(u(u-apps-timeend, %0))],unknown)]%r
+
+                %r%xhApplication Text:%xn [get(#235/memo-%0)]%r
+                %r%xhAdmin Comments:%xn [default(#235/comment-%0, None)]%r},
+  ?1, {@switch [t(setr(4,u(u-apps-forchar,pmatch(%0))))]=
+       1, {@wait 0=@pemit %#=[u(u-apps-header)];
+           @wait 0=@wait 0=think [u(u-apps-body, %q4)];
+           @wait 0=@wait 0=@wait 0=@pemit %#=[u(u-apps-footer)]},
+       {@pemit %#=%xh@apps: no applications on record for [name(pmatch(%0))].}},
+  @pemit %#=%xh%xr@apps: No such application.
+-
+&u-issue-warning #236=
+  [and(strmatch(get(%1/level),I), u(u-suspect-emails, %0))]
+-
+&u-suspect-emails #236=[setq(0,%0)][fold(fold-or, iter(v(cfg-suspect-emails), strmatch(%0,*##*)))]
+-
+&fold-or #236=or(%0,%1)
+-
+&cfg-suspect-emails #236=hotmail.com aol.com yahoo.com
+-
+#@apps/claimed		     - List apps you are currently holding
+&cmd-apps-claimed-self #236 = $@apps/claimed:@apps/claimed %#
+-
+#@apps/claimed <Name>        - List apps <Name> is currently holding
+&cmd-apps-claimed #236 = $@apps/claimed *:@@ later
+-
+#@apps/completed	     - List completed apps
+&cmd-apps-completed #236 = $@apps/completed:
+  @wait %#/semaphore-apps={@pemit %#=[u(u-apps-header2)];@notify %#/semaphore-apps};
+  @wait %#/semaphore-apps={@dolist [sort(u(u-apps-complete))]=think [u(u-apps-body2, ##)];
+                           @notify %#/semaphore-apps};
+  @wait %#/semaphore-apps={@pemit %#=[u(u-apps-footer)]};
+  @notify %#/semaphore-apps
+-
+&u-apps-complete #236 =
+  [iter(setunion(lattr(#235/A.*.DN), lattr(#235/A.*.AP)),
+	first(rest(##, .), .))]
+-
+#@apps/done <#>		     - List info on completed request
+&cmd-apps-done #236 = $@apps/done *:@apps %0
+-
+#@apps/claim <#>	     - Hold an app for your action
+&cmd-apps-claim #236 = $@apps/claim *:
+  @switch [setr(5,[t(match(u(u-apps-active), [trim(%0)]))]
+          [not(t(u(u-apps-claimer, %0)))])] =
+  0?, {@pemit %#=%xh%xr@apps/claim: No such active application.},
+  ?0, {@pemit %#=%xh%xr@apps/claim: Already claimed.},
+  11, {think setq(9,get(#235/[first(lattr(#235/A.%0.*))]));
+       &[lattr(#235/A.%0.*)] #235=
+          [elements(%q9,1 2 3,~)]~%#~[elements(%q9,5,~)]~[elements(%q9,6,~)];
+       @pemit %#=%xh%xg@apps/claim: @app %0 
+         %([name(elements(get(#235/[lattr(#235/A.%0.*)]),1,~))]%) 
+          claimed.},
+  ??, {@pemit %#=%xh%xr@apps/claim: Error.;
+       @mail/quick catherine/@apps claim error=Error: %q5}
+-
+#@apps/search <term>	     - Search through apps for <term>
+&cmd-apps-search #236 = $@apps/search *:
+  @switch [t(words(setr(3,[iter(grepi(#235, A.*.*, %0),
+                                first(rest(##,.),.))])))]=
+  1, { @wait 0=@pemit %#=[u(u-apps-header)];
+       @wait 0=@wait 0=think [u(u-apps-body, %q3)];
+       @wait 0=@wait 0=@wait 0=@pemit %#=[u(u-apps-footer)]},
+     {@pemit %#=%xh@apps/search: No entries match query.}
+-
+#@apps/unclaim <#>	     - Release hold on app
+&cmd-apps-unclaim #236 = $@apps/unclaim *:
+  @switch [setr(5,[t(match(u(u-apps-active), [trim(%0)]))]
+          [not(comp(u(u-apps-claimer, %0),%#))])]=
+  0?, {@pemit %#=%xh%xr@apps/unclaim: No such active application.},
+  ?0, {@pemit %#=%xh%xr@apps/unclaim: Not claimed by you.},
+  11, {&[lattr(#235/A.%0.*)] #235=
+          [elements(get(#235/[lattr(#235/A.%0.*)]),1 2 3,~)]~~
+          [elements(get(#235/[first(lattr(#235/A.%0.*)]),5,~))];
+       @pemit %#=%xh%xg@apps/unclaim: @app %0 
+        %([name(elements(get(#235/[lattr(#235/A.%0.*)]),1,~))]%) 
+           unclaimed.},
+  ??, {@pemit %#=%xh%xr@apps/unclaim: Error.;
+       @mail/quick catherine/@apps unclaim error=Error: %q5}
+-
+#@apps/finished <#>=<info>   - Mark as complete, approve, mail, add <info> to
+#			       mail, post to board.
+&cmd-apps-finished #236 = $@apps/finished *=*:
+   @fo %#=@apps/approve %0=%1
+-
+#@apps/approve <#>=<info>   - Mark as complete, approve, mail, add <info> to
+#			       mail, post to board.
+&cmd-apps-approve #236 = $@apps/approve *=*:
+  @switch [setr(5,[t(match(u(u-apps-active), [trim(%0)]))]
+          [t(hastag(u(u-apps-character,trim(%0)),roster))]
+          [not(comp(u(u-apps-claimer, %0),%#))])]=
+  0??, {@pemit %#=%xh%xr@apps/finished: No such active application.},
+  ??0, {@pemit %#=%xh%xr@apps/finished: Not claimed by you.},
+  ?0?, {@pemit %#=%xh%xr@apps/finished: Player not on the roster.},
+  111, {&time-to-process me = 
+           [v(time-to-process)] 
+           [sub(secs(), elements(get(#235/[lattr(#27873/A.%0.*)]), 3, ~))]; 
+        think setq(9,get(#235/[lattr(#235/A.%0.*)]));
+        @wait 0={&A.%0.AP #235=
+          [elements(%q9,1 2 3 4,~)]~[secs()]~[elements(%q9,6,~)]};
+       @apps/comments %0=%1;
+#       +email [elements(%q9,2,~)] = %1;
+       @force %#=@roster/approve [u(u-apps-email, %0)] for 
+          [name([u(u-apps-character, %0)])]=%1;
+       @wait 0=@Wait 0={&A.%0.AC #235;&A.%0.LT #235;&A.%0.ES #235};
+       @pemit %#=%xh%xg@apps/finished: @app %0 
+        %([name(elements(get(#235/[lattr(#235/A.%0.*)]),1,~))]%) 
+           approved.},
+      {@pemit %#=%xh%xr@apps/finished: Error.;
+        @mail/quick catherine/@apps finished error=Error: %q5}
+-
+&cmd-apps-approve2 #236 = $@apps/approve *:
+  @switch [strmatch(%0,*=*)] = 
+  1, {@@},
+     {@switch [setr(5,[t(match(u(u-apps-active), [trim(%0)]))]
+              [t(hastag(u(u-apps-character,trim(%0)),roster))]
+              [not(comp(u(u-apps-claimer, %0),%#))])]=
+      0??, {@pemit %#=%xh%xr@apps/finished: No such active application.},
+      ??0, {@pemit %#=%xh%xr@apps/finished: Not claimed by you.},
+      ?0?, {@pemit %#=%xh%xr@apps/finished: Player not on the roster.},
+      111, {&time-to-process me = 
+               [v(time-to-process)] 
+               [sub(secs(), elements(get(#235/[lattr(#27873/A.%0.*)]), 3, ~))]; 
+            think setq(9,get(#235/[lattr(#235/A.%0.*)]));
+            @wait 0={&A.%0.AP #235=
+              [elements(%q9,1 2 3 4,~)]~[secs()]~[elements(%q9,6,~)]};
+           @apps/comments %0=No reason given.;
+#           +email [elements(%q9,2,~)] = %1;
+           @force %#=@roster/approve [u(u-apps-email, %0)] for 
+              [name([u(u-apps-character, %0)])];
+           @wait 0=@Wait 0={&A.%0.AC #235;&A.%0.LT #235;&A.%0.ES #235};
+           @pemit %#=%xh%xg@apps/finished: @app %0 
+            %([name(elements(get(#235/[lattr(#235/A.%0.*)]),1,~))]%) 
+               approved.},
+          {@pemit %#=%xh%xr@apps/finished: Error.;
+            @mail/quick catherine/@apps finished error=Error: %q5}
+
+-
+&cmd-apps-finished2 #236 = $@apps/finished *:
+  @switch [strmatch(%0,*=*)] =
+  1, {@@},
+     {@force %#=@apps/approve %0}
+-
+#@apps/deny <#>=<info>       - Mark as complete, deny, mail, add <info> to
+#	                       mail, post to board.
+&cmd-apps-deny #236 = $@apps/deny *=*:
+  @switch [setr(5,[t(match(u(u-apps-active), [trim(%0)]))]
+          [not(comp(u(u-apps-claimer, %0),%#))])]=
+  0?, {@pemit %#=%xh%xr@apps/deny: No such active application.},
+  ?0, {@pemit %#=%xh%xr@apps/deny: Not claimed by you.},
+  11, {&time-to-process me =
+           [v(time-to-process)]
+           [sub(secs(), elements(get(#235/[lattr(#27873/A.%0.*)]), 3, ~))];
+       think setq(9,get(#235/[lattr(#235/A.%0.*)]));
+       @wait 0={&A.%0.DN #235=
+          [elements(%q9,1 2 3 4,~)]~[secs()]~[elements(%q9,6,~)]};
+       @apps/comments %0=%1;
+       @force %#=@bb/post Characters/[name([u(u-apps-character,%0)])]'s Denial 
+           %(App %0%)=%1;
+       +email [elements(%q9,2,~)] = %1; 
+       @wait 0=@Wait 0={&A.%0.AC #235;&A.%0.LT #235;&A.%0.ES #235};
+       @pemit %#=%xh%xg@apps/deny: @app %0 
+        %([name(elements(%q9,1,~))]%) 
+           denied.},
+  ??, {@pemit %#=%xh%xr@apps/deny: Error.;
+       @mail/quick catherine/@apps deny error=Error: %q5}
+-
+#@apps/toss <#>              - Remove app from board with explanation
+&cmd-apps-toss #236 = $@apps/toss *:
+  @switch [setr(5,[t(match(u(u-apps-active), [trim(%0)]))]
+          [not(comp(u(u-apps-claimer, %0),%#))])]=
+  0?, {@pemit %#=%xh%xr@apps/toss: No such active application.},
+  ?0, {@pemit %#=%xh%xr@apps/toss: Not claimed by you.},
+  11, {&time-to-process me = 
+           [v(time-to-process)] 
+           [sub(secs(), elements(get(#235/[lattr(#27873/A.%0.*)]), 3, ~))]; 
+       think setq(9,get(%28783/[lattr(#235/A.%0.*)]));
+       @wait 0=&A.%0.RM #235=
+          [elements(%q9,1 2 3,~)]~~[secs()]~[elements(%q9,6,~)];
+       @Wait 0=@wait 0={&A.%0.AC #235;&A.%0.LT #235;&A.%0.ES #235};
+       @pemit %#=%xh%xg@apps/toss: @app %0 
+        %([name(elements(get(#235/[first(lattr(#235/A.%0.*))]),1,~))]%) 
+          tossed.},
+  ??, {@pemit %#=%xh%xr@apps/toss: Error.;
+       @mail/quick catherine/@apps toss error=Error: %q5}
+-
+#@apps/comments <#>=<info>    - Comment on app.
+&cmd-apps-comment #236 = $@apps/comments *=*:
+  @switch [t(lattr(#235/A.%0.*))] = 
+  1, {@pemit %#=%xh%xg@apps/comments: Comment set.;
+      &COMMENT-%0 #235=%1},
+     {@pemit %#=%xh%xr@apps/comments: Nonexistent application.}
+-
+#@apps/escalate <#>=<info>   - Comment on app and mark for action by superior
+&cmd-apps-escalate #236 = $@apps/escalate *=*:
+  @switch [setr(5,[or(hasattr(#235,A.%0.AC),hasattr(#235,A.%0.LT))]
+          [t(match(u(u-apps-active), [trim(%0)]))]
+          [not(comp(u(u-apps-claimer, %0),%#))])]=
+  ?0?, {@pemit %#=%xh%xr@apps/escalate: No such active application.},
+  ??0, {@pemit %#=%xh%xr@apps/escalate: Not claimed by you.},
+  0??, {@pemit %#=%xh%xr@apps/escalate: You can escalate only active or late 
+           applications.},
+  111, {@apps/comments %0=%1;
+        think setq(9,get(#235/[lattr(#235/A.%0.*)]));
+        &A.%0.ES #235=
+          [elements(%q9,1 2 3,~)]~~[secs()]~[elements(%q9,6,~)];
+       @bb/post Staff/App %0 
+          %([name(elements(get(#235/[first(lattr(#235/A.%0.*))]),1,~))]%) 
+           is escalated!=Application %0 for 
+          %([name(elements(get(#235/[first(lattr(#235/A.%0.*))]),1,~))]%) 
+               has been escalated because: %1;
+       @Wait 0={&A.%0.AC #235;&A.%0.LT #235};
+       @wait 0=@wait 0=@pemit %#=%xh%xg@apps/escalate: @app %0 
+        %([name(elements(get(#235/[first(lattr(#235/A.%0.*))]),1,~))]%) 
+           escalated.},
+       {@pemit %#=%xh%xr@apps/escalate: Error.;
+        @mail/quick catherine/@apps escalate error=Error: %q5}
+
+-
+#@apps/add <player>=<email>=
+#                   <detail> - Add application to the board.
+&cmd-apps-add #236 = $@apps/add *=*=*=*:
+  @switch [t(pmatch(%0))] = 1, {
+    &last-app #235 = [add(1,[get(#235/last-app)])];
+    @pemit %#=%xh%xgApplication for [name(pmatch(%0))] entered into @apps.;
+    &A.[get(#235/last-app)].AC #235 =
+      [pmatch(%0)]~%1~[secs()]~~~%3;
+    &MEMO-[get(#235/last-app)] #235 = %2},
+  @pemit %#=%xh%xr@apps/add: Who are you applying for?
+-
+&cmd-apps-add2 #236 = $@apps/add *=*=*=*:
+  @wait 0=@bb/post characters/Application for [name(pmatch(%0))]=
+    %1 has applied for [name(pmatch(%0))].  Please check the 
+    @apps board, application [get(#235/last-app)].
+-
+#@apps/timecheck	     - Undocumented.  Updates timecheck.
+&cmd-apps-timecheck #236 = $@apps/timecheck:
+  @dolist [u(u-apps-active)] =
+  {@switch [hasattr(#235, A.##.AC)]
+           [gte(u(u-apps-hours, ##), 48)]=
+   11, {&A.##.LT #235=[get(#235/A.##.AC)];
+        @bb/post Staff/App ## 
+         %([name(elements(get(#235/[first(lattr(#235/A.##.*))]),1,~))]%) 
+           late!=Please take a look at Application ## 
+         %([name(elements(get(#235/[first(lattr(#235/A.##.*))]),1,~))]%) 
+            on the @apps board.  It's been more than fourty-eight hours.; 
+        @wait 0=&A.##.AC #235},
+       @@}
+-
+&cmd-apps-help #236 = $@apps/help:
+  @pemit %#=%xhPlease use 'help @apps.'
+-
+&cron_job_apps #63=@apps/timecheck
+-
+&cron_time_apps #63=|||00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 
+   15 16 17 18 19 20 21 22 23|00|
+-
+&fold-add-nums #236 = [add(%0,%1)]
+-
+&cron_job_apps-cemit #63=@tr #236/cron_job_apps-cemit;
+-
+&cron_time_apps-cemit #63=
+  |||00 02 04 06 08 10 12 14 16 18 20 22|00|@@ every 2 hours
+-
+&cron_job_apps-cemit #236 = think setq(0,u(#236/u-apps-active));
+   think setq(1, 
+         elements(get(#235/[first(lattr(#235/A.[first(%q0)].*))]),3,~));
+   think setq(2, 
+         div(div(sub(secs(),%q1),60),60)); 
+   @switch and(gt(words(%q0),0), gt(%q2,8)) = 1, 
+   {@fo me=@cemit Wizards=%xh%xrThere are [words(%q0)] @apps pending. The 
+          oldest @app is %q2 hours old.%xn}
+-
+
+
+
+
+

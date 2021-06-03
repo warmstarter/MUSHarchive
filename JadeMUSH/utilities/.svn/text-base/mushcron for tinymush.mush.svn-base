@@ -1,0 +1,534 @@
+#############################################################################
+# Myrddin's mushcron
+#############################################################################
+
+# edited, reformatted, and altered by Adam Dray, 2/10/98
+
+
+@pemit me = 
+  [repeat(=,78)]%r
+  [center(Constructing Myrddin's mushcron v1.0.0,78)]%r
+  [repeat(-,78)]%r
+  Please wait...%r
+-
+
+@@ @create #63 = 10
+-
+@lock #63 = me
+-
+@set #63 = SAFE
+-
+
+# stop the thing for now...
+@@ @halt #63
+-
+@set #63 = !HALT
+-
+@set #63 = WIZARD
+-
+@power #63 = Builder
+-
+
+# Its home is the Bin of Objects (#3)...
+#
+@link #63 = #3
+-
+@tel #63 = #3
+-
+&CRON-DB #5=#63
+-
+&cmd-cron-time #5=$@cron/time:
+  think setq(0, v(cron-db)); 
+  @pemit %#=Cron last ran for time [get(%q0/last-cron)]. %r
+            Current time: [time()]%r
+            CronIC last ran at [get(%q0/last-cronic)]. %r
+            IC time it ran for: [get(%q0/last-cronic-ic)] %r
+            Current IC time: [ictime24()];
+-
+&CMD-CRON-LAST #5=$@cron/last:
+  think setq(0, v(cron-db)); 
+  @pemit %#=iter(get(%q0/recent-jobs), u(u-display-job, ##))
+-
+&u-display-job #5=
+  %r
+  [ljust(left(extract(%0, 2, 1, :), 15), 15)]
+  [ljust(switch(first(%0, :), Cron-, Cron, Cron-IC, CronIC, ?), 8)] 
+  [elements(convsecs(extract(%0, 3, 1, :)), 2 3 4)] 
+  ([sub(secs(), extract(%0, 3, 1, :))] secs ago) 
+
+  [ifelse(match(Skip, first(first(%0, :), -)),
+          The job ran in catchup/skip mode.,)]
+-
+
+&CMD-CRON-RESET #5=$@cron/reset:
+think setq(0, v(cron-db)); 
+think setq(1, time()); 
+@pemit %#=Halting all cron processing.; 
+@halt %q0; 
+@pemit %#=Setting it so that the cron is NOT in skip mode. DO NOT UNDO THIS! 
+   If it needs to go into skip mode again, it will automatically do so.; 
+@cleartags %q0=Catchup-IC; 
+@cleartags %q0=Catchup; 
+@pemit %#=Changing the cron's time from [get(%q0/last-cron)] to %q1. 
+   To change this back, '&last-cron %q0=[get(%q0/last-cron)]'.; 
+&last-cron %q0=%q1; 
+@pemit %#=Changing the cron's last IC run-time from RL time [get(%q0/last-cronic)] to %q1. 
+   To change this back, '&last-cronic %q0=[get(%q0/last-cronic)]'.; 
+&last-cronic %q0=%q1; 
+@pemit %#=Changing the cron's last IC run-time from IC time 
+   [get(%q0/last-cronic-ic)] to [ictime24()]. To change this back, 
+   '&last-cronic-ic %q0=[get(%q0/last-cronic-ic)]'; 
+&last-cronic-ic %q0=[ictime24()]; 
+@pemit %#=Restarting the cron jobs (both cron, and cronic).; 
+@tr %q0/tr-cron; 
+@tr %q0/tr-cronic; 
+@pemit %#=Done.
+-
+&CMD-CRON-STOP #5=$@cron/stop:
+think setq(0, v(cron-db)); 
+@pemit %#=Stopping the cron.; 
+@halt %q0; 
+@cleartags [ifelse(hastag(%q0, Catchup-IC), 
+                   pemit(%#, Removing 'Catchup-IC' mode/tag from the cron.)%q0,
+                   )]=Catchup-IC; 
+@cleartags [ifelse(hastag(%q0, Catchup), 
+                   pemit(%#, Removing 'Catchup' mode/tag from the cron.)%q0,
+                   )]=Catchup
+-
+&CMD-CRON-START #5=$@cron/start:
+think setq(0, v(cron-db)); 
+think setq(1, get(%q0/Time-To-Restart)); 
+think setq(2, or(gte(sub(secs(), convtime(get(%q0/last-cron))), %q1), 
+                 gte(sub(secs(), convtime(get(%q0/last-cronic))), %q1))); 
+@halt [ifelse(%q2, %q0, )]; 
+@pemit [ifelse(%q2, %#, )]=ifelse(hastag(%q0, Catchup-IC), 
+           Removing 'Catchup-IC' mode/tag from the cron., ); 
+think settag(ifelse(%q2, %q0, ), !Catchup-IC); 
+@pemit [ifelse(%q2, %#, )]=ifelse(hastag(%q0, Catchup), 
+           Removing 'Catchup' mode/tag from the cron., ); 
+think settag(ifelse(%q2, %q0, ), !Catchup); 
+@pemit %#=ifelse(%q2, Starting the cron..., 
+                      The cron has run recently. If it's stopped%, please try again in a bit.); 
+@tr [ifelse(%q2, %q0, )]/tr-cron; 
+@tr [ifelse(%q2, %q0, )]/tr-cronic
+-
+&COMMAND-SKIPTIME #5=$@skiptime/*=*:
+think setq(0, v(cron-db)); 
+think setq(1, u(%q0/u-next-minic,get(%q0/last-cronic-ic))); 
+think setq(2, hastag(%q0, Catchup-IC)); 
+@switch/first [isnum(%1)]|%0 = 
+  0|*, {@pemit %#=Invalid time gap: Type wizhelp @skiptime for correct options.}, 
+  1|hour, {think settag(%q0, Catchup-IC); 
+           &ic-time-offset #63=add(u(#63/ic-time-offset),mul(%1,3600)); 
+           @tr [ifelse(%q2,,%q0)]/tr-run-cronicjobs=%q1, [ictime24()]; 
+           @pemit %#=IC hour amended by %1}, 
+  1|day, {think settag(%q0, Catchup-IC); 
+          &ic-time-offset #63=add(u(#63/ic-time-offset),mul(%1,86400)); 
+          @tr [ifelse(%q2,,%q0)]/tr-run-cronicjobs=%q1, [ictime24()]; 
+          @pemit %#=IC day amended by %1}, 
+  1|minute, {think settag(%q0, Catchup-IC); 
+             &ic-time-offset #63=add(u(#63/ic-time-offset),mul(%1,60)); 
+             @tr [ifelse(%q2,,%q0)]/tr-run-cronicjobs=%q1, [ictime24()]; 
+             @pemit %#=IC minutes amended by %1}, 
+  {@pemit %#=Invalid time period: Type wizhelp @skiptime for correct options.}
+-
+
+@@ @startup #63 = 
+  @cleartags me=Catchup; 
+  @cleartags me=Catchup-IC; 
+  @trigger me/tr-cron; 
+  @trigger me/tr-cronic
+-
+
+@desc #63 = 
+  [repeat(=, 78)]%r
+  %b
+  [iter(lattr(me/cron_time_*), [ljust(rest(rest(##, _), _), 25)][v(##)]%r)]
+  [repeat(-, 78)]%r
+  Pattern of CRON_TIME_* attributes:%r
+  %t<month>|<date>|<day of week>|<hour>|<minute>|<args>%r
+  (ex. Mar||Sun|04|54| would trigger a cron job at 4:54am every Sunday in 
+    the month of March)%r
+  [repeat(=, 78)]
+-
+
+&TR-CRON #63 = 
+  @trigger me/tr-cronjobs=[time()]; 
+  @wait sub(90, last(extract(setr(0, time()), 4, 1), :)) = {
+    @trigger me/tr-cron
+  }
+-
+
+&TR-CRONIC #63 = 
+  @trigger me/tr-cronicjobs=[ictime24()]; 
+  @wait div(sub(90, last(extract(ictime(), 3, 1), :)), 2) = {
+    @trigger me/tr-cronic
+  }
+-
+
+# Convert time() into secs @ the 30 sec mark
+
+&u-time2sec30 #63=[convtime(replace(%0, 4, replace(extract(%0, 4, 1), 
+  3, 30, :)))]
+-
+
+# Gives the time()s, _ separated, of all missed and current cron jobs
+
+&u-2runcron #63=[iter(lnum(div(sub(u(u-time2sec30, %1), setr(9,u(u-time2sec30, 
+    %0))), 60)),
+  convsecs(add(%q9, mul(inc(##), 60))), %b, _)]
+-
+# Checks if the time is the same or %0 > %1. 
+#   Returns 1 if %0 >= %1 (time-wise). 
+#   Changes it to the 30 second mark first.
+
+&u-already-run #63=
+  gt(u(u-time2sec30, %0), u(u-time2sec30, %1))
+-
+# Calculates the next minute at :30 second mark.
+
+&u-next-min #63=convsecs(u(u-time2sec30, convsecs(add(convtime(%0), 60))))
+-
+# Number of seconds before the catchup mode auto-turns on.
+
+# The time between cron checks has to be more than when the cron
+# switches 'Catchup' mode off. Otherwise, it can spawn extra
+# crons.
+
+&Secs-Apart-Skip #63=1200
+-
+# Number of seconds before the catchup mode clicks off
+
+&Secs-Apart-NoSkip #63=600
+-
+# Number of jobs stored for @cron/last
+
+&Num-Jobs-Stored #63=20
+-
+# Number of seconds until you can @cron/start
+
+&Time-To-Restart #63=300
+-
+# Number of IC seconds apart the arguments are.
+
+&U-ICSecs-Apart #63=ifelse(eq(1, match(%1, in*)), sub(icconvtime24(%0%, %1), icconvtime24(%2%, %3)), 
+                                                  sub(icconvtime24(%0), icconvtime24(%1)))
+-
+# Now checks to make sure if the job has already run or not. If it's run 
+# for the time frame in question, it doesn't trigger the cron jobs.
+
+&TR-CRONJOBS #63=
+  think setq(8, convsecs(u(u-time2sec30, %0)));
+  @switch/now [not([or(hastag(%!,Catchup), u(u-already-run, v(last-cron), %q8))])]=0,
+        {@tr me/tr-run-cronjobs=[u(u-next-min, v(last-cron))],%q8};
+  @switch/now [and(not(hastag(%!,Catchup)), 
+                   lte(v(Secs-Apart-Skip), sub(convtime(%q8), convtime(v(last-cron)))))]=1,@tag me=Catchup;
+-
+
+@@ This is what was replaced by the @dolist/delim above and the associated @tr
+# Month
+  think setq(1, extract(%q8, 2, 1)); 
+
+# Day of month
+  think setq(2, extract(%q8, 3, 1)); 
+
+# Day of week
+  think setq(3, extract(%q8, 1, 1)); 
+
+# Hour
+  think setq(4, extract(extract(%q8, 4, 1), 1, 1, :)); 
+
+# Minutes
+  think setq(5, extract(time(), 2, 1, :)); 
+
+  @dolist lattr(me/CRON_TIME_*) = {
+    @switch and(or(member(extract(setr(0, v(##)), 1, 1, |), %q1), 
+                   not(strlen(extract(%q0, 1, 1, |)))), 
+                or(member(extract(%q0, 2, 1, |), %q2), 
+                   not(strlen(extract(%q0, 2, 1, |)))), 
+                or(member(extract(%q0, 3, 1, |), %q3), 
+                   not(strlen(extract(%q0, 3, 1, |)))), 
+                or(member(extract(%q0, 4, 1, |), %q4), 
+                   not(strlen(extract(%q0, 4, 1, |)))), 
+                or(member(extract(%q0, 5, 1, |), %q5), 
+                   not(strlen(extract(%q0, 5, 1, |))))
+               ) = 1, {
+      @trigger me/CRON_JOB_[extract(##, 3, 1, _)] = last(%q0, |);
+      @switch [t(match(v(monitored-jobs), extract(##, 3, 1,_)))]=
+           1, {@bb/post cron/##=Cron Job ## triggered at [time()]}
+    }
+  }
+-
+
+&tr-run-cronjobs #63=
+
+# To prevent duplication, calculate and keep the already-run check.
+@switch/now [(setr(8, or(u(u-already-run, %0, %1), 
+                           u(u-already-run, v(last-cron), %0)))=0,&last-cron me=%0;
+
+# If the jobs have fallen behind, trigger for the next minute again.
+@switch/now [and(not(%q8), t(%0), t(%1))]=1,{@tr me/tr-run-cronjobs=[u(u-next-min, %0)],[ifelse(hastag(%!,Catchup), time(), %1)]};
+# If you're caught up from above, but still not 'current' (it takes time 
+# for cron jobs to catch up), re-trigger until current.
+# @tr [ifelse(and(hastag(%!,Catchup), %q8, t(%0), t(%1)),me,)]/
+#   tr-run-cronjobs=[u(u-next-min, %0, %1)],[time()]; 
+
+# Keeping track of when the last cron job ran is in here now for 
+# catchup purposes (moved to above)
+# &last-cron me=%0; 
+@switch/now [and(hastag(%!,Catchup), 
+                       lte(u(U-Secs-Apart, time(), %0), v(Secs-Apart-NoSkip)))]=1,@cleartags me=Catchup;
+# If caught up enough, remove 'catchup' mode.
+# %0 = time() to run cron job
+
+# Month
+  think setq(1, extract(%0, 2, 1));
+
+# Day of month
+  think setq(2, extract(%0, 3, 1));
+
+# Day of week
+  think setq(3, extract(%0, 1, 1));
+
+# Hour
+  think setq(4, extract(extract(%0, 4, 1), 1, 1, :));
+
+# Minutes
+  think setq(5, extract(%0, 2, 1, :));
+  @switch/first ifelse(%q8,,0)=0,{
+  @dolist lattr(ifelse(%q8,,me)/CRON_TIME_*) = {
+    @switch and(or(member(extract(setr(0, v(##)), 1, 1, |), %q1),
+                   not(strlen(extract(%q0, 1, 1, |)))),
+                or(member(extract(%q0, 2, 1, |), %q2),
+                   not(strlen(extract(%q0, 2, 1, |)))),
+                or(member(extract(%q0, 3, 1, |), %q3),
+                   not(strlen(extract(%q0, 3, 1, |)))),
+                or(member(extract(%q0, 4, 1, |), %q4),
+                   not(strlen(extract(%q0, 4, 1, |)))),
+                or(member(extract(%q0, 5, 1, |), %q5),
+                   not(strlen(extract(%q0, 5, 1, |))))
+               ) = 1, {
+      think setq(7, extract(##, 3, 1, _)); 
+      think setq(6, ifelse(and(hastag(%!,Catchup), 
+                               match(v(Skip-Jobs), %q7)),Skip,Cron));
+      @switch/now  [hasattr(me, %q6_Job_%q7)]=1,
+            {&Recent-Jobs me=
+                      [ifelse(gte(words(v(Recent-Jobs)), v(Num-Jobs-Stored)), 
+                              extract(v(Recent-Jobs), 2, dec(v(Num-Jobs-Stored))), 
+                              v(Recent-Jobs))] %q6-:%q7:[secs()]; 
+      @trigger me/%q6_JOB_%q7 = last(%q0, |), %0;
+      @switch/now [t(match(v(monitored-jobs), %q7))]=
+           1, {@bb/post cron/##=%q6 Job ## triggered at [time()]}
+           }
+    }
+  }
+  }
+-
+
+# Gives the ictime24()s, _ separated, of all missed and current cron jobs
+
+&u-2runcronic #63=[iter(lnum(div(sub(icconvtime24, %1), 
+    setr(9, icconvtime24, %0))), 60)),
+  ictime24-2(add(%q9, mul(inc(##), 60))), %b, _)]
+-
+# Takes two times and checks to see if the IC j ob has already run for
+#    The time frame indicated.
+#
+# Checks if %1 starts with an 'in' because the ic-time has a comma 
+# in it and may be taken as a separate argument. The ifelse checks both
+# ways and returns the correct value.
+
+&u-already-runic #63=ifelse(eq(1, match(%1, in*)), 
+  gt(icconvtime24(%0%, %1), icconvtime24(%2%, %3)), 
+  gt(icconvtime24(%0), icconvtime24(%1)))
+-
+# Returns the next IC minute given the ic 24-hour time as an argument.
+# Checks for 'in' as above to make sure all pertinmant information 
+# (Such as the year) is retained for the time manipulation.
+
+&u-next-minic #63=ictime24-2(add(icconvtime24(ifelse(eq(1, match(%1, in*)), 
+  %0%, %1, %0)), 60))
+-
+# Checks to see if the cron job has run, if so, don't run the jobs.
+
+&TR-CRONICJOBS #63=
+  think setq(8, %0); 
+  @switch/now [or(hastag(%!,Catchup-IC), 
+                 u(u-already-runic, v(last-cronic-ic), %q8))]=0,{@tr me/tr-run-cronicjobs=[u(u-next-minic,v(last-cronic-ic))],%q8}; 
+
+# Not entirely sure why this was put here. Might need to go back. Probably to 
+#    save queue cycles.
+#  &last-cronic [ifelse(u(u-already-runic, v(last-cronic-ic), %q8), ,me)] = 
+#    time();
+@switch/now [and(not(hastag(%!,Catchup-IC)), 
+                   lte(v(Secs-Apart-Skip), u(U-ICSecs-Apart, %q8, v(last-cronic-ic))))]=1,@tag me=Catchup-IC
+-
+@@ This is replaced by the @dolist and @trigger above
+
+# Month
+  think setq(1, extract(%q8, 6, 1)); 
+
+# Day of month
+  think setq(2, before(extract(%q8, 7, 1), \,)); 
+
+# Day of week
+  think setq(3, extract(%q8, 5, 1)); 
+
+# Hour
+  think setq(4, extract(extract(%q8, 3, 1), 1, 1, :)); 
+
+# Minutes
+  think setq(5, extract(extract(%q8, 3, 1), 2, 1, :)); 
+
+  @dolist lattr(me/CRONIC_TIME_*) = {
+    @switch and(or(member(extract(setr(0, v(##)), 1, 1, |), %q1), 
+                   not(strlen(extract(%q0, 1, 1, |)))), 
+                or(member(extract(%q0, 2, 1, |), %q2), 
+                   not(strlen(extract(%q0, 2, 1, |)))), 
+                or(member(extract(%q0, 3, 1, |), %q3), 
+                   not(strlen(extract(%q0, 3, 1, |)))), 
+                or(member(extract(%q0, 4, 1, |), %q4), 
+                   not(strlen(extract(%q0, 4, 1, |)))), 
+                or(member(extract(%q0, 5, 1, |), %q5), 
+                   not(strlen(extract(%q0, 5, 1, |))))
+               ) = 1, {
+      @trigger me/CRONIC_JOB_[extract(##, 3, 1, _)] = last(%q0, |), %0;
+      @switch/now [t(match(v(monitored-jobs), extract(##, 3,1,_)))]=
+           1, {@bb/post cron/##=Cronic Job ## was run at [ictime()] 
+                               and [time()]}
+    }
+  }
+-
+
+&tr-run-cronicjobs #63=
+
+# To prevent duplication, calculate and keep the already-run check.
+@switch/now [setr(8, or(u(u-already-runic, %0, %1), 
+                        u(u-already-runic, v(last-cronic-ic), %0))
+                 )]=0,{&last-cronic-ic me=%0[set(me, last-cronic:[time()])]};
+# #All in one command, so put above.
+# &last-cronic ifelse(%q8,,me)=time(); 
+
+# Runs the job at +1 minute if there has been lag.
+# If it's in catchup mode, catchup until ictime24().
+@switch [and(not(%q8), t(%0), t(%1))]=1,{@tr me=
+  tr-run-cronicjobs=[u(u-next-minic, %0, %1)],
+     [ifelse(hastag(%!,Catchup-IC), ictime24(), %1)],%2,%3}; 
+
+# If first catchup takes long and needs another catchup, this takes 
+# care of that.
+
+# I'm not sure what I (Theo) was thinking, but in catchup mode, wouldn't 
+# it trigger itself twice? EW! BAD!
+
+#  @tr [ifelse(and(hastag(%!,Catchup-IC), %q1, t(%0), t(%1)),me,)]/tr-run-cronicjobs=
+#    [u(u-next-minic, %0, %1)],[ictime24()],%2,%3; 
+
+# Last run ICly now kept track of here for catchup mode purposes.
+#  &last-cronic-ic me = %0; 
+
+# If all caught up on IC jobs, remove the 'Catchup-IC' mode.
+@switch/now [and(hastag(%!,Catchup-IC), 
+                         lte(u(U-ICSecs-Apart, ictime24(), %0), v(Secs-Apart-NoSkip)))]=1,@cleartags me=Catchup-IC;
+# %0 = ictime24()
+
+# Month
+  think setq(1, extract(%0, 6, 1));
+
+# Day of month
+  think setq(2, trim(before(extract(%0, 7, 1), \,)));
+
+# Day of week
+  think setq(3, extract(%0, 5, 1));
+
+# Hour
+  think setq(4, extract(extract(%0, 3, 1), 1, 1, :));
+
+# Minutes
+  think setq(5, extract(extract(%0, 3, 1), 2, 1, :));
+@switch ifelse(%q8,,0)=0,{
+  @dolist lattr(me/CRONIC_TIME_*) = {
+    @switch and(or(member(extract(setr(0, v(##)), 1, 1, |), %q1),
+                   not(strlen(extract(%q0, 1, 1, |)))),
+                or(member(extract(%q0, 2, 1, |), %q2),
+                   not(strlen(extract(%q0, 2, 1, |)))),
+                or(member(extract(%q0, 3, 1, |), %q3),
+                   not(strlen(extract(%q0, 3, 1, |)))),
+                or(member(extract(%q0, 4, 1, |), %q4),
+                   not(strlen(extract(%q0, 4, 1, |)))),
+                or(member(extract(%q0, 5, 1, |), %q5),
+                   not(strlen(extract(%q0, 5, 1, |))))
+               ) = 1, {
+      think setq(7, extract(##, 3, 1, _)); 
+      think setq(6, ifelse(and(hastag(%!,Catchup-IC), match(v(Skip-Jobs), %q7)),Skip,Cron)); 
+      &Recent-Jobs [ifelse(hasattr(me, %q6IC_Job_%q7), me, )]=
+                      [ifelse(gte(words(v(Recent-Jobs)), v(Num-Jobs-Stored)), 
+                              extract(v(Recent-Jobs), 2, dec(v(Num-Jobs-Stored))), 
+                              v(Recent-Jobs))] %q6-IC:%q7:[secs()]; 
+      @trigger me/%q6IC_JOB_%q7 = last(%q0, |), %0; 
+      @switch [t(match(v(monitored-jobs), %q7))]=
+         1, {@bb/post cron/##=%q6IC Job ## was run at [ictime()] and [time()]}
+    }
+  }
+  }
+
+-
+
+&CREDITS #63 = 
+  mushcron was coded by Myrddin (merlin@firstmagic.com).  
+  Permission is granted to distribute the code freely as long as the 
+  initial CREDIT attribute is kept intact.  This code is located at 
+  www.best.com/~merlin/mushcode.html
+-
+
+#############################################################################
+# EXAMPLES
+#############################################################################
+
+@@ &CRON_TIME_TIMECLOCK #63 = 
+  ||||
+  02 04 06 08 10 12 14 16 18 20 22 24 26 28 30 
+  32 34 36 38 40 42 44 46 48 50 52 54 56 58 00|
+-
+@@ &CRON_JOB_TIMECLOCK #63 = 
+  @dolist lwho() = {
+    &timeonweek ## = add(get(##/timeonweek), 2); 
+    &timeon ## = add(get(##/timeon), 2)
+  }
+-
+
+@@ &CRON_TIME_TIMEONWEEK-PURGE #63 = 
+  ||Sun|03|01|
+-
+
+@@ &CRON_JOB_TIMEONWEEK-PURGE #63 = 
+  think setq(0, first(stats())); 
+  @dolist iter(lnum(add(fdiv(%q0, 1000), or(0, mod(%q0, 1000)))), ##) = {
+    @trigger #1/TR_TIMEONWEEK-PURGE = 
+      add(mul(##, 1000), 1), 
+      mul(add(##, 1), 1000)
+  }
+-
+
+@name #63 = CRON - Myrddin's mushcron
+-
+
+@pemit me = 
+  %r
+  If you haven't already, make sure you read the mushcron 'README' 
+  located on Myrddin's MUSH Code web page 
+  (www.best.com/~merlin/mushcode.html).%r
+  %r
+  Three example jobs have been placed on your mushcron object 
+  (TIMECLOCK, TIMEONWEEK-PURGE, and BBTIMEOUT). 
+  You'll want to modify or remove all three as they probably won't 
+  apply to your game, they're simply there to provide a real quick 
+  example of how to use mushcron.%r
+  %r
+  MUSH Cron (#63) construction complete. Once you're ready 
+  to start it, simply '@trigger #63/tr-cron'. You'll never need 
+  to trigger it again, even between game restart/shutdowns.%r
+  [repeat(=, 78)]
+-
+@trigger #63/startup
+-

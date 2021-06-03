@@ -1,0 +1,327 @@
+#############################################################################
+# SETUP.MUX -- initialization of the mux
+#############################################################################
+
+@name #0 = Chaos
+-
+@desc #0 = %r%r
+-
+
+
+@name #1 = Wizard
+-
+
+
+
+@dig/tel Master Room
+-
+@desc #2 = %r%r
+-
+
+
+# make low dbref objects 3-99
+#
+@dolist lnum(97) = {
+  @create DB [add(3, ##)]
+}
+-
+
+
+@name #3 = Bin
+-
+@desc #3 = %r%rA bin to store useful objects in.%r%r
+-
+@lock #3 = =#1
+-
+@link #3 = #2
+-
+@set #3 = sticky
+-
+drop #3
+-
+
+
+@name #4 = God Commands
+-
+@desc #4 = 
+  %r%r
+  Belongs in the Master Room. Contains commands that only God (#1) can use.
+  %r%r
+-
+@lock/use #4 = =#1
+-
+@link #4 = #2
+-
+@set #4 = sticky
+-
+drop #4
+-
+@set #4 = wizard
+-
+@set #4 = inherit
+-
+@power #4 = builder
+-
+
+
+@name #5 = Wizard Commands
+-
+@desc #5 = 
+  %r%r
+  Belongs in the Master Room. Contains commands that only wizards can use.
+  %r%r
+-
+&is-wizard #5 = [hasflag(%#, wizard)]
+-
+@lock/use #5 = is-wizard/1
+-
+@link #5 = #2
+-
+@set #5 = sticky
+-
+drop #5
+-
+@set #5 = wizard
+-
+@power #5 = builder
+-
+
+
+@name #6 = Builder Commands
+-
+@desc #6 = 
+  %r%r
+  Belongs in the Master Room. Contains commands that only builders and 
+  royalty and wizards can use.
+  %r%r
+-
+&is-builder #6 = [or(haspower(%#, builder), orflags(%#, WZ))]
+-
+@lock/use #6 = is-builder/1
+-
+@link #6 = #2
+-
+@set #6 = sticky
+-
+drop #6
+-
+@set #6 = wizard
+-
+@power #6 = builder
+-
+
+
+@name #7 = Player OOC Commands
+-
+@desc #7 = 
+  %r%r
+  Belongs in the Master Room. Contains OOC commands for players.
+  %r%r
+-
+@link #7 = #2
+-
+@set #7 = sticky
+-
+drop #7
+-
+@set #7 = wizard
+-
+@power #7 = builder
+-
+
+
+@name #8 = Player IC Commands
+-
+@desc #8 = 
+  %r%r
+  Belongs in the Master Room. Contains commands which can be used only by 
+  IC players and royalty and wizards.
+  %r%r
+-
+&is-ic #8 = [hastag(%#, ic)]
+-
+&is-royal-or-wizard #8 = [orflags(%#, WZ)]
+-
+@lock/use #8 = is-ic/1 | is-royal-or-wizard/1
+-
+@link #8 = #2
+-
+@set #8 = sticky
+-
+drop #8
+-
+@set #8 = wizard
+-
+@power #8 = builder
+-
+
+
+
+# load dspace
+#
+### #include dspace/dspace.mux
+#
+# (Afterwards, #100 will be the center of dspace)
+
+
+
+
+# Create links from #0 to useful places
+#
+
+@tel #0
+-
+@@ @open Dspace <DS>; ds; dspace; 0 0 0 = #100, 
+      Chaos <C>; chaos; c; ch; cha; chao
+-
+@name ds = Dspace <DS>; ds; dspace; 0 0 0
+-
+@desc dspace = 
+  %r
+  Dynamic Space is a utility that creates an infinite expanse of rooms 
+  in X,Y,Z space.  The rooms are created as needed and disposed of when 
+  no longer in use.  This exit will take you to the center of dspace, 
+  [name(loc(me))].
+  %r
+-
+@succ dspace = You hope through the portal to [name(loc(me))].%r
+-
+@osucc dspace = hops into dspace.
+-
+@odrop dspace = pops in from the chaos.
+-
+dspace
+-
+@name chaos = Chaos <C>; chaos; c; ch; cha; chao
+-
+@desc chaos = 
+  %r
+  Beyond you see nothing but a confusing mixture of static, darkness, 
+  and overwhelming senses.
+  %r
+-
+@succ chaos = You slide into the world of chaos.%r
+-
+@osucc chaos = blinks out of the universe, into chaos.
+-
+@odrop chaos = comes in from dspace 0 0 0, [name(home(me))].
+-
+&is-builder chaos = [haspower(%#, builder)]
+-
+&is-royal-or-wizard chaos = [orflags(%#, WZ)]
+-
+@lock chaos = is-builder/1 | is-royal-or-wizard/1
+-
+chaos
+-
+
+
+@@ @open Master Room <MR>; mr; master room; master = #2, 
+      Chaos <C>; chaos; c; ch; cha; chao
+-
+@name master room = Master Room <MR>; mr; master room; master
+-
+@desc master room = 
+  %r
+  The Master Room is where all the objects containing commands that are 
+  global to the mux are kept (that is, they can be used regardless of your 
+  location).
+  %r
+-
+@succ master room = You take a step and end up in the Master Room.%r
+-
+@osucc master room = goes into the Master Room.
+-
+@odrop master room = comes in from chaos.
+-
+@fail master room = 
+  You must be properly uselocked to enter. Type: %r
+  %t@lock/use me = =me
+-
+&is-uselocked master room = [strmatch(lock(%#/uselock), =*%n)]
+-
+@lock master room = is-uselocked/1
+-
+master room
+-
+@name chaos = Chaos <C>; chaos; c; ch; cha; chao
+-
+@desc chaos = 
+  %r
+  Beyond you see nothing but a confusing mixture of static, darkness, 
+  and overwhelming senses.
+  %r
+-
+&is-in-master-room chaos = [strmatch(%L, #2)]
+-
+@lock chaos = is-in-master-room/1
+-
+@fail chaos = That exit is available only in the Master Room.
+-
+@succ chaos = You slide into the world of chaos.%r
+-
+@osucc chaos = blinks out of the universe, into chaos.
+-
+@odrop chaos = comes in from the Master Room.
+-
+chaos
+-
+
+
+
+@@ @dig Parent Nexus = 
+     Parent Nexus <NEX>; nex; parent nexus; nexus; parent; pn, 
+     Chaos <C>; chaos; c; ch; cha; chao
+-
+@name nexus = Parent Nexus <NEX>; nex; parent nexus; nexus; parent; pn
+-
+@desc parent nexus = 
+  %r
+  The Parent Nexus is a place where parent objects are stored.  Parent 
+  objects are objects which contain generic settings that are used by 
+  many other objects; for example, imagine a Parent Weapon that is the 
+  parent of all the different weapons on the mux.  Parent objects may 
+  contain attributes and commands, which their "children" inherit from 
+  their parent.
+  %r
+-
+@succ parent nexus = You step sideways into the busy confines of the nexus.%r
+-
+@osucc parent nexus = goes into the nexus.
+-
+@odrop parent nexus = comes in out of chaos.
+-
+parent nexus
+-
+@name chaos = Chaos <C>; chaos; c; ch; cha; chao
+-
+@desc chaos = 
+  %r
+  Beyond you see nothing but a confusing mixture of static, darkness, 
+  and overwhelming senses.
+  %r
+-
+@succ chaos = You slide into the world of chaos.%r
+-
+@osucc chaos = blinks out of the universe, into chaos.
+-
+@odrop chaos = comes in from the nexus.
+-
+chaos
+-
+
+
+
+&email me = adam@fey.netgsi.com
+-
+@attribute/access EMAIL = wizard hidden private
+-
+&rank me = God
+-
+@attribute/access RANK = god hidden private
+-
+@fo me = {&created me = #1 [time()]}
+-
+@attribute/access CREATED = wizard hidden private
+-
+

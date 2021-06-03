@@ -1,0 +1,543 @@
+#############################################################################
+# SOUL-CODE.MUX -- support code for reading and writing soul data
+#############################################################################
+
+
+#6 = Builder Commands
+#7 = Player OOC Commands
+#50 = Function Library
+
+###
+### Don't forget to add the functions to #50/functions-list or 
+### #50/functions-preserve-list, and to @restart or manually @function...
+###
+
+
+
+# The number of the parent soul is stored in %vA (think A for Attributes)
+#
+&db-soul #6 = #140
+-
+&db-soul #7 = #140
+-
+
+# The number of the generic NPC is stored too.
+#
+&db-npc #6 = #141
+-
+&db-npc #7 = #141
+- 
+
+
+
+# attribute(<object>, <attribute>)
+# 
+# Returns the value of the given attribute on the object, or #-1 if 
+# the attribute is undefined (not 0) for the object.
+#
+# @function attribute = #50/function-attribute
+#
+&function-attribute #50 = 
+  trim(default(%0/[attrname(%1)], #-1))
+-
+
+
+# attrname(<attr>)
+# 
+# Assuming that <attr> is a partial or complete match to an attribute 
+# name (for instance 'coo' is a partial match for AT-Coordination), 
+# returns the completed attribute name, with spaces replaced with 
+# underscores.
+#
+# @function/privileged attrname = #50/function-attrname
+#
+&function-attrname #50 = 
+  setq(0, lattr(#140/AT-[edit(trim(%0), space(), _)]*))
+
+  [switch(words(%q0), 1, %q0, 0, #-1, #-2)]
+-
+
+
+# skill(<object>, <skill>)
+# 
+# Returns the value of the given skill on the object, or #-1 if 
+# the skill is undefined (not 0) for the object.
+#
+# @function skill = #50/function-skill
+#
+&function-skill #50 = 
+  trim(default(%0/[skillname(%1)], #-1))
+-
+
+
+# skillname(<skill>)
+# 
+# Assuming that <skill> is a partial or complete match to a skill
+# name (for instance 'math' is a partial match for SK-Mathematics and
+# 'chil' is a partial match for 'SK-child_rearing'), returns the 
+# completed attribute name, with spaces replaced with underscores.
+#
+# @function/privileged skillname = #50/function-skillname
+#
+&function-skillname #50 = 
+  setq(0, lattr(#140/SK-[edit(trim(%0), space(), _)]*))
+
+  [switch(words(%q0), 1, %q0, 0, #-1, #-2)]
+-
+
+
+# trait(<object>, <trait>)
+# 
+# Returns the value of the given trait on the object, or #-1 if 
+# the trait is undefined (not 0) for the object.
+#
+# @function trait = #50/function-trait
+#
+&function-trait #50 = 
+  trim(default(%0/[traitname(%1)], #-1))
+-
+
+
+# traitname(<trait>)
+# 
+# Assuming that <trait> is a partial or complete match to a trait
+# name (for instance 'eye' is a partial match for TR-eye_color), 
+# returns the completed trait name, with spaces replaced with 
+# underscores.
+#
+# @function/privileged traitname = #50/function-traitname
+#
+&function-traitname #50 = 
+  setq(0, lattr(#140/TR-[edit(trim(%0), space(), _)]*))
+
+  [switch(words(%q0), 1, %q0, 0, #-1, #-2)]
+-
+
+
+# @attr <object>/<attr> = <number>
+#
+# (Previously named '@attribute' conflicted with the wizard command of 
+#  the same name.) 
+#
+# Set the attribute on the object to the specified value <number>.
+# Accepts partial unambiguous matching for <attr>.
+#
+&cmd-attr #6 = $@attr */*=*: 
+  think setq(0, locate(%#, %0, *)); 
+  think setq(1, attrname(%1)); 
+
+  @switch isdbref(%q0) = 0, {
+    @error %# = locate %q0
+  }, {
+    @switch [strmatch(%q1, AT-*)][isnum(%2)] = 
+    0?, {
+      @error %# = attr %q1
+    }, 
+    10, {
+      @pemit %# = The value on the right hand side of the '=' must be a number.
+    }, {
+# 
+# search the parent chain and set %q2 to the first object whose parent 
+# is the Generic Soul object, if the object is a player. If it is not
+# we can assume it to be an NPC (or a soul) which will always keep all it's
+# attributes on itself.
+#
+      think setq(2, 
+        switch(hastype(%q0,player),
+	 1,first(
+          iter(lparent(%q0), 
+            switch(parent(##), [v(db-soul)], ##)
+          )
+        ),0,%q0)
+      ); 
+      think setq(3, lcstr(edit(after(%q1,-), _, %b))); 
+
+      @switch isdbref(%q2) = 0, {
+        @pemit %# = That object doesn't have [art(%q3)] %q3 attribute to set.
+      }, {
+        &%q1 %q2 = %2; 
+        @pemit %# = capstr(name(%q0))'s [%q3] set to [trim(%2)].
+      }
+    }
+  }
+-
+
+
+# @skill <object>/<skill> = <number>
+#
+# Set the skill on the object to the specified value <number>.
+# Accepts partial unambiguous matching for <skill>.
+#
+&cmd-skill #6 = $@skill */*=*: 
+  think setq(0, locate(%#, %0, *)); 
+  think setq(1, skillname(%1)); 
+
+  @switch isdbref(%q0) = 0, {
+    @error %# = locate %q0
+  }, {
+    @switch [strmatch(%q1, SK-*)][isnum(%2)] = 
+    0?, {
+      @error %# = skill %q1
+    }, 
+    10, {
+      @pemit %# = The value on the right hand side of the '=' must be a number.
+    }, {
+# 
+# search the parent chain and set %q2 to the first object whose parent 
+# is the Generic Soul object, assuming %q0 is a player. If it is not, we can 
+# assume that it is something that should keep its skills on itself.
+#
+      think setq(2, 
+	switch(hastype(%q0,player),
+         1,first(
+          iter(lparent(%q0), 
+            switch(1, t(member([v(db-soul)] [v(db-npc)], parent(##))), ##)
+          )
+        ),0,%q0)
+      ); 
+      think setq(3, lcstr(edit(after(%q1,-), _, %b))); 
+
+      @switch isdbref(%q2) = 0, {
+        @pemit %# = That object doesn't have [art(%q3)] %q3 skill to set.
+      }, {
+        &%q1 %q2 = %2; 
+        @pemit %# = capstr(name(%q0))'s [%q3] set to [trim(%2)].
+      }
+    }
+  }
+-
+
+
+# @trait <object>/<trait> = <string>
+#
+# Set the trait on the object to the specified value <string>.
+# Accepts partial unambiguous matching for <trait>.
+#
+&cmd-trait #6 = $@trait */*=*: 
+  think setq(0, locate(%#, %0, *)); 
+  think setq(1, traitname(%1)); 
+
+  @switch isdbref(%q0) = 0, {
+    @error %# = locate %q0
+  }, {
+    @switch strmatch(%q1, TR-*) = 0, {
+      @error %# = trait %q1
+    }, {
+# 
+# search the parent chain and set %q2 to the first object whose parent 
+# is the Generic Soul object
+#
+      think setq(2, 
+        first(
+          iter(lparent(%q0), 
+            switch(parent(##), [v(db-soul)], ##)
+          )
+        )
+      ); 
+      think setq(3, lcstr(edit(after(%q1,-), _, %b))); 
+
+      @switch isdbref(%q2) = 0, {
+        @pemit %# = That object doesn't have [art(%q3)] %q3 trait to set.
+      }, {
+        &%q1 %q2 = %2; 
+        @pemit %# = capstr(name(%q0))'s [%q3] set to [trim(%2)].
+      }
+    }
+  }
+-
+
+# @skills
+#
+# Show the player his own skills (and scores)
+#
+&cmd-skills #7 = $@skills: 
+  @pemit %# = ulocal(#6/ul-skills-normal, %#, %#)
+-
+
+
+# @skills/long
+#
+# Show the player his own skills (and scores)
+#
+&cmd-skills/long #7 = $@skills/long: 
+  @pemit %# = ulocal(#6/ul-skills-long, %#, %#)
+-
+
+
+# @skills <player>
+#
+# Show the short-form list of skills (and scores) for <player>.
+# (<player> may be any object with skills on it, not just objects of
+#  type Player.)
+#
+&cmd-skills-player #6 = $@skills *: 
+  think setq(1, locate(%#, %0, *P)); 
+  think setq(0, ifelse(isdbref(%q1), %q1, pmatch(%0)) ); 
+
+  @switch isdbref(%q0) = 0, {
+    @error %# = locate %q0
+  }, {
+    @pemit %# = ulocal(#6/ul-skills-normal, %q0, %#)
+  }
+-
+
+# %0 = who to show skills for 
+# %1 = who is looking
+# 
+&ul-skills-normal #6 = 
+  Skill Report for [name(%0)]%b
+  [ifelse(isbuilder(%1), \(%1 [flags(%1)]\),)]%r
+  [repeat(-, 79)]%r
+  [columns(
+    trim(edit(
+      squish(
+        iter(lattr([v(db-soul)]/sk-*),
+          [switch(setr(2, skill(%0, setr(1, after(##,-)))), #-*, -, %q2)]
+          %b
+          [trim(default([v(db-soul)]/ska-%q1, lcstr(edit(%q1, _, %b))))]|
+        )
+      ), 
+      |%b, 
+      |
+    )), 
+    div(79,2), 
+    |
+  )]
+-
+
+
+# @skills/long <player>
+#
+# Show the long-form list of skills (and scores) for <player>.
+# (<player> may be any object with skills on it, not just objects of
+#  type Player.)
+#
+&cmd-skills/long-player #6 = $@skills/long *: 
+  think setq(1, locate(%#, %0, *P)); 
+  think setq(0, ifelse(isdbref(%q1), %q1, pmatch(%0)) ); 
+
+  @switch isdbref(%q0) = 0, {
+    @error %# = locate %q0
+  }, {
+    @pemit %# = ulocal(#6/ul-skills-long, %q0, %#); 
+  }
+-
+
+
+# %0 = who to show skills for 
+# %1 = who is looking
+# 
+&ul-skills-long #6 = 
+  Skill Report for [name(%0)]%b
+  [ifelse(isbuilder(%1), \(%1 [flags(%1)]\),)]%r
+  [repeat(-, 79)]%r
+  [columns(
+    trim(edit(
+      squish(
+        iter(lattr([v(db-soul)]/SK-*), 
+          [switch(setr(2, skill(%0, setr(1, after(##,-)))), #-*, -, %q2)]
+          %b
+          [lcstr(edit(%q1, _, %b))]|
+        )
+      ), 
+      |%b, 
+      |
+    )), 
+    div(79,3), 
+    |
+  )]
+-
+
+# Since columns() prints across rows, we'll give the attributes in row-wise
+# order:
+#
+&attribute-list #7 = 
+  strength    intelligence  
+  stamina     willpower 
+  agility     perception 
+  quickness   awareness 
+  beauty      allure 
+  health      luck
+  
+-
+
+&attribute-list-columnwise #7=
+   strength stamina agility quickness beauty health 
+   intelligence willpower perception awareness allure luck
+-
+
+# @attribs/me
+#
+# Show the player a list of his own attributes (and scores).
+#
+&cmd-attribs-me #7 = $@attribs/me: 
+  @force %# = @attribs %#
+-
+
+# @attributes *
+#
+# Send player a rejection message
+#
+&cmd-attribs-player #7=$@attributes *:@pemit %#=Sorry, you can't see another
+player's attributes.
+ 
+-
+ 
+# @attribs <player>
+#
+# Show the list of attributes (and scores) for <player> to wizards only.
+# (<player> may be any object with attributes on it, not just objects of
+#  type Player.)
+#
+&cmd-attribs-player #7 = $@attribs *: 
+  think setq(1, locate(%#, %0, *P)); 
+  think setq(0, ifelse(isdbref(%q1), %q1, pmatch(%0)) ); 
+
+  @switch [isdbref(%q0)][or(strmatch(%#,%q0),hasflag(%#,Wizard))] = 0?, {
+    @error %# = locate %q0
+  }, ?0, {@pemit %#=%xh%xrPermission denied.}
+   , {
+    @pemit %# = 
+      Attribute Report for [name(%q0)]%b
+      [ifelse(isbuilder(%#), \(%q0 [flags(%q0)]\),)]; 
+    @pemit %# = repeat(-, 79); 
+    @pemit %# = 
+      u(#7/u-attribs, 
+        iter(get(#7/attribute-list-columnwise),  [get(%q0/AT-##)])
+        ) 
+  }
+-
+
+#
+# Old one -- doesn't work due to columns barfage
+#
+#@@ &cmd-attribs-player #7 = $@attribs *: 
+#  think setq(1, locate(%#, %0, *P)); 
+#  think setq(0, ifelse(isdbref(%q1), %q1, pmatch(%0)) ); 
+
+#  @switch isdbref(%q0) = 0, {
+#    @error %# = locate %q0
+#  }, {
+#    @pemit %# = 
+#      Attribute Report for [name(%q0)]%b
+#      [ifelse(isbuilder(%#), \(%# [flags(%#)]\),)]; 
+#    @pemit %# = repeat(-, 79); 
+#    @pemit %# = 
+#      columns(
+#        trim(edit(
+#          squish(
+#            iter(v(attribute-list), 
+#              [setq(2, attribute(%q0, ##))]
+#              [switch(%q2, #-*, -, %q2)]
+#              %b##|
+#            )
+#          ), 
+#          |%b, 
+#          |
+#        )), 
+#        div(79,5), 
+#        |
+#      )
+#  }
+#-
+
+
+# u(u-attribs, <list of attribute scores, columnwise>)
+#
+#  1 strength   7 intelligence  d Life
+#  2 stamina    8 willpower     e Sanity
+#  3 agility    9 perception    f Initiative
+#  4 quickness  a awareness     g Max Lift
+#  5 beauty     b allure        h Lift to Knees
+#  6 health     c luck          i Max Push
+#
+&u-attribs #7 = 
+#
+# Get all stats into registers first.
+ [setq(1,[extract(%0,1,1)])][setq(7,[extract(%0, 7, 1)])][setq(2,[extract(%0,2,1)])][setq(8,[extract(%0, 8,1)])]
+ [setq(3,[extract(%0,3,1)])][setq(9,[extract(%0, 9, 1)])][setq(4,[extract(%0,4,1)])][setq(a,[extract(%0,10,1)])]
+ [setq(5,[extract(%0,5,1)])][setq(b,[extract(%0,11, 1)])][setq(6,[extract(%0,6,1)])][setq(c,[extract(%0,12,1)])]
+ [setq(d,[add(%q6,%qc)])][setq(e,[add(%q8,%q2)])][setq(f,[add(%q4,%qa)])][setq(g,[mul(add(%q1,%q2),15)])]
+ [setq(h,[mul(%qg,2)])][setq(i,[mul(%qg,5)])]
+%b[rjust(%q1,2)] Strength%b%b%t%t
+ [rjust(%q7,2)] Intelligence%t%t
+ Life:%b%qd
+ %r
+#
+#
+ %b
+ [rjust(%q2,2)] Stamina%b%b%b%b%t%t
+ [rjust(%q8,2)] Willpower%b%b%b%t%t
+ Sanity:%b%qe
+ %r
+#
+#
+ %b
+ [rjust(%q3, 2)] Agility%b%b%b%b%t%t
+ [rjust(%q9, 2)] Perception%b%b%t%t
+ Initiative:%b%qf
+ %r
+#
+#
+ %b
+ [rjust(%q4, 2)] Quickness%b%t%t
+ [rjust(%qa,2)] Awareness%b%b%b%t%t
+ Max Lift:%b%qg lbs
+ %r
+#
+#
+ %b
+ [rjust(%q5, 2)] Beauty%b%b%b%b%t%t
+ [rjust(%qb,2)] Allure%t%t
+ Lift to Knees: %qh lbs
+ %r
+#
+#
+ %b
+ [rjust(%q6, 2)] Health%b%b%b%b%t%t
+ [rjust(%qc,2)] Luck%t%t%t
+ Max Push:%b%qi lbs
+ %r
+#
+-
+
+
+
+# @see <object>'s <something>
+#
+# Shows you the value of the <something> score stored on <object>.
+# <something> can be an trait, attribute, or skill, in that order of 
+# preference.
+#
+&cmd-see #6 = $@see *'s *: 
+  think setq(1, locate(%#, %0, *P)); 
+  think setq(0, ifelse(isdbref(%q1), %q1, pmatch(%0)) ); 
+  think setq(2, trim(%1)); 
+
+  @switch isdbref(%q0) = 0, {
+    @error %# = locate %q0
+  }, {
+    @switch 0 = 
+    strmatch(setr(9, trait(%q0, %q2)), #-*), {
+      @pemit %# = [name(%q0)]'s [clip(traitname(%q2))] is [trim(%q9)].
+    }, 
+    strmatch(setr(9, attribute(%q0, %q2)), #-*), {
+      @pemit %# = [name(%q0)]'s [clip(attrname(%q2))] is [trim(%q9)].
+    }, 
+    strmatch(setr(9, skill(%q0, %q2)), #-*), {
+      @pemit %# = [name(%q0)]'s [clip(skillname(%q2))] is [trim(%q9)].
+    }, 
+    not(hasattrp(%q0, basic-%q2)), {
+      @pemit %# = [name(%q0)]'s %q2 is [get(%q0/basic-%q2)].
+    }, 
+    not(hasattrp(%q0, %q2)), {
+      @pemit %# = [name(%q0)]'s %q2 is [get(%q0/%q2)].
+    }, {
+      @pemit %# = 
+        [name(%q0)] doesn't have any such data stored on [obj(%q0)]. 
+    }
+  }
+-
+
+
+

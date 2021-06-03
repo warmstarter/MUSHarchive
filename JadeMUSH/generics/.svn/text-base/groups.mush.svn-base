@@ -1,0 +1,811 @@
+
+###################################################################
+#		            GROUP OBJECTS                         #
+#                                                                 #
+# Stephanie Dray                                                  #
+###################################################################
+
+
+
+#####################################################################
+#      COMMAND: GROUPALL <OBJECT>                                   #
+#               GROUPALL <CONTAINER>'S <OBJECT>                     #
+#               GROUPALL/DIFF <OBJECT>                              #
+#               GROUPALL/DIFF <CONTAINER>'S <OBJECT>                #
+#                                                                   #
+# This command needs to ensure that the objects to be grouped are   #
+# identical in every way except pre-defined ways (see below)        #
+#                                                                   #
+# All objects must be tagged                                        #
+# 'groupable' and not 'wiz_groupable' unless it's a wiz that's      #
+# trying to combine them.                                           #
+#####################################################################
+
+# %q0 is the 'container' in which objects will be grouped.
+#     if no <container>'s syntax is used, it uses the room dbref
+# %q1 is the <object> that you're trying to group.
+# %q2 is the parent of %q1
+#     This is used for determining what objects should be grouped
+#          if %q1 is a currency.
+# %q3 is 1 if they entered groupall/d<something>
+#     This allows /different to be abbreviate
+#     If anything else is used here, it is discarded
+# %q4 takes all the objects in %q0, and filters them out
+#     It checks for: the name/currency, 
+#                    if it's wiz_groupable,
+#                    if it's groupable,
+#                    if it's worn
+#     If any of these are true, it gives an error message, and does 
+#        not try to group it.
+# %q5 is the list of non-generic %q4s.
+#     Since the generic function tends to break the FIL, it is 
+#        separated out into a @dolist.
+
+&cmd-groupall #70=$groupall* *:
+@switch hastag(%#,grouping)=1,
+  {@pemit %#=You are already grouping, please wait till the task finishes!},
+  {@tag %#=grouping;
+#      think pemit(*Kath,GROUPALL: %N groupall%0 %1);
+think setq(0, ifelse(strmatch(%1, *'s *), 
+   locate(%#, before(%1, 's), ifelse(hasflag(%#,wizard), anTX, nTX)), %L)); 
+think setq(1, ifelse(strmatch(%1, *'s *), trim(after(%1, 's)), %1)); 
+think setq(1, ifelse(strmatch(%1,*'s *),
+   locate(%q0, %q1, iTX),
+   locate(%#, %q1, ifelse(hasflag(%#,wizard), anTX, nTX))));
+think setq(2, paccount(get(%q1/currency))); 
+think setq(3, strmatch(%0, /d*)); 
+think setq(4, filter(filter-same-name2, lcon(%q0))); 
+think setq(4, filter(filter-check-wiz, %q4)); 
+think setq(4, filter(filter-check-groupable, %q4)); 
+think setq(4, filter(filter-check-worn, %q4)); 
+think setq(4, filter(filter-check-generic, %q4));
+think setq(5, sort(squish(%q4))); 
+   think setq(6, iter(%q5, get(##/quality))); 
+   think setq(5, revwords(munge(sort-num, %q6, %q5))); 
+   think setq(5, sortby(me/sort-sex,%q5));
+   think setq(9, [isdbref(%q0)]
+                 [gt(words(%q5), 1)]); 
+   @pemit %#=switch(%q9, 
+             0?, Can't find [before(%1, 's)]., 
+             ?0,  There aren't enough similar things to try to group %1 \(
+      [name(%q5)]\).);
+   @dolist rest(%q5)=
+      {think ifelse(%q3, ulocal(ul-group-it-diff, ##, extract(%q5, #@, 1), %#, %q0), 
+                        ulocal(ul-group-it, ##, extract(%q5, #@, 1), %#, %q0));
+      think pemit(*Kath,GROUPALL: %N - ##: 
+      [name(##)])};}
+-
+&sort-num #70=sort(%0, n)
+
+-
+&sort-sex #70=comp(get(%0/sex),get(%1/sex))
+-
+&filter-same-name2 #70=
+  ifelse(isdbref(%q2), match(%q2, parent(%0)), 
+                       strmatch(name(%0), *%q1*))
+-
+&filter-check-wiz #70=
+  ifelse(or(hasflag(%#,wizard), not(hastag(%0,wiz_groupable))), 1, 
+         pemit(%#, Only wizards can group [name(%0)])0)
+-
+&filter-check-groupable #70=
+  ifelse(and(hastag(%0, groupable), not(hastag(%0, finished))), 1, 
+         pemit(%#, name(%0) is not groupable.)0)
+-
+&filter-check-worn #70=
+  ifelse(not(hastag(%0, worn)), 1, 
+         pemit(%#, name(%0) needs to be removed before you can group it.)0)
+-
+&FILTER-CHECK-GENERIC #70=
+      [or(hasattr(%0, poison-doses),
+          generic(%0),
+          hasaccount(%0,sheep animals),
+          hasaccount(%0,chicken animals))]
+-
+
+&CMD-GROUP-DIFFERENT #70=$group/different * with *:
+think [setq(0, locate(%#, %0, switch(hasflag(%#,wizard), 1, anTX, nTX)))]
+      [setq(1, locate(%#, %1, switch(hasflag(%#,wizard), 1, anXT, nTX)))]
+      [setq(1, ifelse(strmatch(%q0, %q1), 
+                      ulocal(ul-locate-different, %L, %q0, %1), 
+                      %q1))];
+think setq(9, [not(strmatch(%0, *'s *))]
+              [isdbref(%q0)]
+              [isdbref(%q1)]
+              [or(hasflag(%#,wizard), not(hastag(%q0,wiz_groupable)))]
+              [or(hasflag(%#,wizard), not(hastag(%q1,wiz_groupable)))]
+              [and(hastag(%q0, groupable), not(hastag(%q0, finished)))]
+              [and(hastag(%q1, groupable), not(hastag(%q1, finished)))]
+              [not(hastag(%q0, worn))]
+              [not(hastag(%q1, worn))]); 
+think switch(%q9,
+  0????????, pemit(%!, @@Wrong Syntax@@),
+  ?0???????, pemit(%#, I don't see %0 here.),
+  ??0??????, pemit(%#, I don't see %1 here.),
+  ???0?????, pemit(%#, Only wizards can group [name(%q0)].),
+  ????0????, pemit(%#, Only wizards can group [name(%q1)].),
+  ?????0???, pemit(%#, [name(%q0)] is not groupable.),
+  ??????0??, pemit(%#, [name(%q1)] is not groupable.),
+  ???????0?, pemit(%#, [name(%q0)] needs to be removed before you can group it.),
+  ????????0, pemit(%#, [name(%q1)] needs to be removed before you can group it.),
+  111111111, ulocal(ul-group-it-diff, %q0, %q1, %#, %L))
+-
+#####################################################################
+# COMMAND: SEPARATE <AMOUNT TO SEPARATE> from <GROUP>               #
+#          SEPARATE <AMOUNT TO SEPARATE> FROM <CONTAINER'S> <GROUP> #
+#####################################################################
+# %q7 = location of the group if container syntax used
+# %q8 = the name of the group
+
+&cmd-separate #70=$separate * from *:
+  think setq(7, switch(strmatch(%1, *'s *), 1, before(%1, 's), Don't Use));
+  think setq(7, switch(%q7, Don't Use, Don't Use, locate(%#, %q7, ina)));
+  think setq(8, switch(strmatch(%1, *'s *), 1, after(%1, 's), %1));
+
+# %q0 = grouped object
+# %q1 = new separated object
+# %q2 = qualities to copy from the original group
+
+  
+  think setq(0, switch(%q7, Don't Use, locate(%#, %q8, ina),
+                            locate(%q7, %q8, i)));
+
+# See if the object we've found is wiz_groupable only, or the player 
+# is a wizard.  If the object is wiz_groupable only and the player is
+# not a wizard, then give them the error message.  Under any other
+# condition, proceed. #3345 is generic npc.
+
+  @select [or(not(hastag(%q0, wiz_groupable)), hasflag(%#, wizard))]
+          [aware(%#)]
+          [not(or(hasflag(loc(%q0),player),member(lparent(loc(%q0)),#3345)))]
+          [not(lte(%0, 0))]
+          [or(hasflag(%#,wizard),
+            strmatch(loc(%q0),loc(%#)),
+            strmatch(loc(%q0),%#),
+            strmatch(loc(loc(%q0)),loc(%#)),
+            strmatch(loc(loc(%q0)),%#))]
+          [not(t(ortags(%q7, locked closed)))]
+          [not(hastag(loc(%q0), no-separate))]=
+  0??????, {@pemit %#=What God has joined together, let no mortal put asunder.},
+  ?0?????, {@pemit %#=In your sleeping state, the objects just don't separate 
+           well.},
+  ??0????, {@pemit %#=You can't separate objects from players or NPCs.},
+  ???0???, {@pemit %#=Yeah right.  You can't separate %0 from that.},
+  ????0??, {@pemit %#=I don't see [name(%q0)] here.},
+  ?????0?, {@pemit %#=You can't separate from closed or locked containers.},
+  ??????0, {@pemit %#=You can't separate items from that. It's not allowed.},
+ 
+# Use the separate() function to actually do the separating (faster,
+# cleaner, and will return a dbref).  If it returns a valid dbref,
+# then go ahead and pemit the player a success
+# message.  Otherwise, do nothing and allow the separate() function to
+# send the player the failure messages.  Note that the @resynch
+# command will do the renaming.
+
+    {think setq(1, trim(separate(%0, %q0, %L, %#)));
+     @switch [isdbref(%q1)]=
+       1, {
+           @pemit %#=Separated %0 from [name(%q0)].;
+           @resynch %q0;
+           @resynch %q1;
+           @resynch [loc(%q1)];
+           @switch [isdbref(%q7)]=1,@resynch %q7},
+       0, {@@ do nothing @@}}     
+
+-
+#####################################################################
+#      COMMAND: GROUP <OBJECT> WITH <OBJECT>                        #
+#               GROUP <CONTAINER>'S <OBJECT> WITH <OBJECT>          #
+#                                                                   #
+# This command needs to ensure that the objects to be grouped are   #
+# identical in every way except for the following defined ways in   #
+# which they may be different:                                      #
+#                                                                   #
+#        a) They may have different weights                         #
+#        b) They may have different volumes                         #
+#        c) They may have different amounts of the same currency    #
+#        d) They may have different names                           #
+#        e) They may have different bulk                            #
+#        f) They may have different sizes                           #
+#        g) They may have different extraction-from and -at         #
+#        h) They may have different touched_last and touched_by     #
+#                                                                   #
+#                                                                   #
+# Both objects must be tagged                                       #
+# 'groupable' and not 'wiz_groupable' unless it's a wiz that's      #
+# trying to combine them.                                           #
+#####################################################################
+
+&cmd-group-container #70=$group *'s * with *:
+  think setq(0, locate(%#, [before(%0,'s)], switch(hasflag(%#,wizard), 1, aniTX, niTX)));
+  think setq(1, locate(%q0, %1, i));
+  think setq(2, locate(%q0, %2, i));
+  think setq(2, ifelse(strmatch(%q1, %q2), 
+                       ulocal(ul-locate-different, %q0, %q1, %2),
+                       %q2));
+
+#----------------------------------------------------------------------
+# Error checking:
+# 1) Did we locate the first object
+# 2) Did we locate the second object
+# 3) Ensure that player is a wiz or object 1 is not wiz_groupable only
+# 4) Ensure that player is a wiz or object 2 is not wiz_groupable only
+# 5) Ensure that object 1 is groupable
+# 6) Ensure that object 2 is groupable
+#----------------------------------------------------------------------
+
+  think setq(9, [and(not(hastype(%q0,player)),isdbref(%q0))]
+                [isdbref(%q1)]
+                [isdbref(%q2)]
+                [or(hasflag(%#,wizard), not(hastag(%q1,wiz_groupable)))]
+                [or(hasflag(%#,wizard), not(hastag(%q2,wiz_groupable)))]
+                [not(hastag(%q1, norename))]
+                [not(hastag(%q0, norename))]
+                [and(hastag(%q1, groupable), not(hastag(%q1, finished)))]
+                [and(hastag(%q2, groupable), not(hastag(%q2, finished)))]);
+
+  think switch(%q9,
+              0????????, pemit(%#, I don't see [before(%0,'s)] here.),
+              ?0???????, pemit(%#, I don't see %1 in the [name(%q0)].),
+              ??0??????, pemit(%#, I don't see %2 in the [name(%q0)].),
+              ???0?????, pemit(%#, Only wizards can group [name(%q1)].),
+              ????0????, pemit(%#, Only wizards can group [name(%q2)].),
+              ?????0???, pemit(%#, You cannot group named animals.),
+              ??????0??, pemit(%#, You cannot group named animals.),
+              ???????0?, pemit(%#, [name(%q1)] is not groupable.),
+              ????????0, pemit(%#, [name(%q2)] is not groupable.),
+              111111111, ulocal(ul-group-it, %q1, %q2, %#, %q0))
+
+-
+
+&cmd-group #70=$group * with *:
+
+#---------------------------------------------------------------------
+# Set the registers:
+# %q0 = dbref of the first object
+# %q1 = dbref of the second object
+
+
+think [setq(0, locate(%#, %0, switch(hasflag(%#,wizard), 1, anTX, nTX)))]
+      [setq(1, locate(%#, %1, switch(hasflag(%#,wizard), 1, anXT, nTX)))]
+      [setq(1, ifelse(strmatch(%q0, %q1), 
+                       ulocal(ul-locate-different, %L, %q0, %1), %q1))];
+
+#----------------------------------------------------------------------
+# Error checking:
+# 1) Did we locate the first object
+# 2) Did we locate the second object
+# 3) Ensure that player is a wiz or object 1 is not wiz_groupable only
+# 4) Ensure that player is a wiz or object 2 is not wiz_groupable only
+# 5) Ensure that object 1 is groupable and not customized
+# 6) Ensure that object 2 is groupable and not customized
+# 7) Ensure that object 1 isn't worn
+# 8) Ensure that object 2 isn't worn
+#----------------------------------------------------------------------
+
+  think setq(9, [not(strmatch(%0, *'s *))]
+                [isdbref(%q0)]
+                [isdbref(%q1)]
+                [or(hasflag(%#,wizard), not(hastag(%q0,wiz_groupable)))]
+                [or(hasflag(%#,wizard), not(hastag(%q1,wiz_groupable)))]
+                [and(hastag(%q0, groupable), not(hastag(%q0, finished)))]
+                [and(hastag(%q1, groupable), not(hastag(%q1, finished)))]
+                [not(hastag(%q0, worn))]
+                [not(hastag(%q1, worn))]
+                [not(hastag(%q1, norename))]
+                [not(hastag(%q0, norename))]
+                [or(and(hastag(%q0,sheared),hastag(%q1,sheared)),
+                    and(not(hastag(%q0,sheared)),
+                        not(hastag(%q1,sheared))))]
+                [strmatch([last([get(%q0/branded)],|)],
+                [last([get(%q1/branded)],|)])]);
+  think switch(%q9,
+              0????????????, pemit(%!, @@Wrong Syntax@@),
+              ?0???????????, pemit(%#, I don't see %0 here.),
+              ??0??????????, pemit(%#, I don't see %1 here.),
+              ???0?????????, pemit(%#, Only wizards can group [name(%q0)].),
+              ????0????????, pemit(%#, Only wizards can group [name(%q1)].),
+              ?????0???????, pemit(%#, [name(%q0)] is not groupable.),
+              ??????0??????, pemit(%#, [name(%q1)] is not groupable.),
+              ???????0?????, pemit(%#, [name(%q0)] needs to be removed before 
+                                       you can group it.),
+              ????????0????, pemit(%#, [name(%q1)] needs to be removed before  
+                                       you can group it.),
+              ?????????0???, pemit(%#, You cannot group named animals.),
+              ??????????0??, pemit(%#, You cannot group named animals.),
+              ???????????0?, pemit(%#, You cannot group sheared and unsheared 
+                                       sheep.),
+              ????????????0, pemit(%#, You cannot group sheep with different 
+                                       brands.),
+              1111111111111, switch([hastag(%q0,sheep)],1,
+                         trigger(#2250/TRIG-FARMSTRIP,%q0,%q1))
+                         ulocal(ul-group-it, %q0, %q1, %#, %L))
+
+-
+# ulocal(ul-group-it, <first object to group>, <second object to group>,
+#                     <enactor>, <location the group should end up>)
+# %0 = dbref of first object to group
+# %1 = dbref of second object to group
+# %2 = enactor
+# %3 =  location the group should end up
+
+&ul-group-it #70=
+#--------------------------------------------------------------------------
+# %q9 = attribute list of first object
+# %q8 = attribute list of second object
+# %q7 = list of attributes that do not match
+#-------------------------------------------------------------------------
+      [setq(9,ulocal(ul-attr-list,%0))]
+      [setq(8,ulocal(ul-attr-list,%1))]
+      [setq(9, sort(setdiff(lcstr(lattrp(%0/*)),%q9)))]
+      [setq(8, sort(setdiff(lcstr(lattrp(%1/*)),%q8)))]
+      [setq(7, 
+        [setq(0,%0)]
+        [setq(1,%1)]
+        [filter(filter-no-match, setunion(%q8, %q9))])]
+#----------------------------------------------------------------------
+# Error checking:
+# 1) Do the currencies match
+# 2) Do the attribute lists match.
+# 3) Do the attribute values match.
+# 4) Does the first object have contents?
+# 5) Does the second object have contents?
+# 6) Are either items unfinished?
+#----------------------------------------------------------------------
+      [setq(6, 
+        [strmatch(get(%0/currency), get(%1/currency))]
+        [strmatch(%q9, %q8)]
+        [t(not(words(%q7)))]
+        [not(t(words(lcon(%0))))]
+        [not(t(words(lcon(%1))))]
+        [and(not(strmatch(
+        [name(%0)],Unfinished*)),not(strmatch(
+        [name(%1)],Unfinished*)))])]
+# Debugging.  Can remove later.
+      [pemit(*Kath,GROUPALL: %N - %%q6: %q6)]
+      [switch(%q6, 
+   0?????, pemit(%2, Those are two entirely different kinds of things.),
+   ?0????, pemit(%2, [name(%0)] and 
+         [name(%1)] are too different to be combined: 
+         [setunion(setdiff(%q9,%q8),setdiff(%q8, %q9))]),
+   ??0???, pemit(%2, [name(%0)] and [name(%1)] have different values in 
+      the following attributes and cannot be combined: %q7),
+   ???0??, pemit(%2, [name(%0)] has contents and thus can not be grouped.),
+   ????0?, pemit(%2, [name(%1)] has contents and thus can not be grouped.),
+   ?????0, pemit(%2, You must not group unfinished items.),
+   111111, [ulocal(ul-combine, %0, %1, %2)]
+      [trigger(#70/trig-me-zap, %1)],pemit(%2, Error: Alert Admin!))]
+
+-
+#####################################################################
+#      COMMAND: GROUP <OBJECT> WITH <OBJECT>                        #
+#               GROUP <CONTAINER>'S <OBJECT> WITH <OBJECT>          #
+#                                                                   #
+# This command needs to ensure that the objects to be grouped are   #
+# identical in every way except for the following defined ways in   #
+# which they may be different:                                      #
+#                                                                   #
+#        a) They may have different weights                         #
+#        b) They may have different volumes                         #
+#        c) They may have different amounts of the same currency    #
+#        d) They may have different names                           #
+#        e) They may have different bulk                            #
+#        f) They may have different sizes                           #
+#        g) They may have different extraction-from and -at         #
+#        h) They may have different touched_last and touched_by     #
+#                                                                   #
+#                                                                   #
+# Both objects must be tagged                                       #
+# 'groupable' and not 'wiz_groupable' unless it's a wiz that's      #
+# trying to combine them.                                           #
+#####################################################################
+
+&cmd-group-container-different #70=$group/different *'s * with *:
+  think setq(0, locate(%#, [before(%0,'s)], switch(hasflag(%#,wizard), 1, aniTX, niTX)));
+  think setq(1, locate(%q0, %1, i));
+  think setq(2, locate(%q0, %2, i));
+  think setq(2, ifelse(strmatch(%q1, %q2), 
+                       ulocal(ul-locate-different, %q0, %q1, %2),
+                       %q2));
+
+#----------------------------------------------------------------------
+# Error checking:
+# 1) Did we locate the first object
+# 2) Did we locate the second object
+# 3) Ensure that player is a wiz or object 1 is not wiz_groupable only
+# 4) Ensure that player is a wiz or object 2 is not wiz_groupable only
+# 5) Ensure that object 1 is groupable
+# 6) Ensure that object 2 is groupable
+#----------------------------------------------------------------------
+
+  think setq(9, [isdbref(%q0)]
+                [isdbref(%q1)]
+                [isdbref(%q2)]
+                [or(hasflag(%#,wizard), not(hastag(%q1,wiz_groupable)))]
+                [or(hasflag(%#,wizard), not(hastag(%q2,wiz_groupable)))]
+                [and(hastag(%q1, groupable), not(hastag(%q1, finished)))]
+                [and(hastag(%q2, groupable), not(hastag(%q2, finished)))]);
+ 
+  think switch(%q9,
+              0??????, pemit(%#, I don't see [before(%0,'s)] here.),
+              ?0?????, pemit(%#, I don't see %1 in the [name(%q0)].),
+              ??0????, pemit(%#, I don't see %2 in the [name(%q0)].),
+              ???0???, pemit(%#, Only wizards can group [name(%q1)].),
+              ????0??, pemit(%#, Only wizards can group [name(%q2)].),
+              ?????0?, pemit(%#, [name(%q1)] is not groupable.),
+              ??????0, pemit(%#, [name(%q2)] is not groupable.),
+              1111111, ulocal(ul-group-it-diff, %q1, %q2, %#, %q0))
+ 
+#-
+ 
+#&cmd-group #70=$group * with *:
+ 
+#---------------------------------------------------------------------
+# Set the registers:
+# %q0 = dbref of the first object
+
+
+#think [setq(0, locate(%#, %0, switch(hasflag(%#,wizard), 1, anTX, nTX)))]
+#      [setq(1, locate(%#, %1, switch(hasflag(%#,wizard), 1, anXT, nTX)))]
+#      [setq(1, ifelse(strmatch(%q0, %q1), 
+#                       ulocal(ul-locate-different, %L, %q0, %1), %q1))];
+
+#----------------------------------------------------------------------
+# Error checking:
+# 1) Did we locate the first object
+# 2) Did we locate the second object
+# 3) Ensure that player is a wiz or object 1 is not wiz_groupable only
+# 4) Ensure that player is a wiz or object 2 is not wiz_groupable only
+# 5) Ensure that object 1 is groupable and not customized
+# 6) Ensure that object 2 is groupable and not customized
+# 7) Ensure that object 1 isn't worn
+# 8) Ensure that object 2 isn't worn
+#----------------------------------------------------------------------
+
+#  think setq(9, [not(strmatch(%0, *'s *))]
+#                [isdbref(%q0)]
+#                [isdbref(%q1)]
+#                [or(hasflag(%#,wizard), not(hastag(%q0,wiz_groupable)))]
+#                [or(hasflag(%#,wizard), not(hastag(%q1,wiz_groupable)))]
+#                [and(hastag(%q0, groupable), not(hastag(%q0, finished)))]
+#                [and(hastag(%q1, groupable), not(hastag(%q1, finished)))]
+#                [not(hastag(%q0, worn))]
+#                [not(hastag(%q1, worn))]);
+#
+#  think switch(%q9,
+#              0????????, pemit(%!, @@Wrong Syntax@@),
+#              ?0???????, pemit(%#, I don't see %0 here.),
+#              ??0??????, pemit(%#, I don't see %1 here.),
+#              ???0?????, pemit(%#, Only wizards can group [name(%q0)].),
+#              ????0????, pemit(%#, Only wizards can group [name(%q1)].),
+#              ?????0???, pemit(%#, [name(%q0)] is not groupable.),
+#              ??????0??, pemit(%#, [name(%q1)] is not groupable.),
+#              ???????0?, pemit(%#, [name(%q0)] needs to be removed before 
+#you can group it.),
+#              ????????0, pemit(%#, [name(%q1)] needs to be removed before 
+#you can group it.),
+#              111111111, ulocal(ul-group-it, %q0, %q1, %#, %L))
+
+-
+# ulocal(ul-group-it-diff, <first object to group>, <second object to group>,
+#                     <enactor>, <location the group should end up>)
+# %0 = dbref of first object to group
+# %1 = dbref of second object to group
+# %2 = enactor
+# %3 =  location the group should end up
+
+&ul-group-it-diff #70=
+#--------------------------------------------------------------------------
+# %q9 = attribute list of first object
+# %q8 = attribute list of second object
+# %q7 = list of attributes that do not match
+#-------------------------------------------------------------------------
+      [setq(9,ulocal(ul-attr-list2,%0))]
+      [setq(8,ulocal(ul-attr-list2,%1))]
+      [setq(9, sort(setdiff(lcstr(lattrp(%0/*)),%q9)))]
+      [setq(8, sort(setdiff(lcstr(lattrp(%1/*)),%q8)))]
+      [setq(7, 
+        [setq(0,%0)]
+        [setq(1,%1)]
+        [filter(filter-no-match, setunion(%q8, %q9))])]
+#----------------------------------------------------------------------
+# Error checking:
+# 1) Do the currencies match
+# 2) Do the attribute lists match.
+# 3) Do the attribute values match.
+# 4) Does the first object have contents?
+# 5) Does the second object have contents?
+# 6) Are either items unfinished?
+#----------------------------------------------------------------------
+      [setq(6, 
+        [strmatch(get(%0/currency), get(%1/currency))]
+        [strmatch(%q9, %q8)]
+        [t(not(words(%q7)))]
+        [not(t(words(lcon(%0))))]
+        [not(t(words(lcon(%1))))]
+        [and(not(strmatch(
+        [name(%0)],Unfinished*)),not(strmatch(
+        [name(%1)],Unfinished*)))])]
+# Debugging.  Can remove later.
+      [pemit(*Kath,GROUPALL: DIFF %N - %%q6: %q6)]
+      [switch(%q6, 
+   0?????, pemit(%2, Those are two entirely different kinds of things.),
+   ?0????, pemit(%2, [name(%0)] and 
+         [name(%1)] are too different to be combined: 
+         [setunion(setdiff(%q9,%q8),setdiff(%q8, %q9))]),
+   ??0???, pemit(%2, [name(%0)] and [name(%1)] have different values in 
+      the following attributes and cannot be combined: %q7),
+   ???0??, pemit(%2, [name(%0)] has contents and thus can not be grouped.),
+   ????0?, pemit(%2, [name(%1)] has contents and thus can not be grouped.),
+   ?????0, pemit(%2, You must not group unfinished items.),
+   111111, [set(%0, quality:
+      [min(get(%0/quality), get(%1/quality))])]
+      [set(%0, maxquality:
+      [min(get(%0/maxquality), get(%1/maxquality))])]
+      [switch(or(hastag(%0,sheared),(hastag(%1,sheared)),set(%0,sheared:YES))]
+      [ulocal(ul-combine, %0, %1, %2)]
+      [trigger(#70/trig-me-zap, %1)],
+    pemit(%2, Error: Alert Admin!))]
+
+-
+&trig-me-zap #70=
+  @wait 10={@zap %0}
+
+-
+# ulocal(#70/ul-combine, <first object to be grouped>, 
+#                        <second object to be grouped>, 
+#                        <player who is grouping>)
+#
+# %0 = first object to be grouped
+# %1 = second object to be grouped
+# %2 = %#
+
+&ul-combine #70=
+
+#---------------------------------------------------------------
+# %q0 = currency in the first item
+# %q1 = amount of currency in the second item
+#---------------------------------------------------------------
+
+  [setq(5, fdiv(add(mul(getaccount(%0,get(%0/currency)),
+                          udefault(%0/poison-doses,t(hastag(%0,poison)))),
+                    mul(getaccount(%1,get(%1/currency)),
+                           udefault(%1/poison-doses,t(hastag(%0,poison))))),
+                add(getaccount(%0,get(%0/currency)),
+                          getaccount(%1,get(%1/currency)))))]
+  [setq(0, get(%0/currency))]
+  [setq(1, getaccount(%1, %q0))]
+  [setq(2, default(%0/extracted_at, 0))]
+  [setq(3, default(%1/extracted_at, 0))]
+  [setq(4, ifelse(gte(%q2, %q3), %q2, %q3))]
+  [pemit(%2, Grouped [name(%0)] with [name(%1)]!)]
+  [set(%0, extracted_at:%q4)]
+  [safetel(%1, #307)]
+  [ac_transfer(%q1, %q0, %1, %0)]
+  [settag(%0, group)]
+  [iter(setdiff(lcstr(laccounts(%1)), %q1), 
+        ac_transfer(getaccount(%1, ##), ##, %1, %0))]
+  [ifelse(hastag(%1, noxious),settag(%0,noxious),)]
+  [ifelse(hastag(%1, sheared),settag(%0,sheared),)]
+  [ifelse(hastag(%1, branded),settag(%0,branded),)]
+  [ifelse(hastag(%1, sheared),settag(%0,sheared),)]
+  [ifelse(or(strmatch(get(%1/SHEARED),YES),hastag(%1,sheared)),
+  set(%0,SHEARED:YES))]
+  [switch([hastag(%0,sheep)],1,[trigger(#2250/trig-farmstrip,%0)])]
+  [set(%0,poison-doses:[ifelse(t(%q5),%q5,)])]
+  [resynch(%0)]
+-
+# ulocal(ul-locate-different, <location>, <dbref to exclude>, <name to find>)
+# %0 = location
+# %1 = dbref of the item that you should exclude
+# %2 = name of item to find
+
+&ul-locate-different #70=
+# %q0 = name of the item we're looking for
+# %q1 = content list of the room
+# %q2 = dbrefs in the room that match that name
+
+ [setq(0, %2)]
+ [setq(1, lcon(%0))]
+ [setq(2, filter(filter-same-name, %q1))]
+ [first(shuffle(remove(%q2, %1)))]
+-
+# %q0 = name to match
+# %0 = item
+
+&filter-same-name #70=
+ [strmatch([name(%0)], *%q0*)]
+
+-
+
+# takes an attribute and sees if the contents of the attribute on
+# object 1 (%q0), matches the contents of the same attribute on 
+# object 2 (%q1).  Returns only the attributes that are different.
+
+&filter-no-match #70=
+ [not(strmatch(get(%q0/%0), get(%q1/%0)))]
+-
+
+&alpha-sort #70=[comp(%0, %1)]
+
+-
+
+#####################################################################
+#			FUNCTIONS                                   #
+#####################################################################
+
+# separate()
+#
+# separate(<amount to separate>, <dbref group object>, 
+#          <dbref destination>, <dbref of enactor>)
+# separates out a given amount and returns the number of the object
+# Returns the dbref of the separated object or an error message
+#
+# %q0 = the currency
+# %q1 = amount of currency the object has
+# %q9 = error code
+# %q2 = separated new object
+# %q3 = dbref of grouped object
+# %q4 = dbref of destination
+# %q5 = dbref of enactor
+# %q6 = list of attributes to copy
+
+&function-separate #50=
+  [setq(0, [get(%1/currency)])]
+  [setq(1, [getaccount(%1, %q0)])]
+  [setq(3, locate(%3, %1, *X))]
+  [setq(4, locate(%3, %2, *X))]
+  [setq(5, locate(%#, %3, *X))]
+  [setq(9, [isnum(%0)]
+           [isdbref(%q3)]
+           [isdbref(%q4)]
+           [isdbref(%q5)]
+           [ortags(%1, group fractional grouped)]
+           [or(iswhole(%0), hastag(%1, fractional))]
+           [not(eq(%q1, %0))]
+           [lte(%0, %q1)] )]
+
+  [trim(
+   switch(%q9, 0???????, pemit(%3, You must specify a number to separate out.),
+               ?0??????, pemit(%3, I don't see what you want to separate.),
+               ??0?????, pemit(%3, Invalid Destination Specified.),
+               ???0????, pemit(%3, Invalid Perspective Person.),
+               ????0???, pemit(%3, [name(%1)] is not a group object.),
+               ?????0??, pemit(%3, You can't separate that fractionally.),
+               ??????0?, pemit(%3, [name(%1)] is already separated into %0.),
+               ???????0, pemit(%3, [name(%1)] only has %q1 unit(s).  
+                                   You can't separate out more than that.),
+
+# Create the new separated object
+               [setq(2, create(%0 %q0, 10))]
+# parent the new separated object to the original parent
+               [trigger(#50/setparent,%q2, parent(%1))]
+# Create an account on the new object
+               [ac_create(%q2, %q0, %0)]
+# Subtract that account from the original group object
+               [ac_adjust(%1, %q0, -%0)]
+
+
+# copy all attributes except weight and volume and accounts 
+# from the old to the new
+               [setq(6, remove(lcstr(lattr(%1)),weight))]
+
+# Interrupt our work on copying to make sure I don't copy
+# non-currency accounts over.
+# Properly adjust all OTHER accounts other than the currency
+               [iter(setdiff(laccounts(%1), ucstr(makeattr(%q0))), 
+                     ifelse(hasattr(%1, ac-[makeattr(##)]), 
+                            [setq(6, remove(%q6, ac-[lcstr(makeattr(##))]))]
+                            [ac_adjust(%q2, ##, sub(
+                               setr(7, div(mul(getaccount(%1, ##), %0), %q1)), 
+                                               getaccount(%q2, ##)))]
+                            [ac_create(%q2, ##, %q7)]
+                            [ac_adjust(%1, ##, -%q7)], ))]
+
+# copy all attributes except weight and volume and accounts 
+# from the old to the new
+               [setq(6, remove(%q6, volume))]
+               [setq(6, remove(%q6, currency))]
+               [setq(6, remove(%q6, ac-[makeattr(%q0)]))]
+               [setq(6, remove(%q6, registry))]
+               [iter(%q6, set(%q2, ##:[get(%1/##)]))]
+# trigger the aextract
+               [trigger([parent(%q2)]/aextract, %#, %q2, %2, %q3)]
+
+[switch([and([hastag(%q2,sheep)],[not([hastag(%q3,sheared)])])],
+               1,[trigger([parent(%q2)]/cleartag-sheared,%q2)])]
+
+# teleport it to the correct destination
+               [safetel(%q2, %2)]%q2))]
+               
+
+-
+# iswhole()
+# returns a 1 if it's a whole number and a 0 if not
+&function-iswhole #50=
+ [eq(%0, trunc(%0))]
+  
+-
+
+# generic(<object>)
+# 
+# 
+# Returns a 1 if the differences do not exist or are trivial.
+# Returns a 0 if the object is not generic
+#
+# Returns #-1 if invalid target
+#
+# %q0 = dbref of the object
+# %q1 = parent dbref of the currency type of the object
+# %q2 = list of the attributes on the original object
+# %q3 = list of attributes on its parent
+# %q5 = currency type
+# %q9 = boolean error string
+
+&function-generic #50=
+  [setq(0, locate(%#, %0, *))]
+  [setq(0, ifelse(not(isdbref(%q0)), locate(%!, %0, *), %q0))]
+  [setq(5, get(%q0/currency))]
+  [setq(1, paccount(%q5))]
+  [setq(9, [isdbref(%q0)]
+           [iscurrency(%q5)]
+           [isdbref(%q1)]
+           [lt(words(lcon(%q0)), 1)])]
+  [switch(%q9, 
+             0???, #-1,
+             ?0??, 0, 
+             ??0?, 0,
+             ???0, 0,
+             [setq(2, setdiff(lcstr(lattr(%q0)), u(u-non-generic-list,%q0)))]
+             [setq(4, filter(filter-different, %q2))]
+             [switch(strmatch(iter(%q2,strmatch(get_eval(%q0/##),
+                                               get_eval(%q1/##))),*0*),
+                 1, 0, 1)])]
+-
+
+&filter-different #50=
+ [not(strmatch(get_eval(%q0/%0), get_eval(%q1/%0)))]
+-
+
+# filters out attributes that are not important to be compared in 
+# determining whether it's generic
+
+&filter-generic #50=
+ [not(t(match([u(u-non-generic-list)], %0)))]
+-
+&u-non-generic-list #50=
+weight volume extracted_from extracted_at creator tags quality 
+registry [lcstr(iter(laccounts(%0),ac-##))] maxquality touched_last 
+touched_by touched buyer seller wearloc followers location capacity 
+detail-color dye-color color created-location basename destroy-attempts 
+gfail dfail date_sheared sex realname worn-on supported-by male-desc 
+female-desc last-icloc cur-icloc bathed-last ac-stenis aeat
+-
+&UL-ATTR-LIST #70=weight volume ac-
+      [makeattr(get(%0/currency))] bulk size 
+      extracted_from extracted_at touched_last 
+      touched_by tags touched location 
+      [lcstr(lattr(%0/ac-*))] created-location 
+      creator disease-2 poison poison-doses poisoned-by 
+      poisoned-loc poisoned-time dfail gfail date_sheared 
+      named-by male-desc female-desc basename
+-
+&UL-ATTR-LIST2 #70=weight volume ac-
+      [makeattr(get(%0/currency))] bulk size 
+      extracted_from extracted_at touched_last 
+      touched_by tags touched location 
+      [lcstr(lattr(%0/ac-*))] created-location 
+      creator disease-2 poison poison-doses quality 
+      maxquality dfail gfail date_sheared named-by male-desc 
+      female-desc sheared basename tame-for poisoned-by 
+      poisoned-loc poisoned-time
+
+
+
+
+
+
+
+
+
+

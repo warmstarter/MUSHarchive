@@ -1,0 +1,81 @@
+#!/bin/bash 
+MYPWD=`pwd`
+echo -n "Putting . in path..."
+PATH=$PATH:.
+echo "done."
+echo "Currently in $MYPWD"
+echo -n "Checking directories to make sure we have the ones we expect..."
+if [[ ! -d src ]] 
+then 
+echo "failed."
+echo "We have no src directory, please do a cvs checkout b5mux and then try this script again"
+exit -1
+fi
+
+if [[ ! -d src/valcode ]] 
+then 
+echo "failed."
+echo "We have no src/valcode directory, please do a cvs checkout b5mux and then try this script again"
+exit -1
+fi
+
+if [[ ! -d src/valcode/vmspace ]] 
+then 
+echo "failed."
+echo "We have no src directory, please do a cvs checkout b5mux and then try this script again"
+exit -1
+fi
+
+if [[ ! -d src/gdbm-1.7.3 ]] 
+then 
+echo "failed."
+echo "We have no src/gdbm-1.7.3 directory, please do a cvs checkout b5mux and then try this script again"
+exit -1
+fi
+
+echo "ok."
+
+
+echo -n "Configuring GDBM..."
+cd src/gdbm-1.7.3
+if ( ! ./configure 2>&1 > /dev/null) 
+then
+echo "failed."
+echo "Looks like you gotta do it manually..."
+exit 1
+fi
+echo "ok."
+
+echo -n "Compiling GDBM..."
+if ( ! make 2>&1 > /dev/null) 
+then
+echo "failed."
+echo "Looks like you gotta do it manually..."
+exit 1
+fi
+echo "ok."
+
+cd $MYPWD/src
+rm -f .depend
+touch .depend
+echo "1" >> buildnum.data
+echo -n "Creating make dependencies file..."
+if ( ! make depend 2>&1 > /dev/null) 
+then
+echo "failed."
+echo "Looks like you gotta do it manually..."
+exit 1
+fi
+echo "ok."
+
+cd $MYPWD/src/valcode/vmspace
+echo -n "Compiling Mechs/VMSpace/RP/and other enhancements..."
+if ( ! make 2>&1 > /dev/null) 
+then
+echo "failed."
+echo "Looks like you gotta do it manually..."
+exit 1
+fi
+echo "ok."
+
+echo "At this point you should cd into the src and run 'make'"

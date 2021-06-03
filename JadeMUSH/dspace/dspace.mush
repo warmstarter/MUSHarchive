@@ -1,0 +1,655 @@
+# Dynamic Space, by Joshua Bell
+# With enhancements by Adam Dray
+#
+# $Header: /usr/local/cvsroot/softcode/dspace/dspace.mux,v 1.26 2001/08/19 01:17:46 theo Exp $
+
+
+
+
+#############################################################################
+# Dynamic Room Parent (#101)
+#############################################################################
+
+# 101
+@create Dynamic Room Parent=10
+-
+&ISBUILDER #101 = [isbuilder(%#)]
+-
+@lock/UseLock #101 = ISBUILDER/1
+-
+
+@set #101 = WIZARD
+-
+@set #101 = SAFE
+-
+@power #101 = builder
+-
+@parent #101 = #102
+-
+
+&REGISTRY #101 = Dynamic-Room-Parent
+-
+@VA #101 = #103
+-
+&DYNAMIC-ARRAY-OBJECT #101 = #103
+-
+&ARRAY #101 = #103
+-
+&EXIT_PARENT #101 = #102
+-
+
+@Desc #101 = 
+  %r
+  [ifelse(gt(get(me/zcoor), 0), 
+    Up in the sky., 
+    You're in a large patch of rolling land covered with a dense forest.
+  )]
+  %r
+-
+
+@Startup #101 = 
+  @trigger me/Aleave
+-
+
+@Aenter #101 = 
+  @switch and(gt(get(%L/zcoor), 0), 
+              not(or(hastag(%#, fly), 
+                     hastag(get(%#/vehicle-riding), fly)))) = 1, {
+    @pemit %# = 
+      [ifelse(hastag(%#, falling), 
+        You plummet towards the ground!, 
+        You start plummeting towards the ground at high speed!
+      )]; 
+    @tags %# = falling; 
+    @force %# = Down
+  }, {
+    @switch and(eq(get(%L/zcoor), 0), hastag(%#, falling)) = 1, {
+      @oemit %# = 
+        %n falls from the sky, landing on the ground next to you!; 
+      @pemit %# = 
+        You slam into the ground! WHAM!; 
+      @wait 2 = {
+        @cleartags %# = falling
+      }
+    }
+  }
+-
+
+@Adesc #101 = 
+  @pemit %# = [switch(hasflag(%#, TERSE), 0, 
+    [setq(1, setunion(v(DARK_EXITS), u(DE_HIDE_BORDER), |))]
+    [setq(0, filter(DE_FILTER, lexits(%!)))]
+    [switch(words(%q0), 0, 
+      No obvious exits.,
+      Obvious exits:%r[iter(%q0, name(##)%b)]
+    )]
+  )]
+-
+
+# Adds Pueblo support.
+#
+@Adesc #101 =
+  think setq(1, setunion(v(DARK_EXITS), u(DE_HIDE_BORDER), |)); 
+  think setq(0, filter(DE_FILTER, lexits(%!))); 
+
+  think setq(5, 
+    ifelse(eq(words(%q0), 0), 
+      No obvious exits., 
+#   else
+      Obvious exits:%r
+      [ifelse(hasflag(%#, HTML), 
+        [iter(%q0, 
+          [setq(5, name(##))]
+          <a xch_cmd="%q5" xch_hint="Go %q5">%q5</a>
+        )], 
+#     else
+        [iter(%q0, name(##)%b)]
+      )]
+    )
+  ); 
+
+  think setq(0, ifelse(hasflag(%#, HTML), %#, #-1)); 
+  think setq(1, ifelse(hasflag(%#, HTML), #-1, %#)); 
+  @pemit %q1 = %q5; 
+  @pemit/html %q0 = %q5%r
+-
+
+
+@Aleave #101 = 
+  @switch and(
+            eq(words(lcon(me)), 0),
+            eq(hastag(num(me),dspace),1), 
+            eq(words(lexits(me)),
+            words(lexits(parent(me))))
+          ) = 1, {
+    &num-[setr(0, [v(XCOOR)].[v(YCOOR)].[v(ZCOOR)])] %va = 
+      setdiff(get(%va/num-%q0), num(me));
+    &tags-%q0 %va = ifelse(strmatch(v(tags), v(default-tags)),, v(tags)); 
+    &district-%q0 %va = 
+      ifelse(strmatch(v(district), v(default-district)),,v(district)); 
+    &recycle_list %va = setunion(get(%va/RECYCLE_LIST), num(me)); 
+    @name me = DS Recycled Room; 
+
+# clear garbage after storing x,y,z
+    think setq(6, [v(xcoor)].[v(ycoor)].[v(zcoor)]); 
+    @desc me; 
+    &xcoor me; 
+    &ycoor me; 
+    &zcoor me; 
+    &tags me; 
+    &district me; 
+    &blocked_exits me; 
+    &dark_exits me; 
+
+
+# Store all the other attributes on the array.
+#
+# This /must/ be done in an iter() loop with set() -- and not a @dolist -- 
+# since the @dolist will suspend the setting operation one queue cycle, 
+# which is after the @parent and @wipe commands.
+#
+# First wipe any existing stored attributes, so we don't get 'ghosts'.
+#
+    @wipe %va/ATT-%q6-*; 
+    think iter(lattr(me), 
+      [set(%va, ATT-%q6-##:[v(##)])]
+    ); 
+
+    @parent me; 
+    @wipe me; 
+    @trigger %va/RECYCLE
+  }
+-
+
+&DE_FILTER #101 = 
+  switch(member(lcstr(%q1), lcstr(name(%0)), |), 0, 1, 0)
+-
+
+&DE_HIDE_BORDER #101 = 
+  edit(
+    trim(squish(
+      [switch(11, [get(%va/X-LIMITS)][eq(v(XCOOR),get(%va/MAXX))], 
+        East|Northeast|Southeast
+      )]
+      %b
+      [switch(11, [get(%va/X-LIMITS)][eq(v(XCOOR),get(%va/MINX))], 
+        West|Northwest|Southwest
+      )]
+      %b
+      [switch(11, [get(%va/Y-LIMITS)][eq(v(YCOOR),get(%va/MAXY))], 
+        North|Northwest|Northeast
+      )]
+      %b
+      [switch(11, [get(%va/Y-LIMITS)][eq(v(YCOOR),get(%va/MINY))], 
+        South|Southwest|Southeast
+      )]
+      %b
+      [switch(11, [get(%va/Z-LIMITS)][eq(v(ZCOOR),get(%va/MAXZ))], 
+        Up
+      )]
+      %b
+      [switch(11, [get(%va/Z-LIMITS)][eq(v(ZCOOR),get(%va/MINZ))], 
+        Down
+      )]
+    )),
+    %b,
+    |
+  )
+-
+
+
+#############################################################################
+# Dynamic Exit Parent (#102)
+#############################################################################
+
+#102
+@create Dynamic Exit Parent = 10
+-
+
+@set #102 = WIZARD
+-
+@set #102 = SAFE
+-
+
+@Fail #102 = \
+-
+
+@Afail #102 = 
+  @wait %va = {
+    think [setq(7, u(DXNEW, u(XNEW, %L)))]
+          [setq(8, u(DYNEW, u(YNEW, %L)))]
+          [setq(9, u(DZNEW, u(ZNEW, %L)))]; 
+
+    @trigger me/[u(U-AFAIL-SUBROUTINE, %q7, %q8, %q9)] = 
+      %#, %L, %n, %q7, %q8, %q9
+  }
+-
+
+&U-AFAIL-SUBROUTINE #102 = 
+  [switch(0, 
+    u(INRANGE, %0, %1, %2), 
+      DUMMY, 
+    u(PASS_LOCK), 
+      DUMMY, 
+    not(ulocal(#45450/u-dspace-hastag,%0.%1.%2,rubble-blocked)),
+      RUBBLE,
+    not(hastag(loc(%#),rubble-blocked)),
+      RUBBLE2,
+    comp(get(%va/NUM-%0.%1.%2),), 
+      ALLOC_ROOM,
+#   else 
+      TEL_TO_ROOM
+  )]
+-
+
+
+@Desc #102 = 
+  [setq(7, u(DXNEW, u(XNEW,%L)))]
+  [setq(8, u(DYNEW, u(YNEW,%L)))]
+  [setq(9, u(DZNEW, u(ZNEW,%L)))]
+  [switch(1, 
+    not(u(INRANGE, %q7, %q8, %q9)), 
+      v(NO_DESC), 
+    not(u(PASS_LOCK)), 
+      v(FAIL_DESC), 
+#   else
+      [setq(0, 
+        objeval(get(%va/NUM-%q7.%q8.%q9), s(u(GETDESC, %q7, %q8, %q9)))
+      )]
+      [switch(%q0,, 
+        get_eval(u(GETPARENT, %q7, %q8, %q9)/Desc), 
+#     else
+        %q0
+      )]
+      [setq(0, s(u(GETSUCC, %q7, %q8, %q9)))]
+      [switch(%q0,, 
+        setq(0, get_eval(u(GETPARENT, %q7, %q8, %q9)/Succ))
+      )]
+      [switch(%q0,,,%r%q0)]
+  )]
+-
+
+
+@VA #102 = #103
+-
+
+&XNEW #102 = get(%0/XCOOR)
+-
+&YNEW #102 = get(%0/YCOOR)
+-
+&ZNEW #102 = get(%0/ZCOOR)
+-
+
+&FAKE_FAIL #102 = Sorry, you can't go to (%1, %2, %3).
+-
+
+&ARRAY #102 = #103
+-
+&ROOM_PARENT #102 = #101
+-
+
+&PASS_LOCK #102 = 
+  [and(
+    not(member(lcstr(get(%L/BLOCKED_EXITS)), lcstr(name(%!)), |)), 
+    not(u(ISNULL, %q7, %q8, %q9)), 
+    u(DIM_LOCK)
+  )]
+-
+
+&DIM_LOCK #102 = 1
+-
+&ISNULL #102 = 0
+-
+&INRANGE #102 = 
+  and(
+    or(
+      neq(get(%va/X-LIMITS), 1), 
+      u(IS_IN_X, %0)
+    ), 
+    or(
+      neq(get(%va/Y-LIMITS), 1), 
+      u(IS_IN_Y, %1)
+    ), 
+    or(
+      neq(get(%va/Z-LIMITS), 1), 
+      u(IS_IN_Z, %2)
+    )
+  )
+-
+
+&INBOUNDS #102 = 
+  and(
+    or(
+      not(get(%va/X-LIMITS)), 
+      u(IS_IN_X, %0)
+    ), 
+    or(
+      not(get(%va/Y-LIMITS)), 
+      u(IS_IN_Y, %1)
+    ), 
+    or(
+      not(get(%va/Z-LIMITS)), 
+      u(IS_IN_Z, %2)
+    )
+  )
+-
+
+&IS_IN_X #102 = 
+  and(
+    lte(%0, get(%va/MAXX)), 
+    gte(%0, get(%va/MINX)), 
+    isnum(%0)
+  )
+-
+&IS_IN_Y #102 = 
+  and(
+    lte(%0, get(%va/MAXY)), 
+    gte(%0, get(%va/MINY)), 
+    isnum(%0)
+  )
+-
+&IS_IN_Z #102 = 
+  and(
+    lte(%0, get(%va/MAXZ)), 
+    gte(%0, get(%va/MINZ)), 
+    isnum(%0)
+  )
+-
+
+&DXNEW #102 = 
+  switch(get(%va/X-LIMITS), 2, 
+    switch(1, 
+      gt(%0, get(%va/MAXX)), 
+        get(%va/MINX), 
+      lt(%0, get(%va/MINX)), 
+        get(%va/MAXX), 
+#     else
+        %0
+    ), 
+# else
+    %0
+  )
+-
+
+&DYNEW #102 = 
+  switch(get(%va/Y-LIMITS), 2, 
+    switch(1, 
+      gt(%0, get(%va/MAXY)), 
+        get(%va/MINY), 
+      lt(%0, get(%va/MINY)), 
+        get(%va/MAXY), 
+#     else
+        %0
+    ), 
+# else
+    %0
+  )
+-
+
+&DZNEW #102 = 
+  switch(get(%va/Z-LIMITS), 2, 
+    switch(1, 
+      gt(%0, get(%va/MAXZ)), 
+        get(%va/MINZ), 
+      lt(%0, get(%va/MINZ)), 
+        get(%va/MAXZ), 
+#     else
+        %0
+    ), 
+# else
+    %0
+  )
+-
+
+&DUMMY #102 = 
+  @pemit %0 = u(FAKE_FAIL, %0, %3, %4, %5); 
+  @notify %va
+-
+&RUBBLE #102 =
+  think setq(0,ulocal(#45450/u-dspace-get,%3.%4.%5,RUBBLE-FAIL));
+
+  think ifelse(strmatch(%q0,),setq(0,
+              You can't go in that direction!  It is blocked by a mess of 
+              rubble and debris!),);
+
+  @pemit %0=%q0 ;
+
+  @notify %va
+
+-
+&RUBBLE2 #102 =
+  think setq(0,ulocal(#45450/u-dspace-get,%3.%4.%5,RUBBLE2-FAIL));
+
+  think ifelse(strmatch(%q0,),setq(0,
+              The room you are in is a mess of rubble and debris!  
+              You are trapped!),);
+
+  @pemit %0=%q0 ;
+
+  @notify %va
+
+-
+&ALLOC_ROOM #102 = 
+  think setq(0, first(cat(get(%va/num-%3.%4.%5), get(%va/recycle_list))) ); 
+
+  &RECYCLE_LIST %va = setdiff(get(%va/RECYCLE_LIST), %q0); 
+  @trigger %va/RECYCLE; 
+  &num-%3.%4.%5 %va = %q0; 
+  &XCOOR %q0 = %3; 
+  &YCOOR %q0 = %4; 
+  &ZCOOR %q0 = %5;  
+  @set %q0 = WIZARD; 
+  @power %q0 = builder; 
+  @parent %q0 = ulocal(GETPARENT, %3, %4, %5);
+  @name %q0 = ulocal(GETNAME, %3, %4, %5); 
+  @desc %q0 = ulocal(GETDESC, %3, %4, %5); 
+  @succ %q0 = ulocal(GETSUCC, %3, %4, %5); 
+  &tags %q0 = ulocal(GETTAGS, %3, %4, %5); 
+  &district %q0 = ulocal(GETDISTRICT, %3, %4, %5); 
+  &DARK_EXITS %q0 = ulocal(GETDARKEXITS, %3, %4, %5); 
+  &BLOCKED_EXITS %q0 = ulocal(GETBLOCKEDEXITS, %3, %4, %5); 
+
+
+# Read off all the ATT-x.y.z-* and write the appropriate attributes to 
+# the newly created room.
+#
+  think iter(lattr(%va/ATT-%3.%4.%5-*), 
+    [set(%q0, [after(##, ATT-%3.%4.%5-)]:[get(%va/##)])]
+  ); 
+
+  @pemit %0 = switch(hasflag(%0, TERSE), 0, ulocal(Succ,%0)); 
+
+  think setq(1, ulocal(Osucc, %0)); 
+  @pemit/contents %1 = switch(and(not(hasflag(%0, DARK)), gt(words(%q1), 0)), 1, %2 %q1); 
+
+# %6 was added. 1 indiciates a @tel/quiet needs to be done.
+  @tel [ifelse(%6,,%0)] = %q0; 
+  @tel/quiet [ifelse(%6,%0,)] = %q0; 
+#  @pemit/contents %1 = switch(t(setr(0, ulocal(Osucc, %0))), %2 %q0); 
+
+  think setq(1, ulocal(Odrop, %0)); 
+  @pemit/contents %q0 = switch(and(not(hasflag(%0, DARK)), gt(words(%q1), 0)), 1, %2 %q1); 
+
+  @pemit %0 = switch(hastag(%0, coordinates), 1, ## %3.%4.%5 ##); 
+  @notify %va
+-
+
+&TEL_TO_ROOM #102 = 
+  think setq(0, get(%va/num-%3.%4.%5)); 
+  @vn me=get(%va/num-%3.%4.%5); 
+  think setq(1, ulocal(Odrop, %0)); 
+  @pemit/contents %q0 = switch(and(not(hasflag(%0, DARK)), gt(words(%q1), 0)), 1, %2 %q1); 
+  @pemit %0 = switch(hasflag(%0, TERSE), 0, ulocal(Succ, %0)); 
+  @set %0 = WIZARD; 
+  @power %0 = builder; 
+
+# %6 added. a 1 indiciates that a @tel/quiet needs to be done.
+  @tel [ifelse(%6,,%0)] = %q0; 
+  @tel/quiet [ifelse(%6,%0,)] = %q0;
+
+  think setq(1, ulocal(Osucc, %0)); 
+  @pemit/contents %1 = switch(and(not(hasflag(%0, DARK)), gt(words(%q1), 0)), 1, %2 %q1); 
+  @pemit %0 = switch(hastag(%0, coordinates), 1, ## %3.%4.%5 ##); 
+  @notify %va
+-
+
+&GETNAME #102 = 
+  [setq(1, get(%va/NAME-%0.%1.%2))]
+  [setq(2, name(get(%va/PARENT-%0.%1.%2)))]
+  [setq(3, name(parent(get(%va/NUM-%0.%1.%2))))]
+  [ifelse(%q1, %q1, 
+    ifelse(%q2, %q2, 
+      ifelse(and(%q3, not(strmatch(%q3, name(#101)))), %q3, 
+        Dynamic Room %0 %1 %2
+      )
+    )
+  )]
+-
+
+&GETDESC #102 = 
+  [setq(1, get(%va/NUM-%0.%1.%2))]
+  [setq(2, get(%q1/Desc))]
+  [ifelse(%q2, %q2, get(%va/DESC-%0.%1.%2))]
+-
+
+&GETSUCC #102 = 
+  [setq(1, get(%va/SUCC-%0.%1.%2))]
+  [switch(%q1,, {}, %q1)]
+-
+
+&GETPARENT #102 = 
+  [default(%va/PARENT-%0.%1.%2, 
+    switch(1, 
+      u(U-Z-IS-LOW-AIR, %2), 
+        v(PARENT-LOW-AIR), 
+      u(U-Z-IS-HIGH-AIR, %2), 
+        v(PARENT-HIGH-AIR), 
+      and(
+          lte(%0,3),
+          gte(%0,-3),
+          lte(%1,3),
+          gte(%1,-3)
+         ),
+        v(imperialcity),
+      v(ROOM_PARENT)
+    )
+  )]
+-
+
+&U-Z-IS-LOW-AIR #102 = 
+  and(gt(%0, 0), lte(%0, 10))
+-
+&U-Z-IS-HIGH-AIR #102 = 
+  and(gt(%0, 10), lte(%0, 20))
+-
+&PARENT-HIGH-AIR #102 = #1084
+-
+&PARENT-LOW-AIR #102 = #1334
+-
+
+
+
+&GETDARKEXITS #102 = 
+  [setq(1, get(%va/DARK_EXITS-%0.%1.%2))]
+  [switch(%q1,, {}, %q1)]
+-
+
+&GETBLOCKEDEXITS #102 = 
+  [setq(1, get(%va/BLOCKED_EXITS-%0.%1.%2))]
+  [switch(%q1,, {}, %q1)]
+-
+
+&U-NEWCOORD-DELTA #102 = 
+  mul(
+    ifelse(%1, %1, 1), 
+    switch(get(%0/zcoor), 
+      0,  1, 
+      1,  1, 
+      20, 1000, 
+#   else
+          mul(10, dec(get(%0/zcoor)))
+    )
+  )
+-
+
+&GETTAGS #102 = default(%va/TAGS-%0.%1.%2, u(default-tags, %0, %1, %2))
+-
+
+&GETDISTRICT #102 = 
+  default(%va/DISTRICT-%0.%1.%2, u(default-district, %0, %1, %2))
+-
+
+&DEFAULT-TAGS #102 = dspace outside
+-
+
+&DEFAULT-DISTRICT #102 = Wilderness
+-
+
+#############################################################################
+# Dynamic Array Object (#103)
+#############################################################################
+
+@create Dynamic Array Object = 10
+-
+
+@set #103 = WIZARD
+-
+@set #103 = SAFE
+-
+
+@Startup #103 = 
+  @drain me; 
+  @notify me; 
+  @wait 1200 = {
+    @dolist lattr(%!/NUM-*) = {
+      @trigger v(##)/Aleave
+    }
+  }
+-
+
+@Listen #103 = * created with room number *.
+-
+
+@Amhear #103 = 
+  &RECYCLE_LIST me = v(RECYCLE_LIST) #%1
+-
+
+&X-LIMITS #103 = 2
+-
+&Y-LIMITS #103 = 2
+-
+&Z-LIMITS #103 = 1
+-
+
+&MAXX #103 = 10
+-
+&MINX #103 = -10
+-
+&MAXY #103 = 10
+-
+&MINY #103 = -10
+-
+&MAXZ #103 = 2
+-
+&MINZ #103 = 0
+-
+&QUEUE-MIN #103 = 5
+-
+&QUEUE-MAX #103 = 10
+-
+
+&RECYCLE #103 = 
+  @switch words(v(RECYCLE_LIST)) = 
+    <[v(QUEUE-MIN)], {
+      @dig DS Recycled Room; 
+      @trigger me/RECYCLE
+    }, 
+    >[v(QUEUE-MAX)], {
+      think setq(0, first(v(RECYCLE_LIST))); 
+      @set %q0 = !WIZARD; 
+      @destroy/override %q0; 
+      &recycle_list me = setdiff(v(RECYCLE_LIST), %q0); 
+      @trigger me/RECYCLE
+    }
+-
+

@@ -1,0 +1,105 @@
+&CMD-PCREATE #5=$@pcreate *=*: 
+ @@ --- @addcommand'ed --- @@; 
+ think setq(0, trim(%0));
+ think setq(1, trim(%1));
+
+ @switch isdbref(pmatch(%q0)) = 
+    0, {__@pcreate %q0=%q1; 
+        think setq(2, pmatch(%q0)); 
+        @switch isdbref(%q2) = 
+	   0, {@pemit %# = Unable to create player %q0 with password %q1.}, 
+              {
+
+#          account setup
+               @account/create %q2/stamina points=0; 
+               @account/create %q2/mon=0; 
+               @account/create %q2/used xp=0; 
+               @account/create %q2/unused xp=0; 
+               @account/create %q2/social points=0; 
+		
+
+#           soul setup. #142 is the bin of souls.
+               think setq(9, create(Soul for %q0, 10)); 
+               @parent %q9 = #140; @@ <--generic soul-- @@; 
+               @parent %q2 = %q9; 
+               @link %q9 = #142; 
+               @set %q9 = STICKY; 
+               @teleport %q9 = #142; 
+               @set %q9 = DARK; 
+               &soul %q2=%q9;
+               &email %q2=[get(%#/email)];
+
+#           default flags and locks (locks are probably default for 
+#                                    players anyway)
+
+               &rank %q2=Player;
+               @set %q2 = SLAVE;
+               @set %q2 = ENTER_OK; 
+               @set %q2 = FIXED; 
+               @lock/enter %q2 = IS-PLAYER/0; 
+
+               &tags %q2 = ic; 
+	
+               &created %q2 = %# [time()]; 
+               @force %q2={addcom g=Guest};
+               @pemit %# = Created player %q0 with dbref %q2 and password %q1.;
+               @cemit Public=(%n just created %q0.);
+               @tel %q2=#143 }}, 
+
+      {@pemit %# = Unable to create player %q0 with password %q1.}
+-
+&CMD-PCREATE-QUIET #5=$@pcreate/quiet *=*: 
+ @@ --- @addcommand'ed --- @@; 
+ think setq(0, trim(%0));
+ think setq(1, trim(%1));
+
+ @switch isdbref(pmatch(%q0)) = 
+    0, {__@pcreate %q0=%q1; 
+        think setq(2, pmatch(%q0)); 
+        @switch isdbref(%q2) = 
+	   0, {@pemit %# = Unable to create player %q0 with password %q1.}, 
+              {
+
+               @set %q2=DARK ;
+
+#          account setup
+               @account/create %q2/stamina points=0; 
+               @account/create %q2/mon=0; 
+               @account/create %q2/used xp=0; 
+               @account/create %q2/unused xp=0; 
+               @account/create %q2/social points=0; 
+
+
+#           soul setup. #142 is the bin of souls.
+               think setq(9, create(Soul for %q0, 10)); 
+               @parent %q9 = #140; @@ <--generic soul-- @@; 
+               @parent %q2 = %q9; 
+               @link %q9 = #142; 
+               @set %q9 = STICKY; 
+               @teleport %q9 = #142; 
+               @set %q9 = DARK; 
+               &soul %q2=%q9;
+               &email %q2=[get(%#/email)];
+
+#           default flags and locks (locks are probably default for 
+#                                    players anyway)
+
+               &rank %q2=Player;
+               @set %q2 = SLAVE;
+               @set %q2 = ENTER_OK; 
+               @set %q2 = FIXED; 
+               @lock/enter %q2 = IS-PLAYER/0; 
+
+               &tags %q2 = ic; 
+	
+               &created %q2 = %# [time()]; 
+
+               @pemit %#=Player '%q0' created silently and placed in chargen. ;
+
+               @tel %q2=#143 }}, 
+
+      {@pemit %# = Unable to create player %q0 with password %q1.}
+-
+
+
+

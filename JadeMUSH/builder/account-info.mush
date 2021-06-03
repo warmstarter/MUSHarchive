@@ -1,0 +1,24 @@
+#===================================================================#
+#                  ACCOUNT INFO                                     #
+# by Brett Willians                                                 #
+#                                                                   #
+# Where #6 is builder command object                                #
+# Where #7 is player ooc commands                                   #
+#===================================================================#
+
+&CMD-ACCOUNT-INFO #7=$@account/info *:
+     think setq(0, makeattr(%0));
+
+     @switch [words(get(#56/un-%q0))]= 
+       >0, {@pemit %#=[u(#56/UN-%q0)]}, 
+      {@pemit %#=%xrThere is no account information stored on %0.%xn}
+-
+
+&CMD-ACCOUNT-STORE #6=$@account/unit */*:
+  think setq(0, makeattr(%0));
+
+  @switch [hasflag(%#, wizard)] = 
+    0, {@pemit %#=%xrYou are not able to perform this task, little one.%xn}, 
+    1, {&UN-%q0 #56=%1 ; 
+        @pemit %#=%xrUnit info stored on %0.%xn}
+

@@ -1,0 +1,10 @@
+/* $Id: vmsecurity.h,v 1.1 2001/01/15 03:23:20 wenk Exp $ */
+
+#define MAXSECENTRY 20
+
+/*SKILLS = usrnames , ADVANS = passwrd */ 
+/*LEVELS ATTRIBS, COMMODITIES, WIELD, WEAR*/
+/* CLASS = CURRENT USRNAME , RANK,CARGO,MCARGO,SIZE=CURRENT LEVEL , TITLE = MANNING*/
+
+
+

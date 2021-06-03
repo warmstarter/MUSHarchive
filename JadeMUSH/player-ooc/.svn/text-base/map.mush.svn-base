@@ -1,0 +1,106 @@
+&RCS-map #8 = 
+  $Header: /usr/local/cvsroot/softcode/player-ooc/map.mux,v 1.7 1999/09/10 01:13:36 steph Exp $
+-
+
+
+# Represents the number of squares on either side of the center of the map.
+# That is, a mapsize of 5 will produce an 11x11 map.
+&mapsize #8 = udefault(%#/mapsize, 4)
+#&mapsize #8 = 4
+-
+
+&mapindent #8 = sub(32, mul(%0, 2))
+-
+
+# map
+#
+# Shows a map of the surrounding dspace area
+#
+&cmd-map #8 = $map: 
+  @switch member(lparent(%L), #101) = >0, {
+    think setq(0, sub(get(%L/ycoor), u(mapsize))); 
+    think setq(1, add(get(%L/ycoor), u(mapsize))); 
+    think setq(2, sub(get(%L/xcoor), u(mapsize))); 
+    think setq(3, add(get(%L/xcoor), u(mapsize))); 
+    think setq(4, 0); 
+    think setq(5, u(mapsize)); 
+
+    @pemit %# = 
+      space(add(u(mapindent, %q5), %q5, %q5)) %b %xh%xr|%xn; 
+
+    @dolist revwords(u(u-lnum, %q0, %q1)) = {
+      @pemit %# = 
+          [setq(9, ulocal(ul-map-row, ##, %q2, %q3, %q4))]
+
+          [space(u(mapindent, %q5))]
+          [switch(#@, inc(%q5), 
+            %xh%xr-- %xn
+#            [left(%q9, mul(2, %q5))]
+#            %xh%xr%xfX%xn
+#            %b
+            [left(%q9, dec(mul(2, %q5)))]
+            %xh%xr%xf>%xn
+            [ulocal(ul-map-row, ##, get(%L/xcoor), get(%L/xcoor), %q4)]
+            %xh%xr%xf<%xn
+            [ulocal(ul-map-row, ##, inc(get(%L/xcoor)), %q3, %q4)]
+            %xh%xr --%xn,
+#         else
+            %b%b %q9
+          )]
+    }; 
+    @wait 0 = {
+      @pemit %# = 
+        space(add(u(mapindent, %q5), %q5, %q5)) %b %xh%xr|%xn; 
+    }
+  }, {
+    @pemit %# = Sorry, but the map is available only in certain areas.
+  }
+-
+
+# u(u-lnum, <low>, <high>)
+#
+# Returns a list of integers from <low> to <high>, inclusive.
+#
+&u-lnum #8 = 
+  iter(lnum(inc(sub(%1, %0))), 
+    add(##, %0)
+  )
+-
+
+
+# ulocal(ul-map-row, <ycoor>, <min-xcoor>, <max-xcoor>, <zcoor>)
+#
+&ul-map-row #8 = 
+  iter(u(u-lnum, %1, %2), 
+    [setq(0, 
+#     first check on the room itself if it exists (fixed rooms)
+      default(default(#103/num-##.%0.%3, #-1)/map, 
+
+#       but if it's not fixed, first check the stored map symbol
+        default(#103/map-##.%0.%3, 
+
+#         and last look in the stored parent's map symbol
+          default(default(#103/parent-##.%0.%3, #-1)/map, 
+
+#           if all else fails, return a green '*' (the forest symbol)
+            %xg*%xn
+          )
+        )
+      )
+    )]
+    [ifelse(strmatch(%q0, %b), %b, eval(%q0))]
+  )
+-
+
+
+&cmd-map-here #9 = $@ds?map here=*:
+  &map-[get(%L/xcoor)].[get(%L/ycoor)].[get(%L/zcoor)] 
+    [get(%L/dynamic-array-object)] = %1;
+  @pemit %# = Map symbol set.
+-
+
+&cmd-setmap #9 = $@setmap *: 
+  &map-[get(%L/xcoor)].[get(%L/ycoor)].[get(%L/zcoor)] 
+    [get(%L/dynamic-array-object)] = %0;
+  @pemit %# = Map symbol set.
+-

@@ -1,0 +1,515 @@
+#============================================================#
+#   PROJECTS CODE BY DOC, MODIFIED BY STEPH
+#   TWEAKED BY STEVEN
+#
+# #48 IS CODE OBJECT
+# #49 IS STORAGE OBJECT
+#############################################################
+
+# @wipe #48
+#-
+# @va #48=#49
+#-
+# @vb #48=0
+#-
+# @vv #48=2.13
+
+
+
+&author #48=Doc
+-
+
+&JOBTYPELIST1.LIST #48=BUILDING CODE SERVER NEWS HELP TP
+-
+
+&JOBTYPELIST2.LIST #48=DESIGN BUGS ROOMS OBJECTS WEB
+-
+
+&JOBTYPELIST.LIST #48=BUILDING CODE SERVER NEWS HELP TP DESIGN 
+                      BUGS ROOMS OBJECTS WEB
+-
+
+&HEADER.FN #48=
+[center(Job Listing \([first(ucstr(%0),.)]\) for [mudname()] v%vv,78)]%r
+[repeat(==,39)]%r
+C%b%bP#.%b%bType%b%b%b%b%b%b
+[ljust(Job Name,40)]%b%bPRI%b%bClaimed By%r
+[repeat(==,39)]%r
+-
+
+&FOOTER.FN #48=
+TOTALS: [words(lattr(%va/*.%0.*))]%b%b
+[iter(v(jobtypelist1.list), ##: [words(lattr(%va/##.%0.*))])]%r
+[iter(v(jobtypelist2.list), ##: [words(lattr(%va/##.%0.*))])]
+      
+# [center(\[ TOTALS: 
+# [words(lattr(%va/*.%0.*))]%b%bBUILDING: 
+# [words(lattr(%va/BUILDING.%0.*))]%b%bCODE: 
+# [words(lattr(%va/CODE.%0.*))]%b%bHELP:
+# [words(lattr(%va/HELP.%0.*))]%b%bNEWS:
+# [words(lattr(%va/NEWS.%0.*))]%b%bSERVER: 
+# [words(lattr(%va/SERVER.%0.*))]%b%bTP: [words(lattr(%va/TP.%0.*))] \],78,=)]
+-
+&JOBBODY.FN #48=
+
+[setq(9, sort(lattr(%va/%0)))]
+[setq(9, munge(sort-num, iter(%q9, last(##,.)), %q9))]
+[setq(9, munge(sort-num, iter(%q9, elements(get(%va/##),3,~)), %q9))]
+
+  
+[list(%q9,[setq(7,get(%va/##))]
+[switch(,elements(%q7,8,~),%b,*)]
+[rjust(last(##,.),4)].%b%b
+[ljust(first(%q7,~),10)]
+[ljust(elements(%q7,2,~),40)]%b%b%b
+[elements(%q7,3,~)]%b%b%b
+[ljust(mid(switch(,setr(4,elements(%q7,8,~)),----------,name(%q4)),0,14),14)])]
+-
+&HEADERTAKEN.FN #48=
+[center(Job Listing \([first(ucstr(%0),.)]\) for [mudname()],78)]%r
+[repeat(==,39)]%r
+%b%bP#.%b%bType%b%bDays%b
+[ljust(Requestor,10)]%b[ljust(Job,34)]%b%bDAYS%b%bClaimed By%r
+[space(14)]up[space(13)]Name[space(28)]CLMD%r
+[repeat(==,39)]
+-
+&REQUESTTAKENBODY.FN #48=
+
+[setq(9, sort(lattr(%va/%0)))]
+[setq(9, munge(sort-num, iter(%q9, last(##,.)), %q9))]
+[setq(9, munge(sort-nnum, iter(%q9,
+[convtime(elements(get(%va/##),7,~))]), %q9$
+
+[list(%q9,[mid([setq(7,get(%va/##))][rjust(last(##,.),5)].%b[ljust(left(first(%q7,~),4),6)][ljust(div(sub(secs(),convtime(elements(%q7,7,~))),86400),4)]%b[ljust(mid(elements(%q7,5,~),0,10),10)]%b[ljust(left(elements(%q7,2,~),31),31)]%b[ljust(div(sub(secs(),convtime(elements(%q7,9,~))),86400),5)]%b[ljust(mid(switch(,setr(4,elements(%q7,8,~)),----------,name(%q4)),0,14),14)],0,77)])]
+-
+&JOBBODY.FN2 #48=
+
+[setq(9, sort(lattr(%va/%0)))]
+[setq(9, munge(sort-num, iter(%q9, last(##,.)), %q9))]
+[setq(9, munge(sort-nnum, iter(%q9, convtime(elements(get(%va/##),7,~))), %q9))]
+
+  
+[list(%q9,[setq(7,get(%va/##))]
+[switch(,elements(%q7,8,~),%b,*)]
+[rjust(last(##,.),4)].%b%b
+[ljust(first(%q7,~),10)]
+[ljust(elements(%q7,2,~),40)]%b%b%b
+[elements(%q7,3,~)]%b%b%b
+[ljust(mid(switch(,setr(4,elements(%q7,8,~)),----------,name(%q4)),0,14),14)])]
+-
+
+&sort-num #48=[sort(%0)]
+-
+&sort-nnum #48=[sort(%0,n)]
+-
+#===============================================================#
+# COMMAND: @JOB <JOB NUMBER>                                    #
+#                                                               #
+# Display's the job.                                            #
+#===============================================================#
+
+
+&JOBSPECIFIC.CMD #48=$@job *:
+
+  think setq(0, lattr(%va/*.*.%0));
+  
+  @select [isnum(%0)]
+          [gt(words(%q0), 1)]
+          [lt(words(%q0), 1)]
+          [strmatch(%q0, *.DONE.*)]
+          [eq(words(%q0), 1)]=
+
+    0????, {@@ Do nothing, other Syntax will pick up @@},
+    ?1???, {@pemit %#=More than one @job has that number.  Error.},
+    ??1??, {@pemit %#=There doesn't appear to be any @job by that number.},
+    ???1?, {@pemit %#=[switch(1, words(setr(1,lattr(%va/*.DONE.%0))),
+                                 [u(JOBLONG.FN,%q1)],
+                              INVALID (%0) JOB CHOICE)]},
+    ????1, {@pemit %#=
+                      [u(joblong.fn,%q0)]
+                      [u(footer.fn, JOB)]}
+-
+&cmd-job-by-type #48=$@job *:
+
+  @select [isnum(%0)]
+          [t(match(get(me/JOBTYPELIST.LIST), trim(%0)))]=
+
+     1?, {@@ do nothing, other syntax will get it @@},
+     ?0, {@pemit %#=You've listed an invalid job type.  The only 
+                 valid job types are: [v(jobtypelist.list)]},
+     {@pemit %#=[u(header.fn, %0)];
+      @wait 0=@pemit %#=
+                [u(jobbody.fn, [trim(%0)].JOB.*)]
+                %r[u(footer.fn, JOB)]}
+
+-
+
+#====================================================================#
+# COMMAND: @job                                                      #
+#                                                                    #
+# Lists all the jobs.                                                #
+#====================================================================#
+
+&cmd-@job-all #48=$@job:
+  @pemit %#=[u(HEADER.FN,ALL)];
+  @wait 0=@pemit %#=[u(JOBBODY.FN,*.JOB.*)];
+  @wait 0=@wait 0=@pemit %#=%r[u(FOOTER.FN,JOB)]
+
+-
+&CMD-@JOB/LIST #48=$@job/list:@fo %#=@job
+-
+
+#===================================================================#
+# COMMAND: @JOB/COMPLETED                                           #
+#                                                                   #
+# Lists all completed jobs.                                         #
+#===================================================================#
+
+&cmd-job-completed #48=$@job/completed:
+ @pemit %#=u(header.fn,COMPLETED);
+ @pemit %#=[u(JOBBODY.FN2,*.DONE.?)];
+ @pemit %#=[u(JOBBODY.FN2,*.DONE.??)];
+ @wait %#/semaphore-job={
+ @dolist [rest(lnum(10))]={@pemit %#=[u(JOBBODY.FN2,*.DONE.##??)]};
+ @dolist [extract(lnum(100),11,90)]={@pemit %#=[u(JOBBODY.FN2,*.DONE.##??)]};@notify %#/semaphore-job};
+ @wait %#/semaphore-job={@pemit %#=[u(FOOTER.FN,DONE)]};@notify %#/semaphore-job
+
+-
+
+&JOBLONG.FN #48=
+[setq(1,get(%va/%0))]
+[center(Job  #[last(%0,.)] for [mudname()],78)]%r
+[repeat(-+,39)]%r
+%b%b%chJob Name:%cn%b%b[ljust(mid(elements(%q1,2,~),0,30),30)]
+%b%b%chJob Type:%cn%b%b[elements(%q1,1,~)]%r
+
+%b%b%chAdded By:%cn%b%b[ljust(name(elements(%q1,6,~)),30)]
+%b%b%chAdded On:%cn%b%b[ljust(ldelete(extract(%q1, 7, 1, ~), 4),15)]%r
+
+%b%b%chClaimed By:
+%cn%b%b[ljust(mid(switch(,setr(2,elements(%q1,8,~)),
+                  **UNCLAIMED**,name(%q2)),0,30),30)]
+%chPriority:%cn%b%b[elements(%q1,3,~)]%r
+
+%b%b%chClaimed On:
+%cn%b%b[ljust(mid(switch(,setr(3,elements(%q1,9,~)),**UNCLAIMED**,elements(%q3,2 3 5)),0,30),30)]
+%chFinished On:%cn%b%b[ljust(mid(switch(,setr(3,elements(%q1,10,~)),**UNFINISHED**,elements(%q
+3,2 3 5)),0,15),15)]%r%r
+
+Long Description:%b%b[elements(%q1,4,~)]%r%r
+Added Comments:
+%b%b[switch(,setr(4,elements(%q1,11,~)),**NONE**,%q4)]%r[repeat(-+,38)]%r
+
+-
+#===================================================================#
+# COMMAND: @JOB/CLAIM <NUMBER>                                      #
+#                                                                   #
+#===================================================================#
+
+&JOBCLAIM.CMD #48=$@job/claim *:
+   @select [hasflags(%#, WZ)]
+           [words(setr(9,lattr(%va/*.JOB.%0)))]
+           [not(words(elements(get(%va/%q9),8,~)))]=
+
+      0??, {@pemit %#=Only wizards can use this command.},
+      ?0?,{@pemit %#=INVALID (%0) JOB.},
+      ?10,{@pemit %#=JOB (%0) ALREADY CLAIMED.},
+      111,{&%q9 %va=[replace(get(%va/%q9),8,%#,~)];
+          &%q9 %va=[replace(get(%va/%q9),9,[time()],~)];
+          @pemit %#=You claimed Job #%0 - [elements(get(%va/%q9),2,~)]}
+
+-
+#===============================================================#
+# COMMAND: @JOB/ADD <TYPE>/<JOB NAME>/<PRIORITY>=<DESCRIPTION>  #
+#===============================================================#
+
+&JOB.ADD.CMD #48=$@job/add */*/*=*:
+  @select [orflags(%#,WZ)]
+          [gt(match(get(me/JOBTYPELIST.LIST),%0),0)]
+          [isnum(%2)]
+          [lte(strlen(%1),40)]
+          [and(gte(%2,1),lte(%2,9))]=
+
+   0????,{@pemit %#=PERMISSION DENIED.},
+   10???,{@pemit %#=Invalid (%0) job type. Must be of type 
+                 [get(me/JOBTYPELIST.LIST)].},
+   110??,{@pemit %#=INVALID (%2) PRIORITY},
+   1110?,{@pemit %#=Job name greater than 40 characters.},
+   11110,{@pemit %#=Priority must be set between 1 and 9.},
+   11111,{&%0.JOB.%vb %va=[ucstr(%0)]~[u(zap_tildas,%1)]~%2~[u(zap_tildas,%3)]
+                          ~%N~%#~[time()]~~~~~~~~~~~~~~;
+          @pemit %#=Job %1 added.;
+          @cemit Wizards=%N added job %vb! 
+                 Type: [ucstr(%0)] - Name: [u(zap_tildas,%1)] - Priority: %2!;
+          @vb me=[add(%vb,1)]}
+
+-
+#==================================================================#
+# COMMAND: @JOB/UNCLAIM <JOB NUMBER>                               #
+#==================================================================#
+
+
+&JOBUNCLAIM.CMD #48=$@job/unclaim *:
+   @switch/first [orflags(%#, WZ)]
+                 [words(setr(1,lattr(%va/*.JOB.%0)))]
+                 [match(elements(get(%va/%q1),8,~),%#)]=
+     0??, {@pemit %#=Permission Denied.},
+     ?0?,{@pemit %#=INVALID (%0) JOB.},
+     ?10,{@pemit %#=YOU HAVE NOT CLAIMED JOB #%0.},
+     111,{&%q1 %va=[replace(get(%va/%q1),9,,~)];
+         &%q1 %va=[replace(get(%va/%q1),8,,~)];
+         @pemit %#=You unclaim the job.}
+-
+&cmd-jobs-dummy #48=$@jobs*:@fo %#=@job%0
+-
+&cmd-jobs-old-dummy #48=$@jobs/old *:@fo %#=@job/done %0
+-
+&cmd-job-old-dummy #48=$@job/old *:@fo %#=@job/done %0
+-
+
+#==============================================================#
+# COMMAND: @JOB/DONE <NUMBER>                                  #
+#                                                              #
+# Allows you to view an old job.                               #
+#==============================================================#
+
+&JOBINFOCOMPLETED.CMD #48=$@job/done *:
+  @pemit %#=
+         [switch(1, words(setr(1,lattr(%va/*.DONE.%0))),
+                    [u(JOBLONG.FN,%q1)],
+                    INVALID (%0) JOB CHOICE)]
+-
+#===============================================================#
+# COMMAND: @JOB/REMOVE <NUMBER>                                 #
+#                                                               #
+# Allows you to remove a job.  Wiz only.                        #
+#===============================================================#
+
+
+&JOBREMOVE.CMD #48=$@job/remove *:
+   @select [orflags(%#,WZ)]
+           [words(setr(1,lattr(%va/*.JOB.%0)))]=
+
+   0?,{@pemit %#=PERMISSION DENIED},
+   10,{@pemit %#=INVALID (%0) JOB.},
+   11,{&%q1 %va=;@pemit %#=JOB (%0) REMOVED.}
+-
+
+&cmd-jobs-check-dummy #48=$@jobs/check *:@fo %#=@job/finished %0
+-
+&cmd-job-check-dummy #48=$@job/check *:@fo %#=@job/finished %0
+-
+
+#===============================================================#
+# COMMAND: @JOB/FINISHED <NUMBER>                               #
+#                                                               #
+# Checks off a job as being complete.                           #
+#===============================================================#
+
+
+&JOBFINISHED.CMD #48=$@job/finished *:
+
+  @select [orflags(%#, WZ)]
+          [words(setr(1,lattr(%va/*.JOB.%0)))]
+          [match(elements(get(%va/%q1),8,~),%#)]=
+
+     0??, {@pemit %#=Permission Denied.},
+     ?0?,{@pemit %#=INVALID (%0) JOB.},
+     ?10,{@pemit %#=JOB (%0) NOT CLAIMED BY YOU.},
+     111,{&%q1 %va=[replace(get(%va/%q1),10,[time()],~)];
+         @mvattr %va=%q1,[setr(8,replace(%q1,2,DONE,.))];
+         think u(#5/u-task-count-increment,jobs);
+         @cemit Wizards=%N finished Job %0 - 
+               [setr(6,elements(get(%va/%q8),2,~))]! 
+               [setr(7,words(lattr(%va/*.JOB.*)))] jobs remaining!;
+         @bb/post Job Updates/Completed Work %q6=
+                  %N has completed Job %0: [elements(get(%va/%q8),4,~)].
+                  %r%rThere are %q7 jobs remaining!}
+-
+
+#=============================================================#
+# COMMAND: @JOB/COMMENTS [!]<number>=<comment>                #
+#                                                             #
+# Adds comments to a job.                                     #
+#=============================================================#
+
+&JOBCOMMENTS.CMD #48=$@job/comments ?*=*:
+  @switch/first [orflags(%#,WZw)]
+                [switch(%0,!,words(setr(1,lattr(%va/*.DONE.%1))),
+                             words(setr(1,lattr(%va/*.JOB.%0%1))))]=
+   0?,{@pemit %#=PERMISSION DENIED},
+   10,{@pemit %#=INVALID ([last(%0%1,!)]) JOB},
+   11,{&%q1 %va=[replace(get(%va/%q1), 11,
+                       cat(elements(get(%va/%q1),11,~),[u(zap_tildas,%2)]),~)];
+		      @pemit %#=Comment added.}
+-
+#==============================================================#
+# COMMAND: @JOB/TYPES                                          #
+#                                                              #
+# Lists valid job types.                                       #
+#==============================================================#
+
+&JOBTYPE.CMD #48=$@job/types:
+  @pemit %#=Valid job types: [get(me/JOBTYPELIST.LIST)]
+-
+#==============================================================#
+# COMMAND: @JOB/HELP                                           #
+#                                                              #
+# Gives help for the new job system.                           #
+#==============================================================#
+
+&JOBHELP.CMD #48=$@job/help:
+@pemit %#=
+%ch%cr@JOB/HELP[repeat(_, 40)](Doc's +projects modified)%cn%r
+[ljust(@job,32)]- Lists uncompleted jobs%r
+[ljust(@job <#>, 32)]- Lists specific info on that job%r
+[ljust(@job/types,32)]- Lists job types%r
+[ljust(@job <type>,32)]- Lists uncompleted job of <type>%r
+[ljust(@job/available,32)]- Lists all unclaimed jobs%r
+[ljust(@job/claimed, 32)]- Lists all of your uncompleted claimed jobs%r
+[ljust(@job/claimed <Name>,32)]- Lists uncompleted claimed jobs for <Name>%r
+[ljust(@job/completed,32)]- Lists completed jobs%r
+[ljust(@job/done <#>,32)]- Lists specific info on completed job%r
+[ljust(@job/claim <#>,32)]- Claims job <#>%r
+[ljust(@job/search <term>, 32)]- Lists jobs containing term%r
+[ljust(@job/priority <#>/<priority>, 32)]- Changes Priority for Job%r
+[ljust(@job/unclaim <#>,32)]- Unclaims job <#>%r
+[ljust(@job/finished <#>,32)]- Marks job as completed%r
+[ljust(@job/remove <#>,32)]- Removes the job%r
+[ljust(@job/taken, 32)]- Lists jobs by number of days claimed.%r
+[ljust(@job/comments %[!%]<#>=<comment>,32)]- Adds comment to jobs.
+%bIf ! is
+%r[space(32)]%b%bincluded, comments set for completed job%r
+@job/add <type>/<name>/<priority>=<details>%b%b- Adds new job%r
+%ch%cr[repeat(-, 75)]
+
+-
+#==================================================================#
+# COMMAND: @JOB/SEARCH <SEARCH TERM>                               #
+#==================================================================#
+
+
+&JOBSEARCH.CMD #48=$@job/search *:
+  @pemit %#=[u(HEADER.FN,Search: %0)];
+  @pemit %#=[setq(9,sort(grepi(%va,*,%0)))]
+            [list(%q9,[setq(7,get(%va/##))]
+            [switch(,elements(%q7,8,~),%b,*)]
+            [rjust(last(##,.),4)].%b%b
+            [ljust(first(%q7,~),10)]
+            [ljust(elements(%q7,2,~),40)]%b%b%b
+            [elements(%q7,3,~)]%b%b%b
+            [ljust(mid(switch(,setr(4,elements(%q7,8,~)),
+                               ----------,
+                               name(%q4)),0,14),14)])]
+            %r[u(FOOTER.FN,JOB)]
+-
+#===============================================================#
+# COMMAND: @JOB/PRIORITY <NUMBER>/<NEW PRIORITY>                #
+#                                                               #
+# Allows us to change the priority of a job.                    #
+#===============================================================#
+
+&JOBPRIORITY.CMD #48=$@job/priority */*:
+  @select [hasflag(%#,WIZARD)]
+          [words(setr(1,lattr(%va/*.JOB.%0)))]
+          [and(gte(%1,1),lte(%1,9))]=
+
+     0??,{@pemit %#=Permission Denied.},
+     10?,{@pemit %#=JOB (%0) NOT FOUND},
+     110,{@pemit %#=Priority not between 1 and 9.},
+     111,{&%q1 %va=[replace(get(%va/%q1),3,%1,~)];
+          @pemit %#=Job %0 priority changed to %1}
+-
+#===============================================================#
+# COMMAND: @JOB/TOTAL                                           #
+#                                                               #
+# Lists total for jobs and job types.                           #
+#===============================================================#
+
+&JOBTOTAL.CMD #48=$@job/total:
+     @pemit %#=[u(FOOTER.FN,JOB)]
+-
+&cmd-job-claimed-dummy #48=$@job/mine:@fo %#=@job/claimed
+-
+
+#================================================================#
+# COMMAND: @JOB/CLAIMED <NAME>                                   #
+#                                                                #
+# Lists all unfinished jobs claimed by someone on the board.     #
+# Omiting the name lists jobs claimed by yourself.               #
+#================================================================#
+
+&cmd-job-claimed #48=$@job/claimed *:
+
+  @select [orflags(*%0,WZ)]=
+
+    0, {@pemit %#=Mortals have better things to do than work on @jobs.},
+    1, {
+       think setq(0, lattr(%va/*.JOB.*));
+       think setq(1, num(*%0));
+       think setq(0, filter(filter-mine, %q0));
+       @pemit %#=[u(header.fn, [name(*%0)])];
+       @dolist %q0={@pemit %#=[u(jobbody.fn, ##)]};
+       @wait 0=@pemit %#=%r[u(footer.fn, JOB)]},
+
+# default happens when invalid name entered.
+       @pemit %#=%0 isn't a valid wizard's name.
+-
+
+&cmd-job-claimed-self #48=$@job/claimed:
+  think setq(0, lattr(%va/*.JOB.*));
+  think setq(1, %#);
+  think setq(0, filter(filter-mine, %q0));
+  @pemit %#=[u(header.fn, [name(%#)])];
+  @dolist %q0={@pemit %#=[u(jobbody.fn, ##)]};
+  @wait 0=@pemit %#=%r[u(footer.fn, JOB)]
+
+-
+&cmd-job-available #48=$@job/available:
+  think setq(0, lattr(%va/*.JOB.*));
+  think setq(0, filter(filter-avail, %q0));
+  think setq(0, munge(sort-num, iter(%q0, last(##,.)), %q0));
+  think setq(0, munge(sort-num, iter(%q0, elements(get(%va/##),3,~)),
+        %q0));
+
+  @pemit %#=[u(header.fn,UNCLAIMED)];
+  @dolist %q0={@pemit %#=[u(jobbody.fn, ##)]};
+  @wait 0=@pemit %#=%r[u(footer.fn, JOB)]
+
+-
+&filter-avail #48=
+ [strmatch(extract(get(%va/%0), 8, 1, ~), )]
+
+-
+&cmd-job-taken #48=$@job/taken:
+  think setq(0, lattr(%va/*.JOB.*));
+  think setq(1, filter(filter-avail, %q0));
+  think setq(2, setdiff(%q0, %q1));
+  think setq(3, iter(%q2, convtime(elements(get(%va/##), 9, ~))));
+  think setq(4, munge(sort-nnum, %q3, %q2));
+  @pemit %#=[u(headertaken.fn,TAKEN)];
+  @dolist %q4={@pemit %#=[u(requesttakenbody.fn, ##)]};
+  @wait 0=@pemit %#=%r[u(footer.fn, JOB)]
+-
+
+# %q1 = dbref of the person owning the jobs being searched for
+
+&filter-mine #48=
+ [strmatch(extract(get(%va/%0), 8, 1, ~), %q1)]
+
+-
+# This function is used to remove tildas in the job
+# description fields.
+
+&zap_tildas #48=
+  edit(%0,~, )
+
+-
+@set #48=INHERIT
+-
+@set #48=WIZARD
+-
+@set #48=SAFE
+-
+
+

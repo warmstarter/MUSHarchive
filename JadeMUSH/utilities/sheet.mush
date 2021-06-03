@@ -1,0 +1,1150 @@
+
+################################################################
+##		Sheet System:  This enables players to learn      #
+## information about various characters on the mux.  It may be    #
+## used for roster purposes down the line.                        #
+##                                                                #
+## by Stephanie Dray                                              #
+## updated 28-aug-1999 by Pete Jackson                            #
+###################################################################
+
+
+# This prevented some of the code from working. Removed.
+# 
+# DO NOT COMMENT BACK OUT!
+#
+# &cmd-sheet-switch-dummy #7=$@sheet/*:
+#   @switch [not(or(t(match(v(sheet-switches), first(%0), |)), 
+#                   strmatch(%0, all *)))]=
+#      1, {@pemit %#=You're not using the @sheet command correctly. 
+#                 Please type: @sheet/help},
+#      0, {@@ do nothing -- correct syntax @@}
+#-
+
+&sheet-switches #7=
+employment|stats|skills|attributes|background|secrets|family|parents|siblings|
+spouse|children|relationships|help|help2|status|add|damage|social|art|all
+
+-
+&cmd-sheet-employment #7=$@sheet/employment:@fo %#=@sheet/employment %#
+-
+#==================================================================#
+&CMD-SHEET-EMPLOYMENT-PLAYER #7=$@sheet/employment *:
+#==================================================================#
+ think setq(0, locate(%!, %0, *));
+ think setq(0, ifelse(isdbref(%q0), %q0, locate(%!, *%0, *)));
+
+ @switch or(hasflag(%#, wizard), strmatch(%#, %q0))=
+  0, {@pemit %#=Only Wizards may view the employment sheets of other players.},
+  1, {@pemit %#=[u(u-sheet-header, %q0)]%r
+                [rjust(%xhEMPLOYMENT SITUATION%xn, 75)]%r;
+
+      @pemit %#=%xh%xg[name(%q0)]'s Employees:%xn%r%r
+                [setq(1, get(%q0/employees))]
+                [center(%xhNAME%xn, 15)]
+                [center(%xhJOB TITLE%xn, 30)]
+                [center(%xhDAILY PAY%xn, 25)]%r
+
+                [iter(%q1, 
+                      columns([name(##)]%b|
+                              [u(##/job_title_%q0)]%b|
+                              [setq(2, u(##/employee_%q0))] 
+                                 [first(%q2, :)] mon/ 
+                                 [last(%q2, :)] labor, 25, |),%b)]%r;
+
+      @pemit %#=%xh%xg[name(%q0)]'s Employers:%xn%r
+             [setq(3, lattr(%q0/employee_*))]
+             [iter(%q3,%r
+                %xhName:%xn [name(last(##,_))]%r%t
+                %xh[name(%q0)]'s Job Title:
+                          %xn [u(%q0/job_title_[last(##,_)])]%r%t
+                %xh[name(%q0)]'s Pay:
+                       %xn [setq(4, u(%q0/##))]
+                          [first(%q4,:)] mon a day for 
+                          [last(%q4, :)] labor)]%r;
+  @pemit %#=u(u-sheet-footer, %q0)}
+-
+
+#==================================================================#
+&CMD-SHEET-SOCIAL #7=$@sheet/social:      
+#==================================================================#
+ @fo %#=@sheet/social %#
+-
+#==================================================================#
+&CMD-SHEET-SOCIAL-PLAYER #7=$@sheet/social *:
+#==================================================================#
+ think setq(0, locate(%!, %0, *));
+ think setq(0, ifelse(isdbref(%q0), %q0, locate(%!, *%0, *)));
+ @switch [isdbref(%q0)]=1,
+ {@pemit %#=
+       [u(u-sheet-header, %q0)]%r
+       [rjust(%xhSOCIAL NETWORK%xn, 75)]%r
+       [u(u-sheet-social
+	 [ifelse(or(hasflag(%#,wizard),strmatch(%#,%q0)),,-other)], %q0)]%r
+       [u(u-sheet-footer, %q0)]},0,{@pemit %#=There is no such player 
+  with that name.}
+-
+&u-sheet-social #7=
+    %xh%xgSocial Information:%xn%r
+    [columns(	
+      %xhSocial Points:%xn  
+      [comma(round(u(%0/ac-social_points),0))]|
+
+      %xhSocial Points via Marriage:%xn 
+      [comma(round(getaccount([u(%0/marriage)], social points),0))],  
+	
+     div(79,2),
+     |)]
+
+    [ifelse(hastag(%0,married),%xhMarried on: 
+             [default(%0/marriage-date, Unknown)]%r%b,)]
+ 
+    [space()][ifelse(hasattr(%0,family),%xhFamily Head:%xn 
+             [get(u(%0/family)/head)]%r%b
+             %xhFamily Members:%xn [get(u(%0/family)/members)], )]%r%b
+    %xhPeople [name(%0)] sponsors:%xn 
+    [default(%0/sponsor_of, None)]%r
+
+    [space()]%xhPeople [name(%0)] is aligned with:%xn 
+    [default(%0/aligned_with, None)]%r
+
+    [space()]%xhPatrons who sponsor [name(%0)]:%xn 
+    [default(%0/sponsored_by, None)]%r
+
+    [space()]%xhPeople who've aligned with [name(%0)]:%xn 
+    [default(%0/aligned_by, None)]           
+-
+&u-sheet-social-other #7=
+
+    %xh%xgSocial Information:%xn%r
+    [space()][ifelse(hasattr(%0,family),%xhFamily Head:%xn
+        [get(u(%0/family)/head)]%r%b
+    %xhFamily Members:%xn [get(u(%0/family)/members)], )]%r
+
+    [space()]%xhPeople [name(%0)] sponsors:%xn 
+    [default(%0/sponsor_of, None)]%r
+
+    [space()]%xhPeople [name(%0)] is aligned with:%xn 
+    [default(%0/aligned_with, None)]%r
+
+    [space()]%xhPatrons who sponsor [name(%0)]:%xn 
+    [default(%0/sponsored_by, None)]%r
+
+    [space()]%xhPeople who've aligned with [name(%0)]:%xn 
+    [default(%0/aligned_by, None)]           
+-
+&CMD-SHEET-ART #7=$@sheet/art:@fo %#=@sheet/art %#
+-
+
+#==============================================================#
+&CMD-SHEET-ART-PLAYER #7=$@sheet/art *:
+#==============================================================#
+ think setq(0, locate(%!, %0, *));
+ think setq(0, ifelse(isdbref(%q0), %q0, locate(%!, *%0, *)));
+
+ think set(%q0, songs_i_know:
+     [edit(setinter(lcstr(edit(get(%q0/songs_i_know), %b, _)), 
+                    lcstr(get(#2932/song-list)), |), _, %b)]); 
+ think set(%q0, instruments_i_know: 
+     [edit(edit(lcstr(lattr(parent(%q0)/*sk-instrument*)), sk-,), 
+           %b, |)]); 
+
+ @switch or(hasflag(%#, wizard), strmatch(%#, %q0))=
+  0, {@pemit %#=Only Wizards may view the art sheets of other players.},
+  1, {@pemit %#=[u(u-sheet-header, %q0)];
+      @pemit %#=[rjust(%xhTHE ARTS, 75)]%r;
+      @pemit %#=[u(u-sheet-art, %q0)]%r;
+      @pemit %#=[u(u-sheet-footer, %q0)]}
+
+-
+&u-sheet-art #7=
+   [space()]%xhDances [name(%0)] knows:%xn 
+       [iter(sort(u(%0/dances_i_know),a,|), ##, |,%,%b)]%r
+    [space()]%xhSongs [name(%0)] knows:%xn   
+       [iter(u(%0/songs_i_know),  ##, |,%,%b)]%r
+    [space()]%xhInstruments [name(%0)] plays:%xn 
+       [iter(u(%0/instruments_i_know), ##, |,%,%b)]%r
+    [space()]%xhPersons who can sing for [name(%0)]:%xn 
+       [default(%0/can_sing_for_me, None)]%r
+    [space()]%xhPersons who can dance for [name(%0)]:%xn 
+       [default(%0/can_dance_for_me, None)]%r
+    [space()]%xhPersons who can play for [name(%0)]:%xn  
+       [default(%0/can_play_for_me, None)]
+-
+&cmd-sheet-damage #7=$@sheet/damage:@fo %#=@sheet/damage %#
+-
+# %q0 = all the damage attributes for damage types
+# %q1 = all the damage attributes
+# %q2 = db# of who is being @sheet-ed
+# %q3 = body locs of the player that are damaged.
+
+&cmd-sheet-damage-player #7=$@sheet/damage *:
+ think setq(2, locate(%!, %0, *));
+ think setq(2, ifelse(isdbref(%q2), %q2, locate(%!, *%0, *)));
+
+ @switch or(hasflag(%#, wizard), strmatch(%#, %q2))=
+  0, {@pemit %#=Only Wizards may view the damage sheets of other players.},
+  1, {@heal/resynch %q2;
+      @pemit %#=[u(u-sheet-header, %q2)];
+      @pemit %#=(Note: higher damage points mean worse injuries. 
+             This command will not %r%bdisplay internal/mysterious 
+             injuries.)%r;
+      @pemit %#=%xg%xhTOTAL DAMAGE SUFFERED:%xn [default(%q2/damage, 0)];
+      @pemit %#=%xg%xhOBVIOUS INJURIES:%xn;
+
+      think setq(0, lattr(%q2/damage-*-*));
+      think setq(1, lattr(%q2/damage-*));
+      think setq(3, setdiff(%q1, %q0));
+      think setq(3, iter(%q3, lcstr(trim(edit(##, DAMAGE-,)))));
+      @dolist %q3=
+         {think setq(4, graball(%q0, *##*));
+          @pemit %#=%xh[u(#15/u-bodyloc-description,##)]:%xn 
+          %r [u(u-iter-injuries, %q4, %q2 )]};
+      @wait 0=@pemit %#=[u(u-sheet-footer, %q2)]}
+
+-
+# u(u-iter-injuries, <list of damage-##-woud type>, <player dbref>)
+
+&u-iter-injuries #7=
+ columns([iter(%0, [clip(clip(##))]:%b%b[get(%1/##)], %b, |)],
+                   [div(75, 4)] , |)
+
+
+-
+# THIS TYPE OF COMMAND COULD TAKE PRECIDENCE OVER THE REAL SHEET/ADD
+# COMMAND DURING PARSING. DO NOT REMOVE, UNLESS SYNTAX IS CHANGED
+# SO THAT IT WOULD NOT.
+#
+#&cmd-sheet-add-dummy #7=$@sheet/add *:
+#  @switch [strmatch(%0, *=*)]=
+#    1, {@@ do nothing, correct syntax was used @@},
+#    {@pemit %#=You're not using the @sheet command correctly. Please 
+#         type: @sheet/help}
+#-
+&cmd-sheet-add-dummy2 #7=$@sheet/add:
+
+    @pemit %#=You're not using the @sheet command correctly. 
+           Please type: @sheet/help
+-
+
+# This command is intended to let players add information to their
+# secrets attribute, and later, to other attributes if they wish
+#
+# %q0 is what type of information you want to add
+# %q1 is the information you want to add
+# %q2 is WHO you want to add the information TO.
+#
+# Command syntax: 
+#   @sheet/add [<Who to add to>/]<Type of information>=<Information>
+#
+# NOTE: This means that <Type> of information CAN NOT have a / in it.
+
+&cmd-sheet-add #7=$@sheet/add *=*:
+  think setq(0, ifelse(strmatch(%0,*/*),rest(%0,/),%0));
+  think setq(1, %1);
+  think setq(2, ifelse(strmatch(%0,*/*),pmatch(first(%0,/)),%#));
+
+ @switch [setr(9,or(hasflag(%#, wizard), strmatch(%#, %q2))
+    [t(match(v(sheet-can-add), %q0, |))])]=
+  0?, {@pemit %#=Only Wizards may add to the sheets of other players.},
+  10, {@pemit %#=You can't add to that part of your 
+        character's sheet. Please see 'help @sheet/add'.},
+  11, {think [setq(3,[switch([hasattr(%q2,SECRETS4)],1,SECRETS4,[switch(
+             [hasattr(%q2,SECRETS3)],1,SECRETS3,[switch([hasattr(%q2,
+             SECRETS2)],1,SECRETS2,SECRETS)])])])];
+       think [setq(4,[strlen([get(%q2/%q3)])])];
+       think [setq(5,[strlen(%q1)])];
+       think [setq(6,[add(%q4,%q5)])];
+       @switch [and([strmatch(%q3,SECRETS4)],[gt(%q6,10500)])]=
+               1,{@pemit %#=That secrets does not fit. Either shorten your 
+                  entry or alert a wizard you have reached your secret 
+                  buffer limit.},
+               0,{@switch [gt(%q6,10500)]=1,{think [setq(7,[switch(
+                             [add([after(%q3,SECRETS)],1)],1,2,
+                             [add([after(%q3,SECRETS)],1)])])];
+                           @tr me/trig-sheet-add-[makeattr(%q0)]=
+                           %q1,%q2,%#,%q7},
+                          0,{think [setq(7,[after(%q3,SECRETS)])];
+                  @tr me/trig-sheet-add-[makeattr(%q0)]=%q1,%q2,%#,%q7}}};
+
+-
+# %0 = the secrets to be added
+# %1 = %#
+
+&trig-sheet-add-secrets #7=
+  &SECRETS%3 %1=[u(%1/secrets%3)]%b%b%0;
+  @pemit %2=%xh[name(%1)]'s secrets now read:%r%xn[u(%1/SECRETS%3)]
+  [trigger(me/trig-post-secret,%0,%1)]
+-
+
+&trig-sheet-add-notes #7=think [setq(0,[get(%1/EMAIL)])];think [setq(1,
+                         [grep(%1,PLAYER-*,%q0)])];@switch [eq([words(%q1)],0)]=
+                         1,{think [setq(2,[get(%1/PLAYERS)])];think [setq(3,
+                         [get(%1/SHEET-NOTES)])];&PLAYER-%q2 %1=%q0;
+                         &SHEET-NOTES-%q3 %1=%q2|%q0|[ictime()]|[time()]|%0;
+                         &PLAYERS %1=[inc(%q2)];&SHEET-NOTES %1=[inc(%q3)];
+                         @pemit %1=The note has been added to your sheet as: %0;
+                         @bb/post Notes/[name(%1)] added Note %q3=[name(%1)] 
+                         (%q0) has added a note with number %q3.  It reads:%r%r
+                         %0%r%rPlease be sure that this is a valid note.},0,
+                         {think [setq(2,[after(%q1,PLAYER-)])];think [setq(3,
+                         [get(%1/SHEET-NOTES)])];&SHEET-NOTES-%q3 %1=
+                         %q2|%q0|[ictime()]|[time()]|%0;&SHEET-NOTES %1=[inc(%q3)];
+                         @pemit %1=The note has been added to your sheet as: %0;
+                         @bb/post Notes/[name(%1)] added Note %q3=[name(%1)] 
+                         (%q0) has added a note with number %q3.  It reads:%r%r%0
+                         %r%rPlease be sure that this is a valid note.}
+-
+
+&sheet-can-add #7=secrets|notes  
+
+-
+&cmd-sheet-status #7=$@sheet/status:@fo %#=@sheet/status %#
+-
+&cmd-sheet-status-player #7=$@sheet/status *:
+ think setq(0, locate(%!, %0, *));
+ think setq(0, ifelse(isdbref(%q0), %q0, locate(%!, *%0, *)));
+
+ @switch or(hasflag(%#, wizard), strmatch(%#, %q0))=
+  0, {@pemit %#=Only Wizards may view the status sheets of other players.},
+  1, {@heal/resynch %q0;
+      @pemit %#=[u(u-sheet-header, %q0)];
+      @pemit %#=%xgStatus: %xn 
+                  [switch(1, hastag(%q0, dead), Dead, Alive)] 
+                  [switch(1, hastag(loc(%q0), ooc), OOC, IC)] 
+                  [switch(1, hastag(%q0, asleep), Asleep, Awake)] 
+                  [switch(1, hasflag(%q0, staff), Staff)] 
+                  %xh%xb[rjust(get(%q0/rank), 40)]%xn%r;
+      @pemit %#= [u(u-sheet-status-energy, %q0)]%r;
+#      @pemit %#=  
+#        %xgToggles:%xn%r%r
+#        [columns(%xhTerse:%xn [switch(1, hasflag(%q0, terse), On, Off)]|
+#             %xhQuietlogin:%xn [ifelse(hastag(%q0, quiet_login), On, Off)]|
+#             %xhAnsi:%xn [switch(1, hasflag(%q0, ansi), On, Off)]|
+#             %xhCombatstats:%xn [switch(1, hastag(%q0, combatstats), On, Off)]|
+#             %xhCombatstatus:%xn [switch(1,hastag(%q0,combatstatus),On,Off)]|
+#             %xhWintelnet:%xn [switch(1, hasflag(%q0, wintelnet), On, Off)]|
+#             %xhEcho:%xn [switch(1, hasflag(%q0, remoteecho), On,Off)]|
+#             %xhMonitor:%xn [switch(1, hastag(%q0, monitor), On,Off)]|
+#             %xhAutowork:%xn [switch(1, hastag(%q0, autowork), On, Off)]|,
+#             25, |)];
+      @pemit %#=
+        %xgToggles:%xn%r
+        [columns(trim(iter(setdiff(get(#31/toggle-settings),ifelse(hastag(%#,deity),,mana)),
+                    %xh[ifelse(eq(1,#@),%%b,)][capstr(trim(##))]:%b%xn
+                    [capstr(lcstr(u(#31/u-toggle-on-or-off,%#,##)))]|)), 25, |)];
+      @pemit %#=[u(u-sheet-footer, %q0)]}
+-
+# A real trigger, not a function.
+
+&trig-post-secret #7=@bb/post oversight/New Secret For [name(%1)]= A new 
+   secret was added on to [name(%1)]'s current secrets.  It reads: %0%r%r 
+   Please check this against [name(%1)]'s overall secrets (using @sheet/secrets) 
+   to make sure it is not unthematic or Out Of Character.              
+
+# Old @bbpost code:
+#
+#&trig-post-secret #7=@bb/post oversight/New Secret For [name(%1)]=
+#  A new secret was added for [name(%1)].  The new secret reads: %0%r%r
+#  [name(%1)]'s secrets now read: [get(%1/secrets)].
+
+-
+
+&u-sheet-status-energy #7=
+    [columns(%xhStamina Points:%xn [u(%0/ac-stamina_points)]|
+             %xhMon %(Money%):%xn [u(%0/ac-mon)]|
+             %xhEncumbrance:%xn [u(%0/encumbrance)] lbs. |
+             %xhUnused Experience Points:%xn [u(%0/ac-unused_xp)]|
+             %xhTotal Damage Points:%xn [u(%0/damage)]|
+             %xhTotal Experience Points:%xn [add(u(%0/ac-unused_xp),
+                                              u(%0/ac-used_xp))],
+                30, |)]
+
+-
+
+
+&cmd-sheet-all-dummy #7=$@sheet/all: @force %#=@sheet/all %#
+-
+
+# This displays _everything_
+
+&cmd-sheet-all #7=$@sheet/all *:
+
+  think setq(0, switch(%0, me, [name(%#)], %0));
+  think setq(0, locate(%#, %0, *));
+  think setq(0, switch(isdbref(%q0), 1, %q0, locate(%#, *%0, *)));
+
+ @switch [isdbref(%q0)][or(hasflag(%#, wizard), strmatch(%#, %q0))]=
+  0?, {@pemit %#=I don't know who that is.},
+  10, {@pemit %#=Only Wizards may view the sheets of other players.},
+  11, {@pemit %#=%xg%xh%xXCHARACTER SHEET FOR:%B%B[NAME(%q0)]%t
+                   %xh[switch(get(%q0/level), I, Feature Character,
+                                           II, Companion Character,
+                                           III, Citizen Character)]%xn%r;
+	 @pemit %#=[u(u-sheet-physical,%q0)]%r;
+	 @pemit %#=[u(u-sheet-pedigree,%q0)]%r%r;
+	 @pemit %#=[u(u-sheet-personality,%q0)]%r%r;
+	 @pemit %#=%xh%xgFamily:%xn;
+	 @pemit %#=[u(u-sheet-spouse, %q0)];
+	 @pemit %#=[u(u-sheet-parents, %q0)];
+	 @pemit %#=[u(u-sheet-siblings, %q0)];	
+	 @pemit %#=[u(u-sheet-children, %q0)];
+	 @pemit %#=%xh%xgOther Relationships:%xn;	
+# break up the relationships, since folks are going over lbuf with them.
+         @pemit %#=[u(u-sheet-rel-other-list1, %q0)];
+         @pemit %#=[u(u-sheet-rel-other-list2, %q0)];
+         @pemit %#=[u(u-sheet-rel-other-list3, %q0)];
+         @pemit %#=[u(u-sheet-rel-other-list4, %q0)]%r%r;
+	 @pemit %#=[u(u-sheet-background, %q0)]%r%r;
+	 @pemit %#=[u(u-sheet-social, %q0)];
+	 @pemit %#=[u(u-sheet-art, %q0)]%r%r;
+         @pemit %#=[u(u-sheet-notes, %q0, [lattr(%q0/sheet-notes-*)], %#)]%r%r;
+	 @pemit %#=[u(u-sheet-secrets, %q0)]%r%r;	
+	 @pemit %#=%xh%xgOther:%xn;	
+	 @pemit %#=[u(u-sheet-status-energy, %q0)]%r%r;	
+	 @pemit %#=[u(u-sheet-skills, %q0)]%r%r;	
+	 @pemit %#=[u(u-sheet-attributes, %q0)]%r%r;	
+
+	}
+
+-
+&u-sheet-physical #7=
+ %xh%xgPhysical Appearance:%xn%r
+ [columns(
+   %xhEye Color:%xn [u([parent(%0)]/tr-eye_color)]|
+   %xhHair Color:%xn [u([parent(%0)]/tr-hair_color)]|
+   %xhHair Length%xn: [u([parent(%0)]/tr-hair_length)]|
+   %xhSkin Color:%xn [u([parent(%0)]/tr-skin_color)]|
+   %xhWeight:%xn [u(%0/weight)]|
+   %xhHeight:%xn [u(%0/height)]|
+   %xhAge Range:%xn [setq(age,get(%0/age))][switch(1,
+        lt(%q<age>,11), child,
+        lt(%q<age>,14), teen,
+        lt(%q<age>,16), young adult,
+        lt(%q<age>,35), adult,
+        lt(%q<age>,45), middle aged,
+        lt(%q<age>,60), elderly,
+         old)]|
+   %xhGender:%xn [u(%0/sex)]|
+   %xhSocial Class:%xn [switch(u(%0/social-status),
+                  1, Eta,
+                  2, Commoner,
+                  3, Lower Noble,
+                  4, High Noble,
+                  5, Royalty)], div(75,2),|)]
+   %xhFeatures:%xn [default(%0/features, None)]
+   %r%b%xX%xh%xwBirthday:%xn [get(%0/birthday)]
+   %r%r
+   [space()]%xhDescription:%xn [edefault(%0/description, NoneSupplied)]
+-
+&cmd-sheet-player #7=$@sheet *:
+  think setq(0, ifelse(strmatch(%0, me), %#, %0));
+  think setq(0, switch(isdbref(%q0), 1, %q0, locate(%!, %0, *)));
+  think setq(0, switch(isdbref(%q0), 1, %q0, locate(%!, *%0, *)));
+  @switch isdbref(%q0)=
+    0, {@pemit %#=No such player as %0.},
+
+    1, {@pemit %#=[u(u-sheet-header, %q0)];
+        @pemit %#=[u(u-sheet-physical, %q0)];
+	@pemit %#=%b[clothingdesc(%q0)]%r;
+        @pemit %#=%xh%xg(To learn more about this character, see help on 
+                      the following commands:%r @info, gossip, learn about)%xn;
+        @pemit %#=[u(u-sheet-footer, %q0)] },
+    {@pemit %#=%xgError:  Admin have been alerted.%xn;
+     @qmail steph/Bug in Sheet Command=Unexpected Condition 
+                  Ocurred in @sheet}
+-
+
+# Adding taken-from-roster here.  Not the right place.
+# 
+
+&u-sheet-pedigree #7=
+    %xh%xgGeneral Information:%xn%r
+    [columns(%xhAge:%xn [default(%0/age, Unknown)]|
+             %xhBirthday:%xn [default(%0/birthday, Unknown)]|
+             %xhLast Name:%xn [default(%0/lastname, None)]|
+             %xhVocation:%xn [default(%0/vocation, None)]|
+             %xhClan Origin:%xn [default(%0/clan, None)]|
+             %xhReligion:%xn [default(%0/religious-orientation, None)]|
+             %xhCity of Birth:%xn [default(%0/birth-city, None)]|
+             %xhPatron Deity:%xn [default(%0/patron-deity, None)]|
+             %xhWeight:%xn [default(%0/weight, 0)] pounds|
+             %xhHeight:%xn [default(%0/height, 0)] feet|
+             %xhSocial Class:%xn [switch(default(%0/social-status, 2),
+                                         1, Outcast <1>, 
+                                         2, Commoner <2>,
+                                         3, Middle Class <3>,
+                                         4, Noble <4>,
+                                         5, Clan Leader <5>)]|
+             %xhCharacter Level:%xn [switch(default(%0/level, III),
+                                            I, Feature (I),
+                                            II, Companion (II),
+                                            III, Citizen (III))]|
+             %xh[ifelse(hastag(%0,roster),,
+                       Taken From Roster: [elements(
+                       [default(%0/taken-from-roster,Unknown)],1 2 3 5)])]|,
+             fdiv(79, 2), |)]
+
+-
+
+
+&u-sheet-personality #7=
+    [space()]%xhPersonality:%xn [default(%0/personality, None Supplied)]%r
+
+-
+
+&cmd-sheet #7=$@sheet:
+  @pemit %#=[u(u-sheet-header, %#)]%r;
+  @pemit %#=[u(u-sheet-pedigree, %#)];
+  @pemit %#=[u(u-sheet-personality, %#)];
+  @pemit %#=%xh(To find out what you look like, type 'look me')%xn;
+  @pemit %#=[u(u-sheet-footer, %#)]
+
+-
+
+&u-sheet-footer #7=
+    %xh%xb[repeat(-,75)]%r%xn%xb
+    [center(See %xh@sheet/help%xn%xb for more.,75)] 
+-
+&u-sheet-background-footer #7=
+    %xh%xb[repeat(-,75)]%r%xn%xb
+    [center(See %xh@sheet/help%xn%xb for more.,75)] 
+
+-
+&u-sheet-header #7=
+
+    %xh%xg[ucstr(ljust(@sheet for [get(%0/lastname)] [name(%0)]  , 75))]%r
+    %xh%xb[repeat(-,75)]
+-
+&cmd-sheet-family #7=$@sheet/family:@fo %#=@sheet/family %#
+-
+&cmd-sheet-family-player #7=$@sheet/family *:
+ think setq(0, locate(%!, %0, *));
+ think setq(0, ifelse(isdbref(%q0), %q0, locate(%!, *%0, *)));
+
+ @switch or(hasflag(%#, wizard), strmatch(%#, %q0))=
+  0, {@pemit %#=Only Wizards may view the family sheets of other players.},
+  1, {@pemit %#=[u(u-sheet-header, %q0)];
+      think setq(1, u(%q0/mother));
+      think setq(1, setunion(%q1, u(%q0/father)));
+      think setq(2, lattr(%q0/sibling*));
+      think setq(2,iter(%q2, u(%q0/##)));
+      think setq(3, lattr(%q0/child*));
+      think setq(3, iter(%q3, u(%q0/##)));
+      think setq(4, u(%q0/spouse));
+      think setq(5, setunion(%q1, %q2));
+      think setq(5, setunion(%q5, %q3));
+      think setq(5, setunion(%q5, %q4));
+      think setq(5, setunion(%q5, [name(%q0)]));
+      think setq(7, lcstr(lattr(%q0/relationship*)));
+      think setq(7, filter(#35/filter-relationships, %q7));
+      think setq(7, iter(%q7, last(u(%q0/##))));
+      think setq(7, filter(#35/filter-don't-match, %q7));
+      think setq(8, setunion(%q6, %q7));
+      @pemit %#=%r%xgParents:%xn %q1%r
+                %xgSiblings:%xn %q2%r
+                %xgChildren:%xn %q3%r
+                %xgSpouse:%xn %q4%r
+                %xgOthers:%xn 
+         [iter(%q8,switch(hastag(pmatch(##),dead),1,##(d),##))]%r;
+     @pemit %#=[u(u-sheet-footer, %q0)]}
+-
+&u-sheet-parents #7=
+   [space()][%xgMother:%b%xn%xh[get(%0/mother)]%xn%b%b]
+   [default(%0/relationship-mother,Not Specified)]
+   [ifelse(t(match(
+     default(%0/relationship-secret-mother,none)
+     ,none)),%r,
+     %r[space()]%xhSecret Relationship with%b
+     [get(%0/mother)]:%b%xg[get(%0/relationship-secret-mother)]%xn%r)]
+   [space()][%xgFather:%b%xn%xh[get(%0/father)]%xn%b%b]
+   [default(%0/relationship-father,Not Specified)]
+   [ifelse(t(match(
+     default(%0/relationship-secret-father,none)
+     ,none)),%r,
+     %r[space()]%xhSecret Relationship with%b
+     [get(%0/father)]:%b%xg[get(%0/relationship-secret-mother)]%xn%r)]
+
+-
+&u-roster-parents #7=
+   [space()][%xgMother:%b%xn%xh[get(%0/mother)]%xn%b%b]
+   [default(%0/relationship-mother,Not Specified)]%r
+   [space()][%xgFather:%b%xn%xh[get(%0/father)]%xn%b%b]
+   [default(%0/relationship-father,Not Specified)]%r
+
+-
+&u-sheet-spouse #7=
+  [space()]%xgSpouse:%b%xn%xh[get(%0/spouse)]%xn%b
+  [default(%0/relationship-spouse,[name(%0)] is unmarried.)]
+  [ifelse(t(match(
+     default(%0/relationship-secret-spouse,none)
+     ,none)),%r,
+     %r[space()]%xhSecret Relationship with%b
+     [get(%0/spouse)]:%b%xg[get(%0/relationship-secret-spouse)]%xn%r)]
+
+-
+&u-roster-spouse #7=
+  [space()]%xgSpouse:%b%xn%xh[get(%0/spouse)]%xn%b
+  [default(%0/relationship-spouse,[name(%0)] is unmarried.)]%r
+
+-
+&cmd-sheet-spouse #7=$@sheet/spouse:@fo %#=@sheet/spouse %#
+-
+&cmd-sheet-spouse-player #7=$@sheet/spouse *:
+ think setq(0, locate(%!, %0, *));
+ think setq(0, ifelse(isdbref(%q0), %q0, locate(%!, *%0, *)));
+
+ @switch or(hasflag(%#, wizard), strmatch(%#, %q0))=
+  0, {@pemit %#=Only Wizards may view the spouse sheets of other players.},
+  1, {@pemit %#=[u(u-sheet-header, %q0)];
+      @pemit %#=[u(u-sheet-spouse, %q0)];	
+      @wait 0=@pemit %#=[u(u-sheet-footer, %q0)]}
+-
+
+&u-sheet-relationships-other #7=
+ [space()][
+   iter(lcstr(lattr(%0/relationship-other*)),
+     %xhRelationship with%b
+     [get(%0/relationship[trim(edit(##,relationship-other,))])]:%b%xn[trim(get(%0/##))]
+     [ifelse(t(match(
+     default(%0/relationship-secret-other[trim(edit(##,relationship-other,))],none)
+     ,none)),%r,
+     %r[space()]%xhSecret Relationship with%b
+     [get(%0/relationship[trim(edit(##,relationship-other,))])]:%b%xg
+     [get(%0/##)]%xn%r)]
+    )
+  ]
+  [  
+   iter(lcstr(setdiff(lattr(%0/relationship-secret-other*),
+    lattr(%0/relationship-other*))),
+    [ifelse(t(match(default(%0/##,none),
+    none)),%r,
+    %r[space()]%xhSecret Relationship with%b
+    [get(%0/relationship[trim(edit(##,relationship-secret-other,))])]:%b%xg
+    [get(%0/##)]%xn%r)]
+   )
+  ]
+-
+
+&u-sheet-relationships-other-list #7=
+   [space()]
+   [trim(
+   iter(
+     lcstr(lattr(%0/relationship-other?)%b
+     [lattr(%0/relationship-other1?)]%b
+     [lattr(%0/relationship-other2?)]%b
+     [lattr(%0/relationship-other3?)]),
+     u(u-format-rel-other,%0,after(##,relationship-other))%r))]
+
+-
+&u-sheet-rel-other-list2 #7=
+   [space()]
+   [trim(
+   iter(
+     lcstr(lattr(%0/relationship-other4?)%b
+     [lattr(%0/relationship-other5?)]%b
+     [lattr(%0/relationship-other6?)]),
+     u(u-format-rel-other,%0,after(##,relationship-other))%r))]
+
+
+-
+&u-sheet-rel-other-list3 #7=
+   [space()]
+   [trim(
+   iter(
+     lcstr(lattr(%0/relationship-other7?)%b
+     [lattr(%0/relationship-other8?)]%b
+     [lattr(%0/relationship-other9?)]%b
+     [lattr(%0/relationship-other???)]),
+     u(u-format-rel-other,%0,after(##,relationship-other))%r))]
+
+-
+
+&u-format-rel-other #7=
+     %xhRelationship with 
+     [get(%0/relationship%1)]:%b%xn
+     [trim(get(%0/relationship-other%1))]
+     [ifelse(
+       t(match(default(%0/relationship-secret-other%1,none),none)),
+       %b,
+       %r[space()]%xhSecret Relationship with 
+       [get(%0/relationship%1)]: 
+       %xg[get(%0/relationship-secret-other%1)]%xn)]
+
+-
+
+&u-format-rel-other-secret #7=
+     [ifelse(
+       t(match(default(%0/relationship-other%1,none),none)),
+       %r[space()]%xhSecret Relationship with 
+       [get(%0/relationship%1)]: 
+       %xg[get(%0/relationship-secret-other%1)]%xn,
+       %b)]
+
+-
+
+&u-sheet-rel-other-list1 #7=
+      [space()]
+      [trim(
+      iter(
+        lcstr(lattr(%0/relationship?)%b
+        [lattr(%0/relationship1?)]%b
+        [lattr(%0/relationship2?)]%b
+        [lattr(%0/relationship3?)]),
+        u(u-format-rel-other,%0,after(##,relationship))%r))]
+
+-
+
+&u-sheet-rel-other-list2 #7=
+      [trim(
+      iter(
+        lcstr(lattr(%0/relationship4?)%b
+        [lattr(%0/relationship5?)]%b
+        [lattr(%0/relationship6?)]),
+        u(u-format-rel-other,%0,after(##,relationship))%r))]
+-
+
+&u-sheet-rel-other-list3 #7=
+      [trim(
+      iter(
+        lcstr(lattr(%0/relationship7?)%b
+        [lattr(%0/relationship8?)]%b
+        [lattr(%0/relationship9?)]),
+        u(u-format-rel-other,%0,after(##,relationship))%r))]
+
+-
+
+&u-sheet-rel-other-list4 #7=
+      [trim(
+      iter(
+         lcstr(lattr(%0/relationship???)),
+         u(u-format-rel-other,%0,after(##,relationship))%r))]
+
+
+-
+
+&cmd-sheet-relationships #7=$@sheet/relationships:@fo %#=
+  @sheet/relationships %#
+-
+&cmd-sheet-relationships-player #7=
+     $@sheet/relationships *:
+     think setq(0, locate(%!, %0, *));
+     think setq(0, ifelse(isdbref(%q0), %q0, locate(%!, *%0, *)));
+     @switch or(hasflag(%#, wizard), strmatch(%#, %q0))=
+       0, {@pemit %#=Only Wizards may view the relationship sheets of other players.},
+       1, {@pemit %#=[u(u-sheet-header, %q0)];
+           @pemit %#=%xh%xgFamily:%xn;
+           @pemit %#=[u(u-sheet-spouse, %q0)];
+           @pemit %#=[u(u-sheet-parents, %q0)];
+           @pemit %#=[u(u-sheet-siblings, %q0)]; 
+           @pemit %#=[u(u-sheet-children, %q0)];
+           @pemit %#=%xh%xgOther Relationships:%xn;
+
+# Breaking the relationships down overcomes the lbuf issue with larger sheets.
+
+           @pemit %#=[u(u-sheet-rel-other-list1,%q0)];
+           @pemit %#=[u(u-sheet-rel-other-list2,%q0)];
+           @pemit %#=[u(u-sheet-rel-other-list3,%q0)];
+           @pemit %#=[u(u-sheet-rel-other-list4,%q0)];
+           @pemit %#=[u(u-sheet-footer, %q0)]
+          }
+
+-
+
+
+&u-sheet-children #7=
+  [space()]
+  [
+      iter(lcstr(lattr(%0/child*)),
+      %xgChild:%b
+      %xh%xw[u(%0/##)].
+      %xn%b
+      [trim(u(%0/relationship-##))]
+      [ifelse(t(match(
+       default(%0/relationship-secret-##,none)
+       ,none)),%r,
+       %r[space()]%xhSecret Relationship with%b
+       [u(%0/##)]:%b%xg[get(%0/relationship-secret-##)]%xn%r)]
+    )
+  ]
+-
+&u-roster-children #7=[space()]
+      [iter(lcstr(lattr(%0/child*)),
+      %xgChild:%b
+      %xh%xw[u(%0/##)].
+      %b%xn[trim(get(%0/relationship-child[after(##,child)]))]%r)]
+
+-
+&cmd-sheet-children #7=$@sheet/children:@fo %#=@sheet/children %#
+-
+&cmd-sheet-children-player #7=$@sheet/children *:
+ think setq(0, locate(%!, %0, *));
+ think setq(0, ifelse(isdbref(%q0), %q0, locate(%!, *%0, *)));
+
+ @switch or(hasflag(%#, wizard), strmatch(%#, %q0))=
+  0, {@pemit %#=Only Wizards may view the children sheets of other players.},
+  1, {@pemit %#=[u(u-sheet-header, %q0)];
+      @pemit %#=[u(u-sheet-children, %q0)];
+#        {@pemit %#=[name(%q0)] does not have children.};
+      @wait 0=@wait 0=@pemit %#=[u(u-sheet-footer, %q0)]}
+-
+
+&cmd-sheet-help #7=$@sheet/help:
+  @pemit %#=%xg%xh@SHEET/HELP -- a quick guide to the sheet commands%xn;
+  @pemit %#=%xb%xh[repeat(-,75)]%xn;
+  @pemit %#=
+  %xh@sheet%xn -- basic info about your character%r
+  %xh@sheet <player>%xn -- basic info about another character%r
+  %xh@sheet/stats%xn -- your character's stats combined%r
+  %xh@sheet/status%xn -- gives the current status of your character.%r
+  %xh@sheet/skills%xn -- your character's skills only%r
+  %xh@sheet/attributes%xn -- your character's attributes only%r
+  %xh@sheet/damage%xn -- displays your character's obvious injuries%r
+  %xh@sheet/background%xn -- your character's background%r
+  %xh@sheet/secrets%xn -- your character's secrets%r
+  %xh@sheet/employment%xn -- your character's employment information%r
+  %xh@sheet/add secrets=<secret> %xn-- allows players to add new secrets.%r
+  %xh@sheet/all %xn-- your character's entire sheet, all at once%r
+  %xh@sheet/help%xn -- this help screen;
+  @pemit %#=%xh%xb[repeat(-,75)];
+  @pemit %#=center(%xh%xgcontinued: @sheet/help2, 65)
+-
+
+&cmd-sheet-help2 #7=$@sheet/help2:
+  @pemit %#=%xg%xh@SHEET/HELP2  -- a quick guide to the sheet commands%xn;
+  @pemit %#=%xb%xh[repeat(-,75)]%xn;
+  @pemit %#=
+  %xh@sheet/family%xn -- brief overview of your character's family%r
+  %xh@sheet/parents%xn -- your character's relationships with his/her parents%r
+  %xh@sheet/siblings%xn -- your character's relationships with siblings%r
+  %xh@sheet/spouse%xn -- your character's relationship with his/her spouse%r
+  %xh@sheet/children%xn -- your character's relationship with his/her 
+                           children%r
+  %xh@sheet/relationships%xn -- your character's other relationships%r
+  %xh@sheet/social%xn -- information about your character's social life%r
+  %xh@sheet/art%xn -- information about your character's artistic life%r
+  %xh@sheet/notes%xn -- notes added by players that don't fit other places 
+                        on the sheet%r
+  %xh@sheet/all <player>%xn -- admin only, displays all character info%r
+  %xh@sheet/employment <player>%xn -- admin only, employment info on player%r
+  %xh@sheet/notes <player>%xn -- admin only to view a characters notes%r
+  %xh@sheet/help2%xn -- this help screen%r
+  %xhhelp @sheet index%xn -- A guide to explanations for each @sheet command;
+  @pemit %#=%xg[u(u-sheet-footer, %#)]
+
+
+-
+
+&u-sheet-secrets #7=
+%xh%xgSecrets:%xn%r
+[edefault(%0/secrets, This character appears not to have any secrets.)]
+-
+&u-sheet-secrets-more #7=%xh%xg%rSecrets:%xn%r
+[edefault(%0/secrets%1, This character has no other secrets.)]
+-
+&cmd-sheet-secrets #7=$@sheet/secrets:@fo %#=@sheet/secrets %#
+-
+&cmd-sheet-secrets-player #7=$@sheet/secrets *:
+ think setq(0, locate(%!, %0, *));
+ think setq(0, ifelse(isdbref(%q0), %q0, locate(%!, *%0, *)));
+ think setq(1, switch(strmatch(%q0,get(%#/SHEET-CHAR)),1,
+               get(%#/SHEET-PAGE),0));
+ think setq(2, inc(%q1));
+ think setq(4, switch(hasattr(%q0,SECRETS%q2),1,%q2,1));
+ think setq(3, inc(%q4));
+
+ @switch or(hasflag(%#, wizard), strmatch(%#, %q0))=
+  0, {@pemit %#=Only Wizards may view the secret sheets of other players.},
+  1, {@switch or(eq(%q4,1),eq(5,%q4))=1,{
+      &SHEET-CHAR %#=%q0;
+      &SHEET-PAGE %#=1;
+      @pemit %#=[u(u-sheet-header, %q0)];
+      @pemit %#=%xh%xgYOUR CHARACTER'S SECRETS%xn%r;
+      @pemit %#=[u(u-sheet-secrets, %q0)];
+      @pemit %#=[u(u-sheet-footer, %q0)];@switch [hasattr(%q0,SECRETS%q3)]=1,{
+      @pemit %#=%xh%xgMore secrets available: %xn@sheet/secrets%xn}
+      },
+      {&SHEET-CHAR %#=%q0;
+       &SHEET-PAGE %#=%q4;
+       @pemit %#=[u(u-sheet-header, %q0)];
+       @pemit %#=%xh%xgYOUR CHARACTER'S SECRETS PAGE %q4;
+       @pemit %#=[u(u-sheet-secrets-more, %q0, %q4)];
+       @pemit %#=[u(u-sheet-footer, %q0)];
+       @switch [hasattr(%q0,SECRETS%q3)]=1,{
+               @pemit %#=%xh%xgMore secrets available: %xn@sheet/secrets%xn}}}
+-
+&cmd-sheet-parents #7=$@sheet/parents:@fo %#=@sheet/parents %#
+-
+&cmd-sheet-parents-player #7=$@sheet/parents *:
+ think setq(0, locate(%!, %0, *));
+ think setq(0, ifelse(isdbref(%q0), %q0, locate(%!, *%0, *)));
+
+ @switch or(hasflag(%#, wizard), strmatch(%#, %q0))=
+  0, {@pemit %#=Only Wizards may view the parents sheets of other players.},
+  1, {@pemit %#=[u(u-sheet-header, %q0)];
+      @pemit %#=%xgMother:%xn [u(%q0/mother)];
+      @pemit %#=%xgRelationship with Mother:%xn%b
+                 [u(%q0/relationship-mother)]%r;
+      @pemit %#=%xgFather:%xn [u(%q0/father)];
+      @pemit %#=%xgRelationship with Father:%xn%b
+                 [u(%q0/relationship-father)]%r;
+      @pemit %#=[u(u-sheet-footer, %q0)]}
+-
+
+&u-sheet-siblings #7=
+   [space()][
+     iter(lcstr(lattr(%0/sibling*)),
+       %xgSibling: 
+       %xh%xw[u(%0/##)].
+       %xn%b
+       [trim(u(%0/relationship-##))]
+       [ifelse(
+         t(match(default(%0/relationship-secret-##,none),none)),
+         %r,
+         %r[space()]
+         %xhSecret Relationship with 
+         [u(%0/##)]: 
+         %xg[get(%0/relationship-secret-##)]%xn%r)]
+      )
+    ]
+
+-
+
+&u-roster-siblings #7=
+   [space()][
+     iter(lcstr(lattr(%0/sibling*)),
+       %xgSibling: 
+       %xh%xw[u(%0/##)].
+       %xn%b
+       [trim(u(%0/relationship-##))]%r)]
+      )
+    ]
+
+-
+&cmd-sheet-siblings #7=$@sheet/siblings:@fo %#=@sheet/siblings %#
+-
+&cmd-sheet-siblings-player #7=$@sheet/siblings *:
+ think setq(0, locate(%!, %0, *));
+ think setq(0, ifelse(isdbref(%q0), %q0, locate(%!, *%0, *)));
+
+ @switch or(hasflag(%#, wizard), strmatch(%#, %q0))=
+  0, {@pemit %#=Only Wizards may view the siblings sheets of other players.},
+  1, {@pemit %#=[u(u-sheet-header, %q0)];
+      @pemit %#=[u(u-sheet-siblings, %q0)];	
+      @wait 0=@wait 0=@pemit %#=[u(u-sheet-footer, %q0)]}
+
+-
+
+&u-sheet-background #7=
+   %xh%xgBackground:%xn%r 
+   [edefault(%0/background, None Supplied)]
+
+-
+&cmd-sheet-background #7=$@sheet/background:@fo %#=@sheet/background %#
+-
+&cmd-sheet-background-player #7=$@sheet/background *:
+ think setq(0, locate(%!, %0, *));
+ think setq(0, ifelse(isdbref(%q0), %q0, locate(%!, *%0, *)));
+
+ @switch or(hasflag(%#, wizard), strmatch(%#, %q0))=
+  0, {@pemit %#=Only Wizards may view the background sheets of other players.},
+  1, {@pemit %#=[u(u-sheet-header, %q0)];
+      @pemit %#=[u(u-sheet-background, %q0)];
+      @pemit %#=[u(u-sheet-background-footer, %q0)]}
+
+-
+
+&u-sheet-stats #7=
+ [u(u-sheet-attributes, %0)]%r%r
+ [u(u-sheet-skills, %0)]
+-
+&cmd-sheet-stats #7=$@sheet/stats:@fo %#=@sheet/stats %#
+-
+&cmd-sheet-stats-player #7=$@sheet/stats *:
+ think setq(0, locate(%!, %0, *));
+ think setq(0, ifelse(isdbref(%q0), %q0, locate(%!, *%0, *)));
+
+ @switch or(hasflag(%#, wizard), strmatch(%#, %q0))=
+  0, {@pemit %#=Only Wizards may view the stats sheets of other players.},
+  1, {@pemit %#=[u(u-sheet-header, %q0)];
+      @pemit %#=[u(u-sheet-stats ,%q0)];
+      @pemit %#=[u(u-sheet-footer, %q0)]}
+-
+
+&u-sheet-skills #7=
+  [setq(0,%0)]
+  %xh%xgSkills:%r%r
+  %xn[columns(
+	iter(
+	 filter(filter-has-skill-reg, 
+ 		iter(setunion(lattr(parent(%0)/sk-*),
+                     lattr(%0/sk-*)),clip(##),%b,|)
+		,|)
+	 ,[rjust([skill(%0, ##)],2)]%b%b
+          [lcstr(default(%0/ska-[edit(##,%b,_)], ##))], |, |), 
+  [div(78, 4)], |)]
+-
+&u-sheet-attributes #7=
+# Flip through the list of attributes, sleecting a score from the player 
+
+# for each. 
+
+  %xh%xgAttributes:%r%r
+  %xn
+  [u(#7/u-attribs, iter(u(#7/attribute-list-columnwise),
+[u(%0/AT-##)]))] 
+-
+&cmd-sheet-skills #7=$@sheet/skills:@fo %#=@sheet/skills %#
+-
+&cmd-sheet-skills-player #7=$@sheet/skills *:
+ think setq(0, locate(%!, %0, *));
+ think setq(0, ifelse(isdbref(%q0), %q0, locate(%!, *%0, *)));
+
+ @switch or(hasflag(%#, wizard), strmatch(%#, %q0))=
+  0, {@pemit %#=Only Wizards may view the skill sheets of other players.},
+  1, {@pemit %#=[u(u-sheet-header, %q0)];
+      @pemit %#=[u(u-sheet-skills, %q0)];
+      @pemit %#=See also: @sheet/stats, @sheet/attributes, @sheet, @sheet/help}
+-
+&cmd-sheet-attributes #7=$@sheet/attributes:@fo %#=@sheet/attributes %#
+-
+&cmd-sheet-attributes-player #7=$@sheet/attributes *:
+ think setq(0, locate(%!, %0, *));
+ think setq(0, ifelse(isdbref(%q0), %q0, locate(%!, *%0, *)));
+
+ @switch or(hasflag(%#, wizard), strmatch(%#, %q0))=
+  0, {@pemit %#=Only Wizards may view the attribute sheets of other players.},
+  1, {@pemit %#=[u(u-sheet-header, %q0)];
+      @pemit %#=[u(u-sheet-attributes, %q0)];
+      @pemit %#=See also: @sheet/stats, @sheet/attributes, @sheet, @sheet/help}
+-
+
+
+&FILTER-HAS-SKILL-REG #7=[gt(skill(%q0, %0), 0)]
+-
+# Commented out. Set in stats.mux file. Stats.mux needs <person> to be
+# %q9. This needs %#. Changed the function to be :
+#     [gt(skill(ifelse(isdbref(%q9),%q9,%#), %0), 0)]
+# DO NOT UNCOMMENT!
+#
+# &FILTER-HAS-SKILL #7=[gt(skill(%#, %0), 0)]
+#-
+&FILTER-NONE #7=1
+-
+
+################################################
+# Sheet Note Commands                          #
+#                                              #
+# Added by Leia on 12/3/01                     #
+################################################
+
+# Dummy command for viewing your own notes
+
+&CMD-SHEET-NOTES #7=$@sheet/notes:@force %#=@sheet/notes %#
+
+-
+
+# Command for viewing all a character's notes
+
+&CMD-SHEET-NOTES-PLAYER #7=$@sheet/notes *:think [setq(0,[locate(%!, %0, *)])];
+                           think [setq(0,[ifelse(isdbref(%q0),%q0,
+                           [locate(%!,*%0,*)])])];think [setq(1,
+                           [lattr(%q0/SHEET-NOTES-*)])];
+                           @switch [or([hasflag(%#,WIZARD)],
+                           [strmatch(%#,%q0)])]=0,{@pemit %#=Only wizards may 
+                           view 
+                           the note sheets of other players.},1,{@pemit %#=
+                           [u(u-sheet-header,%q0)];@pemit %#=
+                           [u(u-sheet-notes,%q0,%q1,%#)];
+                           @pemit %#=[u(u-sheet-footer,%q0)]}
+-
+
+# Body for the notes sheet
+
+&U-SHEET-NOTES #7=%xh%xgCharacter Notes:%xn%r%r
+          [ifelse(not(t(trim(%1))), There are no notes on this character.,)]
+                  [iter(%1,%xh%xwNote 
+                  [u(u-sheet-note-num,##)] -- Added By:%xn Player 
+                  [u(u-sheet-note-player,%0,##)] [switch([hasflag(%2,WIZARD)],
+                  1,%([u(u-sheet-note-email,%0,##)]%))]%r%xh%xwIC Time:%xn 
+                  [u(u-sheet-note-ictime,%0,##)]%r%xh%xwRL Time:%xn 
+                  [u(u-sheet-note-rltime,%0,##)]%r[u(u-sheet-note-text,%0,##)]%r
+                  ,,%r)]
+-
+
+# Gives number of the note
+
+&U-SHEET-NOTE-NUM #7=[after(%0,SHEET-NOTES-)]
+-
+
+# Gives number of player who added
+
+&U-SHEET-NOTE-PLAYER #7=[elements([get(%0/%1)],1,|)]
+-
+
+# Gives email of player who added
+
+&U-SHEET-NOTE-EMAIL #7=[elements([get(%0/%1)],2,|)]
+-
+
+# Gives ic time the note was added
+
+&U-SHEET-NOTE-ICTIME #7=[after([elements([get(%0/%1)],3,|)],on)]
+-
+
+# Gives RL time the note was added
+
+&U-SHEET-NOTE-RLTIME #7=[elements([get(%0/%1)],4,|)]
+-
+
+# Gives text of the note
+
+&U-SHEET-NOTE-TEXT #7=[elements([get(%0/%1)],5,|)]
+-
+
+# Removes a note from a player's own sheet
+
+&CMD-SHEET-NOTES-REMOVE #7=$@sheet/remove notes=*:think [setq(0,%0)];
+                           think [setq(1,[hasattr(%#,SHEET-NOTES-%0)])];
+                           think [setq(2,[elements([get(%#/SHEET-NOTES-%0)],
+                           2,|)])];think [setq(3,[get(%#/EMAIL)])];
+                           think [setq(4,[elements([get(%#/SHEET-NOTES-%0)],
+                           5,|)])];@switch 
+                           [eq(%q1,1)][strmatch(%q2,%q3)]=0?,{@pemit %#=
+                           You do not have a note of that number.},10,{
+                           @pemit %#=You cannot remove that note because 
+                           it is registered under a different email address.},
+                           11,{@wipe %#/SHEET-NOTES-%0;@pemit %#=Note %0 has 
+                           been removed.;@bb/post Notes/[name(%#)] 
+                           deleted Note %0=[name(%#)] (%q3) has removed note 
+                           %0.  It read:%r%r%q4%r%rPlease make sure this was
+                           a valid note to remove.}
+-
+
+
+# Removes a note from another player.  Admin only.
+
+&CMD-SHEET-NOTES-ADMIN #5=$@sheet/remove *=notes/*:think [setq(0,
+                          [pmatch(Leia)])];think [setq(1,%1)];@switch 
+                          [isdbref(%q0)][hasattr(%q0,SHEET-NOTES-%q1)]=
+                          0?,{@pemit %#=There is no player with that name.},
+                          10,{@pemit %#=[name(%q0)] has no note with number 
+                          %q1.},11,{@wipe %q0/SHEET-NOTES-%q1;@pemit %#=
+                          Note %q1 removed from [name(%q0)].}
+-
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

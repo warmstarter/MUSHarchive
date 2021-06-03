@@ -1,0 +1,11 @@
+{"READSKILL",	fun_readskill,	2,	0,	CA_WIZARD},
+{"READSKILL2",	fun_readskill2,	2,	0,	CA_WIZARD},
+{"HURTPHYS",	fun_HurtPhys,	2,	0,	CA_WIZARD},
+{"HURTMENT",	fun_HurtMent,	2,	0,	CA_WIZARD},
+{"BADHURT",	fun_BadHurt,	2,	0,	CA_WIZARD},
+{"SHIPCOORDS",	fun_ShipCoords,	1,	0,	CA_WIZARD},
+{"HYPERCOORDS",	fun_HyperCoords,1,	0,	CA_WIZARD},
+{"HYPER",	fun_Hyper      ,1,	0,	CA_WIZARD},
+{"BESTOW",	fun_Bestow,	3,	0,	CA_WIZARD},
+{"CANSCI",	fun_CanSci,	2,	0,	CA_WIZARD},
+

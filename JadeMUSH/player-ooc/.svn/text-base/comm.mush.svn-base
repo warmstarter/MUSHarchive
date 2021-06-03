@@ -1,0 +1,146 @@
+#############################################################################
+# comm.mux -- communication commands
+#############################################################################
+
+#7 = Player OOC Commands
+
+
+&RCS-Comm #7 = 
+  @@ $Header: /usr/local/cvsroot/softcode/player-ooc/comm.mux,v 1.3 2003/01/21 03:34:37 asta Exp $
+-
+
+
+# Original OOC command from Neko
+#
+@@ &BLEH Thingo=$ooc *:@remit %l=[ansi(c,<OOC>)] [switch(%0,:*,%N 
+[after(%0,:)],{%N says, "%0"})]
+-
+
+# OOC [<control>]<text>
+#
+# Works like a combination say/pose, handling communication "controls"
+# (the ", :, and ; characters) the same way 'page' does (q.v.).
+#
+&cmd-ooc-talk #7 = $ooc *: 
+  @remit %# = 
+    [ansi(ch, <OOC>)] [u(u-communicate, %0, %n)]
+-
+
+
+# u(u-communicate, <text>, <subject>)
+#
+# Takes entered communication string and returns a formatted string
+# suitable for output.  Handles all the things that say and pose do.
+#
+# Examples:
+#   u(u-communicate, :grins., He)          -> He grins.
+#   u(u-communicate, ; grins., He)         -> He grins.
+#   u(u-communicate, ;'s dog died, Bob)    -> Bob's dog died.
+#   u(u-communicate, : 's dog died, Bob)   -> Bob's dog died.
+#   u(u-communicate, Hi!, Adam)            -> Adam says, "Hi!"
+#   u(u-communicate, "Hi!, Adam)           -> Adam says, "Hi!"
+#
+# %0 = text with or without "control" characters (:grins., Hello., etc.)
+# %1 = subject (%n, etc.)
+#
+&u-communicate #7 = 
+  switch(%0, 
+    "*,  {
+      %1 says, "[after(%0, \")]"
+    }, 
+    : *, {
+      %1[after(%0, %b)]
+    }, 
+    ; *, {
+      %1 [after(%0, %b)]
+    }, 
+    :*,  {
+      %1 [after(%0, :)]
+    }, 
+    ;*,  {
+      %1[after(%0, ;)]
+    }, {
+      %1 says, "%0"
+    }
+  )
+-
+
+&cmd-mutter #2541=$mutter *:
+   @switch %0 = *=*, {
+     think setq(7, before(%0, =));
+     think setq(8, after(%0, =));
+     think setq(9, locate(%#, %q7, *P));
+     @switch isdbref(%q9) = 0, {
+      @error %# = locate %q9
+     }, {
+      @pemit %# = You mutter to [name(%q9)], "[u(u-brackets,%q8)]";
+      @pemit %q9 = %n mutters to you, "[u(u-brackets,%q8)]";
+      @dolist setdiff(lcon(%L), %# %q9) = {
+        @pemit ## =%n seems to mutter to [name(%q9)], "[u(u-mutter, %q8,
+         %#,##)]"
+        }
+      }
+    }, {
+      @pemit %# = You mutter, "[u(u-brackets2,%0)]";
+      @dolist setdiff(lcon(%L), %#) = {
+       @pemit ## =%n mutters, "[u(u-mutter, %0, %#, ##)]"
+      }
+    }
+
+-
+
+
+# u(u-mutter, <text>, <speaker>, <listener>)
+#
+# Returns muttered text.  There's a chance that each word in the text will
+# be replaced with a bunch of dots.
+#
+# Optionally, you can pass the #dbrefs of the speaker and listener (if the
+# mutter is directed at a particular person.  These are in turn passed to
+# the u-mutter-percent-chance function for determing the chance of everyone 
+# hearing.
+#
+# Any word enclosed within <> will ALWAYS be heard...
+#
+# %0 = text
+# %1 = %# (speaker/mutterer)
+# %2 = listener
+# 
+&u-mutter #2541 = 
+  iter(%0, 
+    switch(##, <*>, 
+      mid(##, 1, sub(strlen(##), 2)), 
+#   else
+      switch(lte(die(1,100), u(u-mutter-percent-chance, %1, %2)), 1, 
+        ##, 
+#     else
+        repeat(., strlen(##))
+      )
+    )
+  )
+-
+
+# u(u-mutter-percent-chance, speaker, listener, word)
+#
+# Returns a number from 0 to 100 representing the percent chance of a 
+# word being heard.
+# 
+# Currently, it takes the listener's Perception score into consideration
+# (Perception x 12%).  Wizards always hear everything (chance = 100%).
+# 
+# %0 = speaker dbref
+# %1 = listener dbref
+# 
+&u-mutter-percent-chance #2541 = 
+  switch(orflags(%1, WZ), 1, 
+    100, 
+# else
+    mul(attribute(%1, Perception), 12)
+  )
+-
+
+# u-brackets strips the <> from the mutters.
+
+&u-brackets #2541=edit(edit(%q8,<, ),>, )
+
+&u-brackets2 #2541=edit(edit(%0,<, ),>, )

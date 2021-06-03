@@ -1,0 +1,539 @@
+## All commands on #7 (Player OOC Commands)
+
+
+&rcs-where #7 = 
+  $Id: where.mux,v 1.38 2002/10/08 23:47:52 jeanne Exp $
+-
+
+
+
+
+&u-is-findable #7 =  
+  not(u(u-is-unfindable, %0))
+-
+
+&u-is-unfindable #7 =  
+  or(
+    hasflag(%0, unfindable), 
+    hasflag(%0, dark), 
+    hasflag(loc(%0), unfindable), 
+#   equivalent to hastag(%0, !where) -- uses smaller buffer
+    neq(0, member(get(%0/tags), !where))
+  )
+-
+
+&commafy-dbreflist #7
+-
+
+
+@@ PLAYERS-IN COMMENT
+  Parameters:
+    %0 -- #dbref of location
+    %1 -- list of #dbrefs
+    %2 -- list of locations for #dbrefs
+
+  The lists %1 and %2 should map from one to the other. That is,
+  word j of list %2 should be the location for word j of %1.
+
+  Returns a list of all the elements in %1 whose locations (in %2) 
+  match the location %0.
+-
+
+&ul-players-in #7 = 
+  iter(%2, 
+    switch(##, %0, extract(%1, #@, 1))
+  )
+-
+
+&u-name #7 = 
+  ansi(switch(1, 
+     hastype(%0,thing), g,
+     hasflag(%0, Wizard), hy, 
+     hasflag(%0, Royal), y, 
+     hasflag(%0, Staff), hc, 
+     n), 
+   name(%0)
+  )
+-
+
+&fold-name-list #7 = 
+  %0, [u(u-name, %1)]
+-
+
+&u-sorted-name-list #7 =
+  ifelse(eq(1, words(%0)), 
+    u(u-name, %0),
+# else
+    fold(me/fold-name-list, 
+      rest(sortby(namesort, %0)), 
+      u(u-name, first(sortby(namesort, %0)))
+    )
+  )
+-
+
+&map-loc #7 = 
+  [loc(%0)]
+-
+
+&namesort #7 = 
+  [comp(name(%0), name(%1))]
+-
+
+
+&cmd-where #7 = $@where: 
+# who can the player see on the normal who list?
+  think setq(1, setunion(objeval(%#, lwho()),) ); 
+
+# who of those people are findable
+  think setq(2, filter(me/u-is-findable, %q1) ); 
+
+# so these people are not findable
+  think setq(3, setdiff(%q1, %q2) ); 
+
+# make a map of where all the 'findable' people are located
+  think setq(4, map(me/map-loc, %q2) ); 
+
+# and squish it to a short list of dbrefs of locations
+  think setq(5, setunion(%q4,) ); 
+
+# a shortcut for how many players are online, and how many rooms are used
+  think setq(6, ifelse(eq(1, (%q1)), 1 player, words(%q1) players) ); 
+  think setq(7, ifelse(eq(1, words(%q5)), 1 room, words(%q5) rooms) ); 
+
+# find the OOC rooms
+  think setq(8, filter(filter-ooc, %q5)); 
+
+# create a list of OOC rooms with spaces changed to _'s, sorted alphabetically
+  think setq(0, iter(%q8, edit(name(##),%b,_))); 
+  think setq(8, munge(sort-num, %q0, %q8)); 
+
+# who knows
+  think setq(9, setdiff(%q5, %q8)); 
+  think setq(0, iter(%q9, edit(name(##),%b,_))); 
+  think setq(9, munge(sort-num, %q0, %q9)); 
+
+
+# finally, spit out the output!
+  @dolist ~~header~~ %q8 %q9 ~~footer~~ = { 
+      @pemit %# =
+        switch(##,
+          ~~header~~, %xr%xhWHERE 1.3 %b%b%b%xn%xr (%q6 in %q7)%xn, 
+          ~~footer~~, 
+            [switch(words(%q3), 0,, 
+               %xb%xh Unfindable:%xn 
+               [u(u-sorted-name-list, %q3)]%r
+            )]
+            %xh%xr--%xn, 
+#         else 
+
+##            %b
+##            [ljust(
+##              switch(1, 
+##              hasflag(##, jump_ok), 
+##                %xn%xh\(##%xrJ%xn%xh\), 
+##              orflags(%#, WZ), 
+##                %xn%xh\(##\)
+##              ), 
+##              12
+##            )]
+            %b[ifelse(hastag(##,ooc),%xh%xg[name(##)],%xh%xb[name(##)])]:%b%b
+            %xn
+              [u(u-sorted-name-list, ulocal(ul-players-in, ##, %q2, %q4))]
+        )
+  }
+-
+
+
+&cmd-where/watch #7 = $@where/watch: 
+# who can the player see on the normal who list?
+  think setq(1, setunion(objeval(%#, lwho()),) ); 
+
+# who of those people are on the enactor's watch list?
+  think setq(1, setinter(%q1, get(%#/watching))); 
+
+# who of those people are findable
+  think setq(2, filter(me/u-is-findable, %q1) ); 
+
+# so these people are not findable
+  think setq(3, setdiff(%q1, %q2) ); 
+
+# make a map of where all the 'findable' people are located
+  think setq(4, map(me/map-loc, %q2) ); 
+
+# and squish it to a short list of dbrefs of locations
+  think setq(5, setunion(%q4,) ); 
+
+# a shortcut for how many players are online, and how many rooms are used
+  think setq(6, ifelse(eq(1, (%q1)), 1 player, words(%q1) players) ); 
+  think setq(7, ifelse(eq(1, words(%q5)), 1 room, words(%q5) rooms) ); 
+
+# find the OOC rooms
+  think setq(8, filter(filter-ooc, %q5)); 
+
+# create a list of OOC rooms with spaces changed to _'s, sorted alphabetically
+  think setq(0, iter(%q8, edit(name(##),%b,_))); 
+  think setq(8, munge(sort-num, %q0, %q8)); 
+
+# who knows
+  think setq(9, setdiff(%q5, %q8)); 
+  think setq(0, iter(%q9, edit(name(##),%b,_))); 
+  think setq(9, munge(sort-num, %q0, %q9)); 
+
+
+# finally, spit out the output!
+  @dolist ~~header~~ %q8 %q9 ~~footer~~ = { 
+      @pemit %# =
+        switch(##,
+          ~~header~~, %xr%xhWHERE 1.3 %b%b%b%xn%xr (%q6 in %q7)%xn, 
+          ~~footer~~, 
+            [switch(words(%q3), 0,, 
+               %xb%xh Unfindable:%xn 
+               [u(u-sorted-name-list, %q3)]%r
+            )]
+            %xh%xr--%xn, 
+#         else 
+            %b[ifelse(hastag(##,ooc),%xh%xg[name(##)],%xh%xb[name(##)])]:%b%b
+            %xn
+              [u(u-sorted-name-list, ulocal(ul-players-in, ##, %q2, %q4))]
+        )
+  }
+-
+
+
+&cmd-where-wiz #7 = $@where/wiz: 
+@switch hasflag(%#, wizard) = 0, {
+  @pemit %#=@where/wiz is a wizard-only command. Sorry. }, 1, {
+  think [setq(1, setunion(objeval(%#, lwho()),) )]
+    [setq(2, %q1)]
+    [setq(4, map(me/map-loc, %q2) )]
+    [setq(5, setunion(%q4,) )]
+    [setq(6, ifelse(eq(1, (%q1)), 1 player, words(%q1) players) )]
+    [setq(7, ifelse(eq(1, words(%q5)), 1 room, words(%q5) rooms) )]
+    [setq(8, filter(filter-ooc, %q5))]
+    [setq(9, setdiff(%q5, %q8))]
+  ; 
+
+  @dolist ~~header~~ %q9 ~~footer~~ = { 
+      @pemit %# =
+        switch(##,
+          ~~header~~, %xr%xhWHERE 1.3 %b%b%b%xn%xr (%q6 in %q7)%xn, 
+          ~~footer~~, 
+            [switch(words(%q3), 0,, 
+               %xb%xh Unfindable:%xn 
+               [u(u-sorted-name-list, %q3)]%r
+            )]
+            %xh%xr--%xn, 
+#         else 
+
+            %b[ifelse(hastag(##,ooc),%xh%xg[name(##)],%xh%xb[name(##)])]:%b%b
+            %xn
+              [u(u-sorted-name-list-unf, ulocal(ul-players-in, ##, %q2, %q4))]
+        )
+  }
+}
+-
+&u-sorted-name-list-unf #7 =
+  ifelse(eq(1, words(%0)), 
+    u(u-name-unf, %0),
+# else
+    fold(me/fold-name-list-unf, 
+      rest(sortby(namesort, %0)), 
+      u(u-name-unf, first(sortby(namesort, %0)))
+    )
+  )
+-
+&u-name-unf #7 = 
+  ansi(switch(1, 
+     hastype(%0,thing), g,
+     hasflag(%0, Wizard), hy, 
+     hasflag(%0, Royal), y, 
+     hasflag(%0, Staff), hc, 
+     n), 
+   name(%0)[ifelse(u(u-is-unfindable, %0),%(U%),)]
+  )
+-
+&fold-name-list-unf #7 = 
+  %0, [u(u-name-unf, %1)]
+-
+&cmd-where-public #7 = $@where/public: 
+  think [setq(1, setunion(objeval(%#, lwho()),) )]
+    [setq(2, filter(me/u-is-findable, %q1))]
+    [setq(3, setdiff(%q1, %q2) )]
+    [setq(4, map(me/map-loc, %q2) )]
+    [setq(5, setunion(%q4,) )]
+    [setq(6, ifelse(eq(1, (%q1)), 1 player, words(%q1) players) )]
+    [setq(7, ifelse(eq(1, words(%q5)), 1 room, words(%q5) rooms) )]
+    [setq(8, filter(filter-ooc, %q5))]
+    [setq(9, setdiff(%q5, %q8))]
+  ; 
+
+  @dolist ~~header~~ %q8 %q9 ~~footer~~ = { 
+      @pemit %# =
+         switch(##,
+           ~~header~~, %xr%xhWHERE 1.3 %b%b%b%xn%xr (%q6 in %q7)%xn, 
+           ~~footer~~, [switch(words(%q3), 
+                          0,, %xb%xh Unfindable:%xn 
+                                 [u(u-sorted-name-list,%q3)]%r)]%xr%xh--%xn, 
+
+##            %b
+##            [ljust(
+##              switch(1, 
+##              hasflag(##, jump_ok), 
+##                %xn%xh\(##%xrJ%xn%xh\), 
+##              orflags(%#, WZ), 
+##                %xn%xh\(##\)
+##              ), 
+##              12
+##            )]
+           [setq(0, ulocal(ul-players-in, ##, %q2, %q4))]
+           [switch(hastag(##, public), 
+              1, %b[ifelse(hastag(##,ooc),
+                   %xh%xg[name(##)],%xh%xb[name(##)])]:%b%b
+                 %xn[u(u-sorted-name-list, %q0)]
+           )]
+         )
+  }
+
+-
+
+&filter-ooc #7 = 
+  gt(match(get(%0/tags), ooc), 0)
+
+# Old filter: Was breaking invocation limit at 132 players.
+#  hastag(%0, ooc)
+-
+&filter-is-in-public #7 =
+  hastag(loc(%0), public)
+
+-
+# The @where for just one person
+
+# %q0 = dbref of person you're looking for
+# %q1 = Is the person you're looking for unfindable?
+# %q2 = All the people the executor can see
+# %q3 = All those people who are 'findable'.
+# %q4 = Those 'findable' people in the same room as %q0
+
+&cmd-where-person #7=$@where *:
+  think setq(0, pmatch(%0)); 
+  think setq(1, u(#7/u-is-unfindable, %q0)); 
+  think setq(2, objeval(%#, lwho())); 
+  think setq(3, setdiff(%q2, filter(#7/u-is-unfindable, %q2))); 
+  think setq(4, setinter(%q3, lcon(loc(%q0)))); 
+
+  @pemit %#=switch(0, 
+     isdbref(%q0), Sorry%, %N%, '%0' is not a valid player name., 
+     hasflag(%q0, connected),
+          name(%q0) isn't connected so doesn't appear on @where., 
+     not(and(hasflag(%q0,dark),hasflag(%q0,wizard))),
+          name(%q0) isn't connected so doesn't appear on @where., 
+     not(hasflag(%q0,dark)),
+          name(%q0) isn't connected so doesn't appear on @where.,
+     not(%q1), 
+
+# Do if the person is unfindable.
+       name(%q0) is unfindable
+         [ifelse(hasflag(%#, wizard), 
+
+# If you're a wizard, still give the info.
+            %, but ... %r%b%xh%xb[name(loc(%q0))]: %b%xn
+            [u(#7/u-sorted-name-list, setinter(%q2, lcon(loc(%q0))))], 
+            .)], 
+
+# They're findable
+       %b%xh%xb[name(loc(%q0))]: %b%xn[u(#7/u-sorted-name-list, %q4)])
+          
+
+-
+
+
+&cmd-whereis #7 = $@whereis *: 
+  think setq(0, pmatch(%0)); 
+
+  @switch isdbref(%q0) = 0, {
+    @error %# = pmatch %q0
+  }, {
+    @pemit %# = switch(1, 
+    u(u-is-unfindable, %q0), 
+      [name(%q0)] doesn't want to be found., 
+#   hasflag(loc(%q0), unfindable), 
+#     [name(%q0)] is in [name(loc(%q0))]., 
+#   else
+      [name(%q0)] is in [name(loc(%q0))] ([loc(%q0)]).
+    )
+  }
+-
+
+&u-is-findable #7 =  
+  or(not(u(u-is-unfindable, %0)),
+   not(hastype(%0,player)))
+-
+&u-is-findable-pub #7 =  
+  or(hastag(loc(%0,public)),or(not(u(u-is-unfindable, %0)),
+   not(hastype(%0,player))))
+-
+&cmd-where-are-spies #7 = $@where are spies: 
+  @switch hasflag(%#,wizard)=
+   1,{think []
+    [setq(1, setunion(objeval(%#, lwho()),get(#3993/obslist)) )]
+    [setq(2, filter(me/u-is-findable, %q1) )]
+    [setq(3, setdiff(%q1, %q2) )]
+    [setq(4, map(me/map-loc, %q2) )]
+    [setq(5, setunion(%q4,) )]
+    [setq(6, ifelse(eq(1, (%q1)), 1 player, words(%q1) players) )]
+    [setq(7, ifelse(eq(1, words(%q5)), 1 room, words(%q5) rooms) )]
+    [setq(8, filter(filter-ooc, %q5))]
+    [setq(9, setdiff(%q5, %q8))]
+  ; 
+
+  @dolist ~~header~~ %q8 %q9 ~~footer~~ = { 
+      @pemit %# =
+        switch(##,
+          ~~header~~, %xr%xhWHERE 1.3 %b%b%b%xn%xr (%q6 in %q7)%xn, 
+          ~~footer~~, 
+            [switch(words(%q3), 0,, 
+               %xb%xh Unfindable:%xn 
+               [u(u-sorted-name-list, %q3)]%r
+            )]
+            %xr%xh--%xn, 
+#         else 
+
+##            %b
+##            [ljust(
+##              switch(1, 
+##              hasflag(##, jump_ok), 
+##                %xn%xh\(##%xrJ%xn%xh\), 
+##              orflags(%#, WZ), 
+##                %xn%xh\(##\)
+##              ), 
+##              12
+##            )]
+            %b[ifelse(hastag(##,ooc),%xh%xg[name(##)],%xh%xb[name(##)])]:%b%b
+            %xn
+              [u(u-sorted-name-list, ulocal(ul-players-in, ##, %q2, %q4))]
+        )
+  }},
+   0,{@pemit %#=You're not authorized to use this command}
+-
+
+&filter-ooc #3977 = 
+  hastag(%0, ooc)
+-
+&CMD-WHERE/NUMBER #7=$@where/*: 
+  @switch [isnum(trim(%0))] = 0, @@, {
+  think [setq(1, setunion(objeval(%#, lwho()),) )]
+        [setq(2, filter(me/u-is-findable, %q1))]
+        [setq(3, setdiff(%q1, %q2) )]
+        [setq(4, map(me/map-loc, %q2) )]
+        [setq(5, setunion(%q4,) )]
+        [setq(6, ifelse(eq(1, (%q1)), 1 player, words(%q1) players) )]
+        [setq(7, ifelse(eq(1, words(%q5)), 1 room, words(%q5) rooms) )]
+        [setq(8, filter(filter-ooc, %q5))][setq(9, setdiff(%q5, %q8))]; 
+  @dolist ~~header~~ %q8 %q9 ~~footer~~ = 
+    { @pemit %# =switch(##,~~header~~, %xr%xhWHERE 1.3 %b%b%b%xn%xr (%q6 in %q7)%xn, 
+       ~~footer~~, [switch(words(%q3), 0,, %xb%xh Unfindable:%xn [u(u-sorted-name-list,%q3)]%r)]
+          %xr%xh--%xn, [setq(0, ulocal(ul-players-in, ##, %q2, %q4))]
+       [switch(gte(words(%q0),add(0,%0)), 1,
+          %b[ifelse(hastag(##,ooc),%xh%xg[name(##)],%xh%xb[name(##)])]:%b%b
+          %xn[u(u-sorted-name-list, %q0)])])}}
+-
+&CMD-WHERE/CLAN #7=$@where/clan: 
+  think [setq(9, [before(get(%#/clan),%b)]*)];
+
+  think [setq(1, setunion(playersearch(clan=%q9 flag=connected !wizard !flag=dark),) )]
+        [setq(2, filter(me/u-is-findable, %q1))]
+        [setq(3, setdiff(%q1, %q2) )]
+        [setq(4, map(me/map-loc, %q2) )]
+        [setq(5, setunion(%q4,) )]
+        [setq(6, ifelse(eq(1, (%q1)), 1 player, words(%q1) players) )]
+        [setq(7, ifelse(eq(1, words(%q5)), 1 room, words(%q5) rooms) )]
+        [setq(8, filter(filter-ooc, %q5))][setq(9, setdiff(%q5, %q8))]; 
+  @dolist ~~header~~ %q8 %q9 ~~footer~~ = 
+    { @pemit %# =switch(##,~~header~~, %xr%xhWHERE 1.3 %b%b%b%xn%xr (%q6 in %q7)%xn, 
+       ~~footer~~, [switch(words(%q3), 0,, %xb%xh Unfindable:%xn [u(u-sorted-name-list,%q3)]%r)]
+          %xr%xh--%xn, [setq(0, ulocal(ul-players-in, ##, %q2, %q4))]
+          %b[ifelse(hastag(##,ooc),%xh%xg[name(##)],%xh%xb[name(##)])]:%b%b
+          %xn[u(u-sorted-name-list, %q0)])}
+-
+&CMD-WHERE/PARTITION #7=$@where/partition: 
+  think [setq(1, setunion(objeval(%#, lwho()),) )]
+        [setq(2, filter(me/u-is-findable, %q1))]
+        [setq(3, setdiff(%q1, %q2) )]
+        [setq(4, map(me/map-loc, %q2) )]
+        [setq(5, setunion(%q4,) )]
+        [setq(6, ifelse(eq(1, (%q1)), 1 player, words(%q1) players) )]
+        [setq(7, ifelse(eq(1, words(%q5)), 1 room, words(%q5) rooms) )]
+        [setq(8, filter(filter-ooc, %q5))][setq(9, setdiff(%q5, %q8))]; 
+  @dolist ~~header~~ %q8 %q9 ~~footer~~ = 
+    { @pemit %# =switch(##,~~header~~, %xr%xhWHERE 1.3 %b%b%b%xn%xr (%q6 in %q7)%xn, 
+       ~~footer~~, [switch(words(%q3), 0,, %xb%xh Unfindable:%xn [u(u-sorted-name-list,%q3)]%r)]
+          %xr%xh--%xn, [setq(0, ulocal(ul-players-in, ##, %q2, %q4))]
+       [switch(or(strmatch(partition(%#),u(u-room-partition,##)),
+                  ortags(##,ooc dreamworld)), 1,
+          %b[ifelse(hastag(##,ooc),%xh%xg[name(##)],%xh%xb[name(##)])]:%b%b
+          %xn[u(u-sorted-name-list, %q0)])])}
+-
+&u-room-partition #7=
+    [ifelse(
+       t(member(wilderness palace chimera cockatrice eagle bear 
+          gold_dragon hydra ticanee griffon old_city sarkaran,
+             lcstr(edit(default(%0/district,Anarinuell),%b,_)))),
+       Anarinuell,
+       default(%0/district,Anarinuell))]
+-
+&cmd-where-on #7=$@where/on:
+  @switch hastag(%#,!where) = 
+    1, {@cleartags %#=!where; 
+        &where-off %#=; 
+        @pemit %#=You put yourself back on the @where listing.}, 
+    0, {@pemit %#=You aren't on the @where/off listing.}, 
+    @pemit %#=There is an error in @where/on. Please let a wizard know ASAP.
+-
+&cmd-where-off #7=$@where/off:
+  @switch hastag(%#,!where) = 
+    1, {@pemit %#=You're already off the @where listing.}, 
+    0, {@tag %#=!where; 
+        @program %#=me/prog-get-reason: Please enter the reason why you're 
+             hiding by going off the @where list.}, 
+    @pemit %#=There is an error in @where/off. Please let a wizard know ASAP.
+-
+&prog-get-reason #7=
+@switch gt(strlen(%0),20)=
+1,{
+  @pemit %#=You entered '%0' as the reason you're removing yourself from @where.; 
+  think[setq(3,icloc(%#))];
+
+## What I've done here is make it so that the reason for the @where/off is 
+## only posted 1 in 10 times.  This way, it cuts down on our spam but still 
+## helps prevent twinkage.  It also always posts if they're a newbie.
+
+  @switch [or(ortags(%#, newbie suspect), 
+              hasflag(%#, suspect), 
+              eq(rand(10), 1))]=
+    1, {@bb/post oversight/%N Where-Off Reason=
+        %N entered:%r%t%0%r%rAs their reason 
+        for removing themselves from @where while at [name(%q3)] (%q3).}; 
+  &where-off %#=%0}, 
+{@program %#=me/prog-get-reason: Please enter the reason why you're hiding by 
+   going off the @where list. It must be more than 20 characters long.}
+-
+@adisconnect #7=@fo %#=@where/on
+-
+&cron_time_OffWhere #63=||||10 30 50|@@ every 20 minutes @@
+-
+&cron_job_OffWhere #63=@pemit/list filter(filter-off-where, lwho())=
+  %xh%xy%xX## You are off the @where list. @where/on to put yourself back on ##%xn
+-
+&filter-off-where #63=hastag(%0, !where)
+
+
+
+
+
+
+
+
+
+
+
+

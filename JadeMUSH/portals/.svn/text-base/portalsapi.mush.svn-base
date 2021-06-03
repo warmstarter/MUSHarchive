@@ -1,0 +1,435 @@
+#############################################################################
+# PORTALS API
+#############################################################################
+
+# TAGS USED:
+#    DOOR -- the exit is a door
+#    CONTAINER -- the thing is a container
+#    LOCKABLE -- the object has a lock implementation installed
+#    LOCKED -- the object is locked shut
+#    BARRED -- the exit is barred shut
+#    GATED -- the exit is gated shut
+#    WINDOWED -- the exit has a pane of glass barring passage
+#    SHUTTERED -- the exit has shutters which bar passage
+#    LATCHED -- the object is latched shut
+#    PASS -- the player passes freely through secured portals of all kinds
+
+
+
+#----------------------------------------
+# ulocal(ul-new-keycode)
+#----------------------------------------
+#
+# Returns a unique keycode.  Unless the code object is @wiped or the 
+# &config-lastkeycode attribute is otherwise tampered with, the ufun
+# will always return a unique keycode.
+# 
+&ul-new-keycode #22 = 
+# get a new keycode by adding 1 to the last known keycode
+  [setq(0, inc(default(me/config-lastkeycode, 1)))]
+
+# return the new keycode (like 'K0000502')
+  K[rjust(%q0, 7, 0)]
+
+# remember this as the last known keycode
+  [set(me, config-lastkeycode:%q0)]
+-
+
+
+#----------------------------------------
+# Command: @INSTALL DOOR ON <exit>
+#----------------------------------------
+# 
+#     Install a door on the named exit.
+# 
+&cmd-install-door #22 = $@install door on *: 
+  think setq(0, locate(%#, %0, *E)); 
+  think setq(9, 
+    [isdbref(%q0)]
+    [t(hastype(%q0, exit))]
+    [not(and(hastag(%q0, door), member(lparent(%q0), paccount(doors))))]
+    [not(isdbref(parent(%q0)))]
+    [hasflag(%#, wizard)] 
+  ); 
+
+
+  @select %q9 = 
+
+# NOMINAL CASE
+  11111, {
+
+# find the "twin" of the exit
+    think setq(1, exittwin(%q0)); 
+
+# set parents to "generic door"
+    think setq(3, paccount(doors)); 
+    @parent %q0 = %q3; 
+    @parent %q1 = %q3; 
+
+# close the doors
+    think settag(%q0, closed); 
+    think settag(%q1, closed); 
+
+# announce completion
+    @pemit %# = configure: complete; 
+    @pemit %# = %b %b In: %b [name(%q0)] (%q0); 
+    @pemit %# = %b %b Out:%b [name(%q1)] (%q1); 
+  }, 
+# must be a wizard
+  ????0,  { @pemit %#= You must be a wizard to  use this. If you are not, then look up help install.},
+
+# can't find the object
+  0????, { @error %# = locate %q0 }, 
+
+# not an exit
+  ?0???, { @pemit %# = configure: you can install doors only on exit objects. }, 
+
+# already a door
+  ??0??, { @pemit %# = configure: '[goodname(%q0)]' (%q0) already has a door installed. }, 
+
+# already has a parent
+  ??0??, { @pemit %# = configure: '[goodname(%q0)]' (%q0) already has a parent set: [parent(%q0)] (%q0). }, 
+
+# ERROR
+  *, { @pemit %# = configure: an unexpected error occurred. let a staff member know. }
+-
+
+
+#----------------------------------------
+# Command: @INSTALL LOCK ON <door or container object>
+#----------------------------------------
+# 
+#    Installs a lock on a door or container object
+# 
+&install-lock #22 = $@install lock on *: 
+  think setq(0, locate(%#, %0, *ET)); 
+  think setq(9, 
+    [u(u-door-or-container, %q0)]/
+    [isdbref(%q0)]
+    [hastag(%q0, lockable)]
+    [hasflag(%#, wizard)]
+  );
+
+
+  @select %q9 = 
+
+# NOMINAL CASE 1: doors
+    door/101, {
+#     find the exit's twin
+        think setq(1, exittwin(%q0)); 
+
+#     set keylock codes
+        think setq(2, ulocal(ul-new-keycode)); 
+        &code %q0 = %q2; 
+        &code %q1 = %q2; 
+
+#     tag doors lockable
+        think settag(%q0, lockable); 
+        think settag(%q1, lockable); 
+
+#     set the locks on the doors
+        @lock %q0 = IS-LOCKED/0; 
+        @lock %q1 = IS-LOCKED/0; 
+
+#     lock the doors
+        think settag(%q0, locked); 
+        think settag(%q1, locked); 
+
+#     close the doors
+        think settag(%q0, closed); 
+        think settag(%q1, closed); 
+
+        @pemit %# = install: lock installed on door '[goodname(%q0)]' (%q0)
+    }, 
+
+
+# NOMINAL CASE 2: containers
+    container/101, {
+#     set keylock code
+        think setq(2, ulocal(ul-new-keycode)); 
+        &code %q0 = %q2; 
+
+#     tag container lockable
+        think settag(%q0, lockable); 
+
+#     "lock" the container
+        think settag(%q0, locked); 
+
+#     close the container
+        think [switch(hastag(%q0,closable),1,settag(%q0, closed))]; 
+
+        @pemit %# = install: lock installed on container '[goodname(%q0)]' (%q0)
+    }, 
+
+
+# can't find the object to install a lock on it
+    */0?1, { @error %# = locate %q0 }, 
+
+# unknown implementations
+    */101,       { @pemit %# = install: you can't install a lock on that (unknown implementation). }, 
+    invalid/??1, { @pemit %# = install: you can't install a lock on that (invalid implementation). }, 
+
+# already has a lock installed
+    */?11, { @pemit %# = install: '[name(%q0)]' (%q0) already has a lock installed on it. }, 
+
+# must be set wizard
+    */??0, { @pemit %# = You must be a wizard to use this. If you are not, then look up help install.},
+
+# ERROR
+    *,    { @pemit %# = install: unexpected @select condition in #22/install-lock: %q9. }
+-
+
+
+
+#----------------------------------------
+# Command: @INSTALL KEY <key dbref> ON <lock object>
+#----------------------------------------
+#
+#    Creates a key whose code matches the named lock.
+#    The key object is not created in this version.  Instead, it uses the dbref
+#    passed to it as the key object.  The <key dbref> MUST be a valid dbref.
+# 
+&cmd-install-key-as #22 = $@install key * on *: 
+  think setq(0, locate(%#, %1, *ET)); 
+  think setq(9, 
+    [u(u-door-or-container, %q0)]/
+    [isdbref(%q0)]
+    [hastag(%q0, lockable)]
+    [hasflag(%#, wizard)]  
+  ); 
+
+  @select %q9 = 
+
+# NOMINAL CASE 1: doors
+    door/111, {
+#     find the door's twin
+        think setq(1, exittwin(%q0)); 
+
+#     generate a new keycode if necessary, but use the one on the door if possible
+        think setq(2, default(%q0/code, ulocal(ul-new-keycode))); 
+
+#     synchronize the doors with the keycode
+        &code %q0 = setunion(get(%q0/code), %q2); 
+        &code %q1 = setunion(get(%q1/code), %q2); 
+
+#     make a key
+###        think setq(4, create(key for [goodname(%q0)], 10)); 
+        think setq(4, locate(%#, %0, *T)); 
+
+        &code %q4 = %q2; 
+###        @parent %q4 = paccount(iron keys);
+###        think ac_create(%q4, iron keys, 1); 
+###        @tel %q4 = %#; 
+###        @resynch %#; 
+
+        @resynch %q4;
+        @pemit %# = install: a new key has been configured; 
+        @pemit %# = %tDoor in:%b [goodname(%q0)] (%q0); 
+        @pemit %# = %tDoor out:  [goodname(%q1)] (%q1); 
+        @pemit %# = %tKey name:  [goodname(%q4)] (%q4); 
+        @pemit %# = %tKey code:  %q2; 
+    }, 
+
+# NOMINAL CASE 1: containers
+    container/111, {
+#     generate a new keycode if necessary, but use the one on the container if possible
+        think setq(2, default(%q0/code, ulocal(ul-new-keycode))); 
+
+#     synchronize the container with the keycode
+        &code %q0 = setunion(get(%q0/code), %q2); 
+
+#     make a key
+###        think setq(4, create(key for [goodname(%q0)], 10)); 
+        think setq(4, locate(%#, %0, *T)); 
+
+        &code %q4 = %q2; 
+###        @parent %q4 = paccount(iron keys);
+###        think ac_create(%q4, iron keys, 1); 
+###        @tel %q4 = %#; 
+###        @resynch %#; 
+        @resynch %q4;
+
+        @pemit %# = install: a new '[goodname(%q4)]' (%q4) has been configured; 
+        @pemit %# = %tContainer:  [goodname(%q0)] (%q0); 
+        @pemit %# = %tKey code:%b %q2; 
+    }, 
+
+
+# can't find that lock
+    */0?1, { @pemit %# = I don't see that here. }, 
+
+# invalid implementations
+    invalid/??, { @pemit %# = install: you can't install a key on that. }, 
+    */111,       { @pemit %# = install: you can't install a key on that. }, 
+
+# not lockable
+    */?01, { @pemit %# = install: you can't install a key on that (not lockable) }, 
+
+# not a wizard
+
+    */??0, { @pemit %# = You must be wizard to use this. If you are not, then look up help install.},
+
+# ERROR
+    *, { @pemit %# = install: unexpected @select condition in #22/cmd-install-key: %q9 }
+-
+
+
+#----------------------------------------
+# Command: @INSTALL KEY ON <lock object>
+#----------------------------------------
+#
+#    Creates a key whose code matches the named lock.
+# 
+&cmd-install-key #22 = $@install key on *: 
+  think setq(0, locate(%#, %0, *ET)); 
+  think setq(9, 
+    [u(u-door-or-container, %q0)]/
+    [isdbref(%q0)]
+    [hastag(%q0, lockable)]
+    [hasflag(%#, wizard)]
+  ); 
+
+
+  @select %q9 = 
+
+# NOMINAL CASE 1: doors
+    door/111, {
+#     find the door's twin
+        think setq(1, exittwin(%q0)); 
+
+#     generate a new keycode if necessary, but use the one on the door if possible
+        think setq(2, default(%q0/code, ulocal(ul-new-keycode))); 
+
+#     synchronize the doors with the keycode
+        &code %q0 = setunion(get(%q0/code), %q2); 
+        &code %q1 = setunion(get(%q1/code), %q2); 
+
+#     make a key
+        think setq(4, create(key for [goodname(%q0)], 10)); 
+        &code %q4 = %q2; 
+        @parent %q4 = paccount(iron keys);
+        think ac_create(%q4, iron keys, 1); 
+        @tel %q4 = %#; 
+        @resynch %#; 
+        @resynch %q4;
+        @pemit %# = install: a new key has been created; 
+        @pemit %# = %tDoor in:%b [goodname(%q0)] (%q0); 
+        @pemit %# = %tDoor out:  [goodname(%q1)] (%q1); 
+        @pemit %# = %tKey name:  [goodname(%q4)] (%q4); 
+        @pemit %# = %tKey code:  %q2; 
+    }, 
+
+# NOMINAL CASE 1: containers
+    container/111, {
+#     generate a new keycode if necessary, but use the one on the container if possible
+        think setq(2, default(%q0/code, ulocal(ul-new-keycode))); 
+
+#     synchronize the container with the keycode
+        &code %q0 = setunion(get(%q0/code), %q2); 
+
+#     make a key
+        think setq(4, create(key for [goodname(%q0)], 10)); 
+        &code %q4 = %q2; 
+        @parent %q4 = paccount(iron keys); 
+        @tel %q4 = %#; 
+        @resynch %#; 
+
+        @pemit %# = install: a new '[goodname(%q4)]' (%q4) has been created; 
+        @pemit %# = %tContainer:  [goodname(%q0)] (%q0); 
+        @pemit %# = %tKey code:%b %q2; 
+    }, 
+
+
+# can't find that lock
+    */0?1, { @error %# = locate %q0 }, 
+
+# invalid implementations
+    invalid/??, { @pemit %# = install: you can't install a key on that. }, 
+    */111,       { @pemit %# = install: you can't install a key on that. }, 
+
+# not lockable
+    */?01, { @pemit %# = install: you can't install a key on that (not lockable) }, 
+
+# not a wizard
+    */??0, { @pemit %# = You must be a wizard to use this. If you are not, then look up help install.},
+# ERROR
+    *, { @pemit %# = install: unexpected @select condition in #22/cmd-install-key: %q9 }
+-
+
+
+
+#############################################################################
+# U-FUNCTIONS
+#############################################################################
+
+#----------------------------------------
+# u(u-door-or-container, <dbref>)
+#----------------------------------------
+# 
+# Like #22/u-which-impl, but doesn't require a lock implementation present.
+# 
+&u-door-or-container #22 = 
+  switch([type(%0)]/
+         [hastag(%0, container)]
+         [hastag(%0, door)], 
+
+    EXIT/01,   door, 
+    THING/10,  container, 
+               invalid
+  )
+-
+
+
+
+#############################################################################
+# FUNCTIONS
+#############################################################################
+
+#----------------------------------------
+# islocked(<object>)
+#----------------------------------------
+# 
+# Returns 1 if the object is locked; 0 otherwise.
+# Object can be a container or a door, or any other valid lock implementation.
+# 
+# @function/privileged[/preserve] islocked = #50/function-islocked
+# 
+&function-islocked #50 = 
+  [setq(0, locate(%#, %0, *ET))]
+  [setq(1, u-[u(#22/u-which-impl, %0)]-is-locked)]
+
+  [ifelse(and(isdbref(%q0), hasattr(#22, %q1)), ulocal(#22/%q1, %q0), 0)]
+-
+
+#----------------------------------------
+# exittwin(<exit>)
+#----------------------------------------
+# 
+# Returns the dbref of the exit's "twin".  An exit's twin is the first 
+# returning exit in a list of exits located in the destination of <exit>.
+# An exit is "returning" if its destination matches the source of <exit>.
+# 
+# @function/privileged exittwin = #50/function-exittwin
+# 
+&function-exittwin #50 = 
+  ulocal(#22/ul-exit-twin, locate(%#, %0, *E))
+-
+
+
+#############################################################################
+# LOCKS
+#############################################################################
+# 
+# The master exit lock is an evaluation lock (IS-LOCKED/0), with the 
+# &IS-LOCKED code stored on Generic Door (#4250) so that all properly 
+# parented exits inherit the attribute.
+#
+&IS-LOCKED #4250 = 
+  [and(not(hastag(%#, pass)), 
+       or(hastag(%!, locked), 
+          hastag(%!, barred), 
+          hastag(%!, gated), 
+          hastag(%!, latched)
+       )
+  )]
+-

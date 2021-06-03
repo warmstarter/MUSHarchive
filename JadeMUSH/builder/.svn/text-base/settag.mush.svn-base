@@ -1,0 +1,16 @@
+# The Settag function, written by Catherine, and modified by Stephanie
+
+# settag(<object>, [!]<tag_name>)
+# %0 = dbref of the object
+# %1 = tag name
+
+&FUNCTION-SETTAG #50=
+  [setq(0, locate(%#, %0, *))]
+  [switch([isdbref(%q0)]
+          [not(haspower(%q0, immutable))], 
+
+          0?, pemit(%#, #-1 NO MATCH),
+          ?0, pemit(%#, #-2 IMMUTABLE),
+          11, [set(%q0, tags:[setdiff(get(%q0/tags), 
+                              switch(%1, !*, delete(%1, 0, 1), !%1) %1)] %1)])]
+

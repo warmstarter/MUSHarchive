@@ -1,0 +1,379 @@
+@@create mouse
+-
+@@ @wipe mouse 
+-
+@@ @set mouse=puppet
+-
+@@  @set mouse=verbose
+-
+
+@startup mouse=@dolist [children(me)]=@tr me/move
+-
+
+@set mouse=quiet
+-
+@set mouse=wizard
+-
+@set mouse = !uninspected
+-
+@set mouse=immortal
+-
+@power mouse = builder 
+-
+@power mouse = free_money
+-
+@power mouse = free_quota
+-
+@power mouse = see_all
+-
+@power mouse = hide
+-
+@power mouse = tel_anywhere
+-
+
+
+# Parent object's #dbref
+#
+&rodent-god mouse = #23
+-
+@parent mouse = #23
+-
+
+# #dbref of 'mouse heaven'
+#
+&mouse-heaven mouse = #0
+-
+
+&furcolor me = pink
+-
+
+#
+# %0 = #dbref of the mouse to select genes for
+#
+#
+
+&select-genes mouse=
+   @dolist v(gene-types) = {
+
+#	If the mother's gene is recessive:
+
+
+	@switch u(u-is-recessive-##, get(%0/gene-mother-##)) = 1, 
+
+#	Then check and see if the father's gene is also recessive
+
+		{@switch u(u-is-recessive-##,get(%0/gene-father-##)) = 1, 
+
+#	If it is, then both genes are recessive and you should choose
+#	randomly from the two.
+
+			
+			&[##] %0 =
+			   ifelse(rand(2),
+				  get(%0/gene-father-##),
+				  get(%0/gene-mother-##)
+				 )                      
+			, 
+
+#	If the father's gene isn't recessive, it must be dominant,
+#	so select the father's gene for the baby.
+
+			
+			&[##] %0 = get(%0/gene-father-##)
+			
+	}, 
+
+#	If the mother's gene was not recessive, it must be dominant,
+#	so go and get the father's gene and see if it is recessive.
+
+		{@switch u(u-is-recessive-##, get(%0/gene-father-##)) = 1, 
+
+#	If the father's gene is recessive, then select the mother's
+#	gene for the baby.
+
+			
+			&[##] %0 = get(%0/gene-mother-##)
+			,
+
+#	If the father's gene is dominant, then both of the genes are
+#	dominant, so choose randomly between the two.
+
+	
+		   &[##] %0=
+                   ifelse(rand(2),
+                          get(%0/gene-father-##),
+                          get(%0/gene-mother-##)
+                         )
+        	}};
+   @wait 10=@tr me/set-me-up
+-
+
+
+&set-me-up mouse =
+	@switch v(furcolor)=pink, {
+		@wait 10 = @tr me/set-me-up
+	}, {		
+		@charges me = [v(lifespan)];
+		@sex me = [u(u-random-sex)];
+		@lock/use me= =me;
+		@fo me={@name me = [v(furcolor)]%b mouse};
+		@desc me=What a cute little [v(furcolor)] mouse!; 
+		pose emerges into the world as a young [v(furcolor)] mouse.; 
+		@wait 10 = @tr me/move
+	}
+-
+
+
+# %0 = #dbref of the mate
+#
+#
+&mating-behavior mouse = 
+	@switch u(u-sex, v(sex)) =
+	female,
+
+#		These commands create a baby mouse as a clone of the mouse
+#		(the baby is created inside the mouse).
+#
+		{
+		@clone/inventory me = baby mouse;
+		
+# 		Store the #dbref of the new baby in register 7 (%q7).
+#		This assumes that there is only one mouse baby in the mouse.  
+#
+		think setq(7, num(baby mouse));
+
+		@parent %q7 = #355;
+		@power %q7 = builder;
+		@set %q7 = inherit;
+		@sex %q7 = unknown; 
+		&kids %q7 = 0;
+		&age %q7 = 0;
+		&generation %q7 = inc(v(generation));
+		@tr me/pass-genes = %q7, %0;
+			page [get(v(rodent-god)/notify-list)]=I'm pregnant! 
+			(mom=[num(me)], dad=%0, baby=%q7); 
+		pose gives birth to a tiny mouse.;
+		&kids me=inc(v(kids));
+		&kids %0=inc(get(%0/kids));
+		@wait 20=@tr %q7/select-genes = %q7;
+		@dolist lcon(me) = {@force ## = leave}; 
+		@wait 20=@tr %q7/move;
+		@wait 30=@tr me/move
+		},	 
+	male, {
+		pose looks studly and pleased.;
+		@wait 40=@tr me/move
+	}, {
+		pose looks confused.; 
+		page [get(v(rodent-god)/notify-list)] = 
+			Something is wrong with my mating-behavior.
+	}
+-
+
+# @trigger me/pass-genes = <number of baby>, <number of mate>
+# 
+# %0 = dbref of baby mouse to do stuff on
+# %1 = dbref of mate
+
+&pass-genes mouse = 
+	@dolist v(gene-types)= {
+		&gene-mother-## %0 = v(gene-[u(u-random-parent)]-##); 
+		&gene-father-## %0 = get(%1/gene-[u(u-random-parent)]-##)
+	}
+-
+
+##
+##	Someday, perhaps in a future version, this move attribute will
+## 	check to see what zone or area the mouse has moved into and
+##	will prevent it from moving too far from its "nesting" area.
+##
+
+&move mouse = 
+#	Magic that forces the mouse to try to go through a random exit,
+#	ignoring any named Up or Down
+#
+#	@switch name(me)=baby mouse, {
+#		@tr me/die = num(me);
+#	};
+
+	think setq(0, first(shuffle(
+			iter(lexits(here),
+				switch(name(##), Up,, Down,, ##)
+			)
+		      ))
+	      )
+	;
+
+	@switch words(%q0) = >0, {
+		@fo me=[name(%q0)]
+	}, {
+		pose skitters around looking for somewhere to go.
+	}; 
+	@wait 10=@tr me/look-for-mate
+-
+
+
+&look-for-mate mouse=
+	
+#	1.  Use me and age me a year
+
+	use me;
+	&age me=inc(v(age)); 
+#
+#	2.  Get the dbref of a potential mate.
+#	    %q0 will equal the dbref of a random mouse in the room
+#
+	think 	setq(0, 
+		    first(shuffle(
+			iter(setdiff(lcon(%L), %#), 
+				switch(get(##/race), mouse, ##)
+			)
+		    ))
+		 ); 
+
+#
+#	Is it mateable or should I fight it?
+#
+#	If %q0 is empty, there are no other mice here...
+
+	@switch words(%q0) = >0, {
+		@switch u(u-is-opposite-sex, num(me), %q0) = 1, {
+			@switch words(lcon(me)) = 0, {
+				@wait 10={@tr me/mating-behavior= %q0}
+			}, {
+				pose tells [name(%q0)], "Not tonight, 
+					I have a headache.";
+				@tr me/move
+			}
+		},{
+			@tr me/will-i-fight= %q0;
+			
+		}
+	}, {
+		@wait 30 = @tr me/move
+	}
+-
+
+
+##	Here %0, which was fed to it from the &move attribute,
+## 	represents the #dbref of the mouse's potential mate who 
+##	was found to be of the wrong sex for breeding.  
+## 	(see also u-is-opposite-sex)
+##
+&will-i-fight mouse=
+    @switch v(aggression)=
+	passive,
+	  {pose runs away.;@tr me/move},
+	aggressive,
+	  @tr me/attack=%0, 
+## otherwise
+	page waylon=My aggression genes appear to be all screwed up.
+-
+
+## 
+##    This is simulated combat, to the death, between two mice.  
+##
+##    Here, %0 represents the #dbref a potential mate who was found to be
+##    the wrong sex for breeding.  %0 was fed to this command by
+##    the &will-i-fight attribute.
+##
+	
+&attack mouse=
+    @switch v(size)=
+	>[get(%0/size)], {
+		@switch hasattrp(%0,die) = 1, {
+			@tr %0/die = [num(me)]; 
+			pose attacks and kills [name(%q0)];
+			@tr me/move
+		}, {
+			page steph = 
+				I just attacked something that wasn't a mouse!;
+			@tr me/move
+		}
+	},
+	<[get(%0/size)], {
+		pose attacks [name(%0)] but is killed in the fight.; 
+		@tr me/die =%0
+	}, {
+		pose and the [name(%0)] look at each other, size each other 
+			up, and decide it's not worth it.; 
+		page [get([v(rodent-god)]/notify-list)]=
+		  [name(me)]([num(me)]) and [name(%0)](%0) look at each other, 
+		  size each other up, and decide it's not worth it.; 
+		@tr me/move
+	}		
+-
+
+# Just for kicks, %0 may contain the #dbref of the other mouse that 
+# killed him.
+#
+
+
+#
+#	Here the mouse sets itself up as a corpse, kills any baby's
+#	it might have inside of it, @teleports itself to mouse
+#	heaven and then asks the rodent god to kill it.
+#
+@runout mouse=
+	pose staggers and then curls up into a little ball to die.; 
+	@desc me=Dead Mouse.  How Gruesome.;
+	@dolist lcon(me)={
+		@zap ##;
+		@tel ## = v(mouse-heaven)
+	}; 
+ 	@tel v(mouse-heaven); 
+	page [get(v(rodent-god)/notify-list)]=Another little mouse has gone to heaven.(%#); 
+	@name me=dead mouse;
+	@zap me
+#	@tr #183/zap-mice
+-
+&die mouse=
+	pose staggers and then curls up into a little ball to die.; 
+	@desc me=Dead Mouse.  How Gruesome.;
+	@name me=mouse corpse;
+	@dolist lcon(me)={
+		@zap ##;
+		@tel ## = v(mouse-heaven)
+	}; 
+ 	@tel v(mouse-heaven); 
+	page [get(v(rodent-god)/notify-list)]=
+		Another little mouse has gone to heaven.(%#); 
+	@zap me
+#	@tr #183/zap-mice
+-
+@use mouse=You feel a little of the life drain out of you.
+-
+@ouse mouse=scurries away looking for food.
+-
+
+
+@@	&birthday mouse = secs();
+	@switch sub(secs(), v(birthday)) = >[mul(60,60,2)], {
+		@@ kill mousey @@
+	}
+-
+@name mouse=embryonic rodent
+-
+think Renamed mouse as embryonic rodent.
+-
+drop rodent
+-
+generic rodent
+-
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,200 @@
+#=============================================================================
+# @time -- information for player about RL/IC time and weather
+# @tz   -- time zone support
+#=============================================================================
+
+# COMMAND: @tz <timezone>
+#
+# <timezone> can be either a timezone abbrev like EST, or it can be a 
+# numeric offset from GMT like -5.
+# 
+&cmd-tz #7 = $@tz *:
+  think setq(0, ucstr(trim(%0))); 
+  think setq(1, ulocal(ul-get-offset, %q0)); 
+  
+  think setq(9, 
+    [isnum(%q0)]
+    [t(words(%q1))]
+  );
+
+  @select %q9 = 
+    10, {
+      &tz %# = GMT %q0;
+      &tz-offset %# = %q0; 
+      @pemit %# = Time zone set to [get(%#/tz)]. Your local time is 
+                  [u(u-nice-datetime, ltime(%#))]. 
+    }, 
+
+    ?0, {
+      @pemit %# = Unknown time zone %q0. You must specify either a Civil 
+                  Time Zone code (e.g. EST, PDT) or a numeric offset from 
+                  Greenwich Mean Time (e.g. -5 means 5 hours after GMT). 
+                  Type @tz for a list of valid time zone abbreviations.
+    }, 
+
+    01, {
+      think setq(3, ulocal(ul-get-offset, %q0)); 
+      &tz %# = %q0; 
+      &tz-offset %# = %q3; 
+      @pemit %# = Time zone set to %q0 (GMT %q3). 
+                  Your local time is [u(u-nice-datetime, ltime(%#))].
+    }, 
+
+    {@pemit %# = Error in #7/cmd-tz (@tz %0): 
+                 %%q0=%q0, %%q1=%q1, %%q2=%q2, %%q3=%q3, %%q9=%q9}
+-
+
+
+# Returns the numeric offset for a given time zone abbrev.
+# 
+&ul-get-offset #7 = 
+  rest(grab(v(list-time-zones), %0:*), :)
+-
+
+
+# Lists all the known time zone abbrevs and their numeric offsets from GMT
+# 
+&cmd-tz-blank #7 = $@tz: 
+  @pemit %# = @tz: Allowable Civil Time Zones%r
+              [edit(columns(u(list-time-zones), 20), :, %b)]
+-
+
+
+# The list of time zones
+# 
+&list-time-zones #7 = 
+  ADT:-3 AST:-4 BDT:-10 BST:1 CDT:-5 CET:1 CST:-6 EDT:-4 EET:2 EST:-5 
+  GMT:0 HDT:-9 HST:-10 JDT:10 JST:9 MDT:-6 MST:-7 NZDT:13 NZST:12 
+  PDT:-7 PST:-8 SST:8 WET:0 WST:8 YDT:-8 YST:-9 
+-
+
+
+# COMMAND: @time <player>
+#
+# Gives the local time for a given player, and their time zone information.
+# 
+&cmd-time-player #7 = $@time *: 
+  think setq(0, pmatch(%0)); 
+  think setq(1, u(u-nice-datetime, ltime(%q0))); 
+
+  think setq(9, 
+    [isdbref(%q0)]
+    [hasattr(%q0, tz-offset)]
+    [hasattr(%q0, tz)]
+  ); 
+
+  @select %q9 = 
+    111, {
+      @pemit %# = The local time for [name(%q0)] is %q1 \([get(%q0/tz)]\).
+    }, 
+    110, {
+      @pemit %# = The local time for [name(%q0)] is %q1 
+                  \(GMT [get(%q0/tz-offset)]\).
+    }, 
+    101, {
+      &tz %q0; 
+      @pemit %# = The local time for [name(%q0)] is %q1 (no @tz set).
+    }, 
+    100, {
+      @pemit %# = The local time for [name(%q0)] is %q1 (no @tz set).
+    }, 
+    0??, {
+      @error %# = pmatch %q0
+    }, 
+# error
+         { @pemit %# = There is no such player named %0. Try checking your spelling.
+    }
+-
+
+
+# COMMAND: @time
+#
+# Gives a player info about the RL and VR date and time, and the VR weather.
+#
+&cmd-time #7 = $@time: 
+
+# column widths
+  think [setq(7, 33)] [setq(8, 16)]; 
+
+
+
+  @pemit %# = 
+
+### each group of lines below is a row of output
+
+    [ansi(hb, center(%bJadeMush Time Information%b, 78, -))]%r
+ 
+    %r
+
+    [ljust(\[IC\], %q7)] \[RL\]%r
+
+    %r
+
+    [ljust(u(u-nice-ic-datetime, ictime()), %q7)] 
+    [ljust(Server time:, %q8)] 
+    [u(u-nice-datetime, time())]%r
+
+    [ljust(IC:RL time ratio is [u(u-ic-rl-ratio)], %q7)] 
+    [ljust(Your time:, %q8)] 
+    [setq(0, objeval(%#, ltime()))]
+    [switch(%q0, time(), same, u(u-nice-datetime, ltime()))]%r
+
+    [ljust(It's a [get(#63/season)] [get(#63/time-of-day)]., %q7)] 
+    [ljust(Your time zone:, %q8)] 
+    [setq(0, default(%#/tz-offset, sub(0, get(#64/servertz))))]
+    [setq(0, ifelse(gte(%q0,0), +%q0, %q0))]
+    [setq(1, default(%#/tz, none set))]
+    %q1 [switch(%q1, none set, , GMT *, , \(GMT %q0\))]%r
+
+    %r
+
+    Weather:%r
+
+    [border(get(#77/[get(#63/weather-current)]), 70, %b%b%b%b, %b)]%r
+
+    %r
+
+    [ansi(hb, repeat(-, 78))]
+-
+
+&u-ic-rl-ratio #7 = 
+  [get(#63/ic-time-ratio)]:1
+-
+
+
+# Returns a prettier format for the RL date and time
+# 
+&u-nice-datetime #7 = 
+  [extract(%0, 4, 1)] [extract(%0, 1, 1)] [extract(%0, 2, 2)], [last(%0)]
+-
+
+
+# Returns a prettier format for the IC date and time
+# 
+&u-nice-ic-datetime #7 = 
+  [extract(%0, 3, 2)], [extract(%0, 6, 3)] [extract(%0, 12, 2)]
+-
+
+
+# Returns the local time for a player, using his or her time zone
+#
+&function-ltime #50 = 
+  ulocal(#7/ul-ltime, %0)
+-
+
+&ul-ltime #7 = 
+  [setq(0, switch(words(%0), 0, %#, pmatch(%0)))]
+
+  [convsecs(
+    add(
+      mul(
+        add(
+          default(%q0/tz-offset, sub(0, u(#63/servertz))), 
+          u(#63/servertz)
+        ), 
+        3600
+      ), 
+      secs()
+    )
+  )]
+-

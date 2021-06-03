@@ -1,0 +1,648 @@
+
+###########################################################################
+#                COMMANDS: @RELATIONSHIP 
+#############################################################################
+
+&CMD-RELATIONSHIP-ADD-SPOUSE #5=$@relationship/spouse *=*/*:
+ 
+#---------------------------------------------------------------
+# %q0 = target player
+# %q1 = intended spouse
+# %q2 = the description of the relationship
+#----------------------------------------------------------------
+
+  think setq(0, locate(%!, *%0, *P));
+  think setq(1, locate(%!, *%1, *P));
+  think setq(2, %2);
+ 
+  think setq(9, [isdbref(%q0)]
+                [isdbref(%q1)]
+                [not(strmatch(get(%q0/sex), get(%q1/sex)))]);
+
+  @select %q9=
+
+     0??, {@pemit %#=I don't know of a player named %0.},
+     ?0?, {@pemit %#=I don't know of a player named %1.},
+#     ??0, {@pemit %#=You can't marry two players of the same gender.},
+     11?, {@pemit %#=[ifelse(hasattr(%q0, marriage), 
+                        [name(%q0)] has a marriage object named [name(get(%q0/marriage))],
+                        [name(%q0)] has no marriage object.)]%r
+                     [ifelse(hasattr(%q1, marriage), 
+                        [name(%q1)] has a marriage object named [name(get(%q1/marriage))],
+                        [name(%q1)] has no marriage object.)];
+           @prog [setq(0,%q0)][setq(1,%q1)]%#=me/prog-marriage-object:
+              Should I create a marriage object for this marriage?;
+           @dolist %q0 %q1=&relationship-spouse ##=%q2;
+           @pemit %#=Married [name(*%q0)] and [name(*%q1)]. }
+-
+&prog-marriage-object #5=
+  @switch [strmatch(%0,y*)]=1,{@trig #2965/trig-marriage=%q0, %q1},
+  0, {@@}, *, {@mail/quick *waylon/prog-marriage-object=This 
+                             should not happen.}
+-
+&cmd-relationship-add-sibling #5=$@relationship/sibling *=*/*:
+
+#--------------------------------------------------------------
+# %q0 = target player
+# %q1 = intended sibling
+# %q2 = the description of the relationship
+#----------------------------------------------------------------
+
+  think setq(0, locate(%!, *%0, *P));
+  think setq(1, locate(%!, *%1, *P));
+  think setq(2, %2);
+
+  think setq(3, lattr(%q0/sibling*));
+  think setq(3, iter(%q3, after(##, SIBLING)));
+  think setq(3, sort(%q3));
+  think setq(3, last(%q3));
+  think setq(3, switch(0, words(%q3), sibling1, sibling[inc(%q3)]));
+
+  think setq(9, [isdbref(%q0)]
+                [isdbref(%q1)]);
+
+  @select %q9=
+     0?, {@pemit %#=I don't know of any player named %0.},
+     ?0, {@pemit %#=I don't know of any player named %1.},
+     11, {&%q3 %q0=[name(%q1)];
+          &relationship-%q3 %q0=%q2;
+          @pemit %#=[name(%q1)] set as [name(%q0)]'s sibling. Don't 
+                 forget to set [name(%q0)] as [name(%q1)]'s sibling now. }
+-
+ 
+&cmd-relationship-add #5=$@relationship/other *=*/*:
+
+#--------------------------------------------------------------
+# %q0 = target player
+# %q1 = intended relation
+# %q2 = the description of the relationship
+#----------------------------------------------------------------
+
+  think setq(0, locate(%!, *%0, *P));
+  think setq(1, locate(%!, *%1, *P));
+  think setq(2, %2);
+  think setq(3, lattr(%q0/relationship*));
+  think setq(3, filter(filter-wrong-relations, %q3));
+  think setq(3, iter(%q3, after(##, RELATIONSHIP)));
+  think setq(3, sort(%q3));
+  think setq(3, last(%q3));
+  think setq(3, switch(0, words(%q3), relationship1, relationship[inc(%q3)]));
+
+  think setq(9, [isdbref(%q0)]
+                [isdbref(%q1)]);
+
+  @select %q9=
+     0?, {@pemit %#=I don't know of any player named %0.},
+     ?0, {@pemit %#=I don't know of any player named %1.},
+     11, {&%q3 %q0=[name(%q1)];
+          &relationship-other[after(%q3, relationship)] %q0=%q2;
+          @pemit %#=[name(%q1)] set as [name(%q0)]'s relationship. 
+                 Don't forget to set [name(%q0)] as [name(%q1)]'s 
+                 relationship now. }
+
+-
+&filter-wrong-relations #5=
+ [not(strmatch(%0, RELATIONSHIP-*))]
+
+-
+&cmd-relationship-add #7=$@relationship */*:
+
+#--------------------------------------------------------------
+# %q0 = target player
+# %q1 = intended relation
+# %q2 = the description of the relationship
+#----------------------------------------------------------------
+
+  think setq(0, %#);
+  think setq(1, locate(%!, *%0, *P));
+  think setq(2, %1);
+
+# %q3 = all attributes on the player that start with 'relationship'
+  think setq(3, lattr(%q0/relationship*));
+
+# %q3 = all the 'relationship' attributes that are the people and not the 
+#       long description of the relationships
+  think setq(3, filter(#5/filter-wrong-relations, %q3));
+
+# %q3 = a list of the numbers after each relationship
+  think setq(3, iter(%q3, after(##, RELATIONSHIP)));
+
+# %q3 = the list of numbered relationships in order.
+  think setq(3, sort(%q3));
+
+# %q3 = the last/greatest numbered relationship
+  think setq(3, last(%q3));
+
+# %q3 = if it's 0, then make the first relationship relationship1, otherwise, 
+#       increment
+  think setq(3, switch(0, words(%q3), relationship1, relationship[inc(%q3)]));
+
+# %q4 = the list of relationships the player has
+  think setq(4, filter(#5/filter-wrong-relations, lattr(%q0/relationship*)));
+  think setq(4, iter(%q4, get(%q0/##), %b, |));
+
+  think setq(9, [isdbref(%q0)]
+                [isdbref(%q1)]
+                [or(t(match(%q4, [last(name(%q1))], |)),
+                    t(match(%q4, [name(%q1)], |)))]
+                [and(gte(strlen(%q2),10),gte(words(%q2),3))]);
+
+  @select %q9=
+
+# I'm not sure why this wuld ever occur. [isdbref(%q0)] is what this first
+# argument is, and %q0 is %#... This should probably not be %0, but...
+     0???, {@pemit %#=I don't know of any player named %0.},
+     ?0??, {@pemit %#=I don't know of any player named %0.},
+     ???0, {@pemit %#=Relationships need to be longer than that!},
+     1101, {@relationship/other %q0=%q1/%q2;
+           @pemit %#=Relationship to [name(%q1)] added.;
+            @bb/post relationships/[name(%#)] added [name(%q1)] =
+                 [name(%#)] added a @relationship-other to [name(%q1)], which reads:%r
+                  %q2%r%r[ifelse(setr(5,u(me/u-oldrelationship,%#,%q1)),
+                          This relationship obsoleted: %r%q5,)] 
+          },
+     1111, {think setq(6, first(iter(lattr(%#/relationship?) 
+                                   [lattr(%#/relationship??)]
+                                   [lattr(%#/relationship???)],  
+                               ifelse(or(strmatch(last(get(%#/##)),%0),
+                                         strmatch(get(%#/##),%0)),##,)))); 
+           think setq(7, inc(last(sort(edit(lattr(%#/old-relation-*), 
+                             OLD-RELATION-, ) 0)))); 
+           think setq(8, RELATIONSHIP-OTHER[after(%q6,SHIP)]); 
+           &relationship[after(%q6,SHIP)] %#=[name(%q1)]; 
+           @cpattr %#/%q8=%#/old-relation-%q7; 
+           @cpattr %#/%q6=%#/old-relname-%q7; 
+           &%q8 %#=%q2; 
+           @pemit %#=%xc%xhRelationship with %0 changed to %1.%xn; 
+           @bb/post relationships/[name(%#)] modified [name(%q1)] = 
+                 [name(%#)] added a @relationship-other to [name(%q1)], which reads:%r
+                  %q2%r%r[ifelse(setr(5,u(me/u-oldrelationship,%#,%q1)), 
+                          This relationship obsoleted: %r%q5,)]
+
+           }
+
+
+-
+
+# Brent's relationship-remover
+
+&cmd-relationship-remove #5=$@relationship/remove *=*:
+ think setq(9, pmatch(%0));
+ think setq(0,first(iter(
+    [lattr(%q9/relationship?)] 
+    [lattr(%q9/relationship??)]
+    [lattr(%q9/relationship???)], switch(strmatch(
+          get(%q9/##),%1),1,##)))); 
+ think setq(1,inc(words(lattr(%q9/old-relation-*))));
+ think setq(2,RELATIONSHIP-OTHER[after(%q0,SHIP)]);  
+ @switch [t(%q9)][t(%q0)]=
+               0?, {@pemit %#=%xm%xhI don't know %0.%xn},
+               ?0, {@pemit %#=%xm%xh[name(%q9)] doesn't have any relationships with 
+                          '%1'.%xn},
+               {@mvattr %q9=%q2,old-relation-%q1; 
+                @mvattr %q9=%q0,old-relname-%q1; 
+                @pemit %#=%xc%xhRelationship with %1 on [name(%q0)] removed.%xn;
+                @bb/post relationships/[name(%#)] removed [name(%q9)]'s %1 = 
+                 [name(%#)] removed a @relationship-other of [name(%q9)] to %1.%r
+                 Formerly, it read: [get(%q9/old-relation-%q1)]}
+-
+&cmd-relationship-add-child #5=$@relationship/child *=*/*:
+
+ think setq(0,pmatch(%0));
+
+ @switch %q0=#-1, {@pemit %#=I can't find a player named %0.},
+             #-2, {@pemit %#=%0 isn't specific enough for a name!},
+   { think setq(1,inc(words(lattr(%q0/child?)))); 
+     &child%q1 %q0=%1; 
+     &relationship-child%q1 %q0=%2; 
+     @pemit %#=[name(%q0)] given a child relationship to %1 of: %2 }
+-
+&cmd-relationship-add-mother #5=$@relationship/mother *=*/*:
+
+ think setq(0,pmatch(%0));
+
+ @switch %q0=#-1, {@pemit %#=I can't find a player named %0.},
+             #-2, {@pemit %#=%0 isn't specific enough for a name!},
+   { &mother %q0=%1; 
+     &relationship-mother %q0=%2; 
+     @pemit %#=[name(%q0)] given a mother relationship to %1 of: %2 }
+-
+&cmd-relationship-add-father #5=$@relationship/father *=*/*:
+
+ think setq(0,pmatch(%0));
+
+ @switch %q0=#-1, {@pemit %#=I can't find a player named %0.},
+             #-2, {@pemit %#=%0 isn't specific enough for a name!},
+   { &father %q0=%1; 
+     &relationship-father %q0=%2; 
+     @pemit %#=[name(%q0)] given a father relationship to %1 of: %2 }
+
+-
+
+&cmd-relationship-list #5=$@relationship/listold *: 
+
+ think setq(0,pmatch(%0)); 
+
+ @switch %q0=#-1, {@pemit %#=I can't find a player named %0.},
+             #-2, {@pemit %#=%0 isn't specific enough for a name!},
+  { @pemit %#=These are the removed relationships for [name(%q0)].%r 
+     [list(lattr(%q0/old-relation-*),[ljust(after(##,TION-),3)] 
+       [ljust(get(%q0/old-relname-[after(##,TION-)]),12)] 
+       [get(%q0/##)] %r)] }
+
+-
+
+&u-oldrelationship #7=[iter(lattr(%0/old-relname-*),
+                           [ifelse(strmatch(get(%0/##),[name(%1)]),
+                             %r[name(%1)]:
+                             [get(%0/old-relation-[after(##,NAME-)])]%r,)])]
+
+-
+# Jane Catherine August (Catherine) added stuff here.
+#
+# @relationship *
+#   argument should be a player
+#   filter out without response any argument which contains /
+#
+
+&cmd-relationship-player #7=$@relationship *:
+  @switch/first [setr(9,[not(strmatch(%0,*/*))]
+                  [t(setr(0,u(u-get-relationship-type,%#,%0)))]
+          )]=
+          0?, {@@ This is not the right form of the command.},
+	  ?0, {@pemit %#=
+                  %xh%xrYou don't have a relationship with that person.},
+          11, {@pemit %#=Relationship with [capstr(lcstr(%0))] 
+               \(%q0[ifelse(t(match(get(%#/aligned_with),%0)),\,aligned,)]
+                    [ifelse(t(match(get(%#/sponsor_of),%0)),\,sponsoree,)]
+                    [ifelse(t(match(get(%#/sponsored_by),%0)),\,sponsor,)]\):%r
+               [border([u(u-get-relationship-data,%#,%0)],70,%b%b%b%b%b,)]},
+              {@bb/post 7/Bug Report=cmd-relationship-player on #7 setq9
+                                     returned %q9.;@pemit %#=Bug reported!}
+-
+
+&u-get-relationship-type #7=
+  [switch(u(u-get-relkey,%0,%1),mother,mother,father,father,
+            child*,child,sibling*,sibling,spouse,spouse,?*,other)] 
+-
+&u-get-relationship-data #7=
+  [get(%0/[ifelse(isnum(setr(2,u(u-get-relkey,%0,%1))),
+                 relationship-other%q2,relationship-%q2)])]
+  [setq(3,get(%0/[ifelse(isnum(%q2),relationship-secret-other%q2,
+                 relationship-secret-%q2)]))]
+  [ifelse(t(words(%q3)),%rSecret Relationship:%b%xh%xr%q3%xn,%r)]
+
+
+-
+&u-get-relkey #7=[setq(0,%0)][setq(1,%1)]
+  [first([filter(#7/filter-getrelkey,spouse father mother sibling child 
+            [iter([lattr(%0/relationship?)] [lattr(%0/relationship??)] 
+            [lattr(0%/relationship???)],
+                  [mid(##,12,2)])]    
+            [lattr(%0/child*)] [lattr(%0/sibling*)])])]
+-
+&filter-getrelkey #7=
+  [ifelse(isnum(%0), [strmatch(%q1,[get(%q0/relationship%0)])],
+                     [strmatch(%q1,[get(%q0/%0)])])]
+-
+
+#############################################################################
+#                COMMANDS: @RELATIONSHIP-SECRET
+#############################################################################
+
+&CMD-REL-SECRET-ADD-SPOUSE #5=$@relationship-secret/spouse *=*/*:
+ 
+#---------------------------------------------------------------
+# %q0 = target player
+# %q1 = intended spouse
+# %q2 = the description of the relationship
+# %q3 = relationship attribute for description
+# %q4 = relationship attribute for name.
+# %q5 = Old relationship, if it existed.
+
+#----------------------------------------------------------------
+
+  think setq(0, locate(%!, *%0, *P));
+  think setq(1, locate(%!, *%1, *P));
+  think setq(2, %2);
+ 
+  think setq(9, [isdbref(%q0)]
+                [isdbref(%q1)]
+                [strmatch(get(%q0/spouse), name(%q1))]);
+  @select %q9=
+     0??, {@pemit %#=I don't know of a player named %0.},
+     ?0?, {@pemit %#=I don't know of a player named %1.},
+     ??0, {@pemit %#=[name(%q0)] does not appear to be married to [name(%q1)].},
+     111, {@prog 
+                     [setq(0,%q0)]
+                     [setq(1,%q1)]
+                     [setq(3,relationship-secret-spouse)]
+                     [setq(4,spouse)]
+                     [setq(5,get(%q0/relationship-secret-spouse))]
+                     %#=me/prog-confirm-secret-relationship:
+                     %xh%xwWould you like to 
+                     [ifelse(t(words(%q5)),modify,add)] 
+                     the following secret 
+                     spouse relationship on [name(%q0)] for [poss(%q0)] 
+                     [ifelse(strmatch(poss(%q0),her),husband,wife)] [name(%q1)]?%r
+                     %t%xh%xr%q2%xn
+                     [ifelse(t(words(%q5)),%r%xh%xwPrevious secret relationship:%b%xh%xr%q5%xn,
+                     %r(This is a new secret spouse relationship for [name(%q0)]))] 
+           }
+
+-
+&prog-confirm-secret-relationship #5=@switch strmatch(%0,y*)=
+           1,{&%q3 %q0=%q2;&%q4 %q0=[name(%q1)];@pemit %#=%xh%xgSecret relationship                 
+[ifelse(t(words(%q5)),modified,added)].%xn},
+           0,{@pemit %#=%xh%xgSecret relationship not [ifelse(t(words(%q5)),modified,added)].%xn}
+
+-
+&cmd-rel-secret-add-sibling #5=$@relationship-secret/sibling *=*/*:
+
+#--------------------------------------------------------------
+# %q0 = target player
+# %q1 = intended sibling
+# %q2 = the description of the relationship
+# %q3 = sibling attribute for description.
+# %q4 = relationship attribute for name.
+# %q5 = Old relationship, if it existed.
+#----------------------------------------------------------------
+
+  think setq(0, locate(%!, *%0, *P));
+  think setq(1, locate(%!, *%1, *P));
+  think setq(2, %2);
+  think setq(9, [isdbref(%q0)]
+                [isdbref(%q1)]);
+  @select %q9=
+     0?, {@pemit %#=I don't know of any player named %0.},
+     ?0, {@pemit %#=I don't know of any player named %1.},
+     11, {@prog [setq(4, grepi(%q0,sibling*,last(name(%q1))))]
+             [switch(words(%q4),
+              0,[setq(4,last(sort(iter(lattr(%q0/sibling*), 
+                after(##, SIBLING)))))]
+                [switch(0, words(%q4), 
+                 setq(4,sibling1), setq(4,sibling[inc(%q4)]))])
+              ]  
+              [setq(3,relationship-secret-%q4)]
+              [setq(5,get(%q0/relationship-secret-%q4))]
+              %#=me/prog-confirm-secret-relationship:
+              %xh%xwWould you like to 
+                     [ifelse(t(words(%q5)),modify,add)] 
+                     the following secret 
+                     sibling relationship on [name(%q0)] for [poss(%q0)] 
+                     [ifelse(strmatch(poss(%q1),her),sister,brother)] [name(%q1)]?%r
+                     %t%xh%xr%q2%xn
+                     [ifelse(t(words(%q5)),%r%xh%xwPrevious secret relationship:%b%xh%xr%q5%xn,
+                     %r(This is a new secret sibling relationship for [name(%q0)]))] 
+
+          }
+-
+
+
+&cmd-rel-secret-add #5=$@relationship-secret/other *=*/*:
+
+#--------------------------------------------------------------
+# %q0 = target player
+# %q1 = intended sibling
+# %q2 = the description of the relationship
+# %q3 = other relationship attribute for description.
+# %q4 = other relationship attribute for name.
+# %q5 = Old relationship, if it existed.
+#----------------------------------------------------------------
+
+  think setq(0, locate(%!, *%0, *P));
+  think setq(1, locate(%!, *%1, *P));
+  think setq(2, %2);
+  think setq(9, [isdbref(%q0)]
+                [isdbref(%q1)]);
+  @select %q9=
+     0?, {@pemit %#=I don't know of any player named %0.},
+     ?0, {@pemit %#=I don't know of any player named %1.},
+     11, {@prog [setq(4, grepi(%q0,relationship*,last(name(%q1))))]
+                [setq(4, filter(filter-wrong-relations, %q4))]
+                [switch(words(%q4),0,
+                   [setq(4, filter(filter-wrong-relations, lattr(%q0/relationship*)))]
+                [setq(4,last(sort(iter(%q4, after(##, RELATIONSHIP)))))]
+                [switch(0, words(%q4),setq(4,RELATIONSHIP1),
+                    setq(4,RELATIONSHIP[inc(%q4)]))])]
+              [setq(3,relationship-secret-other[after(%q4,RELATIONSHIP)])]
+              [setq(5,get(%q0/relationship-secret-other[after(%q4,RELATIONSHIP)]))]
+              %#=me/prog-confirm-secret-relationship:
+              %xh%xwWould you like to 
+                     [ifelse(t(words(%q5)),modify,add)] 
+                     the following secret 
+                     relationship on [name(%q0)] for [name(%q1)]?%r
+                     %t%xh%xr%q2%xn
+                     [ifelse(t(words(%q5)),%r%xh%xwPrevious secret relationship:%b%xh%xr%q5%xn,
+                     %r(This is a new secret relationship for [name(%q0)]))] 
+
+          }
+
+-
+
+&cmd-rel-secret-add #7=$@relationship-secret */*:
+
+#--------------------------------------------------------------
+# %q0 = target player
+# %q1 = intended sibling
+# %q2 = the description of the relationship
+# %q3 = other relationship attribute for description.
+# %q4 = other relationship attribute for name.
+# %q5 = Old relationship, if it existed.
+#----------------------------------------------------------------
+
+  think setq(0, %#);
+  think setq(1, locate(%!, *%0, *P));
+  think setq(2, %1);
+  think setq(9, [isdbref(%q0)]
+                [isdbref(%q1)][and(gte(strlen(%q2),10),gte(words(%q2),3))]);
+  @select %q9=
+     0??, {@pemit %#=I don't know of any player named %0.},
+     ?0?, {@pemit %#=I don't know of any player named %1.},
+     ??0, {@pemit %#=Relationships need to be longed then that!},
+     111, {@prog [setq(4, grepi(%q0,relationship*,last(name(%q1))))]
+                [setq(4, filter(#5/filter-wrong-relations, %q4))]
+                [switch(words(%q4),0,
+                   [setq(4, filter(#5/filter-wrong-relations, lattr(%q0/relationship*)))]
+                [setq(4,last(sort(iter(%q4, after(##, RELATIONSHIP)))))]
+                [switch(0, words(%q4),setq(4,RELATIONSHIP1),
+                    setq(4,RELATIONSHIP[inc(%q4)]))])]
+              [setq(3,relationship-secret-other[after(%q4,RELATIONSHIP)])]
+              [setq(5,get(%q0/relationship-secret-other[after(%q4,RELATIONSHIP)]))]
+              %#=me/prog-confirm-secret-rel-other:
+              %xh%xwWould you like to 
+                     [ifelse(t(words(%q5)),modify,add)] 
+                     the following secret 
+                     relationship for [name(%q1)]?%r
+                     %t%xh%xr%q2%xn
+                     [ifelse(t(words(%q5)),%r%xh%xwPrevious secret relationship:%b%xh%xr%q5%xn,
+                     %r(This is a new secret relationship for you.))] 
+          }
+
+-
+&prog-confirm-secret-rel-other #7=@switch strmatch(%0,y*)=
+           1,{&%q3 %q0=%q2;&%q4 %q0=[name(%q1)];@pemit %#=%xh%xgSecret relationship                              
+                to [name(%q1)] [ifelse(t(words(%q5)),modified,added)].%xn;
+              @bb/post relationships/[name(%#)] [ifelse(t(words(%q5)),modified,added)] [name(%q1)] (Secret)=
+                 [name(%#)] added a @relationship-secret-other to [name(%q1)], which reads:%r
+                  %q2%r%r[ifelse(t(words(%q5)), 
+                          This relationship obsoleted: %r%q5,
+              (This is a new secret relationship for [name(%q0)].))];
+              @switch [setq(7, inc(last(sort(edit(lattr(%q0/old-relation-secret-*), 
+                    OLD-RELATION-SECRET-, ) 0))))]
+                    [words(%q5)]=
+              0,
+              ,{&old-relation-secret-%q7 %q0=%q5; 
+              &old-relname-secret-%q7 %q0=[name(%q1)];} 
+           },
+           0,{%xh%xgSecret relationship not [ifelse(t(words(%q5)),modified,added)].%xn}
+
+-
+&cmd-rel-secret-add-child #5=$@relationship-secret/child *=*/*:
+
+#--------------------------------------------------------------
+# %q0 = target player
+# %q2 = the description of the relationship
+# %q3 = child attribute for description.
+# %q4 = relationship attribute for name.
+# %q5 = Old relationship, if it existed.
+#----------------------------------------------------------------
+
+  think setq(0, locate(%!, *%0, *P));
+  think setq(1, capstr(%1));
+  think setq(2, %2);
+  @select [isdbref(%q0)]=
+     0, {@pemit %#=I don't know of any player named %0.},
+     1, {@prog [setq(4, grepi(%q0,CHILD*,%q1))]
+             [switch(words(%q4),
+              0,[setq(4,last(sort(iter(lattr(%q0/child*), 
+                after(##, CHILD)))))]
+                [switch(0, words(%q4), 
+                 setq(4,CHILD1), setq(4,CHILD[inc(%q4)]))])
+              ]  
+              [setq(3,relationship-secret-%q4)]
+              [setq(5,get(%q0/relationship-secret-%q4))]
+              %#=me/prog-confirm-secret-child:
+              %xh%xwWould you like to 
+                     [ifelse(t(words(%q5)),modify,add)] 
+                     the following secret 
+                     child relationship on [name(%q0)] for %q1?%r
+                     %t%xh%xr%q2%xn
+                     [ifelse(t(words(%q5)),%r%xh%xwPrevious secret relationship:%b%xh%xr%q5%xn,
+                     %r(This is a new secret child relationship for [name(%q0)]))] 
+
+          }
+
+-
+
+&prog-confirm-secret-child #5=@switch strmatch(%0,y*)=
+         1,{&%q3 %q0=%q2;&%q4 %q0=%q1;
+         @pemit %#=%xh%xgSecret relationship 
+         [ifelse(t(words(%q5)),modified,added)].%xn},
+         0,{@pemit %#=%xh%xgSecret relationship not 
+         [ifelse(t(words(%q5)),modified,added)].%xn}
+
+
+-
+&cmd-rel-secret-add-mother #5=$@relationship-secret/mother *=*/*:
+
+#--------------------------------------------------------------
+# %q0 = target player
+# %q2 = the description of the relationship
+# %q3 = mother attribute for description.
+# %q4 = relationship attribute for name.
+# %q5 = Old relationship, if it existed.
+#----------------------------------------------------------------
+
+  think setq(0, locate(%!, *%0, *P));
+  think setq(1, capstr(%1));
+  think setq(2, %2);
+  @select [isdbref(%q0)]=
+     0, {@pemit %#=I don't know of any player named %0.},
+     1, {@prog [setq(4,MOTHER)]  
+               [setq(3,relationship-secret-MOTHER)]
+               [setq(5,get(%q0/relationship-secret-mother))]
+               %#=me/prog-confirm-secret-child:
+              %xh%xwWould you like to 
+                     [ifelse(t(words(%q5)),modify,add)] 
+                     the following secret 
+                     mother relationship on [name(%q0)] for %q1?%r
+                     %t%xh%xr%q2%xn
+                     [ifelse(t(words(%q5)),%r%xh%xwPrevious secret relationship:%b%xh%xr%q5%xn,
+                     %r(This is a new secret mother relationship for [name(%q0)]))] 
+
+          }
+
+-
+&cmd-rel-secret-add-father #5=$@relationship-secret/father *=*/*:
+
+#--------------------------------------------------------------
+# %q0 = target player
+# %q2 = the description of the relationship
+# %q3 = father attribute for description.
+# %q4 = relationship attribute for name.
+# %q5 = Old relationship, if it existed.
+#----------------------------------------------------------------
+
+  think setq(0, locate(%!, *%0, *P));
+  think setq(1, capstr(%1));
+  think setq(2, %2);
+  @select [isdbref(%q0)]=
+     0, {@pemit %#=I don't know of any player named %0.},
+     1, {@prog [setq(4,FATHER)]  
+               [setq(3,relationship-secret-FATHER)]
+               [setq(5,get(%q0/relationship-secret-father))]
+               %#=me/prog-confirm-secret-child:
+              %xh%xwWould you like to 
+                     [ifelse(t(words(%q5)),modify,add)] 
+                     the following secret 
+                     father relationship on [name(%q0)] for %q1?%r
+                     %t%xh%xr%q2%xn
+                     [ifelse(t(words(%q5)),%r%xh%xwPrevious secret relationship:%b%xh%xr%q5%xn,
+                     %r(This is a new secret father relationship for [name(%q0)]))] 
+
+          }
+
+
+
+-
+
+# Brent's relationship-remover
+
+&cmd-rel-secret-remove #5=$@relationship-secret/remove *=*:
+ think setq(9, pmatch(%0));
+ think setq(0,first(iter(
+    [lattr(%q9/relationship?)] 
+    [lattr(%q9/relationship??)]  
+    [lattr(%q9/relationship???)], switch(strmatch(
+          get(%q9/##),%1),1,##)))); 
+ think setq(1,inc(words(lattr(%q9/old-relation-secret-*))));
+ think setq(2,RELATIONSHIP-SECRET-OTHER[after(%q0,SHIP)]);  
+ @switch [t(%q9)][t(%q0)]=
+               0?, {@pemit %#=%xm%xhI don't know %0.%xn},
+               ?0, {@pemit %#=%xm%xh[name(%q9)] doesn't have any relationships with 
+                          '%1'.%xn},
+               {@mvattr %q9=%q2,old-relation-secret-%q1; 
+                @cpattr %q9=%q0,old-relname-secret-%q1; 
+                @switch words(get(%q9/RELATIONSHIP-OTHER[after(%q0,SHIP)])]=
+                     0,{&RELATIONSHIP-OTHER[after(%q0,SHIP %q9=}
+                @pemit %#=%xc%xhSecret relationship with %1 on [name(%q9)] removed.%xn;
+                @bb/post relationships/[name(%#)] removed [name(%q9)]'s %1 = 
+                 [name(%#)] removed a @relationship-secret-other of [name(%q9)] to %1.%r
+                 Formerly, it read: [get(%q9/old-relation-secret-%q1)]}
+
+-
+
+&cmd-rel-secret-list #5=$@relationship-secret/listold *: 
+
+ think setq(0,pmatch(%0)); 
+
+ @switch %q0=#-1, {@pemit %#=I can't find a player named %0.},
+             #-2, {@pemit %#=%0 isn't specific enough for a name!},
+  { @pemit %#=These are the removed relationships for [name(%q0)].%r 
+     [list(lattr(%q0/old-relation-secret-*),[ljust(after(##,TION-),3)] 
+       [ljust(get(%q0/old-relname-secret-[after(##,TION-)]),12)] 
+       [get(%q0/##)] %r)] }
+
+
+

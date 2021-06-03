@@ -1,0 +1,929 @@
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ @
+@@ ----------------------@                             @-------------------- @
+@@ ----------------------@      SQL Jobs Code v2.0     @-------------------- @
+@@ ----------------------@          Beta Copy          @-------------------- @
+@@ ----------------------@                             @-------------------- @
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ @
+@@ 
+@@                                Future Feeps
+@@ 
+@@ FEEPS:
+@@    - (!!)add an on-completion job hook to cause actions to be taken when
+@@      the job is completed 
+@@    - ability to merge notes on a specific job?  +job/squish notes ##?
+@@    - list of cats to turn on/off? (CODE !FEEP?)
+@@    - Make +jobs/search check note content too?
+@@    - Make +job/notes list only the first X number, with +job/notes 2
+@@      (and so on) for the rest.
+@@    - CONFIG_CREATOR: Set to 1 to allow a job's creator Admin control over 
+@@      it, regardless of actual admin privileges.  (Only Admin can create a
+@@      job anyway; is this necessary?  Only matters if job is moved.)
+@@    - Number +jobs by position in queue rather than by actual ID.
+@@    - OR ability to renumber jobs could be done by temporarily shutting 
+@@      down system, and set a slow @waited fixerupper that checks the number
+@@      of jobs currently on the system, then iterates through, setting 
+@@      matches that show #1 = former id #whatever, up through the system;
+@@      when it's done with that, it deletes and reinstates autonumber on 
+@@      job_list, then dolist updates job_notes to set all job_id fields to
+@@      the appropriate values.
+@@    - have +jobs/new only (on connect) show jobs in monitored categories?
+@@    - have +jobs/new ignore any jobs or notes with %# as author
+@@    - backwards compatibility with 3.0 - remove %q<>s, border()...
+@@    - +job/notes<#> to override the current buffer problem.
+@@ 
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@                               Changelog
+@@ 
+@@ 2003-05-29:  Missing # in +job/claim reported by Daetrin.
+@@ 2003-05-29:  Difficulty with initialization of categories reported by
+@@              Daetrin; @waits may be necessary, or @sql INSERT lines.
+@@ 2003-08-22:  Altered +jobs/new to list only new jobs NOT authored by the
+@@              command invoker.
+@@ 
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@ 
+@@ 
+@@                             Installation Notes
+@@ 
+@@ The installing character MUST have use_sql @power.  If the character is
+@@ not capable of setting the use_sql @power (in most cases only the God
+@@ character has this privilege), the command and data objects must be set
+@@ with the use_sql @power later.
+@@ 
+@@ This code utilizes the @reference command to ensure noninterference with
+@@ other objects while installing.  These references are deleted at the end
+@@ of the process.
+@@ 
+@@ The +jobs/monitor command uses the JOB_MONITOR attribute, which should be
+@@ wiz-locked:
+
+@attribute/access _JOB_MONITOR=hidden wizard
+@attribute/access _JOB_LASTREAD=hidden wizard
+
+@@ These do not HAVE to be locked.  The monitor code checks AUTH to make sure
+@@ a person with a listed monitor id should be able to hear it, for cases
+@@ where an authorization level is changed.
+@@ 
+@@ Alternatively, the following line may be placed into the <game>.conf
+@@ file to lock all attributes beginning in _job_
+@@ 
+@@ attr_type _job_* hidden wizard
+
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@ -------------------------@                       @-------------------------
+@@ -------------------------@  Installation Begins  @-------------------------
+@@ -------------------------@                       @-------------------------
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+@set me=quiet
+
+@create CMD: Job Global Object <JGO>=10
+@create DATA: Job Data Object <JDO>=10
+
+@reference jcmd = JGO
+@reference jdat = JDO
+
+@parent #_jcmd=#_jdat
+
+@power #_jcmd=use_sql
+@power #_jdat=use_sql
+
+@set #_jcmd=inherit
+@set #_jdat=inherit
+
+@set #_jcmd=COMMANDS
+
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@ -------------------------@                       @-------------------------
+@@ -------------------------@   Various Functions   @-------------------------
+@@ -------------------------@                       @-------------------------
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@ 
+@@ FNC-PASSES:        Returns 1 if the character has any auth level permitting
+@@                    command access, 0 else.
+@@                          %0    space-sep list of category auth levels
+@@                          %1    u(FNC-AUTHORITY,%#), usually
+@@ 
+@@ FNC-AUTHORITY:     Returns space-separated list of auth levels which the
+@@                    player with dbref %0 passes.  Used for determining 
+@@                    whether or not they can use various commands.
+@@ 
+@@ FNC-WRITENOTE:     Writes a note into the notes database.  Variables:
+@@                          %0  Job id#
+@@                          %1  Dbref of writer
+@@                          %2  Note content
+@@ 
+@@ FNC-NOTIFY:        Monitor notifier.  Sends a notice to all players with
+@@                    a monitor turned on to a given job category.  (Checks
+@@                    that they still pass the Read authorization for that
+@@                    category.)  Uses side-effect function pemit().
+@@                    Variables:
+@@                          %0  Category id#
+@@                          %1  Read write admin authorization level
+@@                          %2  Activator (%#)
+@@                          %3  Content of notification message
+@@ 
+@@ FNC-DISPLAYHEADER: Goes along with FNC-JOBDISPLAY; the header to be used
+@@                                 above the iteration list.
+@@ FNC-JOBDISPLAY:    General job-display for iterations.  Used in +jobs/mine,
+@@                    +jobs/un, +jobs/all, and +jobs/new.
+@@                                              %0      job_id
+@@                                              %1      cat_name
+@@                                              %2      claimant dbref (with #)
+@@                                              %3      priority (number)
+@@                                              %4      duetype (if any)
+@@                                              %5      duedate (if any)
+@@                                              %6      last update
+@@                              %7      create time
+@@                                              %8      job title
+@@ 
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+&FNC-PASSES #_jdat=[sign(words(setinter(%0,%1)))]
+
+&FNC-AUTHORITY #_jdat=[trim(squish(iter(lattr([parent(me)]/AUTH_*),switch(u(##,%0),1,[after(##,_)]))))]
+
+&FNC-WHATLEVEL #_jdat=[switch(1,sign(words(setinter(%0,%1))),admin,sign(words(setinter(%0,%1 %2))),write,sign(words(setinter(%0,%1 %2 %3))),read,error)]
+
+&QRY-WRITENOTE #_jdat=INSERT INTO job_notes ( job_id, note_date, note_author, note_content ) VALUES ( %0, [secs()], [after(%1,#)], "[edit(edit(%2,",'),',%\')]" )
+
+&FNC-NOTIFY #_jdat=[pemit(setunion(iter(lwho(),ifelse(and(member(get(##/_JOB_MONITOR),%0),or(u(AUTH_[first(%1)],##),u(AUTH_[extract(%1,2,1)],##),u(AUTH_[last(%1)],##))),##,)),%2),[ansi(h,%[JOBS%])] %3)]
+
+&FNC-BAR #_jdat=[ansi(h,repeat(=,78))]
+
+&FNC-DISPLAYHEADER #_jdat=[ansi(h,%b[ljust(ID,5)][ljust(Category,10)][ljust(Claimant,18)]Title%r%b[repeat(-,4)] [repeat(-,9)] [repeat(-,17)] [repeat(-,44)])]
+
+&FNC-JOBDISPLAY #_jdat=%b[ansi(switch(%3,1,hr,2,hy,3,hg),[ljust(%0,5)][ljust(%1,10)][ljust(left(name(%2),14),18)][ljust(%8,36)][u(FNC-DUESTATUS,lcstr(%4),[switch(lcstr(%4),flex,%6,abso,%7)],%5)])]
+
+&FNC-DUESTATUS #_jdat=[switch(%0,flex,{[setq(dur,mul(%2,86400))][setq(used,sub(secs(),%1))][switch(1, gte(secs(),add(%1,%q<dur>)), %xr%xhOVERDUE%xn, gte(fdiv(%q<used>,%q<dur>),0.75), %xy%xhNEAR DUE%xn)]},  abso, {[setq(dur,sub(%2,%1))][setq(used,sub(secs(),%1))][switch(1, gte(secs(),%2), %xr%xhOVERDUE%xn, gte(fdiv(%q<used>,%q<dur>),0.75), %xy%xhNEAR DUE%xn)]})]
+
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@ -------------------------@                       @-------------------------
+@@ -------------------------@   Adding SQL Tables   @-------------------------
+@@ -------------------------@                       @-------------------------
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@ 
+@@                                 SQL Tables
+@@  
+@@ job_list:
+@@  
+@@        job_id           auto-incremented id field
+@@        cat_id           cat_id field from job_cats table
+@@        job_creator      dbref, sans #, of whoever created the job
+@@        job_created      secs() of time the job was created
+@@        job_priority     1, 2, or 3 -- low, medium, high urgency
+@@        job_claimant     dbref, sans #, of whoever's working on the job
+@@        job_lastupdate   secs() of last time the job was modified
+@@        job_duetype      FLEX or ABSO; flexible or absolute duedate
+@@        job_duedate      flex days or absolute secs() duedate
+@@        job_timeout      days untouched before purged from DONE category
+@@        job_title        job title (very brief description)
+@@        job_desc         a longer description of the job (if necessary)
+@@ 
+@@ job_cats:
+@@  
+@@        cat_id           auto-incremented id field
+@@        cat_name         8-character maximum category name.  Single word.
+@@        cat_read         5-character maximum AUTH_level name for reading
+@@        cat_write        5-character maximum AUTH_level name for writing
+@@        cat_admin        5-character maximum AUTH_level name for admin
+@@        cat_timeout      default job_timeout in # of days
+@@        cat_duetype      FLEX or ABSO; default duedate type
+@@        cat_duedate      default flex days or secs from time of creation
+@@        cat_desc         text field description of category, max 35 char
+@@ 
+@@ job_notes:
+@@  
+@@        note_id          auto-incremented id field
+@@        job_id           id from job_list table indicating the job
+@@        note_date        secs() of when this particular note was posted
+@@        note_author      dbref, sans #, of note-poster
+@@        note_content     text field of note content
+@@  
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+@sql CREATE TABLE job_list ( job_id int auto_increment primary key, cat_id tinyint not null, job_creator int not null, job_created int not null, job_priority tinyint not null, job_claimant int, job_lastupdate int, job_timeout int, job_duetype char(5), job_duedate int, job_title char(35) not null, job_desc text )
+
+@sql CREATE TABLE job_cats ( cat_id int auto_increment primary key, cat_name char(8) not null, cat_read char(5) not null, cat_write char(5) not null, cat_admin char(5) not null, cat_timeout int, cat_duetype char(5), cat_duedate int, cat_desc char(35) )
+
+@sql CREATE TABLE job_notes ( note_id int auto_increment primary key, job_id int not null, note_date int, note_author int, note_content text )
+
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@ ----------------------@                             @----------------------
+@@ ----------------------@    Setting Access Privs,    @----------------------
+@@ ----------------------@   Auth Levels, and Options  @----------------------
+@@ ----------------------@                             @----------------------
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@ 
+@@ Access privileges:
+@@ 
+@@ Permission levels for using types of commands.
+@@ 
+@@ HAS_ACCESS:    Determines what characters may use ANY +jobs command. 
+@@                   Default: 1
+@@ 
+@@ ACCESS_CATADMIN:  Determines which characters may use commands listed
+@@                   under the Category Administration section.  These are
+@@                   all general administration commands which can affect the
+@@                   +jobs system as a whole.
+@@ 
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+&HAS_ACCESS #_jdat=1
+@lock/use #_jcmd=HAS_ACCESS/1
+@ufail #_jcmd=Error: You are not permitted to use +jobs.
+
+&ACCESS_CATADMIN #_jdat=[hasflag(%0,wizard)]
+
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@ 
+@@                         Category permission levels
+@@      
+@@ Adjust this to add levels or to change what defines 'staff,' etc.  Auth
+@@ level NONE is included for the DONE category so completed jobs remain
+@@ accessible but invisible until they're cleared out after a month.  A
+@@ category with auth level NONE may still be accessed by wizard characters
+@@ through +jobs/all <cat>, but will not appear on default +jobs listings.
+@@ It is NOT recommended that any other category have this setting.
+@@ 
+@@ AUTH levels must be five or fewer characters in length and return 1 if the
+@@ target should be able to affect the indicated category, else 0.
+@@ 
+@@ Auth level defaults:  WIZ(ard), ST(af)F, ALL, NONE
+@@ 
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+&AUTH_WIZ #_jdat=[hasflag(%0,Wizard)]
+&AUTH_STF #_jdat=[or(hasflag(%0,Staff),hasflag(%0,Wizard))]
+&AUTH_ALL #_jdat=1
+&AUTH_NONE #_jdat=0
+
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@ 
+@@                           Configuration Settings
+@@ 
+@@ CONFIG_ASSIGN:    Controls whether a new job is automatically assigned to
+@@                   the creator.  Default: 0
+@@ 
+@@ CONFIG_EMPLOYED:  Controls whether a character given a job via +job/assign
+@@                   has READ and WRITE privileges over it, regardless of 
+@@                   actual privileges in its category.  Default: 1
+@@ 
+@@ CONFIG_FLEXMAX:   Maximum number of days to which a flexible duedate may
+@@                   be set.  Default: 90
+@@ 
+@@ CONFIG_TIMEOUT:   Controls whether completed jobs are cleared from the
+@@                   DONE category, and when.  This config parameter ONLY
+@@                   sets the default category timeout, aka cat_timeout, when
+@@                   a new category is created; existing category default
+@@                   timeouts must be set with +job/editcat.
+@@                        A job must be X many days old before it is 
+@@                   completely deleted.  If this is set to 0, jobs will be
+@@                   deleted immediately on completion.  If set to -1, jobs
+@@                   will never be deleted.      Default: 30
+@@ 
+@@ CONFIG_CUTOFF:    Cut off the +jobs/all listing at X number of jobs, to
+@@                   force into category listing if the total number is much
+@@                   too high. For no cutoff, set to 0.  Default: 100
+@@ 
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+&CONFIG_ASSIGN #_jdat=0
+&CONFIG_EMPLOYED #_jdat=1
+&CONFIG_FLEXMAX #_jdat=90
+&CONFIG_TIMEOUT #_jdat=30
+&CONFIG_CUTOFF #_jdat=100
+
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@ 
+@@ If CONFIG_TIMEOUT is set to 0 or -1 (and you have no plans to give any jobs
+@@ timeouts in the DONE category in the future), the @startup in this section
+@@ may be removed, as completed jobs will either be immediately or never 
+@@ deleted.
+@@ 
+@@ This sets a daily timeout trigger to run at four in the morning and wipe
+@@ any jobs from the DONE category which have been there for more than the
+@@ number of days specified in CONFIG_TIMEOUT.  It may be modified to run
+@@ at any preferable time and frequency.  
+@@ 
+@@ If the @cron time is changed, the initialization at the end of installation
+@@ must also be changed to the proper time.
+@@ 
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+&QUERY-CRON #_jdat=SELECT job_list.job_id FROM job_cats LEFT JOIN job_list ON job_cats.cat_id=job_list.cat_id WHERE job_cats.cat_name='DONE' AND job_timeout!='-1' AND (job_lastupdate + (job_timeout * 86400))<%0
+
+&CRON_TIMEOUT #_jdat=@dolist [sql(u(QUERY-CRON,secs()))]={@sql DELETE FROM job_notes WHERE job_id=##; @sql DELETE FROM job_list WHERE job_id=##}
+
+@startup #_jcmd=@cron #_jdat/CRON_TIMEOUT=0 4 * * *
+
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@ -----------------------@                           @-----------------------
+@@ -----------------------@  Category Administration  @-----------------------
+@@ -----------------------@                           @-----------------------
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@ 
+@@ Command access permission: ACCESS_CATADMIN
+@@ 
+@@       +jobs/admin
+@@  
+@@ Displays all categories (whether or not the user has read permission, so
+@@ DONE will appear here as well as others) with their authorization levels,
+@@ default timeout, and a list of configuration settings and their values.
+@@  
+@@       +job/cat create [cat name] [read]/[write]/[admin] [desc] 
+@@            E.g., +job/cat create CODE STF/STF/WIZ Code jobs.
+@@       +job/cat delete [category]
+@@       +job/cat config [category]/[name,auth,desc]=[new value]
+@@  
+@@ READ authorization permits those who pass its lock to see the indicated
+@@   categories in +jobs, read their information, and view their notes.
+@@ WRITE authorization permits claiming jobs, creating jobs, and access to
+@@   all commands for working on them.  
+@@ ADMIN authorization allows jobs to be marked completed, and editing of
+@@   some job information.
+@@ 
+@@ Exceptions:
+@@      - Anyone marked as claimant on a job may access WRITE and READ 
+@@        commands exclusively for their marked jobs /if/ CONFIG_EMPLOYED=1
+@@      - The creator of a job has ADMIN privileges over it /if/
+@@        CONFIG_CREATOR=1
+@@ 
+@@ Also:  Although it is theoretically possible to set the AUTH levels such
+@@        that a character with WRITE or ADMIN privileges does not have READ
+@@        privileges (or any other combination), generally it will be more
+@@        useful to make certain that the WRITE authorization level is 
+@@        inclusive of READ, and ADMIN of both READ and WRITE.  The default
+@@        AUTH levels included demonstrate this.  But, of course, there are
+@@        always exceptions, so the ability to set them non-inclusively is
+@@        available.
+@@ 
+@@        +jobs/done               List of completed jobs in storage
+@@ 
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+&CMD-CAT_CREATE #_jcmd=$+job/cat create * */*/* *:@select 0=[u(ACCESS_CATADMIN,%#)], @pemit %#=Permission denied., [lte(strlen(%0),5)], @pemit %#=Error: Category names may not exceed five characters., [hasattr(parent(me),AUTH_%1)], @pemit %#=Error: There is no authorization type [ucstr(%1)]., [hasattr(parent(me),AUTH_%2)], @pemit %#=Error: There is no authorization type [ucstr(%2)]., [hasattr(parent(me),AUTH_%3)], @pemit %#=Error: There is no authorization type [ucstr(%3)]., [eq(words(%0),1)], @pemit %#=Error: Category must be a single word., [lte(strlen(%4),35)], @pemit %#=Error: Category descriptions may not exceed thirty-five characters.  "%4" is [strlen(%4)] characters., [words(sql(SELECT cat_id FROM job_cats WHERE cat_name='[ucstr(%0)]'))], {@pemit %#=[ansi(h,%[JOBS%])] You have added job category [ucstr(%0)] with description "%4" and authorization levels: Read %([ucstr(%1)]%), Write %([ucstr(%2)]%), Admin %([ucstr(%3)]%).; @sql INSERT INTO job_cats ( cat_name, cat_read, cat_write, cat_admin, cat_timeout, cat_desc ) VALUES ( '[ucstr(%0)]', '[ucstr(%1)]', '[ucstr(%2)]', '[ucstr(%3)]', '[v(CONFIG_TIMEOUT)]', '[edit(%4,',%\')]' )}, @pemit %#=Error: There is already a job category named [ucstr(%1)].
+
+&CMD-CAT_CONFIG #_jcmd=$+job/cat config */*=*:@select 01=[u(ACCESS_CATADMIN,%#)]?, @pemit %#=Permission denied., [words(setr(0, sql(SELECT cat_id FROM job_cats WHERE cat_name='[ucstr(%0)]',|)))]?, @pemit %#=Error: There is no category named '[ucstr(%0)].', ?[match(lcstr(%1),name)], {@select 0=[lte(strlen(%3),5)], @pemit %#=Error: Category names may be a maximum of five letters., [eq(words(%3),1)], @pemit %#=Error: Category names must be a single word., [words(sql(SELECT cat_id FROM job_cats WHERE cat_name='[ucstr(%2)]'))], {@pemit %#=[ansi(h,%[JOBS%])] You have changed the name of job category [ucstr(%0)] to [ucstr(%2)].; @sql UPDATE job_cats SET cat_name='[edit(ucstr(%2),',%\')]' WHERE cat_id=%q0}, @pemit %#=Error: There is already a category named [ucstr(%2)].}, ?[nonzero(member(read write admin,lcstr(%1)),1,0)], {@select 0=[hasattr(parent(me),AUTH_%2)], @pemit %#=Error: There is no authorization type [ucstr(%2)]., {@pemit %#=[ansi(h,%[JOBS%])] You have changed the [switch(lcstr(%1),read,reading,write,writing,admin,administration,#Error#)] authorization level of job category [ucstr(%0)] to [ucstr(%2)].; @sql UPDATE job_cats SET cat_[lcstr(%1)]='[edit(ucstr(%2),',%\')]' WHERE cat_id=%q0}}, ?[match(lcstr(first(%1)),duedate)], {@select [setq(dd,sql(SELECT cat_duetype%, cat_duedate FROM job_cats WHERE cat_id=%q0,|,^))][setq(2,extract(%q<dd>,2,1,^))][setq(time,rest(%2))][nonzero(strlen(%2),1,0)][nonzero(strlen(%q2),1,0)][switch(1,match(lcstr(first(%2)),abso*),1,match(lcstr(first(%2)),flex*),2,0)]=00?, @pemit %#=Error: There is no default duedate on category [ucstr(%0)] to clear., 01?, {@pemit %#=[ansi(h,%[JOBS%])] You clear the default duedate for category [ucstr(%0)].; @sql UPDATE job_cats SET cat_duetype=NULL WHERE cat_id=%q0; @sql UPDATE job_cats SET cat_duedate=NULL WHERE cat_id=%q0}, ??0, {@pemit %#=Error: '[first(%2)]' is not a valid duedate type.  'Flexible' and 'Absolute' duedates are acceptable.}, ??1, {@select [and(isnum(%q<time>),gte(%q<time>,1))][nonzero(strlen(%q2),1,0)]=0?, {@pemit %#=Error: A category's default absolute duedate must one or more days.}, ?1, {@pemit %#=[ansi(h,%[JOBS%])] You have changed the default duedate for category [ucstr(%0)] from a [switch(extract(%q<dd>,1,1,^),flex,flexible duedate of %q2 day[switch(%q2,1,,s)],abso,absolute duedate of %q2 day[switch(%q2,1,,s)],error)] to an absolute duedate of %q<time> day[switch(%q<time>,1,,s)].; @sql UPDATE job_cats SET cat_duedate=%q<time> WHERE cat_id=%q0; @sql UPDATE job_cats SET cat_duetype='abso' WHERE cat_id=%q0}, {@pemit %#=[ansi(h,%[JOBS%])] You have set a default absolute duedate of %q<time> day[switch(%q<time>,1,,s)] on category [ucstr(%1)].; @sql UPDATE job_cats SET cat_duetype='abso' WHERE cat_id=%q0; @sql UPDATE job_cats SET cat_duedate=%q<time> WHERE cat_id=%q0}}, ??2, {@select [and(isnum(%q<time>),gt(%q<time>,0),lte(%q<time>,v(CONFIG_FLEXMAX)))][nonzero(strlen(%q2),1,0)]=0?, @pemit %#=Error: Flexible duedate must be a number greater than zero and less than the configured maximum %([v(CONFIG_FLEXMAX)]%)., 10, {@pemit %#=[ansi(h,%[JOBS%])] You have set a default flexible duedate of %q<time> day[switch(%q<time>,1,,s)] on category [ucstr(%0)].; @sql UPDATE job_cats SET cat_duetype='flex' WHERE cat_id=%q0; @sql UPDATE job_cats SET cat_duedate='%q<time>' WHERE cat_id=%q0}, 11, {@pemit %#=[ansi(h,%[JOBS%])] You have changed the default duedate for category [ucstr(%0)] from [switch(extract(%q<dd>,1,1,^),flex,a flexible duedate of %q2 day[switch(%q2,1,,s)],abso,an absolute duedate of %q2 day[switch(%q2,1,,s)],error)] to a flexible duedate of %q<time> day[switch(%q<time>,1,,s)].; @sql UPDATE job_cats SET cat_duetype='flex' WHERE cat_id=%q0; @sql UPDATE job_cats SET cat_duedate='%q<time>' WHERE cat_id=%q0}}, {@pemit %#=Error: There is an unknown error in the duedate setting for +jobs.  Please record the input you gave it and report the error to a wizard.}}, ?[match(lcstr(%1),timeout)], {@select [setq(tm, sql(SELECT cat_timeout FROM job_cats WHERE cat_id=%q0))]1=[eq(%q<tm>,%2)], @pemit %#=Error: Timeout for category [ucstr(%0)] is already set to %2 day[switch(%2,1,,s)]., [eq(%2,-1)], {@pemit %#=[ansi(h,%[JOBS%])] You set the timeout for category [ucstr(%0)] to -1.  Jobs moved to DONE from this category will never time out.; @sql UPDATE job_cats SET cat_timeout=-1 WHERE cat_id=%q0}, [eq(%2,0)], {@pemit %#=[ansi(h,%[JOBS%])] You set the timeout for category [ucstr(%0)] to 0.  Jobs completed in this category will be deleted immediately.; @sql UPDATE job_cats SET cat_timeout=0 WHERE cat_id=%q0}, [and(isnum(%2),gt(%2,0))], {@pemit %#=[ansi(h,%[JOBS%])] You set the timeout for category [ucstr(%0)] to [setr(fl,floor(%2))] day[switch(%q<fl>,1,,s)].; @sql UPDATE job_cats SET cat_timeout=%q<fl> WHERE cat_id=%q0}, {@pemit %#=Error: Category timeout defaults may only be set to -1 %(never%), 0 %(immediately%), or a whole number greater than zero.}}, ?[match(lcstr(%0),desc)], {@select 0=[lte(strlen(%2),35)], @pemit %#=Error: Category names may be a maximum of thirty-five characters., {@pemit %#=[ansi(h,%[JOBS%])] You have changed the description of job category [ucstr(%0)] to: %2; @sql UPDATE job_cats SET cat_desc='[edit(%2,',%\')]' WHERE cat_id=%q0}}, {@pemit %#=Error: %1 is not a category option.  Category options are: name, desc, read, write, admin, timeout, duedate.}
+
+&CMD-CAT_DELETE #_jcmd=$+job/cat delete *:@select 0=[u(ACCESS_CATADMIN,%#)], @pemit %#=Permission denied., [words(setr(0, sql(SELECT cat_id FROM job_cats WHERE cat_name='[ucstr(%0)]')))], @pemit %#=Error: There is no category named '[ucstr(%0)].', [words(sql(SELECT DISTINCT cat_id FROM job_list WHERE cat_id=%q0))], {@pemit %#=[ansi(h,%[JOBS%])] You have deleted the jobs category [ucstr(%1)] from the list.; @sql DELETE FROM job_cats WHERE cat_id=%q0}, @pemit %#=Error: There are still jobs listed under that category.  They must be deleted or moved before the category may be deleted.
+
+&CMD-JOBADMIN #_jcmd=$+job/admin:@select [setq(0, sql(u(QUERY-CATADMIN,[u([parent(me)]/FNC-AUTHORITY,%#)]),|,^))]0=[u(ACCESS_CATADMIN,%#)], @pemit %#=Permission denied., {@pemit %#=[u(FNC-BAR)]%r[center(ansi(h,+Jobs Administration),78)]%r%r[ljust(ansi(h,Configuration Settings on object [parent(me)]:),46)]See +help jobs config[iter(sort(lattr([parent(me)]/CONFIG_*)),%r%t[ljust(##,18)][v(##)])]%r%r[ansi(h,[ljust(Category,11)][ljust(Read,7)][ljust(Write,7)][ljust(Admin,8)][ljust(Timeout,10)]Default Duedate)]%r[ansi(h,[repeat(-,8)][space(3)][repeat(-,6)] [repeat(-,6)] [repeat(-,7)] [repeat(-,9)] [repeat(-,25)])][iter(%q0,%r[ljust(extract(##,2,1,^),11)][ljust(extract(##,3,1,^),7)][ljust(extract(##,4,1,^),7)][ljust(extract(##,5,1,^),9)][ljust(%b[extract(##,6,1,^)],9)][setq(dd,[extract(##,7,1,^)] [extract(##,8,1,^)])][switch(1,eq(strlen(rest(%q<dd>)),0),,match(lcstr(first(%q<dd>)),flex*),%(Flex%) [rest(%q<dd>)] day[switch(%q<dd>,1,,s)], match(lcstr(first(%q<dd>)),abso*), %(Absolute%) [rest(%q<dd>)] day[switch(%q<dd>,1,,s)], Error)],|)]%r%r+job/cat config <cat>/<config>=<value> to set configuration parameter%r%r[u(FNC-BAR)]}
+
+&QUERY-CATADMIN #_jdat=SELECT job_cats.cat_id, cat_name, cat_read, cat_write, cat_admin, cat_timeout, cat_duetype, cat_duedate FROM job_cats LEFT JOIN job_list on job_cats.cat_id=job_list.cat_id GROUP BY job_cats.cat_id ORDER BY cat_name
+
+&CMD-JOBSDONE #_jcmd=$+jobs/done:@select [setq(0, sql(u(QUERY-JOBSDONE),|,^))]0=[u(ACCESS_CATADMIN,%#)], @pemit %#=Permission denied., [words(%q0)], @pemit %#=[ansi(h,%[JOBS%])] There are no completed jobs in archive., {@pemit %#=[u(FNC-BAR)]%r[center(ansi(h,Completed Jobs in Archive),78)]%r%r[u(FNC-DONEHEADER)][iter(%q0, {%r[u(FNC-DONEDISPLAY,extract(##,1,1,^),switch(extract(##,2,1,^),-1,Never,[div(sub(add(extract(##,3,1,^),mul(extract(##,2,1,^),86400)),secs()),86400)]),extract(##,4,1,^))]},|)]%r%r[center(Type +job <ID> to view job information.,78)]%r[u(FNC-BAR)]}
+
+&QUERY-JOBSDONE #_jdat=SELECT job_id, job_timeout, job_lastupdate, job_title FROM job_cats INNER JOIN job_list ON job_cats.cat_id=job_list.cat_id WHERE cat_name='DONE' ORDER BY job_timeout, job_id
+
+&FNC-DONEHEADER #_jdat=[ansi(h,%b[ljust(ID,5)][ljust(Timeout,10)]Title%r%b[repeat(-,4)] [repeat(-,9)] [repeat(-,46)])]
+
+&FNC-DONEDISPLAY #_jdat=%b[ansi(h,[ljust(%0,5)][ljust(%1[switch(%1,Never,,%bday[switch(%1,1,,s)])],10)]%2)]
+
+
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@ -------------------------@                       @-------------------------
+@@ -------------------------@  Initial Categories   @-------------------------
+@@ -------------------------@                       @-------------------------
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@ 
+@@ Add, remove, or adjust auth levels as desired:
+@@ 
+@@  CATEGORY  READ   WRITE  ADMIN  DESCRIPTION
+@@  --------  -----  ------ -----  -------------------------------------------
+@@  BUG       ALL    STF    STF    Bug/typo reports, building issues.
+@@                                 *required for +bug and +typo
+@@  CGEN      STF    STF    STF    Approval requests, chargen issues.
+@@  CODE      STF    STF    WIZ    Coding issues and work in progress.
+@@  FEEP      WIZ    WIZ    WIZ    Feeping creatures: code/etc notions.
+@@  INFO      STF    STF    STF    News, help, etc. needing writing.
+@@  PITCH     STF    STF    STF    Player-suggested plot ideas.
+@@                                 *required for +pitch
+@@  PLOTS     STF    STF    STF    Future plots waiting to be run.
+@@  REQ       ALL    STF    STF    Player requests.
+@@  TPS       STF    STF    STF    Current tinyplots and their status.
+@@                                 *required for +request
+@@ 
+@@  DONE      NONE   NONE   NONE   Completed jobs.  Timeout in 30 days.
+@@  
+@@ Note:  A player may be /assigned/ to any job in any category without regard
+@@        to access or privileges or auth levels.
+@@ 
+@@        I.e., to claim a CGEN job, the player must pass 'staff' AUTH level.
+@@ 
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
++job/cat create BUG   ALL/STF/STF Bug/typo reports, building issues.
++job/cat create CGEN  STF/STF/STF Approval requests, chargen issues.
++job/cat create CODE  STF/STF/WIZ Coding issues and work in progress.
++job/cat create FEEP  WIZ/WIZ/WIZ Feeping creatures: idle notions.
++job/cat create INFO  STF/STF/STF News, help, etc. needing writing.
++job/cat create PITCH STF/STF/STF Player-suggested plot ideas.
++job/cat create PLOTS STF/STF/STF Future plots waiting to be run.
++job/cat create REQ   ALL/STF/STF Player requests.
++job/cat create TPS   STF/STF/STF Current tinyplots and their status. 
+
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@ 
+@@ If you do not intend to have jobs time out naturally, this section may be
+@@ removed.
+@@ 
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
++job/cat create DONE NONE/NONE/NONE Completed jobs.
+
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@ -------------------------@                       @-------------------------
+@@ -------------------------@   Job Administration  @-------------------------
+@@ -------------------------@                       @-------------------------
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@  
+@@ Category permission level required:  ADMIN
+@@ 
+@@        +job/create [category]/[title]=[content]
+@@         Note: Defaults to priority green.  If CONFIG_ASSIGN
+@@               is 1, it will automatically be assigned to the creator.
+@@     +job/delete [id]
+@@     +job/assign [id]=[<who>|none]
+@@         Note: If CONFIG_EMPLOYED is set to 0, this will not send a notice
+@@               to the player being given the assignment unless he or she
+@@               is monitoring its category.  This is to permit the use of
+@@               +jobs as a staff/admin board for keeping tabs on who should
+@@               be doing what.
+@@     +job/config [id]/[category, priority, title, text]=[content]
+@@            Category:     Any existing category
+@@            Priority:     Red, yellow, or green
+@@            Title:        Maximum 50 characters
+@@            Timeout:      Days to timeout; -1 = never, 0 = immediate
+@@            Duedate:      flex <days> or abso <date>
+@@            Desc:         Any length
+@@ 
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+&CMD-JOB-CREATE #_jcmd=$+job/create */*=*:@select [setq(0, sql(SELECT cat_id%, cat_admin%, cat_write%, cat_read%, cat_duetype%, cat_duedate FROM job_cats WHERE cat_name='[ucstr(%0)]',|,^))][setq(auth,u(FNC-PASSES,extract(%q0,2,1,^),u(FNC-AUTHORITY,%#)))]0=[words(%q0)], @pemit %#=Error: There is no job category [ucstr(%0)]., %q<auth>, @pemit %#=Error: You do not have authorization to affect category [ucstr(%0)]., {@select [words(setr(dd,[extract(%q0,5,1,^)] [extract(%q0,6,1,^)]))]=0, {@sql INSERT INTO job_list ( cat_id, job_creator, job_created, job_lastupdate, job_priority, job_title, job_desc[switch(v(CONFIG_ASSIGN),1,%, job_claimant)] ) VALUES ( [first(%q0,^)], [after(%#,#)], [secs()], [secs()], 3, '[edit(%1,',%\')]', '[edit(%2,',%\')]'[switch(v(CONFIG_ASSIGN),1,%, [after(%#,#)])] )}, {@sql INSERT INTO job_list ( cat_id, job_creator, job_created, job_lastupdate, job_priority, job_duetype, job_duedate, job_title, job_desc[switch(v(CONFIG_ASSIGN),1,%, job_claimant)] ) VALUES ( [first(%q0,^)], [after(%#,#)], [secs()], [secs()], 3, '[first(%q<dd>)]', '[switch(first(%q<dd>),abso,add(secs(),mul(last(%q<dd>),86400)),last(%q<dd>))]', '[edit(%1,',%\')]', '[edit(%2,',%\')]'[switch(v(CONFIG_ASSIGN),1,%, [after(%#,#)])] )}; @wait 1={[setq(1, sql(SELECT job_id FROM job_list ORDER BY job_id desc limit 1))][u(FNC-NOTIFY,[first(%q0,^)],[extract(%q0,2,1,^)] [extract(%q0,3,1,^)] [extract(%q0,4,1,^)], %#, %N has created job #%q1 in category [ucstr(%0)] with title "%1")]. [switch(v(CONFIG_ASSIGN),1,{%b%bIt has been assigned to %N by default.})]}}
+
+&CMD-JOB-DELETE #_jcmd=$+job/delete *:@select [setq(0, sql(u(QUERY-JOBDELETE,%0),|,^))][setq(auth,u(FNC-PASSES,extract(%q0,5,1,^),u(FNC-AUTHORITY,%#)))]0=[words(%q0)], @pemit %#=Error: There is no job with ID #%0., [or(%q<auth>,u(ACCESS_CATADMIN,%#))], @pemit %#=Error: You do not have permission to delete jobs in category [extract(%q0,4,1,^)]., {@sql DELETE FROM job_list WHERE job_id=%1; @sql DELETE FROM job_notes WHERE job_id=%0; [u(FNC-NOTIFY,[extract(%q0,2,1,^)],[extract(%q0,5,1,^)] [extract(%q0,6,1,^)] [extract(%q0,7,1,^)],%#,{%N has deleted job #%0, titled "[extract(%q0,3,1,^)]," from category [extract(%q0,4,1,^)].})]}
+
+&QUERY-JOBDELETE #_jdat=SELECT job_id, job_cats.cat_id, job_title, cat_name, cat_admin, cat_write, cat_read FROM job_cats LEFT JOIN job_list ON job_cats.cat_id=job_list.cat_id WHERE job_id=%0
+
+&CMD-JOBASSIGN #_jcmd=$+job/assign *=*:@select [setq(0, sql(u(QUERY-JOBASSIGN,%0),|,^))][setq(1, num(*%2))][setq(auth,u(FNC-PASSES,extract(%q0,6,1,^),u(FNC-AUTHORITY,%#)))]0=[words(%q0)], @pemit %#=Error: There is no job with ID #%0., %q<auth>, @pemit %#=Error: You do not have permission to administrate jobs in category [extract(%q0,5,1,^)]., [not(and(match(lcstr(%1),none),eq(words(extract(%q0,3,1,^)),0)))], @pemit %#=Error: Job #%0 is already unclaimed., [not(or(match(lcstr(%1),none),eq(strlen(%1),0)))], {@pemit %#=[ansi(h,%[JOBS%])] You return job #%0 to unclaimed status, removing former claimant [name(#[extract(%q0,3,1,^)])].; @sql UPDATE job_list SET job_claimant=NULL WHERE job_id=%0; @sql [u(QRY-WRITENOTE,%0,%#,{%N has returned this job to unclaimed status %(former claimant [name(setr(cn,#[extract(%q0,3,1,^)]))] %(%q<cn>%)%).})]}, [and(match(type(%q1),PLAYER),not(hasflag(%q1,ROBOT)))], @pemit %#=Error: %1 is not a player., [u(HAS_ACCESS,%q1)], {@pemit %#=Error: [name(%q1)] is not permitted to use +jobs commands, and may not be assigned to them at this time.}, [words(extract(%q0,3,1,^))], {@pemit [setq(2,secs())]%#=[ansi(h,%[JOBS%])] You assign job #%0 in category [extract(%q0,5,1,^)], '[extract(%q0,4,1,^)],' to [name(%q1)] %(%q1%).  Updating Claimant, and Last Update, and registering a note.; @sql UPDATE job_list SET job_claimant=[after(%q1,#)] WHERE job_id=%0; @sql [u(QRY-WRITENOTE,%0,%#,{Job assigned to [name(%q1)] %(%q1%) by %N %(%#%).})]; [switch(v(CONFIG_EMPLOYED),1,[pemit(%q1,{[ansi(h,%[JOBS%])] %N has assigned you job #%0%, '[extract(%q0,4,1,^)].'  Type +job %0 for further information%, and +help jobs for additional commands.})])]}, {@pemit %#=Error: There is already a claimant for job #%0.  You must +job/assign %0=none before you may reassign it to a new claimant.}
+
+&QUERY-JOBASSIGN #_jdat=SELECT job_id, job_list.cat_id, job_claimant, job_title, cat_name, cat_admin, cat_write, cat_read FROM job_cats LEFT JOIN job_list ON job_cats.cat_id=job_list.cat_id WHERE job_id=%0
+
+&CMD-JOB-CONFIG #_jcmd=$+job/config */*=*:@select [setq(0, sql(u(QUERY-JOBCONFIG,%0),|,^))][setq(auth,or(u(ACCESS_CATADMIN,%#),u(FNC-PASSES,extract(%q0,7,1,^),u(FNC-AUTHORITY,%#))))]0[lcstr(%1)]=[words(%q0)], @pemit %#=Error: There is no job with ID #%0., %q<auth>*, @pemit %#=Error: You do not have permission to affect jobs in category [extract(%q0,3,1,^)]., [member(category priority title desc, lcstr(%1))], {@pemit %#=Error: You may only configure the following job elements: category, priority, duedate, title, and desc.}, *category, {@select [setq(1, sql(SELECT cat_id%, cat_admin FROM job_cats WHERE cat_name='[ucstr(%2)]',|,^))][setq(2, extract(%q0,3,1,^))][setq(auth2,u(FNC-PASSES,extract(%q1,2,1,^),u(FNC-AUTHORITY,%#)))]0=[words(%q1)], @pemit %#=Error: There is no jobs category with name [ucstr(%2)]., %q<auth2>, @pemit %#=Error: You do not have permission to affect category [ucstr(%2)]., [match(%q2,ucstr(%2))], {@pemit %#=[ansi(h,%[JOBS%])] You move the job with ID #%0 from category [extract(%q0,3,1,^)] to category [ucstr(%2)].; @sql UPDATE job_list SET cat_id=[first(%q1,^)] WHERE job_id=%0}, @pemit %#=Error: Job #%0 is already in category [ucstr(%2)].}, *priority, {@select [setq(1, extract(%q0,4,1,^))][setq(2, switch(lcstr(%2),red,1,yellow,2,green,3,#Error))]0=[member(red yellow green,lcstr(%2))], {@pemit %#=Error: Priority must be red, yellow, or green.}, [match(%q1,%q2)], {@pemit %#=[ansi(h,%[JOBS%])] You change the priority for job #%0 from [switch(%q1,1,ansi(hr,red),2,ansi(hy,yellow),3,ansi(hg,green),#Error#)] to [switch(%q2,1,ansi(hr,red),2,ansi(hy,yellow),3,ansi(hg,green),#Error#)].; @sql UPDATE job_list SET job_priority=%q2 WHERE job_id=%0}, @pemit %#=Error: Priority for job #%0 is already [switch(%q1,1,ansi(hr,red),2,ansi(hy,yellow),3,ansi(hg,green),#Error#)].}, *duedate, {@select [setq(2,extract(%q0,9,1,^))][setq(time,rest(%2))][nonzero(strlen(%2),1,0)][nonzero(strlen(%q2),1,0)][switch(1,match(lcstr(first(%2)),abso*),1,match(lcstr(first(%2)),flex*),2,0)]=00?, @pemit %#=Error: There is no duedate on job #%0 to clear., 01?, {@pemit %#=[ansi(h,%[JOBS%])] You clear the duedate for job #%0.; @sql UPDATE job_list SET job_duetype=NULL WHERE job_id=%0; @sql UPDATE job_list SET job_duedate=NULL WHERE job_id=%0}, ??0, {@pemit %#=Error: '[first(%2)]' is not a valid duedate type.  'Flexible' and 'Absolute' duedates are acceptable.}, ??1, {@select [setq(1,convtime(Fri [first(%q<time>)] [extract(%q<time>,2,1)] 23:59:00 [last(%q<time>)]))][switch(%q1,-1,0,1)][gte(%q1,secs())][nonzero(strlen(%q2),1,0)]=0??, @pemit %#=Error: %q<time> is not a valid date.  Please enter a date in the format Jan 01 2003., ?0?, @pemit %#=Error: Duedate must be at least a day later than the current date., ??1, {@pemit %#=[ansi(h,%[JOBS%])] You have changed the duedate for job #%0 from a [switch(extract(%q0,8,1,^),flex,flexible duedate of %q2 day[switch(%q2,1,,s)],abso,absolute duedate of [convsecs(%q2)],error)] to an absolute duedate of [convsecs(%q1)].; @sql UPDATE job_list SET job_duedate=%q1 WHERE job_id=%0; @sql UPDATE job_list SET job_duetype='abso' WHERE job_id=%0}, {@pemit %#=[ansi(h,%[JOBS%])] You have set an absolute duedate of [convsecs(%q1)] on job #%0.; @sql UPDATE job_list SET job_duetype='abso' WHERE job_id=%0; @sql UPDATE job_list SET job_duedate=%q1 WHERE job_id=%0}}, ??2, {@select [and(isnum(%q<time>),gt(%q<time>,0),lte(%q<time>,v(CONFIG_FLEXMAX)))][nonzero(strlen(%q2),1,0)]=0?, @pemit %#=Error: Flexible duedate must be a number greater than zero and less than the configured maximum %([v(CONFIG_FLEXMAX)]%)., 10, {@pemit %#=[ansi(h,%[JOBS%])] You have set a flexible duedate of %q<time> day[switch(%q<time>,1,,s)] on job #%0.; @sql UPDATE job_list SET job_duetype='flex' WHERE job_id=%0; @sql UPDATE job_list SET job_duedate='%q<time>' WHERE job_id=%0}, 11, {@pemit %#=[ansi(h,%[JOBS%])] You have changed the duedate for job #%0 from a [switch(extract(%q0,8,1,^),flex,flexible duedate of %q2 day[switch(%q2,1,,s)],abso,absolute duedate of [convsecs(%q2)],error)] to a flexible duedate of %q<time> day[switch(%q<time>,1,,s)].; @sql UPDATE job_list SET job_duetype='flex' WHERE job_id=%0; @sql UPDATE job_list SET job_duedate='%q<time>' WHERE job_id=%0}}, {@pemit %#=Error: There is an unknown error in the duedate setting for +jobs.  Please record the input you gave it and report the error to a wizard.}}, *timeout, {@select [setq(tm, sql(SELECT job_timeout FROM job_list WHERE job_id=%0))]1=[match(%q<tm>,%2)], @pemit %#=Error: Timeout for job #%0 is already set to %2 day[switch(%2,1,,s)]., [match(%2,-1)], {@pemit %#=[ansi(h,%[JOBS%])] You set the timeout for job #%0 to -1.  This job will never naturally time out.; @sql UPDATE job_list SET job_timeout='-1' WHERE job_id=%0}, [setq(done,sql(SELECT cat_id FROM job_cats WHERE cat_name='DONE'))][and(match(%2,0),match(%q<done>,extract(%q0,2,1,^)))], {@pemit %#=[ansi(h,%[JOBS%])] Job #%0 is already in category DONE.  Use +job/delete %0 to remove this job rather than setting it to immediate timeout.}, [match(%1,0)], {@pemit %#=[ansi(h,%[JOBS%])] You set the timeout for job #%0 to 0.  This job will be deleted immediately upon completion.; @sql UPDATE job_list SET job_timeout=0 WHERE job_id=%0}, [and(isnum(%2),gt(%2,0))], {@pemit %#=[ansi(h,%[JOBS%])] You set the timeout for job #%0 to [setr(fl,floor(%2))] day[switch(%q<fl>,1,,s)].; @sql UPDATE job_list SET job_timeout=%q<fl> WHERE job_id=%0}, {@pemit %#=Error: Job timeouts may only be set to -1 %(never%), 0 %(immediate%), or a whole number greater than zero.}}, *title, {@pemit %#=[ansi(h,%[JOBS%])] You change the title for job #%0 from '[extract(%q0,5,1,^)]' to '%2'; @sql UPDATE job_list SET job_title='[edit(%2,',%\')]' WHERE job_id=%0}, *desc, {@pemit %#=[ansi(h,%[JOBS%])] You change the description for job #%0 from '[extract(%q0,6,1,^)]' to '%2'; @sql UPDATE job_list SET job_desc='[edit(%2,',%\')]' WHERE job_id=%0}, {@pemit %#=Error: Your command has returned an unknown error.  Please record the text entered and contact a wizard.}
+
+&QUERY-JOBCONFIG #_jdat=SELECT job_id, job_list.cat_id, cat_name, job_priority, job_title, job_desc, cat_admin, job_duetype, job_duedate FROM job_cats LEFT JOIN job_list ON job_list.cat_id=job_cats.cat_id WHERE job_id=%0
+
+&CMD-JOB-MERGE #_jcmd=$+job/merge * into *:@select [setq(1, sql(u(QUERY-JOBMERGE1,%0),|,^))][setq(2, sql(u(QUERY-JOBMERGE2,%1),|,^))]0=[and(isnum(%0),gte(%1,1),isnum(%1),gte(%1,1))], @pemit %#=Error: Each argument must be a number greater than zero., [words(%q1)], @pemit %#=Error: There is no job #%0., [words(%q2)], @pemit %#=Error: There is no job #%1., [setq(c1, extract(%q1,8,1,^))][setq(c2, extract(%q2,8,1,^))][or(eq(words(%q<c1>),0), eq(words(%q<c2>),0), match(%q<c1>,%q<c2))], @pemit %#=Error: Both job #%0 and job #%1 are claimed%, by different players.  Jobs may only be merged if one or both are unclaimed%, or claimed by the same player., [setq(auth,u(FNC-AUTHORITY,%#))][setq(cat1,extract(%q1,1,1,^))][u(FNC-PASSES,extract(%q1,2,1,^),%q<auth>)], @pemit %#=Error: You do not pass admin authorization for job #%0's category%, %q<cat1>., [setq(cat2,extract(%q2,1,1,^))][u(FNC-PASSES,extract(%q2,2,1,^),%q<auth>)], @pemit %#=Error: You do not pass admin authorization for job #%1's category%, %q<cat2>., { @pemit %#={[ansi(h,%[JOBS%])] You merge %q<cat1> job #%0 with %q<cat2> job #%1.  The resulting job is set with job #%1's creator, create-time, and category as default, the higher priority %([switch(setr(pri,min(extract(%q1,7,1,^),extract(%q2,7,1,^))),1,%xrred%xn,2,%xyyellow%xn,%xggreen%xn)]), nearer duedate %([setq(due,min(extract(%q1,10,1,^),extract(%q2,10,1,^)))][switch(%q<due>,0,None set,convsecs(%q<due>))]), [switch(0,and(words(%q<c1>),words(%q<c2>)),no claimant,claimant #[trim(%q<c1> %q<c2>)])], and a merge of the titles and descriptions.  All notes for job #%0 have been transferred intact to job #%1, and a new note has been written on job #%1 containing all original information.  Last Update has been modified to the current time and job #%0 deleted.}; @sql UPDATE job_list SET job_priority=%q<pri> WHERE job_id=%1; [switch(words(%q<c1> %q<c2>),0,,sql(UPDATE job_list SET job_claimant=[trim(%q<c1> %q<c2>)] WHERE job_id=%1))]; [switch(%q<due>,0,,sql(UPDATE job_list SET job_duedate=%q<due> WHERE job_id=%1))]; @sql UPDATE job_list SET job_title="[extract(%q1,11,1,^)] / [extract(%q2,11,1,^)]" WHERE job_id=%1; @sql UPDATE job_list SET job_desc="[extract(%q1,12,1,^)] / [extract(%q2,12,1,^)]" WHERE job_id=%1; @sql INSERT INTO job_notes ( job_id, note_date, note_author, note_content ) VALUES ( %1, [secs()], [after(%#,#)], "Job #%0 merged into job #%1.  Job #%0 original information:  Category %q<cat1>, Creator #[extract(%q1,5,1,^)], Created [extract(%q1,6,1,^)], Priority [extract(%q1,7,1,^)], Duedate [switch(strlen(%q<due>),0,not set,[extract(%q1,10,1,^)])], Title [extract(%q1,11,1,^)], Desc [extract(%q1,12,1,^)].  Job #%1 original information: Category %q<cat2>, Creator #[extract(%q2,5,1,^)], Created [extract(%q2,6,1,^)], Priority [extract(%q2,7,1,^)], Duedate [extract(%q2,10,1,^)], Title [extract(%q2,11,1,^)], Desc [extract(%q2,12,1,^)]." ); @sql UPDATE job_notes SET job_id=%1 WHERE job_id=%0; @sql DELETE FROM job_list WHERE job_id=%0}
+
+&QUERY-JOBMERGE1 #_jdat=SELECT cat_name, cat_admin, job_id, job_list.cat_id, job_creator, job_created, job_priority, job_claimant, job_lastupdate, job_duedate, job_title, job_desc FROM job_cats LEFT JOIN job_list ON job_list.cat_id=job_cats.cat_id WHERE job_id=%0
+
+&QUERY-JOBMERGE2 #_jdat=SELECT cat_name, cat_admin, job_id, job_list.cat_id, job_creator, job_created, job_priority, job_claimant, job_lastupdate, job_duedate, job_title, job_desc FROM job_cats LEFT JOIN job_list ON job_list.cat_id=job_cats.cat_id WHERE job_id=%0
+
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@ -------------------------@                       @-------------------------
+@@ -------------------------@      Job Working      @-------------------------
+@@ -------------------------@                       @-------------------------
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@ 
+@@ Category permission level required:  WRITE  (mostly)
+@@ 
+@@ Note:  If CONFIG_EMPLOYED is set to 1, all of these commands, with the
+@@        exception of +job/claim and +job/complete, may be used by any 
+@@        character on jobs for which he is marked as claimant, even if he
+@@        does not pass the category WRITE auth level.
+@@ 
+@@ Command format:
+@@        +job/claim [id]
+@@        +job/release [id]                  *claimant only
+@@        +job/status [id]=<content>         *claimant / category admin only
+@@        +job/note [id]=[note content]
+@@        +job/delnote [job]/[note#]         *author / category admin only
+@@        +job/complete [id][=note]
+@@ 
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+&CMD-JOBCLAIM #_jcmd=$+job/claim *:@select [setq(0, sql(u(QUERY-JOBCLAIM,%0),|,^))][setq(1,extract(%q0,6,1,^))][setq(auth, u(FNC-PASSES,[extract(%q0,9,1,^)] [extract(%q0,6,1,^)],u(FNC-AUTHORITY,%#)))]0=[words(%q0,|)], @pemit %#=Error: No job #%0 exists., %q<auth>, @pemit %#=Error: You do not have authorization to do jobs in category [extract(%q0,5,1,^)]., [words(setr(1,extract(%q0,3,1,^)))], {@sql UPDATE job_list SET job_claimant=[after(%#,#)] WHERE job_id=%0; [u(FNC-NOTIFY,[extract(%q0,7,1,^)],[extract(%q0,8,1,^)] [extract(%q0,6,1,^)] [extract(%q0,9,1,^)],%#,{%N has claimed [extract(%q0,5,1,^)] job #%0, [extract(%q0,4,1,^)]})]}, {@pemit %#=Error: Job #%0 has already been claimed by [name(#%q1)] %(#%q1%).}
+
+&QUERY-JOBCLAIM #_jdat=SELECT job_id, job_priority, job_claimant, job_title, cat_name, cat_write, job_list.cat_id, cat_read, cat_admin FROM job_cats LEFT JOIN job_list ON job_list.cat_id=job_cats.cat_id WHERE job_id=%0
+
+&CMD-JOBRELEASE #_jcmd=$+job/release *:@select [setq(jid, switch(match(%0,*=*),1,before(%0,=),%0))][setq(jnote, switch(match(%0,*=*),1,after(%0,=),0))][setq(0, sql(u(QUERY-JOBCLAIM,%q<jid>),|,^))][setq(1,extract(%q0,3,1,^))]0=[words(%q0)], @pemit %#=Error: No job #%q<jid> exists., [match(#%q1,%#)], @pemit %#=Error: You are not the claimant for job #%q<jid>., {@sql UPDATE job_list SET job_claimant=NULL WHERE job_id=%q<jid>; @sql [switch(%q<jnote>,0,u(QRY-WRITENOTE,%q<jid>,%#,{%N releases this job.}),u(QRY-WRITENOTE,%q<jid>,%#,{%N releases this job with note: %q<jnote>}))]; [u(FNC-NOTIFY,[extract(%q0,7,1,^)],[extract(%q0,8,1,^)],%#,{%N has released [extract(%q0,5,1,^)] job #%q<jid>, "[extract(%q0,4,1,^)]"})]}
+
+&CMD-JOBSTATUS #_jcmd=$+job/status *=*:@select [setq(0, sql(u(QUERY-JOBCLAIM,%0),|,^))][setq(2, [match(%#,extract(%q0,3,1,^))][setq(auth, u(FNC-PASSES,[extract(%q0,9,1,^)],u(FNC-AUTHORITY,%#)))]%q<auth>[v(CONFIG_EMPLOYED)])]0=[words(%q0)], @pemit %#=Error: No job #%0 exists., [or(match(%q2,1?1),match(%q2,?1?))], @pemit %#=Error: You [switch(v(CONFIG_EMPLOYED),0,do not,are neither claimant for job #%0 nor)] have admin authorization in this category., { [u(FNC-NOTIFY,extract(%q0,7,1,^),[extract(%q0,6,1,^)] [extract(%q0,8,1,^)] [extract(%q0,9,1,^)],%#,%N writes a progress note on job #%0%, '[extract(%q0,4,1,^)]')]; @sql [u(QRY-WRITENOTE,%0,%#,PROGRESS NOTE: %1)]; @sql UPDATE job_list SET job_lastupdate=[secs()] WHERE job_id=%0}
+
+&CMD-JOBNOTE #_jcmd=$+job/note *=*:@select [setq(0, sql(u(QUERY-JOBCLAIM,%0),|,^))][setq(2, [match(after(%#,#),extract(%q0,3,1,^))][u(FNC-PASSES,[extract(%q0,9,1,^)] [extract(%q0,6,1,^)],u(FNC-AUTHORITY,%#))][v(CONFIG_EMPLOYED)])]0=[words(%q0)], @pemit %#=Error: No job #%0 exists., [isnum(%0)], @pemit %#=Error: Job must be identified by its ID alone., [or(match(%q2,1?1),match(%q2,?1?))], @pemit %#=Error: You do not have write authorization in category [extract(%q0,4,1,^)]., { @sql [u(QRY-WRITENOTE, %0, %#, %1)]; [u(FNC-NOTIFY,[extract(%q0,7,1,^)],[extract(%q0,8,1,^)],%#,{%N has written a note on job #[extract(%q0,1,1,^)] "[extract(%q0,4,1,^)]" in category [extract(%q0,5,1,^)].})]}
+
+&CMD-JOBDELNOTE #_jcmd=$+job/delnote */*:@select [setq(job, sql(SELECT job_id%, cat_id%, cat_admin%, cat_name FROM job_list WHERE job_id=%0))][setq(notes, sql(u(QUERY-JOBDELNOTE,%0,%1),|,^))][setq(2, u(FNC-PASSES,[extract(%q<job>,3,1,^)],u(FNC-AUTHORITY,%#)))]0=[words(%q<job>)], @pemit %#=Error: No job #%0 exists., [isnum(%0)], @pemit %#=Error: Job must be identified by its ID alone., [isnum(%1)], @pemit %#=Error: Job note must be identified by its ID alone., [gte(%1,1)], @pemit %#=Error: Note number must be greater than zero., [lte(%1,words(%q<notes>,|))], @pemit %#=Error: No note numbered %1 exists on job #%0., [setq(note, extract(%q<notes>,%1,1,|))][or(%q2,match(extract(%q<note>,3,1,^),[after(%#,#)]))], @pemit %#=Error: You do not have deletion authorization in category [extract(%q<job>,4,1,^)] and you are not the original author of note %1 for job #%0., {@sql DELETE FROM job_notes WHERE note_id=[extract(%q<note>,1,1,^)]; @pemit %#=[ansi(h,%[JOBS%])] You delete note %1 from job #%0.}
+
+&QUERY-JOBDELNOTE #_jdat=SELECT note_id, note_date, note_author, note_content FROM job_notes WHERE job_id=%0
+
+&CMD-JOBCOMPLETE #_jcmd=$+job/complete *:@select [setq(jid, switch(match(%0,*=*),1,[before(%0,=)],%0))][setq(jnote, switch(match(%0,*=*),1,after(%0,=),0))][setq(0, sql(u(QUERY-JOBCOMPLETE,%q<jid>),|,^))][setq(ct,extract(%q0,10,1,^))][setq(jt,extract(%q0,11,1,^))][setq(auth,u(FNC-PASSES,[extract(%q0,8,1,^)] [extract(%q0,7,1,^)],u(FNC-AUTHORITY,%#)))]0=[words(%q0)], @pemit %#=Error: No such job ID., %q<auth>, @pemit %#=Error: You do not have write privileges for category [extract(%q0,5,1,^)]., [not(match(extract(%q0,5,1,^),DONE))], @pemit %#=Error: That job is already in category DONE., [not(or(match(%q<jt>,0),and(match(%q<ct>,0),match(words(%q<jt>),0))))], {@sql DELETE FROM job_notes WHERE job_id=%q<jid>; @sql DELETE FROM job_list WHERE job_id=%q<jid>; [u(FNC-NOTIFY,[extract(%q0,6,1,^)],[extract(%q0,7,1,^)] [extract(%q0,8,1,^)] [extract(%q0,9,1,^)],%#,{%N has completed [extract(%q0,5,1,^)] job #%q<jid> "[extract(%q0,4,1,^)][switch(%q<jnote>,0,."," with note "%q<jnote>.")] It is automatically deleted.})]}, {@sql UPDATE job_list SET cat_id=[sql(SELECT cat_id FROM job_cats WHERE cat_name='DONE')] WHERE job_id=%q<jid>;  @sql UPDATE job_list SET job_claimant=NULL WHERE job_id=%q<jid>; @sql UPDATE job_list SET job_lastupdate=[secs()] WHERE job_id=%q<jid>; @select [words(%q<jt>)][words(%q<ct>)]=00,, 1?,, 01, {@sql UPDATE job_list SET job_timeout='%q<ct>' WHERE job_id=%q<jid>}; @sql UPDATE job_list SET job_duetype=NULL WHERE job_id=%q<jid>; @sql UPDATE job_list SET job_duedate=NULL WHERE job_id=%q<jid>;   @sql [switch(%q<jnote>, 0, u(QRY-WRITENOTE,%q<jid>,%#,{%N has marked this job completed.}), u(QRY-WRITENOTE,%q<jid>,%#,{%N has marked this job completed%, adding the note: %q<jnote>}))]; [u(FNC-NOTIFY,[extract(%q0,6,1,^)],[extract(%q0,7,1,^)] [extract(%q0,8,1,^)] [extract(%q0,9,1,^)],%#,{%N has completed [extract(%q0,5,1,^)] job #%q<jid>, "[extract(%q0,4,1,^)]," moving it from category [extract(%q0,5,1,^)] to DONE.[switch(%q<jnote>,0,,%bA completion note was added.)]})]}
+
+&QUERY-JOBCOMPLETE #_jdat=SELECT job_id, job_priority, job_claimant, job_title, cat_name, job_list.cat_id, cat_admin, cat_write, cat_read, cat_timeout, job_timeout FROM job_cats LEFT JOIN job_list ON job_list.cat_id=job_cats.cat_id WHERE job_id=%0
+
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@ -------------------------@                       @-------------------------
+@@ -------------------------@     Job Information   @-------------------------
+@@ -------------------------@                       @-------------------------
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@ 
+@@ Category permission level required:  READ
+@@     FNC-PASSES: %0: cat_admin cat_write and cat_read auth level
+@@                 %1: FNC-AUTHORITY (%0 = %#)
+@@     Total code: [u(FNC-PASSES,<cat_admin> <cat_write> <cat_read>,
+@@                 u(FNC-AUTHORITY,%#))]
+@@ 
+@@ Note:  If CONFIG_EMPLOYED is set to 1, +jobs/mine may be used by any 
+@@        player passing HAS_ACCESS, and +job [id] and +job/notes by any
+@@        player on jobs for which he is marked as claimant.
+@@ 
+@@ Commands (listing):
+@@              +jobs
+@@              +jobs/all[ <category>]
+@@              +jobs/mine[ <category>]
+@@              +jobs/un*[ <category>]
+@@ 
+@@              +jobs/monitor <category>
+@@ 
+@@ Commands (individual):
+@@              +job <id>
+@@              +job/notes <id>
+@@ 
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+&CMD-JOBCATS #_jcmd=$+jobs:@pemit [setq(9, u(FNC-AUTHORITY,%#))][setq(0, sql(u(QUERY-CATLIST),|,^))][setq(1, filter([parent(me)]/MAP-CHECKAUTH,%q0,|,|))]%#=[u(FNC-BAR)]%r[center(ansi(h,Job Categories),78)]%r%r%b[ansi(h,[ljust(Category,11)][ljust(%bJobs,9)][ljust(Auth,8)]Description%r%b[repeat(-,8)][space(3)][repeat(-,6)] %b[repeat(-,6)][space(3)][repeat(-,36)])][iter(%q1, {%r[ifelse(member(get(%#/_JOB_MONITOR),first(##,^)),*,%b)]%b[ljust(extract(##,2,1,^),10)][ljust(switch(setr(1,extract(##,7,1,^)),0,%b,rjust(%q1,3)),8)][ljust(u(FNC-WHATLEVEL,%q9,extract(##,5,1,^),extract(##,4,1,^),extract(##,3,1,^)),9)][extract(##,6,1,^)]},|)]%r%r[center(%(*%) indicates a monitored category,78)]%r[u(FNC-BAR)]
+
+&MAP-CHECKAUTH #_jdat=[u(FNC-PASSES,[extract(%0,3,1,^)] [extract(%0,4,1,^)] [extract(%0,5,1,^)],%q9)]
+
+&QUERY-CATLIST #_jdat=SELECT job_cats.cat_id, cat_name, cat_read, cat_write, cat_admin, cat_desc, COUNT(job_id) FROM job_cats LEFT JOIN job_list on job_cats.cat_id=job_list.cat_id GROUP BY job_cats.cat_id ORDER BY cat_name
+
+&CMD-JOBSMINE #_jcmd=$+jobs/mine*:@select [setq(9, sql(switch(words(%0),0, u(QUERY-JOBSMINE,%#), u(QUERY-JOBSMINE-CAT,%#,trim(%0))),|,^))][setq(8, u(FNC-AUTHORITY,%#))][setq(0, switch(v(CONFIG_EMPLOYED),1,%q9,filter([parent(me)]/MAP-JOBSMINE,%q9,|,|)))][setq(cat,switch(words(%0),0,1,words(sql(SELECT cat_name FROM job_cats WHERE cat_name='[ucstr(trim(%0))]'))))]0=%q<cat>, @pemit %#=Error: There is no category [ucstr(trim(%0))]., [words(%q0)], @pemit %#=[ansi(h,%[JOBS%])] You have claimed no jobs[switch(words(%0),0,,%bin category [trim(ucstr(%0))])]., {@pemit %#=[u(FNC-BAR)]%r[center(ansi(h,Your Claimed Jobs[switch(words(%1),0,,%bin Category [ucstr(trim(%0))])]),78)]%r%r[u(FNC-DISPLAYHEADER)][iter(%q0, %r[u(FNC-JOBDISPLAY,extract(##,1,1,^),extract(##,2,1,^),#[extract(##,6,1,^)],extract(##,7,1,^),extract(##,8,1,^),extract(##,9,1,^),extract(##,10,1,^),extract(##,12,1,^),extract(##,11,1,^))],|)]%r%r[center(Type +job <ID> to view job information.,78)]%r[u(FNC-BAR)]}
+
+@@ Job display -- %0: job_id, %1: cat_name, %2: claimant dbref, %3: Priority, %4: Duetype, %5: Duedate, %6: Last Update, %7: Title
+
+&MAP-JOBSMINE #_jdat=[u(FNC-PASSES,[extract(%0,3,1,^)] [extract(%0,4,1,^)] [extract(%0,5,1,^)],%q8)]
+
+&QUERY-JOBSMINE #_jdat=SELECT job_id, cat_name, cat_read, cat_write, cat_admin, job_claimant, job_priority, job_duetype, job_duedate, job_lastupdate, job_title, job_created FROM job_cats LEFT JOIN job_list ON job_cats.cat_id=job_list.cat_id WHERE job_claimant=[after(%0,#)] ORDER BY cat_name, job_priority, job_id
+
+&QUERY-JOBSMINE-CAT #_jdat=SELECT job_id, cat_name, cat_read, cat_write, cat_admin, job_claimant, job_priority, job_duetype, job_duedate, job_lastupdate, job_title, job_created FROM job_cats LEFT JOIN job_list ON job_cats.cat_id=job_list.cat_id WHERE job_claimant=[after(%0,#)] AND cat_name='[ucstr(%1)]' ORDER BY cat_name, job_priority, job_id
+
+&CMD-JOBSUN #_jcmd=$+jobs/un*:@select [setq(9, trim(iter(sql(SELECT cat_id%, cat_read%, cat_write%, cat_admin FROM job_cats,|,^), switch(u(FNC-PASSES,[extract(##,2,1,^)] [extract(##,3,1,^)] [extract(##,4,1,^)],u(FNC-AUTHORITY,%#)),1,first(##,^)),|,%,),b,%,))][setq(0, switch(sign(words(%0)),1,sql(u(QUERY-JOBSUN2,trim(%0)),|,^),sql(u(QUERY-JOBSUN,%q9),|,^)))][setq(cau,u(FNC-AUTHORITY,%#))][setq(auth, u(FNC-PASSES,[extract(%q0,3,1,^)] [extract(%q0,4,1,^)] [extract(%q0,5,1,^)],%q<cau>))][setq(cat,switch(words(%0),0,1,words(sql(SELECT cat_name FROM job_cats WHERE cat_name='[ucstr(trim(%0))]'))))]0=%q<cat>, @pemit %#=Error: There is no category [ucstr(trim(%0))]., [switch(0,words(%0),1,words(%q0),1,%q<auth>)], @pemit %#=Error: You do not have authorization in category [ucstr(trim(%0))]., [words(%q0)], @pemit %#=[ansi(h,%[JOBS%])] There are no unclaimed jobs[switch(words(%0),0,,%bin category [ucstr(trim(%0))])]., {@pemit %#=[u(FNC-BAR)]%r[center(ansi(h,Unclaimed Jobs[switch(words(%0),0,,%bin Category [ucstr(trim(%0))])]),78)]%r%r[u(FNC-DISPLAYHEADER)][iter(%q0, switch(u(FNC-PASSES,[extract(##,3,1,^)] [extract(##,4,1,^)] [extract(##,5,1,^)],%q<cau>),0,,{%r[u(FNC-JOBDISPLAY,extract(##,1,1,^),extract(##,2,1,^),#[extract(##,6,1,^)],extract(##,7,1,^),extract(##,8,1,^),extract(##,9,1,^),extract(##,10,1,^),extract(##,12,1,^),extract(##,11,1,^))]}),|)]%r%r[center(Type +job <ID> to view job information.,78)]%r[u(FNC-BAR)]}
+
+&QUERY-JOBSUN #_jdat=SELECT job_id, cat_name, cat_read, cat_write, cat_admin, job_claimant, job_priority, job_duetype, job_duedate, job_lastupdate, job_title, job_created FROM job_cats INNER JOIN job_list ON job_cats.cat_id=job_list.cat_id WHERE job_cats.cat_id IN ( [squish(edit(%0,%b,%,),%,)] ) AND job_claimant IS NULL ORDER BY cat_name, job_priority, job_id
+
+&QUERY-JOBSUN2 #_jdat=SELECT job_id, cat_name, cat_read, cat_write, cat_admin, job_claimant, job_priority, job_duetype, job_duedate, job_lastupdate, job_title, job_created FROM job_cats INNER JOIN job_list ON job_cats.cat_id=job_list.cat_id WHERE job_claimant IS NULL AND cat_name='[ucstr(%0)]' ORDER BY cat_name, job_priority, job_id
+
+&CMD-JOBSALL #_jcmd=$+jobs/all*:@select [setq(9, trim(iter(sql(SELECT cat_id%, cat_read%, cat_write%, cat_admin FROM job_cats,|,^), switch(u(FNC-PASSES,[extract(##,2,1,^)] [extract(##,3,1,^)] [extract(##,4,1,^)],u(FNC-AUTHORITY,%#)),1,first(##,^)),|,%,),b,%,))][setq(0, switch(sign(words(%0)),1,sql(u(QUERY-JOBSALL2,trim(%0)),|,^),sql(u(QUERY-JOBSALL,%q9),|,^)))][setq(cau,u(FNC-AUTHORITY,%#))][setq(auth, u(FNC-PASSES,[extract(%q0,3,1,^)] [extract(%q0,4,1,^)] [extract(%q0,5,1,^)],%q<cau>))][setq(cat,switch(words(%0),0,1,words(sql(SELECT cat_name FROM job_cats WHERE cat_name='[ucstr(trim(%0))]'))))]0=%q<cat>, @pemit %#=Error: There is no category [ucstr(trim(%0))]., [switch(0,words(%0),1,words(%q0),1,%q<auth>)], @pemit %#=Error: You do not have authorization in category [ucstr(trim(%0))]., [words(%q0)], @pemit %#=[ansi(h,%[JOBS%])] There are no jobs[switch(words(%0),0,,%bin category [ucstr(trim(%0))])]., [not(and(eq(words(%0),0),v(CONFIG_CUTOFF),gt(words(%q0,|),v(CONFIG_CUTOFF))))], @pemit %#=Error: There are more +jobs in the database than the +jobs/all cutoff of [v(CONFIG_CUTOFF)].  Please check by individual category with +jobs/all <category>., {@pemit %#=[u(FNC-BAR)]%r[center(ansi(h,All Jobs[switch(words(%0),0,,%bin Category [ucstr(trim(%0))])]),78)]%r%r[u(FNC-DISPLAYHEADER)][iter(%q0, switch(u(FNC-PASSES,[extract(##,3,1,^)] [extract(##,4,1,^)] [extract(##,5,1,^)],%q<cau>),0,,{%r[u(FNC-JOBDISPLAY,extract(##,1,1,^),extract(##,2,1,^),#[extract(##,6,1,^)],extract(##,7,1,^),extract(##,8,1,^),extract(##,9,1,^),extract(##,10,1,^),extract(##,12,1,^),extract(##,11,1,^))]}),|)]%r%r[center(Type +job <ID> to view job information.,78)]%r[u(FNC-BAR)]}
+
+&QUERY-JOBSALL #_jdat=SELECT job_id, cat_name, cat_read, cat_write, cat_admin, job_claimant, job_priority, job_duetype, job_duedate, job_lastupdate, job_title, job_created FROM job_cats INNER JOIN job_list ON job_cats.cat_id=job_list.cat_id ORDER BY cat_name, job_priority, job_id
+
+&QUERY-JOBSALL2 #_jdat=SELECT job_id, cat_name, cat_read, cat_write, cat_admin, job_claimant, job_priority, job_duetype, job_duedate, job_lastupdate, job_title, job_created FROM job_cats INNER JOIN job_list ON job_cats.cat_id=job_list.cat_id WHERE cat_name='[ucstr(%0)]' ORDER BY cat_name, job_priority, job_id
+
+&CMD-JOBSNEW #_jcmd=$+jobs/new*:@select [setq(time,switch(words(get(%#/_JOB_LASTREAD)),0,0,get(%#/_JOB_LASTREAD)))][setq(9, trim(iter(sql(SELECT cat_id%, cat_read%, cat_write%, cat_admin FROM job_cats,|,^), switch(u(FNC-PASSES,[extract(##,2,1,^)] [extract(##,3,1,^)] [extract(##,4,1,^)],u(FNC-AUTHORITY,%#)),1,first(##,^)),|,%,),b,%,))][setq(0, switch(sign(words(%0)),1,sql(u(QUERY-JOBSNEW2,trim(%0),%q<time>,%#),|,^),sql(u(QUERY-JOBSNEW,%q9,%q<time>,%#),|,^)))][setq(1, switch(sign(words(%0)),1,sql(u(QUERY-NEWNOTES2,trim(%0),%q<time>,%#),|,^),sql(u(QUERY-NEWNOTES,%q9,%q<time>,%#),|,^)))][setq(cau,u(FNC-AUTHORITY,%#))][setq(auth, u(FNC-PASSES,[extract(%q0,3,1,^)] [extract(%q0,4,1,^)] [extract(%q0,5,1,^)],%q<cau>))][setq(cat,switch(words(%0),0,1,words(sql(SELECT cat_name FROM job_cats WHERE cat_name='[ucstr(trim(%0))]'))))]0=%q<cat>, @pemit %#=Error: There is no category [ucstr(trim(%0))]., [switch(0,words(%0),1,words(%q0),1,%q<auth>)], @pemit %#=Error: You do not have authorization in category [ucstr(trim(%0))]., [words(%q0)], @pemit %#=[ansi(h,%[JOBS%])] There are no new jobs[switch(words(%0),0,,%bin category [ucstr(trim(%0))])][switch(hasattr(%#,_JOB_LASTREAD),0,,%bsince you last updated your time on [convsecs(get(%#/_JOB_LASTREAD))])]., {@pemit %#=[u(FNC-BAR)]%r[center(ansi(h,New Jobs[switch(words(%0),0,,%bin Category [ucstr(trim(%0))])]),78)]%r%r[u(FNC-DISPLAYHEADER)][iter(%q0, switch(u(FNC-PASSES,[extract(##,3,1,^)] [extract(##,4,1,^)] [extract(##,5,1,^)],%q<cau>),0,,{%r[u(FNC-JOBDISPLAY,extract(##,1,1,^),extract(##,2,1,^),#[extract(##,6,1,^)],extract(##,7,1,^),extract(##,8,1,^),extract(##,9,1,^),extract(##,10,1,^),extract(##,12,1,^),extract(##,11,1,^))]}),|)][switch(words(%q1,|),0,,%r[iter(%q1,%r[u(FNC-NEWNOTEDISPLAY,extract(##,1,1,^),extract(##,2,1,^),extract(##,3,1,^))],|)])]%r%r[center(Type +job <ID> to view job information.,78)]%r[center(Type +jobs/clear to update your last-read time.,78)]%r[u(FNC-BAR)]}
+
+&QUERY-JOBSNEW #_jdat=SELECT job_id, cat_name, cat_read, cat_write, cat_admin, job_claimant, job_priority, job_duetype, job_duedate, job_lastupdate, job_title, job_created FROM job_cats INNER JOIN job_list ON job_cats.cat_id=job_list.cat_id WHERE job_cats.cat_id IN ( [squish(edit(%0,%b,%,),%,)] ) AND job_created>=%1 AND job_creator!=[after(%2,#)] ORDER BY cat_name, job_priority, job_id
+
+&QUERY-JOBSNEW2 #_jdat=SELECT job_id, cat_name, cat_read, cat_write, cat_admin, job_claimant, job_priority, job_duetype, job_duedate, job_lastupdate, job_title, job_created FROM job_cats INNER JOIN job_list ON job_cats.cat_id=job_list.cat_id WHERE cat_name='[ucstr(%0)]' AND job_created>=%1 AND job_creator!=[after(%2,#)] ORDER BY cat_name, job_priority, job_id
+
+&QUERY-NEWNOTES #_jdat=SELECT job_list.job_id, count(note_id), job_title from job_list left join job_notes on job_list.job_id=job_notes.job_id, job_cats WHERE job_cats.cat_id=job_list.cat_id AND job_cats.cat_id IN ( [squish(edit(%0,%b,%,),%,)] ) AND note_date>%1 AND job_created<%1 AND job_creator!=[after(%2,#)] GROUP BY job_notes.job_id
+
+&QUERY-NEWNOTES2 #_jdat=SELECT job_list.job_id, count(note_id), job_title from job_list left join job_notes on job_list.job_id=job_notes.job_id, job_cats WHERE job_list.cat_id=job_cats.cat_id AND note_date>%1 AND job_created<%1 AND cat_name='[ucstr(%0)]' AND job_creator!=[after(%2,#)] GROUP BY job_notes.job_id
+
+&FNC-NEWNOTEDISPLAY #_jdat=%b[ansi(h,[ljust(%1 new note[switch(%1,1,,s)] in job #%0:,33)]%2)]
+
+&CMD-JOBSCLEAR #_jcmd=$+jobs/clear:@pemit %#=[ansi(h,%[JOBS%])] You have updated your last-read time for +jobs.  Only jobs posted after this time will appear on +jobs/new.; &_JOB_LASTREAD %#=[secs()]
+
+&CMD-JOBSEARCH #_jcmd=$+job/search *:@select [setq(9, trim(iter(sql(SELECT cat_id%, cat_read%, cat_write%, cat_admin FROM job_cats,|,^), switch(u(FNC-PASSES,[extract(##,2,1,^)] [extract(##,3,1,^)] [extract(##,4,1,^)],u(FNC-AUTHORITY,%#)),1,first(##,^)),|,%,),b,%,))][setq(0, switch(match(%0,*/*),1,sql(u(QUERY-JOBSEARCH2,%0),|,^),sql(u(QUERY-JOBSEARCH,%q9,%0),|,^)))][setq(al,[extract(%q0,3,1,^)] [extract(%q0,4,1,^)] [extract(%q0,5,1,^)])][setq(cau,u(FNC-AUTHORITY,%#))][setq(auth, u(FNC-PASSES,%q<al>,%q<cau>))][setq(cat,switch(match(%0,*/*),0,1,words(sql(SELECT cat_name FROM job_cats WHERE cat_name='[ucstr(before(%0,/))]'))))]0=%q<cat>, @pemit %#=Error: There is no category [ucstr(trim(before(%0,/)))]., [switch(0,match(%0,*/*),1,words(%q0),1,%q<auth>)], @pemit %#=Error: You do not have authorization in category [ucstr(trim(%0))]., [words(%q0)], @pemit %#=[ansi(h,%[JOBS%])] There are no jobs[switch(match(%0,*/*),0,%bresembling '%0',%bresembling '[after(%0,/)]' in category [ucstr(trim(before(%0,/)))])]., {@pemit %#=[u(FNC-BAR)]%r[center(ansi(h,Jobs[switch(match(%0,*/*),0,%bresembling '%0',%bresembling '[after(%0,/)]' %bin Category [ucstr(trim(before(%0,/)))])]),78)]%r%r[u(FNC-DISPLAYHEADER)][iter(%q0, switch(u(FNC-PASSES,[extract(##,3,1,^)] [extract(##,4,1,^)] [extract(##,5,1,^)],%q<cau>),0,,{%r[u(FNC-JOBDISPLAY,extract(##,1,1,^),extract(##,2,1,^),#[extract(##,6,1,^)],extract(##,7,1,^),extract(##,8,1,^),extract(##,9,1,^),extract(##,10,1,^),,extract(##,11,1,^))]}),|)]%r%r[center(Type +job <ID> to view job information.,78)]%r[u(FNC-BAR)]}
+
+&QUERY-JOBSEARCH #_jdat=SELECT job_id, cat_name, cat_read, cat_write, cat_admin, job_claimant, job_priority, job_duetype, job_duedate, job_lastupdate, job_title FROM job_cats INNER JOIN job_list ON job_cats.cat_id=job_list.cat_id WHERE job_cats.cat_id IN ( [squish(edit(%0,%b,%,),%,)] ) AND ( job_title LIKE '%%%1%%' OR job_desc LIKE '%%%1%%' ) ORDER BY cat_name, job_priority, job_id
+
+&QUERY-JOBSEARCH2 #_jdat=SELECT job_id, cat_name, cat_read, cat_write, cat_admin, job_claimant, job_priority, job_duetype, job_duedate, job_lastupdate, job_title FROM job_cats INNER JOIN job_list ON job_cats.cat_id=job_list.cat_id WHERE cat_name='[ucstr(before(%0,/))]' AND ( job_title LIKE '%%[after(%0,/)]%%' OR job_desc LIKE '%%[after(%0,/)]%%' )ORDER BY cat_name, job_priority, job_id
+
+&CMD-JOBMONITOR #_jcmd=$+job/monitor *:@select [setq(0, sql(u(QUERY-MONITOR,ucstr(%0)),|,^))][setq(auth, u(FNC-PASSES,[extract(%q0,3,1,^)] [extract(%q0,4,1,^)] [extract(%q0,5,1,^)],u(FNC-AUTHORITY,%#)))]0=[not(match(lcstr(%0),all))], {@pemit %#=[ansi(h,%[JOBS%])] You have turned on monitors to all categories for which you have reading permission.; &_JOB_MONITOR %#=[sql(SELECT cat_id FROM job_cats)]}, [not(match(lcstr(%0),none))], {@pemit %#=[ansi(h,%[JOBS%])] You have turned off all monitors.; &_JOB_MONITOR %#}, [words(%q0)], @pemit %#=Error: There is no category [ucstr(%0)]., [not(member(get(%#/_JOB_MONITOR),first(%q0,^)))], {@pemit %#=[ansi(h,%[JOBS%])] You have turned off your monitor on job category [ucstr(%0)].; &_JOB_MONITOR %#=[remove(get(%#/_JOB_MONITOR),first(%q0,^))]}, %q<auth>, @pemit %#=Error: You do not have authorization to watch category [ucstr(%0)]., {@pemit %#=[ansi(h,%[JOBS%])] You turn on a monitor for job category [ucstr(%0)].  This will notify you when jobs are created, claimed, completed, and marked with notes.; &_JOB_MONITOR %#=[setunion(get(%#/_JOB_MONITOR),first(%q0,^))]}
+
+&QUERY-MONITOR #_jdat=SELECT cat_id, cat_name, cat_read, cat_write, cat_admin FROM job_cats WHERE cat_name='%0'
+
+&CMD-JOBINFO #_jcmd=$+job *:@select [setq(0, sql(u(QUERY-JOBINFO,%0),|,^))][setq(auth, u(FNC-PASSES,[extract(%q0,8,1,^)] [extract(%q0,9,1,^)] [extract(%q0,10,1,^)],u(FNC-AUTHORITY,%#)))]0=[isnum(%0)], @pemit %#=Error: Argument must be a number., [words(%q0)], @pemit %#=Error: No such job ID., [or(match(%#,#[extract(%q0,2,1,^)]),%q<auth>,u(ACCESS_CATADMIN,%#))], @pemit %#=Error: You do not have permission to read in category [extract(%q0,7,1,^)]., {@pemit %#=[ansi(h,repeat(=,78))]%r[center([extract(%q0,7,1,^)] Job #%0,78)]%r%xh[center(extract(%q0,4,1,^),78)]%xn%r[repeat(-,78)]%r[ljust(ansi(h,Priority:),12)][ljust(switch(extract(%q0,5,1,^),1,ansi(hr,Red),2,ansi(hy,Yellow),3,ansi(hg,Green),#Error#),25)][ljust(ansi(h,Last Update:),15)][convsecs(extract(%q0,3,1,^))]%r[ljust(ansi(h,Claimant:),12)][setq(1, extract(%q0,2,1,^))][ljust(switch(words(%q1),0,,[name(#%q1)] %(#%q1%)),25)][ljust(ansi(h,Duedate:),15)][setq(dd,[extract(%q0,11,1,^)] [extract(%q0,12,1,^)])][switch(1,eq(strlen(last(%q<dd>)),0),None set.,match(lcstr(first(%q<dd>)),abso*),%(Absolute%) [setq(9,convsecs(last(%q<dd>)))][extract(%q9,2,2)] [extract(%q9,5,1)],match(lcstr(first(%q<dd>)),flex*),%(Flex%) [last(%q<dd>)] day[switch(last(%q<dd>),1,,s)],Error)]%r%r[extract(%q0,6,1,^)]%r%r[setq(1, words(sql(SELECT note_id FROM job_notes WHERE job_id=%0)))][center([switch(%q1,0,No notes set. Comment with +job/note %0=<text>.,%q1 note[switch(%q1,1,,s)] on this job. Read +job/notes %0.)],78)]%r[ansi(h,repeat(=,78))]}
+
+&QUERY-JOBINFO #_jdat=SELECT job_id, job_claimant, job_lastupdate, job_title, job_priority, job_desc, cat_name, cat_read, cat_write, cat_admin, job_duetype, job_duedate FROM job_list LEFT JOIN job_cats ON job_list.cat_id=job_cats.cat_id WHERE job_id=%0
+
+&CMD-JOBNOTES #_jcmd=$+job/notes *:@select [setq(0, sql(u(QUERY-JOBNOTES2,%0),|,^))][setq(1, sql(u(QUERY-JOBNOTES,%0),|,^))][setq(auth, u(FNC-PASSES,[extract(%q0,4,1,^)] [extract(%q0,5,1,^)] [extract(%q0,6,1,^)],u(FNC-AUTHORITY,%#)))]0=[words(%q0)], @pemit %#=Error: No job #%0., [or(match(%#,#[extract(%q0,1,1,^)]),%q<auth>,u(ACCESS_CATADMIN,%#))], @pemit %#=Error: You do not have reading authorization within category [ucstr(extract(%q0,7,1,^))]., [words(%q1)], @pemit %#=No notes set for job #%0., {@pemit %#=[u(FNC-BAR)]%r%xh[center(extract(%q0,2,1,^),78)]%r[center([extract(%q0,7,1,^)] Job #%0,78)]%xn%r%r[center(extract(%q0,3,1,^),78)]%r%r[center(repeat(-,50),78)][iter(lnum(1,words(%q1,|)),{%r%r[setq(8,extract(%q1,##,1,|))][ansi(h,{[ljust(##%.,4)]Posted by [name(#[extract(%q8,2,1,^)])], [setq(9,convsecs(extract(%q8,1,1,^)))][revwords(extract(%q9,2,2))] [extract(%q9,5,1)]})]%r[border(extract(%q8,3,1,^),73,%b%b%b%b)]})]%r%r[center(To write a note%, use +job/note %1=<text>,78)]%r[u(FNC-BAR)]}
+
+@@ Semaphored noteslist
+
+&CMD-JOBNOTES #_jcmd=$+job/notes *:@select [setq(0, sql(u(QUERY-JOBNOTES2,%0),|,^))][setq(1, sql(u(QUERY-JOBNOTES,%0),|,^))][setq(auth, u(FNC-PASSES,[extract(%q0,4,1,^)] [extract(%q0,5,1,^)] [extract(%q0,6,1,^)],u(FNC-AUTHORITY,%#)))]0=[words(%q0)], @pemit %#=Error: No job #%0., [or(match(%#,#[extract(%q0,1,1,^)]),%q<auth>,u(ACCESS_CATADMIN,%#))], @pemit %#=Error: You do not have reading authorization within category [ucstr(extract(%q0,7,1,^))]., [words(%q1)], @pemit %#=No notes set for job #%0., {@drain me; @pemit %#=[u(FNC-BAR)]%r%xh[center(extract(%q0,2,1,^),78)]%r[center([extract(%q0,7,1,^)] Job #%0,78)]%xn%r%r[center(extract(%q0,3,1,^),78)]%r%r[center(repeat(-,50),78)]; @dolist [setq(7,lnum(1,words(%q1,|)))]={@wait me={@pemit %#=%r%r[setq(8,extract(%q1,##,1,|))][ansi(h,{[ljust(##%.,4)]Posted by [name(#[extract(%q8,2,1,^)])], [setq(9,convsecs(extract(%q8,1,1,^)))][revwords(extract(%q9,2,2))] [extract(%q9,5,1)]})]%r[border(extract(%q8,3,1,^),73,%b%b%b%b)]}; @switch [match(##,last(%q7))]=1, {@wait me=@pemit %#=%r%r[center(To write a note%, use +job/note %1=<text>,78)]%r[u(FNC-BAR)]}; @no me}}
+
+&QUERY-JOBNOTES2 #_jdat=SELECT job_claimant, job_title, job_desc, cat_read, cat_write, cat_admin, cat_name FROM job_list LEFT JOIN job_cats ON job_cats.cat_id=job_list.cat_id WHERE job_id=%0
+
+&QUERY-JOBNOTES #_jdat=SELECT note_date, note_author, note_content FROM job_notes WHERE job_id=%0 ORDER BY note_date
+
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@ -------------------------@                       @-------------------------
+@@ -------------------------@      Job General      @-------------------------
+@@ -------------------------@                       @-------------------------
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@ 
+@@ Category permission level required:          None.
+@@ General permission required:                         Passes HAS_ACCESS
+@@ 
+@@ Commands:
+@@        +jobs/credits
+@@        +pitch <title>=<description>         *Uses PITCH category
+@@        +request <title>=<description>       *Uses REQ category
+@@        +bug <title>=<description>           *Uses BUILD category
+@@        +typo <typo description>             *Uses BUILD category
+@@ 
+@@ If you remove or change any of the categories used for these commands, be
+@@ sure to make the necessary modifications in the commands below, and/or
+@@ comment them out.  The following (besides +job/credits) are completely
+@@ unnecessary to code functioning.  Also, these will be blocked to anyone
+@@ who does not pass HAS_ACCESS, unless they're moved to another object.  They
+@@ are unaffected by auth levels.
+@@ 
+@@ Recommended that the +help files on these commands describe local staff
+@@ policy on response to them -- that is, whether or not the +pitcher will be
+@@ contacted if a plot is chosen to be run, whether they should specify a 
+@@ desire to run it, be involved in it, etc., and so forth.
+@@ 
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+&CMD-CREDITS #_jcmd=$+job/credits:@pemit %#=[u(FNC-BAR)]%r[center(SQL Jobs v1.1,78)]%r[repeat(-,78)]%r%rWritten by Shadow@FrostFire %(caligo@lynx.purrsia.com%). Conceptually based on Job Database Code v3.2 by Kevin Thomas aka Starfleet@Anomaly (station419@earthlink.net) (release date October 22, 2002).  Infinite advice and bugcatching provided by Luna@FrostFire, Daetrin@FrostFire, and Magneto@Beyond the Ken.%r%rLicense: You may port this code to any game provided that these credits remain intact. Please report any and all bugs, feedback or whatnot to Shadow's email address as provided above.%r%rThe most recent version of the original code can be found at Anomaly's web page: http://anomaly.mushpark.com. %r%r[u(FNC-BAR)]
+
+&CMD-PITCH #_jcmd=$+pitch *:@pemit [setq(0, sql(SELECT cat_id%, cat_read%, cat_write%, cat_admin FROM job_cats WHERE cat_name='PITCH',|,^))]%#=There's the windup-- and the pitch!  You've tossed an idea into the plots bucket for the staff to investigate, described as "%0"  Thank you for your contribution!; @sql INSERT INTO job_list ( cat_id, job_creator, job_created, job_lastupdate, job_priority, job_title, job_desc ) VALUES ( [first(%q0,^)], [after(%#,#)], [secs()], [secs()], 3, "Plot pitch by %N", "[edit(%0,',%\')]" ); [u(FNC-NOTIFY,%q0,[extract(%q0,2,1,^)] [extract(%q0,3,1,^)] [extract(%q0,4,1,^)],%#,{%N has +pitched a plot idea.})]
+
+&CMD-REQUEST #_jcmd=$+request *:@pemit [setq(0, sql(SELECT cat_id%, cat_read%, cat_write%, cat_admin FROM job_cats WHERE cat_name='REQ',|,^))]%#=You enter a request to staff, described as "%0"  Expect a response shortly.  Thank you for your contribution!; @sql INSERT INTO job_list ( cat_id, job_creator, job_created, job_lastupdate, job_priority, job_title, job_desc ) VALUES ( [first(%q0,^)], [after(%#,#)], [secs()], [secs()], 3, "Request made by %N", "[edit(%0,',%\')]" ); [u(FNC-NOTIFY,%q0,[extract(%q0,2,1,^)] [extract(%q0,3,1,^)] [extract(%q0,4,1,^)],%#,{%N has made a +request.})]
+
+&CMD-BUG #_jcmd=$+bug *:@pemit [setq(0, sql(SELECT cat_id%, cat_read%, cat_write%, cat_admin FROM job_cats WHERE cat_name='BUG',|,^))]%#=You have reported a bug to staff, described as "%0"  Thank you for your diligence!; @sql INSERT INTO job_list ( cat_id, job_creator, job_created, job_lastupdate, job_priority, job_title, job_desc ) VALUES ( [first(%q0,^)], [after(%#,#)], [secs()], [secs()], 3, "Bug reported by %N", "[edit(%0,',%\')]" ); [u(FNC-NOTIFY,%q0,[extract(%q0,2,1,^)] [extract(%q0,3,1,^)] [extract(%q0,4,1,^)],%#,{%N has reported a +bug})]
+
+&CMD-TYPO #_jcmd=$+typo *:@pemit [setq(0, sql(SELECT cat_id%, cat_read%, cat_write%, cat_admin FROM job_cats WHERE cat_name='BUG',|,^))]%#=You send a typo report to staff, described as "%0"  Thank you for your alertness!; @sql INSERT INTO job_list ( cat_id, job_creator, job_created, job_lastupdate, job_priority, job_title, job_desc ) VALUES ( [first(%q0,^)], [after(%#,#)], [secs()], [secs()], 3, "Typo reported by %N", "[edit(%0,',%\')]" ); [u(FNC-NOTIFY,%q0,[extract(%q0,2,1,^)] [extract(%q0,3,1,^)] [extract(%q0,4,1,^)],%#,{%N has reported a +typo.})]
+
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@ -------------------------@                       @-------------------------
+@@ -------------------------@      Installation     @-------------------------
+@@ -------------------------@       Completion      @-------------------------
+@@ -------------------------@                       @-------------------------
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@ 
+@@ Starting @cron, setting locks and flags, teleporting data object into
+@@ command object.  Make sure to drop command object in Master Room.
+@@ 
+@@ If your game does not require the COMMANDS flag, the lines setting and 
+@@ unsetting it may be commented out.
+@@ 
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+@cron #_jdat/CRON_TIMEOUT=0 4 * * *
+@ufail #_jcmd=[ansi(h,%[JOBS%])] Temporarily down. Please try again in one minute.
+
+@set #_jcmd=INHERIT
+@set #_jcmd=COMMANDS
+@set #_jcmd=!HALTED
+@set #_jcmd=SAFE
+
+@set #_jdat=INHERIT
+@set #_jdat=SAFE
+@set #_jdat=!COMMANDS
+
+@lock #_jcmd=#1
+@lock #_jdat=#1
+
+@wait 1=@tel #_jdat=#_jcmd
+
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@ Connection Notification of New +Jobs:
+@@ 
+@@ If you do not wish connecting players to see the +jobs/new information,
+@@ the following lines may be deleted.  (Config parameter use_global_aconn
+@@ must be set to Yes for this to function.)  Use the first line if you wish
+@@ all players to see +jobs/new, and the second if only players with Write
+@@ permission in a category should see them at all.
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+@aconn #_jcmd=@fo %#=+jobs/new
+
+@aconn #_jcmd=@select [u(FNC-PASSES,setunion(sql(SELECT cat_admin%, cat_write FROM job_cats),),u(FNC-AUTHORITY,%#))]=1, @fo %#=+jobs/new
+
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@ Clearing @references:
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+@wait 2=@reference jcmd=
+@wait 2=@reference jdat=
+@wait 2=@set me=!QUIET
+
+@wait 2={@pemit %#=JOBS: Script complete. You should drop the Job Global Object in the master room.}
+
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@                        @@@@@@@@@@@@@@@@@@@@@@@@@@
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@      Installation      @@@@@@@@@@@@@@@@@@@@@@@@@@
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@        Complete        @@@@@@@@@@@@@@@@@@@@@@@@@@
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@                        @@@@@@@@@@@@@@@@@@@@@@@@@@
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@ -------------------------@                       @-------------------------
+@@ -------------------------@       +Help Files     @-------------------------
+@@ -------------------------@                       @-------------------------
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@  
+@@ These will likely need to be modified for individual games, config
+@@ parameters set, and personal preference.
+@@ 
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@ Recommend the following additional aliases for & JOBS:
+@@    & BUGS
+@@    & TYPOS
+@@    & PITCH
+@@    & REQUEST
+@@ @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+& JOBS
+=============================================================================
+                                 +Jobs
+   
+     +bug <description>               Report a bug...
+     +typo <description>              ... or a typo
+     +pitch <description>             Suggest a potential plot
+     +request <description>           Make a code, area, or other request
+   
+     +jobs/credits                    See who's responsible
+   
+These general commands are used for reporting bugs and typos, and for making
+requests (code, areas, etc.), or pitching plot ideas for the staff to run.
+   
+Additional +jobs commands are in the following +help topics:
+      
+     JOBS INFO        About the tasks at hand
+     JOBS CLAIM       ... when you have a job to do, how to do it!
+     JOBS ADMIN       ... so you're a +jobs administrator?
+     JOBS CATS        ... you're a category administrator or wizard?
+     JOBS CONFIG      Configuration settings for +jobs
+   
+=============================================================================
+& JOBS ADMIN
+=============================================================================
+                       +Jobs:  Administration Commands
+   
+     +job/create <category>/<title>=<desc>
+     +job/delete <id>
+     +job/assign <id>=<player or 'none'>
+     +job/merge <id1> into <id2>
+     +job/config <id>/<param>=<new param>
+   
+Created jobs default to priority green.
+Deleted jobs are deleted completely, notes and all, and not moved to DONE.
+Jobs may be assigned to anyone, regardless of permissions.
+   
+Two jobs may be merged together; the second ID is preferred for most 
+information, but the highest priority will be chosen.  May not be done if
+both jobs are claimed; the new job will be assigned to any claimant set.
+All notes move to the second id.
+   
+Configuration parameters: 
+     Category        Reassign to any existing category
+     Priority        Red (very urgent), yellow (important), green (average)
+     Title           Job title
+     Timeout         Days until job is deleted in DONE; also -1 (never) and
+                     0 (immediate)
+     Duedate         See +help jobs duedate
+     Desc            Description of the job
+    
+=============================================================================
+& JOBS CATS
+=============================================================================
+                        +Jobs: Category Administration
+     
+     +jobs/admin
+         General status; configuration settings, auth settings, etc.
+   
+     +jobs/done
+         Lists all archived completed jobs (which are inaccessible by the
+         normal job-finding commands).  Shows timeouts.
+   
+     +job/cat create <catname> <read>/<write>/<admin> <desc>
+         E.g.: +job/cat create CODE STF/STF/WIZ Coding issues.
+   
+     +job/cat delete <catname>
+         Only empty categories may be deleted.
+   
+     +job/cat config <catname>/<config>=<new value>
+    
+Category parameters:
+     Name         Category name.  Maximum five letters.
+     Read         Reading authorization: WIZ, STAFF, ALL, NONE
+     Write        Writing authorization: WIZ, STAFF, ALL, NONE
+     Admin        Admin authorization: WIZ, STAFF, ALL, NONE
+     Timeout      Category default for job timeout in DONE
+     Duedate      See +help jobs duedate
+     Desc         Category description.  Maximum fifty characters.
+  
+=============================================================================
+& JOBS CLAIM
+=============================================================================
+                     +Jobs: Claiming and Working Commands
+    
+These commands are accessible only in categories for which the user has
+Write authorization:
+   
+     +job/claim <id>                 Claim the indicated job
+     +job/complete <id>%[<=note>%]     Mark the job completed (note optional)
+   
+These commands are accessible to users with Write privileges, and for any
+jobs for which the user is listed as claimant, regardless of authorization:
+   
+     +job/release <id>%[<=note>%]      Relinquish claim to the job
+     +job/status <id>=<content>      Change your job's current status
+     +job/note <id>=<note>           Write a note about the job
+     +job/delnote <id>/<note #>      Delete one of your notes on a job
+   
+=============================================================================
+& JOBS CONFIG
+=============================================================================
+                        +Jobs: Configuration Settings
+   
+The following must be set on the +Jobs Data object to change their default
+settings:
+   
+HAS_ACCESS: Determines access to +jobs commands; default 1 (all players).
+  
+ACCESS_CATADMIN:  
+Determines which characters may use commands listed under +help Job Cats
+These are administration commands which affect the +jobs system as a whole.
+  
+CONFIG_ASSIGN:    
+Set to 1 to assign all new jobs to their creator, else 0.  Default: 0
+  
+CONFIG_CUTOFF:
+Cut off the +jobs/all listing at X number of jobs, to force into category 
+listing if the total number is much too high. 0: No cutoff.  Default: 100
+   
+CONFIG_EMPLOYED:
+Set to 1 to allow all characters Read and Write control over their own jobs,
+regardless of their actual access.  Default: 1
+  
+CONFIG_FLEXMAX:
+Maximum number of leeway days to which a flexible duedate may be set.
+Default: 90
+  
+CONFIG_TIMEOUT:
+For archiving: ONLY sets the default category timeout for a category on that
+category's creation.  0: Jobs deleted immediately on completion.  -1: Jobs
+never deleted from DONE category.  Any other number:  Number of days until
+a job in DONE is deleted.  Default: 30 
+  
+=============================================================================
+& JOBS DUEDATE
+=============================================================================
+                          +Jobs: Duedates
+    
+The +jobs code supports two types of duedate, which act similarly but have
+very different fuctions:  Absolute and Flexible.
+   
+Absolute duedates are a date at which the job must be complete.  This date
+changes only if altered via +job/config.  Set with:
+     +job/config <job#>/duedate=abso <date in the format Jan 01 2003>
+     E.g., +job/config 3/duedate=abso Feb 30 2003
+  
+Flexible duedates are the number of 'leeway' days a job has.  If those days
+pass without the job being updated (via +job/status), it begins to show up
+as overdue.  This type of duedate can be useful for such things as approval
+requests -- if a day or two passes without activity, the job appears as
+Overdue.  This category of duedate prods the job along, useful for those 
+which need frequent attention but are not due at a specific time.
+    +job/config <job#>/duedate=flex <number of days of leeway>
+    E.g., +job/config 3/duedate=flex 3
+   
+Both types of duedate may be configured as defaults on categories.  For
+example, a flexible duedate may be set as default on the CGEN category, and
+all CGEN jobs (such as approval requests) will be set with that default on
+creation.  Absolute defaults are set as the number of days after creation 
+that the job is marked due, and flexible as the number of leeway days.
+   E.g., +job/cat config CGEN/duedate=flex 3   OR
+         +job/cat config CGEN/duedate=abso 2
+   
+=============================================================================
+& JOBS INFO
+=============================================================================
+                        +Jobs: Informational Commands
+    
+     +jobs                        List jobs categories
+     +jobs/monitor <category>     Monitor significant job events; also 
+                                  accepts 'all' and 'none.'
+   
+     +job <id>                    Show information on an individual job
+     +job/notes <id>              Show any notes on the specified job
+   
+     +jobs/all %[<category>%]       List all jobs, regardless of claimant
+     +jobs/mine %[<category>%]      List all your own claimed jobs
+     +jobs/un %[<category>%]        List all unclaimed jobs
+     +jobs/new %[<category>%]       List all new jobs and notes
+     +jobs/clear                  Clear your +jobs/new list
+   
+     +jobs/search <text>          Find all jobs with descriptions including
+                                  the given <text>.
+     +jobs/search <cat>/<text>    As above, but only searches the category
+                                  specified.
+   
+=============================================================================
+

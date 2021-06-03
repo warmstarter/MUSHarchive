@@ -1,0 +1,79 @@
+#!/usr/bin/perl
+### NOTE this has bugs and I dont feel like debugging it right now.  Use tf. 
+
+exit(0);
+
+$mud_host = "localhost";
+$mud_port = 8000;
+
+use POSIX qw(strftime);
+use IO::Socket::INET;
+sub HereDoc {
+    local $_ = shift;
+    s/^(\s*).*\n//;
+    s/^(?:$1)//gm;
+    return $_;
+}
+
+sub MudSync { 
+
+	my ($ref) = @_;
+
+	print $ref "Fooblekibbleme\n";
+
+	while (<$ref>) { 
+		last if (/^Huh/);
+	} 
+	1;
+}
+
+
+
+sub ConnectMud {
+
+	$mudsocket = IO::Socket::INET->new(	PeerAddr => $mud_host,
+						PeerPort => $mud_port,
+						Proto    => "tcp",
+						Type     => SOCK_STREAM) || die "Cant open socket to game\n";
+
+	print $mudsocket "connect God bab5iscool\n";
+	sleep 2;
+	my $i = 1; 
+	while (<$mudsocket>) {
+		last if (/MOTD/);
+		print "Mud: $_ \n";
+		#sleep 1;
+	}
+	\$mudsocket;
+}
+
+	
+
+	$file = shift;
+	print "*************** NOTE ***************\n";
+	print "You cant have changed the main character or pw for this script to work.  It also assumes you are running on the localhost.  Make sure you change the pw after this script is run if you want to.";
+
+	print "\n\n\n About to connect to localhost:8000 and deliver $file to the mud.\n";
+	print "Continue (any key other than n to continue) ?? \n";
+	$ans = <STDIN>;
+
+	if ($ans =~ /^n+/) {
+		print "Exiting\n";
+		exit (0);
+	}
+	print "Ok, continuing.\n";
+
+	$sock = ConnectMud();
+	if ( ! (open INFILE, $file) ) { 
+		print "Couldn't open file $file\n";
+		exit(-1);
+	}
+	MudSync(\$sock);
+	while (<INFILE>) { 
+		$indat = $_;
+		print $sock $indat . "\n";
+		MudSync(\$sock);
+
+	}
+	print "Done loading file.\n";
+

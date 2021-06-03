@@ -1,0 +1,54 @@
+# Commands to go IC and OOC.
+
+
+&CMD-OOC #7 = $ooc: 
+  @switch hastag(%L, OOC) = 1, {
+    @pemit %# = Ha! You're already in an OOC area. What a kidder.
+  }, {
+
+#  if the current room is a dynamic room (unfixed dspace room), fix the room!
+    think setq(0, ifelse(and(isdspace(%L), not(hasattr(%L, Aleave))), %L, #-1)); 
+    think switch(strmatch(%q0, #-1), 0, res_request(ic-ooc-%#, fixed-dspace, %L)); 
+
+#  Added a functional check so it should never set someone's home to the OOC 
+#     courtyard
+    &ic [ifelse(match(#381, %L), ,%#)] = %L; 
+    @color [ifelse(hastag(%#,fly), %#,)]; 
+    @remit %L = %n goes to the OOC rooms.; 
+    @tel %# = #381; 
+    @remit %L = %n arrives from the game, now out of character.
+  }
+-
+
+&CMD-IC #7 = $ic: 
+  think setq(0, default(%#/ic, default(%#/ic-home, #100))); 
+
+  @switch/first [hastag(%L, ooc)][hastag(%#, policy)] = 
+  
+  0?, {
+     @pemit %# = I'm sorry, but you're not in an Out of Character (OOC) Area.
+                     To go to an OOC area, please type: 'ooc'.},
+  ?0, {
+     @pemit %# = I'm sorry, but you haven't read the policy rooms yet. Please 
+                 go back to the Welcome Room and enter the policy room so 
+                 you can read them. Once you have gone through the rooms 
+                 and typed 'I Accept' you will be permitted to go IC.},
+  11, {
+    @remit %L = %n goes back in character.; 
+    @color [ifelse(hastag(%#,fly), %#,)]=nhc; 
+    @tel/quiet %# = %q0; 
+    @remit %L = %n comes back into character from an OOC room.; 
+
+    think switch(hastag(%q0, ooc-dspace), 1, res_return(ic-ooc-%#, fixed-dspace, %L)); 
+  }
+   
+-
+
+
+
+# Resource Request stuff ...
+#
+&request-fixed-dspace #28 = set(%0, Aleave:#)
+-
+&return-fixed-dspace #28 = set(%0, Aleave:)
+-
